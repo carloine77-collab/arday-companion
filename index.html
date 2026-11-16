@@ -83,10 +83,11 @@
 </div><div class="toast" id="toast"></div>
 <script>
 
+
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0}};
-let s={...base};try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.money;
+let s={...base};try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
 s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
@@ -334,7 +335,7 @@ function renderCalendar(){
  ensureSchedule();let anchor=dayAnchor(),now=new Date(),html='';
  for(let di=0;di<3;di++){let d=plusDays(anchor,di),key=dayKey(d);
  html+='<section class="day-card '+(di===0?'today':'')+'"><div class="day-card-head"><strong>'+['今天','明天','后天'][di]+'</strong><small>'+dayLabel(d)+'</small></div><div class="day-timeline">';
- for(let h=0;h<24;h++){let ev=eventAt(key,h),isNow=di===0&&now.getHours()===h;html+='<div class="day-slot"><time>'+pad(h)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':'busy'):'free')+(isNow?' now':'')+'" data-day="'+di+'" data-hour="'+h+'">'+(ev?ev.title:'＋ 空闲')+'</button></div>'}
+ for(let h=0;h<24;h++){let ev=eventAt(key,h),isNow=di===0&&now.getHours()===h;html+='<div class="day-slot"><time>'+pad(h)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':ev.activity==='sleep'?'sleep':ev.kind==='work'?'work':'busy'):'free')+(isNow?' now':'')+'" data-day="'+di+'" data-hour="'+h+'">'+(ev?ev.title:'＋ 空闲')+'</button></div>'}
  html+='</div><div class="day-legend">'+(di===0?'阿尔今天的安排':di===1?'明天 · 可以协商共同安排':'后天 · 保留自主时间')+'</div></section>'}
  $('calendarContent').innerHTML=html;
  $('calendarContent').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(+b.dataset.day,+b.dataset.hour));
@@ -347,7 +348,7 @@ function slotClick(di,h){
  if(ev){
   $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
   $('choices').innerHTML='<div class="calendar-note">'+(ev.kind==='proposal'?'这是你提出的共同安排。':'这是阿尔自己的安排。你可以邀请他一起，或商量调整。')+'</div><div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">让他自己安排</button><button id="return">返回日程</button></div>';
-  $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.kind!=='sleep'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;change({friend:2,attach:1});remember('shared','一起参与：'+ev.title,2);say('好啊，一起做也不错。');}else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
+  $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.activity!=='sleep'&&ev.kind!=='work'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;change({friend:2,attach:1});remember('shared','一起参与：'+ev.title,2);say('好啊，一起做也不错。');}else if(ev.activity==='sleep'||ev.title.includes('睡眠'))say('现在是我的睡眠时间。我不会为了临时邀请打乱作息。我们可以约在明天醒来以后。');else if(ev.kind==='work')say('我已经答应了这份工作，不能临时把它放下。等结束以后再一起安排吧。');else if(ev.kind==='routine')say('这是我固定的生活安排。我愿意商量，但不想直接取消它。');else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
   $('move').onclick=()=>{let target=prompt('想调整到几点？请输入 0–23 之间的整点。');let n=Number(target);if(!Number.isInteger(n)||n<0||n>23||eventAt(key,n)){toast('这个时间不可用');return}ev.start=n;ev.end=n+1;s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')};
   $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'){say('这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
   $('return').onclick=()=>{$('drawer').classList.remove('open')};return;
@@ -405,6 +406,7 @@ applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar()
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
 })();
+
 
 </script>
 </body></html>
