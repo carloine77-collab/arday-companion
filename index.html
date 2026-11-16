@@ -198,22 +198,42 @@ function has(item){return s.items.includes(item)||s.furniture.includes(item)}
 function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 function buildDay(key){
- let day=[];
- const add=(start,end,title,kind='personal',activity='idle')=>day.push({start,end,title,kind,activity});
- add(0,7,'睡眠','routine','sleep');add(7,8,'起床、洗漱','routine','wash');add(8,9,'吃早餐','routine','eat');
- if(s.energy<42)add(9,11,'补觉 / 慢慢醒来','personal','rest');else if(s.fun<35)add(9,10,'读书或听音乐','personal',has('唱片机')?'music':'read');else add(9,11,has('书桌')?'在书桌前写点东西':'阅读一会儿','personal',has('书桌')?'write':'read');
+ const day=[];
+ const add=(start,end,title,kind='personal',activity='idle')=>{
+  start=Math.max(0,Math.min(24,start));end=Math.max(0,Math.min(24,end));
+  if(end>start)day.push({start,end,title,kind,activity});
+ };
+ // Sleep is generated once per day. Lower energy modestly increases duration.
+ const sleepStart=21+Math.random()*2.5;
+ const sleepHours=Math.max(6.5,Math.min(9.5,7.1+(100-s.energy)*.022+(Math.random()-.5)*1.1));
+ const wakeAt=sleepStart+sleepHours;
+ add(0,Math.max(0,wakeAt-24),'睡眠','routine','sleep');
+ add(sleepStart,24,'睡眠','routine','sleep');
+ let h=Math.ceil(wakeAt-24);
+ if(h<24){
+  add(h,h+1,'起床、洗漱','routine','wash');h++;
+  add(h,h+1,'吃早餐','routine','eat');h++;
+  if(s.energy<42){add(h,Math.min(h+2,11),'慢慢醒来 / 补一会儿觉','personal','rest');h=Math.min(h+2,11);}
+  else if(s.fun<35){add(h,Math.min(h+1,11),'读书或听音乐','personal',has('唱片机')?'music':'read');h++;}
+  else{add(h,Math.min(h+2,11),has('书桌')?'在书桌前写点东西':'阅读一会儿','personal',has('书桌')?'write':'read');h=Math.min(h+2,11);}
+ }
  add(12,13,'午餐','routine','eat');
- if(s.clean<38)add(14,15,'整理自己和房间','personal','wash');else if(s.fun<42)add(14,16,has('唱片机')?'听一会儿唱片':'找点事情消遣','personal',has('唱片机')?'music':'read');else add(14,15,'自由时间','free','idle');
- if(s.project&&s.project.status==='active')add(16,17,s.project.task,'project','project');else if(has('书桌')&&Math.random()<.55)add(16,17,'整理资料 / 写日记','personal','write');else add(16,17,'整理房间','personal','tidy');
+ if(s.clean<38)add(14,15,'整理自己和房间','personal','wash');
+ else if(s.fun<42)add(14,16,has('唱片机')?'听一会儿唱片':'找点事情消遣','personal',has('唱片机')?'music':'read');
+ else add(14,15,'自由时间','free','idle');
+ if(s.project&&s.project.status==='active')add(16,17,s.project.task,'project','project');
+ else if(has('书桌')&&Math.random()<.55)add(16,17,'整理资料 / 写日记','personal','write');
+ else add(16,17,'整理房间','personal','tidy');
  add(19,20,'晚餐','routine','eat');
- if(s.fun<55)add(20,21,has('唱片机')?'听音乐、放松一下':'看书或休息','personal',has('唱片机')?'music':'read');else add(20,21,'自己的时间','free','idle');
- add(21,22,'洗漱、准备睡觉','routine','wash');add(22,24,'睡眠','routine','sleep');
+ if(s.fun<55)add(20,21,has('唱片机')?'听音乐、放松一下':'看书或休息','personal',has('唱片机')?'music':'read');
+ else add(20,21,'自己的时间','free','idle');
+ add(Math.max(21,Math.floor(sleepStart-1)),sleepStart,'洗漱、准备睡觉','routine','wash');
  return day.sort((a,b)=>a.start-b.start);
 }
 function ensureSchedule(){
  const key=dayKey(dayAnchor());
  if(!s.calendar)s.calendar={anchor:key,days:{}};
- if((s.calendar.version||0)<2){s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=2;}
+ if((s.calendar.version||0)<5){s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=5;}
  if(s.calendar.anchor!==key){
   s.calendar.anchor=key;
   Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
