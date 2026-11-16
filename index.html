@@ -118,8 +118,8 @@
 
 
 /* Three.js scene layer; original CSS scene remains as a no-WebGL fallback. */
-.three-scene{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;background:#e8d8bf}
-.three-scene canvas{display:block;width:100%;height:100%}
+.three-scene{position:absolute;inset:0;z-index:1;display:block;overflow:hidden;pointer-events:none;background:#e8d8bf}
+.three-scene canvas{display:block!important;width:100%!important;height:100%!important}
 .stage.three-ready>.scene-bg,.stage.three-ready>.sunlight,.stage.three-ready>.room{display:none}
 .stage.three-ready>.kitchen-scene{display:none!important}
 .stage.three-ready.calendar-mode>.three-scene{display:none}
@@ -984,9 +984,19 @@ function showCollection(){
 
 
 /* Procedural Three.js environment: game state remains in the existing simulator. */
-let arday3D=null;
+let arday3D=null,arday3DLoading=false,arday3DFallbackTried=false;
 function initArday3D(){
- if(!window.THREE)return false;
+ if(!window.THREE){
+  if(!arday3DLoading){
+   arday3DLoading=true;
+   const load=(url,onfail)=>{const tag=document.createElement('script');tag.src=url;tag.onload=()=>{arday3DLoading=false;initArday3D();updateArday3D()};tag.onerror=()=>{tag.remove();onfail()};document.head.appendChild(tag)};
+   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{
+    if(arday3DFallbackTried)return;arday3DFallbackTried=true;
+    load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;console.warn('Three.js could not be loaded from available CDNs')});
+   });
+  }
+  return false;
+ }
  const stage=$('stage');
  try{
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xe8d8bf);scene.fog=new T.Fog(0xe8d8bf,14,28);
