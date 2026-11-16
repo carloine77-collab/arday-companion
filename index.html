@@ -1090,6 +1090,139 @@ function normalizeActivity(a){return ({food:'eat',reading:'read',company:'compan
 function processActivityAt(value){const d=new Date(value),h=d.getHours(),key=ensureScheduleAt(d),hk=key+'-'+h;if(s.lastUnifiedHourKey===hk)return;change({energy:-.45,hunger:-.8,clean:-.25,fun:-.3});s.roomCondition=clamp(s.roomCondition-.012);let ev=(s.calendar.days[key]||[]).find(x=>h>=x.start&&h<x.end),a=normalizeActivity(ev?.activity||'idle');if(!ev||a==='idle'){a=chooseAutonomousActivity();const m=activityMeta[a]||{title:'自己的时间'},rid=a==='cook'?Object.keys(recipes).find(canCook):undefined;writeBlockForKey(key,h,h+1,{title:m.title,kind:'personal',activity:a,autonomous:true,recipeId:rid});ev=(s.calendar.days[key]||[]).find(x=>h>=x.start&&h<x.end)}if(a==='cook'||a==='cookTogether'){completeCooking(ev);setSceneActivity(a,false);change({energy:-2})}else{const m=activityMeta[a];if(m){change(m.effect||{});if(a==='tidy')s.roomCondition=clamp(s.roomCondition+3);if(a==='music')s.preferences.music=(s.preferences.music||0)+1;if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;if(a==='eat')consumeMeal();setSceneActivity(a,false)}}settleWorkAt(key,h);if(a==='project'&&s.project?.status==='active'){s.project.progress=(s.project.progress||0)+1;if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:2,fun:6});addEvent('房间改造完成','房间改造计划已经完成。','long')}}s.lastUnifiedHourKey=hk;s.lastHourKey=hk;s.currentActivity=a;s.activityLog=s.activityLog||[];s.activityLog.push({activity:a,key,hour:h,at:d.getTime()});if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100)}
 function perform(action){if(action==='cook'||action==='cookTogether'){openKitchenPanel(action==='cookTogether');return}const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'},a=map[action]||action,ok=proposeActivityNow(a);if(ok){relation(action);animate(a==='game'?'wave':a==='walk'?'walk':'sit')}}
 $('sceneSwitch').addEventListener('click',()=>{if($('stage').classList.contains('kitchen-mode')){$('drawer').classList.remove('open');kitchenClose()}else openKitchenPanel(false)});
+
+/* === Personal goals and two-account economy ===
+   s.money remains the shared household account. Arday's earnings and personal
+   purchases use a separate balance. */
+s.personalMoney=Number.isFinite(s.personalMoney)?Math.max(0,s.personalMoney):0;
+s.personalItems=s.personalItems||[];
+s.moneyLog=s.moneyLog||[];
+s.goalStats=s.goalStats||{read:0,write:0,tidy:0,jobs:0};
+s.personalGoalHistory=s.personalGoalHistory||[];
+function moneyRecord(account,kind,amount,note,at=Date.now()){
+ s.moneyLog.unshift({account,kind,amount,note,at});
+ if(s.moneyLog.length>40)s.moneyLog.length=40;
+}
+function ensurePersonalGoal(at=Date.now()){
+ if(s.personalGoal&&s.personalGoal.status==='active')return s.personalGoal;
+ if((s.nextGoalAt||0)>at)return null;
+ const options=[
+  {type:'read',title:'读完一本书',detail:'留出几段完整的时间，把手边的一本书读完。',target:5,unit:'次阅读'},
+  {type:'write',title:'整理一份自己的文字',detail:'在书桌前持续写作或整理资料。',target:4,unit:'次写作',requires:'书桌'},
+  {type:'tidy',title:'把生活空间整理得更顺手',detail:'按自己的方式逐步整理房间。',target:4,unit:'次整理'},
+  {type:'jobs',title:'完成两份工作委托',detail:'接下合适的工作，完成后把报酬留在自己的账户。',target:2,unit:'份工作'},
+  {type:'save',title:'存下 ¥500',detail:'暂时不急着花钱，先留下一笔可以自由支配的储蓄。',target:500,unit:'元'}
+ ].filter(x=>!x.requires||has(x.requires));
+ const previous=s.personalGoalHistory[0]?.type;
+ let choices=options.filter(x=>x.type!==previous);
+ if(!choices.length)choices=options;
+ if(!choices.length)return null;
+ const g=choices[Math.floor(Math.random()*choices.length)];
+ s.personalGoal={...g,status:'active',progress:g.type==='save'?s.personalMoney:0,startedAt:at};
+ remember('personal-goal','阿尔开始了自己的计划：'+g.title,2);
+ return s.personalGoal;
+}
+function updatePersonalGoal(activity,at=Date.now()){
+ const g=ensurePersonalGoal(at);if(!g)return;
+ if(g.type==='read'&&activity==='read')s.goalStats.read++;
+ if(g.type==='write'&&activity==='write')s.goalStats.write++;
+ if(g.type==='tidy'&&activity==='tidy')s.goalStats.tidy++;
+ if(g.type==='jobs')g.progress=s.goalStats.jobs;
+ if(g.type==='save')g.progress=s.personalMoney;
+ if(g.type==='read')g.progress=s.goalStats.read;
+ if(g.type==='write')g.progress=s.goalStats.write;
+ if(g.type==='tidy')g.progress=s.goalStats.tidy;
+ if(g.progress>=g.target){
+  g.status='completed';g.completedAt=at;
+  s.personalGoalHistory.unshift({type:g.type,title:g.title,completedAt:at});
+  s.personalGoalHistory=s.personalGoalHistory.slice(0,12);
+  s.nextGoalAt=at+36*3600000;
+  addEvent('阿尔完成了自己的计划','他完成了「'+g.title+'」。这是他自己决定并推进的一件事。','daily');
+  remember('personal-goal','完成自己的计划：'+g.title,2);
+  say('这件事总算做完了。接下来，我想想还有什么值得做。');
+ }
+}
+function settleWorkAt(key,hour){
+ if(!s.pendingWork||s.pendingWork.paid)return;
+ const p=s.pendingWork;
+ if(key>p.day||(key===p.day&&hour+1>=p.end)){
+  p.paid=true;
+  s.personalMoney+=Number(p.pay)||0;
+  s.goalStats.jobs=(s.goalStats.jobs||0)+1;
+  moneyRecord('personal','income',Number(p.pay)||0,'完成工作委托');
+  addEvent('工作报酬到账','阿尔完成工作，获得个人收入 ¥'+p.pay+'。','daily');
+  remember('work','完成工作，个人收入 ¥'+p.pay,2);
+  updatePersonalGoal('work',Date.now());
+ }
+}
+const originalProcessActivityAt=processActivityAt;
+processActivityAt=function(value){
+ const previous=s.lastUnifiedHourKey;
+ originalProcessActivityAt(value);
+ if(s.lastUnifiedHourKey!==previous){
+  updatePersonalGoal(s.currentActivity,new Date(value).getTime());
+  reviewPersonalSpending(new Date(value).getTime());
+ }
+};
+function reviewPersonalSpending(at){
+ if(s.personalMoney<60)return;
+ if((s.lastPersonalSpendingReview||0)>0&&at-s.lastPersonalSpendingReview<48*3600000)return;
+ s.lastPersonalSpendingReview=at;
+ if(s.personalGoal?.status==='active'&&s.personalGoal.type==='save')return;
+ if(Math.random()>.28)return;
+ const options=[
+  {name:'一本私人藏书',cost:48},
+  {name:'一套书写用品',cost:32},
+  {name:'一张自己收藏的唱片',cost:68}
+ ].filter(x=>x.cost<=s.personalMoney);
+ if(!options.length)return;
+ const item=options[Math.floor(Math.random()*options.length)];
+ s.personalMoney-=item.cost;s.personalItems.push(item.name);
+ moneyRecord('personal','expense',item.cost,'购买'+item.name,at);
+ remember('personal-purchase','阿尔用自己的钱买了'+item.name,1);
+ addEvent('阿尔买了件自己的东西','他用个人账户购买了'+item.name+'，没有动用共同账户。','daily');
+}
+const originalPurchase=purchase;
+purchase=function(id,label,cost){
+ const before=s.money;originalPurchase(id,label,cost);
+ const spent=before-s.money;if(spent>0)moneyRecord('shared','expense',spent,'购买'+label);
+};
+const originalBuyIngredient=buyIngredient;
+buyIngredient=function(id,label,cost){
+ const before=s.money;originalBuyIngredient(id,label,cost);
+ const spent=before-s.money;if(spent>0)moneyRecord('shared','expense',spent,'购买食材：'+label);
+};
+function showCollection(){
+ ensurePersonalGoal();
+ const g=s.personalGoal;
+ const goalText=g&&g.status==='active'
+  ?'<section class="profile-section"><h4>阿尔自己的计划</h4><strong>'+g.title+'</strong><p>'+g.detail+'</p><p>进度：'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p><small>这是阿尔自己决定的个人目标。你可以了解进展，但不能替他决定是否继续。</small></section>'
+  :'<section class="profile-section"><h4>阿尔自己的计划</h4><p>目前没有正在推进的个人目标。他会根据自己的生活和想法决定下一件想做的事。</p></section>';
+ const log=s.moneyLog.slice(0,8).map(x=>'<p>'+new Date(x.at).toLocaleDateString('zh-CN')+' · '+(x.account==='shared'?'共同账户':'阿尔个人账户')+' · '+(x.kind==='income'?'+':'−')+'¥'+x.amount+' · '+x.note+'</p>').join('')||'<p>暂时没有账户记录。</p>';
+ $('drawerTitle').textContent='共同生活 · 个人目标与账户';
+ $('choices').innerHTML=
+  '<section class="profile-section"><h4>共同账户</h4><strong style="font-size:20px">¥'+s.money+'</strong><p>用于共同生活、食材、家具和公共开销。</p></section>'+
+  '<section class="profile-section"><h4>阿尔的个人账户</h4><strong style="font-size:20px">¥'+s.personalMoney+'</strong><p>工作报酬进入这里。阿尔可以自行储蓄或购买个人物品，不会自动转入共同账户。</p><p>个人物品：'+(s.personalItems.length?s.personalItems.join('、'):'暂无')+'</p></section>'+
+  goalText+
+  '<section class="profile-section"><h4>近期账户记录</h4>'+log+'</section>'+
+  '<section class="profile-section"><h4>共同物品</h4><p>'+s.items.concat(s.furniture).join('、')+'</p><p>未付共同开销：¥'+(s.unpaidBill||0)+'</p></section>'+
+  '<div class="calendar-actions"><button id="close-project">关闭</button></div>';
+ $('close-project').onclick=()=>$('drawer').classList.remove('open');
+ $('drawer').classList.add('open');
+}
+function eventChoices(e){
+ if(e.type!=='bill')return eventChoicesLegacy(e);
+ $('drawerTitle').textContent=e.title;
+ $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">从共同账户支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
+ $('paybill').onclick=()=>{
+  if(s.money>=80){s.money-=80;s.unpaidBill=Math.max(0,(s.unpaidBill||0)-80);moneyRecord('shared','expense',80,'水电与日常开销');say('共同账户已经支付本周开销。')}
+  else{say('共同账户资金不够，先记账。');s.unpaidBill=(s.unpaidBill||0)+80}
+  completeEvent(e,'支付或记账');save();render();renderEvents();
+ };
+ $('delaybill').onclick=()=>{s.unpaidBill=(s.unpaidBill||0)+80;completeEvent(e,'暂时记账');say('好，先记在共同开销里。');save();render();renderEvents()};
+ $('drawer').classList.add('open');
+}
+
 applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
