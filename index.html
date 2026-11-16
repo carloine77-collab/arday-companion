@@ -1044,6 +1044,7 @@ function tick(){
  // On a fresh install or when reopening within the same hour, initialize the
  // current activity once. Replay above handles all completed intervening hours.
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now.getTime());
+ ensurePersonalGoal(Date.now());updatePersonalGoal('balance',Date.now());
  generateDailyEvents();
  render();
  if($('stage').classList.contains('calendar-mode'))renderCalendar();
@@ -1438,7 +1439,7 @@ showCollection=function(){
 };
 
 
-applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
+ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
 
