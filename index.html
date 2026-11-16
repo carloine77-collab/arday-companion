@@ -1288,18 +1288,6 @@ function advanceSharedGoal(action,at=Date.now()){
   say('原来一起做一件事，最后会留下这样的感觉。');
  }
 }
-const oldRelationForGoals=relation;
-relation=function(action){
- oldRelationForGoals(action);
- if(action==='tidy')advanceSharedGoal('tidy');
- if(action==='walk')advanceSharedGoal('walk');
-};
-const oldCompleteCookingForGoals=completeCooking;
-completeCooking=function(ev){
- const wasDone=!!ev?.completed;
- oldCompleteCookingForGoals(ev);
- if(!wasDone&&ev?.withPlayer&&ev?.completed)advanceSharedGoal('cookTogether');
-};
 function createSituationalEvent(at=Date.now()){
  if(s.events.filter(e=>e.status==='open').length>=4)return;
  if(at-s.lastRandomEventAt<22*3600000)return;
@@ -1396,12 +1384,7 @@ showCollection=function(){
  $('close-project').onclick=()=>$('drawer').classList.remove('open');
  $('drawer').classList.add('open');
 };
-const oldProcessActivityForSharedGoal=processActivityAt;
-processActivityAt=function(value){
- const before=s.lastUnifiedHourKey;
- oldProcessActivityForSharedGoal(value);
- if(s.lastUnifiedHourKey!==before&&s.currentActivity==='tidy')advanceSharedGoal('tidy',value);
-};
+
 
 applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
