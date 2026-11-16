@@ -191,10 +191,17 @@
  .identity-meta{gap:5px}
  .recent-entry{font-size:9px;padding:6px 7px}
 }
-/* Ensure the 3D canvas occupies the complete stage above the legacy 2D scene. */
-.stage{position:relative;isolation:isolate}
-.stage.three-ready>.three-scene{display:block!important;visibility:visible!important;opacity:1!important}
-.stage.three-ready>.three-scene canvas{display:block!important;visibility:visible!important;opacity:1!important}
+/* Explicit header rows prevent iPad control collisions. */
+.top{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;gap:6px!important;min-width:0}
+.identity-line{display:flex!important;min-width:0;flex-wrap:nowrap!important}
+.header-meta-row{display:flex!important;align-items:center;justify-content:flex-start;gap:7px;min-width:0;flex-wrap:wrap}
+.header-meta-row #upkeep,.header-meta-row #cash{display:inline-flex;align-items:center;min-height:32px;padding:5px 9px;border:1px solid var(--line);border-radius:9px;background:#fff9efb8;white-space:nowrap}
+.header-meta-row .recent-entry{min-height:36px;flex:0 0 auto;white-space:nowrap}
+@media(max-width:700px){.header-meta-row{gap:5px}.header-meta-row .recent-entry{font-size:10px;padding:7px 8px}.header-meta-row #upkeep,.header-meta-row #cash{font-size:9px;padding:5px 6px}}
+@media(max-width:390px){.header-meta-row .recent-entry{font-size:9px;padding:6px 7px}}
+.stage{position:relative!important;isolation:isolate!important}
+.stage.three-ready>.three-scene{display:block!important;visibility:visible!important;opacity:1!important;position:absolute!important;inset:0!important;z-index:20!important;pointer-events:auto!important}
+.stage.three-ready>.three-scene canvas{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;height:100%!important}
 </style>
 </head>
 <body>
@@ -202,8 +209,8 @@
 <header class="top">
  <div class="identity-line">
   <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div></div></button>
-  <div class="identity-meta"><button class="recent-entry" id="recentEvents">✦ <span>最近发生的事</span><b id="eventCount"></b></button><span id="upkeep">房间维护 92%</span><span id="cash">¥3000</span></div>
  </div>
+ <div class="header-meta-row"><button class="recent-entry" id="recentEvents">✦ <span>最近发生的事</span><b id="eventCount"></b></button><span id="upkeep">房间维护 92%</span><span id="cash">¥3000</span></div>
  <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
 </header>
 <div class="play-area">
@@ -249,7 +256,7 @@
  <div class="bottom-actions"><button class="top-action decorate" id="decorate">✧ 装修</button></div>
 </footer>
 </div><div class="toast" id="toast"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <script>
 
 
@@ -1056,7 +1063,7 @@ function initArday3D(){
   if(!arday3DLoading){
    arday3DLoading=true;
    const load=(url,onfail)=>{const tag=document.createElement('script');tag.src=url;tag.onload=()=>{arday3DLoading=false;initArday3D();updateArday3D()};tag.onerror=()=>{tag.remove();onfail()};document.head.appendChild(tag)};
-   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',()=>{arday3DLoading=false;console.warn('Three.js unavailable')})})});
+   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;console.error('Three.js could not load from either CDN')})});
   }return false;
  }
  const stage=$('stage');
