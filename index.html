@@ -506,7 +506,7 @@ function applyPose(a){
  if($('roomLabel'))$('roomLabel').textContent='HOME · '+(names[a]||'自己的时间');
 }
 function doAutonomous(a,announce=true){
- const fx={rest:{energy:13,hunger:-2,fun:1},eat:{hunger:24,energy:2},wash:{clean:24,energy:-2},read:{fun:11,energy:-3},music:{fun:13,energy:-2},tidy:{clean:10,energy:-4},write:{fun:8,energy:-4},walk:{fun:12,energy:-7,clean:-2},sleep:{energy:24,hunger:-3},project:{fun:3,energy:-4}};
+ const fx={rest:{energy:13,hunger:-2,fun:1},eat:{hunger:24,energy:2},wash:{clean:24,energy:-2},read:{fun:11,energy:-3},music:{fun:13,energy:-2},tidy:{clean:10,energy:-4},write:{fun:8,energy:-4},walk:{fun:12,energy:-7,clean:-2},sleep:{energy:9,hunger:-1},project:{fun:3,energy:-4}};
  change(fx[a]||{});if(a==='tidy')s.roomCondition=clamp(s.roomCondition+7);
  if(a==='project'&&s.project?.status==='active'){s.project.progress=(s.project.progress||0)+1;if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:2,fun:6});addEvent('房间改造完成','你们一起完成了改造，房间里多了一件纪念摆件。','long')}}
  s.currentActivity=a;s.activityLog.push({a,at:Date.now()});if(s.activityLog.length>30)s.activityLog.shift();
