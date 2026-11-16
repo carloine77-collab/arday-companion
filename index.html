@@ -84,6 +84,7 @@
 <script>
 
 
+
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0}};
@@ -305,8 +306,8 @@ function earnWork(){
  for(let h=Math.max(9,new Date().getHours());h<=18;h++){if(!eventAt(key,h)&&!eventAt(key,h+1)){start=h;break}}
  if(start<0){say('今天已经排得很满了，找不到连续两小时的空档。');return}
  day.push({start,end:start+2,title:'临时工作 · 文案整理',kind:'work',activity:'work'});day.sort((a,b)=>a.start-b.start);
- s.money+=180;s.workedDate=key;change({energy:-12,fun:-5});remember('work','完成临时工作，收入 ¥180',2);addEvent('临时工作结算','完成了两小时的文案整理，获得 ¥180。','daily');
- say('我接了一份两小时的文案整理工作。钱不算多，但可以补贴日常开销。');save();render();toast('工作完成 · +¥180');$('drawer').classList.remove('open');
+ s.workedDate=key;s.pendingWork={day:key,start,end:start+2,pay:180,paid:false};change({energy:-3});remember('work','接下两小时的文案整理工作',1);
+ say('我接了一份两小时的文案整理工作。结束后才能拿到 ¥180。');save();render();toast('已安排工作 · 2小时');$('drawer').classList.remove('open');
 }
 function respondToChat(text){
  const t=text.toLowerCase(),count=(s.chatTopics||{}),pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -323,7 +324,7 @@ function respondToChat(text){
  else if(/对不起|抱歉|原谅/.test(t)){topic='apology';reply=pick(['我听到了。我会看之后怎么相处，不会只凭一句话判断。','谢谢你愿意说出来。我们可以慢慢把这件事讲清楚。','我还需要一点时间消化，不过我愿意继续谈。']);}
  else if(/谢谢|感谢/.test(t)){topic='thanks';reply=pick(['不用特意谢我。我们本来就在一起生活。','嗯，收到。你也帮我做过不少事。']);}
  else if(/为什么|怎么想|觉得呢|你认为/.test(t)){topic=s.lastTopic||'reflection';reply=pick(['我得想一想。你问的是哪一部分？','我不想随便给个听起来正确的答案。你能再具体一点吗？','我的想法可能和你不完全一样，不过可以说说。']);}
- else {topic='general';let snippet=text.length>22?text.slice(0,22)+'…':text;reply=pick(['你说到“'+snippet+'”，我想知道你为什么会想到这个。','我听懂了一部分。这里面你最在意的是哪一点？','这件事我还没有形成明确看法。你愿意多讲一点吗？','我会记着你说的。你希望我回应你的感受，还是和你一起分析？']);}
+ else {topic='general';let snippet=text.length>22?text.slice(0,22)+'…':text;let previous=s.memories.filter(m=>m.type==='conversation'&&m.text!==text).slice(-1)[0];reply=previous&&Math.random()<.45?pick(['你之前提过“'+previous.text.slice(0,18)+'”。我在想，这和你刚才说的事情是不是有点关系？','我记得你前面说过“'+previous.text.slice(0,18)+'”。你现在的想法有变化吗？']):pick(['你说到“'+snippet+'”，我想知道你为什么会想到这个。','我听懂了一部分。这里面你最在意的是哪一点？','这件事我还没有形成明确看法。你愿意多讲一点吗？','我会记着你说的。你希望我回应你的感受，还是和你一起分析？']);}
  count[topic]=(count[topic]||0)+1;s.chatTopics=count;s.lastTopic=topic;
  remember('conversation',text.slice(0,55));
  if(topic==='relationship'&&count[topic]===1)change({friend:1});
@@ -369,6 +370,7 @@ function tick(){
  if(delta>0){change({energy:-delta*2.1,hunger:-delta*1.3,clean:-delta*.55,fun:-delta*.8,bored:delta*.16});s.lastTick=now;}
  ensureSchedule();
  let key=dayKey(dayAnchor()),hour=new Date().getHours(),ev=eventAt(key,hour);
+ if(s.pendingWork&&!s.pendingWork.paid&&(key>s.pendingWork.day||(key===s.pendingWork.day&&hour>=s.pendingWork.end))){s.pendingWork.paid=true;s.money+=s.pendingWork.pay;addEvent('临时工作结算','完成了两小时的文案整理，获得 ¥'+s.pendingWork.pay+'。','daily');say('工作结束了，拿到 ¥'+s.pendingWork.pay。总算可以喘口气。');remember('work','完成临时工作，收入 ¥'+s.pendingWork.pay,2);save();}
  if(now-(s.lastAutonomy||0)>25*60*1000){
   let a;
   if(ev){a=ev.activity||'idle';if(a!=='idle'&&a!=='project')doAutonomous(a,false);}
@@ -406,6 +408,7 @@ applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar()
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
 })();
+
 
 
 </script>
