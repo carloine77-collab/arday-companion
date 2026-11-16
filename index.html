@@ -326,7 +326,7 @@ $('backRoom').onclick=closeCalendar;
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
 $('chatForm').addEventListener('submit',e=>{e.preventDefault();let v=$('message').value.trim();if(!v)return;let repeat=s.memories.slice(-5).filter(m=>m.type==='conversation').length;change({friend:repeat?0:1,fun:-1,bored:repeat?1:0});remember('conversation',v.slice(0,40));say(['我听到了。你接着说。','这个问题我有自己的想法。','嗯？这部分可以再讲具体一点。','我会记住你刚才说的。'][Math.floor(Math.random()*4)]);$('message').value='';save();render()});
 let decorating=false;
-$('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('editing',decorating);$('decorate').textContent=decorating?'完成装修':'✦ 装修';if(decorating){$('drawer').classList.remove('open');say('点选房间里的物件，看看可以怎样调整。')}else say('好了，房间暂时这样。'};
+$('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('editing',decorating);$('decorate').textContent=decorating?'完成装修':'✦ 装修';if(decorating){$('drawer').classList.remove('open');say('点选房间里的物件，看看可以怎样调整。')}else say('好了，房间暂时这样。')};
 document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>{
  let obj=b.dataset.object;
  if(!decorating){
