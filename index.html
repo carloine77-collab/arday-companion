@@ -36,12 +36,12 @@
 
 /* Character dossier, hourly schedule and currency */
 .profile-card{display:flex;gap:12px;align-items:center;background:#f6eddf;border:1px solid #e5d5bd;border-radius:14px;padding:13px;margin-bottom:10px}.profile-avatar{width:48px;height:48px;border-radius:15px;background:#d77d50;color:white;display:grid;place-items:center;font:700 26px Georgia}.profile-card p,.profile-section p{font-size:11px;line-height:1.6;color:#897966;margin:5px 0}.profile-section{background:#fffaf1;border:1px solid #eadfce;border-radius:13px;padding:12px;margin:8px 0}.profile-section h4{font-size:12px;margin:0 0 7px}.trait-list{display:flex;gap:6px;flex-wrap:wrap}.trait{border-radius:20px;background:#e8eddf;color:#617055;padding:6px 9px;font-size:10px}.trait.unknown{background:#f0e8dc;color:#9c8d7c}.trait.discovered{background:#f5dfcb;color:#976543}.profile-section small{font-size:9px;color:#9b8a77}.day-slot.sleep button{background:#e4e0ed;color:#706783;margin:3px 0}.day-slot.work button{background:#f4dfbd;color:#88623c;margin:3px 0}.day-slot button.free{min-height:27px}
-</style>
+.person.sit{left:20%;transform:translate(-50%,10px) scale(.88)}.person.walk{left:68%;transform:translateX(-50%) scale(.88)}#upkeep{font-size:9px;color:#8b7862}.day-slot button.sleep{background:#e8e3ef;color:#706783}.day-slot button.work{background:#f6e3c6;color:#8b653c}.day-slot button.project{background:#f3dfd1;color:#8e5e48}</style>
 </head>
 <body>
 <div class="app">
 <header class="top">
- <div class="identity"><div class="mark">A</div><div><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div><div class="date cash" id="cash">¥3000</div></div></div>
+ <div class="identity"><div class="mark">A</div><div><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div><div class="date cash" id="cash">¥3000</div><div class="date" id="upkeep">房间维护 92%</div></div></div>
  <section class="stats" aria-label="角色状态">
   <div class="stat relation"><label>友谊</label><b id="friendV">24</b><div class="meter"><i id="friendB" style="width:24%"></i></div></div>
   <div class="stat relation"><label>依恋</label><b id="attachV">12</b><div class="meter"><i id="attachB" style="width:12%"></i></div></div>
@@ -86,14 +86,15 @@
 
 
 
+
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
-const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0}};
+const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:'',lastBillWeek:''};
 let s={...base};try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};
+s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.personality=s.personality||{hidden:[['节俭','需要独处','好奇心强'][Math.floor(Math.random()*3)]]};s.personality.hidden=Array.isArray(s.personality.hidden)?s.personality.hidden:[s.personality.hidden||'节俭'];s.revealedTraits=s.revealedTraits||{};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;}
+function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+s.roomCondition+'%;}
 function say(t){$('bubble').textContent=t}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
@@ -227,7 +228,7 @@ function openTab(name){
    if(id==='events'){renderEvents();return}
    if(id==='profile'){renderProfile();return}
    if(id==='work'){earnWork();return}
-   if(id==='chat'){say('我在听。最近我在想：我们可以把这里慢慢变成真正生活的地方。');s.friend=clamp(s.friend+1);s.fun=clamp(s.fun-1);remember('conversation','一次普通聊天');}
+   if(id==='chat'){say('我在听。你想从哪件事说起？');}
    else if(id==='collection'){showCollection();return}
    else if(id==='use-food'){let i=s.items.indexOf('点心');if(i<0){toast('物品栏里没有点心');return}s.items.splice(i,1);change({hunger:25,fun:2});say('点心正好派上用场。');}
    else if(id==='use-record'){if(!has('唱片机')){say('有唱片了，但还缺一台唱片机。');return}perform('music')}
@@ -249,7 +250,7 @@ function showCollection(){
  $('start-project').onclick=()=>{if(s.project?.status==='active'){toast('已经有一个改造计划在进行');return}if(s.money<30){toast('至少需要300¥作为材料预算');return}s.money-=300;s.project={status:'active',task:'一起完成房间改造',progress:0};addEvent('房间改造计划','阿尔想和你一起改善生活空间。需要共同完成三次整理或布置。','long');say('我想把房间弄得更适合我们生活。你愿意一起弄吗？');save();render();};
  $('close-project').onclick=()=>$('drawer').classList.remove('open');
 }
-function eventChoices(e){
+function eventChoicesLegacy(e){
  $('drawerTitle').textContent=e.title;
  let opts=e.type==='long'?['同意，一起做','先等等','提出别的计划']:e.title.includes('唱片机')?['直接买下来','先不花钱','去二手市场找找']:['陪他一起','让他自己决定','提出替代方案'];
  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices">'+opts.map((x,i)=>'<button class="choice" data-choice="'+i+'">'+x+'</button>').join('')+'</div>';
@@ -409,7 +410,160 @@ document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>
 applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
+
+function buildDay(key){
+ let d=[];const add=(start,end,title,kind='personal',activity='idle')=>d.push({start,end,title,kind,activity});
+ add(0,7,'睡眠','routine','sleep');add(7,8,'起床、洗漱','routine','wash');add(8,9,'早餐','routine','eat');
+ add(9,11,s.energy<38?'补觉、慢慢醒来':has('书桌')?'写作与阅读':'阅读、整理资料','personal',s.energy<38?'rest':has('书桌')?'write':'read');
+ add(11,12,'自由安排 / 外出办事','free','idle');add(12,13,'午餐','routine','eat');
+ if(s.project?.status==='active')add(14,15,s.project.task,'project','project');
+ else if(s.roomCondition<65)add(14,15,'整理和维护房间','personal','tidy');
+ else add(14,15,has('唱片机')?'听音乐或阅读':'个人时间','personal',has('唱片机')?'music':'read');
+ add(15,16,'自由时间','free','idle');add(16,17,has('书桌')?'写点东西 / 整理资料':'整理房间','personal',has('书桌')?'write':'tidy');
+ add(17,18,'自己的时间','free','idle');add(18,19,'晚餐','routine','eat');add(19,20,'散步或休闲','personal','walk');
+ add(20,21,has('唱片机')?'听音乐、放松一下':'阅读、放松一下','personal',has('唱片机')?'music':'read');
+ add(21,22,'洗漱、准备睡觉','routine','wash');add(22,24,'睡眠','routine','sleep');return d;
+}
+function ensureSchedule(){
+ const key=dayKey(dayAnchor());if(!s.calendar)s.calendar={anchor:key,days:{},version:3};
+ if((s.calendar.version||0)<3){s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=3}
+ if(s.calendar.anchor!==key){
+  s.calendar.anchor=key;Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
+  s.calendar.days[key]=buildDay(key);addEvent('新的一天','早上六点，我重新安排了今天。明后两天先留一些空白，之后再决定怎么过。','daily');
+  say('六点了。我更新了今天的安排，明后两天还留着空白。');
+ }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
+ for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
+ let week=Math.floor(dayAnchor().getTime()/(7*86400000)).toString();
+ if(s.lastBillWeek!==week){s.lastBillWeek=week;addEvent('本周水电与日常开销','共同生活的基础开销为 ¥80。可以现在支付，也可以暂时记账。','bill')}
+}
+function utility(a){
+ const u={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,write:has('书桌')?13:0,project:s.project?.status==='active'?24:0,walk:s.fun<60?8:2,idle:3};
+ if(s.personality.hidden.includes('需要独处')&&['read','write','rest'].includes(a))u[a]+=5;
+ if(s.personality.hidden.includes('好奇心强')&&['music','walk','write'].includes(a))u[a]+=4;
+ return u[a]||0;
+}
+function autonomousAction(){
+ ensureSchedule();let key=dayKey(dayAnchor()),ev=eventAt(key,new Date().getHours());
+ if(ev){s.currentActivity=ev.activity||'idle';return ev}
+ let opts=['rest','eat','wash','read','music','tidy','write','walk'];
+ let a=opts.map(x=>({a:x,v:utility(x)+Math.random()*3})).sort((x,y)=>y.v-x.v)[0].a;
+ doAutonomous(a,false);s.currentActivity=a;return {activity:a,title:a};
+}
+function applyPose(a){
+ let p=$('person');if(!p)return;p.classList.remove('sit','walk','wave');
+ if(['rest','read','music','tea','food','sleep'].includes(a))p.classList.add('sit');
+ else if(['walk','work','tidy','wash','write','project'].includes(a))p.classList.add('walk');
+ let names={rest:'在沙发上休息',read:'正在阅读',music:'正在听音乐',food:'正在吃东西',sleep:'正在睡觉',walk:'刚出去散步',work:'正在工作',tidy:'正在整理房间',wash:'洗漱中',write:'在书桌前写东西',project:'正在推进房间改造'};
+ if($('roomLabel'))$('roomLabel').textContent='HOME · '+(names[a]||'自己的时间');
+}
+function doAutonomous(a,announce=true){
+ const fx={rest:{energy:13,hunger:-2,fun:1},eat:{hunger:24,energy:2},wash:{clean:24,energy:-2},read:{fun:11,energy:-3},music:{fun:13,energy:-2},tidy:{clean:10,energy:-4},write:{fun:8,energy:-4},walk:{fun:12,energy:-7,clean:-2},sleep:{energy:24,hunger:-3},project:{fun:3,energy:-4}};
+ change(fx[a]||{});if(a==='tidy')s.roomCondition=clamp(s.roomCondition+7);
+ if(a==='project'&&s.project?.status==='active'){s.project.progress=(s.project.progress||0)+1;if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:2,fun:6});addEvent('房间改造完成','你们一起完成了改造，房间里多了一件纪念摆件。','long')}}
+ s.currentActivity=a;s.activityLog.push({a,at:Date.now()});if(s.activityLog.length>30)s.activityLog.shift();
+ let lines={rest:'我在沙发上休息。',eat:'我去找了点吃的。',wash:'我洗漱了一下，顺手整理了房间。',read:'我找了本书，读了一会儿。',music:'我挑了一张唱片听。',tidy:'我把房间收拾了一下。',write:'我在书桌前写了些东西。',walk:'我出去走了一圈。',sleep:'我正在睡觉。',project:'我继续处理房间改造的事情。'};
+ if(announce)say(lines[a]||'我想自己待一会儿。');applyPose(a);
+ if(a==='music')s.preferences.music=(s.preferences.music||0)+1;if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;
+ save();render();
+}
+function applyOffline(){
+ let elapsed=Math.max(0,Math.min(48,(Date.now()-(s.lastTick||s.last||Date.now()))/3600000));if(elapsed<.08)return;
+ change({energy:Math.min(18,elapsed*1.7),hunger:-Math.min(25,elapsed*1.15),clean:-Math.min(13,elapsed*.4),fun:-Math.min(15,elapsed*.55),bored:Math.min(5,elapsed*.12)});
+ s.roomCondition=clamp(s.roomCondition-Math.min(5,elapsed*.08));
+ let acts=Math.min(5,Math.floor(elapsed/4));for(let i=0;i<acts;i++){let a=s.energy<32?'rest':s.hunger<30?'eat':s.clean<28?'wash':s.roomCondition<55?'tidy':s.fun<28?'read':'read';doAutonomous(a,false)}
+ s.lastTick=Date.now();save();
+}
+function relation(action){
+ let recent=s.memories.slice(-12),repeats=recent.filter(m=>m.type===action).length;
+ if(repeats>=2)s.bored=clamp(s.bored+2);
+ if(['listen','tea','walk','read','game','music','food'].includes(action)){
+  s.friend=clamp(s.friend+(repeats?0:2));s.attach=clamp(s.attach+1);if(repeats)s.bored=clamp(s.bored+2);
+  let types=new Set(s.memories.filter(m=>m.type==='shared').map(m=>m.text));if(types.size>=4&&s.love<35&&Math.random()<.18)s.love=clamp(s.love+1);
+  remember('shared',action);
+ }
+}
+function perform(action){
+ const defs={tea:['一起喝茶','坐下来喝杯茶。',{energy:1,hunger:3,fun:5},'tea','tea'],music:['听音乐','阿尔挑了一张唱片。',{fun:12,energy:-2},'music','music'],walk:['出门散步','你们出去走了一圈。',{fun:13,energy:-9,clean:-3},'walk','walk'],read:['一起看书','你们各自读了一会儿，偶尔交换几句。',{fun:7,energy:-3},'read','sit'],game:['玩个游戏','这局我可不会让着你。',{fun:14,energy:-5},'game','wave'],rest:['休息一会','你们安静地待了一会儿。',{energy:8,fun:1},'rest','sit'],food:['一起吃点东西','你们找了些吃的。',{hunger:24,fun:3},'food','sit'],tidy:['一起整理房间','房间看起来整洁多了。',{clean:12,energy:-4,friend:1},'tidy','wave']};
+ let d=defs[action];if(!d)return;
+ if(action==='music'&&!has('唱片机')){say('我们还没有唱片机。先去商店看看？');return}
+ if(action==='food'){let i=s.items.indexOf('点心');if(i<0){say('我们没有现成点心。可以买一些，或者我去厨房找点吃的。');return}s.items.splice(i,1)}
+ 
+ change(d[2]);relation(action);remember(action,d[0]);say(d[1]);animate(d[4]);s.currentActivity=action;applyPose(action);save();render();
+}
+function earnWork(){
+ let key=dayKey(dayAnchor());if(s.workedDate===key){toast('今天已经接过一份工作');return}
+ if(s.energy<22){say('我现在精力不够，没法接工作。');return}
+ let day=s.calendar.days[key]||[];$('drawerTitle').textContent='临时工作 · 选择委托';
+ let jobs=[['资料校对',90,1],['文案整理',180,2],['内容研究',260,3]];
+ $('choices').innerHTML='<div class="calendar-note">工作会占用阿尔自己的时间，报酬在完成后结算。</div>'+jobs.map((x,i)=>'<button class="choice" data-job="'+i+'"><span class="emoji">¥</span>'+x[0]+'<small>'+x[2]+'小时 · ¥'+x[1]+'</small></button>').join('');
+ $('choices').querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{
+  let job=jobs[+b.dataset.job],start=-1;
+  for(let h=Math.max(9,new Date().getHours());h<=18-job[2]+1;h++){let free=true;for(let k=h;k<h+job[2];k++)if(eventAt(key,k))free=false;if(free){start=h;break}}
+  if(start<0){say('今天没有足够的连续空档。');return}
+  day.push({start,end:start+job[2],title:'临时工作 · '+job[0],kind:'work',activity:'work',pay:job[1]});day.sort((a,b)=>a.start-b.start);
+  s.workedDate=key;s.pendingWork={day:key,start,end:start+job[2],pay:job[1],paid:false};remember('work','接下'+job[0]+'委托',1);
+  say('我接下了'+job[0]+'，结束后会拿到 ¥'+job[1]+'。');save();renderCalendar();$('drawer').classList.remove('open');toast('工作已安排 · '+job[0]);
+ });
+}
+function respondToChat(text){
+ const t=text.toLowerCase(),pick=a=>a[Math.floor(Math.random()*a.length)],cur=s.currentActivity||'idle';
+ const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tidy:'整理房间',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',project:'房间改造'};
+ let topic='general',reply='';
+ if(/你好|嗨|早上好|晚上好|在吗|回来/.test(t)){topic='greeting';reply=pick(['你来了。我刚才在'+(act[cur]||'做自己的事')+'。','嗯，我在。你今天过得怎么样？','回来啦。刚才我正准备'+(cur==='sleep'?'睡觉':'继续手头的事')+'。'])}
+ else if(/累|疲惫|困|睡不着|休息/.test(t)){topic='tired';reply=pick(['你听起来有点累。今天是什么事情最消耗你？','那先坐一会儿吧。我刚才也在休息。','你想聊聊原因，还是暂时换个轻松的话题？'])}
+ else if(/难过|伤心|烦|生气|焦虑|压力|痛苦/.test(t)){topic='mood';reply=pick(['我先听你说。是刚发生了什么，还是最近一直积累着？','我不想随便劝你想开点。你最介意的究竟是哪一部分？','你希望我先听着，还是和你一起分析这件事？'])}
+ else if(/钱|价格|贵|便宜|工作|赚钱|收入/.test(t)){topic='money';reply=pick(['我们现在有 ¥'+s.money+'。我觉得先留出生活开销比较稳妥。','我可以接临时工作，不过也得看精力和日程。','最近可以看看委托板。买东西之前最好留点余地。'])}
+ else if(/音乐|唱片|歌/.test(t)){topic='music';reply=has('唱片机')?pick(['最近我常在晚上听唱片。你有特别喜欢的音乐吗？','我想找点没听过的音乐。','唱片机已经成了房间里常用的东西。']):'我也想听音乐，不过我们还没有唱片机。'}
+ else if(/书|阅读|小说|读/.test(t)){topic='reading';reply=pick(['我最近读得比较慢。你在读什么？','你更喜欢故事，还是观点和论证？','有些书读完以后，想法会留很久。'])}
+ else if(/吃|饿|饭|食物/.test(t)){topic='food';reply=pick(['我有点想吃热的东西。你今天吃饭了吗？','如果现在能选，我想吃点简单但有味道的东西。','我们可以看看库存还有什么。'])}
+ else if(/房间|家具|装修|书桌|植物/.test(t)){topic='room';reply=pick(['房间维护度现在是 '+s.roomCondition+'。我觉得先处理真正影响生活的地方。','我希望房间慢慢有生活痕迹，而不是一下子塞满东西。','如果只能先改一处，我会考虑光线、收纳和使用频率。'])}
+ else if(/对不起|抱歉|原谅/.test(t)){topic='apology';reply=pick(['我听到了。我会看之后怎么相处，不会只凭一句话判断。','谢谢你愿意说出来。我们可以慢慢把事情讲清楚。'])}
+ else if(/喜欢|爱你|爱不爱|关系|朋友/.test(t)){topic='relationship';reply=pick(['我觉得关系不是靠一句话就能定下来的。我们相处的细节，我都算数。','我有自己的感受，也还在了解你。你最近怎么想我们的关系？','我们已经形成了一些只有彼此才懂的习惯。'])}
+ else {topic='general';let p=s.memories.filter(m=>m.type==='conversation').slice(-1)[0];reply=p&&Math.random()<.4?'你刚才提到“'+p.text.slice(0,22)+'”。这和你现在说的事情有关系吗？':pick(['你说的这件事里，最让你在意的是哪一部分？','我还没有形成明确看法。你愿意再具体一点吗？','我想知道你为什么会这样想，而不只是听一个结论。','这件事我可能有不同看法。你想听听吗？'])}
+ s.chatTopics=s.chatTopics||{};s.chatTopics[topic]=(s.chatTopics[topic]||0)+1;remember('conversation',text.slice(0,55));say(reply);save();render();
+}
+function eventChoices(e){
+ if(e.type!=='bill')return eventChoicesLegacy(e);
+ $('drawerTitle').textContent=e.title;
+ $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
+ $('paybill').onclick=()=>{if(s.money>=80){s.money-=80;s.unpaidBill=Math.max(0,(s.unpaidBill||0)-80);say('水电和日常开销已经付了。');remember('household','支付本周共同开销 ¥80',2)}else{say('现在资金不够，先记账，等有收入再补上。');s.unpaidBill=(s.unpaidBill||0)+80}completeEvent(e,'支付');save();render();renderEvents()};
+ $('delaybill').onclick=()=>{s.unpaidBill=(s.unpaidBill||0)+80;completeEvent(e,'暂时记账');say('好，先记着。等有收入再补上。');save();render();renderEvents()};
+ $('drawer').classList.add('open');
+}
+function tick(){
+ let now=Date.now(),delta=Math.max(0,Math.min(1.5,(now-(s.lastTick||now))/3600000));
+ if(delta>0){change({energy:-delta*1.7,hunger:-delta*1.1,clean:-delta*.45,fun:-delta*.65,bored:delta*.1});s.roomCondition=clamp(s.roomCondition-delta*.035);s.lastTick=now}
+ ensureSchedule();let key=dayKey(dayAnchor()),hour=new Date().getHours(),hourKey=key+'-'+hour,ev=eventAt(key,hour);
+ if(s.lastHourKey!==hourKey){
+  s.lastHourKey=hourKey;let action=ev?.activity||null;
+  if(!action||action==='idle'){let result=autonomousAction();action=result.activity}
+  else if(action==='work'){change({energy:-5,fun:-2});s.currentActivity='work';applyPose('work')}
+  else doAutonomous(action,false);
+  if(s.pendingWork&&!s.pendingWork.paid&&(key>s.pendingWork.day||(key===s.pendingWork.day&&hour>=s.pendingWork.end))){s.pendingWork.paid=true;s.money+=s.pendingWork.pay;addEvent('临时工作结算','完成工作委托，获得 ¥'+s.pendingWork.pay+'。','daily');say('工作结束了，拿到 ¥'+s.pendingWork.pay+'。');remember('work','完成工作，收入 ¥'+s.pendingWork.pay,2)}
+  if(action==='project')doAutonomous('project',true);
+  if(action==='sleep')say('阿尔已经休息了。房间安静下来。');
+  save();
+ }
+ generateDailyEvents();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();
+}
+function generateDailyEvents(){
+ if(!s.events.some(e=>e.status==='open'&&e.type==='daily')){
+  if(s.hunger<28)addEvent('冰箱快空了','最近吃东西有些不方便。要不要买些食物，或者安排一次采购？','daily');
+  else if(s.roomCondition<55)addEvent('房间需要整理','公共空间有些乱了。阿尔可以自己整理，也可以和你一起完成。','daily');
+  else if(has('绿植')&&s.clean<60&&Math.random()<.25)addEvent('照料绿植','窗边的植物需要浇水和照看。','daily');
+  else if(!has('唱片机')&&s.visits>1&&s.memories.filter(m=>m.type==='music').length>0)addEvent('关于音乐的提议','我还是想有一台唱片机，不过不急着今天买。','daily');
+ }
+}
+function renderProfile(){
+ const known=['慢热','重视自主','好奇心强'];const hidden=['坚持自己的节奏','念旧','节俭','好胜','需要独处','好奇心强'];
+ let unlocked=[...(s.revealedTraits||[])];if(s.personality.hidden.includes('节俭')&&s.memories.filter(m=>m.type==='purchase').length>=2)unlocked.push('节俭');if(s.personality.hidden.includes('需要独处')&&s.rejections>=2)unlocked.push('需要独处');
+ $('drawerTitle').textContent='人物档案 · Arday';
+ $('choices').innerHTML='<div class="profile-card"><div class="profile-avatar">A</div><div><strong>Arday · 阿尔</strong><p>当前状态：'+(s.currentActivity||'自己的时间')+' · 房间维护 '+s.roomCondition+'%</p></div></div><section class="profile-section"><h4>已知性格</h4><div class="trait-list">'+known.map(x=>'<span class="trait">'+x+'</span>').join('')+'</div></section><section class="profile-section"><h4>逐渐发现的性格</h4><p>隐藏特质会实际影响他的选择，不会因为数值达标而全部解锁。</p><div class="trait-list">'+hidden.map(x=>'<span class="trait '+(unlocked.includes(x)?'discovered':'unknown')+'">'+(unlocked.includes(x)?x:'？ 未知特质')+'</span>').join('')+'</div><small>已发现 '+new Set(unlocked).size+' / '+hidden.length+'</small></section><section class="profile-section"><h4>共同生活记录</h4><p>记忆 '+s.memories.length+' 条 · 拒绝 '+(s.rejections||0)+' 次 · 未付账单 ¥'+(s.unpaidBill||0)+'</p><p>'+s.memories.slice(-5).map(m=>m.text).join('；')+'</p></section>';
+ $('drawer').classList.add('open');
+}
+
 })();
+
 
 
 
