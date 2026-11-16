@@ -1315,8 +1315,7 @@ function proposeSharedGoal(at=Date.now()){
  const g=pool[Math.floor(Math.random()*pool.length)];
  if(!g)return;
  s.lastSharedProposalAt=at;
- addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');
- const e=s.events[0];e.goalId=g.id;
+ const e=addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');e.goalId=g.id;
 }
 function acceptSharedGoal(id,variant='normal'){
  const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return;
