@@ -299,9 +299,17 @@ function slotClick(di,h){
  if(ev){
   $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
   $('choices').innerHTML='<div class="calendar-note">'+(ev.kind==='proposal'?'这是你提出的共同安排。':'这是阿尔自己的安排。你可以邀请他一起，或商量调整。')+'</div><div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">让他自己安排</button><button id="return-existing">返回日程</button></div>';
-  $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.activity!=='sleep'&&ev.kind!=='work'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;change({friend:2,attach:1});remember('shared','一起参与：'+ev.title,2);say('好啊，一起做也不错。');}else if(ev.activity==='sleep'||ev.title.includes('睡眠'))say('现在是我的睡眠时间。我不会为了临时邀请打乱作息。我们可以约在明天醒来以后。');else if(ev.kind==='work')say('我已经答应了这份工作，不能临时把它放下。等结束以后再一起安排吧。');else if(ev.kind==='routine')say('这是我固定的生活安排。我愿意商量，但不想直接取消它。');else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
-  $('move').onclick=()=>{let target=prompt('想调整到几点？请输入 0–23 之间的整点。');let n=Number(target);if(!Number.isInteger(n)||n<0||n>23||eventAt(key,n)){toast('这个时间不可用');return}ev.start=n;ev.end=n+1;s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')};
-  $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'){say('这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
+  $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.activity!=='sleep'&&ev.kind!=='work'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;remember('planned','决定一起参与：'+ev.title,1);say('好啊，一起做也不错。')}else if(ev.activity==='sleep'||ev.title.includes('睡眠'))say('现在是我的睡眠时间。我不会为了临时邀请打乱作息。我们可以约在明天醒来以后。');else if(ev.kind==='work')say('我已经答应了这份工作，不能临时把它放下。等结束以后再一起安排吧。');else if(ev.kind==='routine')say('这是我固定的生活安排。我愿意商量，但不想直接取消它。');else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
+  $('move').onclick=()=>{
+    const target=prompt('想调整到几点？请输入 0–23 之间的整点。'),n=Number(target),duration=ev.end-ev.start,oldStart=ev.start;
+    if(!Number.isInteger(n)||n<0||n+duration>24){toast('这个时间不可用');return}
+    const conflict=(s.calendar.days[key]||[]).some(x=>x!==ev&&n<x.end&&n+duration>x.start);
+    if(conflict){toast('这个时段已有其他安排');return}
+    ev.start=n;ev.end=n+duration;
+    if(s.pendingWork?.day===key&&s.pendingWork.start===oldStart){s.pendingWork.start=n;s.pendingWork.end=n+duration}
+    s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')
+   };
+  $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
@@ -309,7 +317,7 @@ function slotClick(di,h){
  $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
   let i=+b.dataset.p,names=['一起吃点东西','散步','听音乐','一起看书','玩游戏','自由相处'],pref=['food','walk','music','reading','game','company'][i],score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(i===0&&s.hunger<40?12:0)+(i===2&&s.fun<40?10:0);
   let accepted=score>12+(di*1.5);
-  if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);change({friend:1,attach:1});s.preferences[pref]=(s.preferences[pref]||0)+1;remember('shared','约定：'+names[i],2);say('可以，我把这段时间留给我们。');}
+  if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
   else{change({bored:1});s.rejections=(s.rejections||0)+1;if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];say(['这个时间我不太想这样安排。我们换个时间，或者各自安排也可以。','我知道你想和我一起，不过我现在确实不想这么做。希望你别把拒绝当成对你的否定。','这次我想说得明确一点：不。我有自己的计划。'][Math.min(2,s.rejections-1)]);}
   save();render();renderCalendar();$('drawer').classList.remove('open');toast(accepted?'阿尔接受了邀请':'阿尔拒绝了这次邀请 · 可以换个时间或活动');
  });
@@ -492,41 +500,44 @@ const activityMeta = {
 
 
 
+function findAvailableSlot(now=new Date(),duration=1){
+ const today=keyAt(now),hour=now.getHours();
+ for(let offset=0;offset<=2;offset++){
+  const d=new Date(now);d.setDate(d.getDate()+offset);
+  const key=ensureScheduleAt(d),from=offset===0?hour+(s.lastUnifiedHourKey===today+'-'+hour?1:0):6;
+  const day=s.calendar.days[key]||[];
+  for(let h=from;h+duration<=24;h++){
+   let free=true;
+   for(let x=h;x<h+duration;x++){const ev=day.find(e=>x>=e.start&&x<e.end);if(ev&&ev.kind!=='free'){free=false;break}}
+   if(free)return {key,start:h};
+  }
+ }
+ return null;
+}
 function proposeActivityNow(action){
- const a=normalizeActivity(action),now=new Date(),hour=now.getHours(),key=keyAt(now),ev=eventAt(key,hour);
+ const a=normalizeActivity(action),now=new Date(),hour=now.getHours(),key=keyAt(now);
  if(a==='idle')return false;
- if(ev&&ev.activity==='sleep'){say('现在是我的睡眠时间。你可以约我醒来以后再做这件事。');return false}
- if(ev&&ev.activity==='work'&&a!=='work'){say('我现在有工作要完成。等结束以后再说吧。');return false}
  if((a==='walk'||a==='game')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
  if(a==='music'&&!has('唱片机')){say('没有唱片机，今天恐怕听不了。');return false}
  if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
+ if(a==='food'&&!s.readyMeals?.length&&!s.items.includes('点心')&&!Object.keys(recipes).some(canCook)){say('家里暂时没有现成的食物。要不要先去厨房准备一点？');return false}
  const survival={eat:s.hunger<38,rest:s.energy<28,wash:s.clean<25};
-  if(a==='food'&&!s.readyMeals?.length&&!s.items.includes('点心')){say('家里暂时没有现成的食物。要不要先去厨房准备一点？');return false;}
  let accept;
  if(a in survival&&survival[a])accept=true;
  else{let probability=.67;if(s.hate>55)probability-=.12;if(s.friend>70&&s.hate<15)probability+=.06;if(a==='walk'&&s.energy<35)probability-=.12;accept=Math.random()<probability}
  if(!accept){
-  const refusals={tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['我现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],tidy:['房间暂时这样就行，我不想现在整理。','你要是想整理可以先动手，我今天没这个打算。','先放着吧，没必要什么都立刻收拾。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
+  const refusals={tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],tidy:['房间暂时这样就行，我不想现在整理。','你要是想整理可以先动手，我今天没这个打算。','先放着吧，没必要什么都立刻收拾。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
   const lines=refusals[a]||['这会儿不太想做。','今天先不了，换个时间吧。','我有自己的安排，别替我决定。'];
   say(lines[Math.floor(Math.random()*lines.length)]);s.rejections=(s.rejections||0)+1;save();return false;
  }
- let start=hour,k=key;
- if(s.lastUnifiedHourKey===key+'-'+hour)start++;
- if(start>=24){k=dayKey(plusDays(dayAnchorAt(now),1));start=6}
+ const slot=findAvailableSlot(now,1);
+ if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
  const titles={rest:'休息一会儿',eat:'吃点东西',food:'一起吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'一起喝茶',walk:'出门散步',game:'玩游戏',company:'自由相处',tidy:'整理房间',write:'写点东西',cook:'做饭',cookTogether:'一起做饭'};
- writeBlockForKey(k,start,start+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
+ writeBlockForKey(slot.key,slot.start,slot.start+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
  remember('interaction','接受提议：'+(titles[a]||a),1);
- say(start===hour?'好，就按这个安排。':'可以。我把稍后的时间留出来。');
+ say(slot.key===key&&slot.start===hour?'好，就按这个安排。':'可以。我把稍后的时间留出来。');
  save();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();return true;
 }
-
-
-
-
-
-
-// === Unified hourly simulation and offline replay (v2) ===
-// Every simulated hour is processed once, whether the page is open or closed.
 function dayAnchorAt(value){
  const d=new Date(value);
  if(d.getHours()<6)d.setDate(d.getDate()-1);
@@ -628,9 +639,23 @@ function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');i
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('sceneSwitch').textContent='← 返回房间';$('roomLabel').textContent='KITCHEN · 厨房'}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('sceneSwitch').textContent='进入厨房 →';const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent='HOME · '+m.title}
 function openKitchenPanel(together=false){kitchenOpen();const stock=Object.entries(ingredientNames).map(([k,n])=>n+' × '+pantryCount(k)).join('　·　'),meals=s.readyMeals||[];$('drawerTitle').textContent='厨房 · 食材与烹饪';$('choices').innerHTML='<div class="calendar-note">冰箱库存：'+stock+'<br>已做好：'+(meals.length?meals.map(x=>x.name).join('、'):'暂无')+'<br>做饭占用一小时，并写入日程。</div><div class="choices">'+Object.entries(recipes).map(([id,r])=>'<button class="choice" data-recipe="'+id+'"><span class="emoji">🍳</span>'+r.name+'<small>'+Object.entries(r.ingredients).map(([k,n])=>ingredientNames[k]+' ×'+n).join('、')+'</small></button>').join('')+'</div><div class="calendar-actions"><button id="kitchen-shop">去商店买食材</button><button id="kitchen-close">收起</button></div>';$('choices').querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>scheduleCooking(b.dataset.recipe,together));$('kitchen-shop').onclick=()=>openTab('商店');$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open')}
-function scheduleCooking(id,together=false){if(!canCook(id)){say('这道菜的食材不够。先去商店补一点，或者换一道菜。');toast('食材不足');return}const now=new Date(),h=now.getHours(),key=dayKey(dayAnchor()),hk=key+'-'+h;let start=h,k=key;if(s.lastUnifiedHourKey===hk){start=h+1;if(start>=24){const next=new Date(now.getTime()+3600000);k=keyAt(next);start=next.getHours();ensureScheduleAt(next)}}const act=together?'cookTogether':'cook',ev={title:(together?'一起做':'阿尔做')+recipes[id].name,kind:together?'proposal':'personal',activity:act,recipeId:id,withPlayer:together,startedBy:together?'player':'arday'};writeBlockForKey(k,start,start+1,ev);say(together?'好啊。你负责洗菜，还是让我来？':'我来做'+recipes[id].name+'。厨房总算派上用场了。');remember('cooking','安排烹饪：'+recipes[id].name,2);save();render();renderCalendar();$('drawer').classList.remove('open')}
+function scheduleCooking(id,together=false){
+ if(!canCook(id)){say('这道菜的食材不够。先去商店补一点，或者换一道菜。');toast('食材不足');return}
+ const slot=findAvailableSlot(new Date(),1);
+ if(!slot){say('最近几天没有合适的空档。食材先留在冰箱里，晚些时候再做。');return}
+ const act=together?'cookTogether':'cook',ev={title:(together?'一起做':'阿尔做')+recipes[id].name,kind:together?'proposal':'personal',activity:act,recipeId:id,withPlayer:together,startedBy:together?'player':'arday'};
+ writeBlockForKey(slot.key,slot.start,slot.start+1,ev);
+ say(together?'好啊。你负责洗菜，还是让我来？':'我来做'+recipes[id].name+'。厨房总算派上用场了。');
+ remember('cooking','安排烹饪：'+recipes[id].name,2);save();render();renderCalendar();$('drawer').classList.remove('open');
+}
 function completeCooking(ev){if(ev.cookingStarted)return;const id=ev.recipeId||Object.keys(recipes).find(canCook),r=recipes[id];if(!r||!canCook(id)){ev.cookingStarted=true;addEvent('食材不够了','原定的烹饪没有完成，冰箱里的食材不足。','daily');say('糟了，食材不够。这顿饭得换个办法。');return}Object.entries(r.ingredients).forEach(([k,n])=>s.pantry[k]=pantryCount(k)-n);s.readyMeals=s.readyMeals||[];s.readyMeals.push({name:r.name,hunger:r.hunger,cookedAt:Date.now()});ev.cookingStarted=true;ev.completed=true;change({energy:-3,fun:ev.withPlayer?3:1});addEvent('做好了'+r.name,ev.withPlayer?'你和阿尔一起完成了'+r.name+'。':'阿尔做好了'+r.name+'，放进了冰箱。','daily');remember('cooking','完成烹饪：'+r.name,2);if(ev.withPlayer)change({friend:1,attach:1});say(r.name+'做好了。')}
-function consumeMeal(){if(s.readyMeals?.length){const m=s.readyMeals.shift();change({hunger:Math.min(45,m.hunger),fun:2});remember('meal','吃了'+m.name,1);return m.name}if(s.items.includes('点心')){s.items.splice(s.items.indexOf('点心'),1);change({hunger:18,fun:1});return '点心'}return null}
+function consumeMeal(){
+ if(s.readyMeals?.length){const m=s.readyMeals.shift();change({hunger:Math.min(45,m.hunger),fun:2});remember('meal','吃了'+m.name,1);return m.name}
+ if(s.items.includes('点心')){s.items.splice(s.items.indexOf('点心'),1);change({hunger:18,fun:1});return '点心'}
+ const id=Object.keys(recipes).find(canCook);
+ if(id){const r=recipes[id];Object.entries(r.ingredients).forEach(([k,n])=>s.pantry[k]=pantryCount(k)-n);change({hunger:r.hunger,fun:1});remember('meal','简单准备并吃了'+r.name,1);return r.name}
+ return null;
+}
 function setSceneActivity(activity,announce){const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);if(kitchen)kitchenOpen();else if($('stage').classList.contains('kitchen-mode'))kitchenClose();const p=document.querySelector(kitchen?'.kitchen-person':'#person');if(p){p.classList.remove('sit','walk','wave');p.classList.add(m.pose||'wave');const pos={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};p.style.left=kitchen?'54%':(pos[m.location]||'51%')}s.currentActivity=a;$('roomLabel').textContent=(kitchen?'KITCHEN':m.location==='outside'?'OUTSIDE':'HOME')+' · '+m.title;if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')}
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];if(s.hunger<48&&Object.keys(recipes).some(canCook)&&Math.random()<.58)return 'cook';const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>(a!=='music'||has('唱片机'))&&(a!=='write'||has('书桌'))).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
 function normalizeActivity(a){return ({reading:'read',listen:'music',rest:'rest',cooking:'cook'})[a]||a||'idle'}
@@ -829,11 +854,12 @@ function proposeSharedGoal(at=Date.now()){
  s.lastSharedProposalAt=at;
  const e=addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');e.goalId=g.id;
 }
-if(s.project?.status==='active'&&!s.sharedGoal?.status==='active'){
+if(s.project?.status==='active'&&s.sharedGoal?.status!=='active'){
  const legacy=sharedGoalCatalog().find(x=>x.id==='room');
  if(legacy)s.sharedGoal={...legacy,progress:Math.min(legacy.target,Number(s.project.progress)||0),status:'active',startedAt:Date.now(),variant:'migrated'};
 }
 delete s.project;
+Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'){ev.activity='tidy';ev.title='整理房间';ev.kind='personal'}}));
 function acceptSharedGoal(id,variant='normal'){
  const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return;
  const target=variant==='slow'?Math.max(1,g.target-1):g.target;
