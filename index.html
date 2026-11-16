@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4ead8">
+<title>Arday · 阿尔</title>
+<style>
+:root{--paper:#f4ead8;--paper2:#fff8ec;--ink:#40382e;--muted:#8d806f;--orange:#d97848;--orange2:#f1b477;--green:#829477;--green2:#dce2cf;--red:#bb6554;--line:#dfd1bb;--shadow:0 12px 32px #68543a18}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","PingFang SC","Microsoft YaHei",sans-serif;min-height:100svh}
+button{font:inherit;color:inherit;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid #d9784880;outline-offset:3px}
+.app{max-width:900px;margin:auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;justify-content:space-between;padding:5px 3px 15px}.brand{display:flex;align-items:center;gap:10px}.mark{width:38px;height:38px;border-radius:14px;background:var(--orange);color:#fff8ec;display:grid;place-items:center;font:700 20px Georgia;box-shadow:0 4px 0 #a95636}.brand strong{font:700 20px Georgia,serif;letter-spacing:.3px}.brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:1px;margin-top:2px}.clock{text-align:right;color:var(--muted);font-size:12px;line-height:1.5}.clock b{display:block;color:var(--ink);font-size:14px;font-weight:650}
+.scene{position:relative;overflow:hidden;border:1px solid #e3d3bb;border-radius:27px;background:#e8dfc9;box-shadow:var(--shadow);min-height:430px}
+.scene-sky{position:absolute;inset:0 0 43% 0;background:linear-gradient(180deg,#f4d9b8,#f3e5c9 70%,#e7ddc7)}
+.window{position:absolute;left:7%;top:8%;width:27%;height:39%;border:9px solid #b7835e;border-bottom-width:13px;border-radius:9px 9px 3px 3px;background:linear-gradient(#c8d9c5,#e8d8b3);box-shadow:inset 0 0 0 2px #f6e9d3}
+.window:before,.window:after{content:"";position:absolute;background:#b7835e}.window:before{width:5px;height:100%;left:50%;top:0}.window:after{height:5px;width:100%;left:0;top:52%}
+.sun{position:absolute;width:40px;height:40px;border-radius:50%;background:#f4c47e;right:14%;top:13%;box-shadow:0 0 35px #f6c98788}
+.shelf{position:absolute;right:8%;top:17%;width:26%;height:10px;background:#a97853;border-radius:4px;box-shadow:0 9px 0 -3px #a97853}
+.plant{position:absolute;right:14%;top:7%;font-size:34px;filter:drop-shadow(0 3px 1px #74543a22)}
+.wall-art{position:absolute;right:13%;top:33%;width:65px;height:76px;background:#f7eddc;border:6px solid #b7835e;transform:rotate(2deg);display:grid;place-items:center;font-size:29px}
+.floor{position:absolute;inset:57% 0 0;background:repeating-linear-gradient(0deg,#d6b995 0 2px,#d9bd9c 2px 44px);border-top:7px solid #bd9873}
+.rug{position:absolute;left:27%;bottom:4%;width:48%;height:23%;border-radius:50%;background:#d7a27c;border:7px solid #c58b69;box-shadow:inset 0 0 0 3px #e8c09b}
+.couch{position:absolute;left:6%;bottom:17%;width:31%;height:24%;border-radius:18px 18px 10px 10px;background:#829477;border:5px solid #718469;box-shadow:inset 0 -10px 0 #718469}
+.couch:before{content:"";position:absolute;left:-8px;right:-8px;bottom:-8px;height:17px;background:#a06f50;border-radius:6px}
+.couch:after{content:"";position:absolute;left:40%;top:7px;height:72%;width:4px;background:#718469}
+.table{position:absolute;right:8%;bottom:12%;width:27%;height:12px;border-radius:50%;background:#a8754e;box-shadow:0 8px 0 -2px #90613f}
+.table:after{content:"";position:absolute;left:12%;right:12%;top:8px;height:42px;border-left:6px solid #90613f;border-right:6px solid #90613f}
+.lamp{position:absolute;right:39%;bottom:25%;font-size:42px;filter:drop-shadow(0 4px 2px #79583b33)}
+.character{position:absolute;left:48%;bottom:17%;width:105px;height:176px;transform:translateX(-50%);transition:transform .35s}
+.char-shadow{position:absolute;bottom:-3px;left:5px;width:96px;height:18px;border-radius:50%;background:#76583a38}
+.body{position:absolute;bottom:12px;left:15px;width:76px;height:95px;border-radius:34px 34px 23px 23px;background:#d47c50;border:4px solid #a95d42;box-shadow:inset -9px 0 #bd6c49}
+.neck{position:absolute;left:43px;bottom:94px;width:20px;height:17px;background:#d9a17c}
+.head{position:absolute;left:16px;bottom:102px;width:75px;height:78px;border-radius:43% 46% 42% 42%;background:#d9a17c;border:4px solid #9c674f;z-index:2}
+.hair{position:absolute;left:11px;top:-9px;width:79px;height:38px;border-radius:48% 55% 25% 25%;background:#493d35;z-index:3;transform:rotate(-4deg)}
+.hair:after{content:"";position:absolute;right:5px;top:17px;width:26px;height:30px;border-radius:0 0 60% 20%;background:#493d35;transform:rotate(-13deg)}
+.ear{position:absolute;top:28px;width:13px;height:20px;border-radius:50%;background:#d9a17c;border:3px solid #9c674f}.ear.l{left:-9px}.ear.r{right:-9px}
+.eye{position:absolute;top:39px;width:6px;height:8px;border-radius:50%;background:#493d35;z-index:4}.eye.l{left:21px}.eye.r{right:20px}
+.nose{position:absolute;left:34px;top:51px;width:7px;height:5px;border-radius:50%;background:#a86d5c;z-index:4}
+.mouth{position:absolute;left:31px;top:59px;width:14px;height:7px;border-bottom:2px solid #91594e;border-radius:50%;z-index:4}
+.blush{position:absolute;top:54px;width:13px;height:7px;border-radius:50%;background:#d9877a66;z-index:4}.blush.l{left:8px}.blush.r{right:7px}
+.arm{position:absolute;top:115px;width:19px;height:57px;border-radius:15px;background:#d9a17c;border:3px solid #9c674f;z-index:1}.arm.l{left:6px;transform:rotate(12deg)}.arm.r{right:5px;transform:rotate(-12deg)}
+.legs{position:absolute;bottom:0;left:27px;width:52px;height:22px;border-radius:10px;background:#66534a;z-index:0}
+.character.wave .arm.r{transform:rotate(-65deg);top:96px}.character.sit{transform:translate(-50%,8px) scale(.92)}.character.sit .legs{height:13px;width:67px;left:19px}
+.bubble{position:absolute;left:50%;top:7%;transform:translateX(-50%);max-width:76%;background:#fff9ed;border:1px solid #e4d1b6;border-radius:17px 17px 17px 5px;padding:11px 15px;font-size:13px;line-height:1.55;box-shadow:0 5px 14px #6d52331a;z-index:5;white-space:normal;text-align:center}
+.bubble:after{content:"";position:absolute;left:22px;bottom:-7px;width:12px;height:12px;background:#fff9ed;border-right:1px solid #e4d1b6;border-bottom:1px solid #e4d1b6;transform:rotate(45deg)}
+.scene-caption{position:absolute;left:17px;bottom:13px;color:#6d5d4b;font-size:11px;letter-spacing:1px}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.stat{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0}.stat-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}.stat-head b{font-size:13px;color:var(--ink)}.bar{height:6px;background:#e9dfd0;border-radius:8px;margin-top:9px;overflow:hidden}.fill{height:100%;border-radius:8px;background:var(--green);transition:width .3s}.stat:nth-child(2) .fill{background:var(--orange)}.stat:nth-child(3) .fill{background:#c18b63}
+.panel{background:var(--paper2);border:1px solid var(--line);border-radius:22px;padding:15px;box-shadow:var(--shadow)}
+.panel-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.panel-title strong{font:700 17px Georgia,serif}.panel-title span{font-size:11px;color:var(--muted)}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.action{min-height:76px;border:1px solid #e4d5bf;background:#fbf1e1;border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .12s,background .12s}.action:active{transform:scale(.96);background:#f4e3cb}.action .ico{font-size:23px}.action span:last-child{font-size:12px}
+.chat{display:flex;gap:9px;margin-top:13px}.chat input{min-width:0;flex:1;border:1px solid var(--line);border-radius:13px;padding:12px 13px;background:#fffdf7;color:var(--ink);font:inherit;font-size:13px;outline:none}.chat input:focus{border-color:var(--orange)}.send{padding:0 18px;border-radius:13px;background:var(--orange);color:#fff;font-weight:650}
+.bottom{display:flex;justify-content:space-between;align-items:center;margin-top:13px;padding:0 3px;color:var(--muted);font-size:11px}.bottom button{background:transparent;color:var(--muted);padding:7px}
+.toast{position:fixed;left:50%;bottom:calc(25px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#493f34;color:#fff8ec;border-radius:12px;padding:10px 15px;font-size:12px;transition:.25s;z-index:10;max-width:85%;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:700px){.app{padding-top:25px}.layout{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;align-items:start}.scene{min-height:510px}.scene-sky{bottom:43%}.side{display:flex;flex-direction:column;gap:14px}.status{margin:0;grid-template-columns:1fr}.actions{grid-template-columns:repeat(2,1fr)}.action{min-height:88px}.panel{padding:18px}}
+@media(max-width:380px){.app{padding-left:11px;padding-right:11px}.scene{min-height:390px}.character{transform:translateX(-50%) scale(.88);transform-origin:bottom center}.bubble{font-size:12px}.action{min-height:69px}.action .ico{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand"><div class="mark">A</div><div><strong>Arday</strong><small>阿尔 · YOUR COMPANION</small></div></div><div class="clock"><b id="time">--:--</b><span id="date">正在读取时间</span></div></header>
+<div class="layout">
+<main>
+<section class="scene" aria-label="阿尔的房间">
+<div class="scene-sky"></div><div class="sun"></div><div class="window"></div><div class="plant">🪴</div><div class="shelf"></div><div class="wall-art">🌿</div><div class="floor"></div><div class="rug"></div><div class="couch"></div><div class="table"></div><div class="lamp">🪔</div>
+<div class="bubble" id="bubble">你来了。今天过得怎么样？</div>
+<div class="character" id="character"><div class="char-shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="body"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div><div class="blush l"></div><div class="blush r"></div></div></div>
+<div class="scene-caption" id="sceneCaption">HOME · 现在</div>
+</section>
+</main>
+<aside class="side">
+<section class="status">
+<div class="stat"><div class="stat-head"><span>☀ 精神</span><b id="energyVal">76</b></div><div class="bar"><div class="fill" id="energyBar" style="width:76%"></div></div></div>
+<div class="stat"><div class="stat-head"><span>♡ 心情</span><b id="moodVal">72</b></div><div class="bar"><div class="fill" id="moodBar" style="width:72%"></div></div></div>
+<div class="stat"><div class="stat-head"><span>✦ 熟悉</span><b id="bondVal">8</b></div><div class="bar"><div class="fill" id="bondBar" style="width:8%"></div></div></div>
+</section>
+<section class="panel"><div class="panel-title"><strong>和阿尔待一会儿</strong><span>选择一件事</span></div>
+<div class="actions">
+<button class="action" data-action="chat"><span class="ico">💬</span><span>聊聊天</span></button>
+<button class="action" data-action="tea"><span class="ico">🍵</span><span>喝点东西</span></button>
+<button class="action" data-action="music"><span class="ico">🎵</span><span>听音乐</span></button>
+<button class="action" data-action="walk"><span class="ico">🌿</span><span>出去走走</span></button>
+</div>
+<div class="chat"><input id="message" maxlength="120" placeholder="想对阿尔说些什么？" autocomplete="off"><button class="send" id="send">发送</button></div>
+</section>
+<section class="panel"><div class="panel-title"><strong>一点日常</strong><span id="dayNote">你们的日子</span></div><div id="dailyText" style="font-size:13px;line-height:1.75;color:#776b5b">窗边有光，房间里很安静。阿尔似乎正在等一个合适的话题。</div></section>
+</aside>
+</div>
+<footer class="bottom"><span>进度自动保存在这台设备上</span><button id="reset">重新开始</button></footer>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const defaults={energy:76,mood:72,bond:8,last:Date.now(),visits:0,notes:0};
+let state={...defaults};
+try{const saved=JSON.parse(localStorage.getItem('arday-save')||'null');if(saved&&typeof saved==='object')state={...defaults,...saved}}catch(e){}
+const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));
+function save(){state.last=Date.now();try{localStorage.setItem('arday-save',JSON.stringify(state))}catch(e){}}
+function render(){
+['energy','mood','bond'].forEach(k=>{$(k+'Val').textContent=state[k];$(k+'Bar').style.width=state[k]+'%'});
+}
+function say(text){$('bubble').textContent=text}
+function toast(text){$('toast').textContent=text;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
+function updateTime(){const d=new Date();$('time').textContent=d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});$('date').textContent=d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});const h=d.getHours();$('sceneCaption').textContent=(h<6?'LATE NIGHT':h<10?'MORNING':h<17?'AFTERNOON':h<20?'EVENING':'NIGHT')+' · '+$('time').textContent}
+function offline(){
+const now=Date.now(),hours=Math.max(0,(now-(state.last||now))/3600000);
+if(hours>.08){state.energy=clamp(state.energy+Math.min(18,hours*2.2));state.mood=clamp(state.mood+Math.min(10,hours*.8));save();render()}
+}
+function act(type){
+const c=$('character');c.classList.remove('wave','sit');void c.offsetWidth;
+const actions={
+chat:{line:'我在听。你想从哪里说起？',energy:-2,mood:5,bond:3,note:'你们聊了一会儿。话题从一件小事慢慢延伸开来。'},
+tea:{line:'茶刚好，不烫。要不要坐下来慢慢喝？',energy:3,mood:7,bond:2,note:'杯子里升起一点热气。窗外的光线也柔和了些。'},
+music:{line:'这首我还挺喜欢的。你听见那段鼓点了吗？',energy:2,mood:8,bond:2,note:'音乐在房间里流淌了一阵，你们都没有急着说话。'},
+walk:{line:'走吧。今天外面的风应该不错。',energy:-7,mood:10,bond:3,note:'你们出去转了一圈。回来时，阿尔的心情看起来轻松了些。'}
+};
+const a=actions[type];if(!a)return;
+state.energy=clamp(state.energy+a.energy);state.mood=clamp(state.mood+a.mood);state.bond=clamp(state.bond+a.bond);state.notes++;
+say(a.line);$('dailyText').textContent=a.note;c.classList.add(type==='tea'?'sit':'wave');save();render();
+}
+const replies=[
+'嗯，我想想。你说的这件事还有另一面。','这倒是个有意思的角度。然后呢？','我记下了。下次我们可以接着讨论。','你今天似乎有不少想法。','先不急着下结论，再多说一点。','我有自己的看法，不过想先听完你的。','好，我明白你的意思了。'
+];
+function send(){
+const input=$('message'),v=input.value.trim();if(!v)return;
+state.bond=clamp(state.bond+1);state.mood=clamp(state.mood+2);state.notes++;
+say(replies[Math.floor(Math.random()*replies.length)]);$('dailyText').textContent='你刚才说：“'+v.slice(0,48)+(v.length>48?'…':'')+'” 阿尔认真听完了。';input.value='';save();render();
+}
+document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>act(b.dataset.action)));
+$('send').addEventListener('click',send);$('message').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+$('reset').addEventListener('click',()=>{if(confirm('要清除这台设备上的阿尔存档，从头开始吗？')){state={...defaults,last:Date.now()};save();render();say('重新认识一下吧。你好，我是阿尔。');$('dailyText').textContent='新的日子开始了。';toast('存档已重置')}})
+offline();state.visits++;save();render();updateTime();setInterval(updateTime,15000);
+const hour=new Date().getHours();if(state.visits===1){say(hour<6?'这么晚还没睡？我陪你待一会儿。':hour<12?'早。今天有什么安排？':hour<18?'你来了。刚好有空。':'晚上好。今天过得怎么样？')}
+})();
+</script>
+</body>
+</html>
