@@ -481,7 +481,6 @@ const activityMeta = {
  food:{title:'一起吃东西',location:'table',pose:'sit',effect:{hunger:20,fun:3}},
  wash:{title:'洗漱',location:'window',pose:'walk',effect:{clean:17,energy:-1}},
  read:{title:'阅读',location:'window',pose:'sit',effect:{fun:8,energy:-2}},
- reading:{title:'一起看书',location:'window',pose:'sit',effect:{fun:8,energy:-2}},
  music:{title:'听音乐',location:'table',pose:'sit',effect:{fun:10,energy:-1}},
  tea:{title:'一起喝茶',location:'table',pose:'sit',effect:{fun:4,hunger:2}},
  walk:{title:'散步',location:'outside',pose:'walk',effect:{fun:9,energy:-5,clean:-1}},
@@ -490,7 +489,6 @@ const activityMeta = {
  tidy:{title:'整理房间',location:'shelf',pose:'walk',effect:{clean:8,energy:-3}},
  write:{title:'写作 / 整理资料',location:'desk',pose:'sit',effect:{fun:5,energy:-3}},
  work:{title:'工作',location:'desk',pose:'sit',effect:{energy:-4,fun:-1}},
- project:{title:'推进共同计划',location:'desk',pose:'walk',effect:{energy:-3,fun:2}},
  cook:{title:'准备做饭',location:'kitchen',pose:'walk',effect:{energy:-2}},
  cookTogether:{title:'一起做饭',location:'kitchen',pose:'walk',effect:{energy:-2,fun:2}}
 };
@@ -800,9 +798,7 @@ function ardayTemperament(){
  const hasWord=re=>re.test(d);
  return {
   composed:hasWord(/从容|游刃有余|淡定|镇定|轻松|不慌/)||!d?0.78:0.58,
-  teasing:hasWord(/轻佻|戏谑|调侃|玩笑|风趣|撩/)||!d?0.72:0.46,
   indirect:hasWord(/操纵|引导|心思|试探|迂回|反向/)||!d?0.76:0.4,
-  detached:hasWord(/冷淡|疏离|世俗|物质|地位|欲望/)||!d?0.68:0.42
  };
 }
 function ardayLine(kind, fallback){
@@ -850,7 +846,7 @@ function proposeSharedGoal(at=Date.now()){
  const g=pool[Math.floor(Math.random()*pool.length)];
  if(!g)return;
  s.lastSharedProposalAt=at;
- const e=addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');e.goalId=g.id;
+ const e=addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');e.goalId=g.id;say(ardayLine('proposal',g.detail));
 }
 if(s.project?.status==='active'&&s.sharedGoal?.status!=='active'){
  const legacy=sharedGoalCatalog().find(x=>x.id==='room');
@@ -903,7 +899,7 @@ function createSituationalEvent(at=Date.now()){
   type:'life-evening'
  });
  const e=candidates[Math.floor(Math.random()*candidates.length)];
- addEvent(e.title,e.detail,e.type);s.events[0].situationId=e.id;s.lastRandomEventAt=at;
+ addEvent(e.title,e.detail,e.type);s.events[0].situationId=e.id;s.lastRandomEventAt=at;say(ardayLine('incident',e.detail));
 }
 function generateDailyEvents(){
  const today=s.calendar?.anchor||dayKey(dayAnchor());
