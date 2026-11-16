@@ -167,6 +167,15 @@
 .toolbar{gap:6px}.tool{min-width:0;flex:1}.tool.active{background:#e9d8c3;color:#5b4430}
 .scene-switch{display:none!important}
 @media(max-width:700px){.recent-entry span{display:none}.dossier-hero{padding:14px}.dossier-monogram{width:56px;height:56px}.account-balance{padding:16px}}
+
+.event-card{display:flex!important;align-items:center!important;gap:12px!important;text-align:left!important;padding:14px 13px!important;border:1px solid #e8d8c4!important;border-radius:15px!important;background:linear-gradient(110deg,#fffaf2,#f6ecdf)!important;box-shadow:0 3px 12px #60472b0c!important}
+.event-mark{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:50%;background:#ead8c1;color:#956b4b;font:20px Georgia}
+.event-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
+.event-copy strong{font-size:13px;color:#594432}
+.event-copy small{font-size:11px;line-height:1.55;color:#8a7865;white-space:normal}
+.event-arrow{font-size:23px;color:#b18b69}
+.event-empty{margin:10px 0;padding:35px 18px;text-align:center;border:1px dashed #d9c5aa;border-radius:17px;background:#fff9f0}
+.event-empty>span{font:34px Georgia;color:#b18a67}.event-empty h3{font:600 18px Georgia;color:#604a37;margin:10px 0}.event-empty p{font-size:12px;color:#94816d;line-height:1.7}
 </style>
 </head>
 <body>
@@ -336,8 +345,8 @@ function eventChoicesLegacy(e){
 function renderEvents(){
  let open=s.events.filter(e=>e.status==='open');
  $('drawerTitle').textContent='最近发生的事';
- $('choices').innerHTML=open.length?'':'<div class="calendar-note">暂时没有需要处理的事件。阿尔会根据生活状态和房间条件继续产生新的想法。</div>';
- open.forEach(e=>{let b=document.createElement('button');b.className='choice';b.innerHTML='<span class="emoji">'+(e.type==='long'?'✦':'•')+'</span>'+e.title+'<small>'+e.detail+'</small>';b.onclick=()=>eventChoices(e);$('choices').appendChild(b)});
+ $('choices').innerHTML=open.length?'':'<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';
+ open.forEach(e=>{let b=document.createElement('button');b.className='choice event-card';b.innerHTML='<span class="event-mark">'+(e.type==='long'?'✦':'·')+'</span><span class="event-copy"><strong>'+e.title+'</strong><small>'+e.detail+'</small></span><span class="event-arrow">›</span>';b.onclick=()=>eventChoices(e);$('choices').appendChild(b)});
  $('drawer').classList.add('open');
 }
 
@@ -503,8 +512,8 @@ function renderProfile(){
 }
 function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open');$('stage').classList.add('calendar-mode');renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
 function refreshTopActions(){let n=s.events.filter(e=>e.status==='open').length;let c=$('eventCount');if(c)c.textContent=n?'· '+n:''}
-$('profileEntry').addEventListener('click',renderProfile);
-$('recentEvents').addEventListener('click',renderEvents);
+$('profileEntry').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='人物档案'){$('drawer').classList.remove('open');return}renderProfile()});
+$('recentEvents').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='最近发生的事'){$('drawer').classList.remove('open');return}renderEvents()});
 document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListener('click',()=>{
  const obj=b.dataset.decorateObject,opts=obj==='沙发'?['鼠尾草绿','暖杏色','砖红色']:obj==='窗户'?['打开窗帘','合上窗帘','换一幅窗景']:['摆上花瓶','放一本书','点亮台灯'];
  $('drawerTitle').textContent='装修 · '+obj;$('choices').innerHTML='';
