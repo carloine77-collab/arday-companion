@@ -29,7 +29,7 @@
 @media(max-width:700px){.schedule-peek{left:6px;top:58px;bottom:38px;width:clamp(105px,32%,138px);max-height:calc(100% - 100px)}.peek-head{padding:6px 7px}.peek-event{font-size:8px;padding:4px}.peek-time{font-size:8px}.calendar-grid{grid-template-columns:1fr;max-height:210px}.tool[data-tab="日程"]{min-width:57px}}
 @media(max-width:390px){.schedule-peek{width:106px}.peek-event{font-size:7px}.peek-time{font-size:7px}.tool[data-tab="日程"]{min-width:49px}}
 
-</style>
+.stage.calendar-mode{background:#eee3d0}.stage.calendar-mode>.scene-bg,.stage.calendar-mode>.sunlight,.stage.calendar-mode>.room,.stage.calendar-mode>.bubble,.stage.calendar-mode>.room-label,.stage.calendar-mode>.decorate,.stage.calendar-mode>.hotspot,.stage.calendar-mode>.edit-hint,.stage.calendar-mode>.schedule-peek{display:none}.calendar-view{display:none;position:absolute;inset:0;padding:15px;background:linear-gradient(145deg,#f5ead8,#e9dcc7);overflow:hidden}.stage.calendar-mode .calendar-view{display:flex;flex-direction:column;gap:11px}.calendar-view-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}.calendar-view-head h2{font:700 20px Georgia;margin:0;color:#514334}.calendar-view-head p{font-size:10px;color:#887965;margin:4px 0 0}.back-room{border:1px solid #dfcbb0;background:#fff9ef;border-radius:11px;padding:9px 13px;font-size:11px;font-weight:650;white-space:nowrap}.calendar-content{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;min-height:0;flex:1}.day-card{background:#fff9efb8;border:1px solid #dfcfb8;border-radius:15px;display:flex;flex-direction:column;min-width:0;overflow:hidden}.day-card.today{border-color:#d8a47b;box-shadow:inset 0 3px #d88b5b}.day-card-head{padding:10px 11px 8px;border-bottom:1px solid #e9dece;display:flex;justify-content:space-between;align-items:center;gap:5px}.day-card-head strong{font-size:13px}.day-card-head small{font-size:9px;color:#92816d}.day-timeline{overflow:auto;min-height:0;flex:1;padding:4px 7px;scrollbar-width:thin}.day-slot{display:grid;grid-template-columns:39px minmax(0,1fr);gap:5px;align-items:stretch;min-height:30px;border-bottom:1px solid #eee5d8}.day-slot time{font-size:9px;color:#9a8873;padding-top:8px;text-align:right}.day-slot button{border:0;border-radius:7px;background:transparent;text-align:left;padding:5px 7px;font-size:10px;color:#796b5b;min-width:0;line-height:1.25}.day-slot button.free{border:1px dashed #d9cbb7;margin:3px 0;background:#fffdf8;color:#9a8b78}.day-slot button.busy{background:#e9eddf;color:#59664e;margin:3px 0}.day-slot button.proposal{background:#f7e5d3;color:#865c3c;margin:3px 0}.day-slot button.now{outline:1px solid #d58b5e}.day-legend{font-size:9px;color:#95836e;padding:7px 10px;border-top:1px solid #eee5d8}.calendar-actions{display:flex;gap:6px;flex-wrap:wrap}.calendar-actions button{border:1px solid #dfcdb5;background:#f6ecdd;border-radius:9px;padding:8px 10px;font-size:11px}@media(max-width:700px){.calendar-view{padding:9px;gap:7px}.calendar-view-head h2{font-size:16px}.calendar-content{gap:5px}.day-card{border-radius:11px}.day-card-head{padding:8px 6px;display:block}.day-card-head strong{display:block;font-size:11px}.day-card-head small{font-size:8px}.day-timeline{padding:3px}.day-slot{grid-template-columns:29px minmax(0,1fr);gap:2px;min-height:31px}.day-slot time{font-size:8px}.day-slot button{font-size:8px;padding:5px 3px}.day-legend{font-size:8px;padding:5px}}@media(max-width:390px){.calendar-view{padding:6px}.calendar-content{gap:3px}.day-card-head{padding:6px 4px}.day-card-head strong{font-size:10px}.day-slot{grid-template-columns:25px minmax(0,1fr)}.day-slot time{font-size:7px}.day-slot button{font-size:7px}}@media(orientation:landscape) and (max-height:560px){.calendar-view{padding:7px}.calendar-content{gap:7px}.day-slot{min-height:25px}.day-slot time{padding-top:6px}}</style>
 </head>
 <body>
 <div class="app">
@@ -55,7 +55,7 @@
   <div class="person" id="person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div>
  </div>
  <div class="bubble" id="bubble">你来了。刚才我在看窗外。</div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2><p>阿尔的生活有自己的节奏，你可以和他协商共同安排。</p></div><button class="back-room" id="backRoom">返回房间</button></div><div class="calendar-content" id="calendarContent"></div></section>
- <section class="schedule-peek" aria-label="阿尔今天的时间安排"><div class="peek-head">今天的安排 <span id="peekDate">—</span></div><div class="peek-list" id="peekList"></div><div class="peek-foot">点击时间块 · 与阿尔商议</div></section>
+
  <div class="room-label" id="roomLabel">HOME · 现在</div>
  <button class="decorate" id="decorate">✦ 装修</button>
  <button class="hotspot spot-sofa" data-object="沙发" aria-label="沙发">▰</button>
@@ -187,8 +187,42 @@ function slotClick(dayIndex,h){
  $('back-calendar').onclick=renderCalendar;
 }
 
+
+// Dedicated three-column calendar view; replaces the former overlay calendar.
+function renderCalendarBoard(){
+ ensureSchedule();let anchor=scheduleAnchor(),now=new Date(),html='';
+ for(let di=0;di<3;di++){
+  let d=plusDays(anchor,di),key=dayKey(d),label=['今天','明天','后天'][di];
+  html+='<section class="day-card '+(di===0?'today':'')+'"><div class="day-card-head"><strong>'+label+'</strong><small>'+dayLabel(d)+'</small></div><div class="day-timeline">';
+  for(let h=6;h<23;h++){let ev=eventAt(key,h),isNow=di===0&&now.getHours()===h;html+='<div class="day-slot"><time>'+pad(h)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':'busy'):'free')+(isNow?' now':'')+'" data-day="'+di+'" data-hour="'+h+'">'+(ev?ev.title:'＋ 空闲')+'</button></div>'}
+  html+='</div><div class="day-legend">'+(di===0?'阿尔今天的个人安排与空闲时间':di===1?'明天 · 等待双方协商':'后天 · 暂无预设安排')+'</div></section>';
+ }
+ $('calendarContent').innerHTML=html;
+ $('calendarContent').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(+b.dataset.day,+b.dataset.hour));
+}
+function openCalendar(){ensureSchedule();$('drawer').classList.remove('open');$('stage').classList.add('calendar-mode');renderCalendarBoard();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
+function closeCalendar(){$('stage').classList.remove('calendar-mode');$('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'))}
+function slotClick(dayIndex,h){
+ ensureSchedule();let d=plusDays(scheduleAnchor(),dayIndex),key=dayKey(d),ev=eventAt(key,h);
+ if(ev){
+  $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
+  $('choices').innerHTML='<div class="calendar-panel"><div class="calendar-note">'+(ev.kind==='proposal'?'这是你提出的安排。':'这是阿尔自己安排的时间。')+'</div><div class="calendar-actions"><button id="ask-join">问他能否一起</button><button id="ask-change">商量调整时间</button><button id="ask-cancel">让他自由安排</button><button id="back-calendar">返回日程</button></div></div>';$('drawer').classList.add('open');
+  $('ask-join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.kind!=='personal'&&(s.friend+s.attach-s.bored>12);if(yes){ev.withPlayer=true;s.friend=clamp(s.friend+1);s.attach=clamp(s.attach+1);say('好啊，一起做也不错。')}else say('这件事我想自己完成。不过结束后可以一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendarBoard();toast(yes?'阿尔同意一起参加':'阿尔保留了自己的安排')};
+  $('ask-change').onclick=()=>{let next=Array.from({length:17},(_,i)=>i+6).find(x=>!eventAt(key,x));if(next===undefined){say('今天没有合适的空档，还是先保持原计划吧。');return}ev.start=next;ev.end=next+1;s.calendar.days[key].sort((a,b)=>a.start-b.start);say('我可以把这件事挪到 '+pad(next)+':00。');save();$('drawer').classList.remove('open');renderCalendarBoard()};
+  $('ask-cancel').onclick=()=>{if(ev.kind==='routine'){say('这件事是我的基本生活安排，我不打算取消。');return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();$('drawer').classList.remove('open');renderCalendarBoard();say('好，这段时间我自己决定。')};
+  $('back-calendar').onclick=()=>{$('drawer').classList.remove('open');renderCalendarBoard()};return;
+ }
+ $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
+ $('choices').innerHTML='<div class="calendar-panel"><div class="calendar-note">邀请阿尔在 '+pad(h)+':00 开始留出一小时。你想和他做什么？</div><div class="choices">'+[['一起吃点东西','🥐'],['散步','🌿'],['听音乐','♫'],['一起看书','📖'],['玩游戏','🎲'],['自由相处','☁']].map((x,i)=>'<button class="choice" data-propose="'+i+'"><span class="emoji">'+x[1]+'</span>'+x[0]+'</button>').join('')+'</div><div class="calendar-actions"><button id="back-calendar">返回日程</button></div></div>';$('drawer').classList.add('open');
+ $('choices').querySelectorAll('[data-propose]').forEach(b=>b.onclick=()=>{let i=+b.dataset.propose,names=['一起吃点东西','散步','听音乐','一起看书','玩游戏','自由相处'],prefs=['food','walk','music','reading','game','company'],pref=s.preferences?.[prefs[i]]||0,need=(i===0&&s.hunger<35)||(i===1&&s.fun<35)||(i===2&&s.fun<40),score=s.friend*.35+s.attach*.35-s.bored*.4+(s.energy-50)*.15+pref*3+(need?12:0),yes=score>15;
+  if(yes){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true});s.calendar.days[key].sort((a,b)=>a.start-b.start);say('可以，我把这段时间留出来。');s.friend=clamp(s.friend+1);s.attach=clamp(s.attach+1);toast('阿尔接受了你的提议')}
+  else{say('这个时间我不太想这样安排。要不换个时间？我也有自己的打算。');s.bored=clamp(s.bored+1);toast('阿尔没有接受这次邀请')}
+  save();render();$('drawer').classList.remove('open');renderCalendarBoard();
+ });
+ $('back-calendar').onclick=()=>{$('drawer').classList.remove('open');renderCalendarBoard()};
+}
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
-$('closeDrawer').onclick=()=>$('drawer').classList.remove('open');$('backRoom').onclick=closeCalendar;
+$('closeDrawer').onclick=()=>$('drawer').classList.remove('open');$('backRoom').onclick=closeCalendar;$('backRoom').onclick=closeCalendar;
 $('chatForm').addEventListener('submit',e=>{e.preventDefault();let v=$('message').value.trim();if(!v)return;s.friend=clamp(s.friend+1);s.fun=clamp(s.fun+2);s.bored=clamp(s.bored-1);let lines=['我听到了。你接着说。','这个问题我有自己的想法。','嗯？这部分可以再讲具体一点。','我先记下这件事。','你今天想聊的内容还真不少。'];say(lines[Math.floor(Math.random()*lines.length)]);$('message').value='';save();render()});
 let decorating=false;
 $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('editing',decorating);$('decorate').textContent=decorating?'完成装修':'✦ 装修';if(decorating){$('drawer').classList.remove('open');say('点选房间里的物件，看看可以怎样调整。')}else say('好了，房间暂时这样。')};
