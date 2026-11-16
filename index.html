@@ -143,7 +143,7 @@ let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-s
 s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+s.roomCondition+'%';}
+function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+s.roomCondition+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
 function say(t){$('bubble').textContent=t}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
@@ -691,8 +691,7 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
  };$('choices').appendChild(x)});
  $('drawer').classList.add('open');
 }));
-const previousRender=render;
-function render(){previousRender();refreshTopActions()}
+
 
 })();
 </script>
