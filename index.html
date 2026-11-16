@@ -20,6 +20,15 @@
 @media(max-width:700px){.app{padding-left:8px;padding-right:8px;gap:7px}.top{grid-template-columns:1fr;gap:5px}.identity{display:none}.stats{padding:6px 4px;gap:1px}.stat label{font-size:9px}.stat b{font-size:11px}.stage{border-radius:18px}.backwall{left:2%;right:2%}.window{left:8%;width:27%}.person{transform:translateX(-50%) scale(.83);transform-origin:bottom center}.person.sit{transform:translate(-50%,10px) scale(.78)}.tool{min-width:61px;height:44px;gap:3px;font-size:12px}.tool .icon{font-size:16px}.bottom{gap:6px}.chat{height:44px}.send{padding:0 12px}.room-label{font-size:9px}}
 @media(max-width:390px){.stat label{font-size:8px}.stat b{font-size:10px}.stats{padding:5px 2px}.tool{min-width:53px}.chat input{font-size:12px}.send{padding:0 9px}}
 @media(orientation:landscape) and (max-height:560px){.app{gap:5px;padding-top:5px;padding-bottom:5px}.stats{padding:4px 7px}.stage{border-radius:16px}.bottom .tool,.chat{height:40px}.person{transform:translateX(-50%) scale(.72);transform-origin:bottom center}.person.sit{transform:translate(-50%,10px) scale(.68)}.bubble{top:3%;padding:7px 12px}}
+
+/* Calendar and autonomous schedule */
+.schedule-peek{position:absolute;z-index:10;left:10px;top:68px;bottom:48px;width:clamp(112px,22%,174px);max-height:calc(100% - 125px);display:flex;flex-direction:column;background:rgba(255,249,239,.30);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.55);border-radius:15px;overflow:hidden;box-shadow:0 4px 16px #59442b16}
+.peek-head{padding:7px 9px 5px;background:rgba(255,249,239,.35);display:flex;justify-content:space-between;align-items:center;color:#594a39;font-size:11px;font-weight:700}.peek-head span{font-size:9px;font-weight:500;opacity:.8}
+.peek-list{overflow:auto;scrollbar-width:none;padding:3px 5px 6px}.peek-list::-webkit-scrollbar{display:none}.peek-row{display:grid;grid-template-columns:32px minmax(0,1fr);gap:4px;align-items:stretch;min-height:27px;border-bottom:1px solid #725f4920}.peek-time{font-size:9px;color:#665746;padding-top:6px;text-align:center}.peek-event{border:0;border-radius:6px;margin:2px 0;padding:4px 5px;text-align:left;background:rgba(255,250,240,.66);font-size:9px;line-height:1.25;overflow:hidden;color:#514334;min-width:0}.peek-event.free{background:rgba(255,255,255,.13);border:1px dashed #786b5740;color:#766a59}.peek-event.current{outline:1px solid #d58b5e}.peek-event small{display:block;font-size:8px;opacity:.75;margin-top:2px}.peek-foot{padding:4px 7px;background:rgba(255,249,239,.32);font-size:8px;color:#6d5e4d;text-align:center}
+.calendar-panel{display:flex;flex-direction:column;gap:9px}.calendar-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.calendar-tab{border:1px solid #e4d3bd;background:#f8efdf;border-radius:10px;padding:8px 3px;font-size:11px}.calendar-tab.active{background:#e9c9a8;border-color:#d5a477;font-weight:700}.calendar-note{font-size:10px;color:#867765;line-height:1.4}.calendar-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;max-height:230px;overflow:auto}.calendar-slot{min-height:45px;border:1px solid #e6d7c4;border-radius:9px;background:#fbf5e9;padding:6px;text-align:left;font-size:10px}.calendar-slot strong{display:block;font-size:10px;color:#8d735b;margin-bottom:3px}.calendar-slot.free{border-style:dashed;background:#fffaf2}.calendar-slot.booked{background:#e9eddf;border-color:#cbd4bf}.calendar-slot.pending{background:#f7e5d3;border-color:#e6c19e}.calendar-actions{display:flex;gap:6px;flex-wrap:wrap}.calendar-actions button{border:1px solid #dfcdb5;background:#f6ecdd;border-radius:9px;padding:8px 10px;font-size:11px}
+@media(max-width:700px){.schedule-peek{left:6px;top:58px;bottom:38px;width:clamp(105px,32%,138px);max-height:calc(100% - 100px)}.peek-head{padding:6px 7px}.peek-event{font-size:8px;padding:4px}.peek-time{font-size:8px}.calendar-grid{grid-template-columns:1fr;max-height:210px}.tool[data-tab="日程"]{min-width:57px}}
+@media(max-width:390px){.schedule-peek{width:106px}.peek-event{font-size:7px}.peek-time{font-size:7px}.tool[data-tab="日程"]{min-width:49px}}
+
 </style>
 </head>
 <body>
@@ -46,6 +55,7 @@
   <div class="person" id="person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div>
  </div>
  <div class="bubble" id="bubble">你来了。刚才我在看窗外。</div>
+ <section class="schedule-peek" aria-label="阿尔今天的时间安排"><div class="peek-head">今天的安排 <span id="peekDate">—</span></div><div class="peek-list" id="peekList"></div><div class="peek-foot">点击时间块 · 与阿尔商议</div></section>
  <div class="room-label" id="roomLabel">HOME · 现在</div>
  <button class="decorate" id="decorate">✦ 装修</button>
  <button class="hotspot spot-sofa" data-object="沙发" aria-label="沙发">▰</button>
@@ -59,6 +69,7 @@
   <button class="tool" data-tab="互动"><span class="icon">✧</span>互动</button>
   <button class="tool" data-tab="物品"><span class="icon">▣</span>物品</button>
   <button class="tool" data-tab="商店"><span class="icon">♧</span>商店</button>
+  <button class="tool" data-tab="日程"><span class="icon">▦</span>日程</button>
  </nav>
  <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
 </footer>
@@ -93,14 +104,96 @@ const tabs={
 '物品':[['旧书','📖','book'],['陶杯','☕','tea'],['点心','🥐','food'],['唱片','💿','music']],
 '商店':[['点心','🥐','buy-food'],['唱片','💿','buy-record'],['绿植','🪴','buy-plant'],['抱枕','🟠','buy-cushion']]
 };
-function openTab(name){$('drawerTitle').textContent=name;$('choices').innerHTML='';tabs[name].forEach(([label,emoji,id])=>{let b=document.createElement('button');b.className='choice';b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(name==='商店'?'<small>查看 / 购买</small>':'');b.addEventListener('click',()=>{if(id.startsWith('buy-')){let cost= id==='buy-food'?12:id==='buy-record'?28:35;if(s.coins<cost){toast('金币不足');return}s.coins-=cost;s.items.push(label);toast('买下了：'+label);say('这个东西放在房间里应该不错。');}else if(name==='物品'){if(id==='food')interact('food');else interact(id);say('你拿出了'+label+'。'+$('bubble').textContent)}else interact(id);save();render();});$('choices').appendChild(b)});$('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab===name))}
+function openTab(name){if(name==='日程'){openCalendar();return}$('drawerTitle').textContent=name;$('choices').innerHTML='';tabs[name].forEach(([label,emoji,id])=>{let b=document.createElement('button');b.className='choice';b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(name==='商店'?'<small>查看 / 购买</small>':'');b.addEventListener('click',()=>{if(id.startsWith('buy-')){let cost= id==='buy-food'?12:id==='buy-record'?28:35;if(s.coins<cost){toast('金币不足');return}s.coins-=cost;s.items.push(label);toast('买下了：'+label);say('这个东西放在房间里应该不错。');}else if(name==='物品'){if(id==='food')interact('food');else interact(id);say('你拿出了'+label+'。'+$('bubble').textContent)}else interact(id);save();render();});$('choices').appendChild(b)});$('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab===name))}
+
+/* Three-day calendar: the current plan rolls over at 06:00 local time. */
+const pad=n=>String(n).padStart(2,'0');
+function dayKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function scheduleAnchor(){let d=new Date();if(d.getHours()<6)d.setDate(d.getDate()-1);d.setHours(0,0,0,0);return d}
+function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
+function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
+function ensureSchedule(){
+ const anchor=scheduleAnchor(),key=dayKey(anchor);
+ if(!s.calendar||s.calendar.anchor!==key){
+  const templates=[
+   [{h:7,title:'起床、洗漱',kind:'routine'},{h:8,title:'吃早餐',kind:'routine'},{h:9,title:'阅读一会儿',kind:'personal'},{h:12,title:'午餐',kind:'routine'},{h:14,title:'自由时间',kind:'free'},{h:16,title:'整理房间',kind:'personal'},{h:19,title:'晚餐',kind:'routine'},{h:20,title:'听音乐',kind:'personal'}],
+  ];
+  s.calendar={anchor:key,days:{[key]:templates[0].map(x=>({start:x.h,end:x.h+1,title:x.title,kind:x.kind}))}};
+  for(let i=1;i<=2;i++)s.calendar.days[dayKey(plusDays(anchor,i))]=[];
+  save();
+ }
+ for(let i=0;i<3;i++){let k=dayKey(plusDays(anchor,i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
+}
+let calendarOffset=0,selectedSlot=null;
+function eventAt(key,h){return (s.calendar.days[key]||[]).find(e=>h>=e.start&&h<e.end)}
+function renderPeek(){
+ ensureSchedule();let anchor=scheduleAnchor(),key=dayKey(anchor),now=new Date(),html='';
+ $('peekDate').textContent=dayLabel(anchor);
+ for(let h=6;h<23;h++){
+  let ev=eventAt(key,h),isNow=dayKey(now)===key&&now.getHours()===h;
+  html+='<div class="peek-row"><span class="peek-time">'+pad(h)+':00</span><button class="peek-event '+(ev?'':'free')+(isNow?' current':'')+'" data-hour="'+h+'">'+(ev?ev.title:'空闲')+(ev?'<small>'+pad(ev.start)+':00–'+pad(ev.end)+':00</small>':'')+'</button></div>';
+ }
+ $('peekList').innerHTML=html;
+ $('peekList').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(0,+b.dataset.hour));
+}
+function openCalendar(){
+ ensureSchedule();calendarOffset=0;renderCalendar();$('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'));
+}
+function renderCalendar(){
+ ensureSchedule();let anchor=scheduleAnchor(),days=[0,1,2].map(i=>plusDays(anchor,i)),key=dayKey(days[calendarOffset]),events=s.calendar.days[key]||[];
+ $('drawerTitle').textContent='时间协商';
+ let tabNames=['今天','明天','后天'];
+ let html='<div class="calendar-panel"><div class="calendar-tabs">'+days.map((d,i)=>'<button class="calendar-tab '+(i===calendarOffset?'active':'')+'" data-day="'+i+'">'+tabNames[i]+'<br>'+dayLabel(d)+'</button>').join('')+'</div><div class="calendar-note">'+(calendarOffset===0?'这是阿尔今天自己安排的日程。空白时间可以向他提出邀请。':calendarOffset===1?'明天和阿尔的时间目前留白。你可以提出共同安排，他也可以拒绝或另作提议。':'后天暂时没有安排。点击空白时段，和阿尔商量是否预留时间。')+'</div><div class="calendar-grid">';
+ for(let h=6;h<23;h++){
+  let ev=eventAt(key,h);
+  html+='<button class="calendar-slot '+(ev?(ev.kind==='proposal'?'pending':'booked'):'free')+'" data-hour="'+h+'"><strong>'+pad(h)+':00</strong>'+(ev?ev.title:'＋ 空闲')+'</button>';
+ }
+ html+='</div><div class="calendar-actions"><button id="calendar-refresh">刷新日程</button><button id="calendar-close">收起</button></div></div>';
+ $('choices').innerHTML=html;
+ $('choices').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{calendarOffset=+b.dataset.day;renderCalendar()});
+ $('choices').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(calendarOffset,+b.dataset.hour));
+ $('calendar-close').onclick=()=>$('drawer').classList.remove('open');
+ $('calendar-refresh').onclick=()=>{ensureSchedule();renderCalendar();renderPeek();toast('日程已更新')};
+}
+function slotClick(dayIndex,h){
+ ensureSchedule();calendarOffset=dayIndex;let d=plusDays(scheduleAnchor(),dayIndex),key=dayKey(d),ev=eventAt(key,h);
+ if(ev){
+  $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
+  $('choices').innerHTML='<div class="calendar-panel"><div class="calendar-note">'+(ev.kind==='proposal'?'这是你提出的安排。': '这是阿尔自己安排的时间。')+'</div><div class="calendar-actions"><button id="ask-join">问他能否一起</button><button id="ask-change">商量调整时间</button><button id="ask-cancel">让他自由安排</button><button id="back-calendar">返回日程</button></div></div>';
+  $('ask-join').onclick=()=>{say(ev.kind==='routine'?'这件事我想自己完成，不过结束后可以一起待一会儿。':'好啊，一起做也不错。');s.friend=clamp(s.friend+1);s.attach=clamp(s.attach+1);save();render();$('drawer').classList.remove('open');toast('你们商量了这段时间')};
+  $('ask-change').onclick=()=>{say('可以商量。你希望换到什么时候？');$('drawer').classList.remove('open');toast('之后可以在空白时段提出新安排')};
+  $('ask-cancel').onclick=()=>{s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderPeek();renderCalendar();say('好，这段时间我自己决定。')};
+  $('back-calendar').onclick=renderCalendar;
+  return;
+ }
+ const proposedTitle=dayIndex===0?'和你一起待一会儿':'和你见面 / 一起活动';
+ $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
+ $('choices').innerHTML='<div class="calendar-panel"><div class="calendar-note">你想邀请阿尔在 '+pad(h)+':00 开始留出一小时。选择一个提议：</div><div class="choices">'+[['一起吃点东西','🥐'],['散步','🌿'],['听音乐','♫'],['一起看书','📖'],['玩游戏','🎲'],['自由相处','☁']].map((x,i)=>'<button class="choice" data-propose="'+i+'"><span class="emoji">'+x[1]+'</span>'+x[0]+'</button>').join('')+'</div><div class="calendar-actions"><button id="back-calendar">返回日程</button></div></div>';
+ $('choices').querySelectorAll('[data-propose]').forEach(b=>b.onclick=()=>{
+  let i=+b.dataset.propose,names=['一起吃点东西','散步','听音乐','一起看书','玩游戏','自由相处'];
+  let chance=s.friend+s.attach-s.bored*.5+(s.energy-50)*.15;
+  let accepted=dayIndex>0?chance>18:chance>10;
+  if(accepted){
+   s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true});
+   s.calendar.days[key].sort((a,b)=>a.start-b.start);
+   say(dayIndex===0?'嗯，这个时间我可以留出来。':'可以，我先把这段时间留给我们。');
+   s.friend=clamp(s.friend+1);s.attach=clamp(s.attach+1);toast('阿尔接受了你的提议');
+  }else{
+   say('这个时间我不太想这样安排。我们可以换个时间，或者到时候再说。');
+   s.bored=clamp(s.bored+1);toast('阿尔暂时没有接受');
+  }
+  save();render();renderPeek();renderCalendar();
+ });
+ $('back-calendar').onclick=renderCalendar;
+}
+
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
 $('closeDrawer').onclick=()=>$('drawer').classList.remove('open');
 $('chatForm').addEventListener('submit',e=>{e.preventDefault();let v=$('message').value.trim();if(!v)return;s.friend=clamp(s.friend+1);s.fun=clamp(s.fun+2);s.bored=clamp(s.bored-1);let lines=['我听到了。你接着说。','这个问题我有自己的想法。','嗯？这部分可以再讲具体一点。','我先记下这件事。','你今天想聊的内容还真不少。'];say(lines[Math.floor(Math.random()*lines.length)]);$('message').value='';save();render()});
 let decorating=false;
 $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('editing',decorating);$('decorate').textContent=decorating?'完成装修':'✦ 装修';if(decorating){$('drawer').classList.remove('open');say('点选房间里的物件，看看可以怎样调整。')}else say('好了，房间暂时这样。')};
 document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>{let obj=b.dataset.object;if(!decorating){say('你看了看'+obj+'。要不要试试装修？');return}let opts=obj==='沙发'?['鼠尾草绿','暖杏色','砖红色']:obj==='窗户'?['打开窗帘','合上窗帘','换一幅窗景']:['摆上花瓶','放一本书','点亮台灯'];$('drawerTitle').textContent='调整 · '+obj;$('choices').innerHTML='';opts.forEach((o,i)=>{let x=document.createElement('button');x.className='choice';x.textContent=o;x.onclick=()=>{if(obj==='沙发')document.querySelector('.sofa').style.background=['#819477','#d9a77d','#b96e5c'][i];if(obj==='窗户')document.querySelector('.window').style.background=['linear-gradient(145deg,#b9d0c0,#f2d9a9)','linear-gradient(145deg,#9c9a91,#c9bba7)','linear-gradient(145deg,#c0d4dd,#f4d5a8)'][i];if(obj==='茶几')say(o+'。');else say(obj+'有了新的样子。');$('drawer').classList.remove('open')};$('choices').appendChild(x)});$('drawer').classList.add('open')}));
-offline();s.visits++;save();render();clock();setInterval(clock,15000);
+offline();s.visits++;ensureSchedule();save();render();clock();renderPeek();setInterval(()=>{clock();let before=s.calendar?.anchor;ensureSchedule();if(s.calendar?.anchor!==before){renderCalendar();renderPeek()}},15000);
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 })();
 </script>
