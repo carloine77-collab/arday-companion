@@ -123,6 +123,14 @@
 .stage.three-ready>.scene-bg,.stage.three-ready>.sunlight,.stage.three-ready>.room{display:none}
 .stage.three-ready>.kitchen-scene{display:none!important}
 .stage.three-ready.calendar-mode>.three-scene{display:none}
+
+.three-scene{pointer-events:auto;touch-action:none;cursor:grab}
+.three-scene:active{cursor:grabbing}
+.three-scene canvas{touch-action:none}
+.bedroom-switch{position:absolute;left:12px;top:12px;z-index:10;min-height:43px;padding:0 13px;border:1px solid #dfcdb4;border-radius:12px;background:#fff9edee;font-size:12px;font-weight:700}
+.camera-hint{position:absolute;left:50%;top:62px;transform:translateX(-50%);z-index:5;padding:5px 10px;border-radius:10px;background:#fff9edc9;color:#6e5b47;font-size:10px;pointer-events:none;white-space:nowrap}
+.stage.kitchen-mode .bedroom-switch,.stage.bedroom-mode .bedroom-switch{background:#fff9edee}
+@media(max-width:700px){.bedroom-switch{left:7px;top:7px;min-height:42px;padding:0 9px;font-size:11px}}
 </style>
 </head>
 <body>
@@ -157,7 +165,7 @@
  </div>
  <div class="bubble" id="bubble">你来了。刚才我在看窗外。</div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2><p>阿尔的生活有自己的节奏，你可以和他协商共同安排。</p></div><button class="back-room" id="backRoom">返回房间</button></div><div class="calendar-content" id="calendarContent"></div></section>
 
- <div class="room-label" id="roomLabel">HOME · 现在</div><button id="sceneSwitch" class="scene-switch">进入厨房 →</button><section class="kitchen-scene"><div class="kitchen-wall"></div><div class="kitchen-floor"></div><div class="kitchen-window"></div><div class="kitchen-counter"></div><div class="kitchen-cabinet"></div><div class="kitchen-fridge">▥<small>冰箱</small></div><div class="kitchen-stove">◉　◉<small>灶台</small></div><div class="kitchen-sink">▱<small>水槽</small></div><div class="kitchen-shelf">🥣　🫙　🍵</div><div class="person kitchen-person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div></section>
+ <div class="room-label" id="roomLabel">HOME · 现在</div><button id="bedroomSwitch" class="bedroom-switch">进入卧室</button><button id="sceneSwitch" class="scene-switch">进入厨房 →</button><section class="kitchen-scene"><div class="kitchen-wall"></div><div class="kitchen-floor"></div><div class="kitchen-window"></div><div class="kitchen-counter"></div><div class="kitchen-cabinet"></div><div class="kitchen-fridge">▥<small>冰箱</small></div><div class="kitchen-stove">◉　◉<small>灶台</small></div><div class="kitchen-sink">▱<small>水槽</small></div><div class="kitchen-shelf">🥣　🫙　🍵</div><div class="person kitchen-person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div></section>
  <div class="decorate-tools" id="decorateTools"><span>选择要调整的物件</span><button data-decorate-object="沙发">沙发</button><button data-decorate-object="窗户">窗户</button><button data-decorate-object="茶几">茶几</button></div>
  <button class="hotspot spot-sofa" data-object="沙发" aria-label="沙发">▰</button>
  <button class="hotspot spot-window" data-object="窗户" aria-label="窗户">☼</button>
@@ -640,8 +648,8 @@ const ingredientNames={rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番
 function pantryCount(k){return Math.max(0,Number(s.pantry?.[k]||0))}
 function canCook(id){const r=recipes[id];return !!r&&Object.entries(r.ingredients).every(([k,n])=>pantryCount(k)>=n)}
 function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;remember('purchase','购买食材：'+label,1);say('食材放进冰箱了。');save();render();openKitchenPanel(false)}
-function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('sceneSwitch').textContent='← 返回房间';$('roomLabel').textContent='KITCHEN · 厨房'}
-function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('sceneSwitch').textContent='进入厨房 →';const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent='HOME · '+m.title}
+function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('sceneSwitch').textContent='← 返回房间';$('roomLabel').textContent='KITCHEN · 厨房';updateArday3D()}
+function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('sceneSwitch').textContent='进入厨房 →';const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent='HOME · '+m.title;updateArday3D()}
 function openKitchenPanel(together=false){kitchenOpen();const stock=Object.entries(ingredientNames).map(([k,n])=>n+' × '+pantryCount(k)).join('　·　'),meals=s.readyMeals||[];$('drawerTitle').textContent='厨房 · 食材与烹饪';$('choices').innerHTML='<div class="calendar-note">冰箱库存：'+stock+'<br>已做好：'+(meals.length?meals.map(x=>x.name).join('、'):'暂无')+'<br>做饭占用一小时，并写入日程。</div><div class="choices">'+Object.entries(recipes).map(([id,r])=>'<button class="choice" data-recipe="'+id+'"><span class="emoji">🍳</span>'+r.name+'<small>'+Object.entries(r.ingredients).map(([k,n])=>ingredientNames[k]+' ×'+n).join('、')+'</small></button>').join('')+'</div><div class="calendar-actions"><button id="kitchen-shop">去商店买食材</button><button id="kitchen-close">收起</button></div>';$('choices').querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>scheduleCooking(b.dataset.recipe,together));$('kitchen-shop').onclick=()=>openTab('商店');$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open')}
 function scheduleCooking(id,together=false){
  if(!canCook(id)){say('这道菜的食材不够。先去商店补一点，或者换一道菜。');toast('食材不足');return}
@@ -983,97 +991,150 @@ function showCollection(){
 
 
 
-/* Procedural Three.js environment: game state remains in the existing simulator. */
+/* Three.js room system. Simulation state remains authoritative. */
 let arday3D=null,arday3DLoading=false,arday3DFallbackTried=false;
 function initArday3D(){
  if(!window.THREE){
   if(!arday3DLoading){
    arday3DLoading=true;
    const load=(url,onfail)=>{const tag=document.createElement('script');tag.src=url;tag.onload=()=>{arday3DLoading=false;initArday3D();updateArday3D()};tag.onerror=()=>{tag.remove();onfail()};document.head.appendChild(tag)};
-   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{
-    if(arday3DFallbackTried)return;arday3DFallbackTried=true;
-    load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;console.warn('Three.js could not be loaded from available CDNs')});
-   });
-  }
-  return false;
+   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;console.warn('Three.js unavailable')})});
+  }return false;
  }
  const stage=$('stage');
  try{
-  const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xe8d8bf);scene.fog=new T.Fog(0xe8d8bf,14,28);
-  const camera=new T.PerspectiveCamera(35,1,.1,60);camera.position.set(8,7.2,10);camera.lookAt(0,1,0);
-  const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;
-  const host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
-  scene.add(new T.HemisphereLight(0xfff1d9,0x88735d,1.5));
-  const sun=new T.DirectionalLight(0xffdfb3,2.1);sun.position.set(-4,8,5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
-  const M=(color,roughness=.85)=>new T.MeshStandardMaterial({color,roughness});
-  const m={wall:M(0xf0e2c9),floor:M(0xc9a77e),wood:M(0x9c704d),oak:M(0xb98b61),sofa:M(0x819477),sofa2:M(0x63785d),skin:M(0xd9a17c),hair:M(0x493d35),shirt:M(0xc87550),pants:M(0x5f5148),glass:M(0x9fbab4,.35),rug:M(0xd59d79),leaf:M(0x708967),dark:M(0x55483e)};
-  function box(parent,x,y,z,w,h,d,material){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
-  function ball(parent,x,y,z,sx,sy,sz,material){const o=new T.Mesh(new T.SphereGeometry(1,18,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;parent.add(o);return o}
-  function cyl(parent,x,y,z,r,h,material){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,16),material);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
-  box(scene,0,-.15,0,11,.3,8.5,m.floor);
-  box(scene,0,2.35,-4.15,11,4.8,.2,m.wall);box(scene,-5.45,2.35,0,.2,4.8,8.5,m.wall);
-  // Window and wall details.
-  box(scene,-2.8,2.6,-4.02,2.15,1.9,.06,m.glass);
-  for(const [x,y,w,h] of [[-3.9,2.6,.12,2],[-1.7,2.6,.12,2],[-2.8,3.55,2.25,.12],[-2.8,1.65,2.25,.12],[-2.8,2.6,.08,1.9]])box(scene,x,y,-3.94,w,h,.1,m.oak);
-  box(scene,3.4,3,-3.85,2.3,.13,.5,m.wood);box(scene,3.7,2, -3.9,.95,1.15,.12,m.oak);box(scene,3.7,2,-3.82,.72,.9,.05,m.wall);
-  const rug=new T.Mesh(new T.CylinderGeometry(2,2,.05,40),m.rug);rug.scale.z=.58;rug.position.set(0,.02,1);scene.add(rug);
-  // Sofa.
-  const sofa=new T.Group();sofa.position.set(-3.35,0,1);scene.add(sofa);
+  const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xe8d9c8);
+  const camera=new T.PerspectiveCamera(38,1,.1,80);
+  const renderer=new T.WebGLRenderer({antialias:false,alpha:false,powerPreference:'low-power'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.15));renderer.outputEncoding=T.sRGBEncoding;
+  renderer.toneMapping=T.NoToneMapping;renderer.shadowMap.enabled=false;
+  const host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
+  const hemi=new T.HemisphereLight(0xfff4e4,0x76604c,1.25);scene.add(hemi);
+  const sun=new T.DirectionalLight(0xffe3c2,1.15);sun.position.set(-4,9,6);scene.add(sun);
+  const fill=new T.DirectionalLight(0xc9ddff,.38);fill.position.set(5,4,-5);scene.add(fill);
+  const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color,roughness});
+  const m={
+   wall:M(0xf0dfc7),floor:M(0xc99b6d),wood:M(0x805638),oak:M(0xb98250),
+   sofa:M(0x5f916e),sofa2:M(0x3f7055),skin:M(0xd9a17c),hair:M(0x40332f),
+   shirt:M(0x4d718d),pants:M(0x454c5c),glass:M(0x80b9c5,.28),rug:M(0xd98c69),
+   leaf:M(0x56834d),dark:M(0x423a36),cream:M(0xf5ead7)
+  };
+  function box(parent,x,y,z,w,h,d,material){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);parent.add(o);return o}
+  function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);parent.add(o);return o}
+  function cyl(parent,x,y,z,r,h,material,seg=14){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,seg),material);o.position.set(x,y,z);parent.add(o);return o}
+  function roomShell(group,wallColor,floorColor){
+   box(group,0,-.14,0,10.8,.28,8.4,M(floorColor));
+   box(group,0,2.35,-4.08,10.8,4.8,.2,M(wallColor));
+   box(group,-5.35,2.35,0,.2,4.8,8.4,M(wallColor));
+   box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
+  }
+  // Three distinct interiors; only one room is visible at a time.
+  const living=new T.Group();scene.add(living);roomShell(living,0xf0dfc7,0xc99b6d);
+  box(living,-2.75,2.6,-3.94,2.1,1.85,.06,m.glass);
+  for(const [x,y,w,h] of [[-3.82,2.6,.12,1.95],[-1.68,2.6,.12,1.95],[-2.75,3.53,2.2,.12],[-2.75,1.67,2.2,.12],[-2.75,2.6,.08,1.85]])box(living,x,y,-3.88,w,h,.1,m.oak);
+  const livingRug=new T.Mesh(new T.CylinderGeometry(2,2,.045,28),M(0xd98c69));livingRug.scale.z=.58;livingRug.position.set(0,.025,1);living.add(livingRug);
+  const sofa=new T.Group();sofa.position.set(-3.35,0,1);living.add(sofa);
   box(sofa,0,.52,0,2.3,.5,1,m.sofa);box(sofa,0,1.12,-.36,2.3,1,.3,m.sofa2);box(sofa,0,.83,.12,1.75,.2,.72,m.sofa);
   box(sofa,-1,.85,.1,.28,.7,.85,m.sofa2);box(sofa,1,.85,.1,.28,.7,.85,m.sofa2);
-  // Table, desk, shelves and a plant.
-  const table=new T.Group();table.position.set(2.6,0,1.4);scene.add(table);cyl(table,0,.82,0,.9,.16,m.oak);
+  const table=new T.Group();table.position.set(2.6,0,1.4);living.add(table);cyl(table,0,.82,0,.9,.16,m.oak);
   for(const [x,z] of [[-.6,-.3],[.6,-.3],[-.6,.3],[.6,.3]])box(table,x,.4,z,.1,.75,.1,m.wood);
-  const desk=new T.Group();desk.position.set(3.4,0,-1.55);scene.add(desk);box(desk,0,1,0,1.7,.14,.85,m.oak);
+  const desk=new T.Group();desk.position.set(3.4,0,-1.55);living.add(desk);box(desk,0,1,0,1.7,.14,.85,m.oak);
   for(const x of [-.7,.7])for(const z of [-.3,.3])box(desk,x,.5,z,.1,.95,.1,m.wood);
-  box(scene,4.45,1.2,-3.25,1,2.3,.4,m.wood);for(let y=.55;y<2.3;y+=.58)box(scene,4.45,y,-3, .95,.07,.5,m.oak);
-  cyl(scene,4,.3,-.5,.28,.55,M(0xb66f55));for(let i=0;i<7;i++){const a=i*Math.PI*2/7;ball(scene,4+Math.cos(a)*.25,.95+(i%3)*.1,-.5+Math.sin(a)*.25,.15,.38,.13,m.leaf)}
-  // Kitchen is a second room in the same 3D scene.
-  const kitchen=new T.Group();scene.add(kitchen);
-  box(kitchen,0,2.25,-4,10.8,4.5,.18,m.wall);box(kitchen,0,1.25,-1.5,7.8,.3,1,m.oak);box(kitchen,0,.62,-1.5,7.8,1.1,.92,m.wood);
-  for(let x=-2.8;x<=2.8;x+=1.4)box(kitchen,x,.65,-1,1.25,.85,.04,m.oak);
-  box(kitchen,3.9,1.5,-2.7,1.25,2.9,1,M(0xe9e6dd));box(kitchen,3.45,1.5,-2.15,.07,1,.08,M(0x99978e));
-  box(kitchen,-.3,1.48,-1.5,1.5,.1,.9,m.dark);for(const x of [-.7,.1])cyl(kitchen,x,1.58,-1.5,.22,.07,M(0xbab5a8));
-  box(kitchen,-2.2,1.5,-1.5,1.1,.12,.75,M(0x9baeb0));kitchen.visible=false;
-  // Arday: a stylized 3D body with independently animated limbs.
+  box(living,4.45,1.2,-3.25,1,2.3,.4,m.wood);
+  for(let y=.55;y<2.3;y+=.58)box(living,4.45,y,-3,.95,.07,.5,m.oak);
+  cyl(living,4,.3,-.5,.28,.55,M(0xb66f55));for(let i=0;i<7;i++){const a=i*Math.PI*2/7;ball(living,4+Math.cos(a)*.25,.95+(i%3)*.1,-.5+Math.sin(a)*.25,.15,.38,.13,m.leaf)}
+  // Bedroom: blue-lilac walls, a proper bed, bedside tables and wardrobe.
+  const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd9d8e9,0xb7a7a0);
+  box(bedroom,-2.8,2.65,-3.94,2.0,1.7,.06,M(0x8eb9cb));
+  for(const [x,y,w,h] of [[-3.83,2.65,.13,1.85],[-1.77,2.65,.13,1.85],[-2.8,3.5,2.15,.13],[-2.8,1.8,2.15,.13]])box(bedroom,x,y,-3.88,w,h,.1,M(0x8a6e68));
+  const bed=new T.Group();bed.position.set(-.55,0,-1.55);bedroom.add(bed);
+  box(bed,0,.38,0,3.1,.55,3.45,M(0x805b4e));box(bed,0,.72,.12,2.95,.22,3.2,M(0xf0d9d1));
+  box(bed,0,.91,-.95,2.95,.22,1.3,M(0x7897b5));
+  box(bed,-.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));box(bed,.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));
+  box(bed,0,.65,-3.28,3.25,1.15,.18,M(0x805b4e));
+  for(const x of [-2.45,1.35]){
+   box(bedroom,x,.5,-1.5,.85,.9,.75,M(0x9a7059));box(bedroom,x,.98,-1.5,.92,.1,.82,M(0xc99570));
+   cyl(bedroom,x,1.3,-1.5,.12,.5,M(0xd9b16d));
+  }
+  box(bedroom,3.85,1.35,-3.15,1.6,2.65,.65,M(0x8c6c62));
+  for(const x of [3.45,4.25])box(bedroom,x,1.3,-2.8,.05,2.25,.04,M(0xc49b7f));
+  const bedRug=new T.Mesh(new T.CylinderGeometry(2.1,2.1,.05,28),M(0xc68f9d));bedRug.scale.z=.58;bedRug.position.set(-.5,.025,1.25);bedroom.add(bedRug);
+  // Kitchen: sage cabinetry, warm tile backsplash, pale stone worktop.
+  const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xe8d8c5,0xbca17f);
+  box(kitchen,-2.8,2.65,-3.94,1.8,1.5,.06,M(0x9dc3bd));
+  for(const x of [-3.7,-1.9])box(kitchen,x,2.65,-3.87,.12,1.65,.1,M(0x9a7655));
+  box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
+  for(let x=-3.4;x<=3.4;x+=.48)for(let y=1.62;y<=2.38;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
+  box(kitchen,0,1.25,-1.5,7.8,.3,1,M(0xe9dfd0));box(kitchen,0,.62,-1.5,7.8,1.1,.92,M(0x78917a));
+  for(let x=-2.8;x<=2.8;x+=1.4){box(kitchen,x,.65,-1,1.25,.85,.04,M(0x9eb49a));box(kitchen,x,.65,-.96,.035,.72,.05,M(0x6b856c))}
+  box(kitchen,3.9,1.5,-2.7,1.25,2.9,1,M(0xe4e2d9));box(kitchen,3.45,1.5,-2.15,.07,1,.08,M(0x8c8a83));
+  box(kitchen,-.3,1.48,-1.5,1.5,.1,.9,M(0x4e514b));for(const x of [-.7,.1])cyl(kitchen,x,1.58,-1.5,.22,.07,M(0x8d8981));
+  box(kitchen,-2.2,1.5,-1.5,1.1,.12,.75,M(0x91b8ba));
+  kitchen.visible=false;bedroom.visible=false;
+  // Character model, shared between all rooms.
   const person=new T.Group();scene.add(person);const body=new T.Group();person.add(body);
   ball(body,0,1.25,0,.46,.62,.31,m.shirt);cyl(body,0,1.8,0,.15,.24,m.skin);
-  ball(body,0,2.22,.02,.42,.46,.39,m.skin);ball(body,0,2.53,-.05,.45,.26,.42,m.hair);
+  ball(body,0,2.22,.02,.42,.46,.39,m.skin,18);ball(body,0,2.53,-.05,.45,.26,.42,m.hair,16);
   ball(body,-.18,2.59,.22,.2,.17,.2,m.hair);ball(body,.18,2.59,.22,.2,.17,.2,m.hair);
-  for(const x of [-.15,.15])ball(body,x,2.27,.385,.04,.05,.03,m.dark);
+  for(const x of [-.15,.15])ball(body,x,2.27,.385,.04,.05,.03,m.dark,10);
   const arms=[],legs=[];
   for(const side of [-1,1]){const p=new T.Group();p.position.set(side*.42,1.6,0);body.add(p);cyl(p,0,-.34,0,.12,.7,m.skin);ball(p,0,-.7,0,.12,.13,.12,m.skin);arms.push(p)}
   for(const side of [-1,1]){const p=new T.Group();p.position.set(side*.2,.72,0);person.add(p);cyl(p,0,-.28,0,.15,.62,m.pants);ball(p,0,-.58,.1,.16,.12,.25,m.dark);legs.push(p)}
-  const shadow=new T.Mesh(new T.CircleGeometry(.6,24),new T.MeshBasicMaterial({color:0x584633,transparent:true,opacity:.17}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.015;person.add(shadow);
-  const positions={sofa:[-3.2,0,1],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05]};
-  let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now();
+  const shadow=new T.Mesh(new T.CircleGeometry(.6,16),new T.MeshBasicMaterial({color:0x584633,transparent:true,opacity:.2}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.015;person.add(shadow);
+  const positions={sofa:[-3.2,0,1],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,0,.2]};
+  let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0;
+  let roomMode='living',theta=.68,phi=1.08,radius=13.4,cameraTarget=new T.Vector3(0,1,0);
+  function applyCamera(){phi=Math.max(.48,Math.min(1.42,phi));radius=Math.max(7.2,Math.min(21,radius));camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget)}
   function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  function setRoom(mode){
+   roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
+   living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
+   const colors={living:0xe8d9c8,bedroom:0xd9d9e9,kitchen:0xe8d8c5};scene.background.set(colors[roomMode]);
+   cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);
+   theta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;phi=1.08;radius=roomMode==='bedroom'?12.7:13.4;applyCamera();
+  }
   function updateActivity(a){
-   const meta=activityMeta[normalizeActivity(a)]||{location:'center',pose:'wave'};
-   const loc=['cook','cookTogether'].includes(normalizeActivity(a))?'kitchen':meta.location,p=positions[loc]||positions.center;
-   target.set(...p);pose=meta.pose||'wave';
+   const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave'};
+   if(act==='sleep')setRoom('bedroom');
+   const loc=act==='sleep'?'bed':(['cook','cookTogether'].includes(act)?'kitchen':meta.location);
+   const p=positions[loc]||positions.center;target.set(...p);pose=meta.pose||'wave';
    body.position.y=pose==='sit' ? -.18:0;
    legs.forEach((l,i)=>{l.rotation.set(pose==='sit'?-.55:0,0,pose==='sit'?(i?-.8:.8):0)});
    arms[1].rotation.z=pose==='wave'?-1:0;
   }
-  function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;person.position.lerp(target,1-Math.pow(.002,dt));phase+=dt*(pose==='walk'?8:2);
-   if(pose==='walk'){legs[0].rotation.x=Math.sin(phase)*.45;legs[1].rotation.x=-Math.sin(phase)*.45;arms[0].rotation.x=-Math.sin(phase)*.28;arms[1].rotation.x=Math.sin(phase)*.28}
+  // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
+  const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius;
+  const canvas=renderer.domElement;
+  canvas.style.touchAction='none';
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1)drag={x:e.clientX,y:e.clientY};if(pointers.size===2){const p=[...pointers.values()];pinchStart=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);pinchRadius=radius}e.preventDefault()});
+  canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const old=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1&&drag){theta-=(e.clientX-old.x)*.008;phi+=(e.clientY-old.y)*.006;applyCamera()}else if(pointers.size===2){const p=[...pointers.values()],d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);if(pinchStart>0){radius=pinchRadius*pinchStart/Math.max(1,d);applyCamera()}}e.preventDefault()});
+  function endPointer(e){pointers.delete(e.pointerId);if(pointers.size===0)drag=null;if(pointers.size===1){const p=[...pointers.values()][0];drag={x:p.x,y:p.y}}}
+  canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
+  canvas.addEventListener('wheel',e=>{radius=Math.max(7.2,Math.min(21,radius+e.deltaY*.012));applyCamera();e.preventDefault()},{passive:false});
+  function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;person.position.lerp(target,1-Math.pow(.002,dt));phase+=dt*(pose==='walk'?8:2);
+   if(pose==='walk'){legs[0].rotation.x=Math.sin(phase)*.42;legs[1].rotation.x=-Math.sin(phase)*.42;arms[0].rotation.x=-Math.sin(phase)*.25;arms[1].rotation.x=Math.sin(phase)*.25}
    else{legs.forEach(l=>l.rotation.x+=(0-l.rotation.x)*.12);arms.forEach((a,i)=>{if(!(pose==='wave'&&i===1))a.rotation.x+=(0-a.rotation.x)*.12})}
-   if(pose==='wave')arms[1].rotation.x=Math.sin(t*.004)*.2;
-   body.position.y+=(Math.sin(t*.0018)*.02-body.position.y)*.08;renderer.render(scene,camera);arday3D.raf=requestAnimationFrame(frame)}
-  arday3D={scene,camera,renderer,host,kitchen,updateActivity,resize,raf:0};stage.classList.add('three-ready');resize();updateActivity(s.currentActivity||'idle');
-  if(window.ResizeObserver){arday3D.ro=new ResizeObserver(resize);arday3D.ro.observe(stage)}window.addEventListener('resize',resize);arday3D.raf=requestAnimationFrame(frame);return true;
+   if(pose==='wave')arms[1].rotation.x=Math.sin(t*.003)*.18;
+   body.position.y+=(Math.sin(t*.0015)*.018-body.position.y)*.08;
+   if(t-lastDraw>33){renderer.render(scene,camera);lastDraw=t}
+   arday3D.raf=requestAnimationFrame(frame)}
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,getRoom:()=>roomMode,raf:0};
+  stage.classList.add('three-ready');resize();setRoom('living');updateActivity(s.currentActivity||'idle');
+  if(window.ResizeObserver){arday3D.ro=new ResizeObserver(resize);arday3D.ro.observe(stage)}window.addEventListener('resize',resize);
+  arday3D.raf=requestAnimationFrame(frame);return true;
  }catch(e){console.warn('3D renderer unavailable; keeping the original scene.',e);return false}
 }
 function updateArday3D(){
- if(!arday3D)return;const k=$('stage').classList.contains('kitchen-mode');arday3D.kitchen.visible=k;
- arday3D.scene.background.set(k?0xe9dfd0:0xe8d8bf);arday3D.scene.fog.color.set(k?0xe9dfd0:0xe8d8bf);
- arday3D.camera.position.set(...(k?[8,6.7,9]:[8,7.2,10]));arday3D.camera.lookAt(...(k?[0,1.3,-1.2]:[0,1,0]));
- arday3D.updateActivity(s.currentActivity||'idle');
+ if(!arday3D)return;
+ const mode=$('stage').classList.contains('kitchen-mode')?'kitchen':$('stage').classList.contains('bedroom-mode')?'bedroom':'living';
+ arday3D.setRoom(mode);arday3D.updateActivity(s.currentActivity||'idle');
+ const b=$('bedroomSwitch');if(b)b.textContent=mode==='bedroom'?'返回起居室':'进入卧室';
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 initArday3D();updateArday3D();
+$('bedroomSwitch').addEventListener('click',()=>{const st=$('stage');const toBedroom=!st.classList.contains('bedroom-mode');st.classList.remove('kitchen-mode');st.classList.toggle('bedroom-mode',toBedroom);$('sceneSwitch').textContent='进入厨房 →';$('roomLabel').textContent=toBedroom?'BEDROOM · 卧室':'HOME · 起居室';updateArday3D()});
+const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';$('stage').appendChild(cameraHint);
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
 
