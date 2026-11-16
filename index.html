@@ -176,6 +176,25 @@
 .event-arrow{font-size:23px;color:#b18b69}
 .event-empty{margin:10px 0;padding:35px 18px;text-align:center;border:1px dashed #d9c5aa;border-radius:17px;background:#fff9f0}
 .event-empty>span{font:34px Georgia;color:#b18a67}.event-empty h3{font:600 18px Georgia;color:#604a37;margin:10px 0}.event-empty p{font-size:12px;color:#94816d;line-height:1.7}
+/* Header: keep the recent-events control on its own row on narrow screens. */
+.identity-line{flex-wrap:wrap;row-gap:7px}
+.identity{flex:0 0 auto}
+.identity-meta{flex:1 1 100%;width:100%;min-width:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.recent-entry{flex:0 0 auto;max-width:100%;min-height:36px;white-space:nowrap}
+.identity-meta>span{flex:0 0 auto}
+@media(max-width:700px){
+ .identity-line{display:flex;align-items:center;gap:5px}
+ .identity-meta{padding-left:0;gap:6px}
+ .recent-entry{font-size:10px;padding:7px 9px}
+}
+@media(max-width:390px){
+ .identity-meta{gap:5px}
+ .recent-entry{font-size:9px;padding:6px 7px}
+}
+/* Ensure the 3D canvas occupies the complete stage above the legacy 2D scene. */
+.stage{position:relative;isolation:isolate}
+.stage.three-ready>.three-scene{display:block!important;visibility:visible!important;opacity:1!important}
+.stage.three-ready>.three-scene canvas{display:block!important;visibility:visible!important;opacity:1!important}
 </style>
 </head>
 <body>
@@ -230,7 +249,7 @@
  <div class="bottom-actions"><button class="top-action decorate" id="decorate">✧ 装修</button></div>
 </footer>
 </div><div class="toast" id="toast"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.128.0/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 
 
@@ -1037,7 +1056,7 @@ function initArday3D(){
   if(!arday3DLoading){
    arday3DLoading=true;
    const load=(url,onfail)=>{const tag=document.createElement('script');tag.src=url;tag.onload=()=>{arday3DLoading=false;initArday3D();updateArday3D()};tag.onerror=()=>{tag.remove();onfail()};document.head.appendChild(tag)};
-   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;console.warn('Three.js unavailable')})});
+   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',()=>{arday3DLoading=false;console.warn('Three.js unavailable')})})});
   }return false;
  }
  const stage=$('stage');
