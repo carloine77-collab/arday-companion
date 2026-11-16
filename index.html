@@ -314,7 +314,7 @@ function openTab(name){
   b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id==='kitchen'){openKitchenPanel(false);return}
-   if(id==='cook-together'){openKitchenPanel(true);return}
+   if(id==='cook-together'){if(Math.random()>.67){s.rejections=(s.rejections||0)+1;say(['今天不想一起做饭。你先决定吃什么吧。','厨房先留给我自己待会儿用，暂时不需要搭档。','做饭可以改天，我现在没这个兴致。'][Math.floor(Math.random()*3)]);save();return}openKitchenPanel(true);return}
    if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
    if(id.startsWith('buy-')){purchase(id,label,+cost);return}
    if(id==='events'){renderEvents();return}
