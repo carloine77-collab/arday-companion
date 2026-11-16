@@ -197,113 +197,14 @@ function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&
 function has(item){return s.items.includes(item)||s.furniture.includes(item)}
 function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
-function buildDay(key){
- const day=[];
- const add=(start,end,title,kind='personal',activity='idle')=>{
-  start=Math.max(0,Math.min(24,start));end=Math.max(0,Math.min(24,end));
-  if(end>start)day.push({start,end,title,kind,activity});
- };
- // Sleep is generated once per day. Lower energy modestly increases duration.
- const sleepStart=21+Math.random()*2.5;
- const sleepHours=Math.max(6.5,Math.min(9.5,7.1+(100-s.energy)*.022+(Math.random()-.5)*1.1));
- const wakeAt=sleepStart+sleepHours;
- add(0,Math.max(0,wakeAt-24),'睡眠','routine','sleep');
- add(sleepStart,24,'睡眠','routine','sleep');
- let h=Math.ceil(wakeAt-24);
- if(h<24){
-  add(h,h+1,'起床、洗漱','routine','wash');h++;
-  add(h,h+1,'吃早餐','routine','eat');h++;
-  if(s.energy<42){add(h,Math.min(h+2,11),'慢慢醒来 / 补一会儿觉','personal','rest');h=Math.min(h+2,11);}
-  else if(s.fun<35){add(h,Math.min(h+1,11),'读书或听音乐','personal',has('唱片机')?'music':'read');h++;}
-  else{add(h,Math.min(h+2,11),has('书桌')?'在书桌前写点东西':'阅读一会儿','personal',has('书桌')?'write':'read');h=Math.min(h+2,11);}
- }
- add(12,13,'午餐','routine','eat');
- if(s.clean<38)add(14,15,'整理自己和房间','personal','wash');
- else if(s.fun<42)add(14,16,has('唱片机')?'听一会儿唱片':'找点事情消遣','personal',has('唱片机')?'music':'read');
- else add(14,15,'自由时间','free','idle');
- if(s.project&&s.project.status==='active')add(16,17,s.project.task,'project','project');
- else if(has('书桌')&&Math.random()<.55)add(16,17,'整理资料 / 写日记','personal','write');
- else add(16,17,'整理房间','personal','tidy');
- add(19,20,'晚餐','routine','eat');
- if(s.fun<55)add(20,21,has('唱片机')?'听音乐、放松一下':'看书或休息','personal',has('唱片机')?'music':'read');
- else add(20,21,'自己的时间','free','idle');
- add(Math.max(21,Math.floor(sleepStart-1)),sleepStart,'洗漱、准备睡觉','routine','wash');
- return day.sort((a,b)=>a.start-b.start);
-}
-function ensureSchedule(){
- const key=dayKey(dayAnchor());
- if(!s.calendar)s.calendar={anchor:key,days:{}};
- if((s.calendar.version||0)<5){s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=5;}
- if(s.calendar.anchor!==key){
-  s.calendar.anchor=key;
-  Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
-  if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
-  let tomorrow=dayKey(plusDays(dayAnchor(),1)),after=dayKey(plusDays(dayAnchor(),2));
-  if(!s.calendar.days[tomorrow])s.calendar.days[tomorrow]=[];
-  if(!s.calendar.days[after])s.calendar.days[after]=[];
-  s.money+=180;
-  addEvent('新的日常收入到账','今天增加了 12 枚¥。可以存起来，也可以用于改善房间。','daily');
-  say('早上六点了。我重新安排了今天的日程。明后两天我还没决定怎么过。');
- }else{
-  if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
-  for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
- }
-}
-function utility(action){
- let u={rest:Math.max(0,55-s.energy)*1.5,eat:Math.max(0,55-s.hunger)*1.7,wash:Math.max(0,55-s.clean)*1.3,read:Math.max(0,58-s.fun)*.75,music:Math.max(0,68-s.fun)*1.1,tidy:Math.max(0,48-s.clean)*.7,write:has('书桌')?15:0,project:s.project?22:0,idle:4};
- return u[action]||0;
-}
-function autonomousAction(){
- ensureSchedule();let now=new Date(),h=now.getHours(),key=dayKey(dayAnchor()),ev=eventAt(key,h);
- if(ev){s.currentActivity=ev.activity;return ev}
- let options=['rest','eat','wash','read','music','tidy','write'];let scored=options.map(a=>({a,score:utility(a)+(Math.random()*5)})).sort((a,b)=>b.score-a.score);
- let a=scored[0].a;
- const names={rest:'我准备休息一会儿。',eat:'有点饿了，我去找点吃的。',wash:'我想整理一下自己和房间。',read:'我想读一会儿书。',music:'我想听会儿音乐。',tidy:'我去收拾一下房间。',write:'我想在书桌前写点东西。'};
- doAutonomous(a,false);s.currentActivity=a;return {activity:a,title:names[a]};
-}
-function doAutonomous(a,announce=true){
- const effects={rest:{energy:12,hunger:-2,fun:1},eat:{hunger:23,energy:2},wash:{clean:25,energy:-2},read:{fun:12,energy:-3},music:{fun:16,energy:-2},tidy:{clean:10,energy:-5},write:{fun:8,energy:-4}};
- change(effects[a]||{});s.lastAutonomy=Date.now();
- if(announce){let lines={rest:'我准备休息一会儿。',eat:'有点饿了，我去找点吃的。',wash:'我想整理一下自己和房间。',read:'我想读一会儿书。',music:'我想听会儿音乐。',tidy:'我去收拾一下房间。',write:'我想在书桌前写点东西。'};say(lines[a]||'我想自己待一会儿。')}
- if(a==='sleep'){change({energy:25,hunger:-3});}
- if(a==='music'&&has('唱片机'))s.preferences.music=(s.preferences.music||0)+1;
- if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;
- save();
-}
-function applyOffline(){
- let elapsed=Math.max(0,Math.min(72,(Date.now()-(s.lastTick||s.last||Date.now()))/3600000));
- if(elapsed<.08)return;
- change({energy:Math.min(15,elapsed*1.8),hunger:-Math.min(24,elapsed*1.2),clean:-Math.min(15,elapsed*.45),fun:-Math.min(16,elapsed*.6),bored:Math.min(7,elapsed*.22)});
- let acts=Math.min(4,Math.floor(elapsed/5));
- for(let i=0;i<acts;i++){let a=s.energy<35?'rest':s.hunger<32?'eat':s.clean<30?'wash':s.fun<28?(has('唱片机')?'music':'read'):'tidy';doAutonomous(a,false)}
- s.lastTick=Date.now();save();
-}
-function relation(action){
- const recent=s.memories.slice(-8),repeats=recent.filter(m=>m.type===action).length;
- if(repeats>=3)s.bored=clamp(s.bored+3);
- if(action==='listen'||action==='tea'||action==='walk'||action==='read'||action==='game'){
-  s.friend=clamp(s.friend+(repeats?0:2));s.attach=clamp(s.attach+1);s.bored=clamp(s.bored+(repeats?2:0));
-  if(s.friend>30&&recent.some(m=>m.type==='shared')&&s.love<45)s.love=clamp(s.love+1);
-  remember('shared',action);
- }else if(action==='ignore'){s.attach=clamp(s.attach-1);s.bored=clamp(s.bored+1)}
-}
-function perform(action){
- const defs={
- tea:['一起喝茶','坐下来喝杯茶。',{energy:1,hunger:3,fun:5},'tea','tea'],
- music:['听音乐','阿尔挑了一张唱片。',{fun:12,energy:-2},'music','music'],
- walk:['出门散步','你们出去走了一圈。',{fun:13,energy:-9,clean:-3},'walk','walk'],
- read:['一起看书','你们各自读了一会儿，偶尔交换几句。',{fun:7,energy:-3},'read','sit'],
- game:['玩个游戏','这局我可不会让着你。',{fun:14,energy:-5},'game','wave'],
- rest:['休息一会','你们安静地待了一会儿。',{energy:8,fun:1},'rest','sit'],
- food:['一起吃点东西','你们找了些吃的。',{hunger:24,fun:3},'food','sit'],
- tidy:['一起整理房间','房间看起来整洁多了。',{clean:12,energy:-4,friend:2},'tidy','wave']
- };
- let d=defs[action];if(!d)return;
- if(action==='sleep'){change({energy:24,hunger:-3,fun:2});return}
- if(action==='music'&&!has('唱片机')){say('我们还没有唱片机。先去商店看看？');return}
- if(action==='food'&&!has('点心')&&s.hunger>55){say('现在还不饿。要不做点别的？');return}
- change(d[2]);relation(action);remember(action,d[0]);say(d[1]);animate(d[4]);save();render();
-}
+
+
+
+
+
+
+
+
 const tabs={
  '互动':[['最近发生的事','✦','events'],['人物档案','▤','profile'],['接临时工作','¥','work'],['聊天','💬','chat'],['进入厨房','🍳','kitchen'],['一起做饭','🥘','cook-together'],['一起喝茶','🍵','tea'],['听音乐','♫','music'],['出门散步','🌿','walk'],['一起看书','📖','read'],['玩个游戏','🎲','game'],['休息一会','☁','rest'],['一起吃点东西','🥐','food'],['整理房间','🧹','tidy']],
  '物品':[['旧书','📖','use-book'],['陶杯','☕','use-cup'],['点心','🥐','use-food'],['唱片','💿','use-record'],['房间与收藏','🪴','collection']],
@@ -353,15 +254,7 @@ function openTab(name){
  });
  $('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
 }
-function showCollection(){
- $('drawerTitle').textContent='共同生活 · 物品与长期计划';
- let list='<div class="calendar-note">¥：'+s.money+' · 已拥有：'+s.items.concat(s.furniture).join('、')+'</div>';
- list+='<div class="calendar-note">共同记忆：'+(s.memories.slice(-6).map(m=>m.text).join('；')||'还没有留下特别的记忆')+'</div>';
- list+='<div class="calendar-actions"><button id="start-project">发起房间改造</button><button id="close-project">关闭</button></div>';
- $('choices').innerHTML=list;
- $('start-project').onclick=()=>{if(s.project?.status==='active'){toast('已经有一个改造计划在进行');return}if(s.money<30){toast('至少需要300¥作为材料预算');return}s.money-=300;s.project={status:'active',task:'一起完成房间改造',progress:0};addEvent('房间改造计划','阿尔想和你一起改善生活空间。需要共同完成三次整理或布置。','long');say('我想把房间弄得更适合我们生活。你愿意一起弄吗？');save();render();};
- $('close-project').onclick=()=>$('drawer').classList.remove('open');
-}
+
 function eventChoicesLegacy(e){
  $('drawerTitle').textContent=e.title;
  let opts=e.type==='long'?['同意，一起做','先等等','提出别的计划']:e.title.includes('唱片机')?['直接买下来','先不花钱','去二手市场找找']:['陪他一起','让他自己决定','提出替代方案'];
@@ -391,71 +284,14 @@ function renderEvents(){
  open.forEach(e=>{let b=document.createElement('button');b.className='choice';b.innerHTML='<span class="emoji">'+(e.type==='long'?'✦':'•')+'</span>'+e.title+'<small>'+e.detail+'</small>';b.onclick=()=>eventChoices(e);$('choices').appendChild(b)});
  $('drawer').classList.add('open');
 }
-function generateDailyEvents(){
- if(s.events.filter(e=>e.status==='open').length>3)return;
- if(!s.dailyEventDate||s.dailyEventDate!==s.calendar.anchor){
-  s.dailyEventDate=s.calendar.anchor;
-  if(!has('唱片机')&&s.visits>0&&Math.random()<.6)addEvent('阿尔想听唱片','最近房间有点安静。我想听音乐，不过我们还没有唱片机。','daily');
-  else if(!has('书桌')&&Math.random()<.45)addEvent('关于房间的一点想法','我想有一张可以坐下来写东西的书桌。现在只能在沙发上看书。','daily');
-  else if(s.fun<35)addEvent('今天有点无聊','我最近做的事情都差不多。想不想一起试试新的活动？','daily');
- }
-}
+
 
 function revealTrait(trait){s.revealedTraits=s.revealedTraits||[];if(!s.revealedTraits.includes(trait))s.revealedTraits.push(trait)}
-function renderProfile(){
- s.personality=s.personality||{hidden:[]};
- const description=s.personality.description||'';
- const esc=x=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- $('drawerTitle').textContent='人物档案 · Arday';
- $('choices').innerHTML='<div class="profile-card"><div class="profile-avatar">A</div><div><strong>Arday · 阿尔</strong><p>他有自己的生活、心思和打算。你所了解的他，也会随着相处慢慢改变。</p></div></div>'+
- '<section class="profile-section"><h4>性格设定</h4><p>由你来定义阿尔。可以写他的脾气、处事方式、欲望、说话习惯，以及他在不同情境下可能做出的选择。不必填写性格标签。</p><textarea id="personalityDescription" maxlength="1800" rows="7" placeholder="写下你心目中的阿尔……">'+esc(description)+'</textarea><button class="choice" id="savePersonality">保存设定</button><small>这份设定会作为后续行为与对话设计的依据。修改不会抹去已经发生的生活记录。</small></section>'+
- '<section class="profile-section"><h4>你们的相处记录</h4><p>生活记录 '+s.memories.length+' 条 · 拒绝与边界 '+(s.rejections||0)+' 次</p><p>'+(s.memories.slice(-5).map(m=>esc(m.text)).join('；')||'你们还没有留下特别的记忆。')+'</p></section>';
- $('savePersonality').onclick=()=>{s.personality=s.personality||{hidden:[]};s.personality.description=$('personalityDescription').value.trim();save();toast('性格设定已保存');};
- $('drawer').classList.add('open');
-}
-function earnWork(){
- const key=dayKey(dayAnchor());
- if(s.workedDate===key){toast('今天已经完成过一份临时工作');return}
- if(s.energy<22){say('我现在精力不够，没法接工作。等休息好了再说。');return}
- let day=s.calendar.days[key]||[],start=-1;
- for(let h=Math.max(9,new Date().getHours());h<=18;h++){if(!eventAt(key,h)&&!eventAt(key,h+1)){start=h;break}}
- if(start<0){say('今天已经排得很满了，找不到连续两小时的空档。');return}
- day.push({start,end:start+2,title:'临时工作 · 文案整理',kind:'work',activity:'work'});day.sort((a,b)=>a.start-b.start);
- s.workedDate=key;s.pendingWork={day:key,start,end:start+2,pay:180,paid:false};change({energy:-3});remember('work','接下两小时的文案整理工作',1);
- say('我接了一份两小时的文案整理工作。结束后才能拿到 ¥180。');save();render();toast('已安排工作 · 2小时');$('drawer').classList.remove('open');
-}
-function respondToChat(text){
- const t=text.toLowerCase(),count=(s.chatTopics||{}),pick=a=>a[Math.floor(Math.random()*a.length)];
- let topic='general',reply='';
- if(/你好|嗨|早上好|晚上好|在吗|回来/.test(t)){topic='greeting';reply=pick(['你总算来了。','我还以为你今天要把我忘在这里了。过来，坐一会儿。','回来了？外面有什么新鲜事，值得你这样急着告诉我？']);}
- else if(/累|疲惫|困|睡不着|休息/.test(t)){topic='tired';reply=pick(['脸色都写在脸上了。过来坐着，别急着逞强。','今天很累？我看得出来。要不要先把那些烦人的事放一放。','你总是把自己弄得这么忙。偶尔也该学会享受一下清闲。']);}
- else if(/难过|伤心|烦|生气|焦虑|压力|痛苦/.test(t)){topic='mood';reply=pick(['谁惹你不高兴了？说来听听。','先别急着把事情讲得那么有条理。你可以想到哪儿说到哪儿，我听着。','我不擅长说漂亮的安慰话。不过今晚我有空，可以把时间留给你。']);}
- else if(/喜欢|爱你|爱不爱|关系|朋友/.test(t)){topic='relationship';reply=pick(['这种问题，你倒是问得坦率。可惜我不打算用一句话敷衍你。','你想听一个好听的答案，还是想知道我真正怎么想？','我们之间的事，哪有那么容易说清。至少我记得你每一次认真看着我的样子。']);}
- else if(/钱|价格|贵|便宜|工作|赚钱|收入/.test(t)){topic='money';reply=pick(['钱当然有用，只是没必要为了它把日子过得乏味。','若真有想要的东西，我自然会想办法。至于为了赚钱而忙碌……那得看值不值得。','账目拿来我看看。别担心，我还不至于让我们为几笔开销伤脑筋。']);}
- else if(/音乐|唱片|歌/.test(t)){topic='music';reply=has('唱片机')?pick(['那张唱片今晚再放一次吧。我倒想看看，你会不会先听腻。','我最近听到一段旋律，想来你或许也会喜欢。','音乐有种奇怪的本事，能让人想起一些原本不打算记起的事。']):'等有了唱片机再说吧。我可不想隔着空气欣赏音乐。';}
- else if(/书|阅读|小说|读/.test(t)){topic='reading';reply=pick(['书读到有趣的地方，总让人舍不得合上。你最近读到什么了？','我喜欢那些读完之后仍旧不肯放过人的故事。','念给我听一段？我想知道是什么地方让你停了下来。']);}
- else if(/吃|饿|饭|食物/.test(t)){topic='food';reply=pick(['我有些饿了。今晚吃点热乎的，怎么样？','你今天好好吃饭了吗？别告诉我又随便对付过去了。','厨房里还有什么？我忽然有点挑剔起来了。']);}
- else if(/房间|家具|装修|书桌|植物/.test(t)){topic='room';reply=pick(['房间不必多么奢华，住久了，总该有一点只属于我们的痕迹。','那处地方确实该收拾了。你来挑，我负责挑剔。','光线不错。若再添一点绿意，或许会更像个真正的家。']);}
- else if(/对不起|抱歉|原谅/.test(t)){topic='apology';reply=pick(['我听见了。至于原不原谅，得看你以后怎么做。','别急着道歉。坐下来，把话说完。','我不会因为一句抱歉就忘记，不过我愿意给你机会。']);}
- else if(/谢谢|感谢/.test(t)){topic='thanks';reply=pick(['这点小事也值得你记在心上？','不必客气。你若真想谢我，不如陪我待一会儿。']);}
- else if(/为什么|怎么想|觉得呢|你认为/.test(t)){topic=s.lastTopic||'reflection';reply=pick(['让我想想。你知道，我不喜欢随口给出答案。','你问得这样认真，我总不好敷衍过去。','我倒有个想法，不过说出来之前，想先听听你怎么想。']);}
- else {topic='general';let previous=s.memories.filter(m=>m.type==='conversation'&&m.text!==text).slice(-1)[0];reply=previous&&Math.random()<.45?pick(['你上回说过这件事。我记性不差，只是想知道，你现在还和当时想的一样吗？','我记得你提起过。看来这件事一直没从你心里过去。']):pick(['说下去，我在听。','你这样说，倒让我有些好奇了。','嗯？然后呢。别只说一半。','这倒有意思。你怎么突然想到这个？']);}
- count[topic]=(count[topic]||0)+1;s.chatTopics=count;s.lastTopic=topic;
- remember('conversation',text.slice(0,55));
- if(topic==='relationship'&&count[topic]===1)change({friend:1});
- if(topic==='apology'){s.hate=Math.max(0,s.hate-1)}
- say(reply);save();render();
-}
-function renderCalendar(){
- ensureSchedule();let anchor=dayAnchor(),now=new Date(),html='';
- for(let di=0;di<3;di++){let d=plusDays(anchor,di),key=dayKey(d);
- html+='<section class="day-card '+(di===0?'today':'')+'"><div class="day-card-head"><strong>'+['今天','明天','后天'][di]+'</strong><small>'+dayLabel(d)+'</small></div><div class="day-timeline">';
- for(let h=0;h<24;h++){let ev=eventAt(key,h),isNow=di===0&&now.getHours()===h;html+='<div class="day-slot"><time>'+pad(h)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':ev.activity==='sleep'?'sleep':ev.kind==='work'?'work':'busy'):'free')+(isNow?' now':'')+'" data-day="'+di+'" data-hour="'+h+'">'+(ev?ev.title:'＋ 空闲')+'</button></div>'}
- html+='</div><div class="day-legend">'+(di===0?'阿尔今天的安排':di===1?'明天 · 可以协商共同安排':'后天 · 保留自主时间')+'</div></section>'}
- $('calendarContent').innerHTML=html;
- $('calendarContent').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(+b.dataset.day,+b.dataset.hour));
-}
-function openCalendar(){ensureSchedule();$('drawer').classList.remove('open');$('stage').classList.add('calendar-mode');renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
+
+
+
+
+
 function closeCalendar(){$('stage').classList.remove('calendar-mode');$('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'))}
 function slotClick(di,h){
  ensureSchedule();let d=plusDays(dayAnchor(),di),key=dayKey(d),ev=eventAt(key,h);
@@ -479,21 +315,7 @@ function slotClick(di,h){
  });
  $('return').onclick=()=>$('drawer').classList.remove('open');
 }
-function tick(){
- let now=Date.now(),delta=Math.max(0,Math.min(1.5,(now-(s.lastTick||now))/3600000));
- if(delta>0){change({energy:-delta*2.1,hunger:-delta*1.3,clean:-delta*.55,fun:-delta*.8,bored:delta*.16});s.lastTick=now;}
- ensureSchedule();
- let key=dayKey(dayAnchor()),hour=new Date().getHours(),ev=eventAt(key,hour);
- if(s.pendingWork&&!s.pendingWork.paid&&(key>s.pendingWork.day||(key===s.pendingWork.day&&hour>=s.pendingWork.end))){s.pendingWork.paid=true;s.money+=s.pendingWork.pay;addEvent('临时工作结算','完成了两小时的文案整理，获得 ¥'+s.pendingWork.pay+'。','daily');say('工作结束了，拿到 ¥'+s.pendingWork.pay+'。总算可以喘口气。');remember('work','完成临时工作，收入 ¥'+s.pendingWork.pay,2);save();}
- if(now-(s.lastAutonomy||0)>25*60*1000){
-  let a;
-  if(ev){a=ev.activity||'idle';if(a!=='idle'&&a!=='project')doAutonomous(a,false);}
-  else {let result=autonomousAction();a=result.activity;}
-  if(a==='project'&&s.project?.status==='active'){s.project.progress++;if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:3,fun:8});addEvent('房间改造完成','你们一起完成了改造，房间里多了一件纪念摆件。','long');say('我们真的把这里变得不一样了。');}}
-  s.lastAutonomy=now;save();
- }
- generateDailyEvents();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();
-}
+
 function initScene(){let hour=new Date().getHours();$('sun').style.opacity=hour<6||hour>20?'.12':hour<9||hour>17?'.55':'1';}
 $('closeDrawer').onclick=()=>$('drawer').classList.remove('open');
 $('backRoom').onclick=closeCalendar;
@@ -520,44 +342,10 @@ document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>
 }));
 /* Initialization is deliberately deferred until all simulation constants and handlers are defined. */
 
-function buildDay(key){
- let d=[];const add=(start,end,title,kind='personal',activity='idle')=>d.push({start,end,title,kind,activity});
- add(0,7,'睡眠','routine','sleep');add(7,8,'起床、洗漱','routine','wash');add(8,9,'早餐','routine','eat');
- add(9,11,s.energy<38?'补觉、慢慢醒来':has('书桌')?'写作与阅读':'阅读、整理资料','personal',s.energy<38?'rest':has('书桌')?'write':'read');
- add(11,12,'自由安排 / 外出办事','free','idle');add(12,13,'午餐','routine','eat');
- if(s.project?.status==='active')add(14,15,s.project.task,'project','project');
- else if(s.roomCondition<65)add(14,15,'整理和维护房间','personal','tidy');
- else add(14,15,has('唱片机')?'听音乐或阅读':'个人时间','personal',has('唱片机')?'music':'read');
- add(15,16,'自由时间','free','idle');add(16,17,has('书桌')?'写点东西 / 整理资料':'整理房间','personal',has('书桌')?'write':'tidy');
- add(17,18,'自己的时间','free','idle');add(18,19,'晚餐','routine','eat');add(19,20,'散步或休闲','personal','walk');
- add(20,21,has('唱片机')?'听音乐、放松一下':'阅读、放松一下','personal',has('唱片机')?'music':'read');
- add(21,22,'洗漱、准备睡觉','routine','wash');add(22,24,'睡眠','routine','sleep');return d;
-}
-function ensureSchedule(){
- const key=dayKey(dayAnchor());if(!s.calendar)s.calendar={anchor:key,days:{},version:3};
- if((s.calendar.version||0)<3){s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=3}
- if(s.calendar.anchor!==key){
-  s.calendar.anchor=key;Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
-  s.calendar.days[key]=buildDay(key);addEvent('新的一天','早上六点，我重新安排了今天。明后两天先留一些空白，之后再决定怎么过。','daily');
-  say('六点了。我更新了今天的安排，明后两天还留着空白。');
- }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
- for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
- let week=Math.floor(dayAnchor().getTime()/(7*86400000)).toString();
- if(!s.lastBillWeek){s.lastBillWeek=week}else if(s.lastBillWeek!==week){s.lastBillWeek=week;addEvent('本周水电与日常开销','共同生活的基础开销为 ¥80。可以现在支付，也可以暂时记账。','bill')}
-}
-function utility(a){
- const u={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,write:has('书桌')?13:0,project:s.project?.status==='active'?24:0,walk:s.fun<60?8:2,idle:3};
- if((s.personality?.hidden||[]).includes('需要独处')&&['read','write','rest'].includes(a))u[a]+=5;
- if((s.personality?.hidden||[]).includes('好奇心强')&&['music','walk','write'].includes(a))u[a]+=4;
- return u[a]||0;
-}
-function autonomousAction(){
- ensureSchedule();let key=dayKey(dayAnchor()),ev=eventAt(key,new Date().getHours());
- if(ev){s.currentActivity=ev.activity||'idle';return ev}
- let opts=['rest','eat','wash','read','music','tidy','write','walk'];
- let a=opts.map(x=>({a:x,v:utility(x)+Math.random()*3})).sort((x,y)=>y.v-x.v)[0].a;
- doAutonomous(a,false);s.currentActivity=a;return {activity:a,title:a};
-}
+
+
+
+
 function applyPose(a){
  let p=$('person');if(!p)return;p.classList.remove('sit','walk','wave');
  if(['rest','read','music','tea','food','sleep'].includes(a))p.classList.add('sit');
@@ -565,40 +353,10 @@ function applyPose(a){
  let names={rest:'在沙发上休息',read:'正在阅读',music:'正在听音乐',food:'正在吃东西',sleep:'正在睡觉',walk:'刚出去散步',work:'正在工作',tidy:'正在整理房间',wash:'洗漱中',write:'在书桌前写东西',project:'正在推进房间改造'};
  if($('roomLabel'))$('roomLabel').textContent='HOME · '+(names[a]||'自己的时间');
 }
-function doAutonomous(a,announce=true){
- const fx={rest:{energy:13,hunger:-2,fun:1},eat:{hunger:24,energy:2},wash:{clean:24,energy:-2},read:{fun:11,energy:-3},music:{fun:13,energy:-2},tidy:{clean:10,energy:-4},write:{fun:8,energy:-4},walk:{fun:12,energy:-7,clean:-2},sleep:{energy:9,hunger:-1},project:{fun:3,energy:-4}};
- change(fx[a]||{});if(a==='tidy')s.roomCondition=clamp(s.roomCondition+7);
- if(a==='project'&&s.project?.status==='active'){s.project.progress=(s.project.progress||0)+1;if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:2,fun:6});addEvent('房间改造完成','你们一起完成了改造，房间里多了一件纪念摆件。','long')}}
- s.currentActivity=a;s.activityLog.push({a,at:Date.now()});if(s.activityLog.length>30)s.activityLog.shift();
- let lines={rest:'我在沙发上休息。',eat:'我去找了点吃的。',wash:'我洗漱了一下，顺手整理了房间。',read:'我找了本书，读了一会儿。',music:'我挑了一张唱片听。',tidy:'我把房间收拾了一下。',write:'我在书桌前写了些东西。',walk:'我出去走了一圈。',sleep:'我正在睡觉。',project:'我继续处理房间改造的事情。'};
- if(announce)say(lines[a]||'我想自己待一会儿。');applyPose(a);
- if(a==='music')s.preferences.music=(s.preferences.music||0)+1;if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;
- save();render();
-}
-function applyOffline(){
- let elapsed=Math.max(0,Math.min(48,(Date.now()-(s.lastTick||s.last||Date.now()))/3600000));if(elapsed<.08)return;
- change({energy:Math.min(18,elapsed*1.7),hunger:-Math.min(25,elapsed*1.15),clean:-Math.min(13,elapsed*.4),fun:-Math.min(15,elapsed*.55),bored:Math.min(5,elapsed*.12)});
- s.roomCondition=clamp(s.roomCondition-Math.min(5,elapsed*.08));
- let acts=Math.min(5,Math.floor(elapsed/4));for(let i=0;i<acts;i++){let a=s.energy<32?'rest':s.hunger<30?'eat':s.clean<28?'wash':s.roomCondition<55?'tidy':s.fun<28?'read':'read';doAutonomous(a,false)}
- s.lastTick=Date.now();save();
-}
-function relation(action){
- let recent=s.memories.slice(-12),repeats=recent.filter(m=>m.type===action).length;
- if(repeats>=2)s.bored=clamp(s.bored+2);
- if(['listen','tea','walk','read','game','music','food'].includes(action)){
-  s.friend=clamp(s.friend+(repeats?0:2));s.attach=clamp(s.attach+1);if(repeats)s.bored=clamp(s.bored+2);
-  let types=new Set(s.memories.filter(m=>m.type==='shared').map(m=>m.text));if(types.size>=4&&s.love<35&&Math.random()<.18)s.love=clamp(s.love+1);
-  remember('shared',action);
- }
-}
-function perform(action){
- const defs={tea:['一起喝茶','坐下来喝杯茶。',{energy:1,hunger:3,fun:5},'tea','tea'],music:['听音乐','阿尔挑了一张唱片。',{fun:12,energy:-2},'music','music'],walk:['出门散步','你们出去走了一圈。',{fun:13,energy:-9,clean:-3},'walk','walk'],read:['一起看书','你们各自读了一会儿，偶尔交换几句。',{fun:7,energy:-3},'read','sit'],game:['玩个游戏','这局我可不会让着你。',{fun:14,energy:-5},'game','wave'],rest:['休息一会','你们安静地待了一会儿。',{energy:8,fun:1},'rest','sit'],food:['一起吃点东西','你们找了些吃的。',{hunger:24,fun:3},'food','sit'],tidy:['一起整理房间','房间看起来整洁多了。',{clean:12,energy:-4,friend:1},'tidy','wave']};
- let d=defs[action];if(!d)return;
- if(action==='music'&&!has('唱片机')){say('我们还没有唱片机。先去商店看看？');return}
- if(action==='food'){let i=s.items.indexOf('点心');if(i<0){say('我们没有现成点心。可以买一些，或者我去厨房找点吃的。');return}s.items.splice(i,1)}
- 
- change(d[2]);relation(action);remember(action,d[0]);say(d[1]);animate(d[4]);s.currentActivity=action;applyPose(action);save();render();
-}
+
+
+
+
 function earnWork(){
  let key=dayKey(dayAnchor());if(s.workedDate===key){toast('今天已经接过一份工作');return}
  if(s.energy<22){say('我现在精力不够，没法接工作。');return}
@@ -631,45 +389,10 @@ function respondToChat(text){
  else {topic='general';let p=s.memories.filter(m=>m.type==='conversation').slice(-1)[0];reply=p&&Math.random()<.4?'你刚才提到“'+p.text.slice(0,22)+'”。这和你现在说的事情有关系吗？':pick(['你说的这件事里，最让你在意的是哪一部分？','我还没有形成明确看法。你愿意再具体一点吗？','我想知道你为什么会这样想，而不只是听一个结论。','这件事我可能有不同看法。你想听听吗？'])}
  s.chatTopics=s.chatTopics||{};s.chatTopics[topic]=(s.chatTopics[topic]||0)+1;remember('conversation',text.slice(0,55));say(reply);save();render();
 }
-function eventChoices(e){
- if(e.type!=='bill')return eventChoicesLegacy(e);
- $('drawerTitle').textContent=e.title;
- $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
- $('paybill').onclick=()=>{if(s.money>=80){s.money-=80;s.unpaidBill=Math.max(0,(s.unpaidBill||0)-80);say('水电和日常开销已经付了。');remember('household','支付本周共同开销 ¥80',2)}else{say('现在资金不够，先记账，等有收入再补上。');s.unpaidBill=(s.unpaidBill||0)+80}completeEvent(e,'支付');save();render();renderEvents()};
- $('delaybill').onclick=()=>{s.unpaidBill=(s.unpaidBill||0)+80;completeEvent(e,'暂时记账');say('好，先记着。等有收入再补上。');save();render();renderEvents()};
- $('drawer').classList.add('open');
-}
-function tick(){
- let now=Date.now(),delta=Math.max(0,Math.min(1.5,(now-(s.lastTick||now))/3600000));
- if(delta>0){change({energy:-delta*1.7,hunger:-delta*1.1,clean:-delta*.45,fun:-delta*.65,bored:delta*.1});s.roomCondition=clamp(s.roomCondition-delta*.035);s.lastTick=now}
- ensureSchedule();let key=dayKey(dayAnchor()),hour=new Date().getHours(),hourKey=key+'-'+hour,ev=eventAt(key,hour);
- if(s.lastHourKey!==hourKey){
-  s.lastHourKey=hourKey;let action=ev?.activity||null;
-  if(!action||action==='idle'){let result=autonomousAction();action=result.activity}
-  else if(action==='work'){change({energy:-5,fun:-2});s.currentActivity='work';applyPose('work')}
-  else doAutonomous(action,false);
-  if(s.pendingWork&&!s.pendingWork.paid&&(key>s.pendingWork.day||(key===s.pendingWork.day&&hour>=s.pendingWork.end))){s.pendingWork.paid=true;s.money+=s.pendingWork.pay;addEvent('临时工作结算','完成工作委托，获得 ¥'+s.pendingWork.pay+'。','daily');say('工作结束了，拿到 ¥'+s.pendingWork.pay+'。');remember('work','完成工作，收入 ¥'+s.pendingWork.pay,2)}
-  if(action==='project')doAutonomous('project',true);
-  if(action==='sleep')say('阿尔已经休息了。房间安静下来。');
-  save();
- }
- generateDailyEvents();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();
-}
-function generateDailyEvents(){
- if(!s.events.some(e=>e.status==='open'&&e.type==='daily')){
-  if(s.hunger<28)addEvent('冰箱快空了','最近吃东西有些不方便。要不要买些食物，或者安排一次采购？','daily');
-  else if(s.roomCondition<55)addEvent('房间需要整理','公共空间有些乱了。阿尔可以自己整理，也可以和你一起完成。','daily');
-  else if(has('绿植')&&s.clean<60&&Math.random()<.25)addEvent('照料绿植','窗边的植物需要浇水和照看。','daily');
-  else if(!has('唱片机')&&s.visits>1&&s.memories.filter(m=>m.type==='music').length>0)addEvent('关于音乐的提议','我还是想有一台唱片机，不过不急着今天买。','daily');
- }
-}
-function renderProfile(){
- const known=['慢热','重视自主','好奇心强'];const hidden=['坚持自己的节奏','念旧','节俭','好胜','需要独处','好奇心强'];
- let unlocked=[...(s.revealedTraits||[])];if(s.personality.hidden.includes('节俭')&&s.memories.filter(m=>m.type==='purchase').length>=2)unlocked.push('节俭');if(s.personality.hidden.includes('需要独处')&&s.rejections>=2)unlocked.push('需要独处');
- $('drawerTitle').textContent='人物档案 · Arday';
- $('choices').innerHTML='<div class="profile-card"><div class="profile-avatar">A</div><div><strong>Arday · 阿尔</strong><p>当前状态：'+(s.currentActivity||'自己的时间')+' · 房间维护 '+s.roomCondition+'%</p></div></div><section class="profile-section"><h4>已知性格</h4><div class="trait-list">'+known.map(x=>'<span class="trait">'+x+'</span>').join('')+'</div></section><section class="profile-section"><h4>逐渐发现的性格</h4><p>隐藏特质会实际影响他的选择，不会因为数值达标而全部解锁。</p><div class="trait-list">'+hidden.map(x=>'<span class="trait '+(unlocked.includes(x)?'discovered':'unknown')+'">'+(unlocked.includes(x)?x:'？ 未知特质')+'</span>').join('')+'</div><small>已发现 '+new Set(unlocked).size+' / '+hidden.length+'</small></section><section class="profile-section"><h4>共同生活记录</h4><p>记忆 '+s.memories.length+' 条 · 拒绝 '+(s.rejections||0)+' 次 · 未付账单 ¥'+(s.unpaidBill||0)+'</p><p>'+s.memories.slice(-5).map(m=>m.text).join('；')+'</p></section>';
- $('drawer').classList.add('open');
-}
+
+
+
+
 
 
 function buildDay(key){
@@ -777,7 +500,7 @@ const activityMeta = {
  cook:{title:'准备做饭',location:'kitchen',pose:'walk',effect:{energy:-2}},
  cookTogether:{title:'一起做饭',location:'kitchen',pose:'walk',effect:{energy:-2,fun:2}}
 };
-function normalizeActivity(a){return ({food:'eat',reading:'read',company:'company',listen:'music',rest:'rest'})[a]||a||'idle'}
+
 function scheduleForToday(){
  ensureSchedule();
  const k=dayKey(dayAnchor());
@@ -796,21 +519,7 @@ function writeScheduleBlock(start,end,block){
  next.sort((a,b)=>a.start-b.start);
  s.calendar.days[dayKey(dayAnchor())]=next;
 }
-function setSceneActivity(activity,announce){
- const a=normalizeActivity(activity),meta=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'};
- const p=$('person');
- if(p){
-  p.classList.remove('sit','walk','wave');
-  p.classList.add(meta.pose||'wave');
-  const positions={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};
-  p.style.left=positions[meta.location]||'51%';
-  p.dataset.location=meta.location||'center';
- }
- s.currentActivity=a;
- const label=$('roomLabel');
- if(label)label.textContent=(meta.location==='outside'?'OUTSIDE':'HOME')+' · '+meta.title;
- if(announce&&meta.title)say('我现在在'+(meta.location==='outside'?'外面':'房间里')+meta.title+'。');
-}
+
 function applyActivityHour(activity){
  const a=normalizeActivity(activity),meta=activityMeta[a];
  if(!meta)return;
@@ -854,61 +563,10 @@ function proposeActivityNow(action){
  say(start===hour?'好，就按这个安排。':'可以。我把稍后的时间留出来。');
  save();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();return true;
 }
-function perform(action){
- const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'};
- const a=map[action]||action;
- const accepted=proposeActivityNow(a);
- if(accepted){relation(action);animate(a==='game'?'wave':a==='walk'?'walk':'sit');}
-}
-function doAutonomous(a,announce=true){
- const activity=normalizeActivity(a);
- setSceneActivity(activity,false);
- applyActivityHour(activity);
- if(announce){const m=activityMeta[activity];say(m?'我去'+m.title+'了。':'我想自己安排一会儿。')}
- save();render();
-}
-function autonomousAction(){
- const {key}=scheduleForToday(),hour=new Date().getHours(),scheduled=eventAt(key,hour);
- if(scheduled){
-  const a=normalizeActivity(scheduled.activity);
-  setSceneActivity(a,false);
-  return {activity:a,title:scheduled.title};
- }
- const candidates=['rest','eat','wash','read','music','tidy','write','walk'];
- const utilityScore=a=>{
-  const values={rest:(55-s.energy)*.9,eat:(55-s.hunger)*1.2,wash:(50-s.clean)*.7,read:(55-s.fun)*.5,music:has('唱片机')?(60-s.fun)*.65:0,tidy:(55-s.roomCondition)*.5,write:has('书桌')?8:0,walk:s.fun<55?7:2};
-  return (values[a]||0)+Math.random()*5;
- };
- const chosen=candidates.filter(a=>!(a==='music'&&!has('唱片机'))&&!(a==='write'&&!has('书桌'))).sort((a,b)=>utilityScore(b)-utilityScore(a))[0]||'rest';
- const meta=activityMeta[chosen];
- writeScheduleBlock(hour,hour+1,{title:meta.title,kind:'personal',activity:chosen,autonomous:true});
- setSceneActivity(chosen,false);
- return {activity:chosen,title:meta.title};
-}
-function tick(){
- const now=Date.now(),hourKey=dayKey(dayAnchor())+'-'+new Date().getHours();
- const previous=s.lastUnifiedHourKey;
- if(!previous||previous!==hourKey){
-  ensureSchedule();
-  const hour=new Date().getHours(),key=dayKey(dayAnchor());
-  let ev=eventAt(key,hour),activity=ev?normalizeActivity(ev.activity):null;
-  if(!activity||activity==='idle'){
-   const chosen=autonomousAction();activity=normalizeActivity(chosen.activity);
-  }
-  if(activity&&activity!=='idle')applyActivityHour(activity);
-  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;
-  if(activity==='sleep')say('阿尔正在睡觉。房间安静下来。');
-  save();
- }
- const elapsed=Math.max(0,Math.min(1.5,(now-(s.lastTick||now))/3600000));
- if(elapsed>0){
-  change({energy:-elapsed*.45,hunger:-elapsed*.8,clean:-elapsed*.25,fun:-elapsed*.3});
-  s.roomCondition=clamp(s.roomCondition-elapsed*.012);
-  s.lastTick=now;save();
- }
- render();
- if($('stage').classList.contains('calendar-mode'))renderCalendar();
-}
+
+
+
+
 
 
 // === Unified hourly simulation and offline replay (v2) ===
@@ -953,22 +611,7 @@ function writeBlockForKey(key,start,end,block){
  next.sort((a,b)=>a.start-b.start);
  s.calendar.days[key]=next;
 }
-function chooseAutonomousActivity(){
- const options=['rest','eat','wash','read','music','tidy','write','walk'];
- const score={
-  rest:Math.max(0,58-s.energy)*1.55,
-  eat:Math.max(0,58-s.hunger)*1.8,
-  wash:Math.max(0,55-s.clean)*1.25,
-  read:Math.max(0,58-s.fun)*.8,
-  music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,
-  tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,
-  write:has('书桌')?13:0,
-  walk:s.fun<60?8:2
- };
- return options.filter(a=>(a!=='music'||has('唱片机'))&&(a!=='write'||has('书桌')))
-  .map(a=>({a,v:score[a]+Math.random()*4}))
-  .sort((x,y)=>y.v-x.v)[0]?.a||'rest';
-}
+
 function settleWorkAt(key,hour){
  if(!s.pendingWork||s.pendingWork.paid)return false;
  const p=s.pendingWork;
@@ -981,51 +624,7 @@ function settleWorkAt(key,hour){
  }
  return false;
 }
-function processActivityAt(value){
- const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
- if(s.lastUnifiedHourKey===hourKey)return false;
- change({energy:-.45,hunger:-.8,clean:-.25,fun:-.3});s.roomCondition=clamp(s.roomCondition-.012);
- let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
- let activity=normalizeActivity(ev?.activity||'idle');
- if(!ev||activity==='idle'){
-  activity=chooseAutonomousActivity();const meta=activityMeta[activity]||{title:'自己的时间'};
-  const recipeId=activity==='cook'?Object.keys(recipes).find(canCook):undefined;
-  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true,recipeId});
-  ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
- }
- const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
- const sessionStart=s.lastProcessedSessionKey!==sessionId;
- if(activity==='cook'||activity==='cookTogether'){
-  if(!ev.completed&&!ev.cookingStarted)completeCooking(ev);
-  setSceneActivity(activity,false);
-  if(ev.completed&&sessionStart&&ev.withPlayer)advanceSharedGoal('cookTogether',d.getTime());
- }else if(meta){
-  const effects={...(meta.effect||{})};
-  if(activity==='eat'){const meal=consumeMeal();if(meal)delete effects.hunger}
-  change(effects);
-  if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
-  if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
-  if(activity==='read')s.preferences.reading=(s.preferences.reading||0)+1;
-  setSceneActivity(activity,false);
- }
- if(sessionStart){
-  if(ev?.withPlayer){
-   relation(activity);
-   if(activity==='tidy'||activity==='walk')advanceSharedGoal(activity,d.getTime());
-  }
-  if(['read','write','tidy'].includes(activity))updatePersonalGoal(activity,d.getTime());
- }
- const workCompleted=settleWorkAt(key,hour);
- if(workCompleted)updatePersonalGoal('work',d.getTime());
- if(activity==='project'&&s.project?.status==='active'){
-  s.project.progress=(s.project.progress||0)+1;
-  if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:2,fun:6});addEvent('房间改造完成','房间改造计划已经完成。','long')}
- }
- s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;s.lastProcessedSessionKey=sessionId;
- s.activityLog=s.activityLog||[];s.activityLog.push({activity,key,hour,at:d.getTime(),withPlayer:!!ev?.withPlayer});
- if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
- reviewPersonalSpending(d.getTime());return true;
-}
+
 function applyOffline(){
  const now=Date.now(),last=Number(s.lastTick||s.last||now);
  if(!Number.isFinite(last)||last<=0){s.lastTick=now;return}
