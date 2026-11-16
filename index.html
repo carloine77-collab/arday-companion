@@ -177,7 +177,7 @@
 
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
-const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:'',lastBillWeek:''};
+const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
 s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
@@ -189,7 +189,7 @@ function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clea
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
 function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=clamp(s[k]+v)})}
-function dayAnchor(){let d=new Date();if(d.getHours()<6)d.setDate(d.getDate()-1);d.setHours(0,0,0,0);return d}
+function dayAnchor(){return dayAnchorAt(Date.now())}
 function dayKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
@@ -266,7 +266,7 @@ function eventChoicesLegacy(e){
    else if(i===1){say('好，那就先不买。我也不是非要现在拥有。');s.bored=clamp(s.bored+1)}
    else{say('二手市场听起来不错。我想找找看。');s.preferences.market=(s.preferences.market||0)+1}
   }else if(e.type==='long'){
-   if(i===0){s.project=s.project||{status:'active',progress:0,task:'一起完成房间改造'};s.project.status='active';say('好，那我们分几次慢慢完成。')}
+   if(i===0){s.project.status='active';say('好，那我们分几次慢慢完成。')}
    else if(i===1){say('没关系，等你觉得合适的时候再说。')}
    else{say('这个主意也可以。我们可以先从最需要的地方开始。');s.preferences.design=(s.preferences.design||0)+1}
   }else{
@@ -368,7 +368,7 @@ function earnWork(){
 }
 function respondToChat(text){
  const t=text.toLowerCase(),pick=a=>a[Math.floor(Math.random()*a.length)],cur=s.currentActivity||'idle';
- const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tidy:'整理房间',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',project:'房间改造'};
+ const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tidy:'整理房间',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',};
  let topic='general',reply='';
  if(/你好|嗨|早上好|晚上好|在吗|回来/.test(t)){topic='greeting';reply=pick(['你来了。我刚才在'+(act[cur]||'做自己的事')+'。','嗯，我在。你今天过得怎么样？','回来啦。刚才我正准备'+(cur==='sleep'?'睡觉':'继续手头的事')+'。'])}
  else if(/累|疲惫|困|睡不着|休息/.test(t)){topic='tired';reply=pick(['你听起来有点累。今天是什么事情最消耗你？','那先坐一会儿吧。我刚才也在休息。','你想聊聊原因，还是暂时换个轻松的话题？'])}
@@ -416,20 +416,7 @@ function buildDay(key){
  add(p.bedtime,24,'睡眠','routine','sleep');
  return d.sort((a,b)=>a.start-b.start);
 }
-function ensureSchedule(){
- const key=dayKey(dayAnchor());
- if(!s.calendar)s.calendar={anchor:key,days:{},version:4};
- if((s.calendar.version||0)<4){
-  s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=4;
- }
- if(s.calendar.anchor!==key){
-  s.calendar.anchor=key;Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
-  s.calendar.days[key]=buildDay(key);
-  addEvent('新的一天','早上六点了。我重新安排了今天的日程。明后两天先留着空白。','daily');
-  say('六点了。我更新了今天的安排，明后两天还没决定怎么过。');
- }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
- for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
-}
+function ensureSchedule(){ensureScheduleAt(Date.now())}
 
 function renderCalendar(){
  ensureSchedule();const anchor=dayAnchor(),d=plusDays(anchor,selectedCalendarDay),key=dayKey(d),now=new Date();
@@ -646,7 +633,7 @@ function completeCooking(ev){if(ev.cookingStarted)return;const id=ev.recipeId||O
 function consumeMeal(){if(s.readyMeals?.length){const m=s.readyMeals.shift();change({hunger:Math.min(45,m.hunger),fun:2});remember('meal','吃了'+m.name,1);return m.name}if(s.items.includes('点心')){s.items.splice(s.items.indexOf('点心'),1);change({hunger:18,fun:1});return '点心'}return null}
 function setSceneActivity(activity,announce){const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);if(kitchen)kitchenOpen();else if($('stage').classList.contains('kitchen-mode'))kitchenClose();const p=document.querySelector(kitchen?'.kitchen-person':'#person');if(p){p.classList.remove('sit','walk','wave');p.classList.add(m.pose||'wave');const pos={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};p.style.left=kitchen?'54%':(pos[m.location]||'51%')}s.currentActivity=a;$('roomLabel').textContent=(kitchen?'KITCHEN':m.location==='outside'?'OUTSIDE':'HOME')+' · '+m.title;if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')}
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];if(s.hunger<48&&Object.keys(recipes).some(canCook)&&Math.random()<.58)return 'cook';const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>(a!=='music'||has('唱片机'))&&(a!=='write'||has('书桌'))).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
-function normalizeActivity(a){return ({food:'eat',reading:'read',company:'company',listen:'music',rest:'rest',cooking:'cook'})[a]||a||'idle'}
+function normalizeActivity(a){return ({reading:'read',listen:'music',rest:'rest',cooking:'cook'})[a]||a||'idle'}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
@@ -685,14 +672,7 @@ function processActivityAt(value){
  }
  const workCompleted=settleWorkAt(key,hour);
  if(workCompleted)updatePersonalGoal('work',d.getTime());
- if(activity==='project'&&s.project?.status==='active'){
-  s.project.progress=(s.project.progress||0)+1;
-  if(s.project.progress>=3){
-   s.project.status='done';s.furniture.push('房间纪念摆件');
-   change({friend:2,fun:6});
-   addEvent('房间改造完成','房间改造计划已经完成。','long');
-  }
- }
+
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;
  s.lastProcessedSessionKey=sessionId;
  s.activityLog=s.activityLog||[];
@@ -849,6 +829,11 @@ function proposeSharedGoal(at=Date.now()){
  s.lastSharedProposalAt=at;
  const e=addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');e.goalId=g.id;
 }
+if(s.project?.status==='active'&&!s.sharedGoal?.status==='active'){
+ const legacy=sharedGoalCatalog().find(x=>x.id==='room');
+ if(legacy)s.sharedGoal={...legacy,progress:Math.min(legacy.target,Number(s.project.progress)||0),status:'active',startedAt:Date.now(),variant:'migrated'};
+}
+delete s.project;
 function acceptSharedGoal(id,variant='normal'){
  const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return;
  const target=variant==='slow'?Math.max(1,g.target-1):g.target;
