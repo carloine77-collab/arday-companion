@@ -1222,6 +1222,209 @@ function eventChoices(e){
  $('drawer').classList.add('open');
 }
 
+
+/* === Shared goals, situational events and personality-aware behavior === */
+s.sharedGoal=s.sharedGoal||null;
+s.sharedGoalHistory=s.sharedGoalHistory||[];
+s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
+s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
+
+function ardayTemperament(){
+ const d=(s.personality?.description||'').toLowerCase();
+ const hasWord=re=>re.test(d);
+ return {
+  composed:hasWord(/从容|游刃有余|淡定|镇定|轻松|不慌/)||!d?0.78:0.58,
+  teasing:hasWord(/轻佻|戏谑|调侃|玩笑|风趣|撩/)||!d?0.72:0.46,
+  indirect:hasWord(/操纵|引导|心思|试探|迂回|反向/)||!d?0.76:0.4,
+  detached:hasWord(/冷淡|疏离|世俗|物质|地位|欲望/)||!d?0.68:0.42
+ };
+}
+function ardayLine(kind, fallback){
+ const p=ardayTemperament();
+ const lines={
+  proposal:[
+   '我倒是有个主意。你先别急着拒绝，听完再说。',
+   '这件事若有你在，似乎会有意思得多。至于怎么做……我们可以慢慢商量。',
+   '我已经替我们想好了一个大致的方向。当然，最后还得看看你愿不愿意。'
+  ],
+  accept:[
+   '好。既然你也有兴致，那就照这个意思来。',
+   '成交。看来今天的安排要比原先有趣一些。',
+   '那便这么定了。我很期待，至少现在是。'
+  ],
+  decline:[
+   '也好，不必为了一个念头把日子安排得满满当当。',
+   '那就先搁着。好东西总不至于因为晚几天就失去趣味。',
+   '听你的。只是我可没保证过会一直惦记这件事。'
+  ],
+  incident:[
+   '生活偶尔就是这样，偏要在最不合时宜的时候添一点麻烦。',
+   '看来今天有件小事需要处理。别担心，还称不上什么大灾难。',
+   '出了点状况。不过，若每件事都顺顺当当，未免也太无趣了。'
+  ]
+ };
+ const pool=lines[kind]||[fallback];
+ let line=pool[Math.floor(Math.random()*pool.length)];
+ if(kind==='proposal'&&p.indirect>.65&&Math.random()<.45)line='我本来只是随口一提。不过，你若答应，我倒也不会反对。';
+ if(kind==='incident'&&p.composed>.65&&Math.random()<.4)line='不是什么大事。总有办法处理，何必现在就皱眉？';
+ return line||fallback;
+}
+function sharedGoalCatalog(){
+ return [
+  {id:'room',title:'把房间重新收拾一番',detail:'一起整理房间，让它更适合两个人生活。',target:3,unit:'次共同整理',action:'tidy'},
+  {id:'meal',title:'认真做几顿晚饭',detail:'不赶时间地一起准备两顿晚餐。',target:2,unit:'顿共同料理',action:'cookTogether'},
+  {id:'outing',title:'找一天出门走走',detail:'把手头的事情放一放，一起出门散步两次。',target:2,unit:'次共同出门',action:'walk'}
+ ];
+}
+function proposeSharedGoal(at=Date.now()){
+ if(s.sharedGoal?.status==='active')return;
+ if(at-s.lastSharedProposalAt<72*3600000)return;
+ if(s.events.some(e=>e.status==='open'&&e.type==='shared-goal-proposal'))return;
+ const pool=sharedGoalCatalog().filter(g=>g.id!==(s.sharedGoalHistory[0]?.id));
+ const g=pool[Math.floor(Math.random()*pool.length)];
+ if(!g)return;
+ s.lastSharedProposalAt=at;
+ addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');
+ const e=s.events[0];e.goalId=g.id;
+}
+function acceptSharedGoal(id,variant='normal'){
+ const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return;
+ const target=variant==='slow'?Math.max(1,g.target-1):g.target;
+ s.sharedGoal={...g,target,progress:0,status:'active',startedAt:Date.now(),variant};
+ say(ardayLine('accept','好，那就一起做吧。'));
+ remember('shared-goal','你们决定一起做：'+g.title,2);
+ addEvent('你们有了一项共同计划','你和阿尔决定一起完成「'+g.title+'」。','daily');
+}
+function advanceSharedGoal(action,at=Date.now()){
+ const g=s.sharedGoal;if(!g||g.status!=='active')return;
+ if(g.action!==action)return;
+ g.progress=Math.min(g.target,(g.progress||0)+1);
+ g.updatedAt=at;
+ if(g.progress>=g.target){
+  g.status='completed';g.completedAt=at;
+  s.sharedGoalHistory.unshift({id:g.id,title:g.title,completedAt:at});
+  s.sharedGoalHistory=s.sharedGoalHistory.slice(0,10);
+  change({friend:2,attach:1,fun:3});
+  addEvent('你们完成了一件共同计划', '「'+g.title+'」已经完成。那些零碎的时间，最后真的拼成了一件事。','daily');
+  remember('shared-goal','共同完成：'+g.title,3);
+  say('原来一起做一件事，最后会留下这样的感觉。');
+ }
+}
+const oldRelationForGoals=relation;
+relation=function(action){
+ oldRelationForGoals(action);
+ if(action==='tidy')advanceSharedGoal('tidy');
+ if(action==='walk')advanceSharedGoal('walk');
+};
+const oldCompleteCookingForGoals=completeCooking;
+completeCooking=function(ev){
+ const wasDone=!!ev?.completed;
+ oldCompleteCookingForGoals(ev);
+ if(!wasDone&&ev?.withPlayer&&ev?.completed)advanceSharedGoal('cookTogether');
+};
+function createSituationalEvent(at=Date.now()){
+ if(s.events.filter(e=>e.status==='open').length>=4)return;
+ if(at-s.lastRandomEventAt<22*3600000)return;
+ const hour=new Date(at).getHours();
+ if(hour<8||hour>22)return;
+ const candidates=[];
+ if(s.roomCondition<72)candidates.push({
+  id:'repair',title:'房间里出了点小状况',
+  detail:'有件日常用品似乎不太好用了。现在处理会花掉一些共同账户的钱，暂时放着也不是不行。',
+  type:'life-repair'
+ });
+ candidates.push({
+  id:'book',title:'旧书里夹着一张纸条',
+  detail:'阿尔整理书架时，从一本旧书里翻出一张折得很整齐的纸条。他似乎认得上面的字迹。',
+  type:'life-memory'
+ });
+ candidates.push({
+  id:'evening',title:'阿尔想临时改一改今晚的安排',
+  detail:'他看了看时间，忽然觉得原定的安排没那么重要了。比起各做各的，他似乎更想把今晚留给一点别的事情。',
+  type:'life-evening'
+ });
+ const e=candidates[Math.floor(Math.random()*candidates.length)];
+ addEvent(e.title,e.detail,e.type);s.events[0].situationId=e.id;s.lastRandomEventAt=at;
+}
+function generateDailyEvents(){
+ const today=s.calendar?.anchor||dayKey(dayAnchor());
+ if(s.dailyEventDate!==today){
+  s.dailyEventDate=today;
+  if(s.events.filter(e=>e.status==='open').length<3){
+   if(!has('唱片机')&&s.visits>0&&Math.random()<.28)addEvent('阿尔想听唱片','最近房间有点安静。我想听音乐，不过我们还没有唱片机。','daily');
+   else if(s.fun<35&&Math.random()<.45)addEvent('今天有点无聊','我最近做的事情都差不多。想不想一起试试新的活动？','daily');
+  }
+  if(Math.random()<.42)proposeSharedGoal(Date.now());
+  if(Math.random()<.3)createSituationalEvent(Date.now());
+ }
+}
+const oldEventChoicesForGoals=eventChoices;
+eventChoices=function(e){
+ if(e.type==='shared-goal-proposal'){
+  const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
+  if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
+  $('drawerTitle').textContent=e.title;
+  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="sg-yes">好，一起做</button><button class="choice" id="sg-slow">可以，但慢慢来</button><button class="choice" id="sg-later">改天再说</button><button class="choice" id="sg-no">我不想做</button></div>';
+  $('sg-yes').onclick=()=>{acceptSharedGoal(g.id);completeEvent(e,'同意共同计划');save();render();renderEvents()};
+  $('sg-slow').onclick=()=>{acceptSharedGoal(g.id,'slow');completeEvent(e,'同意，但降低计划规模');save();render();renderEvents()};
+  $('sg-later').onclick=()=>{say(ardayLine('decline'));completeEvent(e,'暂缓');s.lastSharedProposalAt=Date.now()-48*3600000;save();renderEvents()};
+  $('sg-no').onclick=()=>{say(ardayLine('decline'));if(s.sharedGoal)s.sharedGoal.status='declined';completeEvent(e,'拒绝共同计划');save();renderEvents()};
+  $('drawer').classList.add('open');return;
+ }
+ if(e.type==='life-repair'){
+  $('drawerTitle').textContent=e.title;
+  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="repair-now">现在修理 · ¥80</button><button class="choice" id="repair-later">先放着</button></div>';
+  $('repair-now').onclick=()=>{if(s.money>=80){s.money-=80;moneyRecord('shared','expense',80,'修理日常用品');s.roomCondition=clamp(s.roomCondition+12);say('修好了。你看，生活里的麻烦总有办法解决。');}else say('共同账户的钱不够。那就先等等吧。');completeEvent(e,'处理修理事项');save();render();renderEvents()};
+  $('repair-later').onclick=()=>{s.roomCondition=clamp(s.roomCondition-4);say('好吧，暂时不管它。希望它别挑更糟的时候罢工。');completeEvent(e,'暂缓修理');save();render();renderEvents()};
+  $('drawer').classList.add('open');return;
+ }
+ if(e.type==='life-memory'){
+  $('drawerTitle').textContent=e.title;
+  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="memory-ask">问问他纸条的来历</button><button class="choice" id="memory-keep">替他收起来</button><button class="choice" id="memory-leave">不多过问</button></div>';
+  $('memory-ask').onclick=()=>{say('你倒是很会挑时候。只是这件事，我还没想好要从哪里说起。');remember('old-memory','你问起那张旧纸条，阿尔没有立刻回答。',2);change({friend:1});completeEvent(e,'询问纸条来历') ;save();renderEvents()};
+  $('memory-keep').onclick=()=>{say('替我收着吧。说不定哪天，我会想起它。');remember('old-memory','你替阿尔收起了旧纸条。',2);completeEvent(e,'收起纸条');save();renderEvents()};
+  $('memory-leave').onclick=()=>{say('嗯。偶尔不知道一件事，也没什么不好。');completeEvent(e,'没有追问');save();renderEvents()};
+  $('drawer').classList.add('open');return;
+ }
+ if(e.type==='life-evening'){
+  $('drawerTitle').textContent=e.title;
+  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="evening-together">今晚一起待着</button><button class="choice" id="evening-free">各做各的</button><button class="choice" id="evening-ask">让他自己安排</button></div>';
+  $('evening-together').onclick=()=>{change({friend:1,attach:1,fun:2});say('我就知道你会答应。过来吧，今晚不必赶时间。');remember('evening','你们临时改变安排，共度了一个晚上。',2);completeEvent(e,'一起度过晚上');save();renderEvents()};
+  $('evening-free').onclick=()=>{say('也好。偶尔各自清静，反而更容易想念对方。');completeEvent(e,'各自安排');save();renderEvents()};
+  $('evening-ask').onclick=()=>{say('我？我当然有自己的安排。你不必操心。');completeEvent(e,'由阿尔自行安排');remember('autonomy','阿尔决定自己安排这个晚上。',1);save();renderEvents()};
+  $('drawer').classList.add('open');return;
+ }
+ oldEventChoicesForGoals(e);
+};
+const oldShowCollectionForGoals=showCollection;
+showCollection=function(){
+ ensurePersonalGoal();
+ const g=s.personalGoal;
+ const goalText=g&&g.status==='active'
+  ?'<section class="profile-section"><h4>阿尔自己的计划</h4><strong>'+g.title+'</strong><p>'+g.detail+'</p><p>进度：'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p></section>'
+  :'<section class="profile-section"><h4>阿尔自己的计划</h4><p>目前没有正在推进的个人目标。他会根据自己的生活和想法决定下一件想做的事。</p></section>';
+ const sg=s.sharedGoal;
+ const sharedText=sg?.status==='active'
+  ?'<section class="profile-section"><h4>你们的共同计划</h4><strong>'+sg.title+'</strong><p>'+sg.detail+'</p><p>进度：'+sg.progress+' / '+sg.target+' '+sg.unit+'</p><small>这是双方同意的计划，可以一起推进，也可以在相处中重新商量。</small></section>'
+  :'<section class="profile-section"><h4>你们的共同计划</h4><p>目前没有正在进行的共同计划。阿尔也会主动提出想和你一起做的事。</p></section>';
+ const log=(s.moneyLog||[]).slice(0,8).map(x=>'<p>'+new Date(x.at).toLocaleDateString('zh-CN')+' · '+(x.account==='shared'?'共同账户':'阿尔个人账户')+' · '+(x.kind==='income'?'+':'−')+'¥'+x.amount+' · '+x.note+'</p>').join('')||'<p>暂时没有账户记录。</p>';
+ $('drawerTitle').textContent='共同生活 · 目标与账户';
+ $('choices').innerHTML=
+  '<section class="profile-section"><h4>共同账户</h4><strong style="font-size:20px">¥'+s.money+'</strong><p>用于共同生活和日常开销。未付共同开销：¥'+(s.unpaidBill||0)+'</p></section>'+
+  '<section class="profile-section"><h4>阿尔的个人账户</h4><strong style="font-size:20px">¥'+s.personalMoney+'</strong><p>工作报酬进入这里。阿尔可以自行储蓄或购买个人物品。</p><p>个人物品：'+(s.personalItems.length?s.personalItems.join('、'):'暂无')+'</p></section>'+
+  goalText+sharedText+
+  '<section class="profile-section"><h4>近期账户记录</h4>'+log+'</section>'+
+  '<div class="calendar-actions"><button id="close-project">关闭</button></div>';
+ $('close-project').onclick=()=>$('drawer').classList.remove('open');
+ $('drawer').classList.add('open');
+};
+const oldProcessActivityForSharedGoal=processActivityAt;
+processActivityAt=function(value){
+ const before=s.lastUnifiedHourKey;
+ oldProcessActivityForSharedGoal(value);
+ if(s.lastUnifiedHourKey!==before&&s.currentActivity==='tidy')advanceSharedGoal('tidy',value);
+};
+
 applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
