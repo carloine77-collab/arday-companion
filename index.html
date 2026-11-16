@@ -840,6 +840,171 @@ function tick(){
  if($('stage').classList.contains('calendar-mode'))renderCalendar();
 }
 
+
+// === Unified hourly simulation and offline replay (v2) ===
+// Every simulated hour is processed once, whether the page is open or closed.
+function dayAnchorAt(value){
+ const d=new Date(value);
+ if(d.getHours()<6)d.setDate(d.getDate()-1);
+ d.setHours(0,0,0,0);
+ return d;
+}
+function keyAt(value){return dayKey(dayAnchorAt(value))}
+function ensureScheduleAt(value){
+ const key=keyAt(value);
+ if(!s.calendar)s.calendar={anchor:key,days:{},version:4};
+ s.calendar.days=s.calendar.days||{};
+ if((s.calendar.version||0)<4){
+  s.calendar.anchor=key;
+  s.calendar.days[key]=buildDay(key);
+  s.calendar.version=4;
+ }
+ if(s.calendar.anchor!==key){
+  s.calendar.anchor=key;
+  Object.keys(s.calendar.days).forEach(k=>{if(k<key)delete s.calendar.days[k]});
+  if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
+  for(let i=1;i<=2;i++){
+   const future=dayKey(plusDays(dayAnchorAt(value),i));
+   if(!s.calendar.days[future])s.calendar.days[future]=[];
+  }
+  addEvent('新的一天','阿尔已经开始安排新一天的生活。','daily');
+ }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
+ return key;
+}
+function writeBlockForKey(key,start,end,block){
+ const day=s.calendar.days[key]||(s.calendar.days[key]=[]);
+ const next=[];
+ day.forEach(ev=>{
+  if(ev.end<=start||ev.start>=end){next.push(ev);return}
+  if(ev.start<start)next.push({...ev,end:start});
+  if(ev.end>end)next.push({...ev,start:end});
+ });
+ next.push({...block,start,end});
+ next.sort((a,b)=>a.start-b.start);
+ s.calendar.days[key]=next;
+}
+function chooseAutonomousActivity(){
+ const options=['rest','eat','wash','read','music','tidy','write','walk'];
+ const score={
+  rest:Math.max(0,58-s.energy)*1.55,
+  eat:Math.max(0,58-s.hunger)*1.8,
+  wash:Math.max(0,55-s.clean)*1.25,
+  read:Math.max(0,58-s.fun)*.8,
+  music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,
+  tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,
+  write:has('书桌')?13:0,
+  walk:s.fun<60?8:2
+ };
+ return options.filter(a=>(a!=='music'||has('唱片机'))&&(a!=='write'||has('书桌')))
+  .map(a=>({a,v:score[a]+Math.random()*4}))
+  .sort((x,y)=>y.v-x.v)[0]?.a||'rest';
+}
+function settleWorkAt(key,hour){
+ if(!s.pendingWork||s.pendingWork.paid)return;
+ const p=s.pendingWork;
+ if(key>p.day||(key===p.day&&hour+1>=p.end)){
+  p.paid=true;s.money+=p.pay;
+  addEvent('工作报酬到账','阿尔完成了工作，获得 ¥'+p.pay+'。','daily');
+  remember('work','完成工作，收入 ¥'+p.pay,2);
+ }
+}
+function processActivityAt(value){
+ const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d);
+ const hourKey=key+'-'+hour;
+ if(s.lastUnifiedHourKey===hourKey)return;
+ // Baseline needs change once per simulated hour.
+ change({energy:-.45,hunger:-.8,clean:-.25,fun:-.3});
+ s.roomCondition=clamp(s.roomCondition-.012);
+ let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
+ let activity=normalizeActivity(ev?.activity||'idle');
+ if(!ev||activity==='idle'){
+  activity=chooseAutonomousActivity();
+  const meta=activityMeta[activity]||{title:'自己的时间'};
+  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true});
+  ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
+ }
+ const meta=activityMeta[activity];
+ if(meta){
+  change(meta.effect||{});
+  if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
+  if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
+  if(activity==='read')s.preferences.reading=(s.preferences.reading||0)+1;
+  setSceneActivity(activity,false);
+ }
+ settleWorkAt(key,hour);
+ if(activity==='project'&&s.project?.status==='active'){
+  s.project.progress=(s.project.progress||0)+1;
+  if(s.project.progress>=3){
+   s.project.status='done';s.furniture.push('房间纪念摆件');
+   change({friend:2,fun:6});
+   addEvent('房间改造完成','房间改造计划已经完成。','long');
+  }
+ }
+ s.lastUnifiedHourKey=hourKey;
+ s.lastHourKey=hourKey;
+ s.currentActivity=activity;
+ s.activityLog=s.activityLog||[];
+ s.activityLog.push({activity,key,hour,at:d.getTime()});
+ if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
+}
+function applyOffline(){
+ const now=Date.now(),last=Number(s.lastTick||s.last||now);
+ if(!Number.isFinite(last)||last<=0){s.lastTick=now;return}
+ const first=Math.floor(last/3600000)+1;
+ const final=Math.floor(now/3600000);
+ // Replay at most 7 days. For longer absences, retain the most recent week
+ // rather than attempting an unbounded loop on a mobile browser.
+ const start=Math.max(first,final-167);
+ for(let t=start;t<=final;t++)processActivityAt(t*3600000);
+ s.lastTick=now;
+ save();
+}
+function tick(){
+ applyOffline();
+ const now=new Date(),key=keyAt(now),hourKey=key+'-'+now.getHours();
+ // On a fresh install or when reopening within the same hour, initialize the
+ // current activity once. Replay above handles all completed intervening hours.
+ if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now.getTime());
+ generateDailyEvents();
+ render();
+ if($('stage').classList.contains('calendar-mode'))renderCalendar();
+ save();
+}
+function doAutonomous(a,announce=true){
+ const activity=normalizeActivity(a);
+ const meta=activityMeta[activity];
+ if(!meta)return;
+ change(meta.effect||{});
+ if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
+ setSceneActivity(activity,false);
+ if(announce)say('我去'+meta.title+'了。');
+ s.currentActivity=activity;
+ save();render();
+}
+function autonomousAction(){
+ const now=new Date(),key=ensureScheduleAt(now),hour=now.getHours();
+ let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
+ if(!ev){
+  const activity=chooseAutonomousActivity(),meta=activityMeta[activity];
+  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true});
+  ev={activity,title:meta.title};
+ }
+ setSceneActivity(ev.activity,false);
+ return ev;
+}
+function relation(action){
+ // Repeating an activity is not relationship fatigue. Boredom here means
+ // emotional distance in the relationship and changes only through neglect
+ // or relational conflict, not through repeated music, reading or games.
+ if(['listen','tea','walk','read','game','music','food'].includes(action)){
+  s.friend=clamp(s.friend+1);
+  s.attach=clamp(s.attach+.5);
+  remember('shared',action);
+ }else if(action==='ignore'){
+  s.attach=clamp(s.attach-1);
+ }
+}
+
 })();
 </script>
 </body></html>
