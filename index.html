@@ -266,9 +266,9 @@ function eventChoicesLegacy(e){
    else if(i===1){say('好，那就先不买。我也不是非要现在拥有。');s.bored=clamp(s.bored+1)}
    else{say('二手市场听起来不错。我想找找看。');s.preferences.market=(s.preferences.market||0)+1}
   }else if(e.type==='long'){
-   if(i===0){s.project.status='active';say('好，那我们分几次慢慢完成。')}
-   else if(i===1){say('没关系，等你觉得合适的时候再说。')}
-   else{say('这个主意也可以。我们可以先从最需要的地方开始。');s.preferences.design=(s.preferences.design||0)+1}
+   if(i===0){say('好。让它慢慢融入日常，不必急着安排什么。');remember('shared',e.title,1)}
+   else if(i===1){say('当然，不急。东西已经在这里了，什么时候用都可以。')}
+   else{say('可以。等你有了更具体的想法，我们再调整。')}
   }else{
    if(i===0){s.friend=clamp(s.friend+2);s.attach=clamp(s.attach+1);say('好啊，和你一起做会更有意思。');remember('shared',e.title,2)}
    else if(i===1){say('那我自己来。你也可以忙自己的事情。')}
@@ -412,8 +412,7 @@ function buildDay(key){
  add(p.wake+1,p.wake+2,'早餐','routine','eat');
  if(p.wake+2<12)add(p.wake+2,Math.min(12,p.wake+4),has('书桌')?'阅读 / 写作':'阅读与个人时间','personal',has('书桌')?'write':'read');
  add(12,13,'午餐','routine','eat');
- if(s.project?.status==='active')add(14,15,s.project.task,'project','project');
- else if(s.roomCondition<65)add(14,15,'整理和维护房间','personal','tidy');
+  if(s.roomCondition<65)add(14,15,'整理和维护房间','personal','tidy');
  else add(14,15,has('唱片机')?'听音乐或阅读':'自由安排','personal',has('唱片机')?'music':'read');
  add(15,16,'自由时间','free','idle');
  add(16,17,has('书桌')?'写作 / 整理资料':'整理房间','personal',has('书桌')?'write':'tidy');
@@ -584,7 +583,6 @@ function settleWorkAt(key,hour){
  const p=s.pendingWork;
  if(key>p.day||(key===p.day&&hour+1>=p.end)){
   p.paid=true;const pay=Math.max(0,Number(p.pay)||0);s.personalMoney+=pay;
-  s.goalStats.jobs=(s.goalStats.jobs||0)+1;
   moneyRecord('personal','income',pay,'完成工作委托',Date.now());
   addEvent('工作报酬到账','阿尔完成工作，获得个人收入 ¥'+pay+'。','daily');
   remember('work','完成工作，个人收入 ¥'+pay,2);return true;
