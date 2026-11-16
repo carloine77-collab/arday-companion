@@ -85,6 +85,7 @@
 
 
 
+
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0}};
@@ -122,6 +123,7 @@ function buildDay(key){
 function ensureSchedule(){
  const key=dayKey(dayAnchor());
  if(!s.calendar)s.calendar={anchor:key,days:{}};
+ if((s.calendar.version||0)<2){s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=2;}
  if(s.calendar.anchor!==key){
   s.calendar.anchor=key;
   Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
@@ -408,6 +410,7 @@ applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar()
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
 })();
+
 
 
 
