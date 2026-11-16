@@ -91,7 +91,7 @@
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:'',lastBillWeek:''};
 let s={...base};try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.personality=s.personality||{hidden:[['节俭','需要独处','好奇心强'][Math.floor(Math.random()*3)]]};s.personality.hidden=Array.isArray(s.personality.hidden)?s.personality.hidden:[s.personality.hidden||'节俭'];s.revealedTraits=s.revealedTraits||{};
+s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.personality=s.personality||{hidden:[['节俭','需要独处','好奇心强'][Math.floor(Math.random()*3)]]};s.personality.hidden=Array.isArray(s.personality.hidden)?s.personality.hidden:[s.personality.hidden||'节俭'];s.revealedTraits=s.revealedTraits||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+s.roomCondition+'%';}
@@ -434,10 +434,10 @@ function ensureSchedule(){
  }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
  for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
  let week=Math.floor(dayAnchor().getTime()/(7*86400000)).toString();
- if(s.lastBillWeek!==week){s.lastBillWeek=week;addEvent('本周水电与日常开销','共同生活的基础开销为 ¥80。可以现在支付，也可以暂时记账。','bill')}
+ if(!s.lastBillWeek){s.lastBillWeek=week}else if(s.lastBillWeek!==week){s.lastBillWeek=week;addEvent('本周水电与日常开销','共同生活的基础开销为 ¥80。可以现在支付，也可以暂时记账。','bill')}
 }
 function utility(a){
- const u={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,write:has('书桌')?13:0,project:s.project?.status==='active'?24:0,walk:s.fun<60?8:2,idle:3};
+ const u={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,write:has('书桌')?13:0,project:s.project?.status==='active'?24:0,walk:s.fun<60?8:2,idle:3};
  if(s.personality.hidden.includes('需要独处')&&['read','write','rest'].includes(a))u[a]+=5;
  if(s.personality.hidden.includes('好奇心强')&&['music','walk','write'].includes(a))u[a]+=4;
  return u[a]||0;
