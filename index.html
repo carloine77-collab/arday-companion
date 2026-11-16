@@ -286,7 +286,7 @@ function renderEvents(){
 }
 
 
-function revealTrait(trait){s.revealedTraits=s.revealedTraits||[];if(!s.revealedTraits.includes(trait))s.revealedTraits.push(trait)}
+
 
 
 
@@ -298,14 +298,14 @@ function slotClick(di,h){
  $('drawer').classList.add('open');
  if(ev){
   $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
-  $('choices').innerHTML='<div class="calendar-note">'+(ev.kind==='proposal'?'这是你提出的共同安排。':'这是阿尔自己的安排。你可以邀请他一起，或商量调整。')+'</div><div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">让他自己安排</button><button id="return">返回日程</button></div>';
+  $('choices').innerHTML='<div class="calendar-note">'+(ev.kind==='proposal'?'这是你提出的共同安排。':'这是阿尔自己的安排。你可以邀请他一起，或商量调整。')+'</div><div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">让他自己安排</button><button id="return-existing">返回日程</button></div>';
   $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.activity!=='sleep'&&ev.kind!=='work'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;change({friend:2,attach:1});remember('shared','一起参与：'+ev.title,2);say('好啊，一起做也不错。');}else if(ev.activity==='sleep'||ev.title.includes('睡眠'))say('现在是我的睡眠时间。我不会为了临时邀请打乱作息。我们可以约在明天醒来以后。');else if(ev.kind==='work')say('我已经答应了这份工作，不能临时把它放下。等结束以后再一起安排吧。');else if(ev.kind==='routine')say('这是我固定的生活安排。我愿意商量，但不想直接取消它。');else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
   $('move').onclick=()=>{let target=prompt('想调整到几点？请输入 0–23 之间的整点。');let n=Number(target);if(!Number.isInteger(n)||n<0||n>23||eventAt(key,n)){toast('这个时间不可用');return}ev.start=n;ev.end=n+1;s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')};
   $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'){say('这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
-  $('return').onclick=()=>{$('drawer').classList.remove('open')};return;
+  $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
- $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+[['一起吃点东西','🥐'],['散步','🌿'],['听音乐','♫'],['一起看书','📖'],['玩游戏','🎲'],['自由相处','☁']].map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x[1]+'</span>'+x[0]+'</button>').join('')+'</div><div class="calendar-actions"><button id="return">返回日程</button></div>';
+ $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+[['一起吃点东西','🥐'],['散步','🌿'],['听音乐','♫'],['一起看书','📖'],['玩游戏','🎲'],['自由相处','☁']].map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x[1]+'</span>'+x[0]+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
  $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
   let i=+b.dataset.p,names=['一起吃点东西','散步','听音乐','一起看书','玩游戏','自由相处'],pref=['food','walk','music','reading','game','company'][i],score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(i===0&&s.hunger<40?12:0)+(i===2&&s.fun<40?10:0);
   let accepted=score>12+(di*1.5);
@@ -313,7 +313,7 @@ function slotClick(di,h){
   else{change({bored:1});s.rejections=(s.rejections||0)+1;if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];say(['这个时间我不太想这样安排。我们换个时间，或者各自安排也可以。','我知道你想和我一起，不过我现在确实不想这么做。希望你别把拒绝当成对你的否定。','这次我想说得明确一点：不。我有自己的计划。'][Math.min(2,s.rejections-1)]);}
   save();render();renderCalendar();$('drawer').classList.remove('open');toast(accepted?'阿尔接受了邀请':'阿尔拒绝了这次邀请 · 可以换个时间或活动');
  });
- $('return').onclick=()=>$('drawer').classList.remove('open');
+ $('return-empty').onclick=()=>$('drawer').classList.remove('open');
 }
 
 function initScene(){let hour=new Date().getHours();$('sun').style.opacity=hour<6||hour>20?'.12':hour<9||hour>17?'.55':'1';}
@@ -346,13 +346,7 @@ document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>
 
 
 
-function applyPose(a){
- let p=$('person');if(!p)return;p.classList.remove('sit','walk','wave');
- if(['rest','read','music','tea','food','sleep'].includes(a))p.classList.add('sit');
- else if(['walk','work','tidy','wash','write','project'].includes(a))p.classList.add('walk');
- let names={rest:'在沙发上休息',read:'正在阅读',music:'正在听音乐',food:'正在吃东西',sleep:'正在睡觉',walk:'刚出去散步',work:'正在工作',tidy:'正在整理房间',wash:'洗漱中',write:'在书桌前写东西',project:'正在推进房间改造'};
- if($('roomLabel'))$('roomLabel').textContent='HOME · '+(names[a]||'自己的时间');
-}
+
 
 
 
@@ -436,10 +430,7 @@ function ensureSchedule(){
  }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
  for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
 }
-function utility(a){
- const u={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,write:has('书桌')?13:0,project:s.project?.status==='active'?24:0,walk:s.fun<60?8:2,idle:3};
- return u[a]||0;
-}
+
 function renderCalendar(){
  ensureSchedule();const anchor=dayAnchor(),d=plusDays(anchor,selectedCalendarDay),key=dayKey(d),now=new Date();
  const labels=['今天','明天','后天'];
@@ -452,11 +443,20 @@ function renderCalendar(){
  $('calendarContent').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(+b.dataset.day,+b.dataset.hour));
 }
 function renderProfile(){
+ const description=s.personality?.description||'';
+ const esc=x=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  $('drawerTitle').textContent='人物档案 · Arday';
- $('choices').innerHTML='<div class="profile-card"><div class="profile-avatar">A</div><div><strong>Arday · 阿尔</strong><p>一个与你共同生活、也拥有自己生活的人。</p></div></div>'+
- '<section class="profile-section"><h4>性格设定</h4><p>目前暂不预设性格标签。阿尔的性格由你来设计；在你完成设定之前，游戏只根据生活需求、经历和环境决定他的行为。</p><div class="trait-list"><span class="trait unknown">尚未设置</span></div></section>'+
- '<section class="profile-section"><h4>当前生活</h4><p>当前活动：'+(s.currentActivity||'自己的时间')+' · 房间维护：'+s.roomCondition+'% · 生活资金：¥'+s.money+'</p></section>'+
- '<section class="profile-section"><h4>共同生活记录</h4><p>共同记忆 '+s.memories.length+' 条 · 拒绝与边界 '+(s.rejections||0)+' 次 · 未付账单 ¥'+(s.unpaidBill||0)+'</p><p>'+(s.memories.slice(-6).map(m=>m.text).join('；')||'你们还没有留下特别的共同记忆。')+'</p></section>';
+ $('choices').innerHTML=
+  '<div class="profile-card"><div class="profile-avatar">A</div><div><strong>Arday · 阿尔</strong><p>他有自己的生活、心思和打算。你所了解的他，也会随着相处慢慢改变。</p></div></div>'+
+  '<section class="profile-section"><h4>性格设定</h4><p>由你来定义阿尔。可以写他的脾气、处事方式、欲望、说话习惯，以及他在不同情境下可能做出的选择。不必填写性格标签。</p><textarea id="personalityDescription" maxlength="1800" rows="7" placeholder="写下你心目中的阿尔……">'+esc(description)+'</textarea><button class="choice" id="savePersonality">保存设定</button><small>设定会影响部分自主提议和事件文案；行为决策仍会结合生活状态与实际安排。</small></section>'+
+  '<section class="profile-section"><h4>当前生活</h4><p>当前活动：'+(s.currentActivity||'自己的时间')+' · 房间维护：'+s.roomCondition+'% · 共同账户：¥'+s.money+'</p></section>'+
+  '<section class="profile-section"><h4>相处记录</h4><p>生活记录 '+s.memories.length+' 条 · 拒绝与边界 '+(s.rejections||0)+' 次 · 未付账单 ¥'+(s.unpaidBill||0)+'</p><p>'+(s.memories.slice(-6).map(m=>esc(m.text)).join('；')||'你们还没有留下特别的记录。')+'</p></section>';
+ $('savePersonality').onclick=()=>{
+  s.personality=s.personality||{hidden:[]};
+  s.personality.description=$('personalityDescription').value.trim();
+  save();say('我记下了。至于是不是完全照你写的那样行事，还得看具体情形。');
+  renderProfile();
+ };
  $('drawer').classList.add('open');
 }
 function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open');$('stage').classList.add('calendar-mode');renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
@@ -501,42 +501,10 @@ const activityMeta = {
  cookTogether:{title:'一起做饭',location:'kitchen',pose:'walk',effect:{energy:-2,fun:2}}
 };
 
-function scheduleForToday(){
- ensureSchedule();
- const k=dayKey(dayAnchor());
- if(!s.calendar.days[k])s.calendar.days[k]=[];
- return {key:k,day:s.calendar.days[k]};
-}
-function writeScheduleBlock(start,end,block){
- const {day}=scheduleForToday();
- const next=[];
- day.forEach(ev=>{
-  if(ev.end<=start||ev.start>=end){next.push(ev);return}
-  if(ev.start<start)next.push({...ev,end:start});
-  if(ev.end>end)next.push({...ev,start:end});
- });
- next.push({...block,start,end});
- next.sort((a,b)=>a.start-b.start);
- s.calendar.days[dayKey(dayAnchor())]=next;
-}
 
-function applyActivityHour(activity){
- const a=normalizeActivity(activity),meta=activityMeta[a];
- if(!meta)return;
- change(meta.effect||{});
- if(a==='tidy')s.roomCondition=clamp(s.roomCondition+3);
- if(a==='music')s.preferences.music=(s.preferences.music||0)+1;
- if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;
- if(a==='work'&&s.pendingWork&&!s.pendingWork.paid){
-  const k=dayKey(dayAnchor()),h=new Date().getHours();
-  if(k>s.pendingWork.day||(k===s.pendingWork.day&&h+1>=s.pendingWork.end)){
-   s.pendingWork.paid=true;s.money+=s.pendingWork.pay;
-   addEvent('工作报酬到账','完成工作，获得 ¥'+s.pendingWork.pay+'。','daily');
-   remember('work','工作结算：¥'+s.pendingWork.pay,2);
-  }
- }
- setSceneActivity(a,false);
-}
+
+
+
 function proposeActivityNow(action){
  const a=normalizeActivity(action),now=new Date(),hour=now.getHours(),key=keyAt(now),ev=eventAt(key,hour);
  if(a==='idle')return false;
@@ -546,6 +514,7 @@ function proposeActivityNow(action){
  if(a==='music'&&!has('唱片机')){say('没有唱片机，今天恐怕听不了。');return false}
  if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
  const survival={eat:s.hunger<38,rest:s.energy<28,wash:s.clean<25};
+  if(a==='food'&&!s.readyMeals?.length&&!s.items.includes('点心')){say('家里暂时没有现成的食物。要不要先去厨房准备一点？');return false;}
  let accept;
  if(a in survival&&survival[a])accept=true;
  else{let probability=.67;if(s.hate>55)probability-=.12;if(s.friend>70&&s.hate<15)probability+=.06;if(a==='walk'&&s.energy<35)probability-=.12;accept=Math.random()<probability}
@@ -649,28 +618,8 @@ function tick(){
  if($('stage').classList.contains('calendar-mode'))renderCalendar();
  save();
 }
-function doAutonomous(a,announce=true){
- const activity=normalizeActivity(a);
- const meta=activityMeta[activity];
- if(!meta)return;
- change(meta.effect||{});
- if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
- setSceneActivity(activity,false);
- if(announce)say('我去'+meta.title+'了。');
- s.currentActivity=activity;
- save();render();
-}
-function autonomousAction(){
- const now=new Date(),key=ensureScheduleAt(now),hour=now.getHours();
- let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
- if(!ev){
-  const activity=chooseAutonomousActivity(),meta=activityMeta[activity];
-  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true});
-  ev={activity,title:meta.title};
- }
- setSceneActivity(ev.activity,false);
- return ev;
-}
+
+
 function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
@@ -720,7 +669,7 @@ function processActivityAt(value){
   if(ev.completed&&sessionStart&&ev.withPlayer)advanceSharedGoal('cookTogether',d.getTime());
  }else if(meta){
   const effects={...(meta.effect||{})};
-  if(activity==='eat'){const meal=consumeMeal();if(meal)delete effects.hunger}
+  if(activity==='eat'||activity==='food'){consumeMeal();delete effects.hunger}
   change(effects);
   if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
   if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
@@ -761,7 +710,7 @@ $('sceneSwitch').addEventListener('click',()=>{if($('stage').classList.contains(
 s.personalMoney=Number.isFinite(s.personalMoney)?Math.max(0,s.personalMoney):0;
 s.personalItems=s.personalItems||[];
 s.moneyLog=s.moneyLog||[];
-s.goalStats=s.goalStats||{read:0,write:0,tidy:0,jobs:0};
+
 s.personalGoalHistory=s.personalGoalHistory||[];
 function moneyRecord(account,kind,amount,note,at=Date.now()){
  s.moneyLog.unshift({account,kind,amount,note,at});
@@ -822,24 +771,7 @@ buyIngredient=function(id,label,cost){
  const before=s.money;originalBuyIngredient(id,label,cost);
  const spent=before-s.money;if(spent>0)moneyRecord('shared','expense',spent,'购买食材：'+label);
 };
-function showCollection(){
- ensurePersonalGoal();
- const g=s.personalGoal;
- const goalText=g&&g.status==='active'
-  ?'<section class="profile-section"><h4>阿尔自己的计划</h4><strong>'+g.title+'</strong><p>'+g.detail+'</p><p>进度：'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p><small>这是阿尔自己决定的个人目标。你可以了解进展，但不能替他决定是否继续。</small></section>'
-  :'<section class="profile-section"><h4>阿尔自己的计划</h4><p>目前没有正在推进的个人目标。他会根据自己的生活和想法决定下一件想做的事。</p></section>';
- const log=s.moneyLog.slice(0,8).map(x=>'<p>'+new Date(x.at).toLocaleDateString('zh-CN')+' · '+(x.account==='shared'?'共同账户':'阿尔个人账户')+' · '+(x.kind==='income'?'+':'−')+'¥'+x.amount+' · '+x.note+'</p>').join('')||'<p>暂时没有账户记录。</p>';
- $('drawerTitle').textContent='共同生活 · 个人目标与账户';
- $('choices').innerHTML=
-  '<section class="profile-section"><h4>共同账户</h4><strong style="font-size:20px">¥'+s.money+'</strong><p>用于共同生活、食材、家具和公共开销。</p></section>'+
-  '<section class="profile-section"><h4>阿尔的个人账户</h4><strong style="font-size:20px">¥'+s.personalMoney+'</strong><p>工作报酬进入这里。阿尔可以自行储蓄或购买个人物品，不会自动转入共同账户。</p><p>个人物品：'+(s.personalItems.length?s.personalItems.join('、'):'暂无')+'</p></section>'+
-  goalText+
-  '<section class="profile-section"><h4>近期账户记录</h4>'+log+'</section>'+
-  '<section class="profile-section"><h4>共同物品</h4><p>'+s.items.concat(s.furniture).join('、')+'</p><p>未付共同开销：¥'+(s.unpaidBill||0)+'</p></section>'+
-  '<div class="calendar-actions"><button id="close-project">关闭</button></div>';
- $('close-project').onclick=()=>$('drawer').classList.remove('open');
- $('drawer').classList.add('open');
-}
+
 function eventChoices(e){
  if(e.type!=='bill')return eventChoicesLegacy(e);
  $('drawerTitle').textContent=e.title;
@@ -1014,8 +946,7 @@ eventChoices=function(e){
  }
  oldEventChoicesForGoals(e);
 };
-const oldShowCollectionForGoals=showCollection;
-showCollection=function(){
+function showCollection(){
  ensurePersonalGoal();
  const g=s.personalGoal;
  const goalText=g&&g.status==='active'
@@ -1032,8 +963,8 @@ showCollection=function(){
   '<section class="profile-section"><h4>阿尔的个人账户</h4><strong style="font-size:20px">¥'+s.personalMoney+'</strong><p>工作报酬进入这里。阿尔可以自行储蓄或购买个人物品。</p><p>个人物品：'+(s.personalItems.length?s.personalItems.join('、'):'暂无')+'</p></section>'+
   goalText+sharedText+
   '<section class="profile-section"><h4>近期账户记录</h4>'+log+'</section>'+
-  '<div class="calendar-actions"><button id="close-project">关闭</button></div>';
- $('close-project').onclick=()=>$('drawer').classList.remove('open');
+  '<div class="calendar-actions"><button id="close-collection">关闭</button></div>';
+ $('close-collection').onclick=()=>$('drawer').classList.remove('open');
  $('drawer').classList.add('open');
 };
 
