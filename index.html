@@ -370,7 +370,7 @@ function tick(){
  if(delta>0){change({energy:-delta*2.1,hunger:-delta*1.3,clean:-delta*.55,fun:-delta*.8,bored:delta*.16});s.lastTick=now;}
  ensureSchedule();
  let key=dayKey(dayAnchor()),hour=new Date().getHours(),ev=eventAt(key,hour);
- if(s.pendingWork&&!s.pendingWork.paid&&(key>s.pendingWork.day||(key===s.pendingWork.day&&hour>=s.pendingWork.end))){s.pendingWork.paid=true;s.money+=s.pendingWork.pay;addEvent('临时工作结算','完成了两小时的文案整理，获得 ¥'+s.pendingWork.pay+'。','daily');say('工作结束了，拿到 ¥'+s.pendingWork.pay。总算可以喘口气。');remember('work','完成临时工作，收入 ¥'+s.pendingWork.pay,2);save();}
+ if(s.pendingWork&&!s.pendingWork.paid&&(key>s.pendingWork.day||(key===s.pendingWork.day&&hour>=s.pendingWork.end))){s.pendingWork.paid=true;s.money+=s.pendingWork.pay;addEvent('临时工作结算','完成了两小时的文案整理，获得 ¥'+s.pendingWork.pay+'。','daily');say('工作结束了，拿到 ¥'+s.pendingWork.pay+'。总算可以喘口气。');remember('work','完成临时工作，收入 ¥'+s.pendingWork.pay,2);save();}
  if(now-(s.lastAutonomy||0)>25*60*1000){
   let a;
   if(ev){a=ev.activity||'idle';if(a!=='idle'&&a!=='project')doAutonomous(a,false);}
