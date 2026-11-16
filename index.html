@@ -80,13 +80,52 @@
 }
 @media(max-width:430px){.play-area{grid-template-columns:104px minmax(0,1fr)}.top-action{padding:0 6px}.identity .date.cash,.identity #upkeep{display:none}}
 .scene-switch{position:absolute;right:12px;top:12px;z-index:9;min-height:43px;padding:0 14px;border:1px solid #dfcdb4;border-radius:12px;background:#fff9edee;font-size:12px;font-weight:700}.kitchen-scene{display:none;position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#eee3d1 0 58%,#c9b293 58% 100%)}.kitchen-wall{position:absolute;inset:0 0 41%;background:linear-gradient(180deg,#f0e5d4,#e6d8c5);border-bottom:7px solid #bda487}.kitchen-floor{position:absolute;left:0;right:0;bottom:0;height:42%;background:repeating-linear-gradient(0deg,#c9b393 0 2px,#d8c5a8 2px 42px)}.kitchen-window{position:absolute;left:11%;top:9%;width:24%;height:30%;border:8px solid #9d8065;background:linear-gradient(145deg,#b9d0c0,#f2d9a9)}.kitchen-counter{position:absolute;left:8%;right:8%;bottom:34%;height:18%;background:linear-gradient(180deg,#e8dfd1 0 18%,#9c8065 19% 28%,#c6a783 29%);border-radius:8px;box-shadow:0 8px 0 #987a5b}.kitchen-cabinet{position:absolute;left:9%;right:9%;bottom:12%;height:22%;background:repeating-linear-gradient(90deg,#b38e68 0 31%,#987552 32% 33%);border:4px solid #8d7053}.kitchen-fridge{position:absolute;right:10%;top:12%;width:16%;height:40%;border:5px solid #b7b2a7;border-radius:9px;background:linear-gradient(90deg,#e9e6dc,#faf8f0,#dedbd2);display:flex;align-items:center;justify-content:center;font-size:35px;color:#a49b8e;flex-direction:column}.kitchen-fridge small,.kitchen-stove small,.kitchen-sink small{font-size:10px;color:#756451}.kitchen-stove{position:absolute;left:41%;bottom:48%;width:24%;height:13%;border:5px solid #786b5b;border-radius:8px;background:#4f4a43;display:flex;align-items:center;justify-content:space-evenly;color:#e8c18a;font-size:23px}.kitchen-stove small{position:absolute;bottom:-20px;color:#fff8ec}.kitchen-sink{position:absolute;left:13%;bottom:48%;width:20%;height:12%;border:5px solid #8e7a63;border-radius:8px;background:#9eabb0;display:grid;place-items:center;font-size:26px;color:#e9f1ed}.kitchen-sink small{position:absolute;bottom:-19px;color:#fff8ec}.kitchen-shelf{position:absolute;left:43%;top:17%;font-size:25px;background:#b48b63;padding:7px 15px;border-radius:4px}.kitchen-person{display:none;left:55%;bottom:10%;transform:translateX(-50%) scale(.9)}.stage.kitchen-mode>.scene-bg,.stage.kitchen-mode>.sunlight,.stage.kitchen-mode>.room{display:none}.stage.kitchen-mode .kitchen-scene,.stage.kitchen-mode .kitchen-person{display:block}.stage.kitchen-mode .room-label{color:#fff8ed;text-shadow:0 1px 3px #5b4935}@media(max-width:700px){.scene-switch{right:7px;top:7px;min-height:42px;padding:0 10px;font-size:11px}.kitchen-person{transform:translateX(-50%) scale(.76)}}
+
+/* Revised iPad-friendly header and bottom controls */
+.top{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;min-width:0}
+.identity-line{display:flex;align-items:center;gap:14px;min-width:0}
+.identity{display:flex;align-items:center;gap:8px;white-space:nowrap;border:0;background:transparent;padding:0;text-align:left;min-width:0}
+.identity-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.identity-meta span{padding:5px 9px;border:1px solid var(--line);border-radius:9px;background:#fff9efb8}
+.top .chat{width:100%;height:43px}
+.bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.bottom-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.bottom-actions .top-action{min-height:44px;padding:0 11px}
+.scene-switch{z-index:30;pointer-events:auto}
+.kitchen-scene{pointer-events:none}
+@media(max-width:700px){
+ .top{grid-template-columns:minmax(0,1fr);gap:6px}
+ .identity{display:flex}
+ .identity-line{gap:9px}
+ .identity .name{font-size:16px}
+ .identity-meta{gap:5px;font-size:10px}
+ .identity-meta span{padding:5px 7px}
+ .bottom{gap:5px}
+ .toolbar{gap:4px}
+ .tool{min-width:55px}
+ .bottom-actions{gap:4px}
+ .bottom-actions .top-action{min-height:42px;padding:0 8px;font-size:10px;white-space:nowrap}
+ .top .chat{height:43px}
+}
+@media(max-width:390px){
+ .identity .mark{width:30px;height:30px}
+ .identity .name{font-size:14px}
+ .identity-meta{font-size:9px}
+ .identity-meta span{padding:4px 5px}
+ .tool{min-width:49px;font-size:10px}
+ .bottom-actions .top-action{padding:0 6px;font-size:9px}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
 <header class="top">
- <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div><div class="date cash" id="cash">¥3000</div><div class="date" id="upkeep">房间维护 92%</div></div></button>
- <div class="top-actions"><button class="top-action" id="recentEvents">✦ 最近发生的事 <span id="eventCount"></span></button><button class="top-action decorate" id="decorate">✧ 装修</button></div>
+ <div class="identity-line">
+  <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div></div></button>
+  <div class="identity-meta"><span id="upkeep">房间维护 92%</span><span id="cash">¥3000</span></div>
+ </div>
+ <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
 </header>
 <div class="play-area">
 <aside class="stats" aria-label="角色状态"><div class="stat-group"><div class="stat-group-title">关系</div>
@@ -127,7 +166,7 @@
   <button class="tool" data-tab="商店"><span class="icon">♧</span>商店</button>
   <button class="tool" data-tab="日程"><span class="icon">▦</span>日程</button>
  </nav>
- <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
+ <div class="bottom-actions"><button class="top-action" id="recentEvents">✦ 最近发生的事 <span id="eventCount"></span></button><button class="top-action decorate" id="decorate">✧ 装修</button></div>
 </footer>
 </div><div class="toast" id="toast"></div>
 <script>
@@ -460,9 +499,7 @@ document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>
  };$('choices').appendChild(x)});
  $('drawer').classList.add('open');
 }));
-applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
-if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
-tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
+/* Initialization is deliberately deferred until all simulation constants and handlers are defined. */
 
 function buildDay(key){
  let d=[];const add=(start,end,title,kind='personal',activity='idle')=>d.push({start,end,title,kind,activity});
@@ -777,16 +814,41 @@ function proposeActivityNow(action){
  if(a==='idle')return false;
  if(ev&&ev.activity==='sleep'){say('现在是我的睡眠时间。你可以约我醒来以后再做这件事。');return false}
  if(ev&&ev.activity==='work'&&a!=='work'){say('我现在有工作要完成。等结束以后再说吧。');return false}
- if((a==='walk'||a==='game')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');return false}
+ if((a==='walk'||a==='game')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
  if(a==='music'&&!has('唱片机')){say('没有唱片机，今天恐怕听不了。');return false}
  if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
- const titles={rest:'休息一会儿',eat:'吃点东西',food:'一起吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'一起喝茶',walk:'出门散步',game:'玩游戏',company:'自由相处',tidy:'整理房间',write:'写点东西'};
- const score=(s.energy-35)*.12+(a==='eat'?(45-s.hunger)*.28:0)+(a==='rest'?(45-s.energy)*.25:0)+(a==='music'||a==='read'?(55-s.fun)*.12:0)+(s.friend-25)*.04-(s.bored||0)*.08-(s.hate||0)*.12;
- if(score < -8){say(a==='eat'?'现在还不饿，晚一点吧。':'我现在不太想做这件事。换个时间怎么样？');s.rejections=(s.rejections||0)+1;save();return false}
+ const titles={rest:'休息一会儿',eat:'吃点东西',food:'一起吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'一起喝茶',walk:'出门散步',game:'玩游戏',company:'自由相处',tidy:'整理房间',write:'写点东西',cook:'做饭',cookTogether:'一起做饭'};
+ // Survival-related requests are governed by actual need. Other invitations
+ // are intentionally uncertain: Arday may accept or decline on a whim.
+ const survival={eat:s.hunger<38,rest:s.energy<28,wash:s.clean<25};
+ let accept;
+ if(a in survival && survival[a]) accept=true;
+ else {
+  let probability=.67;
+  if(s.hate>55)probability-=.12;
+  if(s.friend>70&&s.hate<15)probability+=.06;
+  if(a==='walk'&&s.energy<35)probability-=.12;
+  accept=Math.random()<probability;
+ }
+ if(!accept){
+  const refusals={
+   tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],
+   music:['我现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],
+   walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],
+   read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],
+   game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],
+   tidy:['房间暂时这样就行，我不想现在整理。','你要是想整理可以先动手，我今天没这个打算。','先放着吧，没必要什么都立刻收拾。'],
+   food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],
+   rest:['我还不想休息。','现在坐不住，等会儿吧。']
+  };
+  const lines=refusals[a]||['这会儿不太想做。','今天先不了，换个时间吧。','我有自己的安排，别替我决定。'];
+  say(lines[Math.floor(Math.random()*lines.length)]);
+  s.rejections=(s.rejections||0)+1;save();return false;
+ }
  writeScheduleBlock(hour,hour+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
  remember('interaction','接受提议：'+(titles[a]||a),1);
  setSceneActivity(a,false);applyActivityHour(a);
- say('好，就按这个安排。我把现在这段时间空出来了。');
+ say(['好，就按这个安排。','可以，不过只占这一小时。','行啊。看来我今天还挺好说话。'][Math.floor(Math.random()*3)]);
  save();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();
  return true;
 }
@@ -1027,7 +1089,10 @@ function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','musi
 function normalizeActivity(a){return ({food:'eat',reading:'read',company:'company',listen:'music',rest:'rest',cooking:'cook'})[a]||a||'idle'}
 function processActivityAt(value){const d=new Date(value),h=d.getHours(),key=ensureScheduleAt(d),hk=key+'-'+h;if(s.lastUnifiedHourKey===hk)return;change({energy:-.45,hunger:-.8,clean:-.25,fun:-.3});s.roomCondition=clamp(s.roomCondition-.012);let ev=(s.calendar.days[key]||[]).find(x=>h>=x.start&&h<x.end),a=normalizeActivity(ev?.activity||'idle');if(!ev||a==='idle'){a=chooseAutonomousActivity();const m=activityMeta[a]||{title:'自己的时间'},rid=a==='cook'?Object.keys(recipes).find(canCook):undefined;writeBlockForKey(key,h,h+1,{title:m.title,kind:'personal',activity:a,autonomous:true,recipeId:rid});ev=(s.calendar.days[key]||[]).find(x=>h>=x.start&&h<x.end)}if(a==='cook'||a==='cookTogether'){completeCooking(ev);setSceneActivity(a,false);change({energy:-2})}else{const m=activityMeta[a];if(m){change(m.effect||{});if(a==='tidy')s.roomCondition=clamp(s.roomCondition+3);if(a==='music')s.preferences.music=(s.preferences.music||0)+1;if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;if(a==='eat')consumeMeal();setSceneActivity(a,false)}}settleWorkAt(key,h);if(a==='project'&&s.project?.status==='active'){s.project.progress=(s.project.progress||0)+1;if(s.project.progress>=3){s.project.status='done';s.furniture.push('房间纪念摆件');change({friend:2,fun:6});addEvent('房间改造完成','房间改造计划已经完成。','long')}}s.lastUnifiedHourKey=hk;s.lastHourKey=hk;s.currentActivity=a;s.activityLog=s.activityLog||[];s.activityLog.push({activity:a,key,hour:h,at:d.getTime()});if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100)}
 function perform(action){if(action==='cook'||action==='cookTogether'){openKitchenPanel(action==='cookTogether');return}const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'},a=map[action]||action,ok=proposeActivityNow(a);if(ok){relation(action);animate(a==='game'?'wave':a==='walk'?'walk':'sit')}}
-$('sceneSwitch').onclick=()=>{if($('stage').classList.contains('kitchen-mode')){$('drawer').classList.remove('open');kitchenClose()}else openKitchenPanel(false)};
+$('sceneSwitch').addEventListener('click',()=>{if($('stage').classList.contains('kitchen-mode')){$('drawer').classList.remove('open');kitchenClose()}else openKitchenPanel(false)});
+applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
+if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
+tick();setInterval(tick,30000);setInterval(()=>{render();initScene()},60000);
 
 })();
 </script>
