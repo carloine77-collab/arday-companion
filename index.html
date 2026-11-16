@@ -578,12 +578,12 @@ function writeBlockForKey(key,start,end,block){
  s.calendar.days[key]=next;
 }
 
-function settleWorkAt(key,hour){
+function settleWorkAt(key,hour,at=Date.now()){
  if(!s.pendingWork||s.pendingWork.paid)return false;
  const p=s.pendingWork;
  if(key>p.day||(key===p.day&&hour+1>=p.end)){
   p.paid=true;const pay=Math.max(0,Number(p.pay)||0);s.personalMoney+=pay;
-  moneyRecord('personal','income',pay,'完成工作委托',Date.now());
+  moneyRecord('personal','income',pay,'完成工作委托',at);
   addEvent('工作报酬到账','阿尔完成工作，获得个人收入 ¥'+pay+'。','daily');
   remember('work','完成工作，个人收入 ¥'+pay,2);return true;
  }
@@ -620,7 +620,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','tea','walk','read','game','music','food'].includes(action)){
+ if(['listen','tea','walk','read','game','music','food','company'].includes(action)){
   s.friend=clamp(s.friend+1);
   s.attach=clamp(s.attach+.5);
   remember('shared',action);
@@ -656,7 +656,7 @@ function consumeMeal(){
 }
 function setSceneActivity(activity,announce){const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);if(kitchen)kitchenOpen();else if($('stage').classList.contains('kitchen-mode'))kitchenClose();const p=document.querySelector(kitchen?'.kitchen-person':'#person');if(p){p.classList.remove('sit','walk','wave');p.classList.add(m.pose||'wave');const pos={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};p.style.left=kitchen?'54%':(pos[m.location]||'51%')}s.currentActivity=a;$('roomLabel').textContent=(kitchen?'KITCHEN':m.location==='outside'?'OUTSIDE':'HOME')+' · '+m.title;if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')}
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];if(s.hunger<48&&Object.keys(recipes).some(canCook)&&Math.random()<.58)return 'cook';const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>(a!=='music'||has('唱片机'))&&(a!=='write'||has('书桌'))).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
-function normalizeActivity(a){return ({reading:'read',listen:'music',rest:'rest',cooking:'cook'})[a]||a||'idle'}
+function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'cook'})[a]||a||'idle'}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
@@ -693,7 +693,7 @@ function processActivityAt(value){
   }
   if(['read','write','tidy'].includes(activity))updatePersonalGoal(activity,d.getTime());
  }
- const workCompleted=settleWorkAt(key,hour);
+ const workCompleted=settleWorkAt(key,hour,d.getTime());
  if(workCompleted)updatePersonalGoal('work',d.getTime());
 
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;
