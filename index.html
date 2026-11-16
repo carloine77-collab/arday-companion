@@ -693,6 +693,153 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 }));
 
 
+
+// === Unified activity / schedule / scene layer (v1) ===
+// The calendar is the source of truth. Player actions, autonomous actions and
+// scheduled actions all become time blocks in the same day schedule.
+const activityMeta = {
+ rest:{title:'休息',location:'sofa',pose:'sit',effect:{energy:10,fun:1}},
+ sleep:{title:'睡觉',location:'sofa',pose:'sit',effect:{energy:13,hunger:-1}},
+ eat:{title:'吃东西',location:'table',pose:'sit',effect:{hunger:18,energy:1}},
+ food:{title:'一起吃东西',location:'table',pose:'sit',effect:{hunger:20,fun:3}},
+ wash:{title:'洗漱',location:'window',pose:'walk',effect:{clean:17,energy:-1}},
+ read:{title:'阅读',location:'window',pose:'sit',effect:{fun:8,energy:-2}},
+ reading:{title:'一起看书',location:'window',pose:'sit',effect:{fun:8,energy:-2}},
+ music:{title:'听音乐',location:'table',pose:'sit',effect:{fun:10,energy:-1}},
+ tea:{title:'一起喝茶',location:'table',pose:'sit',effect:{fun:4,hunger:2}},
+ walk:{title:'散步',location:'outside',pose:'walk',effect:{fun:9,energy:-5,clean:-1}},
+ game:{title:'玩游戏',location:'rug',pose:'wave',effect:{fun:11,energy:-3}},
+ company:{title:'自由相处',location:'sofa',pose:'sit',effect:{fun:4}},
+ tidy:{title:'整理房间',location:'shelf',pose:'walk',effect:{clean:8,energy:-3}},
+ write:{title:'写作 / 整理资料',location:'desk',pose:'sit',effect:{fun:5,energy:-3}},
+ work:{title:'工作',location:'desk',pose:'sit',effect:{energy:-4,fun:-1}},
+ project:{title:'推进共同计划',location:'desk',pose:'walk',effect:{energy:-3,fun:2}}
+};
+function normalizeActivity(a){return ({food:'eat',reading:'read',company:'company',listen:'music',rest:'rest'})[a]||a||'idle'}
+function scheduleForToday(){
+ ensureSchedule();
+ const k=dayKey(dayAnchor());
+ if(!s.calendar.days[k])s.calendar.days[k]=[];
+ return {key:k,day:s.calendar.days[k]};
+}
+function writeScheduleBlock(start,end,block){
+ const {day}=scheduleForToday();
+ const next=[];
+ day.forEach(ev=>{
+  if(ev.end<=start||ev.start>=end){next.push(ev);return}
+  if(ev.start<start)next.push({...ev,end:start});
+  if(ev.end>end)next.push({...ev,start:end});
+ });
+ next.push({...block,start,end});
+ next.sort((a,b)=>a.start-b.start);
+ s.calendar.days[dayKey(dayAnchor())]=next;
+}
+function setSceneActivity(activity,announce){
+ const a=normalizeActivity(activity),meta=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'};
+ const p=$('person');
+ if(p){
+  p.classList.remove('sit','walk','wave');
+  p.classList.add(meta.pose||'wave');
+  const positions={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};
+  p.style.left=positions[meta.location]||'51%';
+  p.dataset.location=meta.location||'center';
+ }
+ s.currentActivity=a;
+ const label=$('roomLabel');
+ if(label)label.textContent=(meta.location==='outside'?'OUTSIDE':'HOME')+' · '+meta.title;
+ if(announce&&meta.title)say('我现在在'+(meta.location==='outside'?'外面':'房间里')+meta.title+'。');
+}
+function applyActivityHour(activity){
+ const a=normalizeActivity(activity),meta=activityMeta[a];
+ if(!meta)return;
+ change(meta.effect||{});
+ if(a==='tidy')s.roomCondition=clamp(s.roomCondition+3);
+ if(a==='music')s.preferences.music=(s.preferences.music||0)+1;
+ if(a==='read')s.preferences.reading=(s.preferences.reading||0)+1;
+ if(a==='work'&&s.pendingWork&&!s.pendingWork.paid){
+  const k=dayKey(dayAnchor()),h=new Date().getHours();
+  if(k>s.pendingWork.day||(k===s.pendingWork.day&&h+1>=s.pendingWork.end)){
+   s.pendingWork.paid=true;s.money+=s.pendingWork.pay;
+   addEvent('工作报酬到账','完成工作，获得 ¥'+s.pendingWork.pay+'。','daily');
+   remember('work','工作结算：¥'+s.pendingWork.pay,2);
+  }
+ }
+ setSceneActivity(a,false);
+}
+function proposeActivityNow(action){
+ const a=normalizeActivity(action),hour=new Date().getHours(),key=dayKey(dayAnchor()),ev=eventAt(key,hour);
+ if(a==='idle')return false;
+ if(ev&&ev.activity==='sleep'){say('现在是我的睡眠时间。你可以约我醒来以后再做这件事。');return false}
+ if(ev&&ev.activity==='work'&&a!=='work'){say('我现在有工作要完成。等结束以后再说吧。');return false}
+ if((a==='walk'||a==='game')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');return false}
+ if(a==='music'&&!has('唱片机')){say('没有唱片机，今天恐怕听不了。');return false}
+ if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
+ const titles={rest:'休息一会儿',eat:'吃点东西',food:'一起吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'一起喝茶',walk:'出门散步',game:'玩游戏',company:'自由相处',tidy:'整理房间',write:'写点东西'};
+ const score=(s.energy-35)*.12+(a==='eat'?(45-s.hunger)*.28:0)+(a==='rest'?(45-s.energy)*.25:0)+(a==='music'||a==='read'?(55-s.fun)*.12:0)+(s.friend-25)*.04-(s.bored||0)*.08-(s.hate||0)*.12;
+ if(score < -8){say(a==='eat'?'现在还不饿，晚一点吧。':'我现在不太想做这件事。换个时间怎么样？');s.rejections=(s.rejections||0)+1;save();return false}
+ writeScheduleBlock(hour,hour+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
+ remember('interaction','接受提议：'+(titles[a]||a),1);
+ setSceneActivity(a,false);applyActivityHour(a);
+ say('好，就按这个安排。我把现在这段时间空出来了。');
+ save();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();
+ return true;
+}
+function perform(action){
+ const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'};
+ const a=map[action]||action;
+ const accepted=proposeActivityNow(a);
+ if(accepted){relation(action);animate(a==='game'?'wave':a==='walk'?'walk':'sit');}
+}
+function doAutonomous(a,announce=true){
+ const activity=normalizeActivity(a);
+ setSceneActivity(activity,false);
+ applyActivityHour(activity);
+ if(announce){const m=activityMeta[activity];say(m?'我去'+m.title+'了。':'我想自己安排一会儿。')}
+ save();render();
+}
+function autonomousAction(){
+ const {key}=scheduleForToday(),hour=new Date().getHours(),scheduled=eventAt(key,hour);
+ if(scheduled){
+  const a=normalizeActivity(scheduled.activity);
+  setSceneActivity(a,false);
+  return {activity:a,title:scheduled.title};
+ }
+ const candidates=['rest','eat','wash','read','music','tidy','write','walk'];
+ const utilityScore=a=>{
+  const values={rest:(55-s.energy)*.9,eat:(55-s.hunger)*1.2,wash:(50-s.clean)*.7,read:(55-s.fun)*.5,music:has('唱片机')?(60-s.fun)*.65:0,tidy:(55-s.roomCondition)*.5,write:has('书桌')?8:0,walk:s.fun<55?7:2};
+  return (values[a]||0)+Math.random()*5;
+ };
+ const chosen=candidates.filter(a=>!(a==='music'&&!has('唱片机'))&&!(a==='write'&&!has('书桌'))).sort((a,b)=>utilityScore(b)-utilityScore(a))[0]||'rest';
+ const meta=activityMeta[chosen];
+ writeScheduleBlock(hour,hour+1,{title:meta.title,kind:'personal',activity:chosen,autonomous:true});
+ setSceneActivity(chosen,false);
+ return {activity:chosen,title:meta.title};
+}
+function tick(){
+ const now=Date.now(),hourKey=dayKey(dayAnchor())+'-'+new Date().getHours();
+ const previous=s.lastUnifiedHourKey;
+ if(!previous||previous!==hourKey){
+  ensureSchedule();
+  const hour=new Date().getHours(),key=dayKey(dayAnchor());
+  let ev=eventAt(key,hour),activity=ev?normalizeActivity(ev.activity):null;
+  if(!activity||activity==='idle'){
+   const chosen=autonomousAction();activity=normalizeActivity(chosen.activity);
+  }
+  if(activity&&activity!=='idle')applyActivityHour(activity);
+  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;
+  if(activity==='sleep')say('阿尔正在睡觉。房间安静下来。');
+  save();
+ }
+ const elapsed=Math.max(0,Math.min(1.5,(now-(s.lastTick||now))/3600000));
+ if(elapsed>0){
+  change({energy:-elapsed*.45,hunger:-elapsed*.8,clean:-elapsed*.25,fun:-elapsed*.3});
+  s.roomCondition=clamp(s.roomCondition-elapsed*.012);
+  s.lastTick=now;save();
+ }
+ render();
+ if($('stage').classList.contains('calendar-mode'))renderCalendar();
+}
+
 })();
 </script>
 </body></html>
