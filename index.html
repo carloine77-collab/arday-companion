@@ -36,24 +36,71 @@
 
 /* Character dossier, hourly schedule and currency */
 .profile-card{display:flex;gap:12px;align-items:center;background:#f6eddf;border:1px solid #e5d5bd;border-radius:14px;padding:13px;margin-bottom:10px}.profile-avatar{width:48px;height:48px;border-radius:15px;background:#d77d50;color:white;display:grid;place-items:center;font:700 26px Georgia}.profile-card p,.profile-section p{font-size:11px;line-height:1.6;color:#897966;margin:5px 0}.profile-section{background:#fffaf1;border:1px solid #eadfce;border-radius:13px;padding:12px;margin:8px 0}.profile-section h4{font-size:12px;margin:0 0 7px}.trait-list{display:flex;gap:6px;flex-wrap:wrap}.trait{border-radius:20px;background:#e8eddf;color:#617055;padding:6px 9px;font-size:10px}.trait.unknown{background:#f0e8dc;color:#9c8d7c}.trait.discovered{background:#f5dfcb;color:#976543}.profile-section small{font-size:9px;color:#9b8a77}.day-slot.sleep button{background:#e4e0ed;color:#706783;margin:3px 0}.day-slot.work button{background:#f4dfbd;color:#88623c;margin:3px 0}.day-slot button.free{min-height:27px}
-.person.sit{left:20%;transform:translate(-50%,10px) scale(.88)}.person.walk{left:68%;transform:translateX(-50%) scale(.88)}#upkeep{font-size:9px;color:#8b7862}.day-slot button.sleep{background:#e8e3ef;color:#706783}.day-slot button.work{background:#f6e3c6;color:#8b653c}.day-slot button.project{background:#f3dfd1;color:#8e5e48}</style>
+.person.sit{left:20%;transform:translate(-50%,10px) scale(.88)}.person.walk{left:68%;transform:translateX(-50%) scale(.88)}#upkeep{font-size:9px;color:#8b7862}.day-slot button.sleep{background:#e8e3ef;color:#706783}.day-slot button.work{background:#f6e3c6;color:#8b653c}.day-slot button.project{background:#f3dfd1;color:#8e5e48}
+/* Revised iPad layout */
+.app{grid-template-rows:auto minmax(0,1fr) auto;gap:9px}
+.top{display:flex;justify-content:space-between;align-items:center;min-height:66px;padding:0 2px}
+.identity{border:0;background:transparent;padding:4px 8px 4px 0;text-align:left;cursor:pointer;display:flex;align-items:center;gap:9px}
+.identity-copy{display:flex;flex-direction:column;gap:1px}.identity .name{font-size:18px}.identity .date{margin:0}
+.top-actions{display:flex;align-items:center;gap:8px}
+.top-action{min-height:44px;padding:0 15px;border:1px solid var(--line);border-radius:13px;background:var(--cream);font-size:12px;font-weight:650;box-shadow:0 2px 0 #d9c7ad}
+.top-action.decorate{position:static;z-index:auto;background:#f2dfc9}
+.play-area{display:grid;grid-template-columns:154px minmax(0,1fr);gap:10px;min-height:0}
+.stats{display:flex;flex-direction:column;gap:8px;min-width:0;padding:9px;background:#fff9ef;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);overflow:auto}
+.stat-group{display:flex;flex-direction:column;gap:5px}.stat-group-title{font-size:10px;font-weight:750;letter-spacing:1px;color:#a18466;padding:2px 4px 4px;border-bottom:1px solid #eadfce}
+.stat{display:grid;grid-template-columns:34px 24px minmax(0,1fr);gap:4px;align-items:center;text-align:left;border:0;border-bottom:1px solid #eee5d8;padding:5px 1px}
+.stat label{font-size:10px;white-space:nowrap}.stat b{font-size:11px;margin:0;text-align:right}.meter{height:5px}
+.stage{min-width:0}
+.decorate-tools{display:none;position:absolute;z-index:10;top:12px;left:12px;right:12px;align-items:center;gap:7px;padding:7px;background:#fff9efed;border:1px solid #dfcfb8;border-radius:14px;box-shadow:var(--shadow)}
+.stage.editing .decorate-tools{display:flex}.decorate-tools span{font-size:10px;color:#8c7d6c;margin-right:auto;white-space:nowrap}
+.decorate-tools button{min-height:42px;min-width:64px;border:1px solid #e5d5bf;border-radius:10px;background:#f7ecdc;font-size:12px}
+.hotspot{display:none!important}.edit-hint{display:none!important}
+.calendar-content{display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.calendar-day-tabs{display:flex;gap:8px;flex-shrink:0}
+.calendar-day-tabs button{flex:1;min-height:46px;border:1px solid #dfcfb8;border-radius:12px;background:#fff9ef;font-size:13px;font-weight:650}
+.calendar-day-tabs button.active{background:#f1dfc9;border-color:#d8a47b;box-shadow:inset 0 -3px #d88b5b}
+.day-card{flex:1;min-height:0}
+.day-card-head{padding:9px 13px}.day-card-head strong{font-size:14px}.day-card-head small{font-size:11px}
+.day-timeline{padding:5px 10px}
+.day-slot{grid-template-columns:58px minmax(0,1fr);gap:9px;min-height:52px;align-items:center}
+.day-slot time{font-size:12px;padding:0 5px 0 0}
+.day-slot button{min-height:44px;border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.3}
+.day-slot button.free,.day-slot button.busy,.day-slot button.proposal{margin:3px 0}
+.day-legend{font-size:11px;padding:8px 12px}
+.stage.calendar-mode .calendar-view{gap:9px}
+@media(max-width:700px){
+ .app{grid-template-rows:auto minmax(0,1fr) auto}
+ .top{min-height:56px;gap:5px}.identity{gap:6px}.identity .mark{width:31px;height:31px}.identity .name{font-size:14px}.identity .date{font-size:8px}
+ .top-action{min-height:42px;padding:0 8px;font-size:10px}
+ .play-area{grid-template-columns:116px minmax(0,1fr);gap:6px}
+ .stats{padding:6px;gap:6px}.stat-group{gap:4px}.stat{grid-template-columns:29px 20px minmax(0,1fr);gap:2px;padding:5px 0}.stat label{font-size:9px}.stat b{font-size:10px}.stat-group-title{font-size:9px}
+ .decorate-tools{left:7px;right:7px;top:7px;gap:4px;padding:5px}.decorate-tools span{display:none}.decorate-tools button{flex:1;min-width:0;min-height:42px;font-size:11px}
+ .calendar-view{padding:9px}.calendar-day-tabs{gap:5px}.calendar-day-tabs button{min-height:44px;font-size:11px}
+ .day-slot{grid-template-columns:43px minmax(0,1fr);gap:5px;min-height:49px}.day-slot time{font-size:10px}.day-slot button{font-size:11px;padding:7px 8px}
+}
+@media(max-width:430px){.play-area{grid-template-columns:104px minmax(0,1fr)}.top-action{padding:0 6px}.identity .date.cash,.identity #upkeep{display:none}}
+</style>
 </head>
 <body>
 <div class="app">
 <header class="top">
- <div class="identity"><div class="mark">A</div><div><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div><div class="date cash" id="cash">¥3000</div><div class="date" id="upkeep">房间维护 92%</div></div></div>
- <section class="stats" aria-label="角色状态">
+ <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div><div class="date cash" id="cash">¥3000</div><div class="date" id="upkeep">房间维护 92%</div></div></button>
+ <div class="top-actions"><button class="top-action" id="recentEvents">✦ 最近发生的事 <span id="eventCount"></span></button><button class="top-action decorate" id="decorate">✧ 装修</button></div>
+</header>
+<div class="play-area">
+<aside class="stats" aria-label="角色状态"><div class="stat-group"><div class="stat-group-title">关系</div>
   <div class="stat relation"><label>友谊</label><b id="friendV">24</b><div class="meter"><i id="friendB" style="width:24%"></i></div></div>
   <div class="stat relation"><label>依恋</label><b id="attachV">12</b><div class="meter"><i id="attachB" style="width:12%"></i></div></div>
   <div class="stat relation"><label>厌倦</label><b id="boredV">4</b><div class="meter"><i id="boredB" style="width:4%"></i></div></div>
   <div class="stat relation"><label>恨意</label><b id="hateV">0</b><div class="meter"><i id="hateB" style="width:0%"></i></div></div>
   <div class="stat relation"><label>爱意</label><b id="loveV">3</b><div class="meter"><i id="loveB" style="width:3%"></i></div></div>
+ </div><div class="stat-group"><div class="stat-group-title">生活</div>
   <div class="stat"><label>精力</label><b id="energyV">78</b><div class="meter"><i id="energyB" style="width:78%"></i></div></div>
   <div class="stat"><label>食欲</label><b id="hungerV">62</b><div class="meter"><i id="hungerB" style="width:62%"></i></div></div>
   <div class="stat"><label>卫生</label><b id="cleanV">86</b><div class="meter"><i id="cleanB" style="width:86%"></i></div></div>
   <div class="stat"><label>娱乐</label><b id="funV">70</b><div class="meter"><i id="funB" style="width:70%"></i></div></div>
- </section>
-</header>
+ </div></aside>
+
 <main class="stage" id="stage">
  <div class="scene-bg"></div><div class="sunlight"></div>
  <div class="room">
@@ -64,13 +111,14 @@
  <div class="bubble" id="bubble">你来了。刚才我在看窗外。</div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2><p>阿尔的生活有自己的节奏，你可以和他协商共同安排。</p></div><button class="back-room" id="backRoom">返回房间</button></div><div class="calendar-content" id="calendarContent"></div></section>
 
  <div class="room-label" id="roomLabel">HOME · 现在</div>
- <button class="decorate" id="decorate">✦ 装修</button>
+ <div class="decorate-tools" id="decorateTools"><span>选择要调整的物件</span><button data-decorate-object="沙发">沙发</button><button data-decorate-object="窗户">窗户</button><button data-decorate-object="茶几">茶几</button></div>
  <button class="hotspot spot-sofa" data-object="沙发" aria-label="沙发">▰</button>
  <button class="hotspot spot-window" data-object="窗户" aria-label="窗户">☼</button>
  <button class="hotspot spot-table" data-object="茶几" aria-label="茶几">♧</button>
  <div class="edit-hint">选择一个房间物件进行调整 · 再点一次装修退出</div>
  <section class="drawer" id="drawer"><div class="drawer-head"><strong id="drawerTitle">互动</strong><button class="close" id="closeDrawer">收起</button></div><div class="choices" id="choices"></div></section>
 </main>
+</div>
 <footer class="bottom">
  <nav class="toolbar" aria-label="游戏操作">
   <button class="tool" data-tab="互动"><span class="icon">✧</span>互动</button>
@@ -90,8 +138,9 @@
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物'],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastAutonomy:0,lastTick:Date.now(),calendar:null,project:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:'',lastBillWeek:''};
-let s={...base};try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.personality=s.personality||{hidden:[['节俭','需要独处','好奇心强'][Math.floor(Math.random()*3)]]};s.personality.hidden=Array.isArray(s.personality.hidden)?s.personality.hidden:[s.personality.hidden||'节俭'];s.revealedTraits=s.revealedTraits||[];
+let s={...base};
+let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
+s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+s.roomCondition+'%';}
@@ -562,11 +611,89 @@ function renderProfile(){
  $('drawer').classList.add('open');
 }
 
+
+function buildDay(key){
+ const plans=s.sleepPlans||(s.sleepPlans={});
+ if(!plans[key]){
+  const duration=Math.max(6,Math.min(11,Math.round(6.5+(100-s.energy)*.04+(Math.random()-.5)*2)));
+  const bedtime=21+Math.floor(Math.random()*3);
+  const wake=(bedtime+duration)%24;
+  plans[key]={bedtime,duration,wake,energyAtPlanning:s.energy};
+ }
+ const p=plans[key],d=[];
+ const add=(start,end,title,kind='personal',activity='idle')=>{if(end>start)d.push({start,end,title,kind,activity})};
+ add(0,p.wake,'睡眠 · '+p.duration+'小时','routine','sleep');
+ add(p.wake,p.wake+1,'起床、洗漱','routine','wash');
+ add(p.wake+1,p.wake+2,'早餐','routine','eat');
+ if(p.wake+2<12)add(p.wake+2,Math.min(12,p.wake+4),has('书桌')?'阅读 / 写作':'阅读与个人时间','personal',has('书桌')?'write':'read');
+ add(12,13,'午餐','routine','eat');
+ if(s.project?.status==='active')add(14,15,s.project.task,'project','project');
+ else if(s.roomCondition<65)add(14,15,'整理和维护房间','personal','tidy');
+ else add(14,15,has('唱片机')?'听音乐或阅读':'自由安排','personal',has('唱片机')?'music':'read');
+ add(15,16,'自由时间','free','idle');
+ add(16,17,has('书桌')?'写作 / 整理资料':'整理房间','personal',has('书桌')?'write':'tidy');
+ add(18,19,'晚餐','routine','eat');
+ add(19,20,'散步或休闲','personal','walk');
+ add(20,p.bedtime-1,'自己的时间','free','idle');
+ add(p.bedtime-1,p.bedtime,'洗漱、准备睡觉','routine','wash');
+ add(p.bedtime,24,'睡眠','routine','sleep');
+ return d.sort((a,b)=>a.start-b.start);
+}
+function ensureSchedule(){
+ const key=dayKey(dayAnchor());
+ if(!s.calendar)s.calendar={anchor:key,days:{},version:4};
+ if((s.calendar.version||0)<4){
+  s.calendar.anchor=key;s.calendar.days=s.calendar.days||{};s.calendar.days[key]=buildDay(key);s.calendar.version=4;
+ }
+ if(s.calendar.anchor!==key){
+  s.calendar.anchor=key;Object.keys(s.calendar.days||{}).forEach(k=>{if(k<key)delete s.calendar.days[k]});
+  s.calendar.days[key]=buildDay(key);
+  addEvent('新的一天','早上六点了。我重新安排了今天的日程。明后两天先留着空白。','daily');
+  say('六点了。我更新了今天的安排，明后两天还没决定怎么过。');
+ }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
+ for(let i=1;i<=2;i++){let k=dayKey(plusDays(dayAnchor(),i));if(!s.calendar.days[k])s.calendar.days[k]=[]}
+}
+function utility(a){
+ const u={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8+Math.max(0,50-s.clean)*.4,write:has('书桌')?13:0,project:s.project?.status==='active'?24:0,walk:s.fun<60?8:2,idle:3};
+ return u[a]||0;
+}
+function renderCalendar(){
+ ensureSchedule();const anchor=dayAnchor(),d=plusDays(anchor,selectedCalendarDay),key=dayKey(d),now=new Date();
+ const labels=['今天','明天','后天'];
+ let html='<div class="calendar-day-tabs">'+labels.map((x,i)=>'<button class="'+(selectedCalendarDay===i?'active':'')+'" data-day-select="'+i+'">'+x+'<br><small>'+dayLabel(plusDays(anchor,i))+'</small></button>').join('')+'</div>';
+ html+='<section class="day-card '+(selectedCalendarDay===0?'today':'')+'"><div class="day-card-head"><strong>'+labels[selectedCalendarDay]+' · '+dayLabel(d)+'</strong><small>'+(selectedCalendarDay===0?'阿尔今天的完整日程':selectedCalendarDay===1?'明天 · 与阿尔协商安排':'后天 · 保留自主时间')+'</small></div><div class="day-timeline">';
+ for(let hour=0;hour<24;hour++){let ev=eventAt(key,hour),isNow=selectedCalendarDay===0&&now.getHours()===hour;let label=ev?ev.title:'空闲时间';html+='<div class="day-slot"><time>'+pad(hour)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':ev.activity==='sleep'?'sleep':ev.kind==='work'?'work':'busy'):'free')+(isNow?' now':'')+'" data-day="'+selectedCalendarDay+'" data-hour="'+hour+'">'+label+'</button></div>'}
+ html+='</div><div class="day-legend">'+(selectedCalendarDay===0?'点击任意小时，查看安排或与阿尔协商。':selectedCalendarDay===1?'点击空白时段，向阿尔提出共同安排。':'后天暂时留白，阿尔会在接近当天时决定计划。')+'</div></section>';
+ $('calendarContent').innerHTML=html;
+ $('calendarContent').querySelectorAll('[data-day-select]').forEach(b=>b.onclick=()=>{selectedCalendarDay=+b.dataset.daySelect;renderCalendar()});
+ $('calendarContent').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(+b.dataset.day,+b.dataset.hour));
+}
+function renderProfile(){
+ $('drawerTitle').textContent='人物档案 · Arday';
+ $('choices').innerHTML='<div class="profile-card"><div class="profile-avatar">A</div><div><strong>Arday · 阿尔</strong><p>一个与你共同生活、也拥有自己生活的人。</p></div></div>'+
+ '<section class="profile-section"><h4>性格设定</h4><p>目前暂不预设性格标签。阿尔的性格由你来设计；在你完成设定之前，游戏只根据生活需求、经历和环境决定他的行为。</p><div class="trait-list"><span class="trait unknown">尚未设置</span></div></section>'+
+ '<section class="profile-section"><h4>当前生活</h4><p>当前活动：'+(s.currentActivity||'自己的时间')+' · 房间维护：'+s.roomCondition+'% · 生活资金：¥'+s.money+'</p></section>'+
+ '<section class="profile-section"><h4>共同生活记录</h4><p>共同记忆 '+s.memories.length+' 条 · 拒绝与边界 '+(s.rejections||0)+' 次 · 未付账单 ¥'+(s.unpaidBill||0)+'</p><p>'+(s.memories.slice(-6).map(m=>m.text).join('；')||'你们还没有留下特别的共同记忆。')+'</p></section>';
+ $('drawer').classList.add('open');
+}
+function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open');$('stage').classList.add('calendar-mode');renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
+function refreshTopActions(){let n=s.events.filter(e=>e.status==='open').length;let c=$('eventCount');if(c)c.textContent=n?'· '+n:''}
+$('profileEntry').addEventListener('click',renderProfile);
+$('recentEvents').addEventListener('click',renderEvents);
+document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListener('click',()=>{
+ const obj=b.dataset.decorateObject,opts=obj==='沙发'?['鼠尾草绿','暖杏色','砖红色']:obj==='窗户'?['打开窗帘','合上窗帘','换一幅窗景']:['摆上花瓶','放一本书','点亮台灯'];
+ $('drawerTitle').textContent='装修 · '+obj;$('choices').innerHTML='';
+ opts.forEach((o,i)=>{let x=document.createElement('button');x.className='choice';x.textContent=o;x.onclick=()=>{
+  if(obj==='沙发'){document.querySelector('.sofa').style.background=['#819477','#d9a77d','#b96e5c'][i];s.room.sofa=i}
+  else if(obj==='窗户'){document.querySelector('.window').style.background=['linear-gradient(145deg,#b9d0c0,#f2d9a9)','linear-gradient(145deg,#9c9a91,#c9bba7)','linear-gradient(145deg,#c0d4dd,#f4d5a8)'][i];s.room.window=i}
+  else{s.room.table=i;remember('room',o,1);say(o+'。')}
+  save();$('drawer').classList.remove('open');
+ };$('choices').appendChild(x)});
+ $('drawer').classList.add('open');
+}));
+const previousRender=render;
+function render(){previousRender();refreshTopActions()}
+
 })();
-
-
-
-
-
 </script>
 </body></html>
