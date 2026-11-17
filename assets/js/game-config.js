@@ -10,6 +10,7 @@ window.ArdayGameConfig = {
  food:{title:'一起吃东西',location:'table',pose:'sit',effect:{hunger:20,fun:3}},
  wash:{title:'洗漱',location:'window',pose:'walk',effect:{clean:17,energy:-1}},
  read:{title:'阅读',location:'desk',pose:'sit',effect:{fun:8,energy:-2}},
+ chat:{title:'聊天',location:'sofa',pose:'sit',effect:{fun:3,energy:0}},
  computerWork:{title:'使用电脑工作',location:'desk',pose:'sit',effect:{energy:-4,fun:-1}},
  computerPlay:{title:'用电脑玩游戏',location:'desk',pose:'sit',effect:{fun:9,energy:-3}},
  bouquet:{title:'欣赏花束',location:'center',pose:'wave',effect:{fun:3}},
