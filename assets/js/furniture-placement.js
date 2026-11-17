@@ -38,5 +38,10 @@
   }
   return true;
  }
- global.ArdayFurniturePlacement={corners,rectsOverlap,canPlaceFurniture};
+ function rugCandidates(rug){
+  if(!rug)return [];
+  const offsets=[[0,0],[0,-.95],[0,.95],[-1.05,0],[1.05,0],[-.9,-.72],[.9,-.72],[-.9,.72],[.9,.72],[0,-.55],[0,.55]];
+  return offsets.map(([x,z])=>[rug.group.position.x+x,rug.group.position.z+z]);
+ }
+ global.ArdayFurniturePlacement={corners,rectsOverlap,canPlaceFurniture,rugCandidates};
 })(window);
