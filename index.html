@@ -207,8 +207,10 @@
 .stage .camera-hint{z-index:45!important;pointer-events:none!important}
 .stage .room-label{z-index:46!important;pointer-events:none!important}
 /* The WebGL canvas must never intercept taps intended for the footer navigation. */
-.app>.bottom{position:relative!important;z-index:200!important;isolation:isolate;pointer-events:auto!important}
-.app>.bottom .toolbar,.app>.bottom .tool,.app>.bottom .bottom-actions,.app>.bottom .top-action{position:relative;z-index:201;pointer-events:auto!important;touch-action:manipulation}
+/* Footer is a sibling of .app (not its child); elevate the actual footer element. */
+footer.bottom{position:relative!important;z-index:9999!important;isolation:isolate!important;pointer-events:auto!important}
+footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.bottom .top-action{position:relative!important;z-index:10000!important;pointer-events:auto!important;touch-action:manipulation}
+.app{position:relative;z-index:1}
 .stage{z-index:0!important}
 .three-status{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 24px);padding:8px 12px;border:1px solid #d9b99a;border-radius:10px;background:#fff8ed;color:#76533b;font:12px/1.5 system-ui;text-align:center;box-shadow:0 3px 12px #4a352522}
 </style>
