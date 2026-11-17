@@ -137,7 +137,7 @@ function openTab(name,force=false){
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
  const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
- if(name==='互动'){$('choices').className='choices interaction-view';const hero=document.createElement('section');hero.className='interaction-masthead';hero.innerHTML='<div class="interaction-overline">A COMPANION JOURNAL <span>VOL. 01 / DAILY LIFE</span></div><div class="interaction-bigtitle">THE LITTLE<br><i>THINGS</i></div><div class="interaction-subtitle"></div><div class="interaction-asterisk">✳</div>'; $('choices').appendChild(hero);}
+ if(name==='互动'){$('choices').className='choices interaction-view';const hero=document.createElement('section');hero.className='interaction-masthead';hero.innerHTML='<div class="interaction-overline">A COMPANION JOURNAL <span>VOL. 01 / DAILY LIFE</span></div><div class="interaction-bigtitle">THE LITTLE<br><i>THINGS</i></div><div class="interaction-subtitle"></div><div class="interaction-asterisk"></div>'; $('choices').appendChild(hero);}
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
@@ -317,7 +317,7 @@ function ensureSchedule(){ensureScheduleAt(Date.now())}
 function renderCalendar(){
  ensureSchedule();const anchor=dayAnchor(),d=plusDays(anchor,selectedCalendarDay),key=dayKey(d),now=new Date();
  const labels=['今天','明天','后天'];
- let html='<div class="calendar-editorial-masthead"><div class="calendar-masthead-copy"><span class="calendar-eyebrow">ARDAY COMPANION　 /　 THE DAILY EDITION</span><div class="calendar-display-title">日程<span class="calendar-title-mark">✳</span></div><div class="calendar-subtitle">A QUIET RECORD OF ORDINARY DAYS</div></div><div class="calendar-date-stamp"><span>ISSUE</span><strong>'+String(d.getDate()).padStart(2,'0')+'</strong><small>'+dayLabel(d)+'</small></div><span class="calendar-ornament calendar-ornament-one">✳</span><span class="calendar-ornament calendar-ornament-two">✳</span></div><div class="calendar-day-tabs">'+labels.map((x,i)=>'<button class="'+(selectedCalendarDay===i?'active':'')+'" data-day-select="'+i+'"><span class="calendar-tab-index">0'+(i+1)+'</span><span class="calendar-tab-label">'+x+'</span><small>'+dayLabel(plusDays(anchor,i))+'</small></button>').join('')+'</div>';
+ let html='<div class="calendar-editorial-masthead"><div class="calendar-masthead-copy"><span class="calendar-eyebrow">ARDAY COMPANION　 /　 THE DAILY EDITION</span><div class="calendar-display-title">日程<span class="calendar-title-mark"></span></div><div class="calendar-subtitle">A QUIET RECORD OF ORDINARY DAYS</div></div><div class="calendar-date-stamp"><span>ISSUE</span><strong>'+String(d.getDate()).padStart(2,'0')+'</strong><small>'+dayLabel(d)+'</small></div><span class="calendar-ornament calendar-ornament-one"></span><span class="calendar-ornament calendar-ornament-two"></span></div><div class="calendar-day-tabs">'+labels.map((x,i)=>'<button class="'+(selectedCalendarDay===i?'active':'')+'" data-day-select="'+i+'"><span class="calendar-tab-index">0'+(i+1)+'</span><span class="calendar-tab-label">'+x+'</span><small>'+dayLabel(plusDays(anchor,i))+'</small></button>').join('')+'</div>';
  html+='<section class="day-card '+(selectedCalendarDay===0?'today':'')+'"><div class="day-card-head"><strong>'+labels[selectedCalendarDay]+' · '+dayLabel(d)+'</strong></div><div class="day-timeline">';
  for(let hour=0;hour<24;hour++){let ev=eventAt(key,hour),isNow=selectedCalendarDay===0&&now.getHours()===hour;let label=ev?ev.title:'空闲时间';html+='<div class="day-slot"><time>'+pad(hour)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':ev.activity==='sleep'?'sleep':ev.kind==='work'?'work':'busy'):'free')+(isNow?' now':'')+'" data-day="'+selectedCalendarDay+'" data-hour="'+hour+'">'+label+'</button></div>'}
  html+='</div></section>';
@@ -1088,8 +1088,10 @@ function initArday3D(){
     item.button.className='hotspot furniture-hotspot spot-'+id;
     item.button.type='button';item.button.dataset.object=name;item.button.setAttribute('aria-label',name);
     item.button.textContent=id==='desk'?'✎':'▱';stage.appendChild(item.button);
-    item.button.onclick=()=>{if(decorating){selectFurniture(item);return}if(item.action)item.action()};
    }
+   /* Rebind on every scene rebuild: existing hotspot DOM nodes otherwise retain stale closures or no action. */
+   item.button.onclick=()=>{if(decorating){selectFurniture(item);return}if(item.action)item.action()};
+   item.button.dataset.object=name;item.button.setAttribute('aria-label',name);
    furnitureRegistry.push(item);return item;
   }
   function registerWallObject({id,name,room,group,axis,side,range,anchor,action}){
@@ -1493,7 +1495,7 @@ function initArday3D(){
    arms.forEach((a,i)=>{a.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);a.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
-  const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
+  const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,furnitureTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
   let selectedFurniture=null,furnitureDrag=null;
   const floorPlane=new T.Plane(new T.Vector3(0,1,0),0),dragPoint=new T.Vector3(),dragOffset=new T.Vector3();
   const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2();
@@ -1526,6 +1528,8 @@ function initArday3D(){
    }
    let targetRoom=null;
    for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.roomTarget){targetRoom=node.userData.roomTarget;break}node=node.parent}if(targetRoom)break}
+   furnitureTap=null;
+   if(!decorating){for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){const key=node.userData?.furnitureKey;if(key){const found=furnitureRegistry.find(x=>x.id===key&&x.room===roomMode);if(found&&found.action){furnitureTap={item:found,pointerId:e.pointerId,x:e.clientX,y:e.clientY};break}}node=node.parent}if(furnitureTap)break}}
    gestureSurface.setPointerCapture(e.pointerId);
    if(targetRoom){doorTap={target:targetRoom,pointerId:e.pointerId,x:e.clientX,y:e.clientY};e.preventDefault();return}
    doorTap=null;inertiaTheta=0;inertiaPhi=0;
@@ -1610,6 +1614,7 @@ function initArday3D(){
     }
     return;
    }
+   if(furnitureTap&&furnitureTap.pointerId===e.pointerId){const tap=furnitureTap;furnitureTap=null;if(e.type==='pointerup'&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<18){tap.item.action();return}}
    pointers.delete(e.pointerId);
    if(pointers.size===0){drag=null;pinchCenter=null;pinchAngle=0;if(e.type==='pointerup'){inertiaTheta=dragVelocityTheta;inertiaPhi=dragVelocityPhi}dragVelocityTheta=0;dragVelocityPhi=0}
    if(pointers.size===1){const p=[...pointers.values()][0];drag={x:p.x,y:p.y}}
