@@ -320,3 +320,6 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .event-detail{padding:12px 13px;border-radius:13px;background:#f7eddf;color:#6e5b47;font-size:12px;line-height:1.75}
 .event-card{width:100%;min-height:68px}
 @media(max-width:700px){.event-group-head{font-size:12px}.event-group-note{font-size:9px}}
+
+/* Event groups must use the full drawer width rather than the generic three-column action grid. */
+.stage .drawer .choices:has(.event-group){display:flex!important;flex-direction:column!important;align-items:stretch!important}
