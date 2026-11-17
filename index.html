@@ -1611,7 +1611,46 @@ function initArday3D(){
       if(!size.x||!size.y||!size.z)throw new Error('GLB model has empty geometry');
       const scale=Math.min(2.25/size.x,.94/size.y,1.12/size.z);
       model.scale.setScalar(scale);model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
-      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+      function makeTexture(kind){
+       const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
+       const ctx=canvas.getContext('2d');
+       if(kind==='fabric'){
+        ctx.fillStyle='#e4d8c6';ctx.fillRect(0,0,512,512);
+        for(let y=0;y<512;y+=3){ctx.fillStyle=y%6===0?'#d8cbb8':'#eee4d5';ctx.fillRect(0,y,512,1)}
+        for(let x=0;x<512;x+=3){ctx.fillStyle=x%6===0?'#cbbda9':'#f4ebde';ctx.fillRect(x,0,1,512)}
+        for(let i=0;i<1800;i++){const x=Math.random()*512,y=Math.random()*512;ctx.fillStyle=Math.random()>.5?'#ffffff20':'#7d6d5814';ctx.fillRect(x,y,1,1)}
+       }else{
+        ctx.fillStyle='#69482f';ctx.fillRect(0,0,512,512);
+        for(let i=0;i<90;i++){const y=Math.random()*512;ctx.strokeStyle=['#805b3e','#513722','#98704c','#735034'][i%4];ctx.globalAlpha=.18+Math.random()*.25;ctx.lineWidth=.5+Math.random()*2;ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(130,y-8,330,y+8,512,y+(Math.random()-.5)*12);ctx.stroke()}
+        ctx.globalAlpha=1;
+       }
+       const tex=new T.CanvasTexture(canvas);tex.wrapS=T.RepeatWrapping;tex.wrapT=T.RepeatWrapping;tex.repeat.set(5,5);tex.anisotropy=4;tex.encoding=T.sRGBEncoding;tex.needsUpdate=true;return tex;
+      }
+      const fabricMap=makeTexture('fabric'),woodMap=makeTexture('wood');
+      function splitSofaMaterials(sourceMesh){
+       const src=sourceMesh.geometry,pos=src.getAttribute('position'),col=src.getAttribute('color'),idx=src.index;
+       if(!pos||!col||!idx)return [sourceMesh];
+       const bins=[[],[]];
+       for(let i=0;i<idx.count;i+=3){
+        const ids=[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];
+        const red=(col.getX(ids[0])+col.getX(ids[1])+col.getX(ids[2]))/3;
+        const bin=red<.58?1:0,pts=ids.map(id=>new T.Vector3(pos.getX(id),pos.getY(id),pos.getZ(id)));
+        const normal=new T.Vector3().subVectors(pts[1],pts[0]).cross(new T.Vector3().subVectors(pts[2],pts[0])).normalize();
+        const axis=Math.abs(normal.y)>=Math.abs(normal.x)&&Math.abs(normal.y)>=Math.abs(normal.z)?'xz':Math.abs(normal.x)>=Math.abs(normal.z)?'zy':'xy';
+        for(const p of pts){bins[bin].push(p.x,p.y,p.z);if(axis==='xz')bins[bin].push(p.x*4,p.z*4);else if(axis==='zy')bins[bin].push(p.z*4,p.y*4);else bins[bin].push(p.x*4,p.y*4)}
+       }
+       const parent=sourceMesh.parent,created=[];
+       bins.forEach((values,index)=>{
+        if(!values.length)return;
+        const geometry=new T.BufferGeometry(),positions=[],uvs=[];
+        for(let i=0;i<values.length;i+=5){positions.push(values[i],values[i+1],values[i+2]);uvs.push(values[i+3],values[i+4])}
+        geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.computeVertexNormals();
+        const material=index===0?new T.MeshStandardMaterial({map:fabricMap,bumpMap:fabricMap,bumpScale:.012,roughness:.96}):new T.MeshStandardMaterial({map:woodMap,bumpMap:woodMap,bumpScale:.018,roughness:.62});
+        const part=new T.Mesh(geometry,material);part.position.copy(sourceMesh.position);part.quaternion.copy(sourceMesh.quaternion);part.scale.copy(sourceMesh.scale);part.castShadow=true;part.receiveShadow=true;part.name=index===0?'upholstery-textured':'walnut-textured';parent.add(part);created.push(part);
+       });
+       parent.remove(sourceMesh);src.dispose();return created;
+      }
+      const textured=[];model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;textured.push(...splitSofaMaterials(o))}});
       sofa.group.clear();sofa.group.add(model);sofa.group.updateMatrixWorld(true);
       window.__ardaySofaLoaded=true;window.__ardaySofaLoading=false;
       console.info('[Arday] GLB sofa loaded successfully',{size:size.toArray()});
