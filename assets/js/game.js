@@ -117,6 +117,8 @@ function openTab(name,force=false){
   $('choices').classList.add('shop-content');
   const nav=document.createElement('div');nav.className='shop-categories';
   ['食物食材','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  const shopMasthead=document.createElement('section');shopMasthead.className='shop-masthead';shopMasthead.innerHTML='<div class="shop-kicker">ARDAY JOURNAL <span>HOME & LIVING</span></div><div class="shop-coverline"><span class="shop-cover-number">№ 08</span><span class="shop-cover-season">THE ART OF<br>EVERYDAY LIVING</span></div><div class="shop-cover-title">Objects<br><i>with a story.</i></div><div class="shop-cover-note">为日常挑选一件值得留下的东西</div><div class="shop-cover-stamp">A HOME<br>IN THE<br>MAKING</div>'; 
+  $('choices').appendChild(shopMasthead);
   $('choices').appendChild(nav);
   if(shopCategory==='家具'){
    const groups=shopCatalog.furnitureCategories||{};
@@ -135,7 +137,7 @@ function openTab(name,force=false){
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
  const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
- if(name==='互动')$('choices').className='choices interaction-view';
+ if(name==='互动'){$('choices').className='choices interaction-view';const hero=document.createElement('section');hero.className='interaction-masthead';hero.innerHTML='<div class="interaction-overline">A COMPANION JOURNAL <span>VOL. 01 / DAILY LIFE</span></div><div class="interaction-bigtitle">THE LITTLE<br><i>THINGS</i></div><div class="interaction-subtitle">把平凡的一天，过成值得记住的片段</div><div class="interaction-asterisk">✳</div>'; $('choices').appendChild(hero);}
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
