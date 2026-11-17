@@ -15,6 +15,7 @@ window.ArdayGameConfig = {
  walk:{title:'散步',location:'outside',pose:'walk',effect:{fun:9,energy:-5,clean:-1}},
  game:{title:'玩游戏',location:'rug',pose:'wave',effect:{fun:11,energy:-3}},
  company:{title:'自由相处',location:'sofa',pose:'sit',effect:{fun:4}},
+ sitChair:{title:'坐在椅子上',location:'chair',pose:'sit',effect:{energy:5,fun:1}},
  tidy:{title:'整理房间',location:'shelf',pose:'walk',effect:{clean:8,energy:-3}},
  write:{title:'写作 / 整理资料',location:'desk',pose:'sit',effect:{fun:5,energy:-3}},
  work:{title:'工作',location:'desk',pose:'sit',effect:{energy:-4,fun:-1}},
