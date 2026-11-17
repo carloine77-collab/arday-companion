@@ -1650,7 +1650,8 @@ function initArday3D(){
        });
        parent.remove(sourceMesh);src.dispose();return created;
       }
-      const textured=[];model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;textured.push(...splitSofaMaterials(o))}});
+      const sourceMeshes=[];model.traverse(o=>{if(o.isMesh)sourceMeshes.push(o)});
+      sourceMeshes.forEach(o=>{o.castShadow=true;o.receiveShadow=true;splitSofaMaterials(o)});
       sofa.group.clear();sofa.group.add(model);sofa.group.updateMatrixWorld(true);
       window.__ardaySofaLoaded=true;window.__ardaySofaLoading=false;
       console.info('[Arday] GLB sofa loaded successfully',{size:size.toArray()});
