@@ -967,3 +967,18 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
  border-radius:14px!important;box-shadow:0 3px 0 rgba(94,54,45,.13),inset 0 1px 0 rgba(255,255,255,.25)!important;
 }
 .shop-content .shop-category,.shop-content .shop-group,.shop-content .shop-furniture-type{border-radius:12px!important}
+
+
+/* Profile dossier: center within viewport and prevent horizontal clipping. */
+html body .stage .drawer.profile-expanded.open{
+ position:absolute!important;top:12px!important;bottom:12px!important;
+ left:50%!important;right:auto!important;
+ width:min(620px,calc(100% - 28px))!important;max-width:calc(100% - 28px)!important;
+ height:auto!important;max-height:none!important;margin:0!important;
+ transform:translateX(-50%)!important;overflow-x:hidden!important;overflow-y:auto!important;
+ box-sizing:border-box!important;
+}
+html body .stage .drawer.profile-expanded.open .choices{
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ box-sizing:border-box!important;overflow-x:hidden!important;
+}
