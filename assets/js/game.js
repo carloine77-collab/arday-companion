@@ -865,6 +865,7 @@ function showGoals(){
 let cameraGestureMode='pan';
 let arday3D=null,arday3DLoading=false,arday3DFallbackTried=false;
 function initArday3D(){
+ let host=null;
  if(!window.THREE){
   if(!arday3DLoading){
    arday3DLoading=true;
@@ -879,7 +880,7 @@ function initArday3D(){
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));renderer.outputEncoding=T.sRGBEncoding;
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
-  const host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
+  host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
   const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
   const sun=new T.DirectionalLight(0xfff1dc,1.35);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-8;sun.shadow.camera.right=8;sun.shadow.camera.top=8;sun.shadow.camera.bottom=-8;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene.add(sun);
   const fill=new T.DirectionalLight(0xc8d0d8,.28);fill.position.set(5,4,-5);scene.add(fill);
@@ -1060,9 +1061,7 @@ function initArday3D(){
    button.addEventListener('click',()=>{if(decorating)selectFurniture(item);else if(item.action)item.action()});
    furnitureRegistry.push(item);return item;
   }
-  const furnitureHotspots=[
-   registerFurniture({id:'bed',name:'床',room:'bedroom',group:bed,width:3.1,depth:3.45,anchor:[0,1.85],action:()=>openFurnitureActions('bed')})
-  ];
+  const furnitureHotspots=[];
   function enterRoomFromDoor(mode){
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode');
    if(mode==='kitchen')stage.classList.add('kitchen-mode');
