@@ -546,3 +546,39 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .drawer .goal-progress{display:inline-flex;align-items:baseline;gap:8px;margin-top:10px!important;padding:6px 0;color:#a65e43!important;font:italic 18px Georgia,serif!important}
 @media(min-width:700px) and (max-width:1200px){.app{max-width:100%;padding-left:22px;padding-right:22px;gap:12px}.top{gap:18px}.drawer{padding:22px 28px!important}.drawer .choices{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-level-two{gap:7px 8px!important}.shop-furniture-type{font-size:11px!important;min-height:34px!important;padding:7px 12px!important}.shop-product-buy{min-width:74px!important;min-height:46px!important}}
 @media(display-mode:standalone){body{background:#efe5d4}.stage{border-radius:16px}}
+
+/* Inventory: category navigation and item shelf are two visually separate surfaces. */
+.drawer .choices.inventory-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;min-width:0}
+.inventory-view .inventory-categories{display:flex;flex:0 0 auto;gap:7px;margin:0 0 15px;padding:8px;background:#e9dece;border:0;border-radius:13px;box-shadow:inset 0 1px 2px #72583a12}
+.inventory-view .inventory-category{min-height:42px;flex:1;border:0!important;border-radius:9px;background:transparent;color:#806f5c;font:600 13px Georgia,"Noto Serif SC",serif;letter-spacing:.08em;transition:background .18s,color .18s}
+.inventory-view .inventory-category+.inventory-category{border:0!important}
+.inventory-view .inventory-category.active{background:#fffaf1;color:#9a563d;box-shadow:0 2px 8px #6b4b3015}
+.inventory-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:13px;background:#fffaf2;border:1px solid #e7d9c7;border-radius:15px;min-height:115px;align-content:start}
+.inventory-items:empty:after{content:"这里暂时空着";grid-column:1/-1;padding:26px 0;text-align:center;color:#a18d76;font:italic 13px Georgia,serif}
+.inventory-items>.choice{display:flex;min-width:0;min-height:92px;flex-direction:column;justify-content:center;align-items:center;gap:7px;padding:10px 6px;border:1px solid #eadfce;border-radius:11px;background:linear-gradient(155deg,#fffdf8,#f4eadb);color:#5d4a38;font-size:11px;line-height:1.4;overflow-wrap:anywhere;box-shadow:0 2px 7px #60472b0a}
+.inventory-items>.choice .emoji{font-size:25px;margin:0}
+.inventory-items>.choice small{font-size:10px;color:#9b8067}
+.inventory-items>.choice:active{transform:translateY(1px);background:#f0e2d0}
+.drawer .choices.goals-view{display:flex!important;flex-direction:column!important;gap:15px!important;padding:2px 0 22px}
+.goals-view>.profile-section{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:0;padding:22px 21px 24px;border:0;border-radius:3px;background:#f6eee2;box-shadow:none;overflow:hidden}
+.goals-view>.profile-section:first-child{background:linear-gradient(120deg,#f3e7d7,#f9f3e9)}
+.goals-view>.profile-section:nth-child(2){background:linear-gradient(120deg,#e8e6dc,#f4f0e7)}
+.goals-view>.profile-section:before{content:"";position:absolute;right:-32px;top:-45px;width:155px;height:155px;border:1px solid #b18b682c;border-radius:50%;box-shadow:0 0 0 13px #b18b680b,0 0 0 27px #b18b6808}
+.goals-view .section-kicker{margin:0 0 13px;color:#9c785a;font:700 8px Arial,sans-serif;letter-spacing:.23em}
+.goals-view h3{position:relative;margin:0 0 19px;color:#554231;font:600 24px/1.2 Georgia,"Noto Serif SC",serif;letter-spacing:.015em}
+.goals-view strong{position:relative;max-width:90%;font:600 16px/1.65 Georgia,"Noto Serif SC",serif;color:#67513d}
+.goals-view>section>p:not(.goal-progress){margin:0;color:#a18d78;font:italic 13px Georgia,"Noto Serif SC",serif}
+.goals-view .goal-progress{position:relative;display:flex;align-items:baseline;gap:9px;margin:14px 0 0!important;padding:0!important;color:#a65e43!important;font:italic 21px Georgia,serif!important}
+.goals-view .goal-progress:before{content:"PROGRESS";font:700 8px Arial,sans-serif;letter-spacing:.15em;color:#a18c76}
+.goals-view>.profile-section:after{content:"✧";position:absolute;right:22px;bottom:18px;color:#b18b6860;font:22px Georgia,serif}
+.drawer .choices.career-view,.drawer .choices.account-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important}
+.drawer .choices.events-view,.drawer .choices.event-detail-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important}
+.event-detail-view>.calendar-note,.event-detail-view>.event-detail{padding:18px 17px;border:0;border-left:3px solid #b58a67;border-radius:0 9px 9px 0;background:#f6eee2;color:#66533f;font-size:13px;line-height:1.85}
+.drawer .choices.events-view>.event-empty{border:0;border-radius:4px;background:#f6eee2}
+.shop-product-card .shop-product-buy{display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;min-width:70px!important;min-height:48px!important;padding:6px 9px!important;border:1px solid #a65e43!important;border-radius:5px!important;background:#a65e43!important;color:#fff8ee!important;font:700 12px Georgia,serif!important;box-shadow:0 2px 0 #7e4937!important}
+.shop-product-card .shop-product-buy em{display:block!important;padding:0!important;background:transparent!important;color:#f8e9d9!important;font:700 9px Arial,sans-serif!important;letter-spacing:.12em!important}
+.shop-product-card:active .shop-product-buy{transform:translateY(1px);box-shadow:0 1px 0 #7e4937!important}
+.shop-product-card{grid-template-columns:44px minmax(0,1fr) 78px!important;min-height:78px!important;border-radius:9px!important;box-shadow:none!important}
+.shop-product-icon{border-radius:7px!important;background:#eee2d1!important}
+@media(min-width:700px) and (max-width:1200px){.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;padding:16px}.inventory-items>.choice{min-height:104px}.goals-view>.profile-section{padding:27px 27px 30px}.goals-view h3{font-size:27px}.shop-product-card .shop-product-buy{min-width:78px;min-height:52px}}
+@media(max-width:390px){.inventory-items{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-view .inventory-category{font-size:12px}}
