@@ -65,7 +65,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 
 const tabs={
- '互动':[['聊天','💬','chat'],['一起做饭','🥘','cook-together'],['一起喝茶','🍵','tea'],['听音乐','♫','music'],['出门散步','🌿','walk'],['一起看书','📖','read'],['玩个游戏','🎲','game'],['休息一会','☁','rest'],['一起吃点东西','🥐','food'],['整理房间','🧹','tidy']],
+ '互动':[['烹饪','🍳','cookTogether'],['阅读','📖','read'],['休息','☁','rest'],['外出','🌿','walk'],['电脑游戏','▣','computerPlay'],['聊天','💬','chat']],
  '物品':[],
  '商店':[]
 };
@@ -206,9 +206,9 @@ function slotClick(di,h){
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
- $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+[['一起吃点东西','🥐'],['散步','🌿'],['听音乐','♫'],['一起看书','📖'],['玩游戏','🎲'],['自由相处','☁']].map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x[1]+'</span>'+x[0]+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
+ $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+playerActivityOptions.map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x.icon+'</span>'+x.label+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
  $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
-  let i=+b.dataset.p,names=['一起吃点东西','散步','听音乐','一起看书','玩游戏','自由相处'],pref=['food','walk','music','reading','game','company'][i],score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(i===0&&s.hunger<40?12:0)+(i===2&&s.fun<40?10:0);
+  let i=+b.dataset.p,option=playerActivityOptions[i],names=playerActivityOptions.map(x=>x.label),pref=option.activity,score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(pref==='cookTogether'&&s.hunger<40?12:0)+(pref==='computerPlay'&&s.fun<40?10:0);
   let accepted=score>12+(di*1.5);
   if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
   else{change({bored:1});s.rejections=(s.rejections||0)+1;if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];say(['这个时间我不太想这样安排。我们换个时间，或者各自安排也可以。','我知道你想和我一起，不过我现在确实不想这么做。希望你别把拒绝当成对你的否定。','这次我想说得明确一点：不。我有自己的计划。'][Math.min(2,s.rejections-1)]);}
@@ -352,6 +352,7 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 
 
 
+const playerActivityOptions=[{label:'烹饪',icon:'🍳',activity:'cookTogether'},{label:'阅读',icon:'📖',activity:'read'},{label:'休息',icon:'☁',activity:'rest'},{label:'外出',icon:'🌿',activity:'walk'},{label:'电脑游戏',icon:'▣',activity:'computerPlay'},{label:'聊天',icon:'💬',activity:'chat'}];
 function findAvailableSlot(now=new Date(),duration=1){
  const today=keyAt(now),hour=now.getHours();
  for(let offset=0;offset<=2;offset++){
@@ -369,22 +370,23 @@ function findAvailableSlot(now=new Date(),duration=1){
 function proposeActivityNow(action,force=false){
  const a=normalizeActivity(action),now=new Date(),hour=now.getHours(),key=keyAt(now);
  if(a==='idle')return false;
- if((a==='walk'||a==='game')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
+ if((a==='walk'||a==='computerPlay')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
  if(a==='music'&&!has('唱片机')){say('没有唱片机，今天恐怕听不了。');return false}
  if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
+ if(a==='computerPlay'&&!has('电脑')){say('还没有电脑，暂时玩不了电脑游戏。');return false}
  if(a==='food'&&!s.readyMeals?.length&&!s.items.includes('点心')&&!Object.keys(recipes).some(canCook)){say('家里暂时没有现成的食物。要不要先去厨房准备一点？');return false}
  const survival={eat:s.hunger<38,rest:s.energy<28,wash:s.clean<25};
  let accept;
  if(force||a==='sleep'||a==='rest'||a==='sitChair'||(a in survival&&survival[a]))accept=true;
  else{let probability=.67;if(s.hate>55)probability-=.12;if(s.friend>70&&s.hate<15)probability+=.06;if(a==='walk'&&s.energy<35)probability-=.12;accept=Math.random()<probability}
  if(!accept){
-  const refusals={tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],tidy:['房间暂时这样就行，我不想现在整理。','你要是想整理可以先动手，我今天没这个打算。','先放着吧，没必要什么都立刻收拾。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
+  const refusals={chat:['好啊，坐一会儿吧。你想聊什么？','我正好也有话想说。','可以，不过今天由我来挑话题。'],computerPlay:['现在不太想玩电脑游戏。','这会儿没什么游戏兴致，晚点再说。','我想先做点别的。'],cookTogether:['厨房可以借给我们一会儿。','好，看看冰箱里还剩些什么。','可以。今天想做点像样的东西。'],tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],tidy:['房间暂时这样就行，我不想现在整理。','你要是想整理可以先动手，我今天没这个打算。','先放着吧，没必要什么都立刻收拾。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
   const lines=refusals[a]||['这会儿不太想做。','今天先不了，换个时间吧。','我有自己的安排，别替我决定。'];
   say(lines[Math.floor(Math.random()*lines.length)]);s.rejections=(s.rejections||0)+1;save();return false;
  }
  const slot=findAvailableSlot(now,1);
  if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
- const titles={rest:'休息一会儿',eat:'吃点东西',food:'一起吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'一起喝茶',walk:'出门散步',game:'玩游戏',company:'自由相处',tidy:'整理房间',write:'写点东西',cook:'做饭',cookTogether:'一起做饭',computerWork:'使用电脑工作',computerPlay:'用电脑玩游戏',bouquet:'欣赏花束'};
+ const titles={rest:'休息',eat:'吃东西',food:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'喝茶',walk:'外出',game:'游戏',company:'聊天',chat:'聊天',tidy:'整理房间',write:'写作',cook:'烹饪',cookTogether:'烹饪',computerWork:'电脑工作',computerPlay:'电脑游戏',bouquet:'欣赏花束'};
  writeBlockForKey(slot.key,slot.start,slot.start+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
  remember('interaction','接受提议：'+(titles[a]||a),1);
  say(slot.key===key&&slot.start===hour?'好，就按这个安排。':'可以。我把稍后的时间留出来。');
@@ -482,7 +484,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','tea','walk','read','game','music','food','company'].includes(action)){
+ if(['listen','tea','walk','read','game','music','food','company','chat','cookTogether','computerPlay'].includes(action)){
   s.friend=clamp(s.friend+1);
   s.attach=clamp(s.attach+.5);
   remember('shared',action);
@@ -575,13 +577,13 @@ function processActivityAt(value){
 }
 function openFurnitureActions(kind){
  const sets={
-  sofa:{title:'沙发',items:[['坐下休息','rest'],['靠着沙发待一会儿','company']]},
-  bed:{title:'床',items:[['躺下休息','sleep']]},
-  chair:{title:'椅子',items:[['坐下休息','sitChair'],['坐在这里陪我一会儿','sitChair']]},
-  bookshelf:{title:'书架',items:[['挑一本书，坐下阅读','read'],['整理书架','tidy']]},
-  desk:{title:'书桌',items:[['坐下阅读','read'],['写作 / 整理资料','write'],['使用电脑','computerWork']]},
-  computer:{title:'电脑',items:[['工作','computerWork'],['浏览资料','write'],['玩电脑游戏','computerPlay']]},
-  bouquet:{title:'捧花摆件',items:[['欣赏花束','bouquet'],['整理花束','bouquet']]}
+  sofa:{title:'沙发',items:[['休息','rest'],['聊天','chat']]},
+  bed:{title:'床',items:[['休息','rest']]},
+  chair:{title:'椅子',items:[['休息','rest'],['聊天','chat']]},
+  bookshelf:{title:'书架',items:[['阅读','read']]},
+  desk:{title:'书桌',items:[['阅读','read'],['电脑游戏','computerPlay']]},
+  computer:{title:'电脑',items:[['电脑游戏','computerPlay']]},
+  bouquet:{title:'捧花摆件',items:[['聊天','chat']]}
  };
  const set=sets[kind];if(!set)return;
  $('drawerTitle').textContent=set.title+' · 互动';
@@ -593,7 +595,7 @@ function openFurnitureActions(kind){
  });
  $('drawer').classList.add('open');
 }
-function perform(action,force=false){if(action==='cook'||action==='cookTogether'){openKitchenPanel(action==='cookTogether');return}const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'},a=map[action]||action,ok=proposeActivityNow(a,force);if(ok){animate(a==='game'||a==='bouquet'?'wave':a==='walk'?'walk':'sit');setSceneActivity(a,false)}}
+function perform(action,force=false){const map={cook:'cookTogether',cookTogether:'cookTogether',reading:'read',read:'read',outing:'walk',walk:'walk',computerGame:'computerPlay',computerPlay:'computerPlay',chat:'chat',rest:'rest'},a=map[action]||action,ok=proposeActivityNow(a,force);if(ok){animate(a==='walk'?'walk':'sit');setSceneActivity(a,false)}}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
@@ -1172,17 +1174,28 @@ function initArday3D(){
    else{
     let support=null;
     if(surfaceType==='tabletop')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
-    if(surfaceType==='tabletop'&&!support){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);toast('电脑和摆件需要先放在书桌或餐桌上');return null}
-    if(support){item.supportId=support.id;group.position.y=support.group.position.y+support.surfaceY}
-    const rug=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
-    const rugSpots=surfaceType==='floor'&&name!=='地毯'?window.ArdayFurniturePlacement.rugCandidates(rug):[];
-    const fallbackSpots=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
-    const candidates=wallAxis?fallbackSpots:[...rugSpots,...fallbackSpots];
     let placed=false;
-    if(wallAxis){
-     for(const point of candidates){const side=wallSide||'back',offset=point[0];if(canPlaceOnWall(item,side,offset)){wallTransform(group,side,offset,group.position.y);placed=true;break}}
+    if(surfaceType==='tabletop'&&support){
+     item.supportId=support.id;
+     const offsets=name==='电脑'?[[0,0],[-.32,0],[.32,0],[0,.12],[0,-.12]]:[[.38,0],[-.38,0],[0,.12],[0,-.12],[0,0]];
+     const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
+     for(const [ox,oz] of offsets){
+      const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
+      group.position.set(x,support.group.position.y+support.surfaceY+.015,z);
+      group.rotation.y=support.group.rotation.y;
+      if(canPlaceFurniture(item,x,z,group.rotation.y)){placed=true;break}
+     }
     }else{
-     for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
+     if(surfaceType==='tabletop'){item.supportId=null;group.position.y=0}
+     const rug=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
+     const rugSpots=surfaceType==='floor'&&name!=='地毯'?window.ArdayFurniturePlacement.rugCandidates(rug):[];
+     const fallbackSpots=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
+     const candidates=wallAxis?fallbackSpots:[...rugSpots,...fallbackSpots];
+     if(wallAxis){
+      for(const point of candidates){const side=wallSide||'back',offset=point[0];if(canPlaceOnWall(item,side,offset)){wallTransform(group,side,offset,group.position.y);placed=true;break}}
+     }else{
+      for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
+     }
     }
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
