@@ -671,7 +671,6 @@ function ardayLine(kind, fallback){
 }
 function sharedGoalCatalog(){
  return [
-  {id:'room',title:'把房间重新收拾一番',detail:'一起整理房间，让它更适合两个人生活。',target:3,unit:'次共同整理',action:'tidy'},
   {id:'meal',title:'认真做几顿晚饭',detail:'不赶时间地一起准备两顿晚餐。',target:2,unit:'顿共同料理',action:'cookTogether'},
   {id:'outing',title:'找一天出门走走',detail:'把手头的事情放一放，一起出门散步两次。',target:2,unit:'次共同出门',action:'walk'}
  ];
@@ -691,7 +690,7 @@ if(s.project?.status==='active'&&s.sharedGoal?.status!=='active'){
  if(legacy)s.sharedGoal={...legacy,progress:Math.min(legacy.target,Number(s.project.progress)||0),status:'active',startedAt:Date.now(),variant:'migrated'};
 }
 delete s.project;
-Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'){ev.activity='tidy';ev.title='整理房间';ev.kind='personal'}}));
+Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'||ev.activity==='tidy'){ev.activity='idle';ev.title='自由时间';ev.kind='free'}}));
 function acceptSharedGoal(id,variant='normal'){
  const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return;
  const target=variant==='slow'?Math.max(1,g.target-1):g.target;
@@ -1641,14 +1640,13 @@ function initArday3D(){
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
-    const reading=activeActivity==='read',eating=activeActivity==='eat'||activeActivity==='food',tidying=false,typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
+    const reading=activeActivity==='read',eating=activeActivity==='eat'||activeActivity==='food',typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
      let shoulderZ=pose==='sit'?.15:0;
      if(reading){shoulderX=.12+Math.sin(t*.003+i*2.2)*.075;elbowX=-.58+Math.sin(t*.004+i*2.8)*.12;shoulderZ=(i===0?.23:-.18)+Math.sin(t*.002+i)*.025}
      if(typing){shoulderX=.18+Math.sin(t*.012+i*2.5)*.025;elbowX=-.72+Math.sin(t*.01+i)*.035;shoulderZ=i===0?.16:-.16}
-     if(tidying){shoulderX=.32+Math.sin(t*.006+i*2.6)*.16;elbowX=-.35+Math.sin(t*.008+i*2.4)*.18;shoulderZ=i===0?.38:-.34}
      if(eating){shoulderX=.52+Math.sin(t*.006+i*2.8)*.12;elbowX=-.92+Math.sin(t*.008+i*2.1)*.1;shoulderZ=i===0?.34:-.3}
      a.shoulder.rotation.x+=(shoulderX-a.shoulder.rotation.x)*.09;
      a.shoulder.rotation.z+=(shoulderZ-a.shoulder.rotation.z)*.08;
