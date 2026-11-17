@@ -27,8 +27,8 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
 const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
-let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV2){s.money=30000;s.testFundsV2=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=s.furniture||base.furniture.slice();
+let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
+s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=(Array.isArray(s.furniture)?s.furniture:base.furniture.slice()).filter(item=>item!=='沙发');
 s.ownedFurniture=s.ownedFurniture||[];
 s.placedFurniture=s.placedFurniture||[];
 if((s.furnitureCatalogVersion||0)<2){
@@ -409,9 +409,9 @@ function dayAnchorAt(value){
 function keyAt(value){return dayKey(dayAnchorAt(value))}
 function ensureScheduleAt(value){
  const currentKey=keyAt(Date.now()),requestedKey=keyAt(value);
- if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:4};
+ if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:5};
  s.calendar.days=s.calendar.days||{};
- if((s.calendar.version||0)<4){
+ if((s.calendar.version||0)<5){
   s.calendar.anchor=currentKey;s.calendar.days={};s.calendar.version=5;
  }
  if(s.calendar.anchor!==currentKey){
