@@ -16,6 +16,7 @@
 .bubble{position:absolute;left:50%;top:5%;transform:translateX(-50%);z-index:6;max-width:min(78%,440px);padding:10px 15px;background:#fff9ed;border:1px solid #e0ceb3;border-radius:16px 16px 16px 5px;text-align:center;font-size:13px;line-height:1.5;box-shadow:0 5px 15px #624b2c1c}.room-label{position:absolute;left:15px;bottom:12px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#6e5b47;z-index:15;pointer-events:auto;background:#fff9eddd;padding:7px 11px;border:1px solid #d9c5a8;border-radius:10px;box-shadow:0 2px 8px #57432a20;cursor:pointer;touch-action:manipulation}.camera-mode-toggle:active{transform:scale(.97)}
 .hotspot{position:absolute;z-index:7;border:1px solid #fff4d6aa;background:#fff8e8aa;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;font-size:17px;box-shadow:0 2px 8px #57432a22}.hotspot:active{filter:brightness(.96)}.furniture-hotspot{z-index:11;touch-action:manipulation}.decorate-tools button{border:1px solid #d8c4a7;background:#fff8ec;color:#584733;border-radius:9px;padding:6px 10px;font-size:11px;white-space:nowrap}.decorate-tools{position:absolute;left:auto;right:14px;bottom:14px;transform:none;z-index:96;display:none;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;background:transparent;box-shadow:none;pointer-events:auto}.stage.editing .decorate-tools{display:flex}.spot-sofa{left:20%;bottom:36%}.spot-window{left:20%;top:39%}.spot-table{right:16%;bottom:31%}.decorate{position:absolute;right:12px;top:12px;z-index:8;background:#fff9eddd;border:1px solid #dfcdb4;border-radius:12px;padding:9px 13px;font-size:12px;font-weight:650}.edit-hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:9;padding:7px 12px;background:#493f34dd;color:#fff7e9;border-radius:12px;font-size:11px;white-space:nowrap;display:none}.stage.editing .edit-hint{display:block}.stage.editing .hotspot{outline:3px solid #e6a46c}
 .bottom{display:flex;flex-wrap:nowrap;gap:5px;align-items:center;min-width:0}.toolbar{display:flex;flex:1 1 auto;min-width:0;gap:3px;overflow:visible;max-width:none;scrollbar-width:none}.toolbar::-webkit-scrollbar{display:none}.tool{flex:1 1 0;min-width:0;height:42px;padding:0 2px;border-radius:10px;border:1px solid var(--line);background:var(--cream);box-shadow:0 2px 0 #d9c7ad;display:flex;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:650;white-space:nowrap}.tool .icon{font-size:18px}.tool.active{background:#f1ddc4;border-color:#d8ae84;box-shadow:0 2px 0 #c99b70}.chat{height:47px;display:flex;gap:7px;padding:4px;background:var(--cream);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);min-width:0}.chat input{min-width:0;flex:1;border:0;outline:0;background:transparent;padding:0 10px;color:var(--ink);font-size:13px}.chat input::placeholder{color:#a29482}.send{border:0;border-radius:11px;background:var(--orange);color:white;padding:0 17px;font-weight:650}
+.shop-categories{display:flex;gap:8px;margin:0 0 10px}.shop-category{flex:1;border:1px solid #dfcdb5;border-radius:10px;padding:9px;background:#f7efdf;color:#68543e;font-size:12px}.shop-category.active{background:#71583f;color:#fff;border-color:#71583f}
 .drawer{position:absolute;left:50%;bottom:12px;transform:translate(-50%,15px);opacity:0;pointer-events:none;width:min(92%,560px);max-height:42%;overflow:auto;z-index:12;background:#fff9ef;border:1px solid #deccb3;border-radius:18px;padding:13px;box-shadow:0 10px 30px #44331e35;transition:.2s}.drawer.open{opacity:1;transform:translate(-50%,0);pointer-events:auto}.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.drawer-head strong{font:700 16px Georgia}.close{background:#f1e5d4;border-radius:9px;padding:5px 10px}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.account-transfer input{display:block;width:100%;margin:7px 0;padding:10px;border:1px solid #dfcdb5;border-radius:9px;background:#fffdf8;font-size:15px}.account-transfer .calendar-actions{margin-top:8px}.job-card{display:block}.job-card .choice{width:100%;margin-top:5px}.choice{background:#f8efdf;border:1px solid #e5d5bf;border-radius:12px;padding:11px 7px;text-align:center;font-size:12px}.choice .emoji{display:block;font-size:21px;margin-bottom:5px}.choice small{display:block;color:var(--muted);margin-top:4px;font-size:10px}.toast{position:fixed;left:50%;bottom:calc(75px + env(safe-area-inset-bottom));transform:translate(-50%,12px);opacity:0;pointer-events:none;z-index:30;background:#493f34;color:white;border-radius:12px;padding:10px 15px;font-size:12px;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:700px){.app{padding-left:8px;padding-right:8px;gap:7px}.top{grid-template-columns:1fr;gap:5px}.identity{display:none}.stats{padding:6px 4px;gap:1px}.stat label{font-size:9px}.stat b{font-size:11px}.stage{border-radius:18px}.backwall{left:2%;right:2%}.window{left:8%;width:27%}.person{transform:translateX(-50%) scale(.83);transform-origin:bottom center}.person.sit{transform:translate(-50%,10px) scale(.78)}.tool{min-width:61px;height:44px;gap:3px;font-size:12px}.tool .icon{font-size:16px}.bottom{gap:6px}.chat{height:44px}.send{padding:0 12px}.room-label{font-size:9px}}
 @media(max-width:390px){.stat label{font-size:8px}.stat b{font-size:10px}.stats{padding:5px 2px}.tool{min-width:53px}.chat input{font-size:12px}.send{padding:0 9px}}
@@ -1577,17 +1578,24 @@ function initArday3D(){
    if(corners.some(([px,pz])=>px<roomBounds.minX||px>roomBounds.maxX||pz<roomBounds.minZ||pz>roomBounds.maxZ))return false;
    for(const other of furnitureRegistry){
     if(other===item||other.room!==item.room||other.wallAxis)continue;
+    if(item.supportId===other.id||other.supportId===item.id)continue;
     if(rectsOverlap(corners,furnitureCorners(other)))return false;
+   }
+   if(item.supportId){
+    const support=furnitureRegistry.find(x=>x.id===item.supportId);
+    if(!support)return false;
+    const dx=Math.abs(x-support.group.position.x),dz=Math.abs(z-support.group.position.z);
+    if(dx+item.width/2>support.width/2-.08||dz+item.depth/2>support.depth/2-.08)return false;
    }
    return true;
   }
   function persistFurniture(item){
    s.furnitureLayout=s.furnitureLayout||{};
    s.furnitureLayout[item.room]=s.furnitureLayout[item.room]||{};
-   s.furnitureLayout[item.room][item.id]=item.wallAxis?{position:item.group.position[item.wallAxis],y:item.group.position.y}:{x:item.group.position.x,z:item.group.position.z,rotation:item.group.rotation.y};
+   s.furnitureLayout[item.room][item.id]=item.wallAxis?{position:item.group.position[item.wallAxis],y:item.group.position.y}:{x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null};
    s.roomPositions=s.roomPositions||{};s.roomPositions[item.room]=s.roomPositions[item.room]||{};
    s.roomPositions[item.room][item.id]=[item.group.position.x,item.group.position.z];
-   if(item.owned&&s.placedFurniture){const saved=s.placedFurniture.find(x=>x.id===item.id);if(saved){saved.x=item.group.position.x;saved.z=item.group.position.z;saved.rotation=item.group.rotation.y}}
+   if(item.owned&&s.placedFurniture){const saved=s.placedFurniture.find(x=>x.id===item.id);if(saved){saved.x=item.group.position.x;saved.y=item.group.position.y;saved.z=item.group.position.z;saved.rotation=item.group.rotation.y;saved.supportId=item.supportId||null}}
    save();
   }
   function selectFurniture(item){
@@ -1664,7 +1672,7 @@ function initArday3D(){
      const item=furnitureRegistry.find(x=>x.group===furniture);
      if(item){
       selectFurniture(item);
-      const plane=item.wallAxis==='x'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):item.wallAxis==='z'?new T.Plane(new T.Vector3(1,0,0),-furniture.position.x):floorPlane;
+      const plane=item.wallAxis==='x'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):item.wallAxis==='z'?new T.Plane(new T.Vector3(1,0,0),-furniture.position.x):new T.Plane(new T.Vector3(0,1,0),-furniture.position.y);
       if(raycaster.ray.intersectPlane(plane,dragPoint)){
        dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z};
        gestureSurface.setPointerCapture(e.pointerId);e.preventDefault();return;
