@@ -76,11 +76,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 
 
-const tabs={
- '互动':[['阅读','📖','read'],['休息','☁','rest'],['外出','🌿','walk'],['电脑游戏','▣','computerPlay'],['聊天','💬','chat']],
- '物品':[],
- '商店':[]
-};
+const tabs={'互动':Object.entries(activityMeta).filter(([,meta])=>meta.playerSelectable).map(([activity,meta])=>[meta.menuLabel||meta.title,meta.playerIcon||'•',activity]),'物品':[],'商店':[]};
 
 let shopCategory='食物食材';
 let inventoryCategory='全部';
@@ -559,7 +555,18 @@ function presentActivity(activity){
  if(!activityMeta[a])return;
  updateArday3D();
 }
-function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
+function chooseAutonomousActivity(){
+ const available=Object.entries(activityMeta).filter(([id,meta])=>{
+  if(!meta.autonomous||!meta.autonomy)return false;
+  if(meta.requires==='desk'&&!has('书桌'))return false;
+  if(meta.requires==='computer'&&!has('电脑'))return false;
+  return true;
+ }).map(([id,meta])=>{
+  const spec=meta.autonomy,level=Number(s[spec.need]??50);
+  return {activity:id,score:Math.max(0,spec.threshold-level)*spec.weight+(spec.base||0)+Math.random()*4};
+ });
+ return available.sort((a,b)=>b.score-a.score)[0]?.activity||'rest';
+}
 function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
 // Resolve every hour through the calendar. Autonomous choice fills only an unassigned slot;
 // fixed routines and player proposals already exist as calendar events and take precedence.
