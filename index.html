@@ -588,7 +588,7 @@ function respondToChat(text){
  if(/你好|嗨|早上好|晚上好|在吗|回来/.test(t)){topic='greeting';reply=pick(['你来了。我刚才在'+(act[cur]||'做自己的事')+'。','嗯，我在。你今天过得怎么样？','回来啦。刚才我正准备'+(cur==='sleep'?'睡觉':'继续手头的事')+'。'])}
  else if(/累|疲惫|困|睡不着|休息/.test(t)){topic='tired';reply=pick(['你听起来有点累。今天是什么事情最消耗你？','那先坐一会儿吧。我刚才也在休息。','你想聊聊原因，还是暂时换个轻松的话题？'])}
  else if(/难过|伤心|烦|生气|焦虑|压力|痛苦/.test(t)){topic='mood';reply=pick(['我先听你说。是刚发生了什么，还是最近一直积累着？','我不想随便劝你想开点。你最介意的究竟是哪一部分？','你希望我先听着，还是和你一起分析这件事？'])}
- else if(/钱|价格|贵|便宜|工作|赚钱|收入/.test(t)){topic='money';reply=pick(['我们现在有 ¥'+s.money+'。我觉得先留出生活开销比较稳妥。','我可以接临时工作，不过也得看精力和日程。','最近可以看看委托板。买东西之前最好留点余地。'])}
+ else if(/钱|价格|贵|便宜|工作|赚钱|收入/.test(t)){topic='money';reply=pick(['我们现在有 ¥'+s.money+'。我觉得先留出生活开销比较稳妥。','我会看看适合自己的正式职位，也要考虑日程和精力。','最近先留意共同开销，再决定买什么。'])}
  else if(/音乐|唱片|歌/.test(t)){topic='music';reply=has('唱片机')?pick(['最近我常在晚上听唱片。你有特别喜欢的音乐吗？','我想找点没听过的音乐。','唱片机已经成了房间里常用的东西。']):'我也想听音乐，不过我们还没有唱片机。'}
  else if(/书|阅读|小说|读/.test(t)){topic='reading';reply=pick(['我最近读得比较慢。你在读什么？','你更喜欢故事，还是观点和论证？','有些书读完以后，想法会留很久。'])}
  else if(/吃|饿|饭|食物/.test(t)){topic='food';reply=pick(['我有点想吃热的东西。你今天吃饭了吗？','如果现在能选，我想吃点简单但有味道的东西。','我们可以看看库存还有什么。'])}
@@ -1460,7 +1460,49 @@ function initArday3D(){
    registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
    registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')})
   ];
+  function createOwnedFurniture(name,record=null){
+   const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
+   const id=record?.id||('owned-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
+   const group=new T.Group();group.userData.ownedType=name;group.position.set(record?.x??0,0,record?.z??0);group.rotation.y=record?.rotation||0;parent.add(group);
+   const mat=(color,rough=.8)=>new T.MeshStandardMaterial({color,roughness:rough});
+   const wood=mat(0x9a7252),cream=mat(0xe8d9c5),green=mat(0x78916e),terra=mat(0xc58d70),dark=mat(0x594d45);
+   const addBox=(x,y,z,w,h,d,m)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);group.add(o);return o};
+   if(name==='抱枕'){
+    addBox(0,.25,0,.72,.28,.58,cream);addBox(0,.39,0,.62,.035,.48,terra);
+   }else if(name==='绿植'){
+    const pot=new T.Mesh(new T.CylinderGeometry(.2,.15,.34,16),terra);pot.position.y=.17;group.add(pot);
+    for(let i=0;i<5;i++){const a=i*Math.PI*2/5,leaf=new T.Mesh(new T.SphereGeometry(.18,12,10),green);leaf.scale.set(.65,1.8,.55);leaf.position.set(Math.cos(a)*.18,.55+(i%2)*.1,Math.sin(a)*.18);group.add(leaf)}
+   }else if(name==='书桌'){
+    addBox(0,.92,0,1.35,.13,.72,wood);for(const x of [-.56,.56])for(const z of [-.27,.27])addBox(x,.45,z,.09,.85,.09,dark);
+   }else if(name==='书架'){
+    for(const x of [-.55,.55])addBox(x,1.05,0,.1,2.1,.42,wood);
+    for(const y of [.12,.78,1.44,2.08])addBox(0,y,0,1.2,.09,.45,wood);
+    for(let y=.35;y<1.95;y+=.66)for(let j=0;j<3;j++)addBox(-.35+j*.35,y,.02,.22,.42,.28,[cream,terra,green][j]);
+   }else if(name==='唱片机'){
+    addBox(0,.36,0,.8,.18,.62,dark);addBox(-.08,.47,0,.43,.035,.43,wood);
+    const disc=new T.Mesh(new T.CylinderGeometry(.17,.17,.025,24),dark);disc.rotation.x=Math.PI/2;disc.position.set(-.08,.5,0);group.add(disc);
+    addBox(.27,.5,-.15,.06,.35,.06,wood);
+   }else{
+    addBox(0,.3,0,.7,.6,.55,cream);
+   }
+   const dims={抱枕:[.8,.65],绿植:[.55,.55],书桌:[1.45,.82],书架:[1.3,.55],唱片机:[.9,.7]};
+   const [width,depth]=dims[name]||[.8,.7];
+   const item=registerFurniture({id,name,room,group,width,depth,anchor:[0,.5],action:()=>say(name+'摆在这里。')});
+   item.owned=true;
+   if(record){group.position.set(record.x,0,record.z);group.rotation.y=record.rotation||0}
+   else{
+    const candidates=[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
+    const spot=candidates.find(([x,z])=>canPlaceFurniture(item,x,z,group.rotation.y));
+    if(!spot){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
+    group.position.set(spot[0],0,spot[1]);
+   }
+   persistFurniture(item);
+   s.placedFurniture=s.placedFurniture||[];
+   if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,z:group.position.z,rotation:group.rotation.y});
+   return item;
+  }
   const hotspotWorld=new T.Vector3();
+  (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
   function furnitureCorners(item,x=item.group.position.x,z=item.group.position.z,angle=item.group.rotation.y){
    const co=Math.cos(angle),si=Math.sin(angle),hx=item.width/2,hz=item.depth/2;
    return [[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([lx,lz])=>[x+lx*co+lz*si,z-lx*si+lz*co]);
@@ -1502,6 +1544,7 @@ function initArday3D(){
    s.furnitureLayout[item.room][item.id]=item.wallAxis?{position:item.group.position[item.wallAxis],y:item.group.position.y}:{x:item.group.position.x,z:item.group.position.z,rotation:item.group.rotation.y};
    s.roomPositions=s.roomPositions||{};s.roomPositions[item.room]=s.roomPositions[item.room]||{};
    s.roomPositions[item.room][item.id]=[item.group.position.x,item.group.position.z];
+   if(item.owned&&s.placedFurniture){const saved=s.placedFurniture.find(x=>x.id===item.id);if(saved){saved.x=item.group.position.x;saved.z=item.group.position.z;saved.rotation=item.group.rotation.y}}
    save();
   }
   function selectFurniture(item){
@@ -1701,7 +1744,7 @@ function initArday3D(){
    arday3D.raf=requestAnimationFrame(frame)}
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:name=>{const item=createOwnedFurniture(name);if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
