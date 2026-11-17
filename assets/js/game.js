@@ -137,7 +137,7 @@ function openTab(name,force=false){
   const itemIcons={'点心':'🥐','修理工具':'🔧'};
   s.items.forEach((item,index)=>tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index]));
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key])});
-  s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,'▧','place-owned-'+index]));
+  s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,item.startsWith('成品食物·')?'🍽️':'▧','place-owned-'+index]));
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
@@ -511,13 +511,6 @@ function openKitchenPanel(){
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open');
 }
 function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;s.ownedFurniture.push(itemName);addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
-function consumeMeal(){
- if(s.readyMeals?.length){const m=s.readyMeals.shift();change({hunger:Math.min(45,m.hunger),fun:2});remember('meal','吃了'+m.name,1);return m.name}
- if(s.items.includes('点心')){s.items.splice(s.items.indexOf('点心'),1);change({hunger:18,fun:1});return '点心'}
- const id=Object.keys(recipes).find(canCook);
- if(id){const r=recipes[id];Object.entries(r.ingredients).forEach(([k,n])=>s.pantry[k]=pantryCount(k)-n);change({hunger:r.hunger,fun:1});remember('meal','简单准备并吃了'+r.name,1);return r.name}
- return null;
-}
 function setSceneActivity(activity,announce){
  const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);
  s.currentActivity=a;updateArday3D();
@@ -549,7 +542,7 @@ function processActivityAt(value){
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
  if(meta){
   const effects={...(meta.effect||{})};
-  if(activity==='eat'||activity==='food'){if(!placedMealEaten)consumeMeal();delete effects.hunger}
+  if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
   change(effects);
   if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
   if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
@@ -1655,7 +1648,7 @@ function initArday3D(){
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
-    const reading=activeActivity==='read',tidying=activeActivity==='tidy',typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
+    const reading=activeActivity==='read',eating=activeActivity==='eat'||activeActivity==='food',tidying=activeActivity==='tidy',typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
@@ -1663,6 +1656,7 @@ function initArday3D(){
      if(reading){shoulderX=.12+Math.sin(t*.003+i*2.2)*.075;elbowX=-.58+Math.sin(t*.004+i*2.8)*.12;shoulderZ=(i===0?.23:-.18)+Math.sin(t*.002+i)*.025}
      if(typing){shoulderX=.18+Math.sin(t*.012+i*2.5)*.025;elbowX=-.72+Math.sin(t*.01+i)*.035;shoulderZ=i===0?.16:-.16}
      if(tidying){shoulderX=.32+Math.sin(t*.006+i*2.6)*.16;elbowX=-.35+Math.sin(t*.008+i*2.4)*.18;shoulderZ=i===0?.38:-.34}
+     if(eating){shoulderX=.52+Math.sin(t*.006+i*2.8)*.12;elbowX=-.92+Math.sin(t*.008+i*2.1)*.1;shoulderZ=i===0?.34:-.3}
      a.shoulder.rotation.x+=(shoulderX-a.shoulder.rotation.x)*.09;
      a.shoulder.rotation.z+=(shoulderZ-a.shoulder.rotation.z)*.08;
      a.elbow.rotation.x+=(elbowX-a.elbow.rotation.x)*.09;
