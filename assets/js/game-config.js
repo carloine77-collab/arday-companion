@@ -40,6 +40,7 @@ window.ArdayGameConfig = {
 
 },
   activityMeta: {
+ cook:{title:'烹饪',location:'kitchen',pose:'idle',effect:{}},
  rest:{title:'休息',location:'sofa',pose:'sit',effect:{energy:10,fun:1}},
  sleep:{title:'睡觉',location:'bed',pose:'sleep',effect:{energy:13,hunger:-1}},
  eat:{title:'吃东西',location:'table',pose:'sit',effect:{hunger:18,energy:1}},
