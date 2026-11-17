@@ -962,9 +962,9 @@ function initArday3D(){
    group.userData.wallMeshes.push(leftWall,rightWall,frontWall);
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
    box(group,0,.24,-3.91,10.65,.12,.12,M(0xd7b990));
-   const trimMat=M(0xe7d4ba);trimMat.transparent=true;trimMat.depthWrite=false;
-   box(leftWallGroup,-5.22,2.36,0,.12,4.55,8.15,trimMat);
-   box(rightWallGroup,5.22,2.36,0,.12,4.55,8.15,trimMat.clone());
+   const trimMat=M(0xe7d4ba);trimMat.transparent=false;trimMat.depthWrite=true;
+   box(leftWallGroup,-5.22,.13,0,.12,.18,8.12,trimMat);
+   box(rightWallGroup,5.22,.13,0,.12,.18,8.12,trimMat.clone());
    for(let z=-3.55;z<3.7;z+=.92)box(group,0,.012,z,10.45,.018,.012,M(0xb58c68));
   }
   // Three distinct interiors; only one room is visible at a time.
@@ -1010,60 +1010,27 @@ function initArday3D(){
   kitchen.visible=false;bedroom.visible=false;
   // Detailed stylized character with articulated shoulders, elbows, hips and knees.
   const person=new T.Group();scene.add(person);const rig=new T.Group();person.add(rig);const body=new T.Group();rig.add(body);
+  // Character v2: fully rebuilt silhouette, facial topology, hair and outfit.
   const CM=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color,roughness,flatShading:true}));
-  const skinMat=CM(0xe6b18e,.82),skinShadow=CM(0xc9896c),hairMat=CM(0x302a2c),hairHi=CM(0x4a3a3b),shirtMat=CM(0x536f8c),shirtLight=CM(0x7895ad),trouserMat=CM(0x3e4859),shoeMat=CM(0x302d35),eyeMat=CM(0x332b2a),whiteMat=CM(0xf7eee3);
-  // Premium low-poly: controlled facets, clean silhouette and restrained material palette.
-  function ell(parent,x,y,z,sx,sy,sz,mat,seg=18){const o=new T.Mesh(new T.SphereGeometry(1,Math.min(seg,12),8),mat);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
-  ell(body,0,1.27,0,.275,.59,.19,shirtMat,24);ell(body,0,1.67,.015,.19,.105,.17,shirtLight,18);
-  box(body,0,1.25,.225,.022,.42,.014,shirtLight);for(let y of [1.43,1.25,1.07])ell(body,.04,y,.244,.018,.018,.012,whiteMat,10);
-  const collarL=new T.Mesh(new T.ConeGeometry(.14,.24,4),shirtLight);collarL.position.set(-.105,1.64,.19);collarL.rotation.z=-.18;body.add(collarL);
-  const collarR=new T.Mesh(new T.ConeGeometry(.14,.24,4),shirtLight);collarR.position.set(.105,1.64,.19);collarR.rotation.z=.18;body.add(collarR);
-  box(body,0,.91,.195,.38,.055,.035,M(0x293846));
-  cyl(body,0,1.82,0,.135,.24,skinMat,16);
-  const head=new T.Group();head.position.set(0,2.2,.015);head.scale.set(.9,.94,.94);body.add(head);
-  // Faceted face with a tapered jaw and raised cheek planes.
-  ell(head,0,-.015,0,.292,.382,.258,skinMat,12);
-  ell(head,0,-.235,.105,.205,.145,.19,skinMat,8);
-  for(const side of [-1,1]){const cheek=ell(head,side*.185,-.085,.165,.105,.105,.075,skinMat,8);cheek.rotation.z=side*-.16}
-  const earL=ell(head,-.292,-.005,-.005,.065,.105,.07,skinMat,8),earR=ell(head,.292,-.005,-.005,.065,.105,.07,skinMat,8);
-  earL.rotation.z=-.08;earR.rotation.z=.08;
-  const eyeGroups=[];
-  for(const side of [-1,1]){
-   const eye=new T.Group();eye.position.set(side*.115,.045,.235);head.add(eye);
-   ell(eye,0,0,0,.071,.046,.027,whiteMat,20);
-   ell(eye,side*.006,-.003,.022,.032,.039,.014,M(0x687d80),18);
-   ell(eye,side*.006,-.002,.034,.017,.027,.009,eyeMat,16);
-   ell(eye,side*.014,.015,.042,.009,.011,.006,M(0xffffff),10);
-   const upper=new T.QuadraticBezierCurve3(new T.Vector3(-.073,.005,.014),new T.Vector3(0,.061,.025),new T.Vector3(.073,.005,.014));
-   eye.add(new T.Mesh(new T.TubeGeometry(upper,16,.009,6,false),hairMat));
-   const lower=new T.QuadraticBezierCurve3(new T.Vector3(-.06,-.012,.012),new T.Vector3(0,-.047,.018),new T.Vector3(.06,-.012,.012));
-   eye.add(new T.Mesh(new T.TubeGeometry(lower,12,.004,5,false),skinShadow));
-   eyeGroups.push(eye);
-   const brow=ell(head,side*.12,.137,.225,.083,.018,.019,hairMat,16);brow.rotation.z=side*.12;
-   ell(head,side*.25,-.105,.188,.065,.035,.018,M(0xd99b88),14);
-  }
-  // Layered low-poly hair cap and individually modeled locks.
-  ell(head,0,.255,-.035,.335,.19,.295,hairMat,12);
-  ell(head,0,-.055,-.205,.275,.34,.13,hairMat,10);
-  for(const side of [-1,1]){
-   const temple=ell(head,side*.235,.045,.16,.105,.235,.12,hairMat,8);temple.rotation.z=side*-.08;
-   const sideLock=new T.Mesh(new T.ConeGeometry(.105,.48,5),hairMat);sideLock.position.set(side*.245,-.16,-.055);sideLock.rotation.x=Math.PI;sideLock.rotation.z=side*.12;head.add(sideLock);
-  }
-  for(let i=0;i<5;i++){const lock=new T.Mesh(new T.ConeGeometry(.075,.34+(i%2)*.08,5),i%2?hairHi:hairMat);lock.position.set(-.2+i*.1,.29,-.015);lock.rotation.z=(i-2)*-.09;lock.rotation.x=.18;head.add(lock)}
-  const tailCenter=new T.Mesh(new T.ConeGeometry(.115,.52,10),hairMat);tailCenter.position.set(0,-.39,-.18);tailCenter.rotation.x=Math.PI;tailCenter.rotation.z=-.035;head.add(tailCenter);
-  const tailLeft=new T.Mesh(new T.ConeGeometry(.075,.34,9),hairHi);tailLeft.position.set(-.12,-.31,-.12);tailLeft.rotation.x=Math.PI;tailLeft.rotation.z=.22;head.add(tailLeft);
-  const tailRight=new T.Mesh(new T.ConeGeometry(.075,.36,9),hairMat);tailRight.position.set(.13,-.32,-.12);tailRight.rotation.x=Math.PI;tailRight.rotation.z=-.2;head.add(tailRight);
-  const fringe=ell(head,-.075,.205,.225,.235,.085,.075,hairHi,10);fringe.rotation.z=-.12;
-  const fringeR=new T.Mesh(new T.ConeGeometry(.12,.24,5),hairMat);fringeR.position.set(.105,.245,.235);fringeR.rotation.z=-Math.PI/2+.18;fringeR.rotation.x=.2;head.add(fringeR);
-  const nose=new T.Mesh(new T.OctahedronGeometry(.045,0),skinShadow);nose.position.set(0,-.09,.258);nose.scale.set(.62,.9,.7);head.add(nose);
-  ell(head,0,-.045,.25,.018,.036,.018,skinShadow,8);
-  const lipLine=new T.QuadraticBezierCurve3(new T.Vector3(-.043,-.185,.247),new T.Vector3(0,-.198,.26),new T.Vector3(.043,-.185,.247));
-  head.add(new T.Mesh(new T.TubeGeometry(lipLine,14,.006,6,false),M(0x995f5a)));
-  ell(head,0,-.201,.245,.026,.006,.008,M(0xb87570),10);
-  const arms=[];
-  for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.27,1.58,0);body.add(shoulder);ell(shoulder,0,0,0,.09,.11,.09,shirtMat,16);const upper=cyl(shoulder,0,-.22,0,.061,.43,shirtMat,16);upper.position.y=-.22;const elbow=new T.Group();elbow.position.set(0,-.44,0);shoulder.add(elbow);ell(elbow,0,0,0,.062,.07,.062,skinMat,14);const fore=cyl(elbow,0,-.2,0,.048,.39,skinMat,16);fore.position.y=-.2;ell(elbow,0,-.41,.015,.055,.06,.06,skinMat,14);for(let f=0;f<3;f++)ell(elbow,-.035+f*.035,-.47,.035,.014,.055,.014,skinMat,8);arms.push({shoulder,elbow,side})}
-  const legs=[];
-  for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.135,.82,0);rig.add(hip);const thigh=cyl(hip,0,-.22,0,.088,.48,trouserMat,16);thigh.position.y=-.22;const knee=new T.Group();knee.position.set(0,-.46,0);hip.add(knee);ell(knee,0,0,0,.078,.082,.078,trouserMat,14);const shin=cyl(knee,0,-.2,0,.06,.4,trouserMat,16);shin.position.y=-.2;ell(knee,0,-.41,.075,.09,.07,.2,shoeMat,16);box(knee,0,-.47,.12,.17,.035,.2,M(0x171a20));legs.push({hip,knee,side})}
+  const skinMat=CM(0xe8b99d,.88),skinShadow=CM(0xc98e79),hairMat=CM(0x302b2a),hairHi=CM(0x59433d),shirtMat=CM(0xeee4d6),shirtLight=CM(0xc9b6a0),trouserMat=CM(0x4a4c55),shoeMat=CM(0x393337),eyeMat=CM(0x302827),whiteMat=CM(0xf7eee5);
+  const ell=(p,x,y,z,sx,sy,sz,mat,seg=16)=>{const o=new T.Mesh(new T.SphereGeometry(1,seg,Math.max(6,Math.floor(seg*.65)),0,Math.PI*2,0,Math.PI),mat);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;p.add(o);return o};
+  const limb=(p,x,y,z,r1,r2,len,mat)=>{const o=new T.Mesh(new T.CylinderGeometry(r1,r2,len,9,1),mat);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o};
+  const torsoPts=[new T.Vector2(.22,0),new T.Vector2(.285,.1),new T.Vector2(.285,.57),new T.Vector2(.21,.78),new T.Vector2(0,.78)];
+  const torsoGeo=new T.LatheGeometry(torsoPts,10);const torso=new T.Mesh(torsoGeo,shirtMat);torso.position.set(0,.94,0);torso.scale.z=.78;torso.castShadow=true;body.add(torso);
+  box(body,0,1.31,.208,.018,.55,.018,shirtLight);
+  const lapelShape=new T.Shape();lapelShape.moveTo(-.19,1.68);lapelShape.lineTo(-.025,1.46);lapelShape.lineTo(-.105,1.34);lapelShape.lineTo(-.25,1.61);lapelShape.closePath();const lapelGeo=new T.ShapeGeometry(lapelShape);lapelGeo.translate(0,0,.225);const lapel=new T.Mesh(lapelGeo,shirtLight);body.add(lapel);const lapel2=lapel.clone();lapel2.scale.x=-1;body.add(lapel2);
+  for(const y of [1.38,1.2,1.02])ell(body,.025,y,.239,.018,.018,.012,CM(0x9e8069),8);box(body,0,.91,.03,.39,.09,.4,trouserMat);limb(body,0,1.78,0,.105,.12,.25,skinMat);
+  const head=new T.Group();head.position.set(0,2.18,.015);body.add(head);
+  const facePts=[new T.Vector2(.025,-.355),new T.Vector2(.105,-.33),new T.Vector2(.19,-.23),new T.Vector2(.255,-.06),new T.Vector2(.27,.12),new T.Vector2(.245,.29),new T.Vector2(.18,.39),new T.Vector2(0,.415)];const faceGeo=new T.LatheGeometry(facePts,16);faceGeo.scale(1,1,.78);const face=new T.Mesh(faceGeo,skinMat);face.position.z=.005;face.castShadow=true;head.add(face);
+  for(const side of [-1,1]){const ear=ell(head,side*.258,-.005,-.01,.052,.085,.055,skinMat,10);ear.rotation.z=side*.12;ell(head,side*.16,-.075,.174,.085,.075,.065,CM(0xe3aa91),10)}
+  const eyeGroups=[];for(const side of [-1,1]){const eye=new T.Group();eye.position.set(side*.105,.065,.205);head.add(eye);ell(eye,0,0,0,.058,.039,.022,whiteMat,16);ell(eye,side*.004,-.002,.018,.027,.034,.012,CM(0x806d61),14);ell(eye,side*.004,-.002,.028,.014,.025,.008,eyeMat,12);ell(eye,side*.011,.012,.035,.007,.009,.005,CM(0xffffff),8);const brow=new T.Mesh(new T.CapsuleGeometry(.012,.09,3,6),hairMat);brow.position.set(side*.105,.145,.2);brow.rotation.z=side*-.12;head.add(brow);eyeGroups.push(eye)}
+  ell(head,0,.31,-.045,.292,.19,.255,hairMat,16);ell(head,0,.02,-.18,.26,.31,.12,hairMat,14);
+  for(const side of [-1,1]){const panel=ell(head,side*.225,-.055,.035,.075,.31,.12,hairMat,12);panel.rotation.z=side*-.13;const tip=new T.Mesh(new T.ConeGeometry(.075,.22,7),hairHi);tip.position.set(side*.22,-.31,.04);tip.rotation.z=Math.PI;head.add(tip)}
+  for(let i=0;i<7;i++){const lock=new T.Mesh(new T.ConeGeometry(.052,.2+(i%3)*.035,7),i%2?hairHi:hairMat);lock.position.set(-.22+i*.073,.275,.12);lock.rotation.z=(i-3)*-.09;lock.rotation.x=.15;head.add(lock)}
+  const fringe1=new T.Mesh(new T.ConeGeometry(.105,.25,7),hairHi);fringe1.position.set(-.09,.19,.205);fringe1.rotation.z=-1.05;head.add(fringe1);const fringe2=new T.Mesh(new T.ConeGeometry(.09,.22,7),hairMat);fringe2.position.set(.065,.22,.205);fringe2.rotation.z=-.82;head.add(fringe2);
+  const nose=new T.Mesh(new T.OctahedronGeometry(.033,1),skinShadow);nose.position.set(0,-.07,.225);nose.scale.set(.65,.82,.65);head.add(nose);const mouth=new T.QuadraticBezierCurve3(new T.Vector3(-.034,-.19,.19),new T.Vector3(0,-.202,.205),new T.Vector3(.034,-.19,.19));head.add(new T.Mesh(new T.TubeGeometry(mouth,12,.0045,5,false),CM(0x985e5a)));
+  const arms=[];for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.265,1.57,0);body.add(shoulder);ell(shoulder,0,-.035,0,.105,.13,.11,shirtMat,12);limb(shoulder,0,-.235,0,.075,.095,.39,shirtMat);const elbow=new T.Group();elbow.position.set(0,-.43,0);shoulder.add(elbow);ell(elbow,0,0,0,.068,.07,.068,shirtLight,10);limb(elbow,0,-.19,.008,.047,.06,.34,skinMat);ell(elbow,0,-.39,.025,.055,.07,.055,skinMat,10);for(let f=0;f<4;f++){const finger=limb(elbow,-.033+f*.022,-.455,.055,.009,.012,.075,skinMat);finger.rotation.z=(f-1.5)*-.08}arms.push({shoulder,elbow,side})}
+  const legs=[];for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.14,.83,0);rig.add(hip);limb(hip,0,-.22,0,.105,.12,.43,trouserMat);const knee=new T.Group();knee.position.set(0,-.43,0);hip.add(knee);ell(knee,0,0,0,.083,.09,.08,trouserMat,10);limb(knee,0,-.19,.005,.067,.078,.36,trouserMat);ell(knee,0,-.395,.075,.09,.07,.18,shoeMat,12);box(knee,0,-.445,.13,.15,.025,.16,CM(0x242126));legs.push({hip,knee,side})}
   const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
   const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0;
@@ -1177,22 +1144,21 @@ function initArday3D(){
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
    if(modelName==='床'){
-    width=3.1;depth=3.45;height=1.15;action=()=>perform('sleep');
-    box(0,.38,0,3.1,.55,3.45,m.dark);box(0,.72,.12,2.95,.22,3.2,m.fabric);box(0,.91,-.95,2.95,.22,1.3,m.sofa2);box(0,.65,-3.28,3.25,1.15,.18,m.dark);box(-.85,1.05,-1.75,.9,.22,.65,m.cream);box(.85,1.05,-1.75,.9,.22,.65,m.cream);box(0,1.04,.65,2.72,.045,1.05,m.sofa);
+    width=3.1;depth=3.45;height=1.25;action=()=>perform('sleep');box(0,.28,0,3.05,.28,3.38,m.dark);box(0,.48,0,3.12,.18,3.42,m.wood);box(0,.67,.12,2.94,.22,3.12,m.fabric);box(0,.81,.62,2.84,.12,1.45,m.sofa2);box(0,1.02,-1.58,3.12,1.45,.2,m.wood);box(0,1.03,-1.45,2.94,1.2,.12,m.fabric);for(const x of [-1.43,1.43])box(x,1,-1.52,.16,1.28,.22,m.wood);for(const x of [-.88,.88]){const pillow=sphere(x,.94,-.82,.48,.13,.34,m.cream);pillow.rotation.x=-.12}box(0,.84,.92,2.82,.045,.72,m.sofa);
    }else if(modelName==='床头柜'){
-    width=.85;depth=.75;height=1.05;legs(.82,.72,.86,.07);box(0,.88,0,.86,.2,.76,m.dark);box(0,.91,.39,.48,.38,.035,m.metal);
+    width=.88;depth=.78;height=.92;box(0,.47,0,.86,.76,.72,m.wood);box(0,.87,.02,.94,.1,.8,m.cream);for(const y of [.32,.62]){box(0,y,.37,.76,.25,.035,m.sofa2);for(const x of [-.19,.19])cyl(x,y,.405,.018,.018,.035,m.gold,10)}for(const x of [-.34,.34])box(x,.08,-.27,.09,.16,.09,m.dark);
    }else if(modelName==='床头灯'){
-    width=.48;depth=.48;height=1.45;cyl(0,.08,0,.2,.2,.16,m.dark);cyl(0,.62,0,.045,.05,1.05,m.metal);cyl(0,1.22,0,.24,.1,.34,m.cream);
+    width=.5;depth=.5;height=1.55;cyl(0,.08,0,.24,.24,.16,m.dark);cyl(0,.48,0,.07,.09,.68,m.cream);const shade=new T.Mesh(new T.SphereGeometry(1,16,10,0,Math.PI*2,0,Math.PI/2),m.cream);shade.scale.set(.34,.2,.34);shade.position.set(0,.86,0);group.add(shade);cyl(0,.72,0,.12,.12,.035,m.gold);
    }else if(modelName==='衣柜'){
-    width=1.7;depth=.72;height=2.5;box(0,1.25,0,1.7,2.5,.72,m.dark);box(-.42,1.25,.38,.78,2.34,.035,m.sofa2);box(.42,1.25,.38,.78,2.34,.035,m.sofa2);for(const x of [-.07,.07])cyl(x,1.25,.43,.025,.025,.12,m.gold);
+    width=1.85;depth=.78;height=2.45;box(0,1.22,0,1.82,2.38,.74,m.wood);box(0,2.43,0,1.94,.12,.82,m.oak);box(0,.08,0,1.9,.16,.8,m.dark);for(const x of [-.45,.45]){box(x,1.25,.39,.82,2.12,.055,m.sofa2);for(const y of [.35,1.05,1.75,2.15])box(x,y,.423,.68,.018,.012,m.cream);cyl(x+(x<0?.28:-.28),1.25,.45,.025,.025,.1,m.gold,10)}box(0,2.2,.12,.08,.12,.4,m.wood);
    }else if(modelName==='卧室地毯'){
     width=3.4;depth=2.5;surfaceType='rug';box(0,.035,0,3.4,.07,2.5,m.fabric);box(0,.075,0,3.18,.012,2.28,m.sofa2);
    }else if(modelName==='橱柜'){
-    width=2.8;depth=.82;height=1.05;surfaceType='table';surfaceY=1.1;box(0,.55,0,2.8,1.1,.82,m.dark);for(const x of [-.92,0,.92]){box(x,.55,.425,.86,.98,.035,m.sofa2);box(x,.55,.46,.08,.5,.035,m.metal)}box(0,1.12,0,2.9,.12,.9,m.cream);
+    width=2.8;depth=.82;height=1.05;surfaceType='table';surfaceY=1.1;box(0,.48,0,2.76,.96,.78,m.wood);box(0,1,0,2.9,.12,.9,m.cream);for(const x of [-.92,0,.92]){box(x,.49,.405,.84,.82,.045,m.sofa2);box(x,.49,.435,.045,.48,.025,m.gold);for(const y of [.24,.72])box(x,y,.44,.66,.018,.012,m.cream)}box(0,.92,-.12,2.62,.035,.58,m.dark);
    }else if(modelName==='吊柜'){
-    width=2.2;depth=.48;height=1.05;wallAxis='x';wallSide='back';anchor=[0,2.9];box(0,0,0,2.2,1.05,.48,m.dark);for(const x of [-.55,.55]){box(x,0,.25,1.04,.96,.035,m.sofa2);box(x,0,.29,.06,.35,.035,m.metal)}
+    width=2.2;depth=.48;height=1.05;wallAxis='x';wallSide='back';anchor=[0,2.9];box(0,0,0,2.2,1.05,.48,m.wood);box(0,.54,.25,2.28,.08,.55,m.oak);for(const x of [-.72,0,.72]){box(x,0,.25,.68,.94,.04,m.sofa2);box(x,0,.28,.54,.8,.018,m.cream);cyl(x,0,.32,.018,.018,.06,m.gold,10)}
    }else if(modelName==='冰箱'){
-    width=.9;depth=.82;height=2.15;box(0,1.075,0,.9,2.15,.82,m.cream);box(0,1.18,.42,.82,1.78,.035,m.sofa2);box(0,.43,.45,.82,.035,.04,m.metal);box(.3,.9,.48,.035,.42,.04,m.metal);
+    width=1.02;depth=.86;height=2.2;box(0,1.08,0,1.02,2.16,.86,m.cream);box(0,2.19,0,1.04,.08,.88,m.wood);box(0,1.43,.445,.94,1.32,.035,m.sofa2);box(0,.52,.445,.94,.92,.035,m.sofa2);box(0,.99,.47,.94,.035,.025,m.gold);for(const y of [.88,1.72])box(.36,y,.49,.035,.28,.045,m.metal);box(0,.05,0,.98,.08,.82,m.dark);
    }else if(modelName==='灶台'){
     width=variant==='复古珐琅'?1.5:1.35;depth=.82;height=variant==='不锈钢'?1.02:.94;
     if(variant==='复古珐琅'){
@@ -1210,7 +1176,7 @@ function initArday3D(){
      box(0,.22,.425,.95,.38,.035,m.metal);box(0,.22,.45,.76,.25,.018,m.dark);
     }
    }else if(modelName==='水槽'){
-    width=1.25;depth=.82;height=.94;box(0,.42,0,1.25,.84,.82,m.dark);box(0,.87,0,1.32,.1,.88,m.cream);box(0,.94,0,.72,.045,.48,m.metal);cyl(0,1.12,-.22,.035,.035,.38,m.metal);cyl(0,1.3,-.04,.035,.035,.32,m.metal);
+    width=1.35;depth=.88;height=.98;box(0,.43,0,1.35,.86,.88,m.wood);box(0,.91,0,1.43,.12,.94,m.cream);box(0,.99,-.02,.82,.035,.55,m.metal);box(0,1.01,-.02,.72,.025,.45,m.dark);for(const x of [-.55,.55])box(x,.51,.455,.24,.78,.035,m.sofa2);cyl(0,1.22,-.25,.035,.035,.4,m.metal);cyl(0,1.41,-.08,.035,.035,.38,m.metal);cyl(0,1.24,.02,.09,.09,.045,m.gold,12);
    }else if(modelName==='地毯'){
     width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
     box(0,.035,0,width,.07,depth,m.fabric);box(0,.074,0,3.48,.012,2.48,m.cream);box(0,.083,0,3.25,.012,2.25,m.fabric);
@@ -1270,16 +1236,15 @@ function initArday3D(){
     for(let i=0;i<9;i++){const angle=i*Math.PI*2/9,leaf=sphere(Math.cos(angle)*.32,1.82+Math.sin(i*2)*.08,Math.sin(angle)*.32,.18,.72,.1,i%2?m.leaf:m.leaf2);leaf.rotation.z=-Math.cos(angle)*.75;leaf.rotation.x=Math.sin(angle)*.75}
     sphere(0,1.83,0,.25,.24,.25,m.leaf);
    }else if(modelName==='书架'){
-    action=()=>openFurnitureActions('bookshelf');
-    width=1.45;depth=.55;height=2.1;
-    for(const x of [-.66,.66])box(x,1.05,0,.12,2.1,.5,m.wood);
-    for(const y of [.12,.72,1.32,1.92,2.08])box(0,y,0,1.42,.09,.54,m.oak);
-    for(let level=0;level<3;level++)for(let j=0;j<5;j++){const h=.34+(j%2)*.08;box(-.48+j*.24,.32+level*.6,0,.18,h,.32,[m.clay,m.leaf,m.gold,m.dark,m.cream][j])}
+    action=()=>openFurnitureActions('bookshelf');width=1.45;depth=.55;height=2.1;
+    for(const x of [-.62,.62]){const side=box(x,1.02,0,.09,2.04,.46,m.wood);side.rotation.z=x<0?-.055:.055}
+    for(const [y,w,d] of [[.18,1.3,.5],[.72,1.18,.46],[1.28,1.05,.42],[1.82,.92,.38]])box(0,y,0,w,.075,d,m.oak);
+    for(let level=0;level<3;level++)for(let j=0;j<4;j++){const ht=.26+(j%2)*.1;box(-.39+j*.26,.34+level*.55,-.035,.15,ht,.25,[m.clay,m.leaf,m.gold,m.dark][j])}
+    const braceL=box(-.39,1.02,-.22,.045,1.75,.04,m.gold);braceL.rotation.z=-.28;const braceR=box(.39,1.02,-.22,.045,1.75,.04,m.gold);braceR.rotation.z=.28;
    }else if(modelName==='书桌'||modelName==='餐桌'){
-    action=()=>modelName==='书桌'?openFurnitureActions('desk'):perform('food');
-    const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
-    box(0,height,0,width,.14,depth,m.wood);box(0,height+.075,0,width-.1,.025,depth-.1,m.cream);
-    if(dining){box(0,.42,0,.16,.72,.16,m.wood);box(0,.12,0,1.4,.12,.72,m.wood)}else{legs(width,depth,height-.08,.09);box(0,.28,-.3,.72,.08,.42,m.wood)}
+    action=()=>modelName==='书桌'?openFurnitureActions('desk'):perform('food');const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
+    if(dining){cyl(0,.4,0,.13,.2,.72,m.wood,12);cyl(0,.12,0,.62,.62,.13,m.oak,12);cyl(0,.82,0,.08,.08,.1,m.gold,12);cyl(0,.88,0,.62,.58,.12,m.wood,12);cyl(0,.95,0,.57,.57,.035,m.cream,12)}
+    else{box(0,.78,0,1.55,.12,.82,m.wood);box(0,.86,0,1.48,.025,.75,m.cream);for(const x of [-.52,.52]){box(x,.38,0,.12,.72,.72,m.wood);box(x,.4,.38,.68,.06,.08,m.oak)}box(0,.59,-.34,1.25,.28,.1,m.wood);for(const x of [-.42,0,.42])cyl(x,.59,-.275,.025,.025,.04,m.gold,10);box(0,1.02,-.34,1.2,.26,.08,m.oak)}
    }else if(modelName==='椅子'||modelName==='餐桌椅'){
     action=()=>openFurnitureActions('chair');
     width=variant==='软包扶手椅'?.92:.72;depth=.78;height=1.05;
