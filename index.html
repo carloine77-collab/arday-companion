@@ -202,6 +202,11 @@
 .stage{position:relative!important;isolation:isolate!important}
 .stage.three-ready>.three-scene{display:block!important;visibility:visible!important;opacity:1!important;position:absolute!important;inset:0!important;z-index:20!important;pointer-events:auto!important}
 .stage.three-ready>.three-scene canvas{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;height:100%!important}
+/* Keep room controls above the WebGL canvas: the canvas is an interactive layer. */
+.stage .bedroom-switch{z-index:50!important;pointer-events:auto!important}
+.stage .camera-hint{z-index:45!important;pointer-events:none!important}
+.stage .room-label{z-index:46!important;pointer-events:none!important}
+.three-status{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 24px);padding:8px 12px;border:1px solid #d9b99a;border-radius:10px;background:#fff8ed;color:#76533b;font:12px/1.5 system-ui;text-align:center;box-shadow:0 3px 12px #4a352522}
 </style>
 </head>
 <body>
@@ -1063,7 +1068,7 @@ function initArday3D(){
   if(!arday3DLoading){
    arday3DLoading=true;
    const load=(url,onfail)=>{const tag=document.createElement('script');tag.src=url;tag.onload=()=>{arday3DLoading=false;initArday3D();updateArday3D()};tag.onerror=()=>{tag.remove();onfail()};document.head.appendChild(tag)};
-   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;console.error('Three.js could not load from either CDN')})});
+   load('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',()=>{if(arday3DFallbackTried)return;arday3DFallbackTried=true;load('https://unpkg.com/three@0.128.0/build/three.min.js',()=>{arday3DLoading=false;const stage=$('stage');let status=stage.querySelector('.three-status');if(!status){status=document.createElement('div');status.className='three-status';stage.appendChild(status)}status.textContent='无法加载 Three.js：请检查网络/CDN 访问。'})});
   }return false;
  }
  const stage=$('stage');
@@ -1196,7 +1201,15 @@ function initArday3D(){
   stage.classList.add('three-ready');resize();setRoom('living');updateActivity(s.currentActivity||'idle');
   if(window.ResizeObserver){arday3D.ro=new ResizeObserver(resize);arday3D.ro.observe(stage)}window.addEventListener('resize',resize);
   arday3D.raf=requestAnimationFrame(frame);return true;
- }catch(e){console.warn('3D renderer unavailable; keeping the original scene.',e);return false}
+ }catch(e){
+  console.error('Arday 3D initialization failed:',e);
+  if(host&&host.parentNode)host.remove();
+  stage.classList.remove('three-ready');
+  let status=stage.querySelector('.three-status');
+  if(!status){status=document.createElement('div');status.className='three-status';stage.appendChild(status)}
+  status.textContent='3D 场景启动失败：'+(e&&e.message?e.message:String(e))+'。当前保留基础场景。';
+  return false;
+ }
 }
 function updateArday3D(){
  if(!arday3D)return;
@@ -1207,7 +1220,7 @@ function updateArday3D(){
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 initArday3D();updateArday3D();
-$('bedroomSwitch').addEventListener('click',()=>{const st=$('stage');const toBedroom=!st.classList.contains('bedroom-mode');st.classList.remove('kitchen-mode');st.classList.toggle('bedroom-mode',toBedroom);$('roomLabel').textContent=toBedroom?'BEDROOM · 卧室':'HOME · 起居室';updateArday3D()});
+$('bedroomSwitch').addEventListener('click',()=>{const st=$('stage');const toBedroom=!st.classList.contains('bedroom-mode');st.classList.remove('kitchen-mode');st.classList.toggle('bedroom-mode',toBedroom);$('roomLabel').textContent=toBedroom?'BEDROOM · 卧室':'HOME · 起居室';if(arday3D){updateArday3D()}else{const status=st.querySelector('.three-status');if(status)status.textContent='三维场景尚未启动；请查看此处显示的加载错误。'}});
 const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';$('stage').appendChild(cameraHint);
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();setInterval(tick,30000);setInterval(()=>{const key=keyAt(Date.now());if(s.calendar?.anchor!==key){ensureScheduleAt(Date.now());save();renderCalendar()}render();initScene()},60000);
