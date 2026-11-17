@@ -484,8 +484,7 @@ function tick(){
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now.getTime());
  ensurePersonalGoal(Date.now());updatePersonalGoal('balance',Date.now());
  generateDailyEvents();
- // A small, once-per-natural-day greeting adds character presence without introducing a new UI or resource system.
- if(s.lastGreetingDay!==key&&now.getHours()>=6&&now.getHours()<23){const hour=now.getHours();const greeting=hour<11?['早上好。今天想先从什么开始？','醒啦？我刚把今天的事情理了一遍。','早晨的光线不错，今天应该会是安静的一天。']:hour<17?['你回来啦。今天过得怎么样？','我刚好有一会儿空闲，要不要聊聊？','下午好。今天还有不少时间可以慢慢安排。']:['晚上好。今天剩下的时间，我们慢慢来。','你来了。要不要先坐一会儿？','今天辛苦了。晚上的时间留给自己吧。'];say(greeting[Math.floor(Math.random()*greeting.length)]);s.lastGreetingDay=key;}
+
  render();
  if($('stage').classList.contains('calendar-mode'))renderCalendar();
  save();
