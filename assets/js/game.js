@@ -71,7 +71,7 @@ const tabs={
 };
 
 let shopCategory='食物食材';
-const furnitureNameById={'buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架','buy-furniture-desk':'书桌','buy-furniture-chair':'椅子','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-chair':'餐桌椅','buy-furniture-bouquet':'捧花摆件'};
+const furnitureNameById={'buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架','buy-furniture-desk':'书桌','buy-furniture-chair':'椅子','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-chair':'餐桌椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'床头灯','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'卧室地毯','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
 function addItem(name){s.items.push(name)}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
@@ -878,14 +878,16 @@ function initArday3D(){
   function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function cyl(parent,x,y,z,r,h,material,seg=14){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,seg),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function roomShell(group,wallColor,floorColor){
-   box(group,0,-.14,0,10.8,.28,8.4,M(floorColor));
+   group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,M(floorColor));
    group.userData.backWall=box(group,0,2.35,-4.08,10.8,4.8,.2,M(wallColor));
+   group.userData.wallMeshes=[group.userData.backWall];
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
    const sideWallMaterial=M(wallColor);sideWallMaterial.transparent=true;sideWallMaterial.opacity=1;sideWallMaterial.depthWrite=false;
    group.userData.leftWall=leftWallGroup;group.userData.rightWall=rightWallGroup;group.userData.frontWall=frontWallGroup;
    const leftWall=box(leftWallGroup,-5.35,2.35,0,.2,4.8,8.4,sideWallMaterial);leftWall.castShadow=false;
    const rightWall=box(rightWallGroup,5.35,2.35,0,.2,4.8,8.4,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
    const frontWall=box(frontWallGroup,0,2.35,4.08,10.8,4.8,.2,sideWallMaterial.clone());frontWall.material.transparent=true;frontWall.material.depthWrite=false;frontWall.castShadow=false;
+   group.userData.wallMeshes.push(leftWall,rightWall,frontWall);
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
    box(group,0,.24,-3.91,10.65,.12,.12,M(0xd7b990));
    const trimMat=M(0xe7d4ba);trimMat.transparent=true;trimMat.depthWrite=false;
@@ -899,40 +901,18 @@ function initArday3D(){
   box(livingWindow,0,2.6,0,2.1,1.85,.06,m.glass);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
-  // Bedroom: blue-lilac walls, a proper bed, bedside tables and wardrobe.
+  // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);
   box(bedroomWindow,0,2.65,0,2.0,1.7,.06,M(0x8eb9cb));
   for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
-  const bed=new T.Group();bed.position.set(-.55,0,-1.55);bed.userData.furnitureKey='bed';bed.userData.roomKey='bedroom';bedroom.add(bed);
-  if(s.roomPositions?.bedroom?.bed)bed.position.set(s.roomPositions.bedroom.bed[0],0,s.roomPositions.bedroom.bed[1]);
-  box(bed,0,.38,0,3.1,.55,3.45,M(0x805b4e));box(bed,0,.72,.12,2.95,.22,3.2,M(0xf0d9d1));
-  box(bed,0,.91,-.95,2.95,.22,1.3,M(0x7897b5));
-  box(bed,-.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));box(bed,.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));
-  box(bed,0,.65,-3.28,3.25,1.15,.18,M(0x805b4e));
-  box(bed,0,.855,-.15,2.78,.035,2.62,M(0xd9b7b5));
-  ell(bed,-.82,1.055,-1.72,.49,.12,.34,M(0xfaf0e7));ell(bed,.82,1.055,-1.72,.49,.12,.34,M(0xfaf0e7));
-  box(bed,0,1.04,.65,2.72,.045,1.05,M(0xc6a3ad));
-  for(const x of [-2.45,1.35]){
-   box(bedroom,x,.5,-1.5,.85,.9,.75,M(0x9a7059));box(bedroom,x,.98,-1.5,.92,.1,.82,M(0xc99570));
-   box(bedroom,x,.55,-1.105,.48,.38,.035,M(0xb98968));
-   const lamp=new T.Group();lamp.position.set(x,1.04,-1.5);bedroom.add(lamp);cyl(lamp,0,.18,0,.045,.36,M(0xd8bd91));const shade=new T.Mesh(new T.CylinderGeometry(.08,.22,.25,16),M(0xf1dfbd));shade.position.y=.48;lamp.add(shade);
-  }
-  box(bedroom,3.85,1.35,-3.15,1.6,2.65,.65,M(0x8c6c62));
-  for(const x of [3.45,4.25])box(bedroom,x,1.3,-2.8,.05,2.25,.04,M(0xc49b7f));
-  const bedRug=new T.Mesh(new T.CylinderGeometry(2.1,2.1,.05,28),M(0xc68f9d));bedRug.scale.z=.58;bedRug.position.set(-.5,.025,1.25);bedroom.add(bedRug);
-  // Kitchen: sage cabinetry, warm tile backsplash, pale stone worktop.
+  // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);
   box(kitchenWindow,0,2.65,0,1.8,1.5,.06,M(0x9dc3bd));
   for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
   box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=1.62;y<=2.38;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
-  box(kitchen,0,1.25,-1.5,7.8,.3,1,M(0xe9dfd0));box(kitchen,0,.62,-1.5,7.8,1.1,.92,M(0x78917a));
-  for(let x=-2.8;x<=2.8;x+=1.4){box(kitchen,x,.65,-1,1.25,.85,.04,M(0x9eb49a));box(kitchen,x,.65,-.96,.035,.72,.05,M(0x6b856c))}
-  box(kitchen,3.9,1.5,-2.7,1.25,2.9,1,M(0xe4e2d9));box(kitchen,3.45,1.5,-2.15,.07,1,.08,M(0x8c8a83));
-  box(kitchen,-.3,1.48,-1.5,1.5,.1,.9,M(0x4e514b));for(const x of [-.7,.1])cyl(kitchen,x,1.58,-1.5,.22,.07,M(0x8d8981));
-  box(kitchen,-2.2,1.5,-1.5,1.1,.12,.75,M(0x91b8ba));
   // Three-dimensional hinged doors are part of each room, not UI overlays.
   function roomDoor(parent,z,label,target,color){
    const g=new T.Group();g.position.set(5.18,0,z);g.rotation.y=Math.PI/2;g.userData.roomTarget=target;g.userData.wallObject=true;parent.add(g);
