@@ -337,3 +337,17 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 
 .stage.editing .decorate-tools{align-items:flex-end!important;max-width:calc(100% - 20px)!important;right:10px!important;bottom:10px!important;gap:8px!important}
 .stage.editing .furniture-dye-palette{max-height:112px;overflow-y:auto;align-content:center}
+
+/* Player-side cooking panel */
+.cooking-panel{display:flex;flex-direction:column;gap:14px;padding:4px 2px 10px}
+.cooking-stock,.cooking-recipes{display:flex;flex-direction:column;gap:9px}
+.cooking-section-title{font-size:12px;font-weight:700;letter-spacing:.08em;color:#806b55}
+.cooking-stock-list{display:flex;flex-wrap:wrap;gap:7px}
+.cooking-stock-item{display:inline-flex;gap:6px;align-items:center;padding:7px 10px;border-radius:10px;background:#eee5d8;color:#695744;font-size:12px}
+.cooking-stock-item b{font-variant-numeric:tabular-nums;color:#47392c}
+.cooking-card{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px;border:1px solid #e5d8c7;border-radius:13px;background:#fffaf2}
+.cooking-dish-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:#f1e6d5;font-size:22px}
+.cooking-dish-copy{display:flex;flex-direction:column;gap:5px;min-width:0;color:#493b2e}
+.cooking-dish-copy strong{font-size:13px}.cooking-dish-copy small{font-size:10px;color:#97836d;line-height:1.4}
+.cooking-make{border:0;border-radius:9px;padding:8px 11px;background:#80664c;color:#fffaf2;font-size:11px;white-space:nowrap}.cooking-make:disabled{background:#ded5c9;color:#9e9488}
+.cooking-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:9px;border-top:1px solid #e8ddcf;color:#96836e;font-size:10px}.cooking-footer button{border:0;border-radius:9px;padding:8px 14px;background:#e8ddcf;color:#5c4c3b;font-size:11px}
