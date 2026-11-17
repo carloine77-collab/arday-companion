@@ -239,7 +239,7 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
 @media(max-width:700px){.bottom-actions .recent-entry{min-height:42px;padding:0 6px;font-size:9px}.toolbar{flex:1;min-width:0}.tool{min-width:0;padding:0 3px;font-size:10px}.bottom-actions{gap:4px}}
 @media(max-width:390px){.bottom-actions .recent-entry{font-size:8px;padding:0 4px}.bottom-actions .top-action{padding:0 5px;font-size:9px}.tool{font-size:9px}}
 
-footer.bottom .toolbar{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px!important;flex:1 1 auto!important;min-width:0!important}
+footer.bottom .toolbar{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px!important;flex:1 1 auto!important;min-width:0!important}
 footer.bottom .tool{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:3px!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;padding:0 2px!important;font-size:11px!important;line-height:1!important;white-space:nowrap!important;writing-mode:horizontal-tb!important;word-break:keep-all!important;overflow:hidden}
 footer.bottom .tool .icon{font-size:14px!important;flex:0 0 auto}
 footer.bottom .bottom-actions{display:grid!important;grid-template-columns:minmax(0,1fr) 66px!important;align-items:center!important;gap:4px!important;flex:0 0 clamp(148px,22vw,218px)!important;min-width:0!important}
@@ -275,6 +275,7 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
  .stage .drawer:not(.open){pointer-events:none!important;visibility:hidden!important}
 .stage .drawer.open{pointer-events:auto!important;visibility:visible!important}
 .stage>.room,.stage>.scene-bg,.stage>.sunlight,.stage>.bubble,.stage>.room-label,.stage>.schedule-peek,.stage>.kitchen-scene,.stage>.camera-hint,.stage>.three-scene{pointer-events:none!important}
+.stage>.room-label{pointer-events:auto!important;z-index:55!important;cursor:pointer!important}
 .stage>.hotspot{pointer-events:none!important}.stage.editing>.hotspot{pointer-events:auto!important}
 .stage #bubble{pointer-events:none!important;z-index:65!important;box-shadow:0 4px 12px #4a38251a!important}
  .stage #bubble:before,.stage #bubble:after{display:none!important;content:none!important}
