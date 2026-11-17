@@ -375,7 +375,16 @@ window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;
 const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
+s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();
+s.ownedFurniture=s.ownedFurniture||[];
+s.placedFurniture=s.placedFurniture||[];
+if(!s.ownedFurnitureMigrated){
+ const purchasable=['唱片机','书桌','书架','绿植','抱枕'];
+ s.furniture.forEach(name=>{if(purchasable.includes(name))s.ownedFurniture.push(name)});
+ s.furniture=s.furniture.filter(name=>!purchasable.includes(name));
+ s.ownedFurnitureMigrated=true;
+}
+s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
@@ -390,7 +399,7 @@ function dayKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getD
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
-function has(item){return s.items.includes(item)||s.furniture.includes(item)}
+function has(item){return s.items.includes(item)||s.furniture.includes(item)||s.ownedFurniture.includes(item)}
 function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 
@@ -402,7 +411,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 
 const tabs={
- '互动':[['接临时工作','¥','work'],['聊天','💬','chat'],['一起做饭','🥘','cook-together'],['一起喝茶','🍵','tea'],['听音乐','♫','music'],['出门散步','🌿','walk'],['一起看书','📖','read'],['玩个游戏','🎲','game'],['休息一会','☁','rest'],['一起吃点东西','🥐','food'],['整理房间','🧹','tidy']],
+ '互动':[['聊天','💬','chat'],['一起做饭','🥘','cook-together'],['一起喝茶','🍵','tea'],['听音乐','♫','music'],['出门散步','🌿','walk'],['一起看书','📖','read'],['玩个游戏','🎲','game'],['休息一会','☁','rest'],['一起吃点东西','🥐','food'],['整理房间','🧹','tidy']],
  '物品':[['旧书','📖','use-book'],['陶杯','☕','use-cup'],['点心','🥐','use-food'],['唱片','💿','use-record']],
  '商店':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['唱片机','📻','buy-player','399'],['唱片','💿','buy-record','68'],['书桌','🪑','buy-desk','599'],['书架','📚','buy-shelf','299'],['绿植','🪴','buy-plant','39'],['抱枕','🟠','buy-cushion','29'],['修理工具','🔧','buy-tools','88']]
 };
@@ -415,34 +424,43 @@ function purchase(id,label,cost){
  s.money-=cost;
  if(id==='buy-food')addItem('点心');
  else if(id==='buy-record')addItem('唱片');
- else if(id==='buy-player'){s.furniture.push('唱片机');addEvent('新唱片机安置好了','阿尔现在可以主动播放唱片，也可以邀请你一起听。','long')}
- else if(id==='buy-desk'){s.furniture.push('书桌');addEvent('书桌进驻房间','阿尔可以在这里写日记、整理资料。','long')}
- else if(id==='buy-shelf'){s.furniture.push('书架');addEvent('书架添置完成','书籍有了固定的位置，阅读和整理活动更加丰富。','long')}
- else if(id==='buy-plant'){s.furniture.push('绿植');s.preferences.plants=(s.preferences.plants||0)+1}
- else if(id==='buy-cushion'){s.furniture.push('抱枕')}
+ else if(id==='buy-player'){s.ownedFurniture.push('唱片机');addEvent('新唱片机已购入','它现在位于物品栏，可以选择放置到房间。','long')}
+ else if(id==='buy-desk'){s.ownedFurniture.push('书桌');addEvent('书桌已购入','它现在位于物品栏，可以选择放置到房间。','long')}
+ else if(id==='buy-shelf'){s.ownedFurniture.push('书架');addEvent('书架已购入','它现在位于物品栏，可以选择放置到房间。','long')}
+ else if(id==='buy-plant'){s.ownedFurniture.push('绿植');s.preferences.plants=(s.preferences.plants||0)+1}
+ else if(id==='buy-cushion'){s.ownedFurniture.push('抱枕')}
  else if(id==='buy-tools'){s.items.push('修理工具')}
  say('买下了'+label+'。这会给我们的生活带来一点变化。');remember('purchase',label,2);save();render();toast('购入：'+label);openTab('商店');
 }
-function openTab(name){
+function openTab(name,force=false){
  const active=document.querySelector('.tool.active')?.dataset.tab;
- if(active===name&&((name==='日程'&&$('stage').classList.contains('calendar-mode'))||(name!=='日程'&&$('drawer').classList.contains('open')))){if(arday3D?.cancelGesture)arday3D.cancelGesture();closeCalendar();$('drawer').classList.remove('open','profile-expanded');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
+ if(!force&&active===name&&((name==='日程'&&$('stage').classList.contains('calendar-mode'))||(name!=='日程'&&$('drawer').classList.contains('open')))){if(arday3D?.cancelGesture)arday3D.cancelGesture();closeCalendar();$('drawer').classList.remove('open','profile-expanded');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
  if(name==='日程'){openCalendar();return}
  if(name==='目标'){showGoals();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='目标'));return}
  if(name==='账户'){showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
  if(name==='职业'){showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
  $('drawer').classList.remove('profile-expanded');
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';
- (tabs[name]||[]).forEach(([label,emoji,id,cost])=>{
+ const tabEntries=[...(tabs[name]||[])];
+ if(name==='物品'){
+  s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,'▧','place-owned-'+index]));
+ }
+ tabEntries.forEach(([label,emoji,id,cost])=>{
   let b=document.createElement('button');b.className='choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
   b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
+   if(id.startsWith('place-owned-')){
+    const index=Number(id.slice('place-owned-'.length)),item=s.ownedFurniture[index];
+    if(!item){toast('这件物品已不在库存中');openTab('物品',true);return}
+    if(!arday3D?.placeOwnedFurniture||!arday3D.placeOwnedFurniture(item)){toast('当前场景无法放置这件家具');return}
+    s.ownedFurniture.splice(index,1);save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
+   }
    if(id==='kitchen'){openKitchenPanel(false);return}
    if(id==='cook-together'){if(Math.random()>.67){s.rejections=(s.rejections||0)+1;say(['今天不想一起做饭。你先决定吃什么吧。','厨房先留给我自己待会儿用，暂时不需要搭档。','做饭可以改天，我现在没这个兴致。'][Math.floor(Math.random()*3)]);save();return}openKitchenPanel(true);return}
    if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
    if(id.startsWith('buy-')){purchase(id,label,+cost);return}
    if(id==='events'){renderEvents();return}
    if(id==='profile'){renderProfile();return}
-   if(id==='work'){earnWork();return}
    if(id==='chat'){say('我在听。你想从哪件事说起？');}
    else if(id==='collection'){showCollection();return}
    else if(id==='use-food'){let i=s.items.indexOf('点心');if(i<0){toast('物品栏里没有点心');return}s.items.splice(i,1);change({hunger:25,fun:2});say('点心正好派上用场。');}
@@ -563,21 +581,6 @@ document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>
 
 
 
-function earnWork(){
- let key=dayKey(dayAnchor());if(s.workedDate===key){toast('今天已经接过一份工作');return}
- if(s.energy<22){say('我现在精力不够，没法接工作。');return}
- let day=s.calendar.days[key]||[];$('drawerTitle').textContent='临时工作 · 选择委托';
- let jobs=[['资料校对',90,1],['文案整理',180,2],['内容研究',260,3]];
- $('choices').innerHTML='<div class="calendar-note">工作会占用阿尔自己的时间，报酬在完成后结算。</div>'+jobs.map((x,i)=>'<button class="choice" data-job="'+i+'"><span class="emoji">¥</span>'+x[0]+'<small>'+x[2]+'小时 · ¥'+x[1]+'</small></button>').join('');
- $('choices').querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{
-  let job=jobs[+b.dataset.job],start=-1;
-  for(let h=Math.max(9,new Date().getHours());h<=18-job[2]+1;h++){let free=true;for(let k=h;k<h+job[2];k++)if(eventAt(key,k))free=false;if(free){start=h;break}}
-  if(start<0){say('今天没有足够的连续空档。');return}
-  day.push({start,end:start+job[2],title:'临时工作 · '+job[0],kind:'work',activity:'work',pay:job[1]});day.sort((a,b)=>a.start-b.start);
-  s.workedDate=key;s.pendingWork={day:key,start,end:start+job[2],pay:job[1],paid:false};remember('work','接下'+job[0]+'委托',1);
-  say('我接下了'+job[0]+'，结束后会拿到 ¥'+job[1]+'。');save();renderCalendar();$('drawer').classList.remove('open');toast('工作已安排 · '+job[0]);
- });
-}
 function respondToChat(text){
  const t=text.toLowerCase(),pick=a=>a[Math.floor(Math.random()*a.length)],cur=s.currentActivity||'idle';
  const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tidy:'整理房间',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',};
@@ -1181,7 +1184,12 @@ function showCareer(){
  if(s.job?.active){
   const j=s.job;
   $('choices').innerHTML='<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>阿尔每天 '+pad(j.start)+':00 至 '+pad(j.end)+':00 工作。薪资在当日工作结束后发放至个人账户。</p><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob">辞职</button></div></section>';
-  $('resignJob').onclick=()=>{s.job.active=false;s.job.endedAt=dayKey(Date.now());Object.keys(s.calendar?.days||{}).forEach(k=>{if(k>=s.job.endedAt)s.calendar.days[k]=(s.calendar.days[k]||[]).filter(e=>!e.jobShift)});addEvent('阿尔辞去了工作','他结束了在'+j.title+'的任职。','daily');save();showCareer();renderCalendar();toast('已离职')};
+  $('choices').onclick=event=>{
+   const button=event.target.closest('#resignJob');if(!button||!s.job?.active)return;
+   const ended=dayKey(Date.now()),title=s.job.title;s.job.active=false;s.job.endedAt=ended;
+   Object.keys(s.calendar?.days||{}).forEach(k=>{if(k>=ended)s.calendar.days[k]=(s.calendar.days[k]||[]).filter(e=>!e.jobShift)});
+   addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();renderCalendar();toast('已离职');
+  };
  }else{
   const jobs=[
    {id:'assistant-editor',title:'出版编辑助理',salary:185,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:'协助整理稿件、核对资料与校对文字'},
@@ -1498,7 +1506,6 @@ function initArday3D(){
   }
   function selectFurniture(item){
    selectedFurniture=item;rotateFurnitureButton.disabled=!!item.wallAxis;
-   decorateLabel.textContent=item.wallAxis?'已选中：'+item.name+' · 沿墙面拖动移动':'已选中：'+item.name+' · 拖动移动，点击旋转按钮调整方向';
    toast('已选中'+item.name);
   }
   const rotateFurnitureButton=document.createElement('button');
@@ -1558,7 +1565,7 @@ function initArday3D(){
   canvas.style.touchAction='none';canvas.style.pointerEvents='none';
   gestureSurface.style.touchAction='none';
   gestureSurface.addEventListener('pointerdown',e=>{
-   if(e.target.closest('button,[role="button"],input,select,textarea,a,.calendar-view,.drawer,.decorate-tools'))return;
+   if(e.target.closest('button:not(.furniture-hotspot),[role="button"],input,select,textarea,a,.calendar-view,.drawer,.decorate-tools'))return;
    if(e.pointerType==='mouse'&&e.button!==0)return;
    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
    raycaster.setFromCamera(pointerNdc,camera);
