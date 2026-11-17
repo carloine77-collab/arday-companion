@@ -57,7 +57,7 @@ window.ArdayGameConfig = {
  company:{title:'自由相处',autonomous:false,menuLabel:'自由相处',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:4}},
  sitChair:{title:'坐在椅子上',autonomous:false,menuLabel:'坐下',location:'chair',pose:'sit',anchor:'chair',effect:{energy:5,fun:1}},
 
- write:{title:'写作 / 整理资料',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.2,base:13},menuLabel:'写作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:5,energy:-3}},
+ write:{title:'写作 / 整理资料',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.2,base:13},requires:'desk',menuLabel:'写作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:5,energy:-3}},
  work:{title:'工作',autonomous:false,menuLabel:'工作',location:'desk',pose:'sit',anchor:'desk',effect:{energy:-4,fun:-1}}
 },
   furnitureActivities: {
