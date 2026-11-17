@@ -407,3 +407,56 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .day-slot button.now{outline:1px solid #b66b4b!important;outline-offset:-1px;background:#f4dfcf!important}
 @media(max-width:430px){.calendar-editorial-masthead{min-height:clamp(94px,16vh,132px)}.calendar-eyebrow{font-size:7px;letter-spacing:.15em}.calendar-display-title{font-size:clamp(42px,12vw,62px)}.calendar-date-stamp strong{font-size:clamp(46px,13vw,66px)}.calendar-ornament-one{font-size:80px;right:14%}.day-slot{grid-template-columns:42px minmax(0,1fr)!important;gap:6px!important}.day-slot button{padding:7px 8px!important}}
 
+
+
+/* ROUND 2 — editorial layouts for every primary drawer */
+.drawer{background:#eee3d1!important;background-image:radial-gradient(#77664f20 .65px,transparent .65px),linear-gradient(145deg,#f4ead9,#e9dcc8)!important;background-size:5px 5px,100% 100%!important;color:#332e28!important;border:0!important;border-top:1px solid #8f7a5e!important;border-radius:0!important;box-shadow:0 -12px 40px #35271924!important;padding:clamp(14px,2.8vw,25px)!important}
+.drawer-head{position:relative;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;min-height:76px!important;padding:0 2px 12px!important;margin:0 0 14px!important;border-bottom:1px solid #8c785e!important}
+.drawer-head:before{content:"ARDAY COMPANION　 /　 THE HOME JOURNAL";position:absolute;top:0;left:2px;font:700 7px Arial,sans-serif;letter-spacing:.2em;color:#987d62}
+.drawer-head:after{content:"✳";position:absolute;right:54px;top:0;font:normal 27px Georgia,serif;color:#b56e4d;opacity:.8}
+.drawer-head strong{font:900 clamp(32px,6vw,48px)/.9 Georgia,"Noto Serif SC",serif!important;letter-spacing:-.06em!important;color:#352e28!important}
+.drawer-head .close{border:0!important;border-radius:0!important;background:transparent!important;border-bottom:1px solid #a98b6d!important;color:#765c46!important;font:700 10px Arial,sans-serif!important;letter-spacing:.12em!important;padding:7px 3px!important}
+.drawer .choices{gap:0!important;align-content:start!important}
+.drawer .choice{position:relative;border:0!important;border-radius:0!important;border-bottom:1px solid #cbbba4!important;background:transparent!important;color:#443b31!important;box-shadow:none!important;text-align:left!important;padding:13px 10px!important;font-family:"Noto Sans SC",Arial,sans-serif!important}
+.drawer .choice:hover,.drawer .choice:focus-visible{background:#b8755115!important;outline:none!important}
+.drawer .choice .emoji{display:inline-block!important;font-size:17px!important;margin:0 9px 0 0!important;vertical-align:middle}
+.drawer .choice small{font:9px Arial,sans-serif!important;letter-spacing:.06em;color:#987f66!important}
+.drawer .profile-section,.drawer .account-balance,.drawer .account-personal,.drawer .event-card,.drawer .job-card,.drawer .cooking-stock,.drawer .cooking-recipes{border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;padding:13px 3px!important;border-bottom:1px solid #c9b79e!important}
+.drawer .section-kicker,.drawer .cooking-section-title{font:700 8px Arial,sans-serif!important;letter-spacing:.2em!important;color:#a05d43!important;text-transform:uppercase}
+.drawer .profile-section h3,.drawer .job-card h3,.drawer .account-personal h3{font:700 20px/1.15 Georgia,"Noto Serif SC",serif!important;color:#3e352d!important;margin:6px 0 9px!important}
+.drawer .profile-section p,.drawer .job-card p,.drawer .account-records p{font:11px/1.65 "Noto Sans SC",Arial,sans-serif!important;color:#716451!important}
+.drawer .dossier-hero{position:relative;min-height:145px!important;display:flex!important;align-items:flex-end!important;padding:20px 4px!important;border-bottom:1px solid #9c8466!important;background:linear-gradient(115deg,#d8c5a8 0%,#eee3d1 58%,#d6c1a6 100%)!important;overflow:hidden}
+.drawer .dossier-monogram{font:italic 110px/.8 Georgia,serif!important;color:#a65d43!important;opacity:.85!important}
+.drawer .dossier-name h2{font:700 clamp(27px,6vw,42px)/.95 Georgia,"Noto Serif SC",serif!important;color:#332d27!important}
+.drawer .dossier-name span{font:700 8px Arial,sans-serif!important;letter-spacing:.2em!important;color:#896d53!important}
+.drawer .trait-chip{border:0!important;border-bottom:1px solid #bba68b!important;border-radius:0!important;background:transparent!important;color:#695541!important;padding:7px 10px!important}
+.drawer .account-balance{position:relative;min-height:150px!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;background:#a65e43!important;color:#fff4e5!important;padding:18px!important}
+.drawer .account-balance span{font:700 8px Arial,sans-serif!important;letter-spacing:.22em!important;color:#f2d9c4!important}
+.drawer .account-balance h2{font:italic 700 clamp(37px,8vw,58px)/.9 Georgia,serif!important;color:#fff4e5!important;margin:8px 0!important}
+.drawer .account-balance small{font:10px Arial,sans-serif!important;color:#f2d9c4!important}
+.drawer .account-symbol{position:absolute!important;right:18px!important;top:14px!important;font:italic 68px Georgia,serif!important;color:#ffffff36!important}
+.drawer .account-transfer input,.drawer input.shop-search{border:0!important;border-bottom:1px solid #a78c6c!important;border-radius:0!important;background:#f8f0e4!important;color:#45382d!important}
+.drawer .calendar-actions button,.drawer .choice button,.drawer button.cooking-make{border:0!important;border-radius:0!important;background:#9e5d43!important;color:#fff4e8!important;padding:9px 14px!important;font:700 10px Arial,sans-serif!important;letter-spacing:.06em}
+.drawer .shop-categories{background:transparent!important;border-bottom:1px solid #bca98f!important;padding:0 0 8px!important}
+.drawer .shop-category{border:0!important;border-radius:0!important;background:transparent!important;color:#715e49!important;font:700 12px Georgia,serif!important;letter-spacing:.08em!important}
+.drawer .shop-category.active{background:#a65e43!important;color:#fff4e8!important}
+.drawer .shop-level-one,.drawer .shop-level-two{background:transparent!important;padding:7px 0!important;border-bottom:1px solid #c9b79e!important}
+.drawer .shop-group,.drawer .shop-furniture-type{border:0!important;border-radius:0!important;border-bottom:1px solid #c6b398!important;background:transparent!important;color:#75634f!important;font:600 10px Arial,sans-serif!important}
+.drawer .shop-group.active,.drawer .shop-furniture-type.active{background:#a65e43!important;color:#fff4e8!important;border-color:#a65e43!important}
+.drawer .shop-product-grid{gap:0!important}
+.drawer .shop-product-card{display:grid!important;grid-template-columns:42px minmax(0,1fr) auto!important;align-items:center!important;min-height:70px!important;border:0!important;border-bottom:1px solid #c9b79e!important;border-radius:0!important;background:transparent!important;padding:10px 4px!important}
+.drawer .shop-product-icon{font-size:26px!important;color:#a65e43!important}
+.drawer .shop-product-info strong{font:700 14px Georgia,"Noto Serif SC",serif!important;color:#40372e!important}
+.drawer .shop-product-buy{font:italic 15px Georgia,serif!important;color:#a65e43!important}
+.drawer .shop-product-buy em{display:block;font:700 8px Arial,sans-serif!important;letter-spacing:.12em!important;font-style:normal!important}
+.drawer .cooking-stock-list{display:flex!important;flex-wrap:wrap!important;gap:0 15px!important}
+.drawer .cooking-stock-item{font:11px Arial,sans-serif!important;color:#6e604e!important;padding:6px 0!important}
+.drawer .cooking-card{display:grid!important;grid-template-columns:38px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;padding:11px 3px!important;border:0!important;border-bottom:1px solid #c9b79e!important;border-radius:0!important;background:transparent!important}
+.drawer .cooking-dish-icon{font-size:25px!important}
+.drawer .cooking-dish-copy strong{font:700 14px Georgia,"Noto Serif SC",serif!important;color:#40372e!important}
+.drawer .cooking-dish-copy small{font:9px Arial,sans-serif!important;color:#907c63!important}
+.drawer .cooking-footer{border-top:1px solid #8c785e!important;background:transparent!important;padding:12px 0 2px!important}
+.drawer .event-empty{background:transparent!important;border:0!important}
+.drawer .event-empty h3{font:italic 24px Georgia,serif!important;color:#514333!important}
+@media(max-width:430px){.drawer-head{min-height:67px!important}.drawer-head strong{font-size:34px!important}.drawer-head:after{right:48px}.drawer .dossier-hero{min-height:120px!important}.drawer .shop-product-card{grid-template-columns:34px minmax(0,1fr) auto!important}}
+
