@@ -84,6 +84,7 @@ const tabs={
 
 let shopCategory='食物食材';
 let inventoryCategory='全部';
+let inventoryGrid=null;
 let shopFurnitureGroup='起居空间';
 let shopFurnitureType='沙发';
 const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
@@ -106,9 +107,9 @@ function openTab(name,force=false){
  const active=document.querySelector('.tool.active')?.dataset.tab;
  if(!force&&active===name&&((name==='日程'&&$('stage').classList.contains('calendar-mode'))||(name!=='日程'&&$('drawer').classList.contains('open')))){if(arday3D?.cancelGesture)arday3D.cancelGesture();closeCalendar();$('drawer').classList.remove('open','profile-expanded');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
  if(name==='日程'){openCalendar();return}
- if(name==='目标'){showGoals();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='目标'));return}
- if(name==='账户'){showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
- if(name==='职业'){showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
+ if(name==='目标'){closeCalendar();showGoals();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='目标'));return}
+ if(name==='账户'){closeCalendar();showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
+ if(name==='职业'){closeCalendar();showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
  $('drawer').classList.remove('profile-expanded');
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
  let shopGrid=null;
@@ -135,13 +136,14 @@ function openTab(name,force=false){
  }
  const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  if(name==='物品'){
+  $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
   s.items.forEach((item,index)=>{if(item!=='修理工具')tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index,0,'','食物'])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,item.startsWith('成品食物·')?'🍽️':'▧','place-owned-'+index,0,'',item.startsWith('成品食物·')?'食物':'家具']));
   const nav=document.createElement('div');nav.className='inventory-categories';
   ['全部','食物','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;openTab('物品',true)};nav.appendChild(button)});
-  $('choices').appendChild(nav);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
+  $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
@@ -174,13 +176,13 @@ function openTab(name,force=false){
    else perform(id);
    save();render();$('drawerTitle').textContent=name+' · ¥ '+s.money;
   };
-  (shopGrid||$('choices')).appendChild(b);
+  (shopGrid||inventoryGrid||$('choices')).appendChild(b);
  });
  $('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
 }
 
 function eventChoicesLegacy(e){
- $('drawerTitle').textContent=e.title;
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view';$('drawerTitle').textContent=e.title;
  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="event-acknowledge">知道了</button></div>';
  $('event-acknowledge').onclick=()=>{completeEvent(e,'已阅');save();renderEvents()};
  $('drawer').classList.add('open');
@@ -188,7 +190,7 @@ function eventChoicesLegacy(e){
 function renderEvents(){
  const open=s.events.filter(e=>e.status==='open').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
- $('drawerTitle').textContent='最近发生的事';$('choices').innerHTML='';
+ $('drawerTitle').textContent='最近发生的事';$('choices').className='choices events-view';$('choices').innerHTML='';
  if(!open.length){$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';}
  open.forEach(e=>{
   const b=document.createElement('button');b.type='button';b.className='choice event-card';
@@ -613,7 +615,7 @@ buyIngredient=function(id,label,cost){
 
 function eventChoices(e){
  if(e.type!=='bill')return eventChoicesLegacy(e);
- $('drawerTitle').textContent=e.title;
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view';$('drawerTitle').textContent=e.title;
  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">从共同账户支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
  $('paybill').onclick=()=>{
   if(s.money>=80){s.money-=80;s.unpaidBill=Math.max(0,(s.unpaidBill||0)-80);moneyRecord('shared','expense',80,'水电与日常开销');say('共同账户已经支付本周开销。')}
@@ -771,7 +773,7 @@ eventChoices=function(e){
 };
 function showCollection(){
  const log=(s.moneyLog||[]).slice(0,8).map(x=>'<p>'+new Date(x.at).toLocaleDateString('zh-CN')+' · '+(x.account==='shared'?'共同账户':'阿尔个人账户')+' · '+(x.kind==='income'?'+':'−')+'¥'+x.amount+' · '+x.note+'</p>').join('')||'<p>暂时没有账户记录。</p>';
- $('drawerTitle').textContent='账户';
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('drawerTitle').textContent='账户';$('choices').className='choices account-view';
  $('choices').innerHTML=
   '<section class="account-balance"><div><span>SHARED ACCOUNT</span><h2>¥'+s.money+'</h2></div><div class="account-symbol">¥</div><small>未付共同开销 ¥'+(s.unpaidBill||0)+'</small></section>'+
   '<section class="account-personal"><div class="section-kicker">ARDAY · PERSONAL</div><h3>阿尔的个人账户</h3><strong>¥'+s.personalMoney+'</strong></section>'+
@@ -791,7 +793,7 @@ window.resignFromJob=function(event){
 };
 function careerPoster(title,index=0){const hue=[18,34,205,275,145][index%5],mark=String(title||'职').trim().slice(0,1);return '<div class="career-poster" style="--poster-hue:'+hue+'"><span class="career-poster-kicker">ARDAY JOURNAL / CAREER '+(index+1)+'</span><strong>'+title+'</strong><i>'+mark+'</i><small>AN EVERYDAY PROFESSION</small></div>'}
 function showCareer(){
- $('drawer').classList.remove('profile-expanded');$('drawerTitle').textContent='职业';
+ $('drawer').classList.remove('profile-expanded','shop-drawer');$('drawerTitle').textContent='职业';$('choices').className='choices career-view';
  if(s.job?.active){
   const j=s.job;
   $('choices').innerHTML=careerPoster(j.title,0)+'<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
@@ -822,7 +824,7 @@ function showGoals(){
  const shared=sg?.status==='active'
   ?'<strong>'+sg.title+'</strong><p class="goal-progress">'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>'
   :'<p>暂无正在进行的共同计划。</p>';
- $('drawerTitle').textContent='目标';
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('drawerTitle').textContent='目标';$('choices').className='choices goals-view';
  $('choices').innerHTML='<section class="profile-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section><section class="profile-section"><div class="section-kicker">TOGETHER</div><h3>共同计划</h3>'+shared+'</section>';
  $('drawer').classList.add('open');
 }
