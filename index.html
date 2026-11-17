@@ -208,9 +208,9 @@
 .stage .room-label{z-index:46!important;pointer-events:none!important}
 /* The WebGL canvas must never intercept taps intended for the footer navigation. */
 /* Footer is a sibling of .app (not its child); elevate the actual footer element. */
-footer.bottom{position:relative!important;z-index:9999!important;isolation:isolate!important;pointer-events:auto!important}
-footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.bottom .top-action{position:relative!important;z-index:10000!important;pointer-events:auto!important;touch-action:manipulation}
-.app{position:relative;z-index:1}
+footer.bottom{position:fixed!important;left:50%!important;right:auto!important;bottom:0!important;transform:translateX(-50%)!important;width:min(100%,1100px)!important;z-index:2147483647!important;isolation:isolate!important;pointer-events:auto!important;box-sizing:border-box!important;padding:8px 14px calc(8px + env(safe-area-inset-bottom))!important;background:#f3e7d2!important;box-shadow:0 -5px 18px #59442b18!important}
+footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.bottom .top-action{position:relative!important;z-index:10000!important;pointer-events:auto!important;touch-action:manipulation}footer.bottom *{pointer-events:auto!important}
+.app{position:relative;z-index:1;height:calc(100svh - 68px - env(safe-area-inset-bottom));padding-bottom:8px}
 .stage{z-index:0!important}
 /* Keep opened game panels above the WebGL canvas. */
 .stage .drawer{z-index:40!important;pointer-events:auto!important}
@@ -284,7 +284,7 @@ const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.r
 const navFooter=document.querySelector('footer.bottom');
 if(navFooter){
  document.body.appendChild(navFooter);
- Object.assign(navFooter.style,{position:'fixed',left:'0',right:'0',bottom:'env(safe-area-inset-bottom, 0px)',zIndex:'2147483000',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 18px 12px',background:'#f3e7d2',pointerEvents:'auto',isolation:'isolate'});
+ Object.assign(navFooter.style,{position:'fixed',left:'50%',right:'auto',bottom:'0',width:'min(100%, 1100px)',transform:'translateX(-50%)',zIndex:'2147483647',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 14px calc(8px + env(safe-area-inset-bottom))',background:'#f3e7d2',pointerEvents:'auto',isolation:'isolate',boxSizing:'border-box'});
  navFooter.querySelectorAll('button').forEach(b=>{b.style.position='relative';b.style.zIndex='2147483001';b.style.pointerEvents='auto';b.style.touchAction='manipulation'});
 }
 // Bind each bottom-navigation button exactly once. Previously the same
