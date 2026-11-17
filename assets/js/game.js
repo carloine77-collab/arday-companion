@@ -1179,7 +1179,7 @@ function initArday3D(){
     if(surfaceType==='tabletop'&&support){
      item.supportId=support.id;
      const siblings=furnitureRegistry.filter(it=>it.room===room&&it.supportId===support.id);
-     const offsets=name==='电脑'?[[0,0],[-.49,0],[.49,0],[0,.16],[0,-.16]]:siblings.some(it=>it.name==='电脑')?[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]]:[[0,0],[.49,0],[-.49,0],[0,.25],[0,-.25]];
+     const offsets=name==='电脑'?[[0,0],[-.36,0],[.36,0],[0,.16],[0,-.16]]:siblings.some(it=>it.name==='电脑')?[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]]:[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]];
      const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
      for(const [ox,oz] of offsets){
       const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
