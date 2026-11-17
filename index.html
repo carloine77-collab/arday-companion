@@ -1429,6 +1429,15 @@ function initArday3D(){
    else{group.position.set(5.16,y,clamped);group.rotation.y=-Math.PI/2}
   }
   function wallOffset(item){return item.wallSide==='back'||item.wallSide==='front'?item.group.position.x:item.group.position.z}
+  function canPlaceOnWall(item,side,offset){
+   const limit=side==='back'||side==='front'?4.5:3.25;
+   if(Math.abs(offset)>limit)return false;
+   for(const other of furnitureRegistry){
+    if(other===item||other.room!==item.room||!other.wallAxis||other.wallSide!==side)continue;
+    if(Math.abs(wallOffset(other)-offset)<(item.id.includes('door')||other.id.includes('door')?1.45:.65))return false;
+   }
+   return true;
+  }
   function registerFurniture({id,name,room,group,width,depth,anchor=[0,0],action,wallAxis=null,wallSide=null,wallRange=4.5}){
    group.userData.furnitureKey=id;group.userData.roomKey=room;
    const saved=s.furnitureLayout?.[room]?.[id];
@@ -1566,7 +1575,12 @@ function initArday3D(){
     if(surfaceType==='tabletop'&&!support){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);toast('电脑和摆件需要先放在书桌或餐桌上');return null}
     if(support){item.supportId=support.id;group.position.y=support.group.position.y+support.surfaceY}
     const candidates=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
-    let placed=false;for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
+    let placed=false;
+    if(wallAxis){
+     for(const point of candidates){const side=wallSide||'back',offset=point[0];if(canPlaceOnWall(item,side,offset)){wallTransform(group,side,offset,group.position.y);placed=true;break}}
+    }else{
+     for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
+    }
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
    s.placedFurniture=s.placedFurniture||[];
@@ -1629,13 +1643,7 @@ function initArday3D(){
   function canPlaceFurniture(item,x,z,angle=item.group.rotation.y){
    if(item.wallAxis){
     const side=item.wallSide||'back',value=side==='back'||side==='front'?x:z;
-    if(Math.abs(value)>item.wallRange)return false;
-    for(const other of furnitureRegistry){
-     if(other===item||other.room!==item.room||!other.wallAxis||other.wallSide!==side)continue;
-     const otherValue=wallOffset(other),gap=item.id.includes('door')||other.id.includes('door')?1.45:.65;
-     if(Math.abs(value-otherValue)<gap)return false;
-    }
-    return true;
+    return canPlaceOnWall(item,side,value);
    }
    const corners=furnitureCorners(item,x,z,angle);
    if(corners.some(([px,pz])=>px<roomBounds.minX||px>roomBounds.maxX||pz<roomBounds.minZ||pz>roomBounds.maxZ))return false;
@@ -1753,7 +1761,7 @@ function initArday3D(){
       selectFurniture(item);
       const plane=item.wallAxis?(item.wallSide==='back'||item.wallSide==='front'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):new T.Plane(new T.Vector3(1,0,0),-furniture.position.x)):new T.Plane(new T.Vector3(0,1,0),-furniture.position.y);
       if(raycaster.ray.intersectPlane(plane,dragPoint)){
-       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z};
+       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z,wallOffsetDelta:item.wallAxis?wallOffset(item)-(item.wallSide==='back'||item.wallSide==='front'?dragPoint.x:dragPoint.z):0,wallYOffset:item.wallAxis?furniture.position.y-dragPoint.y:0};
        gestureSurface.setPointerCapture(e.pointerId);e.preventDefault();return;
       }
      }
@@ -1775,22 +1783,25 @@ function initArday3D(){
     if(raycaster.ray.intersectPlane(furnitureDrag.plane,dragPoint)){
      const g=furnitureDrag.group,item=furnitureDrag.item;
      if(item.wallAxis){
+      const roomGroup=item.room==='bedroom'?bedroom:item.room==='kitchen'?kitchen:living;
       const candidates=[
-       {side:'back',plane:new T.Plane(new T.Vector3(0,0,1),3.89)},
-       {side:'front',plane:new T.Plane(new T.Vector3(0,0,1),-3.89)},
-       {side:'left',plane:new T.Plane(new T.Vector3(1,0,0),5.16)},
-       {side:'right',plane:new T.Plane(new T.Vector3(1,0,0),-5.16)}
+       {side:'back',plane:new T.Plane(new T.Vector3(0,0,1),3.89),visible:()=>roomGroup.userData.backWall?.visible!==false},
+       {side:'front',plane:new T.Plane(new T.Vector3(0,0,1),-3.89),visible:()=>roomGroup.userData.frontWall?.visible!==false},
+       {side:'left',plane:new T.Plane(new T.Vector3(1,0,0),5.16),visible:()=>roomGroup.userData.leftWall?.visible!==false},
+       {side:'right',plane:new T.Plane(new T.Vector3(1,0,0),-5.16),visible:()=>roomGroup.userData.rightWall?.visible!==false}
       ];
       let best=null;
       for(const candidate of candidates){
+       if(!candidate.visible())continue;
        const point=raycaster.ray.intersectPlane(candidate.plane,new T.Vector3());if(!point)continue;
-       const offset=candidate.side==='back'||candidate.side==='front'?point.x:point.z;
-       if(Math.abs(offset)>item.wallRange||point.y<.15||point.y>4.55)continue;
+       const offset=(candidate.side==='back'||candidate.side==='front'?point.x:point.z)+furnitureDrag.wallOffsetDelta;
+       if(Math.abs(offset)>(candidate.side==='back'||candidate.side==='front'?4.5:3.25))continue;
+       if(point.y<.1||point.y>4.7)continue;
        const distance=point.distanceTo(raycaster.ray.origin);if(!best||distance<best.distance)best={side:candidate.side,point,offset,distance};
       }
-      if(best){
-       const valid=canPlaceFurniture(item,best.side==='back'||best.side==='front'?best.offset:g.position.x,best.side==='left'||best.side==='right'?best.offset:g.position.z,g.rotation.y);
-       if(valid){wallTransform(g,best.side,best.offset,Math.max(.2,Math.min(4.4,best.point.y)));item.wallSide=best.side;item.wallAxis=best.side==='back'||best.side==='front'?'x':'z'}
+      if(best&&canPlaceOnWall(item,best.side,best.offset)){
+       wallTransform(g,best.side,best.offset,Math.max(.05,Math.min(4.5,best.point.y+furnitureDrag.wallYOffset)));
+       item.wallSide=best.side;item.wallAxis=best.side==='back'||best.side==='front'?'x':'z';
       }
      }else{
       const nx=dragPoint.x+furnitureDrag.offsetX,nz=dragPoint.z+furnitureDrag.offsetZ;
