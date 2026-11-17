@@ -1412,7 +1412,7 @@ function initArday3D(){
    if(deskActivities.includes(act)){
     const computer=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='电脑');
     const desk=computer&&furnitureRegistry.find(it=>it.id===computer.supportId)||furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='书桌');
-    const seatCandidates=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name==='餐桌椅'));
+    const seatCandidates=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name==='餐桌椅'||it.name.startsWith('椅子·')));
     const seat=desk&&seatCandidates.sort((a,b)=>Math.hypot(a.group.position.x-desk.group.position.x,a.group.position.z-desk.group.position.z)-Math.hypot(b.group.position.x-desk.group.position.x,b.group.position.z-desk.group.position.z))[0];
     if(desk){
      if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=Math.atan2(desk.group.position.x-seat.group.position.x,desk.group.position.z-seat.group.position.z);}
@@ -1422,7 +1422,7 @@ function initArday3D(){
     const bouquet=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='捧花摆件');
     if(bouquet){p=[bouquet.group.position.x,0,bouquet.group.position.z+.9];faceAngle=Math.PI;}
    }else if(act==='sitChair'){
-    const chair=furnitureRegistry.find(it=>(it.name==='椅子'||it.name==='餐桌椅')&&it.room===roomMode);
+    const chair=furnitureRegistry.find(it=>(it.name==='椅子'||it.name==='餐桌椅'||it.name.startsWith('椅子·'))&&it.room===roomMode);
     if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z]}
    }
    if(act==='sleep'){const bedItem=furnitureRegistry.find(it=>it.room==='bedroom'&&it.name==='床');if(bedItem){const local=new T.Vector3(0,.82,.45).applyAxisAngle(new T.Vector3(0,1,0),bedItem.group.rotation.y);p=[bedItem.group.position.x+local.x,1.1,bedItem.group.position.z+local.z];faceAngle=bedItem.group.rotation.y;}}
