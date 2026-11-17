@@ -886,10 +886,28 @@ function initArday3D(){
   const fill=new T.DirectionalLight(0xc8d0d8,.28);fill.position.set(5,4,-5);scene.add(fill);
   const furniturePalette={0xd8d5ce:0x343b46,0x8b7764:0x6e7782,0x513a2b:0x252c36,0x806044:0x586473,0xd9cdbb:0x40566e,0xc4b49e:0x5b7186,0xb2a18c:0x2d3f55,0xf1eee7:0xcbd2d8,0xd7b990:0x65717f,0xe7d4ba:0x7f8b98,0xb58c68:0x556272,0xd5d1c9:0x343b46,0x8c7966:0x6e7782,0xd0d1d0:0x3b4654,0x87786f:0x727e8a,0x805b4e:0x252c36,0xf8eee4:0xcbd2d8,0xfaf0e7:0xd8dee3,0xf0d9d1:0x566d84,0x7897b5:0x263d58,0xd9b7b5:0x4a627b,0xc6a3ad:0x38a4b5,0x9a7059:0x3c4653,0xc99570:0x7d8a96,0xb98968:0x586473,0xd8bd91:0x65717f,0xf1dfbd:0xadb8c2,0x8c6c62:0x2d3540,0xc49b7f:0x65717f,0xc68f9d:0x2d3f55,0x8a7867:0x6e7782,0x9dc3bd:0x405c68,0x9a7655:0x252c36,0xc98d6d:0x65717f,0xe7b89b:0x38a4b5,0xd9a184:0x5b7186,0xe9dfd0:0xcbd2d8,0x78917a:0x3f5668,0x9eb49a:0x536d7b,0x6b856c:0x405c68,0xe4e2d9:0xcbd2d8,0x8c8a83:0x7f8b98,0x4e514b:0x252c36,0x8d8981:0x65717f,0x91b8ba:0x38a4b5,0x65452f:0x252c36,0x9a704b:0x586473,0xd6b77d:0x38a4b5,0xf1e5d1:0xcbd2d8,0x77513b:0x252c36,0x718778:0x405c68,0xf4f2ed:0xcbd2d8,0x514b43:0x252c36,0xfff1dc:0xcbd2d8,0xc8d0d8:0x7f8b98,0xe4d9c7:0x40566e,0xd3c5b1:0x5b7186,0xc2b39e:0x7f8b98,0x67452f:0x252c36,0x8a6344:0x586473};
   const recolorFurniture=color=>furniturePalette[color]??color;
-  const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness});
+  // Soft cel-lighting: compress diffuse illumination into restrained illustrated value bands.
+  function stylizeMaterial(material){
+   if(!material||!material.isMeshStandardMaterial||material.userData.inkStylized)return material;
+   material.userData.inkStylized=true;
+   material.onBeforeCompile=shader=>{
+    shader.fragmentShader=shader.fragmentShader.replace(
+     '#include <tonemapping_fragment>',
+     `float inkLuminance=dot(outgoingLight,vec3(0.2126,0.7152,0.0722));
+      float inkBand=floor(clamp(inkLuminance,0.0,1.5)*4.0+0.5)/4.0;
+      float inkRatio=inkBand/max(inkLuminance,0.025);
+      outgoingLight=mix(outgoingLight,outgoingLight*inkRatio,0.34);
+      #include <tonemapping_fragment>`
+    );
+   };
+   material.customProgramCacheKey=()=> 'arday-soft-cel-v2';
+   material.roughness=Math.max(material.roughness??.8,.62);
+   return material;
+  }
+  const M=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness}));
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
   const inkOutlineMaterial=new T.ShaderMaterial({
-   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.88},outlineThickness:{value:.012}},
+   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.78},outlineThickness:{value:.009}},
    vertexShader:`uniform float outlineThickness;
     void main(){vec3 expanded=position+normalize(normal)*outlineThickness;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
    fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
@@ -1103,7 +1121,7 @@ function initArday3D(){
    const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
-   const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:rough,metalness});
+   const mat=(color,rough=.78,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(rough,.62),metalness:Math.min(metalness,.45)}));
    const m={wood:mat(0x946746),oak:mat(0xc39a70),fabric:mat(0xb9a1a0,.95),sofa:mat(0xb9a1a0,.95),sofa2:mat(0xd3c5b1,.98),cream:mat(0xeee1cf,.9),dark:mat(0x39434b,.45),metal:mat(0x858783,.3,.72),leaf:mat(0x477a4d,.9),leaf2:mat(0x88a968,.9),clay:mat(0xb56d50),gold:mat(0xc5a15d,.35,.5),wall:mat(0xf0e4d2),screen:mat(0x25465b,.2)};
    // Procedural, dependency-free surface maps: woven upholstery, directional wood grain and fine ceramic grain.
    function surfaceTexture(kind){
