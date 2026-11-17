@@ -460,3 +460,63 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .drawer .event-empty h3{font:italic 24px Georgia,serif!important;color:#514333!important}
 @media(max-width:430px){.drawer-head{min-height:67px!important}.drawer-head strong{font-size:34px!important}.drawer-head:after{right:48px}.drawer .dossier-hero{min-height:120px!important}.drawer .shop-product-card{grid-template-columns:34px minmax(0,1fr) auto!important}}
 
+
+
+/* ROUND 3 — typographic finish, ornament system, tactile states and tablet rhythm */
+:root{--editorial-ink:#342e28;--editorial-muted:#887761;--editorial-paper:#f1e6d4;--editorial-line:#bba88e;--editorial-rust:#a9573d;--editorial-olive:#72745a}
+body{font-kerning:normal;text-rendering:optimizeLegibility}
+button,input,select,textarea{font-family:inherit}
+button{-webkit-tap-highlight-color:transparent}
+.top{background:linear-gradient(105deg,#f2e8d8 0%,#e8dac5 100%)!important;border-bottom:1px solid #b6a184!important;box-shadow:0 3px 18px #47352212!important}
+.identity .mark{font:italic 700 27px Georgia,serif!important;background:#a65e43!important;color:#fff2df!important;border-radius:0!important;transform:rotate(-4deg)}
+.identity-copy .name{font:700 17px Georgia,"Noto Serif SC",serif!important;letter-spacing:-.025em;color:#3b332a!important}
+.identity-copy .date,.identity-meta{font:8px Arial,sans-serif!important;letter-spacing:.1em;color:#8a765e!important}
+.chat input{border:0!important;border-bottom:1px solid #a78d6d!important;border-radius:0!important;background:#f8f0e4!important}
+.chat .send{border:0!important;border-radius:0!important;background:#a65e43!important;color:#fff2df!important;font:700 9px Arial,sans-serif!important;letter-spacing:.12em}
+.drawer,.calendar-view{scrollbar-color:#b79a78 transparent;scrollbar-width:thin}
+.drawer-head{min-height:clamp(70px,11vh,94px)!important}
+.drawer-head strong{position:relative;z-index:1;text-shadow:1px 1px 0 #f8efe1,2px 2px 0 #bfa98b22!important}
+.drawer-head:before{font-size:7px!important;letter-spacing:.24em!important}
+.drawer-head:after{content:"✳  /  01"!important;right:60px!important;top:3px!important;font:italic 10px Georgia,serif!important;letter-spacing:.1em;color:#a65e43!important;opacity:.9!important;border-top:1px solid #b99b7d;border-bottom:1px solid #b99b7d;padding:5px 0}
+.drawer .section-kicker,.drawer .cooking-section-title{display:flex;align-items:center;gap:9px}
+.drawer .section-kicker:after,.drawer .cooking-section-title:after{content:"";display:block;width:34px;height:1px;background:#b99a79}
+.drawer .choice:before{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:#a65e43;transition:width .2s ease}
+.drawer .choice:active:before,.drawer .choice:focus-visible:before{width:3px}
+.drawer button,.calendar-view button{transition:background-color .18s ease,color .18s ease,transform .18s ease,border-color .18s ease}
+.drawer .shop-category,.drawer .shop-group,.drawer .shop-furniture-type{min-height:36px!important;padding:8px 12px!important}
+.drawer .shop-product-card{position:relative}
+.drawer .shop-product-card:after{content:"";position:absolute;left:4px;bottom:-1px;width:0;height:2px;background:#a65e43;transition:width .22s ease}
+.drawer .shop-product-card:active:after{width:calc(100% - 8px)}
+.drawer .shop-product-icon{font-family:Georgia,serif!important}
+.drawer .shop-product-buy{white-space:nowrap}
+.drawer .account-balance:after{content:"HOUSEHOLD / LEDGER";position:absolute;right:18px;bottom:15px;font:700 7px Arial,sans-serif;letter-spacing:.18em;color:#f2d9c4}
+.drawer .dossier-hero:after{content:"A PRIVATE PORTRAIT";position:absolute;right:8px;top:12px;font:700 7px Arial,sans-serif;letter-spacing:.2em;color:#896d53;writing-mode:vertical-rl}
+.calendar-editorial-masthead:after{content:"VOL. 01  /  EVERYDAY";position:absolute;right:3px;bottom:3px;font:700 6px Arial,sans-serif;letter-spacing:.2em;color:#9b886e}
+.calendar-day-tabs button{min-height:54px!important}
+.calendar-day-tabs button.active .calendar-tab-index{font-size:27px!important;color:#a9573d}
+.day-card-head{display:flex!important;align-items:baseline!important;justify-content:space-between!important}
+.day-slot button{min-height:31px!important}
+.day-slot button:active{transform:translateX(2px)}
+.drawer .close:focus-visible,.drawer button:focus-visible,.calendar-view button:focus-visible{outline:2px solid #a9573d!important;outline-offset:2px!important}
+.drawer .choices{overscroll-behavior:contain;scrollbar-gutter:stable}
+@media(min-width:600px){
+ .drawer,.calendar-view{padding:clamp(20px,3vw,34px)!important}
+ .drawer-head{min-height:94px!important;margin-bottom:19px!important}
+ .drawer-head strong{font-size:clamp(42px,5vw,58px)!important}
+ .drawer .choices{column-gap:22px!important}
+ .drawer .shop-product-card{min-height:82px!important}
+ .calendar-editorial-masthead{min-height:clamp(135px,20vh,190px)}
+ .calendar-display-title{font-size:clamp(64px,8vw,92px)}
+}
+@media(max-width:430px){
+ .top{padding-left:max(10px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}
+ .drawer{padding:12px!important}
+ .drawer-head:after{right:48px!important;font-size:8px!important}
+ .drawer-head strong{font-size:clamp(30px,9vw,38px)!important}
+ .drawer .choice{min-height:43px!important;padding:11px 8px!important}
+ .drawer .shop-product-info strong{font-size:13px!important}
+ .drawer .account-balance{min-height:128px!important}
+ .calendar-view{padding:12px!important}
+}
+@media(prefers-reduced-motion:reduce){.drawer button,.calendar-view button,.drawer .choice:before,.drawer .shop-product-card:after{transition:none!important}}
+
