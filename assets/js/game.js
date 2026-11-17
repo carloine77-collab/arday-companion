@@ -516,7 +516,7 @@ function relation(action){
 
 function pantryCount(k){return Math.max(0,Number(s.pantry?.[k]||0))}
 function canCook(id){const r=recipes[id];return !!r&&Object.entries(r.ingredients).every(([k,n])=>pantryCount(k)>=n)}
-function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;remember('purchase','购买食材：'+label,1);say('食材放进冰箱了。');save();render();openKitchenPanel(false)}
+function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);say('食材放进冰箱了。');save();render();openKitchenPanel(false)}
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('roomLabel').textContent='KITCHEN · 厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent='HOME · '+m.title;updateArday3D()}
 function openKitchenPanel(together=false){kitchenOpen();const stock=Object.entries(ingredientNames).map(([k,n])=>n+' × '+pantryCount(k)).join('　·　'),meals=s.readyMeals||[];$('drawerTitle').textContent='厨房 · 食材与烹饪';$('choices').innerHTML='<div class="calendar-note">冰箱库存：'+stock+'<br>已做好：'+(meals.length?meals.map(x=>x.name).join('、'):'暂无')+'</div><div class="choices">'+Object.entries(recipes).map(([id,r])=>'<button class="choice" data-recipe="'+id+'"><span class="emoji">🍳</span>'+r.name+'<small>'+Object.entries(r.ingredients).map(([k,n])=>ingredientNames[k]+' ×'+n).join('、')+'</small></button>').join('')+'</div><div class="calendar-actions"><button id="kitchen-shop">去商店买食材</button><button id="kitchen-close">收起</button></div>';$('choices').querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>scheduleCooking(b.dataset.recipe,together));$('kitchen-shop').onclick=()=>openTab('商店');$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open')}
@@ -780,17 +780,16 @@ eventChoices=function(e){
  }
  if(e.type==='life-repair'){
   $('drawerTitle').textContent=e.title;
-  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="repair-now">现在修理 · ¥80</button><button class="choice" id="repair-later">先放着</button></div>';
-  $('repair-now').onclick=()=>{if(s.money>=80){s.money-=80;moneyRecord('shared','expense',80,'修理日常用品');s.roomCondition=clamp(s.roomCondition+12);say('修好了。你看，生活里的麻烦总有办法解决。');}else say('共同账户的钱不够。那就先等等吧。');completeEvent(e,'处理修理事项');save();render();renderEvents()};
-  $('repair-later').onclick=()=>{s.roomCondition=clamp(s.roomCondition-4);say('好吧，暂时不管它。希望它别挑更糟的时候罢工。');completeEvent(e,'暂缓修理');save();render();renderEvents()};
+  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="repair-now">现在修理 · ¥80</button><button id="repair-later">暂时不处理</button></div>';
+  $('repair-now').onclick=()=>{if(s.money>=80){s.money-=80;moneyRecord('shared','expense',80,'修理日常用品');s.roomCondition=clamp(s.roomCondition+12);say('修好了。你看，生活里的麻烦总有办法解决。')}else say('共同账户的钱不够。');completeEvent(e,'完成修理');save();render();renderEvents()};
+  $('repair-later').onclick=()=>{s.roomCondition=clamp(s.roomCondition-4);say('好吧，先放着。');completeEvent(e,'暂不处理');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  if(e.type==='life-memory'){
   $('drawerTitle').textContent=e.title;
-  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="memory-ask">问问他纸条的来历</button><button class="choice" id="memory-keep">替他收起来</button><button class="choice" id="memory-leave">不多过问</button></div>';
-  $('memory-ask').onclick=()=>{say('你倒是很会挑时候。只是这件事，我还没想好要从哪里说起。');remember('old-memory','你问起那张旧纸条，阿尔没有立刻回答。',2);change({friend:1});completeEvent(e,'询问纸条来历') ;save();renderEvents()};
+  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="memory-ask">问问纸条的来历</button><button id="memory-keep">替他收起来</button></div>';
+  $('memory-ask').onclick=()=>{say('你倒是很会挑时候。只是这件事，我还没想好要从哪里说起。');remember('old-memory','你问起那张旧纸条，阿尔没有立刻回答。',2);change({friend:1});completeEvent(e,'询问纸条来历');save();renderEvents()};
   $('memory-keep').onclick=()=>{say('替我收着吧。说不定哪天，我会想起它。');remember('old-memory','你替阿尔收起了旧纸条。',2);completeEvent(e,'收起纸条');save();renderEvents()};
-  $('memory-leave').onclick=()=>{say('嗯。偶尔不知道一件事，也没什么不好。');completeEvent(e,'没有追问');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  if(e.type==='life-evening'){
@@ -1393,8 +1392,8 @@ function initArday3D(){
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
-   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper;
-   if(wallpaper)applyWallpaperToRoom(root,wallpaper);
+   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
+   applyWallpaperToRoom(root,wallpaper);
    if(finish?.floor){root.userData.floorMesh.material=M(finish.floor==='buy-floor-concrete'?0x69727b:0x424d5b)}
    const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46};scene.background.set(colors[roomMode]);
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);
