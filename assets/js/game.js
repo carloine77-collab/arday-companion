@@ -38,13 +38,15 @@ if((s.furnitureCatalogVersion||0)<2){
  s.furnitureCatalogVersion=2;
 }
 if((s.roomFurnishingMigration||0)<1){
- s.placedFurniture=s.placedFurniture||[];
- s.ownedFurniture=s.ownedFurniture||[];
- const roomFurniture=s.placedFurniture.filter(item=>item&&['bedroom','kitchen'].includes(item.room));
- roomFurniture.forEach(item=>{if(item.name&&!s.ownedFurniture.includes(item.name))s.ownedFurniture.push(item.name)});
- s.placedFurniture=s.placedFurniture.filter(item=>!item||!['bedroom','kitchen'].includes(item.room));
- s.furnitureLayout=s.furnitureLayout||{};s.furnitureLayout.bedroom={};s.furnitureLayout.kitchen={};
- s.roomPositions=s.roomPositions||{};s.roomPositions.bedroom={};s.roomPositions.kitchen={};
+ if(!Array.isArray(s.placedFurniture))s.placedFurniture=[];
+ if(!Array.isArray(s.ownedFurniture))s.ownedFurniture=[];
+ const roomFurniture=s.placedFurniture.filter(item=>item&&typeof item==='object'&&['bedroom','kitchen'].includes(item.room));
+ roomFurniture.forEach(item=>{if(typeof item.name==='string'&&item.name&&!s.ownedFurniture.includes(item.name))s.ownedFurniture.push(item.name)});
+ s.placedFurniture=s.placedFurniture.filter(item=>item&&typeof item==='object'&&!['bedroom','kitchen'].includes(item.room));
+ s.furnitureLayout=s.furnitureLayout&&typeof s.furnitureLayout==='object'?s.furnitureLayout:{};
+ s.furnitureLayout.bedroom={};s.furnitureLayout.kitchen={};
+ s.roomPositions=s.roomPositions&&typeof s.roomPositions==='object'?s.roomPositions:{};
+ s.roomPositions.bedroom={};s.roomPositions.kitchen={};
  s.roomFurnishingMigration=1;
 }
 s.ownedFurniture=s.ownedFurniture||[];s.placedFurniture=s.placedFurniture||[];
@@ -1211,15 +1213,13 @@ function initArday3D(){
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
    s.placedFurniture=s.placedFurniture||[];
-  const legacyRoomDefaults=new Set(['床','床头柜','床头灯','衣柜','卧室地毯','橱柜','吊柜','冰箱','灶台','水槽']);
-  s.placedFurniture=s.placedFurniture.filter(item=>!(legacyRoomDefaults.has(item.name)&&['bedroom','kitchen'].includes(item.room)&&item.starterDefault===true));
    if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
    persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
   s.placedFurniture=s.placedFurniture||[];
   if(!s.placedFurniture.some(item=>item.name==='沙发'&&item.room==='living'))s.placedFurniture.push({id:'arday-cream-walnut-sofa',name:'沙发',room:'living',x:-2.55,y:0,z:1.05,rotation:0,supportId:null});
-  (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
+  (s.placedFurniture||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string').forEach(record=>createOwnedFurniture(record.name,record));
 
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
