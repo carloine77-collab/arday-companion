@@ -246,7 +246,7 @@ footer.bottom .bottom-actions{display:grid!important;grid-template-columns:minma
 footer.bottom .bottom-actions .recent-entry,footer.bottom .bottom-actions .decorate{position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;width:100%!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:0 4px!important;border:1px solid #e5d2b8!important;border-radius:11px!important;background:#fff8ec!important;color:#765a40!important;font-size:10px!important;font-weight:650!important;line-height:1!important;white-space:nowrap!important;box-shadow:none!important}
 footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .stage .room-door{z-index:22!important}
-.stage .drawer{z-index:80!important}.stage .drawer.profile-expanded{top:12px!important;bottom:12px!important;left:50%!important;transform:translate(-50%,0)!important;width:min(92%,620px)!important;max-height:none!important;height:auto!important;overflow-y:auto!important;overscroll-behavior:contain!important}.stage .drawer.profile-expanded .choices{display:flex!important;flex-direction:column!important;gap:12px!important}.stage.editing .decorate-tools{display:flex!important;visibility:visible!important;opacity:1!important;z-index:95!important}.stage.editing #rotateFurnitureButton{display:inline-flex!important;visibility:visible!important;width:44px!important;height:44px!important;min-height:44px!important;min-width:44px!important;align-items:center;justify-content:center;padding:0!important;border-radius:50%!important;background:#725743!important;color:#fff8ed!important;border:1px solid #725743!important;box-shadow:0 3px 10px #44331e30!important;font-size:22px!important}.stage.editing #rotateFurnitureButton:disabled{opacity:.42!important}.wall-hotspot{z-index:13!important;min-width:30px;min-height:28px;padding:5px 7px!important;background:#fff8e8ee!important;border:1px solid #b99b79!important;color:#654a32!important;font-size:10px!important}
+.stage .drawer{z-index:80!important}.stage .drawer.profile-expanded{top:12px!important;bottom:12px!important;left:50%!important;transform:translate(-50%,0)!important;width:min(92%,620px)!important;max-height:none!important;height:auto!important;overflow-y:auto!important;overscroll-behavior:contain!important}.stage .drawer.profile-expanded .choices{display:flex!important;flex-direction:column!important;gap:12px!important}.stage.editing .decorate-tools{display:flex!important;visibility:visible!important;opacity:1!important;z-index:96!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;pointer-events:none!important}.stage.editing #rotateFurnitureButton{pointer-events:auto!important;outline:none!important}.stage.editing #rotateFurnitureButton{display:inline-flex!important;visibility:visible!important;width:44px!important;height:44px!important;min-height:44px!important;min-width:44px!important;align-items:center;justify-content:center;padding:0!important;border-radius:50%!important;background:#725743!important;color:#fff8ed!important;border:1px solid #725743!important;box-shadow:0 3px 10px #44331e30!important;font-size:22px!important}.stage.editing #rotateFurnitureButton:disabled{opacity:.42!important}.wall-hotspot{z-index:13!important;min-width:30px;min-height:28px;padding:5px 7px!important;background:#fff8e8ee!important;border:1px solid #b99b79!important;color:#654a32!important;font-size:10px!important}
 .stage:has(.drawer.open) .room-door{display:none!important}
 .stage.calendar-mode .room-door{display:none!important}
 .stage{touch-action:none}
@@ -375,6 +375,7 @@ const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:3000;}}catch(e){} delete s.coins;
 s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
+s.jobApplications=s.jobApplications||{};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+Math.round(Number(s.roomCondition)||0)+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
@@ -737,29 +738,30 @@ function dayAnchorAt(value){
 }
 function keyAt(value){return dayKey(dayAnchorAt(value))}
 function ensureScheduleAt(value){
- const key=keyAt(value);
- if(!s.calendar)s.calendar={anchor:key,days:{},version:4};
+ const currentKey=keyAt(Date.now()),requestedKey=keyAt(value);
+ if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:4};
  s.calendar.days=s.calendar.days||{};
  if((s.calendar.version||0)<4){
-  s.calendar.anchor=key;
-  s.calendar.days[key]=buildDay(key);
-  s.calendar.version=4;
+  s.calendar.anchor=currentKey;s.calendar.days={};s.calendar.version=4;
  }
- if(s.calendar.anchor!==key){
-  s.calendar.anchor=key;
-  Object.keys(s.calendar.days).forEach(k=>{if(k<key)delete s.calendar.days[k]});
-  Object.keys(s.sleepPlans||{}).forEach(k=>{if(k<key)delete s.sleepPlans[k]});
-  if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
-  for(let i=1;i<=2;i++){
-   const future=dayKey(plusDays(dayAnchorAt(value),i));
-   if(!s.calendar.days[future])s.calendar.days[future]=[];
-  }
+ if(s.calendar.anchor!==currentKey){
+  s.calendar.anchor=currentKey;
+  Object.keys(s.calendar.days).forEach(k=>{if(k<currentKey)delete s.calendar.days[k]});
+  Object.keys(s.sleepPlans||{}).forEach(k=>{if(k<currentKey)delete s.sleepPlans[k]});
   addEvent('新的一天','阿尔已经开始安排新一天的生活。','daily');
- }else if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
- if(s.job?.active&&key>=s.job.startDate&&!((s.calendar.days[key]||[]).some(e=>e.jobShift&&e.jobId===s.job.id))){
-  writeBlockForKey(key,s.job.start,s.job.end,{title:'工作 · '+s.job.title,kind:'work',activity:'work',jobShift:true,jobId:s.job.id});
  }
- return key;
+ const ensureDay=key=>{if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key)};
+ ensureDay(currentKey);
+ for(let i=1;i<=2;i++)ensureDay(dayKey(plusDays(dayAnchor(),i)));
+ if(requestedKey>=currentKey)ensureDay(requestedKey);
+ if(s.job?.active){
+  Object.keys(s.calendar.days).filter(k=>k>=s.job.startDate).sort().forEach(key=>{
+   if(!(s.calendar.days[key]||[]).some(e=>e.jobShift&&e.jobId===s.job.id)){
+    writeBlockForKey(key,s.job.start,s.job.end,{title:'工作 · '+s.job.title,kind:'work',activity:'work',jobShift:true,jobId:s.job.id});
+   }
+  });
+ }
+ return requestedKey;
 }
 function writeBlockForKey(key,start,end,block){
  const day=s.calendar.days[key]||(s.calendar.days[key]=[]);
@@ -1185,12 +1187,14 @@ function showCareer(){
    {id:'research-assistant',title:'研究助理',salary:260,start:9,end:12,minFriend:28,minEnergy:42,skill:'reading',skillMin:2,desc:'搜集资料、整理文献并撰写研究摘要'},
    {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:'参与内容选题、撰写方案与项目协作'}
   ];
+  const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
   $('choices').innerHTML='<div class="calendar-note">阿尔目前没有工作。申请会根据他的精力、关系状态和相关经验判定；满足基本条件后仍有一定录用概率。薪资按工作日发放。</div>'+jobs.map((j,i)=>{
+   const attempted=!!s.jobApplications[applicationDay][j.id];
    const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
    const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
-   return '<section class="profile-section job-card"><div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>'+j.desc+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'">申请职位</button></section>';
+   return '<section class="profile-section job-card"><div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>'+j.desc+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted?'disabled':'')+'>'+(attempted?'今日已申请':'申请职位')+'</button></section>';
   }).join('');
-  $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{const j=jobs.find(x=>x.id===b.dataset.applyJob),skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');return}const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}const startDate=dayKey(plusDays(dayAnchor(),1));s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(plusDays(dayAnchor(),1));save();addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功')});
+  $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{const j=jobs.find(x=>x.id===b.dataset.applyJob);if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};s.jobApplications[applicationDay][j.id]={at:Date.now()};save();const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');showCareer();return}const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}const startDate=dayKey(plusDays(dayAnchor(),1));s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(plusDays(dayAnchor(),1));save();addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功')});
  }
  $('drawer').classList.add('open');
 }
