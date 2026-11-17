@@ -1611,7 +1611,12 @@ function initArday3D(){
      .then(encoded=>{
       const clean=encoded.trim().replace(/\s/g,'');
       if(!clean)throw new Error('模型资源为空');
-      const binary=Uint8Array.from(atob(clean),ch=>ch.charCodeAt(0));
+      let payload=clean;
+      // The checked-in base64 asset contains one extra 'A' immediately before its final '=='.
+      // Remove that duplicated padding-adjacent character before decoding.
+      if(payload.length%4===1&&payload.endsWith('AAA=='))payload=payload.slice(0,-3)+payload.slice(-2);
+      if(payload.length%4===1)throw new Error('沙发资源 Base64 长度仍然损坏：'+payload.length);
+      const binary=Uint8Array.from(atob(payload),ch=>ch.charCodeAt(0));
       if(binary[0]!==31||binary[1]!==139)throw new Error('模型压缩文件头无效');
       const inflate=()=>{
        if(typeof DecompressionStream!=='undefined'){
