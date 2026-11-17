@@ -65,7 +65,8 @@ function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
 function has(item){return s.items.includes(item)||s.furniture.includes(item)||s.ownedFurniture.includes(item)||(s.placedFurniture||[]).some(x=>x.name===item)}
-function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
+function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(type==='shared-goal-proposal'||type==='long')return 'proposal';if(type==='player-action')return 'player';if(type.startsWith('life-'))return 'random';return 'daily'}
+function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,category:eventCategory({type}),choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 
 
@@ -82,22 +83,23 @@ const tabs={
 };
 
 let shopCategory='食物食材';
-let shopFurnitureType='地毯';
-const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架','buy-furniture-desk':'书桌','buy-furniture-chair':'椅子','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-chair':'餐桌椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'床头灯','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'卧室地毯','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
+let shopFurnitureGroup='起居空间';
+let shopFurnitureType='沙发';
+const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架','buy-furniture-desk':'书桌','buy-furniture-chair':'椅子','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-chair':'椅子·餐椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'床头灯','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
 function addItem(name){s.items.push(name)}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
- if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}s.money-=cost;arday3D.applyRoomFinish(id);remember('purchase','房间装修：'+label,2);say('已经换上新的'+label+'。');save();render();toast('装修完成：'+label);openTab('商店',true);return}
+ if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}s.money-=cost;arday3D.applyRoomFinish(id);const scope=id.startsWith('buy-wallpaper-')?'全屋墙面':'当前房间地面';addEvent('你更换了房间饰面',label+'已应用于'+scope+'。','player-action');remember('purchase','房间装修：'+label,2);say('已经换上新的'+label+'。');save();render();toast('装修完成：'+label);openTab('商店',true);return}
  if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')){
   const furnitureName=furnitureNameById[id];if(!furnitureName){toast('商品信息不存在');return}
-  s.money-=cost;s.ownedFurniture.push(furnitureName);say('这件家具已经收进物品栏。等你决定好位置，再把它摆进房间。');
+  s.money-=cost;s.ownedFurniture.push(furnitureName);addEvent('你购入了一件家具',label+'已放入物品栏，可以在任意房间自由摆放。','player-action');say('这件家具已经收进物品栏。等你决定好位置，再把它摆进房间。');
   remember('purchase',label,2);save();render();toast('购入：'+label);openTab('物品',true);return;
  }
  s.money-=cost;
  if(id==='buy-food')addItem('点心');
  else if(id==='buy-record')addItem('唱片');
 
- say('买下了'+label+'。这会给我们的生活带来一点变化。');remember('purchase',label,2);save();render();toast('购入：'+label);openTab('商店',true);
+ addEvent('你添置了生活用品',label+'已收入物品栏。','player-action');say('买下了'+label+'。这会给我们的生活带来一点变化。');remember('purchase',label,2);save();render();toast('购入：'+label);openTab('商店',true);
 }
 function openTab(name,force=false){
  const active=document.querySelector('.tool.active')?.dataset.tab;
@@ -107,27 +109,40 @@ function openTab(name,force=false){
  if(name==='账户'){showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
  if(name==='职业'){showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
  $('drawer').classList.remove('profile-expanded');
- $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';
+ $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
+ let shopGrid=null;
  if(name==='商店'){
+  $('choices').classList.add('shop-content');
   const nav=document.createElement('div');nav.className='shop-categories';
   ['食物食材','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   $('choices').appendChild(nav);
   if(shopCategory==='家具'){
-   const types=document.createElement('div');types.className='shop-furniture-types';
-   Object.keys(shopCatalog.furnitureCategories||{}).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFurnitureType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFurnitureType=type;openTab('商店',true)};types.appendChild(button)});
-   $('choices').appendChild(types);
+   const groups=shopCatalog.furnitureCategories||{};
+   if(!groups[shopFurnitureGroup])shopFurnitureGroup=Object.keys(groups)[0]||'';
+   const groupNav=document.createElement('div');groupNav.className='shop-level-one';
+   Object.keys(groups).forEach(group=>{const button=document.createElement('button');button.type='button';button.className='shop-group'+(shopFurnitureGroup===group?' active':'');button.textContent=group;button.onclick=()=>{shopFurnitureGroup=group;shopFurnitureType=Object.keys(groups[group]||{})[0]||'';openTab('商店',true)};groupNav.appendChild(button)});
+   $('choices').appendChild(groupNav);
+   const types=groups[shopFurnitureGroup]||{};
+   if(!types[shopFurnitureType])shopFurnitureType=Object.keys(types)[0]||'';
+   const typeNav=document.createElement('div');typeNav.className='shop-level-two';
+   Object.keys(types).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFurnitureType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFurnitureType=type;openTab('商店',true)};typeNav.appendChild(button)});
+   $('choices').appendChild(typeNav);
   }
+  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder='搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
+  shopGrid=document.createElement('div');shopGrid.className='shop-product-grid';$('choices').appendChild(shopGrid);
+  search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
- const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  if(name==='物品'){
   const itemIcons={'一本旧书':'📖','旧书':'📖','陶杯':'☕','点心':'🥐','唱片':'💿','修理工具':'🔧'};
   s.items.forEach((item,index)=>tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index]));
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key])});
   s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,'▧','place-owned-'+index]));
  }
- tabEntries.forEach(([label,emoji,id,cost])=>{
-  let b=document.createElement('button');b.className='choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
-  b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
+ tabEntries.forEach(([label,emoji,id,cost,description])=>{
+  let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
+  if(isShop){const desc=description||(id.startsWith('buy-wallpaper-')?'全屋墙面饰面':id.startsWith('buy-floor-')?'当前房间地面饰面':'可收入物品栏，自由摆放');b.dataset.search=(label+' '+desc+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong><small>'+desc+'</small></span><span class="shop-product-buy">'+(Number(cost)===0?'免费':'¥'+cost)+'<em>购入</em></span>';}
+  else b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
    if(id.startsWith('use-inventory-')){
@@ -144,7 +159,7 @@ function openTab(name,force=false){
     const index=Number(id.slice('place-owned-'.length)),item=s.ownedFurniture[index];
     if(!item){toast('这件物品已不在库存中');openTab('物品',true);return}
     if(!arday3D?.placeOwnedFurniture||!arday3D.placeOwnedFurniture(item)){toast('当前场景无法放置这件家具');return}
-    s.ownedFurniture.splice(index,1);save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
+    s.ownedFurniture.splice(index,1);addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
    }
    if(id==='kitchen'){openKitchenPanel(false);return}
    if(id==='cook-together'){if(Math.random()>.67){s.rejections=(s.rejections||0)+1;say(['今天不想一起做饭。你先决定吃什么吧。','厨房先留给我自己待会儿用，暂时不需要搭档。','做饭可以改天，我现在没这个兴致。'][Math.floor(Math.random()*3)]);save();return}openKitchenPanel(true);return}
@@ -161,38 +176,44 @@ function openTab(name,force=false){
    else perform(id);
    save();render();$('drawerTitle').textContent=name+' · ¥ '+s.money;
   };
-  $('choices').appendChild(b);
+  (shopGrid||$('choices')).appendChild(b);
  });
  $('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
 }
 
 function eventChoicesLegacy(e){
  $('drawerTitle').textContent=e.title;
- let opts=e.type==='long'?['同意，一起做','先等等','提出别的计划']:e.title.includes('唱片机')?['直接买下来','先不花钱','去二手市场找找']:['陪他一起','让他自己决定','提出替代方案'];
- $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices">'+opts.map((x,i)=>'<button class="choice" data-choice="'+i+'">'+x+'</button>').join('')+'</div>';
- $('choices').querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{
-  let i=+b.dataset.choice,choice=opts[i];
-  if(e.title.includes('唱片机')){
-   if(i===0){if(s.money>=399){s.money-=399;s.furniture.push('唱片机');say('谢谢你。我已经在想第一张要放什么唱片了。');remember('shared','一起决定添置唱片机',3)}else say('钱还不够，我们先攒一点。')}
-   else if(i===1){say('好，那就先不买。我也不是非要现在拥有。');s.bored=clamp(s.bored+1)}
-   else{say('二手市场听起来不错。我想找找看。');s.preferences.market=(s.preferences.market||0)+1}
-  }else if(e.type==='long'){
-   if(i===0){say('好。让它慢慢融入日常，不必急着安排什么。');remember('shared',e.title,1)}
-   else if(i===1){say('当然，不急。东西已经在这里了，什么时候用都可以。')}
-   else{say('可以。等你有了更具体的想法，我们再调整。')}
-  }else{
-   if(i===0){s.friend=clamp(s.friend+2);s.attach=clamp(s.attach+1);say('好啊，和你一起做会更有意思。');remember('shared',e.title,2)}
-   else if(i===1){say('那我自己来。你也可以忙自己的事情。')}
-   else{say('可以换个方式，我愿意听听你的想法。');s.friend=clamp(s.friend+1)}
-  }
-  completeEvent(e,choice);save();render();$('drawer').classList.remove('open');
- });$('drawer').classList.add('open');
+ $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="event-acknowledge">知道了</button></div>';
+ $('event-acknowledge').onclick=()=>{completeEvent(e,'已阅');save();renderEvents()};
+ $('drawer').classList.add('open');
 }
 function renderEvents(){
- let open=s.events.filter(e=>e.status==='open');
- $('drawerTitle').textContent='最近发生的事';
- $('choices').innerHTML=open.length?'':'<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';
- open.forEach(e=>{let b=document.createElement('button');b.className='choice event-card';b.innerHTML='<span class="event-mark">'+(e.type==='long'?'✦':'·')+'</span><span class="event-copy"><strong>'+e.title+'</strong><small>'+e.detail+'</small></span><span class="event-arrow">›</span>';b.onclick=()=>eventChoices(e);$('choices').appendChild(b)});
+ const open=s.events.filter(e=>e.status==='open').sort((a,b)=>(b.created||0)-(a.created||0));
+ $('drawerTitle').textContent='最近发生的事';$('choices').innerHTML='';
+ const groups=[
+  ['daily','日常生活中的明确事件','阿尔日常生活中实际发生的事情'],
+  ['random','系统随机生成的生活事件','由生活状态与随机情境触发'],
+  ['proposal','阿尔主动提出的共同计划','阿尔希望与你一起完成的安排'],
+  ['player','玩家操作直接产生的事件','由你的购买、装修和摆放等操作产生']
+ ];
+ if(!open.length)$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';
+ groups.forEach(([key,title,description])=>{
+  const items=open.filter(e=>eventCategory(e)===key);
+  const section=document.createElement('section');section.className='event-group';
+  const head=document.createElement('div');head.className='event-group-head';head.innerHTML='<span>'+title+'</span><small>'+items.length+'</small>';section.appendChild(head);
+  const note=document.createElement('p');note.className='event-group-note';note.textContent=description;section.appendChild(note);
+  if(!items.length){const empty=document.createElement('div');empty.className='event-group-empty';empty.textContent='暂无记录';section.appendChild(empty)}
+  items.forEach(e=>{
+   const b=document.createElement('button');b.type='button';b.className='choice event-card';
+   const mark=document.createElement('span');mark.className='event-mark';mark.textContent=key==='proposal'?'✦':key==='random'?'◇':key==='player'?'↗':'·';
+   const copy=document.createElement('span');copy.className='event-copy';
+   const titleNode=document.createElement('strong');titleNode.textContent=e.title;
+   const detailNode=document.createElement('small');detailNode.textContent=e.detail;
+   copy.append(titleNode,detailNode);const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='›';b.append(mark,copy,arrow);
+   b.onclick=()=>eventChoices(e);section.appendChild(b);
+  });
+  $('choices').appendChild(section);
+ });
  $('drawer').classList.add('open');
 }
 
@@ -752,11 +773,9 @@ eventChoices=function(e){
   const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
   if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
   $('drawerTitle').textContent=e.title;
-  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="sg-yes">好，一起做</button><button class="choice" id="sg-slow">可以，但慢慢来</button><button class="choice" id="sg-later">改天再说</button><button class="choice" id="sg-no">我不想做</button></div>';
-  $('sg-yes').onclick=()=>{acceptSharedGoal(g.id);completeEvent(e,'同意共同计划');save();render();renderEvents()};
-  $('sg-slow').onclick=()=>{acceptSharedGoal(g.id,'slow');completeEvent(e,'同意，但降低计划规模');save();render();renderEvents()};
-  $('sg-later').onclick=()=>{say(ardayLine('decline'));completeEvent(e,'暂缓');s.lastSharedProposalAt=Date.now()-48*3600000;save();renderEvents()};
-  $('sg-no').onclick=()=>{say(ardayLine('decline'));if(s.sharedGoal)s.sharedGoal.status='declined';completeEvent(e,'拒绝共同计划');save();renderEvents()};
+  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="sg-accept">一起做</button><button id="sg-decline">这次先不安排</button></div>';
+  $('sg-accept').onclick=()=>{acceptSharedGoal(g.id);completeEvent(e,'接受共同计划');save();render();renderEvents()};
+  $('sg-decline').onclick=()=>{say(ardayLine('decline'));s.lastSharedProposalAt=Date.now();completeEvent(e,'暂不安排');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  if(e.type==='life-repair'){
@@ -776,10 +795,9 @@ eventChoices=function(e){
  }
  if(e.type==='life-evening'){
   $('drawerTitle').textContent=e.title;
-  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="choices"><button class="choice" id="evening-together">今晚一起待着</button><button class="choice" id="evening-free">各做各的</button><button class="choice" id="evening-ask">让他自己安排</button></div>';
+  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="evening-together">今晚一起待着</button><button id="evening-free">维持原定安排</button></div>';
   $('evening-together').onclick=()=>{change({friend:1,attach:1,fun:2});say('我就知道你会答应。过来吧，今晚不必赶时间。');remember('evening','你们临时改变安排，共度了一个晚上。',2);completeEvent(e,'一起度过晚上');save();renderEvents()};
-  $('evening-free').onclick=()=>{say('也好。偶尔各自清静，反而更容易想念对方。');completeEvent(e,'各自安排');save();renderEvents()};
-  $('evening-ask').onclick=()=>{say('我？我当然有自己的安排。你不必操心。');completeEvent(e,'由阿尔自行安排');remember('autonomy','阿尔决定自己安排这个晚上。',1);save();renderEvents()};
+  $('evening-free').onclick=()=>{say('也好。今晚就照原来的安排来。');completeEvent(e,'维持原定安排');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  oldEventChoicesForGoals(e);
@@ -1362,11 +1380,21 @@ function initArday3D(){
     }
    }
   }
+  const wallpaperColors={'buy-wallpaper-warm-white':0xd5d1c9,'buy-wallpaper-deepblue':0x243b59,'buy-wallpaper-mist':0x8b929c};
+  function applyWallpaperToRoom(root,id){
+   const color=wallpaperColors[id]??wallpaperColors['buy-wallpaper-warm-white'],texture=createPainterTexture('wall');
+   (root.userData.wallMeshes||[]).forEach(mesh=>{
+    const previous=mesh.material,material=applyPainterMap(M(color),texture,.004);
+    material.side=T.DoubleSide;
+    if(previous?.transparent){material.transparent=true;material.opacity=previous.opacity??1;material.depthWrite=false}
+    mesh.material=material;
+   });
+  }
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
-   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living,finish=s.roomFinishes?.[roomMode];
-   if(finish?.wallpaper){const color=finish.wallpaper==='buy-wallpaper-deepblue'?0x243b59:0x8b929c;(root.userData.wallMeshes||[]).forEach(mesh=>{mesh.material=M(color);mesh.material.side=T.DoubleSide})}
+   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper;
+   if(wallpaper)applyWallpaperToRoom(root,wallpaper);
    if(finish?.floor){root.userData.floorMesh.material=M(finish.floor==='buy-floor-concrete'?0x69727b:0x424d5b)}
    const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46};scene.background.set(colors[roomMode]);
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);
@@ -1585,7 +1613,7 @@ function initArday3D(){
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
   applyInkOutlines(scene);
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':'living';const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;if(id.startsWith('buy-wallpaper-')){finishes[room]=finishes[room]||{};finishes[room].wallpaper=id;const color=id==='buy-wallpaper-deepblue'?0x243b59:0x8b929c;(root.userData.wallMeshes||[]).forEach(mesh=>{mesh.material=M(color);mesh.material.side=T.DoubleSide})}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const color=id==='buy-floor-concrete'?0x69727b:0x424d5b;root.userData.floorMesh.material=M(color)}} ,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:name=>{const item=createOwnedFurniture(name);if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:name=>{const item=createOwnedFurniture(name);if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
