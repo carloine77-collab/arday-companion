@@ -153,7 +153,7 @@ function openTab(name,force=false){
     const index=Number(id.slice('use-inventory-'.length)),item=s.items[index];
     if(!item){openTab('物品',true);return}
     if(item==='点心'){s.items.splice(index,1);change({hunger:25,fun:2});say('点心正好派上用场。')}
-    else if(item==='修理工具'){s.roomCondition=clamp(s.roomCondition+12);s.items.splice(index,1);say('我用修理工具把房间里几处松动的地方处理好了。')}
+    
     save();render();openTab('物品',true);return;
    }
    if(id.startsWith('place-owned-')){
@@ -261,7 +261,7 @@ $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('e
 function respondToChat(text){
  if(ardayUnavailable()){busyBubble();return}
  const t=text.toLowerCase(),pick=a=>a[Math.floor(Math.random()*a.length)],cur=s.currentActivity||'idle';
- const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tidy:'整理房间',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',};
+ const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',};
  let topic='general',reply='';
  if(/你好|嗨|早上好|晚上好|在吗|回来/.test(t)){topic='greeting';reply=pick(['你来了。我刚才在'+(act[cur]||'做自己的事')+'。','嗯，我在。你今天过得怎么样？','回来啦。刚才我正准备'+(cur==='sleep'?'睡觉':'继续手头的事')+'。'])}
  else if(/累|疲惫|困|睡不着|休息/.test(t)){topic='tired';reply=pick(['你听起来有点累。今天是什么事情最消耗你？','那先坐一会儿吧。我刚才也在休息。','你想聊聊原因，还是暂时换个轻松的话题？'])}
@@ -270,7 +270,7 @@ function respondToChat(text){
  else if(/音乐|唱片|歌/.test(t)){topic='music';reply=has('唱片机')?pick(['最近我常在晚上听唱片。你有特别喜欢的音乐吗？','我想找点没听过的音乐。','唱片机已经成了房间里常用的东西。']):'我也想听音乐，不过我们还没有唱片机。'}
  else if(/书|阅读|小说|读/.test(t)){topic='reading';reply=pick(['我最近读得比较慢。你在读什么？','你更喜欢故事，还是观点和论证？','有些书读完以后，想法会留很久。'])}
  else if(/吃|饿|饭|食物/.test(t)){topic='food';reply=pick(['我有点想吃热的东西。你今天吃饭了吗？','如果现在能选，我想吃点简单但有味道的东西。','我们可以看看库存还有什么。'])}
- else if(/房间|家具|装修|书桌|植物/.test(t)){topic='room';reply=pick(['房间维护度现在是 '+s.roomCondition+'。我觉得先处理真正影响生活的地方。','我希望房间慢慢有生活痕迹，而不是一下子塞满东西。','如果只能先改一处，我会考虑光线、收纳和使用频率。'])}
+ else if(/房间|家具|装修|书桌|植物/.test(t)){topic='room';reply=pick(['我希望房间慢慢有生活痕迹，而不是一下子塞满东西。','如果只能先改一处，我会考虑光线、收纳和使用频率。'])}
  else if(/对不起|抱歉|原谅/.test(t)){topic='apology';reply=pick(['我听到了。我会看之后怎么相处，不会只凭一句话判断。','谢谢你愿意说出来。我们可以慢慢把事情讲清楚。'])}
  else if(/喜欢|爱你|爱不爱|关系|朋友/.test(t)){topic='relationship';reply=pick(['我觉得关系不是靠一句话就能定下来的。我们相处的细节，我都算数。','我有自己的感受，也还在了解你。你最近怎么想我们的关系？','我们已经形成了一些只有彼此才懂的习惯。'])}
  else {topic='general';let p=s.memories.filter(m=>m.type==='conversation').slice(-1)[0];reply=p&&Math.random()<.4?'你刚才提到“'+p.text.slice(0,22)+'”。这和你现在说的事情有关系吗？':pick(['你说的这件事里，最让你在意的是哪一部分？','我还没有形成明确看法。你愿意再具体一点吗？','我想知道你为什么会这样想，而不只是听一个结论。','这件事我可能有不同看法。你想听听吗？'])}
@@ -385,13 +385,13 @@ function proposeActivityNow(action,force=false){
  if(force||a==='sleep'||a==='rest'||a==='sitChair'||(a in survival&&survival[a]))accept=true;
  else{let probability=.67;if(s.hate>55)probability-=.12;if(s.friend>70&&s.hate<15)probability+=.06;if(a==='walk'&&s.energy<35)probability-=.12;accept=Math.random()<probability}
  if(!accept){
-  const refusals={chat:['好啊，坐一会儿吧。你想聊什么？','我正好也有话想说。','可以，不过今天由我来挑话题。'],computerPlay:['现在不太想玩电脑游戏。','这会儿没什么游戏兴致，晚点再说。','我想先做点别的。'],cookTogether:['厨房可以借给我们一会儿。','好，看看冰箱里还剩些什么。','可以。今天想做点像样的东西。'],tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],tidy:['房间暂时这样就行，我不想现在整理。','你要是想整理可以先动手，我今天没这个打算。','先放着吧，没必要什么都立刻收拾。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
+  const refusals={chat:['好啊，坐一会儿吧。你想聊什么？','我正好也有话想说。','可以，不过今天由我来挑话题。'],computerPlay:['现在不太想玩电脑游戏。','这会儿没什么游戏兴致，晚点再说。','我想先做点别的。'],cookTogether:['厨房可以借给我们一会儿。','好，看看冰箱里还剩些什么。','可以。今天想做点像样的东西。'],tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
   const lines=refusals[a]||['这会儿不太想做。','今天先不了，换个时间吧。','我有自己的安排，别替我决定。'];
   say(lines[Math.floor(Math.random()*lines.length)]);s.rejections=(s.rejections||0)+1;save();return false;
  }
  const slot=findAvailableSlot(now,1);
  if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
- const titles={rest:'休息',eat:'吃东西',food:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'喝茶',walk:'外出',game:'游戏',company:'聊天',chat:'聊天',tidy:'整理房间',write:'写作',cook:'烹饪',cookTogether:'烹饪',computerWork:'电脑工作',computerPlay:'电脑游戏',bouquet:'欣赏花束'};
+ const titles={rest:'休息',eat:'吃东西',food:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'喝茶',walk:'外出',game:'游戏',company:'聊天',chat:'聊天',write:'写作',cook:'烹饪',cookTogether:'烹饪',computerWork:'电脑工作',computerPlay:'电脑游戏',bouquet:'欣赏花束'};
  writeBlockForKey(slot.key,slot.start,slot.start+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
  remember('interaction','接受提议：'+(titles[a]||a),1);
  say(slot.key===key&&slot.start===hour?'好，就按这个安排。':'可以。我把稍后的时间留出来。');
@@ -519,7 +519,7 @@ function setSceneActivity(activity,announce){
  s.currentActivity=a;updateArday3D();
  if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')
 }
-function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
+function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
 function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
@@ -555,9 +555,9 @@ function processActivityAt(value){
  if(sessionStart){
   if(ev?.withPlayer){
    relation(activity);
-   if(activity==='tidy'||activity==='walk')advanceSharedGoal(activity,d.getTime());
+   if(activity==='walk')advanceSharedGoal(activity,d.getTime());
   }
-  if(['read','write','tidy'].includes(activity))updatePersonalGoal(activity,d.getTime());
+  if(['read','write'].includes(activity))updatePersonalGoal(activity,d.getTime());
  }
  const workCompleted=settleWorkAt(key,hour,d.getTime());
  if(workCompleted)updatePersonalGoal('work',d.getTime());
@@ -721,11 +721,7 @@ function createSituationalEvent(at=Date.now()){
  const hour=new Date(at).getHours();
  if(hour<8||hour>22)return;
  const candidates=[];
- if(s.roomCondition<72)candidates.push({
-  id:'repair',title:'房间里出了点小状况',
-  detail:'有件日常用品似乎不太好用了。现在处理会花掉一些共同账户的钱，暂时放着也不是不行。',
-  type:'life-repair'
- });
+ 
  
  candidates.push({
   id:'evening',title:'阿尔想临时改一改今晚的安排',
@@ -756,13 +752,6 @@ eventChoices=function(e){
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="sg-accept">一起做</button><button id="sg-decline">这次先不安排</button></div>';
   $('sg-accept').onclick=()=>{acceptSharedGoal(g.id);completeEvent(e,'接受共同计划');save();render();renderEvents()};
   $('sg-decline').onclick=()=>{say(ardayLine('decline'));s.lastSharedProposalAt=Date.now();completeEvent(e,'暂不安排');save();renderEvents()};
-  $('drawer').classList.add('open');return;
- }
- if(e.type==='life-repair'){
-  $('drawerTitle').textContent=e.title;
-  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="repair-now">现在修理 · ¥80</button><button id="repair-later">暂时不处理</button></div>';
-  $('repair-now').onclick=()=>{if(s.money>=80){s.money-=80;moneyRecord('shared','expense',80,'修理日常用品');s.roomCondition=clamp(s.roomCondition+12);say('修好了。你看，生活里的麻烦总有办法解决。')}else say('共同账户的钱不够。');completeEvent(e,'完成修理');save();render();renderEvents()};
-  $('repair-later').onclick=()=>{s.roomCondition=clamp(s.roomCondition-4);say('好吧，先放着。');completeEvent(e,'暂不处理');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  if(e.type==='life-memory'){
@@ -806,7 +795,7 @@ function showCareer(){
  $('drawer').classList.remove('profile-expanded');$('drawerTitle').textContent='职业';
  if(s.job?.active){
   const j=s.job;
-  $('choices').innerHTML=careerPoster(j.title,0)+'<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>阿尔每天 '+pad(j.start)+':00 至 '+pad(j.end)+':00 工作。薪资在当日工作结束后发放至个人账户。</p><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
+  $('choices').innerHTML=careerPoster(j.title,0)+'<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
 
  }else{
   const jobs=[
@@ -815,7 +804,7 @@ function showCareer(){
    {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:'参与内容选题、撰写方案与项目协作'}
   ];
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
-  $('choices').innerHTML='<div class="calendar-note">阿尔目前没有工作。申请会根据他的精力、关系状态和相关经验判定；满足基本条件后仍有一定录用概率。薪资按工作日发放。</div>'+jobs.map((j,i)=>{
+  $('choices').innerHTML=jobs.map((j,i)=>{
    const attempted=!!s.jobApplications[applicationDay][j.id];
    const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
    const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
@@ -829,10 +818,10 @@ function showGoals(){
  ensurePersonalGoal();
  const g=s.personalGoal,sg=s.sharedGoal;
  const personal=g&&g.status==='active'
-  ?'<strong>'+g.title+'</strong><p>'+g.detail+'</p><p>进度：'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>'
+  ?'<strong>'+g.title+'</strong><p class="goal-progress">'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>'
   :'<p>暂无正在进行的个人计划。</p>';
  const shared=sg?.status==='active'
-  ?'<strong>'+sg.title+'</strong><p>'+sg.detail+'</p><p>进度：'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>'
+  ?'<strong>'+sg.title+'</strong><p class="goal-progress">'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>'
   :'<p>暂无正在进行的共同计划。</p>';
  $('drawerTitle').textContent='目标';
  $('choices').innerHTML='<section class="profile-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section><section class="profile-section"><div class="section-kicker">TOGETHER</div><h3>共同计划</h3>'+shared+'</section>';
@@ -1486,7 +1475,7 @@ function initArday3D(){
     const chair=furnitureRegistry.find(it=>(it.name==='椅子'||it.name==='餐桌椅'||it.name.startsWith('椅子·'))&&it.room===roomMode);
     if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z]}
    }
-   if(['read','tidy'].includes(act)){const shelf=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('书架'));if(shelf){const seat=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name.startsWith('椅子·'))).sort((a,b)=>Math.hypot(a.group.position.x-shelf.group.position.x,a.group.position.z-shelf.group.position.z)-Math.hypot(b.group.position.x-shelf.group.position.x,b.group.position.z-shelf.group.position.z))[0];const offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2]);}}
+   if(['read'].includes(act)){const shelf=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('书架'));if(shelf){const seat=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name.startsWith('椅子·'))).sort((a,b)=>Math.hypot(a.group.position.x-shelf.group.position.x,a.group.position.z-shelf.group.position.z)-Math.hypot(b.group.position.x-shelf.group.position.x,b.group.position.z-shelf.group.position.z))[0];const offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2]);}}
    if(['rest','chat','company'].includes(act)){const sofa=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('沙发'));if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI;}}
    if(act==='eat'||act==='food'){const table=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='餐桌');if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2]);}}
    if(act==='sleep'){const bedItem=furnitureRegistry.find(it=>it.room==='bedroom'&&it.name.startsWith('床'));if(bedItem){const local=new T.Vector3(0,.92,.04).applyAxisAngle(new T.Vector3(0,1,0),bedItem.group.rotation.y);p=[bedItem.group.position.x+local.x,bedItem.group.position.y+local.y,bedItem.group.position.z+local.z];faceAngle=bedItem.group.rotation.y;}}
@@ -1652,7 +1641,7 @@ function initArday3D(){
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
-    const reading=activeActivity==='read',eating=activeActivity==='eat'||activeActivity==='food',tidying=activeActivity==='tidy',typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
+    const reading=activeActivity==='read',eating=activeActivity==='eat'||activeActivity==='food',tidying=false,typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
