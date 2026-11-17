@@ -25,7 +25,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:30000,items:[],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
+const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV2){s.money=30000;s.testFundsV2=true;}}}catch(e){} delete s.coins;
 s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=s.furniture||base.furniture.slice();
@@ -135,6 +135,7 @@ function openTab(name,force=false){
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
  const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ if(name==='互动')$('choices').className='choices interaction-view';
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
@@ -401,7 +402,7 @@ function proposeActivityNow(action,force=false){
 }
 function dayAnchorAt(value){
  const d=new Date(value);
- if(d.getHours()<6)d.setDate(d.getDate()-1);
+ /* The simulation day changes at local midnight. */
  d.setHours(0,0,0,0);
  return d;
 }
@@ -411,7 +412,7 @@ function ensureScheduleAt(value){
  if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:4};
  s.calendar.days=s.calendar.days||{};
  if((s.calendar.version||0)<4){
-  s.calendar.anchor=currentKey;s.calendar.days={};s.calendar.version=4;
+  s.calendar.anchor=currentKey;s.calendar.days={};s.calendar.version=5;
  }
  if(s.calendar.anchor!==currentKey){
   s.calendar.anchor=currentKey;
@@ -1366,7 +1367,7 @@ function initArday3D(){
   }
   const hotspotWorld=new T.Vector3();
   s.placedFurniture=s.placedFurniture||[];
-  if(!s.placedFurniture.some(item=>item.name==='沙发'&&item.room==='living'))s.placedFurniture.push({id:'arday-cream-walnut-sofa',name:'沙发',room:'living',x:-2.55,y:0,z:1.05,rotation:0,supportId:null});
+  s.placedFurniture=s.placedFurniture.filter(item=>item?.id!=='arday-cream-walnut-sofa');
   (s.placedFurniture||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string').forEach(record=>createOwnedFurniture(record.name,record));
 
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
