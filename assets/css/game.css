@@ -351,3 +351,16 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .cooking-dish-copy strong{font-size:13px}.cooking-dish-copy small{font-size:10px;color:#97836d;line-height:1.4}
 .cooking-make{border:0;border-radius:9px;padding:8px 11px;background:#80664c;color:#fffaf2;font-size:11px;white-space:nowrap}.cooking-make:disabled{background:#ded5c9;color:#9e9488}
 .cooking-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:9px;border-top:1px solid #e8ddcf;color:#96836e;font-size:10px}.cooking-footer button{border:0;border-radius:9px;padding:8px 14px;background:#e8ddcf;color:#5c4c3b;font-size:11px}
+
+/* Primary navigation panels share the calendar's full-stage canvas and dimensions. */
+.stage .drawer{inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;width:auto!important;height:auto!important;max-height:none!important;box-sizing:border-box!important;transform:translateY(12px)!important;opacity:0;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:15px!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:linear-gradient(145deg,#f5ead8,#e9dcc7)!important;}
+.stage .drawer.open{transform:translateY(0)!important;opacity:1!important;}
+.stage .drawer .drawer-head{flex:0 0 auto!important;margin:0 0 11px!important;padding:0 0 10px!important;border-bottom:1px solid #cbb99f!important;}
+.stage .drawer .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;gap:10px;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 1px 16px!important;}
+.stage .drawer .choices.cooking-panel{display:flex!important;flex-direction:column!important;}
+.stage .drawer.shop-drawer{inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;width:auto!important;max-height:none!important;transform:translateY(12px)!important;padding:15px!important;}
+.stage .drawer.shop-drawer.open{transform:translateY(0)!important;}
+.stage .drawer .shop-content{background:transparent!important;}
+.stage .drawer .shop-categories,.stage .drawer .shop-level-one,.stage .drawer .shop-level-two{background:#f5ead8!important;}
+.stage .furniture-hotspot{pointer-events:auto!important;touch-action:manipulation!important;z-index:40!important;}
+.stage .furniture-hotspot[aria-label="冰箱"],.stage .furniture-hotspot[aria-label="灶台"]{width:48px!important;height:40px!important;border-radius:12px!important;background:#fff6e8ed!important;border:1px solid #b89b77!important;color:#5b4631!important;font-size:12px!important;font-weight:750!important;box-shadow:0 3px 12px #46321f30!important;}
