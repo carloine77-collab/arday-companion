@@ -1277,6 +1277,7 @@ function initArday3D(){
     for(const x of [-.62,.62]){const side=box(x,1.02,0,.09,2.04,.46,m.wood);side.rotation.z=x<0?-.055:.055}
     for(const [y,w,d] of [[.18,1.3,.5],[.72,1.18,.46],[1.28,1.05,.42],[1.82,.92,.38]])box(0,y,0,w,.075,d,m.oak);
     for(let level=0;level<3;level++)for(let j=0;j<4;j++){const ht=.26+(j%2)*.1;box(-.39+j*.26,.34+level*.55,-.035,.15,ht,.25,[m.clay,m.leaf,m.gold,m.dark][j])}
+    if(variant==='玻璃门书柜'){const glass=mat(0xc4d8d9,.18,.12);glass.transparent=true;glass.opacity=.3;box(-.3,1.02,.245,.55,1.7,.025,glass);box(.3,1.02,.245,.55,1.7,.025,glass);box(0,1.02,.265,.035,1.78,.04,m.gold);for(const x of [-.06,.06])cyl(x,1.02,.29,.018,.018,.045,m.gold,10)}
     const braceL=box(-.39,1.02,-.22,.045,1.75,.04,m.gold);braceL.rotation.z=-.28;const braceR=box(.39,1.02,-.22,.045,1.75,.04,m.gold);braceR.rotation.z=.28;
    }else if(modelName==='书桌'||modelName==='餐桌'){
     action=()=>modelName==='书桌'?openFurnitureActions('desk'):perform('food');const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
