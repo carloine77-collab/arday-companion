@@ -775,7 +775,7 @@ function writeBlockForKey(key,start,end,block){
 }
 
 function settleWorkAt(key,hour,at=Date.now()){
- if(s.job?.active&&key>=s.job.startDate&&hour+1>=s.job.end&&hour+1<=s.job.end+1){
+ if(s.job?.active&&key>=s.job.startDate&&hour>=s.job.end){
   s.job.paidDays=s.job.paidDays||[];
   if(!s.job.paidDays.includes(key)){s.job.paidDays.push(key);s.personalMoney+=s.job.salary;moneyRecord('personal','income',s.job.salary,s.job.title+' · 日薪',at);addEvent('今日薪资到账','阿尔完成了'+s.job.title+'的工作，获得日薪 ¥'+s.job.salary+'。','daily');remember('salary','获得'+s.job.title+'日薪 ¥'+s.job.salary,1);return true;}
  }
