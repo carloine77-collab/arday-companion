@@ -117,11 +117,9 @@
 }
 
 
-/* Three.js scene layer; original CSS scene remains as a no-WebGL fallback. */
+/* Three.js scene layer; the retired 2D room is no longer mounted. */
 .three-scene{position:absolute;inset:0;z-index:1;display:block;overflow:hidden;pointer-events:none;background:#e8d8bf}
 .three-scene canvas{display:block!important;width:100%!important;height:100%!important}
-.stage.three-ready>.scene-bg,.stage.three-ready>.sunlight,.stage.three-ready>.room{display:none}
-.stage.three-ready>.kitchen-scene{display:none!important}
 .stage.three-ready.calendar-mode>.three-scene{display:none}
 
 .three-scene{pointer-events:none!important;touch-action:pan-y;cursor:grab}
