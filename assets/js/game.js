@@ -1085,6 +1085,30 @@ function initArday3D(){
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
    const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:rough,metalness});
    const m={wood:mat(0x946746),oak:mat(0xc39a70),fabric:mat(0xb9a1a0,.95),cream:mat(0xeee1cf,.9),dark:mat(0x39434b,.45),metal:mat(0x858783,.3,.72),leaf:mat(0x477a4d,.9),leaf2:mat(0x88a968,.9),clay:mat(0xb56d50),gold:mat(0xc5a15d,.35,.5),wall:mat(0xf0e4d2),screen:mat(0x25465b,.2)};
+   // Procedural, dependency-free surface maps: woven upholstery, directional wood grain and fine ceramic grain.
+   function surfaceTexture(kind){
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
+    const ctx=canvas.getContext('2d');ctx.fillStyle=kind==='wood'?'#e0d2bd':kind==='fabric'?'#dedbd5':'#e8e5df';ctx.fillRect(0,0,512,512);
+    if(kind==='fabric'){
+     for(let y=0;y<512;y+=3){ctx.fillStyle='rgba(72,65,58,.10)';ctx.fillRect(0,y,512,1);ctx.fillStyle='rgba(255,255,255,.24)';ctx.fillRect(0,y+1,512,1)}
+     for(let x=0;x<512;x+=3){ctx.fillStyle='rgba(72,65,58,.08)';ctx.fillRect(x,0,1,512);ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(x+1,0,1,512)}
+    }else if(kind==='wood'){
+     for(let i=0;i<46;i++){
+      const y=i*12+(i%4)*2;ctx.beginPath();ctx.moveTo(0,y);
+      for(let x=0;x<=512;x+=32)ctx.lineTo(x,y+Math.sin(x*.018+i*1.7)*3+Math.sin(x*.047+i)*1.2);
+      ctx.strokeStyle=i%5===0?'rgba(91,54,29,.22)':'rgba(125,83,48,.12)';ctx.lineWidth=i%5===0?2:1;ctx.stroke();
+     }
+     for(let i=0;i<18;i++){const x=(i*83)%512,y=(i*137)%512;ctx.beginPath();ctx.ellipse(x,y,7+(i%4)*3,2,0,0,Math.PI*2);ctx.strokeStyle='rgba(91,54,29,.13)';ctx.lineWidth=1;ctx.stroke()}
+    }else{
+     for(let i=0;i<1800;i++){const x=(i*97)%512,y=(i*193)%512;ctx.fillStyle=i%3?'rgba(90,83,72,.035)':'rgba(255,255,255,.28)';ctx.fillRect(x,y,1+(i%2),1+(i%2))}
+    }
+    const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(kind==='wood'?2:3,kind==='wood'?2:3);texture.anisotropy=renderer.capabilities.getMaxAnisotropy();return texture;
+   }
+   const fabricMap=surfaceTexture('fabric'),woodMap=surfaceTexture('wood'),ceramicMap=surfaceTexture('ceramic');
+   function detailMaterial(material,map,bump){material.map=map;material.bumpMap=map;material.bumpScale=bump;material.needsUpdate=true;return material}
+   [m.fabric,m.sofa,m.sofa2].forEach(material=>detailMaterial(material,fabricMap,.018));
+   [m.wood,m.oak].forEach(material=>detailMaterial(material,woodMap,.012));
+   detailMaterial(m.cream,ceramicMap,.006);
    const box=(x,y,z,w,h,d,material)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
    const cyl=(x,y,z,top,bottom,h,material)=>{const o=new T.Mesh(new T.CylinderGeometry(top,bottom,h,20),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;return o};
    const sphere=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,20,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;return o};
@@ -1119,6 +1143,8 @@ function initArday3D(){
    }else if(name==='沙发'){
     width=2.35;depth=1.12;height=.94;action=()=>openFurnitureActions('sofa');
     const fabric=mat(0xe4d9c7,.96),fabricShade=mat(0xd3c5b1,.98),welt=mat(0xc2b39e,.92),walnut=mat(0x67452f,.62),walnutEdge=mat(0x8a6344,.58);
+    detailMaterial(fabric,fabricMap,.026);detailMaterial(fabricShade,fabricMap,.022);detailMaterial(welt,fabricMap,.016);
+    detailMaterial(walnut,woodMap,.014);detailMaterial(walnutEdge,woodMap,.012);
     const soft=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,32,22),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
     const seam=(points,r=.008,material=welt)=>{const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const mesh=new T.Mesh(new T.TubeGeometry(curve,Math.max(16,points.length*3),r,8,false),material);group.add(mesh);mesh.castShadow=true};
     box(0,.27,0,2.08,.16,.82,walnut);box(0,.31,-.425,1.98,.19,.055,walnutEdge);box(0,.35,.39,1.98,.16,.06,walnut);
