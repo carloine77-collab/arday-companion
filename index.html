@@ -1450,7 +1450,7 @@ function initArday3D(){
     const legacy=s.roomPositions?.[room]?.[id];
     if(legacy)group.position.set(legacy[0],0,legacy[1]);
    }
-   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange};
+   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0};
    const existing=document.querySelector('.spot-'+id);
    item.button=existing||document.createElement('button');
    if(!existing){
@@ -1467,7 +1467,7 @@ function initArday3D(){
    const offset=saved?.offset??saved?.position??(savedSide==='back'||savedSide==='front'?group.position.x:group.position.z);
    wallTransform(group,savedSide,offset,saved?.y??group.position.y);
    const button=document.createElement('button');button.className='hotspot furniture-hotspot wall-hotspot spot-'+id;button.type='button';button.textContent=id.includes('door')?'门':'窗';button.setAttribute('aria-label',name);button.dataset.object=name;stage.appendChild(button);
-   const item={id,name,room,group,button,wallAxis:savedSide==='back'||savedSide==='front'?'x':'z',wallSide:savedSide,wallRange:range,anchor:anchor||[0,0],action,width:0,depth:0};
+   const item={id,name,room,group,button,wallAxis:savedSide==='back'||savedSide==='front'?'x':'z',wallSide:savedSide,wallRange:range,anchor:anchor||[0,0],action,width:0,depth:0,wallAnchorY:(anchor?.[1]??2.55)-group.position.y};
    button.addEventListener('click',()=>{if(decorating)selectFurniture(item);else if(item.action)item.action()});
    furnitureRegistry.push(item);return item;
   }
@@ -1700,10 +1700,11 @@ function initArday3D(){
     if(item.room!==roomMode||!item.group.visible){b.style.visibility='hidden';continue}
     item.group.updateWorldMatrix(true,false);
     if(item.wallAxis){
-     if(item.wallSide==='back')hotspotWorld.set(item.group.position.x,item.anchor[1]||2.55,item.group.position.z+.12);
-     else if(item.wallSide==='front')hotspotWorld.set(item.group.position.x,item.anchor[1]||2.55,item.group.position.z-.12);
-     else if(item.wallSide==='left')hotspotWorld.set(item.group.position.x+.12,item.anchor[1]||2.55,item.group.position.z);
-     else hotspotWorld.set(item.group.position.x-.12,item.anchor[1]||2.55,item.group.position.z);
+     const wallY=item.group.position.y+(item.wallAnchorY??(item.anchor[1]||2.55));
+     if(item.wallSide==='back')hotspotWorld.set(item.group.position.x,wallY,item.group.position.z+.12);
+     else if(item.wallSide==='front')hotspotWorld.set(item.group.position.x,wallY,item.group.position.z-.12);
+     else if(item.wallSide==='left')hotspotWorld.set(item.group.position.x+.12,wallY,item.group.position.z);
+     else hotspotWorld.set(item.group.position.x-.12,wallY,item.group.position.z);
     }
     else{const a=item.anchor,co=Math.cos(item.group.rotation.y),si=Math.sin(item.group.rotation.y);hotspotWorld.set(item.group.position.x+a[0]*co+a[1]*si,a[2]||1.05,item.group.position.z-a[0]*si+a[1]*co);}
     const p=hotspotWorld.project(camera);
