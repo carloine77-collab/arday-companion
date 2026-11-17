@@ -3,11 +3,11 @@ window.ArdayGameConfig = {
  '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4']],
  furnitureCategories:{
   '起居空间':{
-   '沙发':[['直排双人沙发','▰','buy-furniture-sofa-linen','1180',''],['转角组合沙发','▰','buy-furniture-sofa-blue','1480',''],['复古高背沙发','▰','buy-furniture-sofa','880','']],
-   '餐桌':[['餐桌','▱','buy-furniture-dining-table','680','用餐与日常摆放']]
+   '沙发':[['沙发·亚麻燕麦','▰','buy-furniture-sofa-linen','1180',''],['沙发·雾蓝绒布','▰','buy-furniture-sofa-blue','1480',''],['沙发·复古高背','▰','buy-furniture-sofa','880','']],
+   '餐桌':[['餐桌','▱','buy-furniture-dining-table','680','用餐与日常摆放'],['餐桌·浅橡木长桌','▱','buy-furniture-dining-table-oak','820','']]
   },
   '卧室':{
-   '床':[['床','▰','buy-bedroom-bed','1600','卧室核心家具']],
+   '床':[['床·胡桃木软包','▰','buy-bedroom-bed','1600','卧室核心家具'],['床·浅橡木框架','▰','buy-bedroom-bed-oak','1780','']],
    '床头柜':[['床头柜','▤','buy-bedroom-nightstand','260','床边收纳']],
    '衣柜':[['衣柜','▥','buy-bedroom-wardrobe','980','双开门衣柜']]
   },
@@ -19,14 +19,14 @@ window.ArdayGameConfig = {
    '水槽':[['水槽','▱','buy-kitchen-sink','580','带龙头水槽']]
   },
   '书房':{
-   '书桌':[['书桌','▱','buy-furniture-desk','480','阅读与工作桌']],
-   '书架':[['书架','▤','buy-furniture-bookshelf','520','多层书架']],
+   '书桌':[['书桌·经典书桌','▱','buy-furniture-desk','480','阅读与工作桌'],['书桌·抽屉工作台','▱','buy-furniture-desk-drawer','620','']],
+   '书架':[['书架·开放格架','▤','buy-furniture-bookshelf','520','多层书架'],['书架·玻璃门书柜','▤','buy-furniture-bookshelf-glass','760','']],
    '电脑':[['电脑','▣','buy-furniture-computer','1200','可自由摆放']]
   },
   '通用家具':{
    '地毯':[['波斯绛红地毯','▤','buy-furniture-rug-persian','680','传统纹样'],['奶油棋盘地毯','▤','buy-furniture-rug-checker','360','棋盘格'],['海盐蓝地毯','▤','buy-furniture-rug-sea','520','蓝白条纹'],['卧室款地毯','▧','buy-bedroom-rug','320','浅色卧室款']],
-   '椅子':[['温莎木椅','▰','buy-furniture-chair','180',''],['软包扶手椅','▰','buy-furniture-dining-chair','220','']],
-   '灯具':[['蘑菇台灯','◉','buy-bedroom-lamp','180','']],
+   '椅子':[['椅子·温莎木椅','▰','buy-furniture-chair','180',''],['椅子·软包扶手椅','▰','buy-furniture-dining-chair','220',''],['椅子·藤编餐椅','▰','buy-furniture-chair-rattan','240','']],
+   '灯具':[['台灯·蘑菇','◉','buy-bedroom-lamp','180',''],['台灯·陶瓷折线','◉','buy-bedroom-lamp-ceramic','220',''],['壁灯·黄铜双臂','◉','buy-bedroom-wall-lamp','260',''],['壁灯·单臂','◉','buy-bedroom-wall-lamp-single','190',''],['吊灯·乳白玻璃','◉','buy-bedroom-ceiling-lamp','420',''],['吊灯·锥形金属','◉','buy-bedroom-ceiling-lamp-metal','360','']],
    '绿植':[['棕榈树绿植','♧','buy-furniture-palm','150','室内观叶植物']],
    '壁画':[['壁画','▧','buy-furniture-art','180','墙面装饰']],
    '隔断':[['隔断','▥','buy-furniture-divider','360','空间分隔']],
