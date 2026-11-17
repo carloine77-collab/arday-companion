@@ -305,7 +305,7 @@ let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-s
 s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=s.items||[];s.furniture=s.furniture||base.furniture.slice();s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=s[k];if(b)b.style.width=s[k]+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+s.roomCondition+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
+function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+Math.round(Number(s.roomCondition)||0)+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
 function say(t){$('bubble').textContent=t}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
@@ -671,6 +671,7 @@ function ensureScheduleAt(value){
  if(s.calendar.anchor!==key){
   s.calendar.anchor=key;
   Object.keys(s.calendar.days).forEach(k=>{if(k<key)delete s.calendar.days[k]});
+  Object.keys(s.sleepPlans||{}).forEach(k=>{if(k<key)delete s.sleepPlans[k]});
   if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);
   for(let i=1;i<=2;i++){
    const future=dayKey(plusDays(dayAnchorAt(value),i));
@@ -775,8 +776,9 @@ function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'co
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
- change({energy:-.45,hunger:-.8,clean:-.25,fun:-.3});
- s.roomCondition=clamp(s.roomCondition-.012);
+ // Preserve fractional hourly decay; integer clamping would round small losses to zero.
+ for(const [k,loss] of Object.entries({energy:.45,hunger:.8,clean:.25,fun:.3}))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
+ s.roomCondition=Math.max(0,Math.min(100,(Number(s.roomCondition)||0)-.012));
  let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
  let activity=normalizeActivity(ev?.activity||'idle');
  if(!ev||activity==='idle'){
@@ -1269,7 +1271,13 @@ initArday3D();updateArday3D();
 // Bedroom listener is installed before simulation initialization.
 const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';$('stage').appendChild(cameraHint);
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
-tick();setInterval(tick,30000);setInterval(()=>{const key=keyAt(Date.now());if(s.calendar?.anchor!==key){ensureScheduleAt(Date.now());save();renderCalendar()}render();initScene()},60000);
+tick();
+ // Catch up immediately when Safari restores a backgrounded or suspended tab.
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();updateArday3D();}});
+ window.addEventListener('pageshow',()=>{tick();updateArday3D();});
+ window.addEventListener('pagehide',()=>{save();});
+ setInterval(tick,30000);
+ setInterval(()=>{const key=keyAt(Date.now());if(s.calendar?.anchor!==key){ensureScheduleAt(Date.now());save();renderCalendar()}render();initScene()},60000);
 
 })();
 </script>
