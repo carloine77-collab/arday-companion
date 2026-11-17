@@ -306,7 +306,6 @@ function buildDay(key){
  add(previous.wake,previous.wake+1,'早餐','routine','eat');
  add(9,10,'阅读','personal','read');
  add(10,11,'休息','personal','rest');
- add(11,12,'烹饪','personal','cook');
  add(12,13,'午餐','routine','eat');
  add(14,15,'电脑游戏','personal','computerPlay');
  add(16,17,'外出','personal','walk');
@@ -393,13 +392,13 @@ function proposeActivityNow(action,force=false){
  if(force||a==='sleep'||a==='rest'||a==='sitChair'||(a in survival&&survival[a]))accept=true;
  else{let probability=.67;if(s.hate>55)probability-=.12;if(s.friend>70&&s.hate<15)probability+=.06;if(a==='walk'&&s.energy<35)probability-=.12;accept=Math.random()<probability}
  if(!accept){
-  const refusals={chat:['好啊，坐一会儿吧。你想聊什么？','我正好也有话想说。','可以，不过今天由我来挑话题。'],computerPlay:['现在不太想玩电脑游戏。','这会儿没什么游戏兴致，晚点再说。','我想先做点别的。'],cookTogether:['厨房可以借给我们一会儿。','好，看看冰箱里还剩些什么。','可以。今天想做点像样的东西。'],tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
+  const refusals={chat:['好啊，坐一会儿吧。你想聊什么？','我正好也有话想说。','可以，不过今天由我来挑话题。'],computerPlay:['现在不太想玩电脑游戏。','这会儿没什么游戏兴致，晚点再说。','我想先做点别的。'],tea:['现在不想喝茶。你先喝吧，我待会儿再看。','茶可以晚点喝，我还有点自己的事。','今天先不了。你怎么突然这么有兴致？'],music:['现在不想听音乐。改天吧。','这会儿想安静一会儿，唱片先放着。','不太想。你可以自己挑一张。'],walk:['外面我暂时不想去。','今天不想出门，改天再说。','你先去吧，我不一定跟得上你的兴致。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。','今天想换点别的，不想看书。'],game:['这局先免了，我现在没兴趣。','你自己玩吧，我今天不想竞争。','不了，我可不想被你拉去消磨时间。'],food:['现在不想一起吃东西。','我还不饿，等会儿再说。','你先吃，我暂时没胃口。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
   const lines=refusals[a]||['这会儿不太想做。','今天先不了，换个时间吧。','我有自己的安排，别替我决定。'];
   say(lines[Math.floor(Math.random()*lines.length)]);s.rejections=(s.rejections||0)+1;save();return false;
  }
  const slot=findAvailableSlot(now,1);
  if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
- const titles={rest:'休息',eat:'吃东西',food:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'喝茶',walk:'外出',game:'游戏',company:'聊天',chat:'聊天',write:'写作',cook:'烹饪',cookTogether:'烹饪',computerWork:'电脑工作',computerPlay:'电脑游戏',bouquet:'欣赏花束'};
+ const titles={rest:'休息',eat:'吃东西',food:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',tea:'喝茶',walk:'外出',game:'游戏',company:'聊天',chat:'聊天',write:'写作',computerWork:'电脑工作',computerPlay:'电脑游戏',bouquet:'欣赏花束'};
  writeBlockForKey(slot.key,slot.start,slot.start+1,{title:titles[a]||a,kind:'proposal',activity:a,withPlayer:true,startedBy:'player'});
  remember('interaction','接受提议：'+(titles[a]||a),1);
  say(slot.key===key&&slot.start===hour?'好，就按这个安排。':'可以。我把稍后的时间留出来。');
@@ -416,6 +415,13 @@ function ensureScheduleAt(value){
  const currentKey=keyAt(Date.now()),requestedKey=keyAt(value);
  if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:5};
  s.calendar.days=s.calendar.days||{};
+ if((s.calendar.version||0)<7){
+  Object.keys(s.calendar.days).forEach(k=>{
+   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['cook','cooking'].includes(ev.activity)&&ev.title!=='烹饪');
+   if(!s.calendar.days[k].length)delete s.calendar.days[k];
+  });
+  s.calendar.version=7;
+ }
  if((s.calendar.version||0)<6){
   s.calendar.anchor=currentKey;
   Object.keys(s.calendar.days).forEach(k=>{
@@ -503,7 +509,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','tea','walk','read','game','music','food','company','chat','cookTogether','computerPlay'].includes(action)){
+ if(['listen','tea','walk','read','game','music','food','company','chat','computerPlay'].includes(action)){
   s.friend=clamp(s.friend+1);
   s.attach=clamp(s.attach+.5);
   remember('shared',action);
@@ -529,12 +535,12 @@ function openKitchenPanel(){
 }
 function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;s.ownedFurniture.push(itemName);addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
 function setSceneActivity(activity,announce){
- const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);
+ const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'};
  s.currentActivity=a;updateArday3D();
- if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')
+ if(announce)say('我现在在'+(m.location==='outside'?'外面':'房间里')+m.title+'。')
 }
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
-function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'cook',cookTogether:'cook'})[a]||a||'idle'}
+function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
@@ -546,8 +552,7 @@ function processActivityAt(value){
  if(!ev||activity==='idle'){
   activity=chooseAutonomousActivity();
   const meta=activityMeta[activity]||{title:'自己的时间'};
-  const recipeId=activity==='cook'?Object.keys(recipes).find(canCook):undefined;
-  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true,recipeId});
+  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true});
   ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
  }
  let placedMealEaten=false;
