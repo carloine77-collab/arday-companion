@@ -310,7 +310,7 @@ function say(t){$('bubble').textContent=t}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
-function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=clamp(s[k]+v)})}
+function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)+Number(v||0)))})}
 function dayAnchor(){return dayAnchorAt(Date.now())}
 function dayKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
