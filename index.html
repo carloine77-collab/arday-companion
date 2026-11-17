@@ -283,7 +283,7 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .stage .three-scene{pointer-events:none!important}
 .stage .camera-hint{pointer-events:none!important}
 /* One compact dialogue element; legacy .bubble styling is intentionally bypassed. */
-.stage #dialogue{position:absolute!important;left:50%!important;top:auto!important;bottom:14px!important;transform:translateX(-50%)!important;z-index:65!important;pointer-events:none!important;display:none;box-sizing:border-box;width:max-content;max-width:min(58%,230px)!important;max-height:42px!important;overflow:hidden!important;padding:5px 9px!important;background:rgba(255,249,237,.94)!important;border:1px solid #d8c4a7!important;border-radius:10px!important;text-align:center!important;font-size:10px!important;line-height:1.35!important;color:#554333!important;box-shadow:0 2px 7px #3b2b1b20!important;white-space:normal!important;animation:none!important;filter:none!important}
+.stage #dialogue{position:absolute!important;left:50%!important;top:12px!important;bottom:auto!important;transform:translateX(-50%)!important;z-index:65!important;pointer-events:none!important;display:none;box-sizing:border-box;width:max-content;max-width:min(72%,380px)!important;max-height:72px!important;overflow:hidden!important;padding:8px 14px!important;background:rgba(255,249,237,.96)!important;border:1px solid #d8c4a7!important;border-radius:14px!important;text-align:center!important;font-size:12px!important;line-height:1.4!important;color:#554333!important;box-shadow:0 3px 10px #3b2b1b20!important;white-space:normal!important;animation:none!important;filter:none!important}
 .stage #dialogue[style*='display: block']{display:block!important}
 .stage #dialogue:before,.stage #dialogue:after{display:none!important;content:none!important}
 .stage.calendar-mode>#dialogue{display:none!important}
@@ -1307,22 +1307,24 @@ function initArday3D(){
   box(body,0,.91,.195,.38,.055,.035,M(0x293846));
   cyl(body,0,1.82,0,.135,.24,skinMat,16);
   const head=new T.Group();head.position.set(0,2.2,.015);head.scale.set(.9,.94,.94);body.add(head);
-  ell(head,0,-.015,0,.292,.365,.258,skinMat,32);
-  ell(head,-.205,-.075,.135,.075,.095,.085,skinMat,20);ell(head,.205,-.075,.135,.075,.095,.085,skinMat,20);
-  ell(head,0,-.285,.105,.075,.052,.075,skinMat,18);
-  ell(head,-.31,-.045,0,.045,.075,.05,skinShadow,16);ell(head,.31,-.045,0,.045,.075,.05,skinShadow,16);
+  ell(head,0,-.015,0,.286,.372,.255,skinMat,32);
+  ell(head,-.205,-.075,.135,.105,.12,.115,skinMat,20);ell(head,.205,-.075,.135,.105,.12,.115,skinMat,20);
+  ell(head,0,-.285,.105,.105,.075,.12,skinMat,18);
+  ell(head,-.31,-.045,0,.052,.095,.06,skinShadow,16);ell(head,.31,-.045,0,.052,.095,.06,skinShadow,16);
   const eyeGroups=[];
   for(const side of [-1,1]){
-   const eye=new T.Group();eye.position.set(side*.116,.045,.235);head.add(eye);
-   ell(eye,0,0,0,.052,.034,.018,M(0x473633),20);
-   ell(eye,side*.004,-.001,.014,.026,.029,.012,M(0x4b7180),18);
-   ell(eye,side*.004,-.001,.023,.014,.021,.008,eyeMat,16);
-   ell(eye,side*.012,.012,.03,.007,.008,.005,M(0xffffff),10);
-   const upper=new T.QuadraticBezierCurve3(new T.Vector3(-.052,.004,.01),new T.Vector3(0,.039,.018),new T.Vector3(.052,.004,.01));
-   eye.add(new T.Mesh(new T.TubeGeometry(upper,14,.006,6,false),hairMat));
+   const eye=new T.Group();eye.position.set(side*.115,.045,.235);head.add(eye);
+   ell(eye,0,0,0,.071,.046,.027,whiteMat,20);
+   ell(eye,side*.006,-.003,.022,.032,.039,.014,M(0x687d80),18);
+   ell(eye,side*.006,-.002,.034,.017,.027,.009,eyeMat,16);
+   ell(eye,side*.014,.015,.042,.009,.011,.006,M(0xffffff),10);
+   const upper=new T.QuadraticBezierCurve3(new T.Vector3(-.073,.005,.014),new T.Vector3(0,.061,.025),new T.Vector3(.073,.005,.014));
+   eye.add(new T.Mesh(new T.TubeGeometry(upper,16,.009,6,false),hairMat));
+   const lower=new T.QuadraticBezierCurve3(new T.Vector3(-.06,-.012,.012),new T.Vector3(0,-.047,.018),new T.Vector3(.06,-.012,.012));
+   eye.add(new T.Mesh(new T.TubeGeometry(lower,12,.004,5,false),skinShadow));
    eyeGroups.push(eye);
-   const brow=ell(head,side*.12,.132,.222,.061,.011,.012,hairMat,16);brow.rotation.z=side*.1;
-   ell(head,side*.245,-.105,.185,.045,.022,.012,M(0xd99b88),14);
+   const brow=ell(head,side*.12,.137,.225,.083,.018,.019,hairMat,16);brow.rotation.z=side*.12;
+   ell(head,side*.25,-.105,.188,.065,.035,.018,M(0xd99b88),14);
   }
   ell(head,0,.255,-.035,.335,.19,.295,hairMat,22);
   ell(head,0,-.055,-.205,.275,.34,.13,hairMat,20);
@@ -1354,6 +1356,29 @@ function initArday3D(){
    });
   }
   function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  const furnitureHotspots=[
+   {button:document.querySelector('.spot-sofa'),group:sofa,room:'living',height:1.55},
+   {button:document.querySelector('.spot-table'),group:table,room:'living',height:1.18}
+  ];
+  const hotspotWorld=new T.Vector3();
+  function updateFurnitureHotspots(){
+   const rect=stage.getBoundingClientRect();
+   for(const item of furnitureHotspots){
+    const b=item.button;if(!b)continue;
+    if(item.room!==roomMode||!item.group.visible){b.style.visibility='hidden';continue}
+    item.group.updateWorldMatrix(true,false);
+    item.group.getWorldPosition(hotspotWorld);hotspotWorld.y=item.height;
+    const p=hotspotWorld.clone().project(camera);
+    const visible=p.z>=-1&&p.z<=1&&Math.abs(p.x)<=1.15&&Math.abs(p.y)<=1.15;
+    b.style.visibility=visible?'visible':'hidden';
+    if(visible){
+     b.style.left=((p.x+1)*.5*rect.width)+'px';
+     b.style.top=((1-p.y)*.5*rect.height)+'px';
+     b.style.right='auto';b.style.bottom='auto';
+     b.style.transform='translate(-50%,-50%)';
+    }
+   }
+  }
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
@@ -1466,6 +1491,7 @@ function initArday3D(){
    head.rotation.x+=(Math.sin(phase*.22)*.025-head.rotation.x)*.04;
    body.position.y+=(Math.sin(t*.0015)*.026-body.position.y)*.08;
    if(t>lastBlink){eyeGroups.forEach(g=>{g.scale.y=.12});setTimeout(()=>eyeGroups.forEach(g=>{g.scale.y=1}),90);lastBlink=t+2400+Math.random()*2600;}
+   updateFurnitureHotspots();
    if(t-lastDraw>16){renderer.render(scene,camera);lastDraw=t}
    arday3D.raf=requestAnimationFrame(frame)}
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
