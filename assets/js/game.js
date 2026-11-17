@@ -589,7 +589,7 @@ function openFurnitureActions(kind){
  });
  $('drawer').classList.add('open');
 }
-function perform(action){if(action==='cook'||action==='cookTogether'){openKitchenPanel(action==='cookTogether');return}const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'},a=map[action]||action,ok=proposeActivityNow(a);if(ok)animate(a==='game'?'wave':a==='walk'?'walk':'sit')}
+function perform(action){if(action==='cook'||action==='cookTogether'){openKitchenPanel(action==='cookTogether');return}const map={tea:'tea',music:'music',walk:'walk',read:'reading',game:'game',rest:'rest',food:'food',tidy:'tidy'},a=map[action]||action,ok=proposeActivityNow(a);if(ok){animate(a==='game'?'wave':a==='walk'?'walk':'sit');setSceneActivity(a,false)}}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 /* === Personal goals and two-account economy ===
