@@ -246,7 +246,7 @@ footer.bottom .bottom-actions{display:grid!important;grid-template-columns:minma
 footer.bottom .bottom-actions .recent-entry,footer.bottom .bottom-actions .decorate{position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;width:100%!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:0 4px!important;border:1px solid #e5d2b8!important;border-radius:11px!important;background:#fff8ec!important;color:#765a40!important;font-size:10px!important;font-weight:650!important;line-height:1!important;white-space:nowrap!important;box-shadow:none!important}
 footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .stage .room-door{z-index:22!important}
-.stage .drawer{z-index:80!important}.stage .drawer.profile-expanded{top:12px!important;bottom:12px!important;left:50%!important;transform:translate(-50%,0)!important;width:min(92%,620px)!important;max-height:none!important;height:auto!important;overflow-y:auto!important;overscroll-behavior:contain!important}.stage .drawer.profile-expanded .choices{display:flex!important;flex-direction:column!important;gap:12px!important}.stage.editing .decorate-tools{display:flex!important;visibility:visible!important;opacity:1!important;z-index:95!important}.stage.editing #rotateFurnitureButton{display:inline-flex!important;visibility:visible!important;min-height:38px!important;min-width:104px!important;align-items:center;justify-content:center;background:#725743!important;color:#fff8ed!important;border:1px solid #725743!important}.stage.editing #rotateFurnitureButton:disabled{opacity:.42!important}
+.stage .drawer{z-index:80!important}.stage .drawer.profile-expanded{top:12px!important;bottom:12px!important;left:50%!important;transform:translate(-50%,0)!important;width:min(92%,620px)!important;max-height:none!important;height:auto!important;overflow-y:auto!important;overscroll-behavior:contain!important}.stage .drawer.profile-expanded .choices{display:flex!important;flex-direction:column!important;gap:12px!important}.stage.editing .decorate-tools{display:flex!important;visibility:visible!important;opacity:1!important;z-index:95!important}.stage.editing #rotateFurnitureButton{display:inline-flex!important;visibility:visible!important;min-height:38px!important;min-width:104px!important;align-items:center;justify-content:center;background:#725743!important;color:#fff8ed!important;border:1px solid #725743!important}.stage.editing #rotateFurnitureButton:disabled{opacity:.42!important}.wall-hotspot{z-index:13!important;min-width:30px;min-height:28px;padding:5px 7px!important;background:#fff8e8ee!important;border:1px solid #b99b79!important;color:#654a32!important;font-size:10px!important}
 .stage:has(.drawer.open) .room-door{display:none!important}
 .stage.calendar-mode .room-door{display:none!important}
 .stage{touch-action:none}
@@ -1223,8 +1223,9 @@ function initArday3D(){
   }
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xd5c0a3,0xa47a54);
-  box(living,-2.75,2.6,-3.94,2.1,1.85,.06,m.glass);
-  for(const [x,y,w,h] of [[-3.82,2.6,.12,1.95],[-1.68,2.6,.12,1.95],[-2.75,3.53,2.2,.12],[-2.75,1.67,2.2,.12],[-2.75,2.6,.08,1.85]])box(living,x,y,-3.88,w,h,.1,m.oak);
+  const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);
+  box(livingWindow,0,2.6,0,2.1,1.85,.06,m.glass);
+  for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
   const livingRug=new T.Mesh(new T.CylinderGeometry(2,2,.045,28),M(0xd98c69));livingRug.scale.z=.58;livingRug.position.set(0,.025,1);living.add(livingRug);
   const sofa=new T.Group();sofa.position.set(-3.35,0,1);sofa.userData.furnitureKey='sofa';sofa.userData.roomKey='living';living.add(sofa);
   if(s.roomPositions?.living?.sofa)sofa.position.set(s.roomPositions.living.sofa[0],0,s.roomPositions.living.sofa[1]);
@@ -1245,8 +1246,9 @@ function initArday3D(){
   cyl(living,4,.3,-.5,.28,.55,M(0xb66f55));for(let i=0;i<7;i++){const a=i*Math.PI*2/7;ball(living,4+Math.cos(a)*.25,.95+(i%3)*.1,-.5+Math.sin(a)*.25,.15,.38,.13,m.leaf)}
   // Bedroom: blue-lilac walls, a proper bed, bedside tables and wardrobe.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xbeb8cf,0x927e82);
-  box(bedroom,-2.8,2.65,-3.94,2.0,1.7,.06,M(0x8eb9cb));
-  for(const [x,y,w,h] of [[-3.83,2.65,.13,1.85],[-1.77,2.65,.13,1.85],[-2.8,3.5,2.15,.13],[-2.8,1.8,2.15,.13]])box(bedroom,x,y,-3.88,w,h,.1,M(0x8a6e68));
+  const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);
+  box(bedroomWindow,0,2.65,0,2.0,1.7,.06,M(0x8eb9cb));
+  for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
   const bed=new T.Group();bed.position.set(-.55,0,-1.55);bed.userData.furnitureKey='bed';bed.userData.roomKey='bedroom';bedroom.add(bed);
   if(s.roomPositions?.bedroom?.bed)bed.position.set(s.roomPositions.bedroom.bed[0],0,s.roomPositions.bedroom.bed[1]);
   box(bed,0,.38,0,3.1,.55,3.45,M(0x805b4e));box(bed,0,.72,.12,2.95,.22,3.2,M(0xf0d9d1));
@@ -1266,8 +1268,9 @@ function initArday3D(){
   const bedRug=new T.Mesh(new T.CylinderGeometry(2.1,2.1,.05,28),M(0xc68f9d));bedRug.scale.z=.58;bedRug.position.set(-.5,.025,1.25);bedroom.add(bedRug);
   // Kitchen: sage cabinetry, warm tile backsplash, pale stone worktop.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd2bea2,0x9b7958);
-  box(kitchen,-2.8,2.65,-3.94,1.8,1.5,.06,M(0x9dc3bd));
-  for(const x of [-3.7,-1.9])box(kitchen,x,2.65,-3.87,.12,1.65,.1,M(0x9a7655));
+  const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);
+  box(kitchenWindow,0,2.65,0,1.8,1.5,.06,M(0x9dc3bd));
+  for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
   box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=1.62;y<=2.38;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
   box(kitchen,0,1.25,-1.5,7.8,.3,1,M(0xe9dfd0));box(kitchen,0,.62,-1.5,7.8,1.1,.92,M(0x78917a));
@@ -1277,7 +1280,7 @@ function initArday3D(){
   box(kitchen,-2.2,1.5,-1.5,1.1,.12,.75,M(0x91b8ba));
   // Three-dimensional hinged doors are part of each room, not UI overlays.
   function roomDoor(parent,z,label,target,color){
-   const g=new T.Group();g.position.set(5.18,0,z);g.rotation.y=Math.PI/2;g.userData.roomTarget=target;parent.add(g);
+   const g=new T.Group();g.position.set(5.18,0,z);g.rotation.y=Math.PI/2;g.userData.roomTarget=target;g.userData.wallObject=true;parent.add(g);
    const frameMat=M(0x65452f),leafMat=M(color),insetMat=M(0x9a704b),metalMat=M(0xd6b77d,.42);
    box(g,-.72,1.22,0,.16,2.44,.22,frameMat);box(g,.72,1.22,0,.16,2.44,.22,frameMat);box(g,0,2.44,0,1.6,.16,.22,frameMat);
    const leaf=box(g,0,1.16,-.035,1.26,2.28,.13,leafMat);leaf.userData.roomTarget=target;
@@ -1293,10 +1296,10 @@ function initArday3D(){
    signFace.position.set(0,2.72,.076);g.add(signFace);
    return g;
   }
-  roomDoor(living,-1.45,'卧室','bedroom',0x77513b);
-  roomDoor(living,1.45,'厨房','kitchen',0x718778);
-  roomDoor(bedroom,.45,'起居室','living',0x77513b);
-  roomDoor(kitchen,.45,'起居室','living',0x718778);
+  const livingBedroomDoor=roomDoor(living,-1.45,'卧室','bedroom',0x77513b);
+  const livingKitchenDoor=roomDoor(living,1.45,'厨房','kitchen',0x718778);
+  const bedroomLivingDoor=roomDoor(bedroom,.45,'起居室','living',0x77513b);
+  const kitchenLivingDoor=roomDoor(kitchen,.45,'起居室','living',0x718778);
   kitchen.visible=false;bedroom.visible=false;
   // Detailed stylized character with articulated shoulders, elbows, hips and knees.
   const person=new T.Group();scene.add(person);const body=new T.Group();person.add(body);
@@ -1377,11 +1380,28 @@ function initArday3D(){
    }
    furnitureRegistry.push(item);return item;
   }
+  function registerWallObject({id,name,room,group,axis,side,range,anchor,action}){
+   group.userData.furnitureKey=id;group.userData.roomKey=room;group.userData.wallObject=true;
+   const saved=s.furnitureLayout?.[room]?.[id];if(saved){group.position[axis]=saved.position;group.position.y=saved.y||0}
+   const button=document.createElement('button');button.className='hotspot furniture-hotspot wall-hotspot spot-'+id;button.type='button';button.textContent=id.includes('door')?'门':'窗';button.setAttribute('aria-label',name);button.dataset.object=name;stage.appendChild(button);
+   const item={id,name,room,group,button,wallAxis:axis,wallSide:side,wallRange:range,anchor:anchor||[0,0],action,width:0,depth:0};
+   button.addEventListener('click',()=>{if(decorating)selectFurniture(item);else if(item.action)item.action()});
+   furnitureRegistry.push(item);return item;
+  }
   const furnitureHotspots=[
    registerFurniture({id:'sofa',name:'沙发',room:'living',group:sofa,width:2.3,depth:1,anchor:[0,.68],action:()=>perform('rest')}),
    registerFurniture({id:'table',name:'茶几',room:'living',group:table,width:1.8,depth:1.8,anchor:[0,.25],action:()=>openTab('物品')}),
    registerFurniture({id:'desk',name:'书桌',room:'living',group:desk,width:1.7,depth:.85,anchor:[0,.5],action:()=>say('书桌前留着一些未完成的事情。')}),
    registerFurniture({id:'bed',name:'床',room:'bedroom',group:bed,width:3.1,depth:3.45,anchor:[0,1.85],action:()=>perform('sleep')})
+  ];
+  const wallObjects=[
+   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read')}),
+   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('窗外的光线落在床边。')}),
+   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('厨房窗边透进一些光。')}),
+   registerWallObject({id:'living-bedroom-door',name:'卧室门',room:'living',group:livingBedroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('bedroom')}),
+   registerWallObject({id:'living-kitchen-door',name:'厨房门',room:'living',group:livingKitchenDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('kitchen')}),
+   registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')}),
+   registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')})
   ];
   const hotspotWorld=new T.Vector3();
   function furnitureCorners(item,x=item.group.position.x,z=item.group.position.z,angle=item.group.rotation.y){
@@ -1401,10 +1421,20 @@ function initArday3D(){
    return true;
   }
   function canPlaceFurniture(item,x,z,angle=item.group.rotation.y){
+   if(item.wallAxis){
+    const value=item.wallAxis==='x'?x:z;
+    if(Math.abs(value)>item.wallRange)return false;
+    for(const other of furnitureRegistry){
+     if(other===item||other.room!==item.room||other.wallAxis!==item.wallAxis||other.wallSide!==item.wallSide)continue;
+     const otherValue=other.group.position[item.wallAxis],gap=item.id.includes('door')?1.5:.65;
+     if(Math.abs(value-otherValue)<gap)return false;
+    }
+    return true;
+   }
    const corners=furnitureCorners(item,x,z,angle);
    if(corners.some(([px,pz])=>px<roomBounds.minX||px>roomBounds.maxX||pz<roomBounds.minZ||pz>roomBounds.maxZ))return false;
    for(const other of furnitureRegistry){
-    if(other===item||other.room!==item.room)continue;
+    if(other===item||other.room!==item.room||other.wallAxis)continue;
     if(rectsOverlap(corners,furnitureCorners(other)))return false;
    }
    return true;
@@ -1412,14 +1442,14 @@ function initArday3D(){
   function persistFurniture(item){
    s.furnitureLayout=s.furnitureLayout||{};
    s.furnitureLayout[item.room]=s.furnitureLayout[item.room]||{};
-   s.furnitureLayout[item.room][item.id]={x:item.group.position.x,z:item.group.position.z,rotation:item.group.rotation.y};
+   s.furnitureLayout[item.room][item.id]=item.wallAxis?{position:item.group.position[item.wallAxis],y:item.group.position.y}:{x:item.group.position.x,z:item.group.position.z,rotation:item.group.rotation.y};
    s.roomPositions=s.roomPositions||{};s.roomPositions[item.room]=s.roomPositions[item.room]||{};
    s.roomPositions[item.room][item.id]=[item.group.position.x,item.group.position.z];
    save();
   }
   function selectFurniture(item){
-   selectedFurniture=item;rotateFurnitureButton.disabled=false;
-   decorateLabel.textContent='已选中：'+item.name+' · 拖动移动，点击旋转按钮调整方向';
+   selectedFurniture=item;rotateFurnitureButton.disabled=!!item.wallAxis;
+   decorateLabel.textContent=item.wallAxis?'已选中：'+item.name+' · 沿墙面拖动移动':'已选中：'+item.name+' · 拖动移动，点击旋转按钮调整方向';
    toast('已选中'+item.name);
   }
   const rotateFurnitureButton=document.createElement('button');
@@ -1432,12 +1462,13 @@ function initArday3D(){
   };
   function updateFurnitureHotspots(){
    const rect=stage.getBoundingClientRect();
-   for(const item of furnitureHotspots){
+   for(const item of furnitureRegistry){
     const b=item.button;if(!b)continue;
     if(item.room!==roomMode||!item.group.visible){b.style.visibility='hidden';continue}
     item.group.updateWorldMatrix(true,false);
-    const a=item.anchor,co=Math.cos(item.group.rotation.y),si=Math.sin(item.group.rotation.y);
-    hotspotWorld.set(item.group.position.x+a[0]*co+a[1]*si, a[2]||1.05, item.group.position.z-a[0]*si+a[1]*co);
+    if(item.wallAxis==='x')hotspotWorld.set(item.group.position.x,item.anchor[1]||2.55,item.group.position.z+.12);
+    else if(item.wallAxis==='z')hotspotWorld.set(item.group.position.x+.12,item.anchor[1]||2.55,item.group.position.z);
+    else{const a=item.anchor,co=Math.cos(item.group.rotation.y),si=Math.sin(item.group.rotation.y);hotspotWorld.set(item.group.position.x+a[0]*co+a[1]*si,a[2]||1.05,item.group.position.z-a[0]*si+a[1]*co);}
     const p=hotspotWorld.project(camera);
     const visible=p.z>=-1&&p.z<=1&&Math.abs(p.x)<=1.08&&Math.abs(p.y)<=1.08;
     b.style.visibility=visible?'visible':'hidden';
@@ -1489,9 +1520,14 @@ function initArday3D(){
     for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.furnitureKey){furniture=node;break}node=node.parent}if(furniture)break}
     if(furniture&&raycaster.ray.intersectPlane(floorPlane,dragPoint)){
      const item=furnitureRegistry.find(x=>x.group===furniture);
-     if(item){selectFurniture(item);dragOffset.copy(furniture.position).sub(dragPoint);
-      furnitureDrag={pointerId:e.pointerId,group:furniture,lastValid:{x:furniture.position.x,z:furniture.position.z}};gestureSurface.setPointerCapture(e.pointerId);
-      e.preventDefault();return;}
+     if(item){
+      selectFurniture(item);
+      const plane=item.wallAxis==='x'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):item.wallAxis==='z'?new T.Plane(new T.Vector3(1,0,0),-furniture.position.x):floorPlane;
+      if(raycaster.ray.intersectPlane(plane,dragPoint)){
+       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z};
+       gestureSurface.setPointerCapture(e.pointerId);e.preventDefault();return;
+      }
+     }
     }
    }
    let targetRoom=null;
@@ -1507,10 +1543,16 @@ function initArday3D(){
   gestureSurface.addEventListener('pointermove',e=>{
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
     const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
-    if(raycaster.ray.intersectPlane(floorPlane,dragPoint)){
-     const g=furnitureDrag.group,item=furnitureRegistry.find(x=>x.group===g);
-     const nx=dragPoint.x+dragOffset.x,nz=dragPoint.z+dragOffset.z;
-     if(item&&canPlaceFurniture(item,nx,nz,g.rotation.y)){g.position.x=nx;g.position.z=nz;furnitureDrag.lastValid={x:nx,z:nz}}
+    if(raycaster.ray.intersectPlane(furnitureDrag.plane,dragPoint)){
+     const g=furnitureDrag.group,item=furnitureDrag.item;
+     if(item.wallAxis){
+      const value=dragPoint[item.wallAxis],offset=furnitureDrag.initial-(furnitureDrag.initial||0);
+      const nx=item.wallAxis==='x'?value: g.position.x,nz=item.wallAxis==='z'?value:g.position.z;
+      if(canPlaceFurniture(item,nx,nz,g.rotation.y)){g.position[item.wallAxis]=value}
+     }else{
+      const nx=dragPoint.x+furnitureDrag.offsetX,nz=dragPoint.z+furnitureDrag.offsetZ;
+      if(item&&canPlaceFurniture(item,nx,nz,g.rotation.y)){g.position.x=nx;g.position.z=nz}
+     }
     }e.preventDefault();return;
    }
    if(!pointers.has(e.pointerId))return;
