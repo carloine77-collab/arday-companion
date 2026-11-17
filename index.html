@@ -1672,7 +1672,7 @@ function initArday3D(){
       return parseAsset(buffer);
      })
      .then(model=>{
-      const bounds=new T.Box3().setFromObject(model),size=bounds.getSize(new T.Vector3()),center=bounds.getCenter(new T.Vector3());
+      model.rotation.x=-Math.PI/2;model.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(model),size=bounds.getSize(new T.Vector3()),center=bounds.getCenter(new T.Vector3());
       if(!size.x||!size.y||!size.z)throw new Error('GLB 模型没有有效几何体');
       const scale=Math.min(2.25/size.x,.94/size.y,1.12/size.z);
       model.scale.setScalar(scale);model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
