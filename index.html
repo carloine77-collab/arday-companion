@@ -529,6 +529,9 @@ let decorating=false;
 $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('editing',decorating);$('decorate').textContent=decorating?'完成装修':'✦ 装修';if(decorating){$('drawer').classList.remove('open')}else say('好了。')};
 document.querySelectorAll('.hotspot').forEach(b=>b.addEventListener('click',()=>{
  let obj=b.dataset.object;
+ if(decorating&&arday3D?.selectFurnitureById&&['沙发','茶几','书桌','床'].includes(obj)){
+  arday3D.selectFurnitureById(({沙发:'sofa',茶几:'table',书桌:'desk',床:'bed'})[obj]);return;
+ }
  if(!decorating){
   if(obj==='茶几')openTab('物品');else if(obj==='沙发')perform('rest');else if(obj==='窗户')perform('read');
   return;
@@ -1566,7 +1569,7 @@ function initArday3D(){
    arday3D.raf=requestAnimationFrame(frame)}
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,getRoom:()=>roomMode,raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   const decorateLabel=document.createElement('span');decorateLabel.textContent='装修：拖动家具移动，选中后可旋转';
   const clearSelection=document.createElement('button');clearSelection.type='button';clearSelection.textContent='取消选中';clearSelection.onclick=()=>{selectedFurniture=null;furnitureDrag=null;decorateLabel.textContent='装修：拖动家具移动，选中后可旋转'};
