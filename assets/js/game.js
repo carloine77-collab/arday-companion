@@ -1149,13 +1149,13 @@ function initArday3D(){
     for(const x of [-.3,.3])box(x,.62,.02,.07,.5,.07,m.wood);
    }else if(name==='电脑'){
     action=()=>openFurnitureActions('computer');
-    width=.78;depth=.62;height=.62;surfaceType='tabletop';surfaceY=.04;
+    width=.68;depth=.5;height=.62;surfaceType='tabletop';surfaceY=.04;
     box(0,.46,-.13,.72,.46,.07,m.dark);box(0,.46,-.08,.64,.37,.018,m.screen);
     box(0,.21,-.12,.1,.12,.1,m.metal);box(0,.13,-.12,.38,.045,.22,m.metal);
     box(0,.055,.16,.72,.055,.24,m.dark);box(0,.09,.16,.62,.018,.17,m.cream);
    }else if(name==='捧花摆件'){
     action=()=>openFurnitureActions('bouquet');
-    width=.55;depth=.55;height=.58;surfaceType='tabletop';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
+    width=.4;depth=.4;height=.58;surfaceType='tabletop';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
     for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;cyl(Math.cos(angle)*.08,.63,Math.sin(angle)*.08,.018,.022,.42,m.leaf);sphere(Math.cos(angle)*.11,.82+(i%2)*.06,Math.sin(angle)*.11,.13,.17,.12,[m.cream,m.clay,m.gold][i%3])}
    }else{toast('没有找到这种家具模型：'+name);return null}
    let modelMeshCount=0;
@@ -1178,7 +1178,8 @@ function initArday3D(){
     let placed=false;
     if(surfaceType==='tabletop'&&support){
      item.supportId=support.id;
-     const offsets=name==='电脑'?[[0,0],[-.32,0],[.32,0],[0,.12],[0,-.12]]:[[.38,0],[-.38,0],[0,.12],[0,-.12],[0,0]];
+     const siblings=furnitureRegistry.filter(it=>it.room===room&&it.supportId===support.id);
+     const offsets=name==='电脑'?[[0,0],[-.36,0],[.36,0],[0,.12],[0,-.12]]:siblings.some(it=>it.name==='电脑')?[[.36,0],[-.36,0],[0,.16],[0,-.16],[0,0]]:[[0,0],[.36,0],[-.36,0],[0,.16],[0,-.16]];
      const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
      for(const [ox,oz] of offsets){
       const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
