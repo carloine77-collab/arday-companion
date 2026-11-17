@@ -1536,6 +1536,7 @@ function initArday3D(){
     let support=null;
     if(surfaceType==='tabletop')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
     else if(surfaceType==='floor')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
+    if(surfaceType==='tabletop'&&!support){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);toast('电脑和摆件需要先放在书桌或餐桌上');return null}
     if(support){item.supportId=support.id;group.position.y=support.group.position.y+support.surfaceY}
     const candidates=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
     let placed=false;for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
@@ -1589,6 +1590,17 @@ function initArday3D(){
    }
    return true;
   }
+  function moveSupportedFurniture(parent,oldX,oldY,oldZ,oldAngle){
+   const dx=parent.group.position.x-oldX,dz=parent.group.position.z-oldZ,dy=parent.group.position.y-oldY,da=parent.group.rotation.y-oldAngle;
+   const co=Math.cos(da),si=Math.sin(da);
+   furnitureRegistry.filter(child=>child.supportId===parent.id).forEach(child=>{
+    const rx=child.group.position.x-oldX,rz=child.group.position.z-oldZ;
+    child.group.position.x=parent.group.position.x+rx*co+rz*si;
+    child.group.position.z=parent.group.position.z-rx*si+rz*co;
+    child.group.position.y+=dy;child.group.rotation.y+=da;
+    persistFurniture(child);
+   });
+  }
   function persistFurniture(item){
    s.furnitureLayout=s.furnitureLayout||{};
    s.furnitureLayout[item.room]=s.furnitureLayout[item.room]||{};
@@ -1608,7 +1620,8 @@ function initArday3D(){
    const item=selectedFurniture;if(!item){toast('请先选中一件家具');return}
    const next=item.group.rotation.y+Math.PI/12;
    if(!canPlaceFurniture(item,item.group.position.x,item.group.position.z,next)){toast('这个方向会超出房间或与其他家具碰撞');return}
-   item.group.rotation.y=next;persistFurniture(item);updateFurnitureHotspots();
+   const ox=item.group.position.x,oy=item.group.position.y,oz=item.group.position.z,oa=item.group.rotation.y;
+   item.group.rotation.y=next;moveSupportedFurniture(item,ox,oy,oz,oa);persistFurniture(item);updateFurnitureHotspots();
   };
   function updateFurnitureHotspots(){
    const rect=stage.getBoundingClientRect();
@@ -1701,7 +1714,7 @@ function initArday3D(){
       if(canPlaceFurniture(item,nx,nz,g.rotation.y)){g.position[item.wallAxis]=value}
      }else{
       const nx=dragPoint.x+furnitureDrag.offsetX,nz=dragPoint.z+furnitureDrag.offsetZ;
-      if(item&&canPlaceFurniture(item,nx,nz,g.rotation.y)){g.position.x=nx;g.position.z=nz}
+      if(item&&canPlaceFurniture(item,nx,nz,g.rotation.y)){const ox=g.position.x,oy=g.position.y,oz=g.position.z,oa=g.rotation.y;g.position.x=nx;g.position.z=nz;moveSupportedFurniture(item,ox,oy,oz,oa)}
      }
     }e.preventDefault();return;
    }
