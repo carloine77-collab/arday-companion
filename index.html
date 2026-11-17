@@ -217,7 +217,7 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
 .app{position:relative;z-index:1;height:calc(100svh - 68px - env(safe-area-inset-bottom));padding-bottom:8px}
 .stage{z-index:0!important}
 /* Keep opened game panels above the WebGL canvas. */
-.stage .drawer{z-index:40!important;pointer-events:auto!important}
+.stage .drawer{z-index:40!important;pointer-events:none!important}.stage .drawer.open{pointer-events:auto!important}
 .stage .calendar-view{z-index:35!important;pointer-events:auto!important}
 .stage .calendar-view button,.stage .drawer button{pointer-events:auto!important;touch-action:manipulation}
 .three-status{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 24px);padding:8px 12px;border:1px solid #d9b99a;border-radius:10px;background:#fff8ed;color:#76533b;font:12px/1.5 system-ui;text-align:center;box-shadow:0 3px 12px #4a352522}
@@ -226,7 +226,8 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
 .identity-meta span{display:inline-flex;align-items:center;min-height:31px;padding:5px 8px;border:1px solid var(--line);border-radius:9px;background:#fff9efb8;white-space:nowrap}
 @media(max-width:700px){.identity-meta{gap:4px;font-size:9px}.identity-meta span{padding:4px 5px;min-height:29px}.identity .name{font-size:14px}}
 @media(max-width:390px){.identity-meta{font-size:8px}.identity-meta span{padding:4px 4px}.identity .mark{width:28px;height:28px}}
-.stage .bubble{z-index:65!important;pointer-events:none!important;max-width:min(72%,400px);box-shadow:0 3px 9px #624b2c14}
+.stage #bubble{z-index:65!important;pointer-events:none!important;display:none;max-width:min(72%,400px);box-shadow:0 3px 9px #624b2c14;animation:none!important;filter:none!important}
+.stage #bubble[style*='display: block']{display:block!important}
 .stage .bubble:before,.stage .bubble:after{content:none!important;display:none!important}
 .hotspot{display:none!important;z-index:66!important;pointer-events:auto!important}
 .stage.editing .hotspot{display:grid!important}
@@ -269,6 +270,13 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
  footer.bottom .bottom-actions{flex-basis:139px!important;grid-template-columns:minmax(0,1fr) 59px!important}
  footer.bottom .bottom-actions .recent-entry,footer.bottom .bottom-actions .decorate{font-size:8px!important}
 }
+/* A closed drawer must be completely transparent to scene gestures. */
+.stage .drawer:not(.open){pointer-events:none!important;visibility:hidden!important}
+.stage .drawer.open{pointer-events:auto!important;visibility:visible!important}
+.stage #bubble{pointer-events:none!important;z-index:65!important;box-shadow:0 4px 12px #4a38251a!important}
+.stage #bubble:before,.stage #bubble:after{display:none!important;content:none!important}
+.stage .three-scene{pointer-events:none!important}
+.stage .camera-hint{pointer-events:none!important}
 </style>
 </head>
 <body>
@@ -334,6 +342,7 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 // Hard-isolate the footer from all room/WebGL stacking contexts.
+const bubbleNodes=document.querySelectorAll('.bubble');bubbleNodes.forEach((node,i)=>{if(i>0)node.remove()});
 const navFooter=document.querySelector('footer.bottom');
 if(navFooter){
  document.body.appendChild(navFooter);
@@ -357,7 +366,7 @@ s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+Math.round(Number(s.roomCondition)||0)+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
-function say(t){const b=$('bubble');if(!b)return;b.textContent=String(t||'');b.style.display='block';b.classList.remove('bubble-pop');void b.offsetWidth;b.classList.add('bubble-pop')}
+function say(t){const b=$('bubble');if(!b)return;document.querySelectorAll('.bubble').forEach(node=>{if(node!==b)node.remove()});b.textContent=String(t||'');b.style.display='block';b.classList.remove('bubble-pop');b.style.animation='none';b.style.opacity='1';b.style.transform='translateX(-50%)'}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
@@ -1167,12 +1176,12 @@ function initArday3D(){
  try{
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xe8d9c8);
   const camera=new T.PerspectiveCamera(38,1,.1,80);
-  const renderer=new T.WebGLRenderer({antialias:false,alpha:false,powerPreference:'low-power'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.15));renderer.outputEncoding=T.sRGBEncoding;
-  renderer.toneMapping=T.NoToneMapping;renderer.shadowMap.enabled=false;
+  const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));renderer.outputEncoding=T.sRGBEncoding;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
   const host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
   const hemi=new T.HemisphereLight(0xfff4e4,0x76604c,1.25);scene.add(hemi);
-  const sun=new T.DirectionalLight(0xffe3c2,1.15);sun.position.set(-4,9,6);scene.add(sun);
+  const sun=new T.DirectionalLight(0xffe3c2,1.55);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-8;sun.shadow.camera.right=8;sun.shadow.camera.top=8;sun.shadow.camera.bottom=-8;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene.add(sun);
   const fill=new T.DirectionalLight(0xc9ddff,.38);fill.position.set(5,4,-5);scene.add(fill);
   const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color,roughness});
   const m={
@@ -1190,6 +1199,10 @@ function initArday3D(){
    group.userData.leftWall=box(group,-5.35,2.35,0,.2,4.8,8.4,M(wallColor));
    group.userData.rightWall=box(group,5.35,2.35,0,.2,4.8,8.4,M(wallColor));
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
+   box(group,0,.24,-3.91,10.65,.12,.12,M(0xd7b990));
+   box(group,-5.22,2.36,0,.12,4.55,8.15,M(0xe7d4ba));
+   box(group,5.22,2.36,0,.12,4.55,8.15,M(0xe7d4ba));
+   for(let z=-3.55;z<3.7;z+=.92)box(group,0,.012,z,10.45,.018,.012,M(0xb58c68));
   }
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xf0dfc7,0xc99b6d);
@@ -1199,6 +1212,10 @@ function initArday3D(){
   const sofa=new T.Group();sofa.position.set(-3.35,0,1);living.add(sofa);
   box(sofa,0,.52,0,2.3,.5,1,m.sofa);box(sofa,0,1.12,-.36,2.3,1,.3,m.sofa2);box(sofa,0,.83,.12,1.75,.2,.72,m.sofa);
   box(sofa,-1,.85,.1,.28,.7,.85,m.sofa2);box(sofa,1,.85,.1,.28,.7,.85,m.sofa2);
+  ell(sofa,-.48,.94,.12,.55,.16,.34,M(0xa8b89a));ell(sofa,.48,.94,.12,.55,.16,.34,M(0xa8b89a));
+  ell(sofa,0,.93,-.16,.46,.13,.24,M(0xd8c7a8));
+  for(const x of [-.83,.83]){cyl(sofa,x,.23,.32,.055,.44,m.wood,10);}
+  box(sofa,0,.28,-.34,2.12,.08,.08,M(0x6b4c3a));
   const table=new T.Group();table.position.set(2.6,0,1.4);living.add(table);cyl(table,0,.82,0,.9,.16,m.oak);
   for(const [x,z] of [[-.6,-.3],[.6,-.3],[-.6,.3],[.6,.3]])box(table,x,.4,z,.1,.75,.1,m.wood);
   const desk=new T.Group();desk.position.set(3.4,0,-1.55);living.add(desk);box(desk,0,1,0,1.7,.14,.85,m.oak);
@@ -1215,9 +1232,13 @@ function initArday3D(){
   box(bed,0,.91,-.95,2.95,.22,1.3,M(0x7897b5));
   box(bed,-.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));box(bed,.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));
   box(bed,0,.65,-3.28,3.25,1.15,.18,M(0x805b4e));
+  box(bed,0,.855,-.15,2.78,.035,2.62,M(0xd9b7b5));
+  ell(bed,-.82,1.055,-1.72,.49,.12,.34,M(0xfaf0e7));ell(bed,.82,1.055,-1.72,.49,.12,.34,M(0xfaf0e7));
+  box(bed,0,1.04,.65,2.72,.045,1.05,M(0xc6a3ad));
   for(const x of [-2.45,1.35]){
    box(bedroom,x,.5,-1.5,.85,.9,.75,M(0x9a7059));box(bedroom,x,.98,-1.5,.92,.1,.82,M(0xc99570));
-   cyl(bedroom,x,1.3,-1.5,.12,.5,M(0xd9b16d));
+   box(bedroom,x,.55,-1.105,.48,.38,.035,M(0xb98968));
+   const lamp=new T.Group();lamp.position.set(x,1.04,-1.5);bedroom.add(lamp);cyl(lamp,0,.18,0,.045,.36,M(0xd8bd91));const shade=new T.Mesh(new T.CylinderGeometry(.08,.22,.25,16),M(0xf1dfbd));shade.position.y=.48;lamp.add(shade);
   }
   box(bedroom,3.85,1.35,-3.15,1.6,2.65,.65,M(0x8c6c62));
   for(const x of [3.45,4.25])box(bedroom,x,1.3,-2.8,.05,2.25,.04,M(0xc49b7f));
@@ -1260,11 +1281,14 @@ function initArday3D(){
   const person=new T.Group();scene.add(person);const body=new T.Group();person.add(body);
   const skinMat=M(0xe6b18e,.72),skinShadow=M(0xc9896c),hairMat=M(0x302a2c),hairHi=M(0x4a3a3b),shirtMat=M(0x536f8c),shirtLight=M(0x7895ad),trouserMat=M(0x3e4859),shoeMat=M(0x302d35),eyeMat=M(0x332b2a),whiteMat=M(0xf7eee3);
   function ell(parent,x,y,z,sx,sy,sz,mat,seg=18){return ball(parent,x,y,z,sx,sy,sz,mat,seg)}
-  ell(body,0,1.29,0,.32,.61,.225,shirtMat,22);ell(body,0,1.67,.015,.205,.105,.19,shirtLight,18);
-  box(body,0,1.25,.285,.025,.48,.018,shirtLight);for(let y of [1.43,1.25,1.07])ell(body,.045,y,.305,.025,.025,.018,whiteMat,10);
+  ell(body,0,1.27,0,.275,.59,.19,shirtMat,24);ell(body,0,1.67,.015,.19,.105,.17,shirtLight,18);
+  box(body,0,1.25,.225,.022,.42,.014,shirtLight);for(let y of [1.43,1.25,1.07])ell(body,.04,y,.244,.018,.018,.012,whiteMat,10);
+  const collarL=new T.Mesh(new T.ConeGeometry(.14,.24,4),shirtLight);collarL.position.set(-.105,1.64,.19);collarL.rotation.z=-.18;body.add(collarL);
+  const collarR=new T.Mesh(new T.ConeGeometry(.14,.24,4),shirtLight);collarR.position.set(.105,1.64,.19);collarR.rotation.z=.18;body.add(collarR);
+  box(body,0,.91,.195,.38,.055,.035,M(0x293846));
   cyl(body,0,1.82,0,.135,.24,skinMat,16);
-  const head=new T.Group();head.position.set(0,2.2,.015);body.add(head);
-  ell(head,0,0,0,.315,.405,.285,skinMat,24);ell(head,-.31,-.045,0,.052,.095,.06,skinShadow,14);ell(head,.31,-.045,0,.052,.095,.06,skinShadow,14);
+  const head=new T.Group();head.position.set(0,2.2,.015);head.scale.set(.9,.94,.94);body.add(head);
+  ell(head,0,0,0,.29,.385,.265,skinMat,28);ell(head,-.31,-.045,0,.052,.095,.06,skinShadow,14);ell(head,.31,-.045,0,.052,.095,.06,skinShadow,14);
   ell(head,0,.255,-.035,.335,.19,.295,hairMat,22);
   ell(head,0,-.055,-.205,.275,.34,.13,hairMat,20);
   ell(head,-.235,.045,.16,.105,.235,.12,hairMat,16);ell(head,.235,.045,.16,.105,.235,.12,hairMat,16);
@@ -1277,10 +1301,10 @@ function initArday3D(){
   ell(head,0,-.075,.29,.027,.045,.025,skinShadow,12);
   const smile=new T.Mesh(new T.TorusGeometry(.075,.012,6,16,Math.PI),M(0x925d55));smile.position.set(0,-.17,.27);smile.rotation.z=Math.PI;head.add(smile);
   const arms=[];
-  for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.305,1.58,0);body.add(shoulder);ell(shoulder,0,0,0,.105,.125,.11,shirtMat,14);const upper=cyl(shoulder,0,-.22,0,.073,.43,shirtMat,14);upper.position.y=-.22;const elbow=new T.Group();elbow.position.set(0,-.44,0);shoulder.add(elbow);ell(elbow,0,0,0,.073,.08,.073,skinMat,12);const fore=cyl(elbow,0,-.2,0,.058,.39,skinMat,14);fore.position.y=-.2;ell(elbow,0,-.41,.015,.068,.065,.07,skinMat,12);arms.push({shoulder,elbow,side})}
+  for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.27,1.58,0);body.add(shoulder);ell(shoulder,0,0,0,.09,.11,.09,shirtMat,16);const upper=cyl(shoulder,0,-.22,0,.061,.43,shirtMat,16);upper.position.y=-.22;const elbow=new T.Group();elbow.position.set(0,-.44,0);shoulder.add(elbow);ell(elbow,0,0,0,.062,.07,.062,skinMat,14);const fore=cyl(elbow,0,-.2,0,.048,.39,skinMat,16);fore.position.y=-.2;ell(elbow,0,-.41,.015,.055,.06,.06,skinMat,14);for(let f=0;f<3;f++)ell(elbow,-.035+f*.035,-.47,.035,.014,.055,.014,skinMat,8);arms.push({shoulder,elbow,side})}
   const legs=[];
-  for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.145,.82,0);person.add(hip);const thigh=cyl(hip,0,-.22,0,.105,.46,trouserMat,14);thigh.position.y=-.22;const knee=new T.Group();knee.position.set(0,-.45,0);hip.add(knee);ell(knee,0,0,0,.09,.095,.09,trouserMat,12);const shin=cyl(knee,0,-.19,0,.073,.36,trouserMat,14);shin.position.y=-.19;ell(knee,0,-.39,.075,.105,.075,.19,shoeMat,14);legs.push({hip,knee,side})}
-  const shadow=new T.Mesh(new T.CircleGeometry(.58,18),new T.MeshBasicMaterial({color:0x584633,transparent:true,opacity:.18}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
+  for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.135,.82,0);person.add(hip);const thigh=cyl(hip,0,-.22,0,.088,.48,trouserMat,16);thigh.position.y=-.22;const knee=new T.Group();knee.position.set(0,-.46,0);hip.add(knee);ell(knee,0,0,0,.078,.082,.078,trouserMat,14);const shin=cyl(knee,0,-.2,0,.06,.4,trouserMat,16);shin.position.y=-.2;ell(knee,0,-.41,.075,.09,.07,.2,shoeMat,16);box(knee,0,-.47,.12,.17,.035,.2,M(0x171a20));legs.push({hip,knee,side})}
+  const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
   const positions={sofa:[-3.2,0,1],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,0,.2]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0);
@@ -1357,12 +1381,14 @@ function initArday3D(){
    targetRadius+=e.deltaY*.012;applyCamera();e.preventDefault();
   },{passive:false});
   function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);person.position.lerp(target,1-Math.pow(.002,dt));phase+=dt*(pose==='walk'?8:2);
-   if(pose==='walk'){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.48;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.55});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.28;a.elbow.rotation.x=-.12})}
-   else if(pose==='wave'){arms[1].shoulder.rotation.x=Math.sin(t*.004)*.22;arms[1].elbow.rotation.x=-.85+Math.sin(t*.006)*.22}
+   if(pose==='walk'){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.55;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.62});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.34;a.shoulder.rotation.z=a.side*Math.sin(phase+i*Math.PI)*.045;a.elbow.rotation.x=-.12+Math.max(0,Math.sin(phase+i*Math.PI))*.08});body.rotation.y=Math.sin(phase)*.035}
+   else if(pose==='wave'){arms[1].shoulder.rotation.x=Math.sin(t*.004)*.22;arms[1].shoulder.rotation.z=-.72+Math.sin(t*.002)*.035;arms[1].elbow.rotation.x=-.85+Math.sin(t*.006)*.22;head.rotation.z=Math.sin(t*.0017)*.025}
    else{legs.forEach(l=>{l.hip.rotation.x+=(0-l.hip.rotation.x)*.1;l.knee.rotation.x+=(0-l.knee.rotation.x)*.1});arms.forEach((a,i)=>{const idleArm=pose==='sit'?0.04:Math.sin(phase*.55+i*1.7)*.055;a.shoulder.rotation.x+=(idleArm-a.shoulder.rotation.x)*.07;a.elbow.rotation.x+=((pose==='sit'?-.18:Math.sin(phase*.45+i)*.045)-a.elbow.rotation.x)*.07})}
-   body.rotation.z+=(Math.sin(phase*.38)*.012-body.rotation.z)*.05;
-   head.rotation.y+=(Math.sin(phase*.31)*.075-head.rotation.y)*.045;
-   body.position.y+=(Math.sin(t*.0015)*.022-body.position.y)*.08;
+   body.rotation.z+=(Math.sin(phase*.38)*.018-body.rotation.z)*.05;
+   body.rotation.y+=(Math.sin(phase*.24)*.018-body.rotation.y)*.04;
+   head.rotation.y+=(Math.sin(phase*.31)*.085-head.rotation.y)*.045;
+   head.rotation.x+=(Math.sin(phase*.22)*.025-head.rotation.x)*.04;
+   body.position.y+=(Math.sin(t*.0015)*.026-body.position.y)*.08;
    if(t-lastDraw>16){renderer.render(scene,camera);lastDraw=t}
    arday3D.raf=requestAnimationFrame(frame)}
   arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,getRoom:()=>roomMode,raf:0};
@@ -1395,7 +1421,7 @@ ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;initSc
 initArday3D();updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
-const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';$('stage').appendChild(cameraHint);
+const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';cameraHint.style.pointerEvents='none';$('stage').appendChild(cameraHint);
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
 showCurrentScheduleBubble();
