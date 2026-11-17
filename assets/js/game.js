@@ -1381,7 +1381,7 @@ function initArday3D(){
   }
   const wallpaperColors={'buy-wallpaper-warm-white':0xd5d1c9,'buy-wallpaper-deepblue':0x243b59,'buy-wallpaper-mist':0x8b929c};
   function applyWallpaperToRoom(root,id){
-   const color=wallpaperColors[id]??wallpaperColors['buy-wallpaper-warm-white'],texture=createPainterTexture('wall');
+   const color=wallpaperColors[id]??wallpaperColors['buy-wallpaper-warm-white'],texture=roomWallMap;
    (root.userData.wallMeshes||[]).forEach(mesh=>{
     const previous=mesh.material,material=applyPainterMap(M(color),texture,.004);
     material.side=T.DoubleSide;
