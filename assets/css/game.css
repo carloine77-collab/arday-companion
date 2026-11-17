@@ -745,3 +745,10 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .interaction-view>.choice:nth-of-type(even){background:#eee7da!important}
 .interaction-view>.choice:active{transform:scale(.985)!important}
 @media(min-width:600px){.drawer .choices.interaction-view{gap:16px!important;padding:0 22px 34px!important}.interaction-view .interaction-masthead{min-height:270px!important;margin:0 -22px 7px!important;padding:22px 30px!important}.interaction-view .interaction-bigtitle{font-size:84px!important}.interaction-view>.choice{min-height:175px!important;padding:20px!important;font-size:20px!important}}
+
+/* Remove obstructive solid/circular editorial ornaments from shop and interaction. */
+.shop-content .shop-cover-stamp{display:none!important}
+.interaction-view .interaction-asterisk{display:none!important}
+.interaction-view>.choice:before,
+.interaction-view>.choice:after,
+.shop-content .shop-product-card:before{content:none!important;display:none!important;border:0!important;box-shadow:none!important;background:none!important}
