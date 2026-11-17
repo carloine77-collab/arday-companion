@@ -210,7 +210,8 @@ function slotClick(di,h){
  $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
   let i=+b.dataset.p,option=playerActivityOptions[i],names=playerActivityOptions.map(x=>x.label),pref=option.activity,score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(pref==='cookTogether'&&s.hunger<40?12:0)+(pref==='computerPlay'&&s.fun<40?10:0);
   let accepted=score>12+(di*1.5);
-  if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
+  if(accepted&&pref==='cookTogether'){openKitchenPanel(true);}
+  else if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
   else{change({bored:1});s.rejections=(s.rejections||0)+1;if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];say(['这个时间我不太想这样安排。我们换个时间，或者各自安排也可以。','我知道你想和我一起，不过我现在确实不想这么做。希望你别把拒绝当成对你的否定。','这次我想说得明确一点：不。我有自己的计划。'][Math.min(2,s.rejections-1)]);}
   save();render();renderCalendar();$('drawer').classList.remove('open');toast(accepted?'阿尔接受了邀请':'阿尔拒绝了这次邀请 · 可以换个时间或活动');
  });
@@ -595,7 +596,7 @@ function openFurnitureActions(kind){
  });
  $('drawer').classList.add('open');
 }
-function perform(action,force=false){const map={cook:'cookTogether',cookTogether:'cookTogether',reading:'read',read:'read',outing:'walk',walk:'walk',computerGame:'computerPlay',computerPlay:'computerPlay',chat:'chat',rest:'rest'},a=map[action]||action,ok=proposeActivityNow(a,force);if(ok){animate(a==='walk'?'walk':'sit');setSceneActivity(a,false)}}
+function perform(action,force=false){if(action==='cook'||action==='cookTogether'){openKitchenPanel(true);return}const map={reading:'read',read:'read',outing:'walk',walk:'walk',computerGame:'computerPlay',computerPlay:'computerPlay',chat:'chat',rest:'rest'},a=map[action]||action,ok=proposeActivityNow(a,force);if(ok){animate(a==='walk'?'walk':'sit');setSceneActivity(a,false)}}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
