@@ -1202,17 +1202,19 @@ function showCollection(){
  $('giftMoney').onclick=()=>{const n=amount();if(!Number.isFinite(n)||n<=0){toast('请输入有效金额');return}if(n>s.money){toast('共同账户余额不足');return}s.money-=n;s.personalMoney+=n;moneyRecord('shared','expense',n,'赠与阿尔');moneyRecord('personal','income',n,'收到赠与');save();render();showCollection();toast('已赠与 ¥'+n)};
  $('requestMoney').onclick=()=>{const n=amount();if(!Number.isFinite(n)||n<=0){toast('请输入有效金额');return}if(n>s.personalMoney){say('我个人账户里没有这么多钱。');toast('个人账户余额不足');return}const chance=Math.max(.12,Math.min(.92,.32+s.friend*.004+s.attach*.003-s.hate*.004));if(Math.random()>chance){say('这笔钱我暂时不想转给共同账户。你可以告诉我这笔支出有什么必要。');toast('阿尔暂时拒绝了');return}s.personalMoney-=n;s.money+=n;moneyRecord('personal','expense',n,'转给共同账户');moneyRecord('shared','income',n,'阿尔转入');save();render();showCollection();toast('阿尔转入共同账户 ¥'+n)};
 }
+window.resignFromJob=function(event){
+ if(event){event.preventDefault();event.stopPropagation()}
+ if(!s.job?.active){toast('当前没有在职岗位');return false}
+ const ended=dayKey(Date.now()),title=s.job.title;s.job.active=false;s.job.endedAt=ended;
+ Object.keys(s.calendar?.days||{}).forEach(k=>{if(k>=ended)s.calendar.days[k]=(s.calendar.days[k]||[]).filter(e=>!e.jobShift)});
+ addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();render();showCareer();renderCalendar();toast('已离职');return false;
+};
 function showCareer(){
  $('drawer').classList.remove('profile-expanded');$('drawerTitle').textContent='职业';
  if(s.job?.active){
   const j=s.job;
-  $('choices').innerHTML='<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>阿尔每天 '+pad(j.start)+':00 至 '+pad(j.end)+':00 工作。薪资在当日工作结束后发放至个人账户。</p><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob">辞职</button></div></section>';
-  $('choices').onclick=event=>{
-   const button=event.target.closest('#resignJob');if(!button||!s.job?.active)return;
-   const ended=dayKey(Date.now()),title=s.job.title;s.job.active=false;s.job.endedAt=ended;
-   Object.keys(s.calendar?.days||{}).forEach(k=>{if(k>=ended)s.calendar.days[k]=(s.calendar.days[k]||[]).filter(e=>!e.jobShift)});
-   addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();renderCalendar();toast('已离职');
-  };
+  $('choices').innerHTML='<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>阿尔每天 '+pad(j.start)+':00 至 '+pad(j.end)+':00 工作。薪资在当日工作结束后发放至个人账户。</p><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
+
  }else{
   const jobs=[
    {id:'assistant-editor',title:'出版编辑助理',salary:185,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:'协助整理稿件、核对资料与校对文字'},
