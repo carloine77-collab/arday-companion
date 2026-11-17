@@ -374,7 +374,7 @@ function proposeActivityNow(action,force=false){
  if((a==='walk'||a==='computerPlay')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
  if(a==='music'&&!has('唱片机')){say('没有唱片机，今天恐怕听不了。');return false}
  if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
- if(a==='computerPlay'&&!has('电脑')){say('还没有电脑，暂时玩不了电脑游戏。');return false}
+ if(a==='computerPlay'&&!(s.placedFurniture||[]).some(x=>x.name==='电脑')){say('电脑还没有摆进房间，暂时玩不了电脑游戏。');return false}
  if(a==='food'&&!s.readyMeals?.length&&!s.items.includes('点心')&&!Object.keys(recipes).some(canCook)){say('家里暂时没有现成的食物。要不要先去厨房准备一点？');return false}
  const survival={eat:s.hunger<38,rest:s.energy<28,wash:s.clean<25};
  let accept;
