@@ -1596,24 +1596,50 @@ function initArday3D(){
    const sofa=furnitureRegistry.find(item=>item.name==='沙发'&&item.room==='living');
    if(!sofa||window.__ardaySofaLoading||window.__ardaySofaLoaded)return;
    window.__ardaySofaLoading=true;
-   const fail=error=>{console.error('[Arday] GLB sofa load failed:',error);window.__ardaySofaLoading=false;toast('沙发模型加载失败，请检查网络后刷新')};
-   const parseAsset=buffer=>new Promise((resolve,reject)=>new T.GLTFLoader().parse(buffer,'',gltf=>resolve(gltf.scene),reject));
+   const fail=error=>{
+    console.error('[Arday] GLB sofa load failed:',error);
+    window.__ardaySofaLoading=false;
+    toast('沙发模型加载失败：'+(error?.message||String(error)).slice(0,90));
+   };
+   const parseAsset=buffer=>{
+    if(!T.GLTFLoader)throw new Error('GLTFLoader 未加载');
+    return new Promise((resolve,reject)=>new T.GLTFLoader().parse(buffer,'',gltf=>resolve(gltf.scene),reject));
+   };
    const loadModel=()=>{
-    fetch('https://raw.githubusercontent.com/carloine77-collab/arday-companion/main/assets/arday_sofa.glb.gz.b64?v=3',{cache:'no-store'})
-     .then(r=>{if(!r.ok)throw new Error('asset HTTP '+r.status);return r.text()})
+    fetch('https://raw.githubusercontent.com/carloine77-collab/arday-companion/main/assets/arday_sofa.glb.gz.b64?cacheBust=4',{cache:'no-store'})
+     .then(r=>{if(!r.ok)throw new Error('模型资源 HTTP '+r.status);return r.text()})
      .then(encoded=>{
-      const binary=Uint8Array.from(atob(encoded.replace(/\\s/g,'')),ch=>ch.charCodeAt(0));
-      if(typeof DecompressionStream==='undefined')throw new Error('gzip decompression is unavailable');
-      return new Response(new Blob([binary]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
-     }).then(parseAsset)
+      const clean=encoded.trim().replace(/\s/g,'');
+      if(!clean)throw new Error('模型资源为空');
+      const binary=Uint8Array.from(atob(clean),ch=>ch.charCodeAt(0));
+      if(binary[0]!==31||binary[1]!==139)throw new Error('模型压缩文件头无效');
+      const inflate=()=>{
+       if(typeof DecompressionStream!=='undefined'){
+        return new Response(new Blob([binary]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+       }
+       if(window.pako)return Promise.resolve(window.pako.ungzip(binary).buffer);
+       return new Promise((resolve,reject)=>{
+        const tag=document.createElement('script');tag.src='https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js';
+        tag.onload=()=>{try{resolve(window.pako.ungzip(binary).buffer)}catch(e){reject(e)}};
+        tag.onerror=()=>reject(new Error('当前浏览器不支持解压，备用解压库也无法加载'));document.head.appendChild(tag);
+       });
+      };
+      return inflate();
+     })
+     .then(buffer=>{
+      const view=new DataView(buffer);
+      if(view.getUint32(0,true)!==0x46546c67)throw new Error('解压后的文件不是 GLB');
+      if(view.getUint32(4,true)!==2)throw new Error('GLB 版本不受支持');
+      return parseAsset(buffer);
+     })
      .then(model=>{
       const bounds=new T.Box3().setFromObject(model),size=bounds.getSize(new T.Vector3()),center=bounds.getCenter(new T.Vector3());
-      if(!size.x||!size.y||!size.z)throw new Error('GLB model has empty geometry');
+      if(!size.x||!size.y||!size.z)throw new Error('GLB 模型没有有效几何体');
       const scale=Math.min(2.25/size.x,.94/size.y,1.12/size.z);
       model.scale.setScalar(scale);model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
       function makeTexture(kind){
        const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
-       const ctx=canvas.getContext('2d');
+       const ctx=canvas.getContext('2d');if(!ctx)throw new Error('无法创建沙发材质画布');
        if(kind==='fabric'){
         ctx.fillStyle='#e4d8c6';ctx.fillRect(0,0,512,512);
         for(let y=0;y<512;y+=3){ctx.fillStyle=y%6===0?'#d8cbb8':'#eee4d5';ctx.fillRect(0,y,512,1)}
@@ -1629,7 +1655,7 @@ function initArday3D(){
       const fabricMap=makeTexture('fabric'),woodMap=makeTexture('wood');
       function splitSofaMaterials(sourceMesh){
        const src=sourceMesh.geometry,pos=src.getAttribute('position'),col=src.getAttribute('color'),idx=src.index;
-       if(!pos||!col||!idx)return [sourceMesh];
+       if(!pos||!col||!idx)return;
        const bins=[[],[]];
        for(let i=0;i<idx.count;i+=3){
         const ids=[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];
@@ -1639,16 +1665,16 @@ function initArday3D(){
         const axis=Math.abs(normal.y)>=Math.abs(normal.x)&&Math.abs(normal.y)>=Math.abs(normal.z)?'xz':Math.abs(normal.x)>=Math.abs(normal.z)?'zy':'xy';
         for(const p of pts){bins[bin].push(p.x,p.y,p.z);if(axis==='xz')bins[bin].push(p.x*4,p.z*4);else if(axis==='zy')bins[bin].push(p.z*4,p.y*4);else bins[bin].push(p.x*4,p.y*4)}
        }
-       const parent=sourceMesh.parent,created=[];
+       const parent=sourceMesh.parent;
        bins.forEach((values,index)=>{
         if(!values.length)return;
         const geometry=new T.BufferGeometry(),positions=[],uvs=[];
         for(let i=0;i<values.length;i+=5){positions.push(values[i],values[i+1],values[i+2]);uvs.push(values[i+3],values[i+4])}
         geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.computeVertexNormals();
         const material=index===0?new T.MeshStandardMaterial({map:fabricMap,bumpMap:fabricMap,bumpScale:.012,roughness:.96}):new T.MeshStandardMaterial({map:woodMap,bumpMap:woodMap,bumpScale:.018,roughness:.62});
-        const part=new T.Mesh(geometry,material);part.position.copy(sourceMesh.position);part.quaternion.copy(sourceMesh.quaternion);part.scale.copy(sourceMesh.scale);part.castShadow=true;part.receiveShadow=true;part.name=index===0?'upholstery-textured':'walnut-textured';parent.add(part);created.push(part);
+        const part=new T.Mesh(geometry,material);part.position.copy(sourceMesh.position);part.quaternion.copy(sourceMesh.quaternion);part.scale.copy(sourceMesh.scale);part.castShadow=true;part.receiveShadow=true;part.name=index===0?'upholstery-textured':'walnut-textured';parent.add(part);
        });
-       parent.remove(sourceMesh);src.dispose();return created;
+       parent.remove(sourceMesh);src.dispose();
       }
       const sourceMeshes=[];model.traverse(o=>{if(o.isMesh)sourceMeshes.push(o)});
       sourceMeshes.forEach(o=>{o.castShadow=true;o.receiveShadow=true;splitSofaMaterials(o)});
@@ -1659,7 +1685,7 @@ function initArday3D(){
    };
    const loadLoader=(urls,index=0)=>{
     if(T.GLTFLoader){loadModel();return}
-    if(index>=urls.length){fail(new Error('GLTFLoader CDN sources failed'));return}
+    if(index>=urls.length){fail(new Error('GLTFLoader CDN 加载失败'));return}
     const tag=document.createElement('script');tag.src=urls[index];tag.onload=()=>T.GLTFLoader?loadModel():loadLoader(urls,index+1);tag.onerror=()=>{tag.remove();loadLoader(urls,index+1)};document.head.appendChild(tag);
    };
    loadLoader(['https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js','https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js']);
