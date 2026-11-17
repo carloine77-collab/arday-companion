@@ -3,7 +3,7 @@ window.ArdayGameConfig = {
  '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4']],
  furnitureCategories:{
   '起居空间':{
-   '沙发':[['亚麻燕麦沙发','▰','buy-furniture-sofa-linen','1180','亚麻织物'],['雾蓝绒布沙发','▰','buy-furniture-sofa-blue','1480','雾蓝绒布'],['经典沙发','▰','buy-furniture-sofa','880','经典款']],
+   '沙发':[['直排双人沙发','▰','buy-furniture-sofa-linen','1180',''],['转角组合沙发','▰','buy-furniture-sofa-blue','1480',''],['复古高背沙发','▰','buy-furniture-sofa','880','']],
    '餐桌':[['餐桌','▱','buy-furniture-dining-table','680','用餐与日常摆放']]
   },
   '卧室':{
@@ -25,8 +25,8 @@ window.ArdayGameConfig = {
   },
   '通用家具':{
    '地毯':[['波斯绛红地毯','▤','buy-furniture-rug-persian','680','传统纹样'],['奶油棋盘地毯','▤','buy-furniture-rug-checker','360','棋盘格'],['海盐蓝地毯','▤','buy-furniture-rug-sea','520','蓝白条纹'],['卧室款地毯','▧','buy-bedroom-rug','320','浅色卧室款']],
-   '椅子':[['椅子','▰','buy-furniture-chair','180','通用单人椅'],['餐椅','▰','buy-furniture-dining-chair','220','餐桌配套椅']],
-   '灯具':[['床头灯','◉','buy-bedroom-lamp','180','暖光床头灯']],
+   '椅子':[['温莎木椅','▰','buy-furniture-chair','180',''],['软包扶手椅','▰','buy-furniture-dining-chair','220','']],
+   '灯具':[['蘑菇台灯','◉','buy-bedroom-lamp','180','']],
    '绿植':[['棕榈树绿植','♧','buy-furniture-palm','150','室内观叶植物']],
    '壁画':[['壁画','▧','buy-furniture-art','180','墙面装饰']],
    '隔断':[['隔断','▥','buy-furniture-divider','360','空间分隔']],
