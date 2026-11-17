@@ -276,6 +276,20 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
 
 (()=>{
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
+// Hard-isolate the footer from all room/WebGL stacking contexts.
+const navFooter=document.querySelector('footer.bottom');
+if(navFooter){
+ document.body.appendChild(navFooter);
+ Object.assign(navFooter.style,{position:'fixed',left:'0',right:'0',bottom:'env(safe-area-inset-bottom, 0px)',zIndex:'2147483000',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 18px 12px',background:'#f3e7d2',pointerEvents:'auto',isolation:'isolate'});
+ navFooter.querySelectorAll('button').forEach(b=>{b.style.position='relative';b.style.zIndex='2147483001';b.style.pointerEvents='auto';b.style.touchAction='manipulation'});
+}
+document.addEventListener('click',event=>{
+ const button=event.target.closest('footer.bottom .tool');
+ if(!button)return;
+ event.preventDefault();event.stopPropagation();
+ try{openTab(button.dataset.tab)}
+ catch(error){console.error('Navigation failed:',error);const toast=$('toast');if(toast){toast.textContent='打开页面失败：'+(error&&error.message?error.message:String(error));toast.classList.add('show')}}
+},true);
 // Bind primary controls before simulation initialization, so an initialization error cannot disable navigation.
 document.querySelectorAll('.tool').forEach(button=>button.addEventListener('click',()=>{try{openTab(button.dataset.tab)}catch(error){console.error('Navigation failed:',error);const stage=$('stage');if(stage){let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='页面操作出错：'+(error&&error.message?error.message:String(error))}}}));
 const bedroomControl=$('bedroomSwitch');if(bedroomControl)bedroomControl.addEventListener('click',()=>{const stage=$('stage');if(!stage)return;const toBedroom=!stage.classList.contains('bedroom-mode');stage.classList.remove('kitchen-mode');stage.classList.toggle('bedroom-mode',toBedroom);const label=$('roomLabel');if(label)label.textContent=toBedroom?'BEDROOM · 卧室':'HOME · 起居室';try{updateArday3D()}catch(error){console.error('Room switch failed:',error)}});
