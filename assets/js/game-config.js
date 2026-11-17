@@ -12,7 +12,7 @@ window.ArdayGameConfig = {
    '衣柜':[['衣柜','▥','buy-bedroom-wardrobe','980','双开门衣柜']]
   },
   '厨房':{
-   '灶台':[['复古珐琅灶台','▦','buy-kitchen-stove-enamel','980','复古珐琅'],['不锈钢灶台','▦','buy-kitchen-stove-steel','720','不锈钢'],['奶油陶瓷灶台','▦','buy-kitchen-stove-cream','1080','奶油陶瓷']],
+   '灶台':[['灶台·复古珐琅','▦','buy-kitchen-stove-enamel','980','复古珐琅'],['灶台·不锈钢','▦','buy-kitchen-stove-steel','720','不锈钢'],['灶台·奶油陶瓷','▦','buy-kitchen-stove-cream','1080','奶油陶瓷']],
    '橱柜':[['橱柜','▤','buy-kitchen-cabinets','1100','厨房地柜']],
    '吊柜':[['吊柜','▥','buy-kitchen-wall-cabinet','620','墙面收纳']],
    '冰箱':[['冰箱','▯','buy-kitchen-fridge','1500','双层冰箱']],
@@ -24,7 +24,7 @@ window.ArdayGameConfig = {
    '电脑':[['电脑','▣','buy-furniture-computer','1200','可自由摆放']]
   },
   '通用家具':{
-   '地毯':[['波斯绛红地毯','▤','buy-furniture-rug-persian','680','传统纹样'],['奶油棋盘地毯','▤','buy-furniture-rug-checker','360','棋盘格'],['海盐蓝地毯','▤','buy-furniture-rug-sea','520','蓝白条纹'],['卧室款地毯','▧','buy-bedroom-rug','320','浅色卧室款']],
+   '地毯':[['地毯·波斯绛红','▤','buy-furniture-rug-persian','680','传统纹样'],['地毯·奶油棋盘','▤','buy-furniture-rug-checker','360','棋盘格'],['地毯·海盐蓝','▤','buy-furniture-rug-sea','520','蓝白条纹'],['地毯·卧室款','▧','buy-bedroom-rug','320','浅色卧室款']],
    '椅子':[['椅子·温莎木椅','▰','buy-furniture-chair','180',''],['椅子·软包扶手椅','▰','buy-furniture-dining-chair','220',''],['椅子·藤编餐椅','▰','buy-furniture-chair-rattan','240','']],
    '灯具':[['台灯·蘑菇','◉','buy-bedroom-lamp','180',''],['台灯·陶瓷折线','◉','buy-bedroom-lamp-ceramic','220',''],['壁灯·黄铜双臂','◉','buy-bedroom-wall-lamp','260',''],['壁灯·单臂','◉','buy-bedroom-wall-lamp-single','190',''],['吊灯·乳白玻璃','◉','buy-bedroom-ceiling-lamp','420',''],['吊灯·锥形金属','◉','buy-bedroom-ceiling-lamp-metal','360','']],
    '绿植':[['棕榈树绿植','♧','buy-furniture-palm','150','室内观叶植物']],
