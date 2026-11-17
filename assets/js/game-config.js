@@ -2,31 +2,41 @@ window.ArdayGameConfig = {
   shopCatalog: {
  '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4']],
  furnitureCategories:{
- '地毯':[['波斯绛红地毯','▤','buy-furniture-rug-persian','680'],['奶油棋盘地毯','▤','buy-furniture-rug-checker','360'],['海盐蓝地毯','▤','buy-furniture-rug-sea','520']],
- '沙发':[['亚麻燕麦沙发','▰','buy-furniture-sofa-linen','1180'],['雾蓝绒布沙发','▰','buy-furniture-sofa-blue','1480'],['经典沙发','▰','buy-furniture-sofa','880']],
- '灶台':[['复古珐琅灶台','▦','buy-kitchen-stove-enamel','980'],['不锈钢灶台','▦','buy-kitchen-stove-steel','720'],['奶油陶瓷灶台','▦','buy-kitchen-stove-cream','1080']],
- '壁画':[['壁画','▧','buy-furniture-art','180']],
- '隔断':[['隔断','▥','buy-furniture-divider','360']],
- '绿植':[['棕榈树绿植','♧','buy-furniture-palm','150']],
- '书架':[['书架','▤','buy-furniture-bookshelf','520']],
- '书桌':[['书桌','▱','buy-furniture-desk','480']],
- '椅子':[['椅子','▰','buy-furniture-chair','180']],
- '电脑':[['电脑','▣','buy-furniture-computer','1200']],
- '餐桌':[['餐桌','▱','buy-furniture-dining-table','680']],
- '餐桌椅':[['餐桌椅','▰','buy-furniture-dining-chair','220']],
- '摆件':[['捧花摆件','✿','buy-furniture-bouquet','120']],
- '床':[['床','▰','buy-bedroom-bed','1600']],
- '床头柜':[['床头柜','▤','buy-bedroom-nightstand','260']],
- '床头灯':[['床头灯','◉','buy-bedroom-lamp','180']],
- '卧室地毯':[['卧室地毯','▧','buy-bedroom-rug','320']],
- '衣柜':[['衣柜','▥','buy-bedroom-wardrobe','980']],
- '橱柜':[['橱柜','▤','buy-kitchen-cabinets','1100']],
- '吊柜':[['吊柜','▥','buy-kitchen-wall-cabinet','620']],
- '冰箱':[['冰箱','▯','buy-kitchen-fridge','1500']],
- '水槽':[['水槽','▱','buy-kitchen-sink','580']],
- '墙纸':[['深海蓝墙纸','▤','buy-wallpaper-deepblue','380'],['雾灰墙纸','▤','buy-wallpaper-mist','320']],
- '地板':[['石墨水泥地板','▧','buy-floor-concrete','460'],['深色 terrazzo 地板','▧','buy-floor-terrazzo','520']]
- },
+  '起居空间':{
+   '沙发':[['亚麻燕麦沙发','▰','buy-furniture-sofa-linen','1180','亚麻织物'],['雾蓝绒布沙发','▰','buy-furniture-sofa-blue','1480','雾蓝绒布'],['经典沙发','▰','buy-furniture-sofa','880','经典款']],
+   '餐桌':[['餐桌','▱','buy-furniture-dining-table','680','用餐与日常摆放']]
+  },
+  '卧室':{
+   '床':[['床','▰','buy-bedroom-bed','1600','卧室核心家具']],
+   '床头柜':[['床头柜','▤','buy-bedroom-nightstand','260','床边收纳']],
+   '衣柜':[['衣柜','▥','buy-bedroom-wardrobe','980','双开门衣柜']]
+  },
+  '厨房':{
+   '灶台':[['复古珐琅灶台','▦','buy-kitchen-stove-enamel','980','复古珐琅'],['不锈钢灶台','▦','buy-kitchen-stove-steel','720','不锈钢'],['奶油陶瓷灶台','▦','buy-kitchen-stove-cream','1080','奶油陶瓷']],
+   '橱柜':[['橱柜','▤','buy-kitchen-cabinets','1100','厨房地柜']],
+   '吊柜':[['吊柜','▥','buy-kitchen-wall-cabinet','620','墙面收纳']],
+   '冰箱':[['冰箱','▯','buy-kitchen-fridge','1500','双层冰箱']],
+   '水槽':[['水槽','▱','buy-kitchen-sink','580','带龙头水槽']]
+  },
+  '书房':{
+   '书桌':[['书桌','▱','buy-furniture-desk','480','阅读与工作桌']],
+   '书架':[['书架','▤','buy-furniture-bookshelf','520','多层书架']],
+   '电脑':[['电脑','▣','buy-furniture-computer','1200','可自由摆放']]
+  },
+  '通用家具':{
+   '地毯':[['波斯绛红地毯','▤','buy-furniture-rug-persian','680','传统纹样'],['奶油棋盘地毯','▤','buy-furniture-rug-checker','360','棋盘格'],['海盐蓝地毯','▤','buy-furniture-rug-sea','520','蓝白条纹'],['卧室款地毯','▧','buy-bedroom-rug','320','浅色卧室款']],
+   '椅子':[['椅子','▰','buy-furniture-chair','180','通用单人椅'],['餐椅','▰','buy-furniture-dining-chair','220','餐桌配套椅']],
+   '灯具':[['床头灯','◉','buy-bedroom-lamp','180','暖光床头灯']],
+   '绿植':[['棕榈树绿植','♧','buy-furniture-palm','150','室内观叶植物']],
+   '壁画':[['壁画','▧','buy-furniture-art','180','墙面装饰']],
+   '隔断':[['隔断','▥','buy-furniture-divider','360','空间分隔']],
+   '摆件':[['捧花摆件','✿','buy-furniture-bouquet','120','花束摆件']]
+  },
+  '墙面与地面':{
+   '墙纸':[['暖白石膏墙纸','▤','buy-wallpaper-warm-white','0','默认暖白墙面，全屋应用'],['深海蓝墙纸','▤','buy-wallpaper-deepblue','380','深海蓝，全屋应用'],['雾灰墙纸','▤','buy-wallpaper-mist','320','雾灰色，全屋应用']],
+   '地板':[['石墨水泥地板','▧','buy-floor-concrete','460','当前房间'],['深色 terrazzo 地板','▧','buy-floor-terrazzo','520','当前房间']]
+  }
+ }
 
 },
   activityMeta: {
