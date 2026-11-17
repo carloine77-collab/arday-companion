@@ -18,6 +18,7 @@ window.ArdayGameConfig = {
  '床':[['床','▰','buy-bedroom-bed','1600']],
  '床头柜':[['床头柜','▤','buy-bedroom-nightstand','260']],
  '床头灯':[['床头灯','◉','buy-bedroom-lamp','180']],
+ '卧室地毯':[['卧室地毯','▧','buy-bedroom-rug','320']],
  '衣柜':[['衣柜','▥','buy-bedroom-wardrobe','980']],
  '橱柜':[['橱柜','▤','buy-kitchen-cabinets','1100']],
  '吊柜':[['吊柜','▥','buy-kitchen-wall-cabinet','620']],
