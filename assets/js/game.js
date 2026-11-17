@@ -1021,14 +1021,23 @@ function initArday3D(){
   const lapelShape=new T.Shape();lapelShape.moveTo(-.19,1.68);lapelShape.lineTo(-.025,1.46);lapelShape.lineTo(-.105,1.34);lapelShape.lineTo(-.25,1.61);lapelShape.closePath();const lapelGeo=new T.ShapeGeometry(lapelShape);lapelGeo.translate(0,0,.225);const lapel=new T.Mesh(lapelGeo,shirtLight);body.add(lapel);const lapel2=lapel.clone();lapel2.scale.x=-1;body.add(lapel2);
   for(const y of [1.38,1.2,1.02])ell(body,.025,y,.239,.018,.018,.012,CM(0x9e8069),8);box(body,0,.91,.03,.39,.09,.4,trouserMat);limb(body,0,1.78,0,.105,.12,.25,skinMat);
   const head=new T.Group();head.position.set(0,2.18,.015);body.add(head);
-  const facePts=[new T.Vector2(.025,-.355),new T.Vector2(.105,-.33),new T.Vector2(.19,-.23),new T.Vector2(.255,-.06),new T.Vector2(.27,.12),new T.Vector2(.245,.29),new T.Vector2(.18,.39),new T.Vector2(0,.415)];const faceGeo=new T.LatheGeometry(facePts,16);faceGeo.scale(1,1,.78);const face=new T.Mesh(faceGeo,skinMat);face.position.z=.005;face.castShadow=true;head.add(face);
-  for(const side of [-1,1]){const ear=ell(head,side*.258,-.005,-.01,.052,.085,.055,skinMat,10);ear.rotation.z=side*.12;ell(head,side*.16,-.075,.174,.085,.075,.065,CM(0xe3aa91),10)}
-  const eyeGroups=[];for(const side of [-1,1]){const eye=new T.Group();eye.position.set(side*.105,.065,.205);head.add(eye);ell(eye,0,0,0,.058,.039,.022,whiteMat,16);ell(eye,side*.004,-.002,.018,.027,.034,.012,CM(0x806d61),14);ell(eye,side*.004,-.002,.028,.014,.025,.008,eyeMat,12);ell(eye,side*.011,.012,.035,.007,.009,.005,CM(0xffffff),8);const brow=new T.Mesh(new T.CylinderGeometry(.012,.012,.09,8),hairMat);brow.position.set(side*.105,.145,.2);brow.rotation.z=side*-.12;head.add(brow);eyeGroups.push(eye)}
+  // Softer oval face: fuller cheeks and a rounded chin replace the pinched old jaw.
+  const facePts=[new T.Vector2(.045,-.36),new T.Vector2(.105,-.335),new T.Vector2(.16,-.275),new T.Vector2(.215,-.17),new T.Vector2(.247,-.025),new T.Vector2(.255,.13),new T.Vector2(.235,.265),new T.Vector2(.18,.36),new T.Vector2(0,.405)];
+  const faceGeo=new T.LatheGeometry(facePts,24);faceGeo.scale(1,1,.86);const face=new T.Mesh(faceGeo,skinMat);face.position.z=.005;face.castShadow=true;head.add(face);
+  for(const side of [-1,1]){const ear=ell(head,side*.247,-.005,-.005,.048,.078,.052,skinMat,12);ear.rotation.z=side*.12;ell(head,side*.145,-.115,.165,.095,.085,.052,CM(0xe7aa98),14)}
+  const eyeGroups=[];for(const side of [-1,1]){
+   const eye=new T.Group();eye.position.set(side*.108,.065,.208);head.add(eye);
+   ell(eye,0,0,0,.056,.035,.022,whiteMat,18);ell(eye,side*.003,-.002,.018,.026,.03,.012,CM(0x806d61),16);ell(eye,side*.003,-.002,.028,.013,.022,.008,eyeMat,14);ell(eye,side*.011,.011,.035,.006,.008,.005,CM(0xffffff),8);
+   const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.178,.145,.177),new T.Vector3(side*.15,.169,.205),new T.Vector3(side*.108,.177,.218),new T.Vector3(side*.068,.158,.205)]);
+   const brow=new T.Mesh(new T.TubeGeometry(browCurve,14,.008,8,false),hairMat);head.add(brow);eyeGroups.push(eye);
+  }
   ell(head,0,.31,-.045,.292,.19,.255,hairMat,16);ell(head,0,.02,-.18,.26,.31,.12,hairMat,14);
   for(const side of [-1,1]){const panel=ell(head,side*.225,-.055,.035,.075,.31,.12,hairMat,12);panel.rotation.z=side*-.13;const tip=new T.Mesh(new T.ConeGeometry(.075,.22,7),hairHi);tip.position.set(side*.22,-.31,.04);tip.rotation.z=Math.PI;head.add(tip)}
   for(let i=0;i<7;i++){const lock=new T.Mesh(new T.ConeGeometry(.052,.2+(i%3)*.035,7),i%2?hairHi:hairMat);lock.position.set(-.22+i*.073,.275,.12);lock.rotation.z=(i-3)*-.09;lock.rotation.x=.15;head.add(lock)}
   const fringe1=new T.Mesh(new T.ConeGeometry(.105,.25,7),hairHi);fringe1.position.set(-.09,.19,.205);fringe1.rotation.z=-1.05;head.add(fringe1);const fringe2=new T.Mesh(new T.ConeGeometry(.09,.22,7),hairMat);fringe2.position.set(.065,.22,.205);fringe2.rotation.z=-.82;head.add(fringe2);
-  const nose=new T.Mesh(new T.OctahedronGeometry(.033,1),skinShadow);nose.position.set(0,-.07,.225);nose.scale.set(.65,.82,.65);head.add(nose);const mouth=new T.QuadraticBezierCurve3(new T.Vector3(-.034,-.19,.19),new T.Vector3(0,-.202,.205),new T.Vector3(.034,-.19,.19));head.add(new T.Mesh(new T.TubeGeometry(mouth,12,.0045,5,false),CM(0x985e5a)));
+  ell(head,0,-.075,.218,.032,.024,.022,skinShadow,12);
+  const mouth=new T.QuadraticBezierCurve3(new T.Vector3(-.038,-.19,.194),new T.Vector3(0,-.205,.205),new T.Vector3(.038,-.19,.194));head.add(new T.Mesh(new T.TubeGeometry(mouth,14,.004,6,false),CM(0x985e5a)));
+  for(const side of [-1,1]){const blush=ell(head,side*.17,-.12,.184,.045,.018,.009,CM(0xd98e87),12);blush.material.transparent=true;blush.material.opacity=.28;}
   const arms=[];for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.265,1.57,0);body.add(shoulder);ell(shoulder,0,-.035,0,.105,.13,.11,shirtMat,12);limb(shoulder,0,-.235,0,.075,.095,.39,shirtMat);const elbow=new T.Group();elbow.position.set(0,-.43,0);shoulder.add(elbow);ell(elbow,0,0,0,.068,.07,.068,shirtLight,10);limb(elbow,0,-.19,.008,.047,.06,.34,skinMat);ell(elbow,0,-.39,.025,.055,.07,.055,skinMat,10);for(let f=0;f<4;f++){const finger=limb(elbow,-.033+f*.022,-.455,.055,.009,.012,.075,skinMat);finger.rotation.z=(f-1.5)*-.08}arms.push({shoulder,elbow,side})}
   const legs=[];for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.14,.83,0);rig.add(hip);limb(hip,0,-.22,0,.105,.12,.43,trouserMat);const knee=new T.Group();knee.position.set(0,-.43,0);hip.add(knee);ell(knee,0,0,0,.083,.09,.08,trouserMat,10);limb(knee,0,-.19,.005,.067,.078,.36,trouserMat);ell(knee,0,-.395,.075,.09,.07,.18,shoeMat,12);box(knee,0,-.445,.13,.15,.025,.16,CM(0x242126));legs.push({hip,knee,side})}
   const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
@@ -1222,19 +1231,37 @@ function initArday3D(){
      width=2.35;depth=1.12;
     }
    }else if(modelName==='壁画'){
-    width=1.5;depth=.12;height=1.15;wallAxis='x';wallSide='back';anchor=[0,1.9];
-    box(0,0,0,1.5,1.15,.12,m.gold);box(0,0,.07,1.36,1.01,.035,m.wood);box(0,0,.095,1.25,.9,.018,m.wall);
-    sphere(-.25,.08,.12,.32,.44,.025,m.clay);sphere(.16,-.12,.13,.42,.28,.026,m.leaf);
-    box(0,-.39,.14,.9,.035,.018,m.gold);
+    width=1.5;depth=.14;height=1.18;wallAxis='x';wallSide='back';anchor=[0,1.9];
+    box(0,0,0,1.52,1.18,.13,m.wood);box(0,0,.075,1.4,1.06,.035,m.gold);box(0,0,.098,1.32,.98,.018,m.cream);
+    const arch=new T.Mesh(new T.CircleGeometry(.36,32,0,Math.PI),m.wall);arch.position.set(0,.17,.112);group.add(arch);box(0,-.19,.115,.72,.72,.012,m.wall);
+    const stemA=new T.CatmullRomCurve3([new T.Vector3(-.22,-.34,.135),new T.Vector3(-.13,-.08,.145),new T.Vector3(-.16,.2,.14),new T.Vector3(-.32,.37,.135)]);
+    const stemB=new T.CatmullRomCurve3([new T.Vector3(.1,-.36,.14),new T.Vector3(.19,-.08,.15),new T.Vector3(.12,.17,.14),new T.Vector3(.31,.35,.135)]);
+    for(const curve of [stemA,stemB])group.add(new T.Mesh(new T.TubeGeometry(curve,20,.012,6,false),m.clay));
+    for(const [x,y,rot] of [[-.27,-.08,-.6],[-.12,.12,.65],[-.3,.3,-.7],[.2,-.08,.65],[.14,.17,-.65],[.29,.3,.7]]){const leaf=sphere(x,y,.15,.12,.045,.018,m.leaf);leaf.rotation.z=rot}
+    cyl(0,-.39,.145,.18,.18,.018,m.gold,16);
    }else if(modelName==='隔断'){
-    width=2.35;depth=.25;height=2.05;
-    for(const x of [-1.05,0,1.05]){box(x,1.02,0,.08,2,.12,m.wood);box(x,1.02,.075,.72,1.82,.055,m.cream)}
-    for(const y of [.18,.55,1.48,1.85])box(0,y,0,2.2,.045,.18,m.oak);
-    for(const x of [-1.13,1.13])box(x,.09,0,.18,.16,.32,m.wood);
+    width=2.45;depth=.34;height=2.12;
+    for(let panel=0;panel<3;panel++){
+     const x=(panel-1)*.82,angle=panel===1?0:(panel===0?.13:-.13);
+     const part=new T.Group();part.position.set(x,0,0);part.rotation.y=angle;group.add(part);
+     box(0,1.02,0,.075,2.02,.13,m.wood);box(0,1.02,.078,.72,1.78,.035,m.cream);
+     for(const y of [.15,1.88])box(0,y,.105,.78,.09,.08,m.oak);
+     for(let n=0;n<5;n++){const slat=box(-.27+n*.135,1.02,.105,.025,1.62,.025,n%2?m.gold:m.wood);slat.rotation.z=(n-2)*.035}
+     for(const y of [.3,.58,.86,1.14,1.42,1.7])box(0,y,.12,.67,.018,.025,m.gold);
+     box(0,.07,.02,.18,.14,.36,m.wood);
+     if(panel<2)cyl(x+.405,1.02,.02,.035,.035,1.86,m.gold);
+    }
    }else if(modelName==='棕榈树绿植'){
-    width=.9;depth=.9;height=2.25;cyl(0,.25,0,.34,.25,.5,m.clay);cyl(0,.51,0,.28,.28,.07,m.gold);cyl(0,1.18,0,.095,.12,1.35,m.wood);
-    for(let i=0;i<9;i++){const angle=i*Math.PI*2/9,leaf=sphere(Math.cos(angle)*.32,1.82+Math.sin(i*2)*.08,Math.sin(angle)*.32,.18,.72,.1,i%2?m.leaf:m.leaf2);leaf.rotation.z=-Math.cos(angle)*.75;leaf.rotation.x=Math.sin(angle)*.75}
-    sphere(0,1.83,0,.25,.24,.25,m.leaf);
+    width=1.05;depth=1.05;height=2.3;
+    const pot=new T.Mesh(new T.CylinderGeometry(.23,.34,.48,24,1),m.clay);pot.position.y=.25;group.add(pot);
+    cyl(0,.5,0,.31,.31,.055,m.gold,24);cyl(0,1.16,0,.055,.075,1.28,m.wood,14);
+    for(let i=0;i<9;i++){
+     const a=i*Math.PI*2/9,dx=Math.cos(a),dz=Math.sin(a);
+     const curve=new T.CatmullRomCurve3([new T.Vector3(0,1.7,0),new T.Vector3(dx*.24,2.05,dz*.24),new T.Vector3(dx*.52,1.98,dz*.52),new T.Vector3(dx*.72,1.72,dz*.72)]);
+     group.add(new T.Mesh(new T.TubeGeometry(curve,14,.018,6,false),m.leaf2));
+     for(let n=1;n<=5;n++){const t=n/6,p=curve.getPoint(t);for(const side of [-1,1]){const leaflet=sphere(p.x-dz*side*.095,p.y-.025,p.z+dx*side*.095,.11,.025,.045,(n+i)%2?m.leaf:m.leaf2);leaflet.rotation.y=a;leaflet.rotation.z=side*.35}}
+    }
+    sphere(0,1.77,0,.14,.16,.14,m.leaf);
    }else if(modelName==='书架'){
     action=()=>openFurnitureActions('bookshelf');width=1.45;depth=.55;height=2.1;
     for(const x of [-.62,.62]){const side=box(x,1.02,0,.09,2.04,.46,m.wood);side.rotation.z=x<0?-.055:.055}
@@ -1263,14 +1290,17 @@ function initArday3D(){
     }
    }else if(modelName==='电脑'){
     action=()=>openFurnitureActions('computer');
-    width=.62;depth=.48;height=.62;surfaceType='floor';surfaceY=.04;
-    box(0,.46,-.13,.72,.46,.07,m.dark);box(0,.46,-.08,.64,.37,.018,m.screen);
-    box(0,.21,-.12,.1,.12,.1,m.metal);box(0,.13,-.12,.38,.045,.22,m.metal);
-    box(0,.055,.16,.72,.055,.24,m.dark);box(0,.09,.16,.62,.018,.17,m.cream);
+    width=.72;depth=.55;height=.72;surfaceType='floor';surfaceY=.04;
+    box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);box(0,.245,-.16,.075,.12,.09,m.metal);box(0,.18,-.16,.34,.035,.22,m.metal);
+    box(0,.07,.15,.68,.045,.23,m.dark);box(0,.096,.15,.6,.012,.17,m.cream);
+    for(const x of [-.43,.43]){box(x,.2,-.14,.085,.22,.12,m.wood);box(x,.2,-.072,.045,.12,.012,m.dark);cyl(x,.2,-.06,.018,.018,.012,m.gold,10)}
+    box(0,.74,-.12,.16,.018,.012,m.gold);
    }else if(modelName==='捧花摆件'){
     action=()=>openFurnitureActions('bouquet');
-    width=.34;depth=.34;height=.58;surfaceType='floor';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
-    for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;cyl(Math.cos(angle)*.08,.63,Math.sin(angle)*.08,.018,.022,.42,m.leaf);sphere(Math.cos(angle)*.11,.82+(i%2)*.06,Math.sin(angle)*.11,.13,.17,.12,[m.cream,m.clay,m.gold][i%3])}
+    width=.42;depth=.42;height=.72;surfaceType='floor';surfaceY=.04;
+    const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.11,0),new T.Vector2(.17,.08),new T.Vector2(.2,.28),new T.Vector2(.13,.42),new T.Vector2(.085,.48)],18),m.clay);vase.position.y=.08;group.add(vase);
+    cyl(0,.56,0,.11,.11,.035,m.gold,16);
+    for(let i=0;i<7;i++){const angle=i*Math.PI*2/7,x=Math.cos(angle),z=Math.sin(angle),stem=new T.CatmullRomCurve3([new T.Vector3(x*.035,.55,z*.035),new T.Vector3(x*.07,.75,z*.07),new T.Vector3(x*.14,.91+(i%2)*.05,z*.14)]);group.add(new T.Mesh(new T.TubeGeometry(stem,12,.012,6,false),m.leaf));const flower=new T.Group();flower.position.set(x*.14,.91+(i%2)*.05,z*.14);group.add(flower);for(let petal=0;petal<6;petal++){const a=petal*Math.PI/3,p=sphere(Math.cos(a)*.065,0,Math.sin(a)*.065,.06,.075,.045,[m.cream,m.clay,m.gold][i%3]);p.position.add(flower.position)}sphere(flower.position.x,flower.position.y+.015,flower.position.z,.035,.035,.035,m.gold,12)}
    }else{toast('没有找到这种家具模型：'+name);return null}
    let modelMeshCount=0;
    group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
