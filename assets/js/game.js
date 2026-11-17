@@ -189,6 +189,7 @@ function eventChoicesLegacy(e){
 }
 function renderEvents(){
  const open=s.events.filter(e=>e.status==='open').sort((a,b)=>(b.created||0)-(a.created||0));
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='最近发生的事';$('choices').innerHTML='';
  const groups=[
   ['daily','日常生活中的明确事件','阿尔日常生活中实际发生的事情'],
@@ -769,6 +770,7 @@ function generateDailyEvents(){
 }
 const oldEventChoicesForGoals=eventChoices;
 eventChoices=function(e){
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  if(e.type==='shared-goal-proposal'){
   const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
   if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
