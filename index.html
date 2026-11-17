@@ -377,7 +377,7 @@ s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+Math.round(Number(s.roomCondition)||0)+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
-function say(t){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});b.textContent=String(t||'');b.style.display='block';b.style.opacity='1';b.style.animation='none';b.style.transform='translateX(-50%)';b.style.maxWidth='min(58%,230px)';b.style.padding='5px 9px'}
+function say(t){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});b.textContent=String(t||'');Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'})}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
@@ -1207,13 +1207,16 @@ function initArday3D(){
   function roomShell(group,wallColor,floorColor){
    box(group,0,-.14,0,10.8,.28,8.4,M(floorColor));
    group.userData.backWall=box(group,0,2.35,-4.08,10.8,4.8,.2,M(wallColor));
-   const leftWallMat=M(wallColor),rightWallMat=M(wallColor);leftWallMat.transparent=true;rightWallMat.transparent=true;
-   group.userData.leftWall=box(group,-5.35,2.35,0,.2,4.8,8.4,leftWallMat);group.userData.leftWall.castShadow=false;
-   group.userData.rightWall=box(group,5.35,2.35,0,.2,4.8,8.4,rightWallMat);group.userData.rightWall.castShadow=false;
+   const leftWallGroup=new T.Group(),rightWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup);
+   const sideWallMaterial=M(wallColor);sideWallMaterial.transparent=true;sideWallMaterial.opacity=1;sideWallMaterial.depthWrite=false;
+   group.userData.leftWall=leftWallGroup;group.userData.rightWall=rightWallGroup;
+   const leftWall=box(leftWallGroup,-5.35,2.35,0,.2,4.8,8.4,sideWallMaterial);leftWall.castShadow=false;
+   const rightWall=box(rightWallGroup,5.35,2.35,0,.2,4.8,8.4,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
    box(group,0,.24,-3.91,10.65,.12,.12,M(0xd7b990));
-   box(group,-5.22,2.36,0,.12,4.55,8.15,M(0xe7d4ba));
-   box(group,5.22,2.36,0,.12,4.55,8.15,M(0xe7d4ba));
+   const trimMat=M(0xe7d4ba);trimMat.transparent=true;trimMat.depthWrite=false;
+   box(leftWallGroup,-5.22,2.36,0,.12,4.55,8.15,trimMat);
+   box(rightWallGroup,5.22,2.36,0,.12,4.55,8.15,trimMat.clone());
    for(let z=-3.55;z<3.7;z+=.92)box(group,0,.012,z,10.45,.018,.012,M(0xb58c68));
   }
   // Three distinct interiors; only one room is visible at a time.
@@ -1221,16 +1224,19 @@ function initArday3D(){
   box(living,-2.75,2.6,-3.94,2.1,1.85,.06,m.glass);
   for(const [x,y,w,h] of [[-3.82,2.6,.12,1.95],[-1.68,2.6,.12,1.95],[-2.75,3.53,2.2,.12],[-2.75,1.67,2.2,.12],[-2.75,2.6,.08,1.85]])box(living,x,y,-3.88,w,h,.1,m.oak);
   const livingRug=new T.Mesh(new T.CylinderGeometry(2,2,.045,28),M(0xd98c69));livingRug.scale.z=.58;livingRug.position.set(0,.025,1);living.add(livingRug);
-  const sofa=new T.Group();sofa.position.set(-3.35,0,1);living.add(sofa);
+  const sofa=new T.Group();sofa.position.set(-3.35,0,1);sofa.userData.furnitureKey='sofa';sofa.userData.roomKey='living';living.add(sofa);
+  if(s.roomPositions?.living?.sofa)sofa.position.set(s.roomPositions.living.sofa[0],0,s.roomPositions.living.sofa[1]);
   box(sofa,0,.52,0,2.3,.5,1,m.sofa);box(sofa,0,1.12,-.36,2.3,1,.3,m.sofa2);box(sofa,0,.83,.12,1.75,.2,.72,m.sofa);
   box(sofa,-1,.85,.1,.28,.7,.85,m.sofa2);box(sofa,1,.85,.1,.28,.7,.85,m.sofa2);
   ell(sofa,-.48,.94,.12,.55,.16,.34,M(0xa8b89a));ell(sofa,.48,.94,.12,.55,.16,.34,M(0xa8b89a));
   ell(sofa,0,.93,-.16,.46,.13,.24,M(0xd8c7a8));
   for(const x of [-.83,.83]){cyl(sofa,x,.23,.32,.055,.44,m.wood,10);}
   box(sofa,0,.28,-.34,2.12,.08,.08,M(0x6b4c3a));
-  const table=new T.Group();table.position.set(2.6,0,1.4);living.add(table);cyl(table,0,.82,0,.9,.16,m.oak);
+  const table=new T.Group();table.position.set(2.6,0,1.4);table.userData.furnitureKey='table';table.userData.roomKey='living';living.add(table);
+  if(s.roomPositions?.living?.table)table.position.set(s.roomPositions.living.table[0],0,s.roomPositions.living.table[1]);cyl(table,0,.82,0,.9,.16,m.oak);
   for(const [x,z] of [[-.6,-.3],[.6,-.3],[-.6,.3],[.6,.3]])box(table,x,.4,z,.1,.75,.1,m.wood);
-  const desk=new T.Group();desk.position.set(3.4,0,-1.55);living.add(desk);box(desk,0,1,0,1.7,.14,.85,m.oak);
+  const desk=new T.Group();desk.position.set(3.4,0,-1.55);desk.userData.furnitureKey='desk';desk.userData.roomKey='living';living.add(desk);
+  if(s.roomPositions?.living?.desk)desk.position.set(s.roomPositions.living.desk[0],0,s.roomPositions.living.desk[1]);box(desk,0,1,0,1.7,.14,.85,m.oak);
   for(const x of [-.7,.7])for(const z of [-.3,.3])box(desk,x,.5,z,.1,.95,.1,m.wood);
   box(living,4.45,1.2,-3.25,1,2.3,.4,m.wood);
   for(let y=.55;y<2.3;y+=.58)box(living,4.45,y,-3,.95,.07,.5,m.oak);
@@ -1239,7 +1245,8 @@ function initArday3D(){
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xbeb8cf,0x927e82);
   box(bedroom,-2.8,2.65,-3.94,2.0,1.7,.06,M(0x8eb9cb));
   for(const [x,y,w,h] of [[-3.83,2.65,.13,1.85],[-1.77,2.65,.13,1.85],[-2.8,3.5,2.15,.13],[-2.8,1.8,2.15,.13]])box(bedroom,x,y,-3.88,w,h,.1,M(0x8a6e68));
-  const bed=new T.Group();bed.position.set(-.55,0,-1.55);bedroom.add(bed);
+  const bed=new T.Group();bed.position.set(-.55,0,-1.55);bed.userData.furnitureKey='bed';bed.userData.roomKey='bedroom';bedroom.add(bed);
+  if(s.roomPositions?.bedroom?.bed)bed.position.set(s.roomPositions.bedroom.bed[0],0,s.roomPositions.bedroom.bed[1]);
   box(bed,0,.38,0,3.1,.55,3.45,M(0x805b4e));box(bed,0,.72,.12,2.95,.22,3.2,M(0xf0d9d1));
   box(bed,0,.91,-.95,2.95,.22,1.3,M(0x7897b5));
   box(bed,-.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));box(bed,.85,1.05,-1.75,.9,.22,.65,M(0xf8eee4));
@@ -1300,24 +1307,22 @@ function initArday3D(){
   box(body,0,.91,.195,.38,.055,.035,M(0x293846));
   cyl(body,0,1.82,0,.135,.24,skinMat,16);
   const head=new T.Group();head.position.set(0,2.2,.015);head.scale.set(.9,.94,.94);body.add(head);
-  ell(head,0,-.015,0,.286,.372,.255,skinMat,32);
-  ell(head,-.205,-.075,.135,.105,.12,.115,skinMat,20);ell(head,.205,-.075,.135,.105,.12,.115,skinMat,20);
-  ell(head,0,-.285,.105,.105,.075,.12,skinMat,18);
-  ell(head,-.31,-.045,0,.052,.095,.06,skinShadow,16);ell(head,.31,-.045,0,.052,.095,.06,skinShadow,16);
+  ell(head,0,-.015,0,.292,.365,.258,skinMat,32);
+  ell(head,-.205,-.075,.135,.075,.095,.085,skinMat,20);ell(head,.205,-.075,.135,.075,.095,.085,skinMat,20);
+  ell(head,0,-.285,.105,.075,.052,.075,skinMat,18);
+  ell(head,-.31,-.045,0,.045,.075,.05,skinShadow,16);ell(head,.31,-.045,0,.045,.075,.05,skinShadow,16);
   const eyeGroups=[];
   for(const side of [-1,1]){
-   const eye=new T.Group();eye.position.set(side*.115,.045,.235);head.add(eye);
-   ell(eye,0,0,0,.071,.046,.027,whiteMat,20);
-   ell(eye,side*.006,-.003,.022,.032,.039,.014,M(0x687d80),18);
-   ell(eye,side*.006,-.002,.034,.017,.027,.009,eyeMat,16);
-   ell(eye,side*.014,.015,.042,.009,.011,.006,M(0xffffff),10);
-   const upper=new T.QuadraticBezierCurve3(new T.Vector3(-.073,.005,.014),new T.Vector3(0,.061,.025),new T.Vector3(.073,.005,.014));
-   eye.add(new T.Mesh(new T.TubeGeometry(upper,16,.009,6,false),hairMat));
-   const lower=new T.QuadraticBezierCurve3(new T.Vector3(-.06,-.012,.012),new T.Vector3(0,-.047,.018),new T.Vector3(.06,-.012,.012));
-   eye.add(new T.Mesh(new T.TubeGeometry(lower,12,.004,5,false),skinShadow));
+   const eye=new T.Group();eye.position.set(side*.116,.045,.235);head.add(eye);
+   ell(eye,0,0,0,.052,.034,.018,M(0x473633),20);
+   ell(eye,side*.004,-.001,.014,.026,.029,.012,M(0x4b7180),18);
+   ell(eye,side*.004,-.001,.023,.014,.021,.008,eyeMat,16);
+   ell(eye,side*.012,.012,.03,.007,.008,.005,M(0xffffff),10);
+   const upper=new T.QuadraticBezierCurve3(new T.Vector3(-.052,.004,.01),new T.Vector3(0,.039,.018),new T.Vector3(.052,.004,.01));
+   eye.add(new T.Mesh(new T.TubeGeometry(upper,14,.006,6,false),hairMat));
    eyeGroups.push(eye);
-   const brow=ell(head,side*.12,.137,.225,.083,.018,.019,hairMat,16);brow.rotation.z=side*.12;
-   ell(head,side*.25,-.105,.188,.065,.035,.018,M(0xd99b88),14);
+   const brow=ell(head,side*.12,.132,.222,.061,.011,.012,hairMat,16);brow.rotation.z=side*.1;
+   ell(head,side*.245,-.105,.185,.045,.022,.012,M(0xd99b88),14);
   }
   ell(head,0,.255,-.035,.335,.19,.295,hairMat,22);
   ell(head,0,-.055,-.205,.275,.34,.13,hairMat,20);
@@ -1327,12 +1332,10 @@ function initArday3D(){
   const tailLeft=new T.Mesh(new T.ConeGeometry(.075,.34,9),hairHi);tailLeft.position.set(-.12,-.31,-.12);tailLeft.rotation.x=Math.PI;tailLeft.rotation.z=.22;head.add(tailLeft);
   const tailRight=new T.Mesh(new T.ConeGeometry(.075,.36,9),hairMat);tailRight.position.set(.13,-.32,-.12);tailRight.rotation.x=Math.PI;tailRight.rotation.z=-.2;head.add(tailRight);
   const fringe=ell(head,-.075,.205,.225,.235,.085,.075,hairHi,18);fringe.rotation.z=-.12;ell(head,.105,.265,.19,.13,.075,.07,hairMat,16);
-  const noseBridge=ell(head,0,-.025,.246,.025,.085,.032,skinMat,16);noseBridge.rotation.x=-.16;
-  ell(head,0,-.112,.274,.035,.026,.028,skinShadow,16);
-  ell(head,-.025,-.124,.268,.012,.008,.009,M(0x8d5e52),10);ell(head,.025,-.124,.268,.012,.008,.009,M(0x8d5e52),10);
-  const lipLine=new T.QuadraticBezierCurve3(new T.Vector3(-.055,-.195,.251),new T.Vector3(0,-.213,.266),new T.Vector3(.055,-.195,.251));
-  head.add(new T.Mesh(new T.TubeGeometry(lipLine,16,.009,6,false),M(0x854f4c)));
-  ell(head,0,-.231,.241,.035,.009,.012,M(0xb87570),12);
+  ell(head,0,-.045,.25,.018,.036,.018,skinShadow,14);
+  const lipLine=new T.QuadraticBezierCurve3(new T.Vector3(-.043,-.185,.247),new T.Vector3(0,-.198,.26),new T.Vector3(.043,-.185,.247));
+  head.add(new T.Mesh(new T.TubeGeometry(lipLine,14,.006,6,false),M(0x995f5a)));
+  ell(head,0,-.201,.245,.026,.006,.008,M(0xb87570),10);
   const arms=[];
   for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.27,1.58,0);body.add(shoulder);ell(shoulder,0,0,0,.09,.11,.09,shirtMat,16);const upper=cyl(shoulder,0,-.22,0,.061,.43,shirtMat,16);upper.position.y=-.22;const elbow=new T.Group();elbow.position.set(0,-.44,0);shoulder.add(elbow);ell(elbow,0,0,0,.062,.07,.062,skinMat,14);const fore=cyl(elbow,0,-.2,0,.048,.39,skinMat,16);fore.position.y=-.2;ell(elbow,0,-.41,.015,.055,.06,.06,skinMat,14);for(let f=0;f<3;f++)ell(elbow,-.035+f*.035,-.47,.035,.014,.055,.014,skinMat,8);arms.push({shoulder,elbow,side})}
   const legs=[];
@@ -1343,7 +1346,13 @@ function initArday3D(){
   let activeActivity='idle',idleNextMove=performance.now()+2500,idleWalkStartedAt=0,walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0);
   function applyCamera(){targetPhi=Math.max(.48,Math.min(1.42,targetPhi));targetRadius=Math.max(7.2,Math.min(21,targetRadius))}
-  function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);[living,bedroom,kitchen].forEach(g=>{if(g.userData.backWall)g.userData.backWall.visible=camera.position.z>-2.8;if(g.userData.leftWall){const fade=camera.position.x< -2.0;g.userData.leftWall.material.opacity=fade?.09:1;g.userData.leftWall.material.depthWrite=!fade}if(g.userData.rightWall){const fade=camera.position.x>2.0;g.userData.rightWall.material.opacity=fade?.09:1;g.userData.rightWall.material.depthWrite=!fade}})}
+  function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
+   [living,bedroom,kitchen].forEach(g=>{
+    if(g.userData.backWall)g.userData.backWall.visible=camera.position.z>-2.8;
+    if(g.userData.leftWall)g.userData.leftWall.visible=camera.position.x>-2.15;
+    if(g.userData.rightWall)g.userData.rightWall.visible=camera.position.x<2.15;
+   });
+  }
   function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
@@ -1367,6 +1376,8 @@ function initArday3D(){
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,doorTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
+  let selectedFurniture=null,furnitureDrag=null;
+  const floorPlane=new T.Plane(new T.Vector3(0,1,0),0),dragPoint=new T.Vector3(),dragOffset=new T.Vector3();
   const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2();
   // Camera gestures are handled by the stage, not the canvas. The canvas itself
   // is click-through so it can never steal taps from the footer or room controls.
@@ -1374,12 +1385,21 @@ function initArday3D(){
   canvas.style.touchAction='none';canvas.style.pointerEvents='none';
   gestureSurface.style.touchAction='none';
   gestureSurface.addEventListener('pointerdown',e=>{
-   if(e.target.closest('button,[role="button"],input,select,textarea,a,.calendar-view,.drawer'))return;
+   if(e.target.closest('button,[role="button"],input,select,textarea,a,.calendar-view,.drawer,.decorate-tools'))return;
    if(e.pointerType==='mouse'&&e.button!==0)return;
    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
    raycaster.setFromCamera(pointerNdc,camera);
    const activeRoom=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living;
    const hits=raycaster.intersectObjects(activeRoom.children,true);
+   if(decorating){
+    let furniture=null;
+    for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.furnitureKey){furniture=node;break}node=node.parent}if(furniture)break}
+    if(furniture&&raycaster.ray.intersectPlane(floorPlane,dragPoint)){
+     selectedFurniture=furniture;dragOffset.copy(furniture.position).sub(dragPoint);
+     furnitureDrag={pointerId:e.pointerId,group:furniture};gestureSurface.setPointerCapture(e.pointerId);
+     toast('已选中家具，拖动即可移动');e.preventDefault();return;
+    }
+   }
    let targetRoom=null;
    for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.roomTarget){targetRoom=node.userData.roomTarget;break}node=node.parent}if(targetRoom)break}
    gestureSurface.setPointerCapture(e.pointerId);
@@ -1391,6 +1411,12 @@ function initArday3D(){
    lastPointerTime=e.timeStamp;e.preventDefault();
   });
   gestureSurface.addEventListener('pointermove',e=>{
+   if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
+    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
+    if(raycaster.ray.intersectPlane(floorPlane,dragPoint)){
+     const g=furnitureDrag.group;g.position.x=Math.max(-4.25,Math.min(4.25,dragPoint.x+dragOffset.x));g.position.z=Math.max(-3.15,Math.min(3.15,dragPoint.z+dragOffset.z));
+    }e.preventDefault();return;
+   }
    if(!pointers.has(e.pointerId))return;
    const old=pointers.get(e.pointerId),dx=e.clientX-old.x,dy=e.clientY-old.y,elapsed=Math.max(8,e.timeStamp-lastPointerTime||16);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
    if(pointers.size===1&&drag){targetTheta-=dx*.0065;targetPhi+=dy*.0045;dragVelocityTheta=-dx/elapsed*.00065;dragVelocityPhi=dy/elapsed*.00042;applyCamera()}
@@ -1398,6 +1424,11 @@ function initArday3D(){
    lastPointerTime=e.timeStamp;e.preventDefault();
   });
   function endPointer(e){
+   if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
+    const g=furnitureDrag.group;furnitureDrag=null;
+    s.roomPositions=s.roomPositions||{};s.roomPositions[g.userData.roomKey]=s.roomPositions[g.userData.roomKey]||{};
+    s.roomPositions[g.userData.roomKey][g.userData.furnitureKey]=[g.position.x,g.position.z];save();toast('家具位置已保存');return;
+   }
    if(doorTap&&doorTap.pointerId===e.pointerId){
     const tap=doorTap,dist=Math.hypot(e.clientX-tap.x,e.clientY-tap.y);doorTap=null;
     if(e.type==='pointerup'&&dist<18){
@@ -1440,6 +1471,10 @@ function initArday3D(){
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
   arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,getRoom:()=>roomMode,raf:0};
+  const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
+  const decorateLabel=document.createElement('span');decorateLabel.textContent='点选沙发、茶几、书桌或床，再拖动调整位置';
+  const clearSelection=document.createElement('button');clearSelection.type='button';clearSelection.textContent='取消选中';clearSelection.onclick=()=>{selectedFurniture=null;furnitureDrag=null;toast('已取消选中')};
+  decorateTools.append(decorateLabel,clearSelection);stage.appendChild(decorateTools);
   stage.classList.add('three-ready');resize();setRoom('living');updateActivity(s.currentActivity||'idle');
   if(window.ResizeObserver){arday3D.ro=new ResizeObserver(resize);arday3D.ro.observe(stage)}window.addEventListener('resize',resize);
   arday3D.raf=requestAnimationFrame(frame);return true;
@@ -1469,7 +1504,7 @@ ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;initSc
 initArday3D();updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
-const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';cameraHint.style.pointerEvents='none';$('stage').appendChild(cameraHint);
+
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
 showCurrentScheduleBubble();
