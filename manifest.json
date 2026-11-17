@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Arday · 阿尔",
+  "short_name": "Arday",
+  "description": "Arday Companion",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#efe5d4",
+  "theme_color": "#f2e7d4",
+  "icons": [
+    {"src":"./assets/icons/arday-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ]
+}
