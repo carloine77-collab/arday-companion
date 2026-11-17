@@ -218,6 +218,29 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
 .stage .calendar-view{z-index:35!important;pointer-events:auto!important}
 .stage .calendar-view button,.stage .drawer button{pointer-events:auto!important;touch-action:manipulation}
 .three-status{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:60;max-width:calc(100% - 24px);padding:8px 12px;border:1px solid #d9b99a;border-radius:10px;background:#fff8ed;color:#76533b;font:12px/1.5 system-ui;text-align:center;box-shadow:0 3px 12px #4a352522}
+.identity-line{display:flex!important;align-items:center;justify-content:space-between!important;gap:8px!important;flex-wrap:nowrap!important;min-width:0}
+.identity-meta{display:flex!important;align-items:center;justify-content:flex-end;gap:6px;min-width:0;flex:0 1 auto!important;flex-wrap:nowrap!important;font-size:10px}
+.identity-meta span{display:inline-flex;align-items:center;min-height:31px;padding:5px 8px;border:1px solid var(--line);border-radius:9px;background:#fff9efb8;white-space:nowrap}
+@media(max-width:700px){.identity-meta{gap:4px;font-size:9px}.identity-meta span{padding:4px 5px;min-height:29px}.identity .name{font-size:14px}}
+@media(max-width:390px){.identity-meta{font-size:8px}.identity-meta span{padding:4px 4px}.identity .mark{width:28px;height:28px}}
+.stage .bubble{z-index:65!important;pointer-events:none!important;display:block!important}
+.stage .room-door{position:absolute;z-index:55;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;width:58px;height:105px;padding:5px 3px 2px;border:0;background:transparent;color:#fff8ed;text-shadow:0 1px 4px #382b20;touch-action:manipulation}
+.room-door .door-leaf{display:block;width:43px;height:79px;border:4px solid #684832;border-radius:4px 4px 0 0;background:linear-gradient(90deg,#9b704d,#c09164 48%,#80573c);box-shadow:inset 4px 0 0 #d0a67a,inset -4px 0 0 #684832,0 3px 6px #382b2055;position:relative}
+.room-door .door-leaf:after{content:"";position:absolute;right:6px;top:42px;width:5px;height:5px;border-radius:50%;background:#e8c58a}
+.room-door small{font-size:10px;font-weight:700;letter-spacing:.08em}
+.bedroom-door{right:7%;bottom:12%}.kitchen-door{right:18%;bottom:12%}
+.return-door{display:none;right:7%;bottom:12%}
+.stage.bedroom-mode .bedroom-door,.stage.bedroom-mode .kitchen-door,.stage.kitchen-mode .bedroom-door,.stage.kitchen-mode .kitchen-door{display:none}
+.stage.bedroom-mode .return-door,.stage.kitchen-mode .return-door{display:flex}
+.stage.calendar-mode .room-door{display:none!important}
+.hotspot{display:none!important;z-index:66!important;pointer-events:auto!important}
+.stage.editing .hotspot{display:grid!important}
+.stage.editing .edit-hint{display:block!important}
+.bottom-actions{gap:5px!important}
+.bottom-actions .recent-entry{min-height:44px;padding:0 9px;font-size:10px}
+.bottom-actions .recent-entry b{margin-left:3px}
+@media(max-width:700px){.bottom-actions .recent-entry{min-height:42px;padding:0 6px;font-size:9px}.toolbar{flex:1;min-width:0}.tool{min-width:0;padding:0 3px;font-size:10px}.bottom-actions{gap:4px}}
+@media(max-width:390px){.bottom-actions .recent-entry{font-size:8px;padding:0 4px}.bottom-actions .top-action{padding:0 5px;font-size:9px}.tool{font-size:9px}}
 </style>
 </head>
 <body>
@@ -225,8 +248,8 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
 <header class="top">
  <div class="identity-line">
   <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div></div></button>
+  <div class="identity-meta"><span id="upkeep">房间维护 92%</span><span id="cash">共同账户 ¥3000</span></div>
  </div>
- <div class="header-meta-row"><button class="recent-entry" id="recentEvents">✦ <span>最近发生的事</span><b id="eventCount"></b></button><span id="upkeep">房间维护 92%</span><span id="cash">¥3000</span></div>
  <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
 </header>
 <div class="play-area">
@@ -252,8 +275,10 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
  </div>
  <div class="bubble" id="bubble">你来了。刚才我在看窗外。</div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2><p>每天早上 06:00，阿尔会根据自己的状态重新安排接下来的一天。</p></div></div><div class="calendar-content" id="calendarContent"></div></section>
 
- <div class="room-label" id="roomLabel">HOME · 现在</div><button id="bedroomSwitch" class="bedroom-switch">进入卧室</button><button id="kitchenSwitch" class="kitchen-switch">进入厨房</button><section class="kitchen-scene"><div class="kitchen-wall"></div><div class="kitchen-floor"></div><div class="kitchen-window"></div><div class="kitchen-counter"></div><div class="kitchen-cabinet"></div><div class="kitchen-fridge">▥<small>冰箱</small></div><div class="kitchen-stove">◉　◉<small>灶台</small></div><div class="kitchen-sink">▱<small>水槽</small></div><div class="kitchen-shelf">🥣　🫙　🍵</div><div class="person kitchen-person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div></section>
- <div class="decorate-tools" id="decorateTools"><span>选择要调整的物件</span><button data-decorate-object="沙发">沙发</button><button data-decorate-object="窗户">窗户</button><button data-decorate-object="茶几">茶几</button></div>
+ <div class="room-label" id="roomLabel">HOME · 起居室</div>
+ <button class="room-door bedroom-door" data-enter-room="bedroom" aria-label="进入卧室"><span class="door-leaf"></span><small>卧室</small></button>
+ <button class="room-door kitchen-door" data-enter-room="kitchen" aria-label="进入厨房"><span class="door-leaf"></span><small>厨房</small></button>
+ <button class="room-door return-door" data-enter-room="living" aria-label="返回起居室"><span class="door-leaf"></span><small>起居室</small></button><section class="kitchen-scene"><div class="kitchen-wall"></div><div class="kitchen-floor"></div><div class="kitchen-window"></div><div class="kitchen-counter"></div><div class="kitchen-cabinet"></div><div class="kitchen-fridge">▥<small>冰箱</small></div><div class="kitchen-stove">◉　◉<small>灶台</small></div><div class="kitchen-sink">▱<small>水槽</small></div><div class="kitchen-shelf">🥣　🫙　🍵</div><div class="person kitchen-person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div></section>
  <button class="hotspot spot-sofa" data-object="沙发" aria-label="沙发">▰</button>
  <button class="hotspot spot-window" data-object="窗户" aria-label="窗户">☼</button>
  <button class="hotspot spot-table" data-object="茶几" aria-label="茶几">♧</button>
@@ -267,9 +292,10 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
   <button class="tool" data-tab="物品"><span class="icon">▣</span>物品</button>
   <button class="tool" data-tab="商店"><span class="icon">♧</span>商店</button>
   <button class="tool" data-tab="日程"><span class="icon">▦</span>日程</button>
+  <button class="tool" data-tab="目标"><span class="icon">◇</span>目标</button>
   <button class="tool" data-tab="账户"><span class="icon">◈</span>账户</button>
  </nav>
- <div class="bottom-actions"><button class="top-action decorate" id="decorate">✧ 装修</button></div>
+ <div class="bottom-actions"><button class="recent-entry" id="recentEvents">✦ 最近发生的事<b id="eventCount"></b></button><button class="top-action decorate" id="decorate">✧ 装修</button></div>
 </footer>
 </div><div class="toast" id="toast"></div>
 
@@ -305,7 +331,7 @@ s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+Math.round(Number(s.roomCondition)||0)+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
-function say(t){$('bubble').textContent=t}
+function say(t){const b=$('bubble');if(!b)return;b.textContent=t;b.style.display='block';b.classList.remove('bubble-pop');void b.offsetWidth;b.classList.add('bubble-pop')}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function animate(type){let p=$('person');p.classList.remove('wave','sit','walk');void p.offsetWidth;p.classList.add(type||'wave')}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
@@ -352,6 +378,7 @@ function openTab(name){
  const active=document.querySelector('.tool.active')?.dataset.tab;
  if(active===name&&((name==='日程'&&$('stage').classList.contains('calendar-mode'))||(name!=='日程'&&$('drawer').classList.contains('open')))){closeCalendar();$('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
  if(name==='日程'){openCalendar();return}
+ if(name==='目标'){showGoals();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='目标'));return}
  if(name==='账户'){showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';
  (tabs[name]||[]).forEach(([label,emoji,id,cost])=>{
@@ -769,7 +796,13 @@ function consumeMeal(){
  if(id){const r=recipes[id];Object.entries(r.ingredients).forEach(([k,n])=>s.pantry[k]=pantryCount(k)-n);change({hunger:r.hunger,fun:1});remember('meal','简单准备并吃了'+r.name,1);return r.name}
  return null;
 }
-function setSceneActivity(activity,announce){const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);if(kitchen)kitchenOpen();else if($('stage').classList.contains('kitchen-mode'))kitchenClose();const p=document.querySelector(kitchen?'.kitchen-person':'#person');if(p){p.classList.remove('sit','walk','wave');p.classList.add(m.pose||'wave');const pos={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};p.style.left=kitchen?'54%':(pos[m.location]||'51%')}s.currentActivity=a;updateArday3D();$('roomLabel').textContent=(kitchen?'KITCHEN':m.location==='outside'?'OUTSIDE':'HOME')+' · '+m.title;if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')}
+function setSceneActivity(activity,announce){
+ const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'},kitchen=['cook','cookTogether'].includes(a);
+ const p=document.querySelector(kitchen?'.kitchen-person':'#person');
+ if(p){p.classList.remove('sit','walk','wave');p.classList.add(m.pose||'wave');const pos={sofa:'20%',table:'77%',window:'37%',outside:'88%',rug:'52%',shelf:'72%',desk:'68%',center:'51%'};p.style.left=kitchen?'54%':(pos[m.location]||'51%')}
+ s.currentActivity=a;updateArday3D();
+ if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')
+}
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];if(s.hunger<48&&Object.keys(recipes).some(canCook)&&Math.random()<.58)return 'cook';const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:has('唱片机')?Math.max(0,65-s.fun)*1.05:0,tidy:Math.max(0,55-s.roomCondition)*.8,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>(a!=='music'||has('唱片机'))&&(a!=='write'||has('书桌'))).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
 function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'cook'})[a]||a||'idle'}
 function processActivityAt(value){
@@ -1070,24 +1103,27 @@ eventChoices=function(e){
  oldEventChoicesForGoals(e);
 };
 function showCollection(){
- ensurePersonalGoal();
- const g=s.personalGoal;
- const goalText=g&&g.status==='active'
-  ?'<section class="profile-section"><h4>阿尔自己的计划</h4><strong>'+g.title+'</strong><p>'+g.detail+'</p><p>进度：'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p></section>'
-  :'<section class="profile-section"><h4>阿尔自己的计划</h4><p>目前没有正在推进的个人目标。他会根据自己的生活和想法决定下一件想做的事。</p></section>';
- const sg=s.sharedGoal;
- const sharedText=sg?.status==='active'
-  ?'<section class="profile-section"><h4>你们的共同计划</h4><strong>'+sg.title+'</strong><p>'+sg.detail+'</p><p>进度：'+sg.progress+' / '+sg.target+' '+sg.unit+'</p><small>这是双方同意的计划，可以一起推进，也可以在相处中重新商量。</small></section>'
-  :'<section class="profile-section"><h4>你们的共同计划</h4><p>目前没有正在进行的共同计划。阿尔也会主动提出想和你一起做的事。</p></section>';
  const log=(s.moneyLog||[]).slice(0,8).map(x=>'<p>'+new Date(x.at).toLocaleDateString('zh-CN')+' · '+(x.account==='shared'?'共同账户':'阿尔个人账户')+' · '+(x.kind==='income'?'+':'−')+'¥'+x.amount+' · '+x.note+'</p>').join('')||'<p>暂时没有账户记录。</p>';
  $('drawerTitle').textContent='账户';
  $('choices').innerHTML=
   '<section class="account-balance"><div><span>SHARED ACCOUNT</span><h2>¥'+s.money+'</h2><p>共同生活 · 日常开销</p></div><div class="account-symbol">¥</div><small>未付共同开销 ¥'+(s.unpaidBill||0)+'</small></section>'+
-  '<section class="account-personal"><div class="section-kicker">ARDAY · PERSONAL</div><h3>阿尔的个人账户</h3><strong>¥'+s.personalMoney+'</strong><p>工作报酬与个人支出</p><div class="account-items">个人物品　'+(s.personalItems.length?s.personalItems.join('、'):'暂无')+'</div></section>'+
-  goalText+sharedText+
+  '<section class="account-personal"><div class="section-kicker">ARDAY · PERSONAL</div><h3>阿尔的个人账户</h3><strong>¥'+s.personalMoney+'</strong><p>工作报酬与个人支出</p></section>'+
   '<section class="profile-section account-records"><div class="section-kicker">TRANSACTION HISTORY</div><h3>近期账户记录</h3>'+log+'</section>';
  $('drawer').classList.add('open');
-};
+}
+function showGoals(){
+ ensurePersonalGoal();
+ const g=s.personalGoal,sg=s.sharedGoal;
+ const personal=g&&g.status==='active'
+  ?'<strong>'+g.title+'</strong><p>'+g.detail+'</p><p>进度：'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>'
+  :'<p>目前没有正在推进的个人计划。阿尔会根据自己的生活和想法决定下一件想做的事。</p>';
+ const shared=sg?.status==='active'
+  ?'<strong>'+sg.title+'</strong><p>'+sg.detail+'</p><p>进度：'+sg.progress+' / '+sg.target+' '+sg.unit+'</p><small>这是双方同意的计划，可以一起推进，也可以重新商量。</small>'
+  :'<p>目前没有正在进行的共同计划。阿尔也会主动提出想和你一起做的事。</p>';
+ $('drawerTitle').textContent='目标';
+ $('choices').innerHTML='<section class="profile-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section><section class="profile-section"><div class="section-kicker">TOGETHER</div><h3>共同计划</h3>'+shared+'</section>';
+ $('drawer').classList.add('open');
+}
 
 
 
@@ -1204,8 +1240,9 @@ function initArday3D(){
   }
   function updateActivity(a){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave'};
-   if(act==='sleep')setRoom('bedroom');
    const loc=act==='sleep'?'bed':(['cook','cookTogether'].includes(act)?'kitchen':meta.location);
+   const characterRoom=act==='sleep'?'bedroom':(['cook','cookTogether'].includes(act)?'kitchen':'living');
+   person.visible=characterRoom===roomMode;
    const p=positions[loc]||positions.center;target.set(...p);pose=meta.pose||'wave';
    body.position.y=pose==='sit' ? -.12:0;
    legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
@@ -1259,15 +1296,28 @@ function initArday3D(){
  }
 }
 function updateArday3D(){
- if(!arday3D)return;
- const mode=$('stage').classList.contains('kitchen-mode')?'kitchen':$('stage').classList.contains('bedroom-mode')?'bedroom':'living';
- arday3D.setRoom(mode);arday3D.updateActivity(s.currentActivity||'idle');
- const b=$('bedroomSwitch');if(b)b.textContent=mode==='bedroom'?'返回起居室':'进入卧室';
+ const stage=$('stage'),mode=stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
+ if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(s.currentActivity||'idle')}
+ else{
+  const act=normalizeActivity(s.currentActivity||'idle'),isKitchen=['cook','cookTogether'].includes(act),isBedroom=act==='sleep';
+  const livingPerson=$('person'),kitchenPerson=document.querySelector('.kitchen-person');
+  if(livingPerson)livingPerson.style.display=(isKitchen||isBedroom)?'none':'';
+  if(kitchenPerson)kitchenPerson.style.display=(isKitchen&&mode==='kitchen')?'block':'none';
+ }
+ const label=$('roomLabel');if(label)label.textContent=mode==='kitchen'?'KITCHEN · 厨房':mode==='bedroom'?'BEDROOM · 卧室':'HOME · 起居室';
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;initScene();render();renderCalendar();generateDailyEvents();save();
 initArday3D();updateArday3D();
-// Bedroom listener is installed before simulation initialization.
+// Room doors change only the player's viewpoint. Arday's schedule and
+// physical location remain controlled by the simulation clock.
+document.querySelectorAll('[data-enter-room]').forEach(door=>door.addEventListener('click',()=>{
+ const mode=door.dataset.enterRoom,stage=$('stage');
+ stage.classList.toggle('kitchen-mode',mode==='kitchen');
+ stage.classList.toggle('bedroom-mode',mode==='bedroom');
+ $('drawer').classList.remove('open');
+ updateArday3D();
+}));
 const cameraHint=document.createElement('div');cameraHint.className='camera-hint';cameraHint.textContent='拖动旋转视角 · 双指缩放';$('stage').appendChild(cameraHint);
 if(s.visits===1)say(new Date().getHours()<10?'早。今天有什么安排？':'你来了。我刚好有空。');
 tick();
