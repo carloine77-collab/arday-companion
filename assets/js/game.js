@@ -439,6 +439,10 @@ function ensureScheduleAt(value){
   s.pendingCookingSlot=null;
   s.calendar.version=8;
  }
+ if((s.calendar.version||0)<9){
+  Object.keys(s.calendar.days).forEach(k=>{s.calendar.days[k]=(s.calendar.days[k]||[]).map(ev=>ev.autonomous?{...ev,kind:'autonomous',source:ev.source||'simulation'}:ev)});
+  s.calendar.version=9;
+ }
  if(s.calendar.anchor!==currentKey){
   s.calendar.anchor=currentKey;
   Object.keys(s.calendar.days).forEach(k=>{if(k<currentKey)delete s.calendar.days[k]});
@@ -543,31 +547,37 @@ function openKitchenPanel(){
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open');
 }
 function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;s.ownedFurniture.push(itemName);addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
-function setSceneActivity(activity,announce){
- const a=normalizeActivity(activity),m=activityMeta[a]||{title:'自己的时间',location:'center',pose:'wave'};
- s.currentActivity=a;updateArday3D();
- if(announce)say('我现在在'+(m.location==='outside'?'外面':'房间里')+m.title+'。')
+// Presentation only. The schedule processor is the sole writer of currentActivity.
+function presentActivity(activity){
+ const a=normalizeActivity(activity);
+ if(!activityMeta[a])return;
+ updateArday3D();
 }
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
 function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
+// Resolve every hour through the calendar. Autonomous choice fills only an unassigned slot;
+// fixed routines and player proposals already exist as calendar events and take precedence.
+function resolveScheduledActivity(key,hour){
+ let ev=eventAt(key,hour);
+ if(!ev||normalizeActivity(ev.activity)==='idle'){
+  const activity=chooseAutonomousActivity(),meta=activityMeta[activity]||{title:'自己的时间'};
+  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'autonomous',activity,autonomous:true,source:'simulation'});
+  ev=eventAt(key,hour);
+ }
+ return {event:ev,activity:normalizeActivity(ev?.activity||'idle')};
+}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
  // Preserve fractional hourly decay; integer clamping would round small losses to zero.
  for(const [k,loss] of Object.entries({energy:.45,hunger:.8,clean:.25,fun:.3}))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
  
- let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
- let activity=normalizeActivity(ev?.activity||'idle');
- if(!ev||activity==='idle'){
-  activity=chooseAutonomousActivity();
-  const meta=activityMeta[activity]||{title:'自己的时间'};
-  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'personal',activity,autonomous:true});
-  ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
- }
+ const resolved=resolveScheduledActivity(key,hour);
+ let ev=resolved.event,activity=resolved.activity;
  let placedMealEaten=false;
  if([7,12,18].includes(hour)&&!['sleep','work','computerWork'].includes(activity)){
   const meal=(s.placedFurniture||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placedFurniture=s.placedFurniture.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;activity='eat';s.currentActivity='eat';setSceneActivity('eat',false);say('这道'+dishName+'是你做的？谢谢，我正好饿了。');remember('meal','Arday吃了'+dishName,2);}
+  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placedFurniture=s.placedFurniture.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;activity='eat';say('这道'+dishName+'是你做的？谢谢，我正好饿了。');remember('meal','Arday吃了'+dishName,2);}
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
@@ -578,7 +588,7 @@ function processActivityAt(value){
   
   if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
   if(activity==='read')s.preferences.reading=(s.preferences.reading||0)+1;
-  setSceneActivity(activity,false);
+  // Scene presentation is applied once after the authoritative state is committed.
  }
  if(sessionStart){
   if(ev?.withPlayer){
@@ -591,6 +601,7 @@ function processActivityAt(value){
  if(workCompleted)updatePersonalGoal('work',d.getTime());
 
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;
+ presentActivity(activity);
  s.lastProcessedSessionKey=sessionId;
  s.activityLog=s.activityLog||[];
  s.activityLog.push({activity,key,hour,at:d.getTime(),withPlayer:!!ev?.withPlayer});
@@ -625,7 +636,7 @@ function openFurnitureActions(kind){
 }
 function ardayUnavailable(){const now=new Date(),ev=eventAt(keyAt(now),now.getHours()),a=normalizeActivity(ev?.activity||s.currentActivity||'idle');return ['sleep','work','computerWork'].includes(a)}
 function busyBubble(){say('等Arday回家后和他商量吧。')}
-function perform(action,force=false){if(action==='cook'||action==='cookTogether'){openKitchenPanel();return}if(ardayUnavailable()){busyBubble();return}const map={reading:'read',read:'read',outing:'walk',walk:'walk',computerGame:'computerPlay',computerPlay:'computerPlay',chat:'chat',rest:'rest',cook:'cook'},a=map[action]||action,ok=proposeActivityNow(a,force);if(ok)setSceneActivity(a,false)}
+function perform(action,force=false){if(action==='cook'||action==='cookTogether'){openKitchenPanel();return}if(ardayUnavailable()){busyBubble();return}const map={reading:'read',read:'read',outing:'walk',walk:'walk',computerGame:'computerPlay',computerPlay:'computerPlay',chat:'chat',rest:'rest'},a=map[action]||action;proposeActivityNow(a,force)}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
