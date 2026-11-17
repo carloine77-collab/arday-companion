@@ -1088,7 +1088,7 @@ function initArday3D(){
     item.button.className='hotspot furniture-hotspot spot-'+id;
     item.button.type='button';item.button.dataset.object=name;item.button.setAttribute('aria-label',name);
     item.button.textContent=id==='desk'?'✎':'▱';stage.appendChild(item.button);
-    item.button.addEventListener('click',()=>{if(decorating){selectFurniture(item);return}if(item.action)item.action()});
+    item.button.onclick=()=>{if(decorating){selectFurniture(item);return}if(item.action)item.action()};
    }
    furnitureRegistry.push(item);return item;
   }
@@ -1099,7 +1099,7 @@ function initArday3D(){
    wallTransform(group,savedSide,offset,saved?.y??group.position.y);
    const button=document.createElement('button');button.className='hotspot furniture-hotspot wall-hotspot spot-'+id;button.type='button';button.textContent=id.includes('door')?'门':'窗';button.setAttribute('aria-label',name);button.dataset.object=name;stage.appendChild(button);
    const item={id,name,room,group,button,wallAxis:savedSide==='back'||savedSide==='front'?'x':'z',wallSide:savedSide,wallRange:range,anchor:anchor||[0,0],action,width:0,depth:0,wallAnchorY:(anchor?.[1]??2.55)-group.position.y};
-   button.addEventListener('click',()=>{if(decorating)selectFurniture(item);else if(item.action)item.action()});
+   button.onclick=()=>{if(decorating)selectFurniture(item);else if(item.action)item.action()};
    furnitureRegistry.push(item);return item;
   }
   const furnitureHotspots=[];
