@@ -364,3 +364,46 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .stage .drawer .shop-categories,.stage .drawer .shop-level-one,.stage .drawer .shop-level-two{background:#f5ead8!important;}
 .stage .furniture-hotspot{pointer-events:auto!important;touch-action:manipulation!important;z-index:40!important;}
 .stage .furniture-hotspot[aria-label="冰箱"],.stage .furniture-hotspot[aria-label="灶台"]{width:48px!important;height:40px!important;border-radius:12px!important;background:#fff6e8ed!important;border:1px solid #b89b77!important;color:#5b4631!important;font-size:12px!important;font-weight:750!important;box-shadow:0 3px 12px #46321f30!important;}
+
+
+/* ROUND 1 — editorial poster language: calendar master screen */
+.stage.calendar-mode{background:#e9dfcd!important}
+.calendar-view{padding:clamp(13px,2.6vw,25px)!important;gap:clamp(8px,1.4vh,14px)!important;background-color:#efe5d4!important;background-image:radial-gradient(#806d5420 .65px,transparent .65px),linear-gradient(135deg,#f4ead9 0%,#e8dcc8 100%)!important;background-size:5px 5px,100% 100%!important;color:#302d28}
+.calendar-view-head{display:none!important}
+.calendar-editorial-masthead{position:relative;isolation:isolate;display:flex;align-items:flex-end;justify-content:space-between;min-height:clamp(104px,19vh,166px);padding:5px 3px 12px;border-bottom:1px solid #76644d;overflow:hidden;flex:0 0 auto}
+.calendar-masthead-copy{position:relative;z-index:2}
+.calendar-eyebrow{display:block;font:700 8px/1.2 Arial,sans-serif;letter-spacing:.22em;color:#8a634b;margin-bottom:7px}
+.calendar-display-title{font:900 clamp(43px,8.5vw,76px)/.86 Georgia,"Noto Serif SC",serif;letter-spacing:-.075em;color:#342e29;text-shadow:1px 1px 0 #f9f1e4}
+.calendar-title-mark{display:inline-block;margin-left:9px;color:#b76d4c;font:normal 21px Georgia;vertical-align:top;letter-spacing:0}
+.calendar-subtitle{font:600 7px/1.3 Arial,sans-serif;letter-spacing:.2em;color:#887b69;margin-top:10px}
+.calendar-date-stamp{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-end;color:#9b573d;margin:0 4px 0 10px}
+.calendar-date-stamp span{font:700 7px Arial;letter-spacing:.22em}
+.calendar-date-stamp strong{font:italic 700 clamp(48px,10vw,82px)/.8 Georgia,serif;letter-spacing:-.08em}
+.calendar-date-stamp small{font:600 8px Arial;letter-spacing:.12em;margin-top:8px;color:#74644f}
+.calendar-ornament{position:absolute;z-index:0;color:#b77c5d;opacity:.18;line-height:1}
+.calendar-ornament-one{font-size:105px;right:19%;top:-22px;transform:rotate(14deg)}
+.calendar-ornament-two{font-size:42px;right:4%;top:5px;transform:rotate(-12deg)}
+.calendar-day-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0!important;flex:0 0 auto;border-bottom:1px solid #b6a58d}
+.calendar-day-tabs button{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:baseline;column-gap:7px;text-align:left;border:0!important;border-radius:0!important;background:transparent!important;padding:8px 9px 9px!important;color:#786b59;font-family:Arial,sans-serif}
+.calendar-day-tabs button+button{border-left:1px solid #c8b9a4!important}
+.calendar-day-tabs button.active{color:#a64f35!important;background:linear-gradient(0deg,#b66b4b16,transparent 75%)!important}
+.calendar-day-tabs button.active:after{content:"";position:absolute;bottom:-1px;left:9px;right:9px;height:3px;background:#a9573d}
+.calendar-tab-index{grid-row:1/3;font:italic 22px/1 Georgia,serif;color:#b06c4e}
+.calendar-tab-label{font:700 11px/1.2 "Noto Serif SC",Georgia,serif}
+.calendar-day-tabs button small{font:8px Arial;letter-spacing:.08em;color:#978873}
+.day-card{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.day-card.today{border:0!important;box-shadow:none!important}
+.day-card-head{padding:5px 2px 8px!important;border-bottom:1px solid #c9b99f!important}
+.day-card-head strong{font:italic 17px Georgia,"Noto Serif SC",serif!important;color:#514335}
+.day-card-head:after{content:"THE HOURS / 24";font:700 7px Arial,sans-serif;letter-spacing:.18em;color:#9a8a74}
+.day-timeline{padding:4px 2px!important}
+.day-slot{grid-template-columns:48px minmax(0,1fr)!important;gap:9px!important;min-height:34px!important;border-bottom:1px solid #8f7c641b}
+.day-slot time{font:italic 11px Georgia,serif!important;color:#9b6c51!important;padding-top:7px}
+.day-slot button{position:relative;text-align:left!important;border:0!important;border-radius:0!important;border-left:2px solid #b7a48a!important;background:#f7efe2a8!important;padding:7px 10px!important;font:500 10px/1.25 "Noto Sans SC",Arial,sans-serif!important;color:#51483d!important;box-shadow:none!important}
+.day-slot button.free{background:transparent!important;border-left:2px dashed #b8a88f!important;color:#897d6b!important}
+.day-slot button.sleep{border-left-color:#7d8295!important;background:#e5e4e0a6!important}
+.day-slot button.work{border-left-color:#9c654b!important;background:#efe0d2!important}
+.day-slot button.proposal{border-left-color:#a77b43!important;background:#f1e7ce!important}
+.day-slot button.now{outline:1px solid #b66b4b!important;outline-offset:-1px;background:#f4dfcf!important}
+@media(max-width:430px){.calendar-editorial-masthead{min-height:clamp(94px,16vh,132px)}.calendar-eyebrow{font-size:7px;letter-spacing:.15em}.calendar-display-title{font-size:clamp(42px,12vw,62px)}.calendar-date-stamp strong{font-size:clamp(46px,13vw,66px)}.calendar-ornament-one{font-size:80px;right:14%}.day-slot{grid-template-columns:42px minmax(0,1fr)!important;gap:6px!important}.day-slot button{padding:7px 8px!important}}
+
