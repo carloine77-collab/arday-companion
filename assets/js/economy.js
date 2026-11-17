@@ -2,8 +2,7 @@
  'use strict';
  function create({state,has,remember,addEvent,say}){
   const s=state;
-    s.money remains the shared household account. Arday's earnings and personal
-    purchases use a separate balance. */
+  /* Personal goals and two-account economy. Shared household and personal funds remain separate. */
  s.personalMoney=Number.isFinite(s.personalMoney)?Math.max(0,s.personalMoney):0;
  s.personalItems=s.personalItems||[];
  s.moneyLog=s.moneyLog||[];
