@@ -5,7 +5,7 @@ window.ArdayGameConfig = {
 },
   activityMeta: {
  rest:{title:'休息',location:'sofa',pose:'sit',effect:{energy:10,fun:1}},
- sleep:{title:'睡觉',location:'sofa',pose:'sit',effect:{energy:13,hunger:-1}},
+ sleep:{title:'睡觉',location:'bed',pose:'sleep',effect:{energy:13,hunger:-1}},
  eat:{title:'吃东西',location:'table',pose:'sit',effect:{hunger:18,energy:1}},
  food:{title:'一起吃东西',location:'table',pose:'sit',effect:{hunger:20,fun:3}},
  wash:{title:'洗漱',location:'window',pose:'walk',effect:{clean:17,energy:-1}},
