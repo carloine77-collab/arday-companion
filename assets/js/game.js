@@ -235,9 +235,9 @@ function slotClick(di,h){
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
- $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+playerActivityOptions.map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x.icon+'</span>'+x.label+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
+ $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+playerActivityOptions.map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x.icon+'</span>'+activityLabel(x.activity)+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
  $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
-  let i=+b.dataset.p,option=playerActivityOptions[i],names=playerActivityOptions.map(x=>x.label),pref=option.activity,score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(pref==='computerPlay'&&s.fun<40?10:0);
+  let i=+b.dataset.p,option=playerActivityOptions[i],names=playerActivityOptions.map(x=>activityLabel(x.activity)),pref=option.activity,score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(pref==='computerPlay'&&s.fun<40?10:0);
   let accepted=score>12+(di*1.5);
   if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
   else{change({bored:1});s.rejections=(s.rejections||0)+1;if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];say(['这个时间我不太想这样安排。我们换个时间，或者各自安排也可以。','我知道你想和我一起，不过我现在确实不想这么做。希望你别把拒绝当成对你的否定。','这次我想说得明确一点：不。我有自己的计划。'][Math.min(2,s.rejections-1)]);}
@@ -362,7 +362,7 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 
 
 
-const playerActivityOptions=[{label:'阅读',icon:'📖',activity:'read'},{label:'休息',icon:'☁',activity:'rest'},{label:'外出',icon:'🌿',activity:'walk'},{label:'电脑游戏',icon:'▣',activity:'computerPlay'},{label:'聊天',icon:'💬',activity:'chat'}];
+const playerActivityOptions=[{icon:'📖',activity:'read'},{icon:'☁',activity:'rest'},{icon:'🌿',activity:'walk'},{icon:'▣',activity:'computerPlay'},{icon:'💬',activity:'chat'}];
 function findAvailableSlot(now=new Date(),duration=1){
  const today=keyAt(now),hour=now.getHours();
  for(let offset=0;offset<=2;offset++){
@@ -609,26 +609,33 @@ function processActivityAt(value){
  reviewPersonalSpending(d.getTime());
  return true;
 }
+// Furniture declares only which canonical activities it exposes.
+// Names, poses, locations and effects live exclusively in activityMeta.
+const furnitureActivityMap={
+ sofa:{title:'沙发',activities:['rest','chat']},
+ dining:{title:'餐桌',activities:['eat','chat']},
+ fridge:{title:'冰箱',action:'kitchen'},
+ stove:{title:'灶台',action:'kitchen'},
+ sink:{title:'水槽',activities:['wash']},
+ bed:{title:'床',activities:['rest']},
+ chair:{title:'椅子',activities:['rest','chat']},
+ bookshelf:{title:'书架',activities:['read']},
+ desk:{title:'书桌',activities:['read','computerPlay']},
+ computer:{title:'电脑',activities:['computerPlay']},
+ bouquet:{title:'捧花摆件',activities:['bouquet']}
+};
+function activityLabel(activity){
+ const meta=activityMeta[normalizeActivity(activity)];
+ return meta?.menuLabel||meta?.title||activity;
+}
 function openFurnitureActions(kind){
- const sets={
-  sofa:{title:'沙发',items:[['休息','rest'],['聊天','chat']]},
-  dining:{title:'餐桌',items:[['用餐','eat'],['聊天','chat']]},
-  fridge:{title:'冰箱',openKitchen:true},
-  stove:{title:'灶台',openKitchen:true},
-  sink:{title:'水槽',items:[['洗漱','wash']]},
-  bed:{title:'床',items:[['休息','rest']]},
-  chair:{title:'椅子',items:[['休息','rest'],['聊天','chat']]},
-  bookshelf:{title:'书架',items:[['阅读','read']]},
-  desk:{title:'书桌',items:[['阅读','read'],['电脑游戏','computerPlay']]},
-  computer:{title:'电脑',items:[['电脑游戏','computerPlay']]},
-  bouquet:{title:'捧花摆件',items:[['聊天','chat']]}
- };
- const set=sets[kind];if(!set)return;
- if(set.openKitchen){openKitchenPanel();return}
+ const set=furnitureActivityMap[kind];if(!set)return;
+ if(set.action==='kitchen'){openKitchenPanel();return}
  $('drawerTitle').textContent=set.title+' · 互动';
  $('choices').innerHTML='';
- set.items.forEach(([label,activity])=>{
-  const b=document.createElement('button');b.className='choice';b.type='button';b.textContent=label;
+ set.activities.forEach(activity=>{
+  if(!activityMeta[activity])return;
+  const b=document.createElement('button');b.className='choice';b.type='button';b.textContent=activityLabel(activity);
   b.onclick=()=>{$('drawer').classList.remove('open');perform(activity,true)};
   $('choices').appendChild(b);
  });
