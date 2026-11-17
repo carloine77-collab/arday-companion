@@ -1172,14 +1172,16 @@ function initArday3D(){
    group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
    if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
    group.visible=true;group.updateMatrixWorld(true);
-   let x=record?.x??0,z=record?.z??0,y=record?.y??0,rotation=record?.rotation||0;
+   let x=record?.x??0,z=record?.z??0,y=record?.y??(wallAxis?2.65:0),rotation=record?.rotation||0;
+   // Wall cabinets are modeled around their local origin; legacy saves stored them at floor height.
+   if(name==='吊柜'&&(!Number.isFinite(y)||y<1.6))y=2.65;
    if(record?.supportId){const savedSupport=s.placedFurniture?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.name==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support&&support.surfaceType==='table'){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}else{supportId=null;y=0}}
    if(name==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
    group.position.set(x,y,z);group.rotation.y=rotation;
    const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action,wallAxis,wallSide,wallRange:4.5});
    item.owned=true;item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    if(record){
-    if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,record.y??y);item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z'}
+    if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,name==='吊柜'?y:(record.y??y));item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z';item.wallAnchorY=(anchor?.[1]??2.55)-group.position.y}
     else{const legacyRugSupport=record.supportId&&s.placedFurniture?.some(it=>it.id===record.supportId&&it.name==='地毯');if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
    }
    else{
