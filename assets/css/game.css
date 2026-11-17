@@ -786,3 +786,75 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .inventory-items>.choice small{margin:0!important;color:#8b7b67!important;font:italic 10px Georgia,serif!important}
 @media(min-width:600px){.drawer .choices.inventory-view{padding-left:22px!important;padding-right:22px!important}.inventory-view:before{margin-left:-22px!important;margin-right:-22px!important;padding-left:30px!important;min-height:178px!important}.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:15px!important;padding:22px 17px 26px!important}.inventory-items>.choice{min-height:130px!important;font-size:13px!important}.shop-content .shop-level-one{padding-left:18px!important}.shop-content .shop-level-two{padding-left:27px!important}}
 @media(max-width:430px){.inventory-items{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+
+/* 2026-11-19l — iPad mini touch layout: no horizontal drawer scrolling, spacious shop taxonomy */
+.drawer{overflow-x:hidden!important;overscroll-behavior-x:none!important}
+.drawer .choices{min-width:0!important;max-width:100%!important;overflow-x:hidden!important;box-sizing:border-box!important}
+.drawer .choices.interaction-view{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-flow:row!important;align-content:start!important;align-items:stretch!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ gap:clamp(10px,2vw,16px)!important;padding:15px clamp(12px,2.4vw,22px) 28px!important;
+ box-sizing:border-box!important;touch-action:pan-y!important;
+}
+.interaction-view>.interaction-masthead{grid-column:1/-1!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+.interaction-view>.choice{min-width:0!important;width:100%!important;max-width:100%!important;min-height:clamp(104px,15vw,142px)!important;box-sizing:border-box!important;overflow-wrap:anywhere!important}
+.drawer .choices.shop-content{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important;
+}
+.shop-content .shop-categories{
+ position:relative!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;width:100%!important;box-sizing:border-box!important;
+ padding:7px 5px 12px!important;margin:0 0 10px!important;border:0!important;
+}
+.shop-content .shop-category{
+ min-width:0!important;min-height:46px!important;padding:10px 8px!important;
+ white-space:normal!important;text-align:center!important;box-sizing:border-box!important;
+}
+.shop-content .shop-level-one,.shop-content .shop-level-two{
+ position:relative!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;
+ z-index:1!important;display:grid!important;
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,112px),1fr))!important;
+ grid-auto-flow:row!important;align-content:start!important;align-items:stretch!important;
+ justify-content:stretch!important;gap:8px!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ min-height:0!important;height:auto!important;max-height:none!important;
+ margin:0 0 13px!important;padding:10px 8px 12px 17px!important;
+ overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important;
+ white-space:normal!important;box-sizing:border-box!important;
+ border:0!important;background:rgba(205,197,182,.34)!important;border-radius:0 8px 8px 0!important;
+}
+.shop-content .shop-level-one:before,.shop-content .shop-level-two:before{
+ grid-column:1/-1!important;display:block!important;min-width:0!important;
+ margin:0 0 2px!important;color:#817764!important;
+ font:700 8px Arial,sans-serif!important;letter-spacing:.2em!important;
+}
+.shop-content .shop-level-one:before{content:"FURNITURE COLLECTION"!important}
+.shop-content .shop-level-two:before{content:"SELECT A STYLE"!important}
+.shop-content .shop-group,.shop-content .shop-furniture-type{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-width:0!important;min-height:42px!important;height:auto!important;
+ margin:0!important;padding:9px 7px!important;box-sizing:border-box!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;
+ line-height:1.25!important;font-size:11px!important;touch-action:manipulation!important;
+ border:1px solid #b9ad98!important;border-radius:4px!important;
+}
+.shop-content .shop-group.active{background:#34465a!important;border-color:#34465a!important;color:#f4eadb!important}
+.shop-content .shop-furniture-type.active{background:#788697!important;border-color:#788697!important;color:#fff!important}
+.shop-content .shop-search{position:relative!important;top:auto!important;min-width:0!important;width:100%!important;box-sizing:border-box!important}
+@media(min-width:600px) and (max-width:900px){
+ .drawer .choices.interaction-view{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;padding-left:18px!important;padding-right:18px!important}
+ .interaction-view>.choice{min-height:128px!important;padding:18px!important}
+ .shop-content .shop-level-one,.shop-content .shop-level-two{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))!important;gap:9px!important;padding-left:20px!important;padding-right:12px!important}
+ .shop-content .shop-group,.shop-content .shop-furniture-type{min-height:46px!important;font-size:12px!important}
+}
+@media(max-width:599px){
+ .drawer .choices.interaction-view{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;padding:12px 9px 24px!important}
+ .interaction-view>.choice{min-height:104px!important;padding:13px 10px!important}
+ .shop-content .shop-level-one,.shop-content .shop-level-two{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding-left:15px!important}
+ .shop-content .shop-group,.shop-content .shop-furniture-type{min-height:43px!important}
+}
