@@ -1422,7 +1422,7 @@ function initArday3D(){
   function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
    let delta=target.clone().sub(person.position),distance=delta.length(),moving=distance>.075;
    if(moving){const step=Math.min(distance,1.35*dt);person.position.add(delta.normalize().multiplyScalar(step));}
-   if(pose==='walk'&&activeActivity==='walk'&&!moving&&t>walkPauseUntil){walkPauseUntil=t+650;walkIndex=(walkIndex+1)%walkRoute.length;target.set(...walkRoute[walkIndex]);}
+   if(pose==='walk'&&activeActivity==='walk'){if(moving)walkPauseUntil=0;else if(!walkPauseUntil)walkPauseUntil=t+650;else if(t>=walkPauseUntil){walkIndex=(walkIndex+1)%walkRoute.length;target.set(...walkRoute[walkIndex]);walkPauseUntil=0;}}
    if(pose==='idle'&&!moving&&t>idleNextMove){const choices=['sofa','table','window','rug','shelf','center'];let pick=positions[choices[Math.floor(Math.random()*choices.length)]];if(Math.hypot(pick[0]-person.position.x,pick[2]-person.position.z)<1)pick=positions.outside;target.set(...pick);pose='idleWalk';idleWalkStartedAt=t;}
    if(pose==='idleWalk'&&!moving&&distance<.075&&t>idleWalkStartedAt+350){pose='idle';idleNextMove=t+3500+Math.random()*4500;}
    phase+=dt*(moving?9:2);
