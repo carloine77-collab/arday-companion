@@ -58,9 +58,7 @@ window.ArdayGameConfig = {
  sitChair:{title:'坐在椅子上',location:'chair',pose:'sit',effect:{energy:5,fun:1}},
  tidy:{title:'整理房间',location:'shelf',pose:'walk',effect:{clean:8,energy:-3}},
  write:{title:'写作 / 整理资料',location:'desk',pose:'sit',effect:{fun:5,energy:-3}},
- work:{title:'工作',location:'desk',pose:'sit',effect:{energy:-4,fun:-1}},
- cook:{title:'准备做饭',location:'kitchen',pose:'walk',effect:{energy:-2}},
- cookTogether:{title:'一起做饭',location:'kitchen',pose:'walk',effect:{energy:-2,fun:2}}
+ work:{title:'工作',location:'desk',pose:'sit',effect:{energy:-4,fun:-1}}
 },
   recipes: {eggRice:{name:'蛋炒饭',ingredients:{rice:1,egg:1},hunger:30},tomatoEgg:{name:'番茄炒蛋',ingredients:{tomato:1,egg:2},hunger:28},vegetableSoup:{name:'蔬菜汤',ingredients:{vegetable:2},hunger:22}},
   ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄'}
