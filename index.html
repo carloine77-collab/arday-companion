@@ -128,6 +128,7 @@
 .three-scene:active{cursor:grabbing}
 .three-scene canvas{pointer-events:none!important;touch-action:none!important}
 .bedroom-switch{position:absolute;left:12px;top:12px;z-index:10;min-height:43px;padding:0 13px;border:1px solid #dfcdb4;border-radius:12px;background:#fff9edee;font-size:12px;font-weight:700}
+.kitchen-switch{position:absolute;right:12px;top:12px;z-index:30;min-height:43px;padding:0 13px;border:1px solid #dfcdb4;border-radius:12px;background:#fff9edee;font-size:12px;font-weight:700;pointer-events:auto;touch-action:manipulation}.stage.kitchen-mode .kitchen-switch{background:#e8eddf;border-color:#9eae91}@media(max-width:700px){.kitchen-switch{right:7px;top:7px;min-height:42px;padding:0 9px;font-size:11px}}
 .camera-hint{position:absolute;left:50%;top:62px;transform:translateX(-50%);z-index:5;padding:5px 10px;border-radius:10px;background:#fff9edc9;color:#6e5b47;font-size:10px;pointer-events:none;white-space:nowrap}
 .stage.kitchen-mode .bedroom-switch,.stage.bedroom-mode .bedroom-switch{background:#fff9edee}
 @media(max-width:700px){.bedroom-switch{left:7px;top:7px;min-height:42px;padding:0 9px;font-size:11px}}
@@ -251,7 +252,7 @@ footer.bottom .toolbar,footer.bottom .tool,footer.bottom .bottom-actions,footer.
  </div>
  <div class="bubble" id="bubble">你来了。刚才我在看窗外。</div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2><p>每天早上 06:00，阿尔会根据自己的状态重新安排接下来的一天。</p></div></div><div class="calendar-content" id="calendarContent"></div></section>
 
- <div class="room-label" id="roomLabel">HOME · 现在</div><button id="bedroomSwitch" class="bedroom-switch">进入卧室</button><section class="kitchen-scene"><div class="kitchen-wall"></div><div class="kitchen-floor"></div><div class="kitchen-window"></div><div class="kitchen-counter"></div><div class="kitchen-cabinet"></div><div class="kitchen-fridge">▥<small>冰箱</small></div><div class="kitchen-stove">◉　◉<small>灶台</small></div><div class="kitchen-sink">▱<small>水槽</small></div><div class="kitchen-shelf">🥣　🫙　🍵</div><div class="person kitchen-person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div></section>
+ <div class="room-label" id="roomLabel">HOME · 现在</div><button id="bedroomSwitch" class="bedroom-switch">进入卧室</button><button id="kitchenSwitch" class="kitchen-switch">进入厨房</button><section class="kitchen-scene"><div class="kitchen-wall"></div><div class="kitchen-floor"></div><div class="kitchen-window"></div><div class="kitchen-counter"></div><div class="kitchen-cabinet"></div><div class="kitchen-fridge">▥<small>冰箱</small></div><div class="kitchen-stove">◉　◉<small>灶台</small></div><div class="kitchen-sink">▱<small>水槽</small></div><div class="kitchen-shelf">🥣　🫙　🍵</div><div class="person kitchen-person"><div class="shadow"></div><div class="legs"></div><div class="arm l"></div><div class="arm r"></div><div class="torso"></div><div class="neck"></div><div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div></div></section>
  <div class="decorate-tools" id="decorateTools"><span>选择要调整的物件</span><button data-decorate-object="沙发">沙发</button><button data-decorate-object="窗户">窗户</button><button data-decorate-object="茶几">茶几</button></div>
  <button class="hotspot spot-sofa" data-object="沙发" aria-label="沙发">▰</button>
  <button class="hotspot spot-window" data-object="窗户" aria-label="窗户">☼</button>
@@ -296,6 +297,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
  catch(error){console.error('Navigation failed:',error);const stage=$('stage');if(stage){let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='页面操作出错：'+(error&&error.message?error.message:String(error))}}
 }));
 const bedroomControl=$('bedroomSwitch');if(bedroomControl)bedroomControl.addEventListener('click',()=>{const stage=$('stage');if(!stage)return;const toBedroom=!stage.classList.contains('bedroom-mode');stage.classList.remove('kitchen-mode');stage.classList.toggle('bedroom-mode',toBedroom);const label=$('roomLabel');if(label)label.textContent=toBedroom?'BEDROOM · 卧室':'HOME · 起居室';try{updateArday3D()}catch(error){console.error('Room switch failed:',error)}});
+const kitchenControl=$('kitchenSwitch');if(kitchenControl)kitchenControl.addEventListener('click',()=>{const stage=$('stage');if(!stage)return;const entering=!stage.classList.contains('kitchen-mode');if(entering)kitchenOpen();else kitchenClose();const label=$('roomLabel');if(label)label.textContent=entering?'KITCHEN · 厨房':'HOME · 起居室';kitchenControl.textContent=entering?'返回起居室':'进入厨房';});
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
 const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:3000,items:['一本旧书','陶杯'],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
@@ -1172,20 +1174,20 @@ function initArday3D(){
   const person=new T.Group();scene.add(person);const body=new T.Group();person.add(body);
   const skinMat=M(0xe6b18e,.72),skinShadow=M(0xc9896c),hairMat=M(0x302a2c),hairHi=M(0x4a3a3b),shirtMat=M(0x536f8c),shirtLight=M(0x7895ad),trouserMat=M(0x3e4859),shoeMat=M(0x302d35),eyeMat=M(0x332b2a),whiteMat=M(0xf7eee3);
   function ell(parent,x,y,z,sx,sy,sz,mat,seg=18){return ball(parent,x,y,z,sx,sy,sz,mat,seg)}
-  ell(body,0,1.29,0,.43,.58,.29,shirtMat,22);ell(body,0,1.67,.015,.25,.12,.24,shirtLight,18);
+  ell(body,0,1.29,0,.32,.61,.225,shirtMat,22);ell(body,0,1.67,.015,.205,.105,.19,shirtLight,18);
   box(body,0,1.25,.285,.025,.48,.018,shirtLight);for(let y of [1.43,1.25,1.07])ell(body,.045,y,.305,.025,.025,.018,whiteMat,10);
   cyl(body,0,1.82,0,.135,.24,skinMat,16);
   const head=new T.Group();head.position.set(0,2.2,.015);body.add(head);
-  ell(head,0,0,0,.39,.46,.34,skinMat,24);ell(head,-.385,-.045,0,.075,.12,.08,skinShadow,14);ell(head,.385,-.045,0,.075,.12,.08,skinShadow,14);
-  ell(head,0,.285,-.025,.405,.245,.36,hairMat,22);ell(head,-.28,.12,.19,.16,.25,.18,hairMat,16);ell(head,.28,.12,.19,.16,.25,.18,hairMat,16);
-  const fringe=ell(head,-.1,.235,.27,.29,.13,.12,hairHi,18);fringe.rotation.z=-.16;ell(head,.12,.31,.22,.18,.11,.1,hairMat,16);
-  for(const side of [-1,1]){ell(head,side*.145,.025,.307,.052,.064,.027,whiteMat,12);ell(head,side*.14,.022,.333,.025,.04,.014,eyeMat,12);const brow=ell(head,side*.145,.13,.31,.075,.018,.018,hairMat,12);brow.rotation.z=side*.08}
-  ell(head,0,-.075,.34,.035,.052,.035,skinShadow,12);
-  const smile=new T.Mesh(new T.TorusGeometry(.075,.012,6,16,Math.PI),M(0x925d55));smile.position.set(0,-.17,.315);smile.rotation.z=Math.PI;head.add(smile);
+  ell(head,0,0,0,.315,.405,.285,skinMat,24);ell(head,-.31,-.045,0,.052,.095,.06,skinShadow,14);ell(head,.31,-.045,0,.052,.095,.06,skinShadow,14);
+  ell(head,0,.255,-.035,.335,.19,.295,hairMat,22);ell(head,-.235,.045,.16,.105,.235,.12,hairMat,16);ell(head,.235,.045,.16,.105,.235,.12,hairMat,16);
+  const fringe=ell(head,-.075,.205,.225,.235,.085,.075,hairHi,18);fringe.rotation.z=-.12;ell(head,.105,.265,.19,.13,.075,.07,hairMat,16);
+  for(const side of [-1,1]){ell(head,side*.12,.025,.258,.043,.052,.022,whiteMat,12);ell(head,side*.12,.022,.279,.021,.033,.012,eyeMat,12);const brow=ell(head,side*.12,.115,.258,.06,.014,.014,hairMat,12);brow.rotation.z=side*.08}
+  ell(head,0,-.075,.29,.027,.045,.025,skinShadow,12);
+  const smile=new T.Mesh(new T.TorusGeometry(.075,.012,6,16,Math.PI),M(0x925d55));smile.position.set(0,-.17,.27);smile.rotation.z=Math.PI;head.add(smile);
   const arms=[];
-  for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.4,1.58,0);body.add(shoulder);ell(shoulder,0,0,0,.16,.17,.16,shirtMat,14);const upper=cyl(shoulder,0,-.22,0,.105,.43,shirtMat,14);upper.position.y=-.22;const elbow=new T.Group();elbow.position.set(0,-.44,0);shoulder.add(elbow);ell(elbow,0,0,0,.105,.11,.105,skinMat,12);const fore=cyl(elbow,0,-.2,0,.085,.39,skinMat,14);fore.position.y=-.2;ell(elbow,0,-.41,.015,.095,.09,.1,skinMat,14);arms.push({shoulder,elbow,side})}
+  for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.305,1.58,0);body.add(shoulder);ell(shoulder,0,0,0,.105,.125,.11,shirtMat,14);const upper=cyl(shoulder,0,-.22,0,.073,.43,shirtMat,14);upper.position.y=-.22;const elbow=new T.Group();elbow.position.set(0,-.44,0);shoulder.add(elbow);ell(elbow,0,0,0,.073,.08,.073,skinMat,12);const fore=cyl(elbow,0,-.2,0,.058,.39,skinMat,14);fore.position.y=-.2;ell(elbow,0,-.41,.015,.068,.065,.07,skinMat,12);arms.push({shoulder,elbow,side})}
   const legs=[];
-  for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.2,.82,0);person.add(hip);const thigh=cyl(hip,0,-.22,0,.145,.46,trouserMat,14);thigh.position.y=-.22;const knee=new T.Group();knee.position.set(0,-.45,0);hip.add(knee);ell(knee,0,0,0,.13,.13,.13,trouserMat,12);const shin=cyl(knee,0,-.19,0,.105,.36,trouserMat,14);shin.position.y=-.19;ell(knee,0,-.39,.09,.13,.09,.22,shoeMat,14);legs.push({hip,knee,side})}
+  for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.145,.82,0);person.add(hip);const thigh=cyl(hip,0,-.22,0,.105,.46,trouserMat,14);thigh.position.y=-.22;const knee=new T.Group();knee.position.set(0,-.45,0);hip.add(knee);ell(knee,0,0,0,.09,.095,.09,trouserMat,12);const shin=cyl(knee,0,-.19,0,.073,.36,trouserMat,14);shin.position.y=-.19;ell(knee,0,-.39,.075,.105,.075,.19,shoeMat,14);legs.push({hip,knee,side})}
   const shadow=new T.Mesh(new T.CircleGeometry(.58,18),new T.MeshBasicMaterial({color:0x584633,transparent:true,opacity:.18}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
   const positions={sofa:[-3.2,0,1],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,0,.2]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0;
