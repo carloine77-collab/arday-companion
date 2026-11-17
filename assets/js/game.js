@@ -98,7 +98,7 @@ function openTab(name,force=false){
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';
  if(name==='商店'){
   const nav=document.createElement('div');nav.className='shop-categories';
-  ['食物食材','家具','卧室家具','厨房家具','壁纸与地板'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  ['食物食材','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   $('choices').appendChild(nav);
  }
  const tabEntries=name==='商店'?[...(shopCatalog[shopCategory]||[])]:[...(tabs[name]||[])];
@@ -1069,7 +1069,7 @@ function initArday3D(){
    registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')})
   ];
   function createOwnedFurniture(name,record=null){
-   const defaultRoom=({床:'bedroom','床头柜':'bedroom','床头灯':'bedroom','衣柜':'bedroom','卧室地毯':'bedroom',橱柜:'kitchen',吊柜:'kitchen',冰箱:'kitchen',灶台:'kitchen',水槽:'kitchen'})[name];const room=record?.room||defaultRoom||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
+   const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
    const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:rough,metalness});
@@ -1201,6 +1201,8 @@ function initArday3D(){
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
    s.placedFurniture=s.placedFurniture||[];
+  const legacyRoomDefaults=new Set(['床','床头柜','床头灯','衣柜','卧室地毯','橱柜','吊柜','冰箱','灶台','水槽']);
+  s.placedFurniture=s.placedFurniture.filter(item=>!(legacyRoomDefaults.has(item.name)&&['bedroom','kitchen'].includes(item.room)&&item.starterDefault===true));
    if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
    persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
