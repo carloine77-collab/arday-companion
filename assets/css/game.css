@@ -413,7 +413,7 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .drawer{background:#eee3d1!important;background-image:radial-gradient(#77664f20 .65px,transparent .65px),linear-gradient(145deg,#f4ead9,#e9dcc8)!important;background-size:5px 5px,100% 100%!important;color:#332e28!important;border:0!important;border-top:1px solid #8f7a5e!important;border-radius:0!important;box-shadow:0 -12px 40px #35271924!important;padding:clamp(14px,2.8vw,25px)!important}
 .drawer-head{position:relative;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;min-height:76px!important;padding:0 2px 12px!important;margin:0 0 14px!important;border-bottom:1px solid #8c785e!important}
 .drawer-head:before{content:"ARDAY COMPANION　 /　 THE HOME JOURNAL";position:absolute;top:0;left:2px;font:700 7px Arial,sans-serif;letter-spacing:.2em;color:#987d62}
-.drawer-head:after{content:"✳";position:absolute;right:54px;top:0;font:normal 27px Georgia,serif;color:#b56e4d;opacity:.8}
+.drawer-head:after{content:"";position:absolute;right:54px;top:0;font:normal 27px Georgia,serif;color:#b56e4d;opacity:.8}
 .drawer-head strong{font:900 clamp(32px,6vw,48px)/.9 Georgia,"Noto Serif SC",serif!important;letter-spacing:-.06em!important;color:#352e28!important}
 .drawer-head .close{border:0!important;border-radius:0!important;background:transparent!important;border-bottom:1px solid #a98b6d!important;color:#765c46!important;font:700 10px Arial,sans-serif!important;letter-spacing:.12em!important;padding:7px 3px!important}
 .drawer .choices{gap:0!important;align-content:start!important}
@@ -477,7 +477,7 @@ button{-webkit-tap-highlight-color:transparent}
 .drawer-head{min-height:clamp(70px,11vh,94px)!important}
 .drawer-head strong{position:relative;z-index:1;text-shadow:1px 1px 0 #f8efe1,2px 2px 0 #bfa98b22!important}
 .drawer-head:before{font-size:7px!important;letter-spacing:.24em!important}
-.drawer-head:after{content:"✳  /  01"!important;right:60px!important;top:3px!important;font:italic 10px Georgia,serif!important;letter-spacing:.1em;color:#a65e43!important;opacity:.9!important;border-top:1px solid #b99b7d;border-bottom:1px solid #b99b7d;padding:5px 0}
+.drawer-head:after{content:"  /  01"!important;right:60px!important;top:3px!important;font:italic 10px Georgia,serif!important;letter-spacing:.1em;color:#a65e43!important;opacity:.9!important;border-top:1px solid #b99b7d;border-bottom:1px solid #b99b7d;padding:5px 0}
 .drawer .section-kicker,.drawer .cooking-section-title{display:flex;align-items:center;gap:9px}
 .drawer .section-kicker:after,.drawer .cooking-section-title:after{content:"";display:block;width:34px;height:1px;background:#b99a79}
 .drawer .choice:before{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:#a65e43;transition:width .2s ease}
@@ -631,7 +631,7 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .drawer .choices.interaction-view{border:0!important;outline:0!important;box-shadow:none!important}
 .drawer .choices.inventory-view{gap:0!important;padding:0 0 28px!important;background:#e9dfcf!important;background-image:radial-gradient(#6c67591a .65px,transparent .65px),linear-gradient(145deg,#eee5d6,#e4d8c5)!important;background-size:7px 7px,100% 100%!important}
 .inventory-view .inventory-categories{position:relative!important;display:flex!important;justify-content:space-around!important;gap:10px!important;margin:0 0 13px!important;padding:13px 8px 8px!important;border:0!important;background:transparent!important;box-shadow:none!important}
-.inventory-view .inventory-categories:after{content:"✳     ·     ✧     ·     ✳";display:block;position:absolute;bottom:-12px;left:0;right:0;text-align:center;color:#a28d6b;font:12px Georgia,serif;letter-spacing:.55em;pointer-events:none}
+.inventory-view .inventory-categories:after{content:"     ·     ✧     ·     ";display:block;position:absolute;bottom:-12px;left:0;right:0;text-align:center;color:#a28d6b;font:12px Georgia,serif;letter-spacing:.55em;pointer-events:none}
 .inventory-view .inventory-category{position:relative!important;min-height:45px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#657080!important;font:700 12px Georgia,"Noto Serif SC",serif!important;letter-spacing:.18em!important}
 .inventory-view .inventory-category:before{color:#a18a62!important}
 .inventory-view .inventory-category.active{color:#34475d!important;background:transparent!important;box-shadow:none!important}
@@ -649,7 +649,7 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 /* Shop: no red accents, no horizontal dividers, editorial catalogue hierarchy. */
 .drawer .choices.shop-content{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:12px 10px calc(28px + env(safe-area-inset-bottom))!important;background:#e8dece!important;background-image:radial-gradient(#77715f18 .65px,transparent .65px),linear-gradient(140deg,#eee5d7,#e3d7c5)!important;background-size:7px 7px,100% 100%!important}
 .shop-content .shop-categories{display:flex!important;gap:30px!important;justify-content:flex-start!important;margin:0 0 12px!important;padding:9px 8px 14px!important;border:0!important;background:transparent!important}
-.shop-content .shop-categories:after{content:"✳  ✧  ✳";margin-left:auto;color:#a58e64;font:13px Georgia,serif;letter-spacing:.2em}
+.shop-content .shop-categories:after{content:"  ✧  ";margin-left:auto;color:#a58e64;font:13px Georgia,serif;letter-spacing:.2em}
 .shop-content .shop-category{position:relative!important;min-height:42px!important;padding:0 2px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#697585!important;font:700 13px Georgia,"Noto Serif SC",serif!important;letter-spacing:.13em!important}
 .shop-content .shop-category.active{color:#34475d!important;background:transparent!important}
 .shop-content .shop-category.active:after{content:"✦";position:absolute;left:calc(50% - 4px);bottom:-5px;width:auto;height:auto;background:none!important;color:#b49b69;font:10px Georgia,serif}
@@ -705,7 +705,7 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .shop-content .shop-categories:after{content:"SELECTED FOR THE HOME";margin-left:auto;color:#89909a;font:8px Arial,sans-serif;letter-spacing:.16em}
 .shop-content .shop-category{position:relative!important;min-height:42px!important;padding:0 1px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#7c7b75!important;font:italic 19px Georgia,"Noto Serif SC",serif!important;letter-spacing:0!important}
 .shop-content .shop-category.active{color:#26384c!important;font-weight:700!important}
-.shop-content .shop-category.active:after{content:"✳";position:absolute;left:calc(50% - 5px);bottom:-11px;width:auto;height:auto;background:none!important;color:#b29b70!important;font:10px Georgia,serif}
+.shop-content .shop-category.active:after{content:"";position:absolute;left:calc(50% - 5px);bottom:-11px;width:auto;height:auto;background:none!important;color:#b29b70!important;font:10px Georgia,serif}
 .shop-content .shop-level-one{display:flex!important;flex-wrap:wrap!important;gap:7px!important;padding:6px 0 12px!important;border:0!important;background:transparent!important}
 .shop-content .shop-group{min-height:31px!important;padding:6px 11px!important;border:0!important;border-radius:20px!important;background:#c9c4b8!important;color:#4c5967!important;font:600 10px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.06em!important}
 .shop-content .shop-group.active{background:#34475c!important;color:#f5eddf!important;box-shadow:none!important}
@@ -923,3 +923,47 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
  .shop-content .shop-level-one{padding-left:21px!important}
  .shop-content .shop-level-two{padding-left:29px!important}
 }
+
+
+/* Restore the inventory's editorial poster composition; remove star glyphs only. */
+.drawer .choices.inventory-view:before{
+ content:"THE ART OF\A KEEPING THINGS"!important;white-space:pre!important;
+ display:block!important;position:relative!important;order:0!important;
+ min-height:154px!important;margin:0 -15px 15px!important;padding:23px 22px 20px!important;
+ box-sizing:border-box!important;background:#34465a!important;color:#f2eadb!important;
+ font:500 clamp(37px,8vw,62px)/.82 Georgia,"Noto Serif SC",serif!important;letter-spacing:-.065em!important;
+}
+.drawer .choices.inventory-view:after{
+ content:"ARDAY JOURNAL     /     PERSONAL COLLECTION     ·     VOL. 03"!important;
+ display:block!important;position:relative!important;order:-1!important;
+ margin:0 0 9px!important;color:#8d806e!important;
+ font:700 8px Arial,sans-serif!important;letter-spacing:.18em!important;
+}
+.inventory-view .inventory-categories:before,.inventory-view .inventory-categories:after,
+.inventory-view .inventory-category:before,.inventory-view .inventory-category:after,
+.inventory-items:before,.inventory-items:after,
+.inventory-items>.choice:before,.inventory-items>.choice:after,
+.interaction-view>.choice:before{content:none!important;display:none!important}
+.inventory-view .inventory-categories{margin-top:0!important}
+.inventory-view .inventory-items{padding-top:18px!important}
+@media(min-width:600px){.drawer .choices.inventory-view:before{margin-left:-22px!important;margin-right:-22px!important;padding-left:30px!important;min-height:178px!important}}
+
+/* Rounded editorial treatment for formerly square red action buttons. */
+.drawer .choice,.drawer button.choice,.drawer .shop-product-buy,
+.drawer .shop-category,.drawer .shop-group,.drawer .shop-furniture-type,
+.drawer .calendar-actions button,.drawer .kitchen-actions button,
+.drawer .interaction-view button,.drawer .inventory-view button{
+ border-radius:13px!important;
+}
+.drawer .choice[style*="background"],.drawer button[style*="background"],
+.drawer .choice,.drawer button.choice{
+ transition:border-radius .16s ease,box-shadow .16s ease,transform .16s ease!important;
+}
+.drawer .choice:active,.drawer button.choice:active{
+ border-radius:18px!important;transform:translateY(1px)!important;
+}
+.drawer .choice[style*="rgb(1"],.drawer button[style*="rgb(1"],
+.drawer .choice[style*="#c"],.drawer button[style*="#c"]{
+ border-radius:14px!important;box-shadow:0 3px 0 rgba(94,54,45,.13),inset 0 1px 0 rgba(255,255,255,.25)!important;
+}
+.shop-content .shop-category,.shop-content .shop-group,.shop-content .shop-furniture-type{border-radius:12px!important}
