@@ -25,10 +25,10 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={roomCondition:92,friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:30000,items:[],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
+const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:30000,items:[],furniture:['沙发','茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV2){s.money=30000;s.testFundsV2=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片'].includes(item)):[];s.furniture=s.furniture||base.furniture.slice();
+s.preferences=s.preferences||{};s.memories=s.memories||[];s.events=s.events||[];s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=s.furniture||base.furniture.slice();
 s.ownedFurniture=s.ownedFurniture||[];
 s.placedFurniture=s.placedFurniture||[];
 if((s.furnitureCatalogVersion||0)<2){
@@ -50,11 +50,11 @@ if((s.roomFurnishingMigration||0)<1){
  s.roomFurnishingMigration=1;
 }
 s.ownedFurniture=s.ownedFurniture||[];s.placedFurniture=s.placedFurniture||[];
-s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
+s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;let up=$('upkeep');if(up)up.textContent='房间维护 '+Math.round(Number(s.roomCondition)||0)+'%';if(typeof refreshTopActions==='function')refreshTopActions();}
+function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
 function say(t){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});b.textContent=String(t||'');Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'})}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
@@ -83,6 +83,7 @@ const tabs={
 };
 
 let shopCategory='食物食材';
+let inventoryCategory='全部';
 let shopFurnitureGroup='起居空间';
 let shopFurnitureType='沙发';
 const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
@@ -134,10 +135,13 @@ function openTab(name,force=false){
  }
  const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  if(name==='物品'){
-  const itemIcons={'点心':'🥐','修理工具':'🔧'};
-  s.items.forEach((item,index)=>tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index]));
-  Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key])});
-  s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,item.startsWith('成品食物·')?'🍽️':'▧','place-owned-'+index]));
+  const itemIcons={'点心':'🥐'};
+  s.items.forEach((item,index)=>{if(item!=='修理工具')tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index,0,'','食物'])});
+  Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
+  s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,item.startsWith('成品食物·')?'🍽️':'▧','place-owned-'+index,0,'',item.startsWith('成品食物·')?'食物':'家具']));
+  const nav=document.createElement('div');nav.className='inventory-categories';
+  ['全部','食物','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;openTab('物品',true)};nav.appendChild(button)});
+  $('choices').appendChild(nav);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
@@ -293,10 +297,9 @@ function buildDay(key){
  add(p.wake+1,p.wake+2,'早餐','routine','eat');
  if(p.wake+2<12)add(p.wake+2,Math.min(12,p.wake+4),has('书桌')?'阅读 / 写作':'阅读与个人时间','personal',has('书桌')?'write':'read');
  add(12,13,'午餐','routine','eat');
-  if(s.roomCondition<65)add(14,15,'整理和维护房间','personal','tidy');
- else add(14,15,has('唱片机')?'听音乐或阅读':'自由安排','personal',has('唱片机')?'music':'read');
+  add(14,15,has('唱片机')?'听音乐或阅读':'自由安排','personal',has('唱片机')?'music':'read');
  add(15,16,'自由时间','free','idle');
- add(16,17,has('书桌')?'写作 / 整理资料':'整理房间','personal',has('书桌')?'write':'tidy');
+ add(16,17,has('书桌')?'写作 / 整理资料':'自由时间','personal',has('书桌')?'write':'idle');
  add(18,19,'晚餐','routine','eat');
  add(19,20,'散步或休闲','personal','walk');
  add(20,p.bedtime-1,'自己的时间','free','idle');
@@ -516,14 +519,14 @@ function setSceneActivity(activity,announce){
  s.currentActivity=a;updateArday3D();
  if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')
 }
-function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,tidy:Math.max(0,55-s.roomCondition)*.8,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
+function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','tidy','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
 function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
  // Preserve fractional hourly decay; integer clamping would round small losses to zero.
  for(const [k,loss] of Object.entries({energy:.45,hunger:.8,clean:.25,fun:.3}))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
- s.roomCondition=Math.max(0,Math.min(100,(Number(s.roomCondition)||0)-.012));
+ 
  let ev=(s.calendar.days[key]||[]).find(x=>hour>=x.start&&hour<x.end);
  let activity=normalizeActivity(ev?.activity||'idle');
  if(!ev||activity==='idle'){
@@ -544,7 +547,7 @@ function processActivityAt(value){
   const effects={...(meta.effect||{})};
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
   change(effects);
-  if(activity==='tidy')s.roomCondition=clamp(s.roomCondition+3);
+  
   if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
   if(activity==='read')s.preferences.reading=(s.preferences.reading||0)+1;
   setSceneActivity(activity,false);
@@ -798,11 +801,12 @@ window.resignFromJob=function(event){
  Object.keys(s.calendar?.days||{}).forEach(k=>{if(k>=ended)s.calendar.days[k]=(s.calendar.days[k]||[]).filter(e=>!e.jobShift)});
  addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();render();renderCalendar();toast('已离职');return false;
 };
+function careerPoster(title,index=0){const hue=[18,34,205,275,145][index%5],mark=String(title||'职').trim().slice(0,1);return '<div class="career-poster" style="--poster-hue:'+hue+'"><span class="career-poster-kicker">ARDAY JOURNAL / CAREER '+(index+1)+'</span><strong>'+title+'</strong><i>'+mark+'</i><small>AN EVERYDAY PROFESSION</small></div>'}
 function showCareer(){
  $('drawer').classList.remove('profile-expanded');$('drawerTitle').textContent='职业';
  if(s.job?.active){
   const j=s.job;
-  $('choices').innerHTML='<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>阿尔每天 '+pad(j.start)+':00 至 '+pad(j.end)+':00 工作。薪资在当日工作结束后发放至个人账户。</p><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
+  $('choices').innerHTML=careerPoster(j.title,0)+'<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>阿尔每天 '+pad(j.start)+':00 至 '+pad(j.end)+':00 工作。薪资在当日工作结束后发放至个人账户。</p><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
 
  }else{
   const jobs=[
@@ -815,7 +819,7 @@ function showCareer(){
    const attempted=!!s.jobApplications[applicationDay][j.id];
    const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
    const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
-   return '<section class="profile-section job-card"><div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>'+j.desc+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted?'disabled':'')+'>'+(attempted?'今日已申请':'申请职位')+'</button></section>';
+   return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>'+j.desc+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted?'disabled':'')+'>'+(attempted?'今日已申请':'申请职位')+'</button></section>';
   }).join('');
   $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{const j=jobs.find(x=>x.id===b.dataset.applyJob);if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};s.jobApplications[applicationDay][j.id]={at:Date.now()};save();const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');showCareer();return}const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}const nextWorkday=plusDays(dayAnchor(),1);nextWorkday.setHours(12,0,0,0);const startDate=dayKey(nextWorkday);s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(nextWorkday);save();addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功')});
  }
