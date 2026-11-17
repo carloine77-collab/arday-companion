@@ -397,7 +397,7 @@ function animate(type){let p=$('person');p.classList.remove('wave','sit','walk')
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
 function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)+Number(v||0)))})}
 function dayAnchor(){return dayAnchorAt(Date.now())}
-function dayKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function dayKey(value){const d=value instanceof Date?value:new Date(value);if(Number.isNaN(d.getTime()))throw new TypeError('dayKey expects a valid Date or timestamp');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
@@ -1208,7 +1208,7 @@ window.resignFromJob=function(event){
  if(!s.job?.active){toast('当前没有在职岗位');return false}
  const ended=dayKey(Date.now()),title=s.job.title;s.job.active=false;s.job.endedAt=ended;
  Object.keys(s.calendar?.days||{}).forEach(k=>{if(k>=ended)s.calendar.days[k]=(s.calendar.days[k]||[]).filter(e=>!e.jobShift)});
- addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();render();showCareer();renderCalendar();toast('已离职');return false;
+ addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();render();renderCalendar();toast('已离职');return false;
 };
 function showCareer(){
  $('drawer').classList.remove('profile-expanded');$('drawerTitle').textContent='职业';
@@ -1422,7 +1422,7 @@ function initArday3D(){
   function registerFurniture({id,name,room,group,width,depth,anchor=[0,0],action}){
    group.userData.furnitureKey=id;group.userData.roomKey=room;
    const saved=s.furnitureLayout?.[room]?.[id];
-   if(saved){group.position.set(saved.x,0,saved.z);group.rotation.y=saved.rotation||0}
+   if(saved){group.position.set(saved.x??0,saved.y??0,saved.z??0);group.rotation.y=saved.rotation||0}
    else{
     const legacy=s.roomPositions?.[room]?.[id];
     if(legacy)group.position.set(legacy[0],0,legacy[1]);
@@ -1524,7 +1524,11 @@ function initArday3D(){
    }else if(name==='捧花摆件'){
     width=.55;depth=.55;height=.58;surfaceType='tabletop';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
     for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;cyl(Math.cos(angle)*.08,.63,Math.sin(angle)*.08,.018,.022,.42,m.leaf);sphere(Math.cos(angle)*.11,.82+(i%2)*.06,Math.sin(angle)*.11,.13,.17,.12,[m.cream,m.clay,m.gold][i%3])}
-   }else{toast('没有找到这种家具模型');return null}
+   }else{toast('没有找到这种家具模型：'+name);return null}
+   let modelMeshCount=0;
+   group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
+   if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
+   group.visible=true;group.updateMatrixWorld(true);
    let x=record?.x??0,z=record?.z??0,y=record?.y??0,rotation=record?.rotation||0;
    if(record?.supportId){const support=furnitureRegistry.find(it=>it.id===record.supportId);if(support){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}}
    if(name==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
@@ -1544,7 +1548,7 @@ function initArday3D(){
    }
    s.placedFurniture=s.placedFurniture||[];
    if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
-   persistFurniture(item);return item;
+   persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
   (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
