@@ -897,6 +897,11 @@ function initArday3D(){
       float inkBand=floor(clamp(inkLuminance,0.0,1.5)*4.0+0.5)/4.0;
       float inkRatio=inkBand/max(inkLuminance,0.025);
       outgoingLight=mix(outgoingLight,outgoingLight*inkRatio,0.34);
+      float inkShadow=1.0-smoothstep(0.24,0.76,inkLuminance);
+      float inkHatch=step(0.84,fract((gl_FragCoord.x+gl_FragCoord.y)*0.072));
+      outgoingLight*=1.0-inkHatch*inkShadow*0.045;
+      float paperGrain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5;
+      outgoingLight*=1.0+paperGrain*0.018;
       #include <tonemapping_fragment>`
     );
    };
@@ -907,9 +912,9 @@ function initArday3D(){
   const M=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness}));
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
   const inkOutlineMaterial=new T.ShaderMaterial({
-   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.78},outlineThickness:{value:.009}},
+   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.78},outlineThickness:{value:.0085}},
    vertexShader:`uniform float outlineThickness;
-    void main(){vec3 expanded=position+normalize(normal)*outlineThickness;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
+    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float width=outlineThickness*(1.0+0.10*wobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
    fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
     void main(){gl_FragColor=vec4(outlineColor,outlineAlpha);}`,
    side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
