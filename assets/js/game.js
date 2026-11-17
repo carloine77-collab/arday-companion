@@ -1217,14 +1217,17 @@ function initArday3D(){
    item.owned=true;item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    if(record){
     if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,record.y??y);item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z'}
-    else{group.position.set(record.x??x,record.y??y,record.z??z);group.rotation.y=record.rotation||0}
+    else{const legacyRugSupport=record.supportId&&s.placedFurniture?.some(it=>it.id===record.supportId&&it.name==='地毯');if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
    }
    else{
     let support=null;
     if(surfaceType==='tabletop')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
     if(surfaceType==='tabletop'&&!support){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);toast('电脑和摆件需要先放在书桌或餐桌上');return null}
     if(support){item.supportId=support.id;group.position.y=support.group.position.y+support.surfaceY}
-    const candidates=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
+    const rug=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
+    const rugSpots=surfaceType==='floor'&&name!=='地毯'?window.ArdayFurniturePlacement.rugCandidates(rug):[];
+    const fallbackSpots=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
+    const candidates=wallAxis?fallbackSpots:[...rugSpots,...fallbackSpots];
     let placed=false;
     if(wallAxis){
      for(const point of candidates){const side=wallSide||'back',offset=point[0];if(canPlaceOnWall(item,side,offset)){wallTransform(group,side,offset,group.position.y);placed=true;break}}
