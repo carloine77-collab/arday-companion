@@ -289,27 +289,30 @@ function respondToChat(text){
 
 function buildDay(key){
  const plans=s.sleepPlans||(s.sleepPlans={});
+ // At midnight calculate the sleep needed to restore the current energy deficit.
+ // Sleep restores 13 points/hour and ordinary hourly decay removes 0.45.
  if(!plans[key]){
-  const duration=Math.max(6,Math.min(11,Math.round(6.5+(100-s.energy)*.04+(Math.random()-.5)*2)));
-  const bedtime=21+Math.floor(Math.random()*3);
+  const deficit=Math.max(0,100-Math.max(0,Math.min(100,Number(s.energy)||0)));
+  const duration=Math.ceil(deficit/12.55);
+  const bedtime=22;
   const wake=(bedtime+duration)%24;
-  plans[key]={bedtime,duration,wake,energyAtPlanning:s.energy};
+  plans[key]={bedtime,duration,wake,energyAtPlanning:s.energy,recoveryRate:12.55,plannedAt:Date.now()};
  }
- const p=plans[key],d=[];
+ const p=plans[key],previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate);
+ const previous=plans[previousKey]||{duration:8,bedtime:22,wake:6};
+ const d=[];
  const add=(start,end,title,kind='personal',activity='idle')=>{if(end>start)d.push({start,end,title,kind,activity})};
- add(0,p.wake,'睡眠 · '+p.duration+'小时','routine','sleep');
- add(p.wake,p.wake+1,'起床、洗漱','routine','wash');
- add(p.wake+1,p.wake+2,'早餐','routine','eat');
- if(p.wake+2<12)add(p.wake+2,Math.min(12,p.wake+4),has('书桌')?'阅读 / 写作':'阅读与个人时间','personal',has('书桌')?'write':'read');
+ add(0,previous.wake,'睡眠 · '+previous.duration+'小时','routine','sleep');
+ add(previous.wake,previous.wake+1,'早餐','routine','eat');
+ add(9,10,'阅读','personal','read');
+ add(10,11,'休息','personal','rest');
+ add(11,12,'烹饪','personal','cook');
  add(12,13,'午餐','routine','eat');
-  add(14,15,has('唱片机')?'听音乐或阅读':'自由安排','personal',has('唱片机')?'music':'read');
- add(15,16,'自由时间','free','idle');
- add(16,17,has('书桌')?'写作 / 整理资料':'自由时间','personal',has('书桌')?'write':'idle');
+ add(14,15,'电脑游戏','personal','computerPlay');
+ add(16,17,'外出','personal','walk');
  add(18,19,'晚餐','routine','eat');
- add(19,20,'散步或休闲','personal','walk');
- add(20,p.bedtime-1,'自己的时间','free','idle');
- add(p.bedtime-1,p.bedtime,'洗漱、准备睡觉','routine','wash');
- add(p.bedtime,24,'睡眠','routine','sleep');
+ add(19,20,'聊天','personal','chat');
+ add(p.bedtime,24,'睡眠 · '+p.duration+'小时','routine','sleep');
  return d.sort((a,b)=>a.start-b.start);
 }
 function ensureSchedule(){ensureScheduleAt(Date.now())}
@@ -413,8 +416,13 @@ function ensureScheduleAt(value){
  const currentKey=keyAt(Date.now()),requestedKey=keyAt(value);
  if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:5};
  s.calendar.days=s.calendar.days||{};
- if((s.calendar.version||0)<5){
-  s.calendar.anchor=currentKey;s.calendar.days={};s.calendar.version=5;
+ if((s.calendar.version||0)<6){
+  s.calendar.anchor=currentKey;
+  Object.keys(s.calendar.days).forEach(k=>{
+   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['routine','personal','free'].includes(ev.kind));
+   if(!s.calendar.days[k].length)delete s.calendar.days[k];
+  });
+  s.sleepPlans={};s.calendar.version=6;
  }
  if(s.calendar.anchor!==currentKey){
   s.calendar.anchor=currentKey;
@@ -526,7 +534,7 @@ function setSceneActivity(activity,announce){
  if(announce)say('我现在在'+(kitchen?'厨房':m.location==='outside'?'外面':'房间里')+m.title+'。')
 }
 function chooseAutonomousActivity(){const opts=['rest','eat','wash','read','music','write','walk'];const v={rest:Math.max(0,58-s.energy)*1.55,eat:Math.max(0,58-s.hunger)*1.8,wash:Math.max(0,55-s.clean)*1.25,read:Math.max(0,58-s.fun)*.8,music:Math.max(0,65-s.fun)*1.05,write:has('书桌')?13:0,walk:s.fun<60?8:2};return opts.filter(a=>a!=='write'||has('书桌')).map(a=>({a,v:v[a]+Math.random()*4})).sort((x,y)=>y.v-x.v)[0]?.a||'rest'}
-function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
+function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'cook',cookTogether:'cook'})[a]||a||'idle'}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
