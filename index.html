@@ -399,7 +399,7 @@ function dayKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getD
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
-function has(item){return s.items.includes(item)||s.furniture.includes(item)||s.ownedFurniture.includes(item)}
+function has(item){return s.items.includes(item)||s.furniture.includes(item)||s.ownedFurniture.includes(item)||(s.placedFurniture||[]).some(x=>x.name===item)}
 function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 
@@ -412,7 +412,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 const tabs={
  '互动':[['聊天','💬','chat'],['一起做饭','🥘','cook-together'],['一起喝茶','🍵','tea'],['听音乐','♫','music'],['出门散步','🌿','walk'],['一起看书','📖','read'],['玩个游戏','🎲','game'],['休息一会','☁','rest'],['一起吃点东西','🥐','food'],['整理房间','🧹','tidy']],
- '物品':[['旧书','📖','use-book'],['陶杯','☕','use-cup'],['点心','🥐','use-food'],['唱片','💿','use-record']],
+ '物品':[],
  '商店':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['唱片机','📻','buy-player','399'],['唱片','💿','buy-record','68'],['书桌','🪑','buy-desk','599'],['书架','📚','buy-shelf','299'],['绿植','🪴','buy-plant','39'],['抱枕','🟠','buy-cushion','29'],['修理工具','🔧','buy-tools','88']]
 };
 function addItem(name){s.items.push(name)}
@@ -443,12 +443,24 @@ function openTab(name,force=false){
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';
  const tabEntries=[...(tabs[name]||[])];
  if(name==='物品'){
+  const itemIcons={'一本旧书':'📖','旧书':'📖','陶杯':'☕','点心':'🥐','唱片':'💿','修理工具':'🔧'};
+  s.items.forEach((item,index)=>tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index]));
   s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,'▧','place-owned-'+index]));
  }
  tabEntries.forEach(([label,emoji,id,cost])=>{
   let b=document.createElement('button');b.className='choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
   b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
+   if(id.startsWith('use-inventory-')){
+    const index=Number(id.slice('use-inventory-'.length)),item=s.items[index];
+    if(!item){openTab('物品',true);return}
+    if(item==='点心'){s.items.splice(index,1);change({hunger:25,fun:2});say('点心正好派上用场。')}
+    else if(item==='唱片'){if(!has('唱片机')){say('有唱片了，但还缺一台唱片机。');return}perform('music')}
+    else if(item==='陶杯')perform('tea');
+    else if(item==='一本旧书'||item==='旧书')perform('read');
+    else if(item==='修理工具'){s.roomCondition=clamp(s.roomCondition+12);s.items.splice(index,1);say('我用修理工具把房间里几处松动的地方处理好了。')}
+    save();render();openTab('物品',true);return;
+   }
    if(id.startsWith('place-owned-')){
     const index=Number(id.slice('place-owned-'.length)),item=s.ownedFurniture[index];
     if(!item){toast('这件物品已不在库存中');openTab('物品',true);return}
