@@ -75,7 +75,8 @@ const furnitureNameById={'buy-furniture-rug':'地毯','buy-furniture-sofa':'沙�
 function addItem(name){s.items.push(name)}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
- if(id.startsWith('buy-furniture-')){
+ if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}s.money-=cost;arday3D.applyRoomFinish(id);remember('purchase','房间装修：'+label,2);say('已经换上新的'+label+'。');save();render();toast('装修完成：'+label);openTab('商店',true);return}
+ if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')){
   const furnitureName=furnitureNameById[id];if(!furnitureName){toast('商品信息不存在');return}
   s.money-=cost;s.ownedFurniture.push(furnitureName);say('这件家具已经收进物品栏。等你决定好位置，再把它摆进房间。');
   remember('purchase',label,2);save();render();toast('购入：'+label);openTab('物品',true);return;
@@ -97,7 +98,7 @@ function openTab(name,force=false){
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';
  if(name==='商店'){
   const nav=document.createElement('div');nav.className='shop-categories';
-  ['食物食材','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  ['食物食材','家具','卧室家具','厨房家具','壁纸与地板'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   $('choices').appendChild(nav);
  }
  const tabEntries=name==='商店'?[...(shopCatalog[shopCategory]||[])]:[...(tabs[name]||[])];
@@ -1068,7 +1069,7 @@ function initArday3D(){
    registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')})
   ];
   function createOwnedFurniture(name,record=null){
-   const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
+   const defaultRoom=({床:'bedroom','床头柜':'bedroom','床头灯':'bedroom','衣柜':'bedroom','卧室地毯':'bedroom',橱柜:'kitchen',吊柜:'kitchen',冰箱:'kitchen',灶台:'kitchen',水槽:'kitchen'})[name];const room=record?.room||defaultRoom||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
    const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:rough,metalness});
@@ -1078,7 +1079,28 @@ function initArday3D(){
    const sphere=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,20,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;return o};
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
-   if(name==='地毯'){
+   if(name==='床'){
+    width=3.1;depth=3.45;height=1.15;action=()=>perform('sleep');
+    box(0,.38,0,3.1,.55,3.45,m.dark);box(0,.72,.12,2.95,.22,3.2,m.fabric);box(0,.91,-.95,2.95,.22,1.3,m.sofa2);box(0,.65,-3.28,3.25,1.15,.18,m.dark);box(-.85,1.05,-1.75,.9,.22,.65,m.cream);box(.85,1.05,-1.75,.9,.22,.65,m.cream);box(0,1.04,.65,2.72,.045,1.05,m.sofa);
+   }else if(name==='床头柜'){
+    width=.85;depth=.75;height=1.05;legs(.82,.72,.86,.07);box(0,.88,0,.86,.2,.76,m.dark);box(0,.91,.39,.48,.38,.035,m.metal);
+   }else if(name==='床头灯'){
+    width=.48;depth=.48;height=1.45;cyl(0,.08,0,.2,.2,.16,m.dark);cyl(0,.62,0,.045,.05,1.05,m.metal);cyl(0,1.22,0,.24,.1,.34,m.cream);
+   }else if(name==='衣柜'){
+    width=1.7;depth=.72;height=2.5;box(0,1.25,0,1.7,2.5,.72,m.dark);box(-.42,1.25,.38,.78,2.34,.035,m.sofa2);box(.42,1.25,.38,.78,2.34,.035,m.sofa2);for(const x of [-.07,.07])cyl(x,1.25,.43,.025,.025,.12,m.gold);
+   }else if(name==='卧室地毯'){
+    width=3.4;depth=2.5;surfaceType='rug';box(0,.035,0,3.4,.07,2.5,m.fabric);box(0,.075,0,3.18,.012,2.28,m.sofa2);
+   }else if(name==='橱柜'){
+    width=2.8;depth=.82;height=1.05;surfaceType='table';surfaceY=1.1;box(0,.55,0,2.8,1.1,.82,m.dark);for(const x of [-.92,0,.92]){box(x,.55,.425,.86,.98,.035,m.sofa2);box(x,.55,.46,.08,.5,.035,m.metal)}box(0,1.12,0,2.9,.12,.9,m.cream);
+   }else if(name==='吊柜'){
+    width=2.2;depth=.48;height=1.05;wallAxis='x';wallSide='back';anchor=[0,2.9];box(0,0,0,2.2,1.05,.48,m.dark);for(const x of [-.55,.55]){box(x,0,.25,1.04,.96,.035,m.sofa2);box(x,0,.29,.06,.35,.035,m.metal)}
+   }else if(name==='冰箱'){
+    width=.9;depth=.82;height=2.15;box(0,1.075,0,.9,2.15,.82,m.cream);box(0,1.18,.42,.82,1.78,.035,m.sofa2);box(0,.43,.45,.82,.035,.04,m.metal);box(.3,.9,.48,.035,.42,.04,m.metal);
+   }else if(name==='灶台'){
+    width=1.35;depth=.82;height=.94;box(0,.42,0,1.35,.84,.82,m.dark);box(0,.87,0,1.4,.1,.86,m.metal);for(const x of [-.38,.38])for(const z of [-.22,.22]){cyl(x,.94,z,.16,.16,.055,m.dark);cyl(x,.98,z,.09,.09,.025,m.metal)}
+   }else if(name==='水槽'){
+    width=1.25;depth=.82;height=.94;box(0,.42,0,1.25,.84,.82,m.dark);box(0,.87,0,1.32,.1,.88,m.cream);box(0,.94,0,.72,.045,.48,m.metal);cyl(0,1.12,-.22,.035,.035,.38,m.metal);cyl(0,1.3,-.04,.035,.035,.32,m.metal);
+   }else if(name==='地毯'){
     width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
     box(0,.035,0,width,.07,depth,m.fabric);box(0,.074,0,3.48,.012,2.48,m.cream);box(0,.083,0,3.25,.012,2.25,m.fabric);
     for(const x of [-1.7,1.7])for(const z of [-1.2,1.2])box(x,.092,z,.14,.012,.14,m.gold);
@@ -1465,7 +1487,7 @@ function initArday3D(){
    arday3D.raf=requestAnimationFrame(frame)}
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:name=>{const item=createOwnedFurniture(name);if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':'living';const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;if(id.startsWith('buy-wallpaper-')){finishes[room]=finishes[room]||{};finishes[room].wallpaper=id;const color=id==='buy-wallpaper-deepblue'?0x243b59:0x8b929c;(root.userData.wallMeshes||[]).forEach(mesh=>{mesh.material=M(color);mesh.material.side=T.DoubleSide})}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const color=id==='buy-floor-concrete'?0x69727b:0x424d5b;root.userData.floorMesh.material=M(color)}} ,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:name=>{const item=createOwnedFurniture(name);if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
