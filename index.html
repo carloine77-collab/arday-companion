@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#f2e7d4">
 <title>Arday · 阿尔</title>
 <style>
-:root{--paper:#f2e7d4;--cream:#fff9ef;--ink:#453a30;--muted:#8c7d6c;--line:#dfcfb8;--orange:#d77d50;--green:#819477;--rose:#bd7169;--shadow:0 8px 24px #5c49301a}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:var(--paper);color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","PingFang SC",sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit;-webkit-tap-highlight-color:transparent}.app{height:100svh;max-width:1100px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 14px calc(9px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:9px}
+:root{--paper:#e8e5df;--cream:#f7f5f0;--ink:#343434;--muted:#77736c;--line:#d2cec6;--orange:#8b7763;--green:#788477;--rose:#a77d75;--shadow:0 8px 24px #29251f18}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit;-webkit-tap-highlight-color:transparent}.app{height:100svh;max-width:1100px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 14px calc(9px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:9px}
 .top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}.identity{display:flex;align-items:center;gap:8px;white-space:nowrap}.mark{width:35px;height:35px;border-radius:12px;background:var(--orange);color:white;display:grid;place-items:center;font:700 20px Georgia;box-shadow:0 3px 0 #a75e3d}.name{font:700 17px Georgia}.date{font-size:10px;color:var(--muted);margin-top:2px}.stats{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;min-width:0;background:var(--cream);border:1px solid var(--line);border-radius:15px;padding:7px 8px;box-shadow:var(--shadow)}.stat{min-width:0;text-align:center;border-right:1px solid #eadfce;padding:0 3px}.stat:last-child{border:0}.stat label{display:block;font-size:10px;color:var(--muted);white-space:nowrap}.stat b{display:block;font-size:12px;margin:2px 0 4px}.meter{height:4px;border-radius:9px;background:#eee4d6;overflow:hidden}.meter i{display:block;height:100%;border-radius:9px;background:var(--green)}.stat.relation:nth-child(2) .meter i,.stat.relation:nth-child(3) .meter i{background:#d39a62}.stat.relation:nth-child(4) .meter i,.stat.relation:nth-child(5) .meter i{background:#bd7169}
 .stage{position:relative;min-height:0;overflow:hidden;border:1px solid #d9c6a9;border-radius:23px;background:#eadfc9;box-shadow:var(--shadow);isolation:isolate}.scene-bg{position:absolute;inset:0;background:linear-gradient(180deg,#f1dfc2 0%,#e9d8bc 54%,#d4b995 54%,#c9a77e 100%)}.sunlight{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 17%,#fff6d766,transparent 42%);pointer-events:none}
 .room{position:absolute;inset:0;perspective:900px}.backwall{position:absolute;left:5%;right:5%;top:4%;height:54%;background:linear-gradient(180deg,#f2e4ca,#e8d7b9);border:2px solid #d4bd9d;border-bottom:8px solid #c5a782;box-shadow:inset 0 0 0 8px #f5ead7}.floor{position:absolute;left:0;right:0;bottom:0;height:45%;background:repeating-linear-gradient(0deg,#caa982 0 2px,#d8bd98 2px 43px);clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);border-top:5px solid #b68e68}.floor:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 110px,#b58e6a22 111px 113px)}.window{position:absolute;left:12%;top:11%;width:24%;height:37%;border:9px solid #a97854;border-bottom-width:12px;border-radius:8px;background:linear-gradient(145deg,#b9d0c0,#f2d9a9);box-shadow:inset 0 0 0 3px #f8ecd8}.window:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:5px;background:#a97854}.window:after{content:"";position:absolute;left:0;right:0;top:52%;height:5px;background:#a97854}.outside-sun{position:absolute;right:15%;top:14%;width:35px;height:35px;border-radius:50%;background:#f2bd70;box-shadow:0 0 30px #f6cb89aa}.wall-shelf{position:absolute;right:12%;top:20%;width:23%;height:9px;background:#a87852;box-shadow:0 5px 0 #d7b18b}.wall-shelf:after{content:"📚　🪴";position:absolute;right:8px;bottom:8px;font-size:24px;white-space:nowrap}.picture{position:absolute;right:16%;top:38%;width:65px;height:74px;border:7px solid #ae805b;background:#f8eedc;display:grid;place-items:center;font-size:28px;transform:rotate(2deg)}
@@ -1262,21 +1262,21 @@ function initArday3D(){
  }
  const stage=$('stage');
  try{
-  const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xe8d9c8);
+  const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xd9d7d1);
   const camera=new T.PerspectiveCamera(38,1,.1,80);
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));renderer.outputEncoding=T.sRGBEncoding;
-  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.78;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
   const host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
-  const hemi=new T.HemisphereLight(0xffe8d0,0x51402f,.82);scene.add(hemi);
-  const sun=new T.DirectionalLight(0xffd8b0,1.18);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-8;sun.shadow.camera.right=8;sun.shadow.camera.top=8;sun.shadow.camera.bottom=-8;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene.add(sun);
-  const fill=new T.DirectionalLight(0xa9c2df,.22);fill.position.set(5,4,-5);scene.add(fill);
+  const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
+  const sun=new T.DirectionalLight(0xfff1dc,1.35);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-8;sun.shadow.camera.right=8;sun.shadow.camera.top=8;sun.shadow.camera.bottom=-8;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene.add(sun);
+  const fill=new T.DirectionalLight(0xc8d0d8,.28);fill.position.set(5,4,-5);scene.add(fill);
   const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color,roughness});
   const m={
-   wall:M(0xd6c2a6),floor:M(0xa87950),wood:M(0x68432f),oak:M(0x9a673e),
-   sofa:M(0x47765b),sofa2:M(0x315b43),skin:M(0xd9a17c),hair:M(0x302629),
-   shirt:M(0x4d718d),pants:M(0x454c5c),glass:M(0x80b9c5,.28),rug:M(0xd98c69),
-   leaf:M(0x56834d),dark:M(0x423a36),cream:M(0xf5ead7)
+   wall:M(0xd8d5ce),floor:M(0x8b7764),wood:M(0x513a2b),oak:M(0x806044),
+   sofa:M(0xd9cdbb),sofa2:M(0xc4b49e),skin:M(0xd9a17c),hair:M(0x302629),
+   shirt:M(0x526575),pants:M(0x454c5c),glass:M(0x8fa9b1,.2),rug:M(0xb2a18c),
+   leaf:M(0x64775d),dark:M(0x423a36),cream:M(0xf1eee7)
   };
   function box(parent,x,y,z,w,h,d,material){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
@@ -1297,13 +1297,13 @@ function initArday3D(){
    for(let z=-3.55;z<3.7;z+=.92)box(group,0,.012,z,10.45,.018,.012,M(0xb58c68));
   }
   // Three distinct interiors; only one room is visible at a time.
-  const living=new T.Group();scene.add(living);roomShell(living,0xd5c0a3,0xa47a54);
+  const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0x8c7966);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);
   box(livingWindow,0,2.6,0,2.1,1.85,.06,m.glass);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
   // Bedroom: blue-lilac walls, a proper bed, bedside tables and wardrobe.
-  const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xbeb8cf,0x927e82);
+  const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);
   box(bedroomWindow,0,2.65,0,2.0,1.7,.06,M(0x8eb9cb));
   for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
@@ -1325,7 +1325,7 @@ function initArday3D(){
   for(const x of [3.45,4.25])box(bedroom,x,1.3,-2.8,.05,2.25,.04,M(0xc49b7f));
   const bedRug=new T.Mesh(new T.CylinderGeometry(2.1,2.1,.05,28),M(0xc68f9d));bedRug.scale.z=.58;bedRug.position.set(-.5,.025,1.25);bedroom.add(bedRug);
   // Kitchen: sage cabinetry, warm tile backsplash, pale stone worktop.
-  const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd2bea2,0x9b7958);
+  const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);
   box(kitchenWindow,0,2.65,0,1.8,1.5,.06,M(0x9dc3bd));
   for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
@@ -1483,12 +1483,16 @@ function initArday3D(){
     for(const x of [-1.7,1.7])for(const z of [-1.2,1.2])box(x,.092,z,.14,.012,.14,m.gold);
     for(let x=-1.5;x<=1.5;x+=.24){box(x,.08,-1.34,.018,.018,.14,m.gold);box(x,.08,1.34,.018,.018,.14,m.gold)}
    }else if(name==='沙发'){
-    width=2.5;depth=1.25;height=1.25;
-    box(0,.38,0,2.35,.42,1.05,m.wood);box(0,.78,-.42,2.35,.78,.22,m.fabric);
-    box(-1.08,.76,.02,.22,.78,1.05,m.fabric);box(1.08,.76,.02,.22,.78,1.05,m.fabric);
-    box(0,.67,.08,1.95,.2,.78,m.cream);
-    for(const x of [-.68,0,.68]){box(x,.83,-.25,.56,.31,.12,m.fabric);box(x,.83,-.25,.49,.25,.1,m.cream)}
-    legs(2.12,.95,.25,.1);
+    width=2.35;depth=1.12;height=.94;
+    const fabric=mat(0xe4d9c7,.96),fabricShade=mat(0xd3c5b1,.98),welt=mat(0xc2b39e,.92),walnut=mat(0x67452f,.62),walnutEdge=mat(0x8a6344,.58);
+    const soft=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,32,22),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
+    const seam=(points,r=.008,material=welt)=>{const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const mesh=new T.Mesh(new T.TubeGeometry(curve,Math.max(16,points.length*3),r,8,false),material);group.add(mesh);mesh.castShadow=true};
+    box(0,.27,0,2.08,.16,.82,walnut);box(0,.31,-.425,1.98,.19,.055,walnutEdge);box(0,.35,.39,1.98,.16,.06,walnut);
+    for(const x of [-.62,0,.62]){soft(x,.49,-.105,.345,.145,.405,fabric);seam([[x-.29,.53,-.48],[x-.15,.55,-.49],[x,.55,-.49],[x+.15,.55,-.49],[x+.29,.53,-.48]],.009)}
+    for(const x of [-.62,0,.62]){const back=soft(x,.755,.295,.34,.315,.16,fabricShade);back.rotation.x=-.13;seam([[x-.28,.73,.13],[x-.16,.72,.125],[x,.72,.12],[x+.16,.72,.125],[x+.28,.73,.13]],.007)}
+    for(const x of [-1.015,1.015]){soft(x,.59,-.015,.17,.285,.49,fabric);soft(x,.855,-.045,.19,.085,.43,fabricShade);box(x,.39,.02,.055,.43,.79,walnut);seam([[x,.91,-.34],[x,.925,-.18],[x,.925,0],[x,.925,.18],[x,.91,.31]],.007)}
+    for(const x of [-.86,.86])for(const z of [-.32,.32]){const leg=new T.Mesh(new T.CylinderGeometry(.035,.052,.25,12),walnut);leg.position.set(x,.125,z);group.add(leg);leg.castShadow=true}
+    box(0,.19,-.423,1.86,.07,.035,walnutEdge);
    }else if(name==='壁画'){
     width=1.5;depth=.12;height=1.15;wallAxis='x';wallSide='back';anchor=[0,1.9];
     box(0,0,0,1.5,1.15,.12,m.gold);box(0,0,.07,1.36,1.01,.035,m.wood);box(0,0,.095,1.25,.9,.018,m.wall);
@@ -1551,6 +1555,8 @@ function initArday3D(){
    persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
+  s.placedFurniture=s.placedFurniture||[];
+  if(!s.placedFurniture.some(item=>item.name==='沙发'&&item.room==='living'))s.placedFurniture.push({id:'arday-cream-walnut-sofa',name:'沙发',room:'living',x:-2.55,y:0,z:1.05,rotation:0,supportId:null});
   (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
   function furnitureCorners(item,x=item.group.position.x,z=item.group.position.z,angle=item.group.rotation.y){
    const co=Math.cos(angle),si=Math.sin(angle),hx=item.width/2,hz=item.depth/2;
@@ -1648,7 +1654,7 @@ function initArday3D(){
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
-   const colors={living:0xcab79e,bedroom:0xb9b5c8,kitchen:0xc5b69f};scene.background.set(colors[roomMode]);
+   const colors={living:0xd9d7d1,bedroom:0xd2d3d2,kitchen:0xd9d7d1};scene.background.set(colors[roomMode]);
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:13.4;applyCamera();
   }
