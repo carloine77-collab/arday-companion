@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f2e7d4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arday">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Arday">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./assets/icons/arday-icon.svg">
 <title>Arday · 阿尔</title>
 <link rel="stylesheet" href="assets/css/game.css">
 </head>
@@ -12,7 +19,7 @@
 <header class="top">
  <div class="identity-line">
   <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div></div></button>
-  <div class="identity-meta"><span id="upkeep">房间维护 92%</span><span id="cash">共同账户 ¥30000</span></div>
+  <div class="identity-meta"><span id="cash">共同账户 ¥30000</span></div>
  </div>
  <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
 </header>
@@ -42,7 +49,7 @@
   <button class="tool" data-tab="互动"><span class="icon">✧</span>互动</button>
   <button class="tool" data-tab="物品"><span class="icon">▣</span>物品</button>
   <button class="tool" data-tab="商店"><span class="icon">♧</span>商店</button>
-  <button class="tool" data-tab="日程"><span class="icon">▦</span>日程</button>
+  <button class="tool" data-tab="日程"><span class="icon">✧</span>日程</button>
   <button class="tool" data-tab="目标"><span class="icon">◇</span>目标</button>
   <button class="tool" data-tab="账户"><span class="icon">◈</span>账户</button>
   <button class="tool" data-tab="职业"><span class="icon">▤</span>职业</button>
@@ -54,5 +61,9 @@
 <script src="assets/js/game-config.js?v=20261118i"></script>
 <script src="assets/js/furniture-placement.js?v=20261118i"></script>
 <script src="assets/js/economy.js?v=20261118i"></script>
-<script src="assets/js/game.js?v=20261118x"></script>
+<script src="assets/js/game.js?v=20261119a"></script>
+<script>
+document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
+</script>
 </body></html>
