@@ -1287,7 +1287,7 @@ function initArday3D(){
    item.owned=true;item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    if(record){
     if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,modelName==='吊柜'?y:(record.y??y));item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z';item.wallAnchorY=(anchor?.[1]??2.55)-group.position.y}
-    else{const legacyRugSupport=record.supportId&&s.placedFurniture?.some(it=>it.id===record.supportId&&it.modelName==='地毯');if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
+    else{const legacyRugSupport=record.supportId&&s.placedFurniture?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
    }
    else{
     let support=null;
@@ -1296,7 +1296,7 @@ function initArday3D(){
     if(surfaceType==='tabletop'&&support){
      item.supportId=support.id;
      const siblings=furnitureRegistry.filter(it=>it.room===room&&it.supportId===support.id);
-     const offsets=modelName==='电脑'?[[0,0],[-.36,0],[.36,0],[0,.16],[0,-.16]]:siblings.some(it=>it.modelName==='电脑')?[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]]:[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]];
+     const offsets=modelName==='电脑'?[[0,0],[-.36,0],[.36,0],[0,.16],[0,-.16]]:siblings.some(it=>it.name==='电脑')?[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]]:[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]];
      const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
      for(const [ox,oz] of offsets){
       const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
