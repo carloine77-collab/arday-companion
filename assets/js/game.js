@@ -870,13 +870,10 @@ function initArday3D(){
   const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
   const sun=new T.DirectionalLight(0xfff1dc,1.35);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-8;sun.shadow.camera.right=8;sun.shadow.camera.top=8;sun.shadow.camera.bottom=-8;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene.add(sun);
   const fill=new T.DirectionalLight(0xc8d0d8,.28);fill.position.set(5,4,-5);scene.add(fill);
-  const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color,roughness});
-  const m={
-   wall:M(0xd8d5ce),floor:M(0x8b7764),wood:M(0x513a2b),oak:M(0x806044),
-   sofa:M(0xd9cdbb),sofa2:M(0xc4b49e),skin:M(0xd9a17c),hair:M(0x302629),
-   shirt:M(0x526575),pants:M(0x454c5c),glass:M(0x8fa9b1,.2),rug:M(0xb2a18c),
-   leaf:M(0x64775d),dark:M(0x423a36),cream:M(0xf1eee7)
-  };
+  const furniturePalette={0xd8d5ce:0x343b46,0x8b7764:0x6e7782,0x513a2b:0x252c36,0x806044:0x586473,0xd9cdbb:0x40566e,0xc4b49e:0x5b7186,0xb2a18c:0x2d3f55,0xf1eee7:0xcbd2d8,0xd7b990:0x65717f,0xe7d4ba:0x7f8b98,0xb58c68:0x556272,0xd5d1c9:0x343b46,0x8c7966:0x6e7782,0xd0d1d0:0x3b4654,0x87786f:0x727e8a,0x805b4e:0x252c36,0xf8eee4:0xcbd2d8,0xfaf0e7:0xd8dee3,0xf0d9d1:0x566d84,0x7897b5:0x263d58,0xd9b7b5:0x4a627b,0xc6a3ad:0x38a4b5,0x9a7059:0x3c4653,0xc99570:0x7d8a96,0xb98968:0x586473,0xd8bd91:0x65717f,0xf1dfbd:0xadb8c2,0x8c6c62:0x2d3540,0xc49b7f:0x65717f,0xc68f9d:0x2d3f55,0x8a7867:0x6e7782,0x9dc3bd:0x405c68,0x9a7655:0x252c36,0xc98d6d:0x65717f,0xe7b89b:0x38a4b5,0xd9a184:0x5b7186,0xe9dfd0:0xcbd2d8,0x78917a:0x3f5668,0x9eb49a:0x536d7b,0x6b856c:0x405c68,0xe4e2d9:0xcbd2d8,0x8c8a83:0x7f8b98,0x4e514b:0x252c36,0x8d8981:0x65717f,0x91b8ba:0x38a4b5,0x65452f:0x252c36,0x9a704b:0x586473,0xd6b77d:0x38a4b5,0xf1e5d1:0xcbd2d8,0x77513b:0x252c36,0x718778:0x405c68,0xf4f2ed:0xcbd2d8,0x514b43:0x252c36,0xfff1dc:0xcbd2d8,0xc8d0d8:0x7f8b98};
+  const recolorFurniture=color=>furniturePalette[color]??color;
+  const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness});
+  const m={wall:M(0xd8d5ce),floor:M(0x8b7764),wood:M(0x513a2b),oak:M(0x806044),sofa:M(0xd9cdbb),sofa2:M(0xc4b49e),skin:M(0xd9a17c),hair:M(0x302629),shirt:M(0x526575),pants:M(0x454c5c),glass:M(0x8fa9b1,.2),rug:M(0xb2a18c),leaf:M(0x64775d),dark:M(0x423a36),cream:M(0xf1eee7)};
   function box(parent,x,y,z,w,h,d,material){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function cyl(parent,x,y,z,r,h,material,seg=14){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,seg),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
@@ -1094,7 +1091,7 @@ function initArday3D(){
    const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
-   const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color,roughness:rough,metalness});
+   const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:rough,metalness});
    const m={wood:mat(0x946746),oak:mat(0xc39a70),fabric:mat(0xb9a1a0,.95),cream:mat(0xeee1cf,.9),dark:mat(0x39434b,.45),metal:mat(0x858783,.3,.72),leaf:mat(0x477a4d,.9),leaf2:mat(0x88a968,.9),clay:mat(0xb56d50),gold:mat(0xc5a15d,.35,.5),wall:mat(0xf0e4d2),screen:mat(0x25465b,.2)};
    const box=(x,y,z,w,h,d,material)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
    const cyl=(x,y,z,top,bottom,h,material)=>{const o=new T.Mesh(new T.CylinderGeometry(top,bottom,h,20),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;return o};
@@ -1149,13 +1146,13 @@ function initArday3D(){
     for(const x of [-.3,.3])box(x,.62,.02,.07,.5,.07,m.wood);
    }else if(name==='电脑'){
     action=()=>openFurnitureActions('computer');
-    width=.62;depth=.48;height=.62;surfaceType='tabletop';surfaceY=.04;
+    width=.62;depth=.48;height=.62;surfaceType='floor';surfaceY=.04;
     box(0,.46,-.13,.72,.46,.07,m.dark);box(0,.46,-.08,.64,.37,.018,m.screen);
     box(0,.21,-.12,.1,.12,.1,m.metal);box(0,.13,-.12,.38,.045,.22,m.metal);
     box(0,.055,.16,.72,.055,.24,m.dark);box(0,.09,.16,.62,.018,.17,m.cream);
    }else if(name==='捧花摆件'){
     action=()=>openFurnitureActions('bouquet');
-    width=.34;depth=.34;height=.58;surfaceType='tabletop';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
+    width=.34;depth=.34;height=.58;surfaceType='floor';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
     for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;cyl(Math.cos(angle)*.08,.63,Math.sin(angle)*.08,.018,.022,.42,m.leaf);sphere(Math.cos(angle)*.11,.82+(i%2)*.06,Math.sin(angle)*.11,.13,.17,.12,[m.cream,m.clay,m.gold][i%3])}
    }else{toast('没有找到这种家具模型：'+name);return null}
    let modelMeshCount=0;
@@ -1163,7 +1160,7 @@ function initArday3D(){
    if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
    group.visible=true;group.updateMatrixWorld(true);
    let x=record?.x??0,z=record?.z??0,y=record?.y??0,rotation=record?.rotation||0;
-   if(record?.supportId){const savedSupport=s.placedFurniture?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.name==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}}
+   if(record?.supportId){const savedSupport=s.placedFurniture?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.name==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support&&support.surfaceType==='table'){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}else{supportId=null;y=0}}
    if(name==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
    group.position.set(x,y,z);group.rotation.y=rotation;
    const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action,wallAxis,wallSide,wallRange:4.5});
@@ -1272,7 +1269,7 @@ function initArday3D(){
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
-   const colors={living:0xd9d7d1,bedroom:0xd2d3d2,kitchen:0xd9d7d1};scene.background.set(colors[roomMode]);
+   const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46};scene.background.set(colors[roomMode]);
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:13.4;applyCamera();
   }
@@ -1290,8 +1287,8 @@ function initArday3D(){
     const seatCandidates=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name==='餐桌椅'));
     const seat=desk&&seatCandidates.sort((a,b)=>Math.hypot(a.group.position.x-desk.group.position.x,a.group.position.z-desk.group.position.z)-Math.hypot(b.group.position.x-desk.group.position.x,b.group.position.z-desk.group.position.z))[0];
     if(desk){
-     if(seat){p=[seat.group.position.x,0,seat.group.position.z+.06];faceAngle=Math.PI;}
-     else{p=[desk.group.position.x,0,desk.group.position.z+Math.max(.82,desk.depth/2+.48)];faceAngle=Math.PI;}
+     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=Math.atan2(desk.group.position.x-seat.group.position.x,desk.group.position.z-seat.group.position.z);}
+     else{const forward=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+forward.x,0,desk.group.position.z+forward.z];faceAngle=Math.atan2(desk.group.position.x-p[0],desk.group.position.z-p[2]);}
     }
    }else if(act==='bouquet'){
     const bouquet=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='捧花摆件');
@@ -1300,11 +1297,12 @@ function initArday3D(){
     const chair=furnitureRegistry.find(it=>(it.name==='椅子'||it.name==='餐桌椅')&&it.room===roomMode);
     if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z]}
    }
-   target.set(...p);pose=meta.pose||'wave';if(['rest','company','sitChair',...deskActivities].includes(act)||act==='bouquet')person.rotation.y=faceAngle;basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
+   if(act==='sleep'){const bedItem=furnitureRegistry.find(it=>it.room==='bedroom'&&it.name==='床');if(bedItem){const local=new T.Vector3(0,.82,.45).applyAxisAngle(new T.Vector3(0,1,0),bedItem.group.rotation.y);p=[bedItem.group.position.x+local.x,local.y,bedItem.group.position.z+local.z];faceAngle=bedItem.group.rotation.y;}}
+   target.set(...p);pose=meta.pose||'wave';if(['rest','company','sitChair',...deskActivities].includes(act)||act==='bouquet'||act==='sleep')person.rotation.y=faceAngle;basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
-   rig.rotation.set(0,0,0);rig.position.set(0,0,0);if(act==='sleep')rig.rotation.set(-Math.PI/2,Math.PI,0);
-   body.position.y=pose==='sit' ? -.12:0;
+   rig.rotation.set(0,0,0);rig.position.set(0,0,0);if(act==='sleep')rig.rotation.set(-Math.PI/2,0,0);
+   body.position.y=pose==='sit' ? -.32:0;
    legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
    arms.forEach((a,i)=>{a.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);a.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
@@ -1378,7 +1376,7 @@ function initArday3D(){
       }
      }else{
       const nx=dragPoint.x+furnitureDrag.offsetX,nz=dragPoint.z+furnitureDrag.offsetZ;
-      if(item&&canPlaceFurniture(item,nx,nz,g.rotation.y)){const ox=g.position.x,oy=g.position.y,oz=g.position.z,oa=g.rotation.y;g.position.x=nx;g.position.z=nz;moveSupportedFurniture(item,ox,oy,oz,oa)}
+      if(item){const previousSupport=item.supportId;let support=null;if(['电脑','捧花摆件'].includes(item.name)){support=furnitureRegistry.filter(other=>other.room===item.room&&other.surfaceType==='table').find(other=>{const dx=Math.abs(nx-other.group.position.x),dz=Math.abs(nz-other.group.position.z);return dx+item.width/2<=other.width/2-.08&&dz+item.depth/2<=other.depth/2-.08});}item.supportId=support?.id||null;const nextY=support?support.group.position.y+support.surfaceY+.015:0;if(canPlaceFurniture(item,nx,nz,g.rotation.y)){const ox=g.position.x,oy=g.position.y,oz=g.position.z,oa=g.rotation.y;g.position.x=nx;g.position.z=nz;g.position.y=nextY;moveSupportedFurniture(item,ox,oy,oz,oa)}else item.supportId=previousSupport;}
      }
     }e.preventDefault();return;
    }
