@@ -1445,7 +1445,7 @@ function initArday3D(){
    phase+=dt*(moving?9:2);
    if(moving){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.82;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.9});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.58;a.shoulder.rotation.z=a.side*Math.sin(phase+i*Math.PI)*.045;a.elbow.rotation.x=-.1+Math.max(0,Math.sin(phase+i*Math.PI))*.08});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
    else{
-    legs.forEach(l=>{l.hip.rotation.x+=(pose==='sit'?-1.15:pose==='sleep'?-1.35:0-l.hip.rotation.x)*.12;l.knee.rotation.x+=(pose==='sit'?1.45:pose==='sleep'?1.5:0-l.knee.rotation.x)*.12});
+    legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
     const reading=activeActivity==='read',typing=['write','work','computerWork','computerPlay'].includes(activeActivity);
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
