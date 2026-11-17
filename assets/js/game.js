@@ -577,7 +577,7 @@ function openFurnitureActions(kind){
  const sets={
   sofa:{title:'沙发',items:[['坐下休息','rest'],['靠着沙发待一会儿','company']]},
   bed:{title:'床',items:[['躺下休息','sleep']]},
-  chair:{title:'椅子',items:[['坐下休息','rest'],['坐在这里陪我一会儿','company']]}
+  chair:{title:'椅子',items:[['坐下休息','sitChair'],['坐在这里陪我一会儿','sitChair']]}
  };
  const set=sets[kind];if(!set)return;
  $('drawerTitle').textContent=set.title+' · 互动';
@@ -1053,7 +1053,7 @@ function initArday3D(){
   const legs=[];
   for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.135,.82,0);rig.add(hip);const thigh=cyl(hip,0,-.22,0,.088,.48,trouserMat,16);thigh.position.y=-.22;const knee=new T.Group();knee.position.set(0,-.46,0);hip.add(knee);ell(knee,0,0,0,.078,.082,.078,trouserMat,14);const shin=cyl(knee,0,-.2,0,.06,.4,trouserMat,16);shin.position.y=-.2;ell(knee,0,-.41,.075,.09,.07,.2,shoeMat,16);box(knee,0,-.47,.12,.17,.035,.2,M(0x171a20));legs.push({hip,knee,side})}
   const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
-  const positions={sofa:[-2.55,0,1.05],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
+  const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0;
   let activeActivity='idle',idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0);
@@ -1348,7 +1348,7 @@ function initArday3D(){
    const loc=act==='sleep'?'bed':(['cook','cookTogether'].includes(act)?'kitchen':meta.location);
    const characterRoom=act==='sleep'?'bedroom':(['cook','cookTogether'].includes(act)?'kitchen':'living');
    person.visible=characterRoom===roomMode;
-   const p=positions[loc]||positions.center;target.set(...p);pose=meta.pose||'wave';basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
+   let p=positions[loc]||positions.center;if(act==='sitChair'){const chair=furnitureRegistry.find(it=>(it.name==='椅子'||it.name==='餐桌椅')&&it.room===roomMode);if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z]}}target.set(...p);pose=meta.pose||'wave';if(act==='rest'||act==='company'||act==='sitChair')person.rotation.y=Math.PI;basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
    rig.rotation.set(0,0,0);rig.position.set(0,0,0);if(act==='sleep')rig.rotation.set(-Math.PI/2,Math.PI,0);
