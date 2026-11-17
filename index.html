@@ -1467,44 +1467,82 @@ function initArday3D(){
   ];
   function createOwnedFurniture(name,record=null){
    const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
-   const id=record?.id||('owned-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
-   const group=new T.Group();group.userData.ownedType=name;group.position.set(record?.x??0,0,record?.z??0);group.rotation.y=record?.rotation||0;parent.add(group);
-   const mat=(color,rough=.8)=>new T.MeshStandardMaterial({color,roughness:rough});
-   const wood=mat(0x9a7252),cream=mat(0xe8d9c5),green=mat(0x78916e),terra=mat(0xc58d70),dark=mat(0x594d45);
-   const addBox=(x,y,z,w,h,d,m)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);group.add(o);return o};
-   if(name==='抱枕'){
-    addBox(0,.25,0,.72,.28,.58,cream);addBox(0,.39,0,.62,.035,.48,terra);
-   }else if(name==='绿植'){
-    const pot=new T.Mesh(new T.CylinderGeometry(.2,.15,.34,16),terra);pot.position.y=.17;group.add(pot);
-    for(let i=0;i<5;i++){const a=i*Math.PI*2/5,leaf=new T.Mesh(new T.SphereGeometry(.18,12,10),green);leaf.scale.set(.65,1.8,.55);leaf.position.set(Math.cos(a)*.18,.55+(i%2)*.1,Math.sin(a)*.18);group.add(leaf)}
-   }else if(name==='书桌'){
-    addBox(0,.92,0,1.35,.13,.72,wood);for(const x of [-.56,.56])for(const z of [-.27,.27])addBox(x,.45,z,.09,.85,.09,dark);
+   const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
+   const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
+   const mat=(color,rough=.78,metalness=0)=>new T.MeshStandardMaterial({color,roughness:rough,metalness});
+   const m={wood:mat(0x946746),oak:mat(0xc39a70),fabric:mat(0xb9a1a0,.95),cream:mat(0xeee1cf,.9),dark:mat(0x39434b,.45),metal:mat(0x858783,.3,.72),leaf:mat(0x477a4d,.9),leaf2:mat(0x88a968,.9),clay:mat(0xb56d50),gold:mat(0xc5a15d,.35,.5),wall:mat(0xf0e4d2),screen:mat(0x25465b,.2)};
+   const box=(x,y,z,w,h,d,material)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
+   const cyl=(x,y,z,top,bottom,h,material)=>{const o=new T.Mesh(new T.CylinderGeometry(top,bottom,h,20),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;return o};
+   const sphere=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,20,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;return o};
+   let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
+   const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
+   if(name==='地毯'){
+    width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
+    box(0,.035,0,width,.07,depth,m.fabric);box(0,.074,0,3.48,.012,2.48,m.cream);box(0,.083,0,3.25,.012,2.25,m.fabric);
+    for(const x of [-1.7,1.7])for(const z of [-1.2,1.2])box(x,.092,z,.14,.012,.14,m.gold);
+    for(let x=-1.5;x<=1.5;x+=.24){box(x,.08,-1.34,.018,.018,.14,m.gold);box(x,.08,1.34,.018,.018,.14,m.gold)}
+   }else if(name==='沙发'){
+    width=2.5;depth=1.25;height=1.25;
+    box(0,.38,0,2.35,.42,1.05,m.wood);box(0,.78,-.42,2.35,.78,.22,m.fabric);
+    box(-1.08,.76,.02,.22,.78,1.05,m.fabric);box(1.08,.76,.02,.22,.78,1.05,m.fabric);
+    box(0,.67,.08,1.95,.2,.78,m.cream);
+    for(const x of [-.68,0,.68]){box(x,.83,-.25,.56,.31,.12,m.fabric);box(x,.83,-.25,.49,.25,.1,m.cream)}
+    legs(2.12,.95,.25,.1);
+   }else if(name==='壁画'){
+    width=1.5;depth=.12;height=1.15;wallAxis='x';wallSide='back';anchor=[0,1.9];
+    box(0,0,0,1.5,1.15,.12,m.gold);box(0,0,.07,1.36,1.01,.035,m.wood);box(0,0,.095,1.25,.9,.018,m.wall);
+    sphere(-.25,.08,.12,.32,.44,.025,m.clay);sphere(.16,-.12,.13,.42,.28,.026,m.leaf);
+    box(0,-.39,.14,.9,.035,.018,m.gold);
+   }else if(name==='隔断'){
+    width=2.35;depth=.25;height=2.05;
+    for(const x of [-1.05,0,1.05]){box(x,1.02,0,.08,2,.12,m.wood);box(x,1.02,.075,.72,1.82,.055,m.cream)}
+    for(const y of [.18,.55,1.48,1.85])box(0,y,0,2.2,.045,.18,m.oak);
+    for(const x of [-1.13,1.13])box(x,.09,0,.18,.16,.32,m.wood);
+   }else if(name==='棕榈树绿植'){
+    width=.9;depth=.9;height=2.25;cyl(0,.25,0,.34,.25,.5,m.clay);cyl(0,.51,0,.28,.28,.07,m.gold);cyl(0,1.18,0,.095,.12,1.35,m.wood);
+    for(let i=0;i<9;i++){const angle=i*Math.PI*2/9,leaf=sphere(Math.cos(angle)*.32,1.82+Math.sin(i*2)*.08,Math.sin(angle)*.32,.18,.72,.1,i%2?m.leaf:m.leaf2);leaf.rotation.z=-Math.cos(angle)*.75;leaf.rotation.x=Math.sin(angle)*.75}
+    sphere(0,1.83,0,.25,.24,.25,m.leaf);
    }else if(name==='书架'){
-    for(const x of [-.55,.55])addBox(x,1.05,0,.1,2.1,.42,wood);
-    for(const y of [.12,.78,1.44,2.08])addBox(0,y,0,1.2,.09,.45,wood);
-    for(let y=.35;y<1.95;y+=.66)for(let j=0;j<3;j++)addBox(-.35+j*.35,y,.02,.22,.42,.28,[cream,terra,green][j]);
-   }else if(name==='唱片机'){
-    addBox(0,.36,0,.8,.18,.62,dark);addBox(-.08,.47,0,.43,.035,.43,wood);
-    const disc=new T.Mesh(new T.CylinderGeometry(.17,.17,.025,24),dark);disc.rotation.x=Math.PI/2;disc.position.set(-.08,.5,0);group.add(disc);
-    addBox(.27,.5,-.15,.06,.35,.06,wood);
-   }else{
-    addBox(0,.3,0,.7,.6,.55,cream);
-   }
-   const dims={抱枕:[.8,.65],绿植:[.55,.55],书桌:[1.45,.82],书架:[1.3,.55],唱片机:[.9,.7]};
-   const [width,depth]=dims[name]||[.8,.7];
-   const item=registerFurniture({id,name,room,group,width,depth,anchor:[0,.5],action:()=>say(name+'摆在这里。')});
-   item.owned=true;
-   if(record){group.position.set(record.x,0,record.z);group.rotation.y=record.rotation||0}
+    width=1.45;depth=.55;height=2.1;
+    for(const x of [-.66,.66])box(x,1.05,0,.12,2.1,.5,m.wood);
+    for(const y of [.12,.72,1.32,1.92,2.08])box(0,y,0,1.42,.09,.54,m.oak);
+    for(let level=0;level<3;level++)for(let j=0;j<5;j++){const h=.34+(j%2)*.08;box(-.48+j*.24,.32+level*.6,0,.18,h,.32,[m.clay,m.leaf,m.gold,m.dark,m.cream][j])}
+   }else if(name==='书桌'||name==='餐桌'){
+    const dining=name==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
+    box(0,height,0,width,.14,depth,m.wood);box(0,height+.075,0,width-.1,.025,depth-.1,m.cream);
+    if(dining){box(0,.42,0,.16,.72,.16,m.wood);box(0,.12,0,1.4,.12,.72,m.wood)}else{legs(width,depth,height-.08,.09);box(0,.28,-.3,.72,.08,.42,m.wood)}
+   }else if(name==='椅子'||name==='餐桌椅'){
+    width=.72;depth=.78;height=1.05;box(0,.48,0,.62,.12,.62,m.oak);legs(.62,.62,.48,.065);
+    box(0,.91,-.27,.62,.82,.1,m.wood);box(0,.93,-.2,.52,.62,.055,m.fabric);
+    for(const x of [-.3,.3])box(x,.62,.02,.07,.5,.07,m.wood);
+   }else if(name==='电脑'){
+    width=.78;depth=.62;height=.62;surfaceType='tabletop';surfaceY=.04;
+    box(0,.46,-.13,.72,.46,.07,m.dark);box(0,.46,-.08,.64,.37,.018,m.screen);
+    box(0,.21,-.12,.1,.12,.1,m.metal);box(0,.13,-.12,.38,.045,.22,m.metal);
+    box(0,.055,.16,.72,.055,.24,m.dark);box(0,.09,.16,.62,.018,.17,m.cream);
+   }else if(name==='捧花摆件'){
+    width=.55;depth=.55;height=.58;surfaceType='tabletop';surfaceY=.04;cyl(0,.18,0,.18,.24,.32,m.clay);cyl(0,.35,0,.16,.16,.05,m.gold);
+    for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;cyl(Math.cos(angle)*.08,.63,Math.sin(angle)*.08,.018,.022,.42,m.leaf);sphere(Math.cos(angle)*.11,.82+(i%2)*.06,Math.sin(angle)*.11,.13,.17,.12,[m.cream,m.clay,m.gold][i%3])}
+   }else{toast('没有找到这种家具模型');return null}
+   let x=record?.x??0,z=record?.z??0,y=record?.y??0,rotation=record?.rotation||0;
+   if(record?.supportId){const support=furnitureRegistry.find(it=>it.id===record.supportId);if(support){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}}
+   if(name==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
+   group.position.set(x,y,z);group.rotation.y=rotation;
+   const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action});
+   item.owned=true;item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
+   if(record){group.position.set(record.x??x,record.y??y,record.z??z);group.rotation.y=record.rotation||0}
    else{
-    const candidates=[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
-    const spot=candidates.find(([x,z])=>canPlaceFurniture(item,x,z,group.rotation.y));
-    if(!spot){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
-    group.position.set(spot[0],0,spot[1]);
+    let support=null;
+    if(surfaceType==='tabletop')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
+    else if(surfaceType==='floor')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
+    if(support){item.supportId=support.id;group.position.y=support.group.position.y+support.surfaceY}
+    const candidates=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
+    let placed=false;for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
+    if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
-   persistFurniture(item);
    s.placedFurniture=s.placedFurniture||[];
-   if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,z:group.position.z,rotation:group.rotation.y});
-   return item;
+   if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
+   persistFurniture(item);return item;
   }
   const hotspotWorld=new T.Vector3();
   (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
