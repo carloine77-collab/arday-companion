@@ -191,29 +191,15 @@ function renderEvents(){
  const open=s.events.filter(e=>e.status==='open').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='最近发生的事';$('choices').innerHTML='';
- const groups=[
-  ['daily','日常生活中的明确事件','阿尔日常生活中实际发生的事情'],
-  ['random','系统随机生成的生活事件','由生活状态与随机情境触发'],
-  ['proposal','阿尔主动提出的共同计划','阿尔希望与你一起完成的安排'],
-  ['player','玩家操作直接产生的事件','由你的购买、装修和摆放等操作产生']
- ];
- if(!open.length)$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';
- groups.forEach(([key,title,description])=>{
-  const items=open.filter(e=>eventCategory(e)===key);
-  const section=document.createElement('section');section.className='event-group';
-  const head=document.createElement('div');head.className='event-group-head';head.innerHTML='<span>'+title+'</span><small>'+items.length+'</small>';section.appendChild(head);
-  const note=document.createElement('p');note.className='event-group-note';note.textContent=description;section.appendChild(note);
-  if(!items.length){const empty=document.createElement('div');empty.className='event-group-empty';empty.textContent='暂无记录';section.appendChild(empty)}
-  items.forEach(e=>{
-   const b=document.createElement('button');b.type='button';b.className='choice event-card';
-   const mark=document.createElement('span');mark.className='event-mark';mark.textContent=key==='proposal'?'✦':key==='random'?'◇':key==='player'?'↗':'·';
-   const copy=document.createElement('span');copy.className='event-copy';
-   const titleNode=document.createElement('strong');titleNode.textContent=e.title;
-   const detailNode=document.createElement('small');detailNode.textContent=e.detail;
-   copy.append(titleNode,detailNode);const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='›';b.append(mark,copy,arrow);
-   b.onclick=()=>eventChoices(e);section.appendChild(b);
-  });
-  $('choices').appendChild(section);
+ if(!open.length){$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';}
+ open.forEach(e=>{
+  const b=document.createElement('button');b.type='button';b.className='choice event-card';
+  const copy=document.createElement('span');copy.className='event-copy';
+  const titleNode=document.createElement('strong');titleNode.textContent=e.title;
+  const detailNode=document.createElement('small');detailNode.textContent=e.detail;
+  const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  copy.append(titleNode,detailNode,timeNode);const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='›';b.append(copy,arrow);
+  b.onclick=()=>eventChoices(e);$('choices').appendChild(b);
  });
  $('drawer').classList.add('open');
 }
@@ -1024,8 +1010,10 @@ function initArday3D(){
   kitchen.visible=false;bedroom.visible=false;
   // Detailed stylized character with articulated shoulders, elbows, hips and knees.
   const person=new T.Group();scene.add(person);const rig=new T.Group();person.add(rig);const body=new T.Group();rig.add(body);
-  const skinMat=M(0xe6b18e,.72),skinShadow=M(0xc9896c),hairMat=M(0x302a2c),hairHi=M(0x4a3a3b),shirtMat=M(0x536f8c),shirtLight=M(0x7895ad),trouserMat=M(0x3e4859),shoeMat=M(0x302d35),eyeMat=M(0x332b2a),whiteMat=M(0xf7eee3);
-  function ell(parent,x,y,z,sx,sy,sz,mat,seg=18){return ball(parent,x,y,z,sx,sy,sz,mat,seg)}
+  const CM=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color,roughness,flatShading:true}));
+  const skinMat=CM(0xe6b18e,.82),skinShadow=CM(0xc9896c),hairMat=CM(0x302a2c),hairHi=CM(0x4a3a3b),shirtMat=CM(0x536f8c),shirtLight=CM(0x7895ad),trouserMat=CM(0x3e4859),shoeMat=CM(0x302d35),eyeMat=CM(0x332b2a),whiteMat=CM(0xf7eee3);
+  // Premium low-poly: controlled facets, clean silhouette and restrained material palette.
+  function ell(parent,x,y,z,sx,sy,sz,mat,seg=18){const o=new T.Mesh(new T.SphereGeometry(1,Math.min(seg,12),8),mat);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
   ell(body,0,1.27,0,.275,.59,.19,shirtMat,24);ell(body,0,1.67,.015,.19,.105,.17,shirtLight,18);
   box(body,0,1.25,.225,.022,.42,.014,shirtLight);for(let y of [1.43,1.25,1.07])ell(body,.04,y,.244,.018,.018,.012,whiteMat,10);
   const collarL=new T.Mesh(new T.ConeGeometry(.14,.24,4),shirtLight);collarL.position.set(-.105,1.64,.19);collarL.rotation.z=-.18;body.add(collarL);
@@ -1385,7 +1373,7 @@ function initArday3D(){
   function applyWallpaperToRoom(root,id){
    const color=wallpaperColors[id]??wallpaperColors['buy-wallpaper-warm-white'],texture=roomWallMap;
    (root.userData.wallMeshes||[]).forEach(mesh=>{
-    const previous=mesh.material,material=applyPainterMap(M(color),texture,.004);
+    const previous=mesh.material,material=applyPainterMap(stylizeMaterial(new T.MeshStandardMaterial({color,roughness:.9})),texture,.004);
     material.side=T.DoubleSide;
     if(previous?.transparent){material.transparent=true;material.opacity=previous.opacity??1;material.depthWrite=false}
     mesh.material=material;
