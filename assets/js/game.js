@@ -618,7 +618,7 @@ const furnitureActivityMap={
  stove:{title:'灶台',action:'kitchen'},
  sink:{title:'水槽',activities:['wash']},
  bed:{title:'床',activities:['rest']},
- chair:{title:'椅子',activities:['rest','chat']},
+ chair:{title:'椅子',activities:['sitChair']},
  bookshelf:{title:'书架',activities:['read']},
  desk:{title:'书桌',activities:['read','computerPlay']},
  computer:{title:'电脑',activities:['computerPlay']},
@@ -1499,40 +1499,36 @@ function initArday3D(){
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:13.4;applyCamera();
   }
   function updateActivity(a){
-   const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave'};
-   activeActivity=act;
-   const loc=act==='sleep'?'bed':meta.location;
-   const characterRoom=act==='sleep'?'bedroom':'living';
-   person.visible=characterRoom===roomMode;
-   let p=positions[loc]||positions.center,faceAngle=person.rotation.y;
-   const deskActivities=['read','write','work','computerWork','computerPlay'];
-   if(deskActivities.includes(act)){
-    const computer=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='电脑');
-    const desk=computer&&furnitureRegistry.find(it=>it.id===computer.supportId)||furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='书桌');
-    const seatCandidates=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name==='餐桌椅'||it.name.startsWith('椅子·')));
-    const seat=desk&&seatCandidates.sort((a,b)=>Math.hypot(a.group.position.x-desk.group.position.x,a.group.position.z-desk.group.position.z)-Math.hypot(b.group.position.x-desk.group.position.x,b.group.position.z-desk.group.position.z))[0];
-    if(desk){
-     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=Math.atan2(desk.group.position.x-seat.group.position.x,desk.group.position.z-seat.group.position.z);}
-     else{const forward=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+forward.x,0,desk.group.position.z+forward.z];faceAngle=Math.atan2(desk.group.position.x-p[0],desk.group.position.z-p[2]);}
-    }
-   }else if(act==='bouquet'){
-    const bouquet=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='捧花摆件');
-    if(bouquet){p=[bouquet.group.position.x,0,bouquet.group.position.z+.9];faceAngle=Math.PI;}
-   }else if(act==='sitChair'){
-    const chair=furnitureRegistry.find(it=>(it.name==='椅子'||it.name==='餐桌椅'||it.name.startsWith('椅子·'))&&it.room===roomMode);
-    if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z]}
+   const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave',anchor:'default'};
+   activeActivity=act;const characterRoom=act==='sleep'?'bedroom':'living';person.visible=characterRoom===roomMode;
+   const anchor=meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y;
+   const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
+   const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
+   if(anchor==='desk'){
+    const computer=furniture(it=>it.name==='电脑')[0],desk=(computer&&furniture(it=>it.id===computer.supportId)[0])||furniture(it=>it.name.startsWith('书桌'))[0];
+    if(desk){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),desk.group.position);
+     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=Math.atan2(desk.group.position.x-seat.group.position.x,desk.group.position.z-seat.group.position.z)}
+     else{const offset=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+offset.x,0,desk.group.position.z+offset.z];faceAngle=Math.atan2(desk.group.position.x-p[0],desk.group.position.z-p[2])}}
+   }else if(anchor==='shelf'){
+    const shelf=furniture(it=>it.name.startsWith('书架'))[0];if(shelf){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2])}
+   }else if(anchor==='sofa'){
+    const sofa=furniture(it=>it.name.startsWith('沙发'))[0];if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI}
+   }else if(anchor==='table'){
+    const table=furniture(it=>it.name.startsWith('餐桌'))[0];if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2])}
+   }else if(anchor==='chair'){
+    const chair=furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),roomMode)[0];if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z];faceAngle=chair.group.rotation.y+Math.PI}
+   }else if(anchor==='bouquet'){
+    const bouquet=furniture(it=>it.name==='捧花摆件')[0];if(bouquet){p=[bouquet.group.position.x,0,bouquet.group.position.z+.9];faceAngle=Math.PI}
+   }else if(anchor==='bed'){
+    const bed=furniture(it=>it.name.startsWith('床'),'bedroom')[0];if(bed){const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y}
    }
-   if(['read'].includes(act)){const shelf=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('书架'));if(shelf){const seat=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name.startsWith('椅子·'))).sort((a,b)=>Math.hypot(a.group.position.x-shelf.group.position.x,a.group.position.z-shelf.group.position.z)-Math.hypot(b.group.position.x-shelf.group.position.x,b.group.position.z-shelf.group.position.z))[0];const offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2]);}}
-   if(['rest','chat','company'].includes(act)){const sofa=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('沙发'));if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI;}}
-   if(act==='eat'||act==='food'){const table=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='餐桌');if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2]);}}
-   if(act==='sleep'){const bedItem=furnitureRegistry.find(it=>it.room==='bedroom'&&it.name.startsWith('床'));if(bedItem){/* The rig is rotated onto its side; its head sits 2.18 units behind the root along the bed's local -Z axis. Keep the whole head inside the mattress footprint, regardless of bed depth or rotation. */const mattressHalf=(Number(bedItem.depth)||3.42)/2;const headBack=2.18+.405;const localHeadClearance=.16;const sleepZ=Math.min(mattressHalf-.2,Math.max(.98,headBack-mattressHalf+localHeadClearance));const local=new T.Vector3(0,.92,sleepZ).applyAxisAngle(new T.Vector3(0,1,0),bedItem.group.rotation.y);p=[bedItem.group.position.x+local.x,bedItem.group.position.y+local.y,bedItem.group.position.z+local.z];faceAngle=bedItem.group.rotation.y;}}
-   target.set(...p);pose=meta.pose||'wave';activityFacing=faceAngle;if(['rest','company','sitChair',...deskActivities].includes(act)||act==='bouquet'||act==='sleep')person.rotation.y=faceAngle;basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
+   target.set(...p);pose=meta.pose||'wave';activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','bouquet','bed'].includes(anchor))person.rotation.y=faceAngle;
+   basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
    rig.rotation.set(0,0,0);rig.position.set(0,0,0);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep')rig.rotation.set(-Math.PI/2,0,0);
-   body.position.y=pose==='sit' ? -.32:0;
-   legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
-   arms.forEach((a,i)=>{a.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);a.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
+   body.position.y=pose==='sit'?-.32:0;legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
+   arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,furnitureTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
