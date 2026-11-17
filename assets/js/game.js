@@ -887,6 +887,26 @@ function initArday3D(){
   const furniturePalette={0xd8d5ce:0x343b46,0x8b7764:0x6e7782,0x513a2b:0x252c36,0x806044:0x586473,0xd9cdbb:0x40566e,0xc4b49e:0x5b7186,0xb2a18c:0x2d3f55,0xf1eee7:0xcbd2d8,0xd7b990:0x65717f,0xe7d4ba:0x7f8b98,0xb58c68:0x556272,0xd5d1c9:0x343b46,0x8c7966:0x6e7782,0xd0d1d0:0x3b4654,0x87786f:0x727e8a,0x805b4e:0x252c36,0xf8eee4:0xcbd2d8,0xfaf0e7:0xd8dee3,0xf0d9d1:0x566d84,0x7897b5:0x263d58,0xd9b7b5:0x4a627b,0xc6a3ad:0x38a4b5,0x9a7059:0x3c4653,0xc99570:0x7d8a96,0xb98968:0x586473,0xd8bd91:0x65717f,0xf1dfbd:0xadb8c2,0x8c6c62:0x2d3540,0xc49b7f:0x65717f,0xc68f9d:0x2d3f55,0x8a7867:0x6e7782,0x9dc3bd:0x405c68,0x9a7655:0x252c36,0xc98d6d:0x65717f,0xe7b89b:0x38a4b5,0xd9a184:0x5b7186,0xe9dfd0:0xcbd2d8,0x78917a:0x3f5668,0x9eb49a:0x536d7b,0x6b856c:0x405c68,0xe4e2d9:0xcbd2d8,0x8c8a83:0x7f8b98,0x4e514b:0x252c36,0x8d8981:0x65717f,0x91b8ba:0x38a4b5,0x65452f:0x252c36,0x9a704b:0x586473,0xd6b77d:0x38a4b5,0xf1e5d1:0xcbd2d8,0x77513b:0x252c36,0x718778:0x405c68,0xf4f2ed:0xcbd2d8,0x514b43:0x252c36,0xfff1dc:0xcbd2d8,0xc8d0d8:0x7f8b98,0xe4d9c7:0x40566e,0xd3c5b1:0x5b7186,0xc2b39e:0x7f8b98,0x67452f:0x252c36,0x8a6344:0x586473};
   const recolorFurniture=color=>furniturePalette[color]??color;
   const M=(color,roughness=.82)=>new T.MeshStandardMaterial({color:recolorFurniture(color),roughness});
+  // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
+  const inkOutlineMaterial=new T.ShaderMaterial({
+   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.88},outlineThickness:{value:.012}},
+   vertexShader:`uniform float outlineThickness;
+    void main(){vec3 expanded=position+normalize(normal)*outlineThickness;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
+   fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
+    void main(){gl_FragColor=vec4(outlineColor,outlineAlpha);}`,
+   side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
+  });
+  function applyInkOutlines(root){
+   root.traverse(object=>{
+    if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    if(!materials.some(material=>material&&material.isMeshStandardMaterial&&!material.transparent&&(material.opacity??1)>.94&&(material.roughness??1)>.28))return;
+    const shell=new T.Mesh(object.geometry,inkOutlineMaterial);
+    shell.name='hand-drawn-ink-outline';shell.userData.inkOutline=true;shell.frustumCulled=false;
+    shell.castShadow=false;shell.receiveShadow=false;shell.renderOrder=1;
+    object.userData.hasInkOutline=true;object.add(shell);
+   });
+  }
   const m={wall:M(0xd8d5ce),floor:M(0x8b7764),wood:M(0x513a2b),oak:M(0x806044),sofa:M(0xd9cdbb),sofa2:M(0xc4b49e),skin:M(0xd9a17c),hair:M(0x302629),shirt:M(0x526575),pants:M(0x454c5c),glass:M(0x8fa9b1,.2),rug:M(0xb2a18c),leaf:M(0x64775d),dark:M(0x423a36),cream:M(0xf1eee7)};
   function box(parent,x,y,z,w,h,d,material){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
@@ -1197,6 +1217,7 @@ function initArday3D(){
    let modelMeshCount=0;
    group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
    if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
+   applyInkOutlines(group);
    group.visible=true;group.updateMatrixWorld(true);
    let x=record?.x??0,z=record?.z??0,y=record?.y??(wallAxis?2.65:0),rotation=record?.rotation||0;
    // Wall cabinets are modeled around their local origin; legacy saves stored them at floor height.
@@ -1528,6 +1549,7 @@ function initArday3D(){
    if(t-lastDraw>16){renderer.render(scene,camera);lastDraw=t}
    arday3D.raf=requestAnimationFrame(frame)}
   scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+  applyInkOutlines(scene);
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
   arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':'living';const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;if(id.startsWith('buy-wallpaper-')){finishes[room]=finishes[room]||{};finishes[room].wallpaper=id;const color=id==='buy-wallpaper-deepblue'?0x243b59:0x8b929c;(root.userData.wallMeshes||[]).forEach(mesh=>{mesh.material=M(color);mesh.material.side=T.DoubleSide})}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const color=id==='buy-floor-concrete'?0x69727b:0x424d5b;root.userData.floorMesh.material=M(color)}} ,getRoom:()=>roomMode,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:name=>{const item=createOwnedFurniture(name);if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
