@@ -1210,7 +1210,7 @@ function initArday3D(){
    if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
    group.visible=true;group.updateMatrixWorld(true);
    let x=record?.x??0,z=record?.z??0,y=record?.y??0,rotation=record?.rotation||0;
-   if(record?.supportId){const support=furnitureRegistry.find(it=>it.id===record.supportId);if(support){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}}
+   if(record?.supportId){const savedSupport=s.placedFurniture?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.name==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}}
    if(name==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
    group.position.set(x,y,z);group.rotation.y=rotation;
    const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action,wallAxis,wallSide,wallRange:4.5});
@@ -1222,7 +1222,6 @@ function initArday3D(){
    else{
     let support=null;
     if(surfaceType==='tabletop')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
-    else if(surfaceType==='floor')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
     if(surfaceType==='tabletop'&&!support){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);toast('电脑和摆件需要先放在书桌或餐桌上');return null}
     if(support){item.supportId=support.id;group.position.y=support.group.position.y+support.surfaceY}
     const candidates=name==='壁画'?[[-2.1,-3.78],[0,-3.78],[2.1,-3.78]]:[[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
@@ -1243,42 +1242,9 @@ function initArday3D(){
   if(!s.placedFurniture.some(item=>item.name==='沙发'&&item.room==='living'))s.placedFurniture.push({id:'arday-cream-walnut-sofa',name:'沙发',room:'living',x:-2.55,y:0,z:1.05,rotation:0,supportId:null});
   (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
 
-  function furnitureCorners(item,x=item.group.position.x,z=item.group.position.z,angle=item.group.rotation.y){
-   const co=Math.cos(angle),si=Math.sin(angle),hx=item.width/2,hz=item.depth/2;
-   return [[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([lx,lz])=>[x+lx*co+lz*si,z-lx*si+lz*co]);
-  }
-  function rectsOverlap(a,b){
-   const axes=[];
-   for(const poly of [a,b])for(let i=0;i<4;i++){
-    const p=poly[i],q=poly[(i+1)%4],dx=q[0]-p[0],dz=q[1]-p[1],len=Math.hypot(dx,dz)||1;
-    axes.push([-dz/len,dx/len]);
-   }
-   for(const [ax,az] of axes){
-    const pa=a.map(p=>p[0]*ax+p[1]*az),pb=b.map(p=>p[0]*ax+p[1]*az);
-    if(Math.max(...pa)<=Math.min(...pb)+.025||Math.max(...pb)<=Math.min(...pa)+.025)return false;
-   }
-   return true;
-  }
-  function canPlaceFurniture(item,x,z,angle=item.group.rotation.y){
-   if(item.wallAxis){
-    const side=item.wallSide||'back',value=side==='back'||side==='front'?x:z;
-    return canPlaceOnWall(item,side,value);
-   }
-   const corners=furnitureCorners(item,x,z,angle);
-   if(corners.some(([px,pz])=>px<roomBounds.minX||px>roomBounds.maxX||pz<roomBounds.minZ||pz>roomBounds.maxZ))return false;
-   for(const other of furnitureRegistry){
-    if(other===item||other.room!==item.room||other.wallAxis)continue;
-    if(item.supportId===other.id||other.supportId===item.id)continue;
-    if(rectsOverlap(corners,furnitureCorners(other)))return false;
-   }
-   if(item.supportId){
-    const support=furnitureRegistry.find(x=>x.id===item.supportId);
-    if(!support)return false;
-    const dx=Math.abs(x-support.group.position.x),dz=Math.abs(z-support.group.position.z);
-    if(dx+item.width/2>support.width/2-.08||dz+item.depth/2>support.depth/2-.08)return false;
-   }
-   return true;
-  }
+  const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
+  const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
+  const canPlaceFurniture=(item,x,z,angle=item.group.rotation.y)=>window.ArdayFurniturePlacement.canPlaceFurniture(item,x,z,angle,furnitureRegistry,roomBounds,canPlaceOnWall);
   function moveSupportedFurniture(parent,oldX,oldY,oldZ,oldAngle){
    const dx=parent.group.position.x-oldX,dz=parent.group.position.z-oldZ,dy=parent.group.position.y-oldY,da=parent.group.rotation.y-oldAngle;
    const co=Math.cos(da),si=Math.sin(da);
