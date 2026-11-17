@@ -1663,15 +1663,11 @@ function initArday3D(){
       const binary=Uint8Array.from(atob(payload),ch=>ch.charCodeAt(0));
       if(binary[0]!==31||binary[1]!==139)throw new Error('模型压缩文件头无效');
       const inflate=()=>{
-       if(typeof DecompressionStream!=='undefined'){
-        return new Response(new Blob([binary]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
-       }
-       if(window.pako)return Promise.resolve(window.pako.ungzip(binary).buffer);
-       return new Promise((resolve,reject)=>{
-        const tag=document.createElement('script');tag.src='https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js';
-        tag.onload=()=>{try{resolve(window.pako.ungzip(binary).buffer)}catch(e){reject(e)}};
-        tag.onerror=()=>reject(new Error('当前浏览器不支持解压，备用解压库也无法加载'));document.head.appendChild(tag);
-       });
+       if(typeof DecompressionStream==='undefined')throw new Error('当前浏览器不支持 gzip 解压（缺少 DecompressionStream），已停止尝试加载外部解压库');
+       try{
+        const stream=new Blob([binary]).stream().pipeThrough(new DecompressionStream('gzip'));
+        return new Response(stream).arrayBuffer().catch(error=>{throw new Error('gzip 解压流失败：'+(error?.message||String(error)))});
+       }catch(error){throw new Error('无法启动 gzip 解压：'+(error?.message||String(error)))}
       };
       return inflate();
      })
@@ -1730,7 +1726,10 @@ function initArday3D(){
       sofa.group.clear();sofa.group.add(model);sofa.group.updateMatrixWorld(true);
       window.__ardaySofaLoaded=true;window.__ardaySofaLoading=false;
       console.info('[Arday] GLB sofa loaded successfully',{size:size.toArray()});
-     }).catch(fail);
+     }).catch(error=>{
+      const detail=error?.message||String(error);
+      fail(new Error('沙发模型链路失败（内嵌数据 → Base64 → gzip → GLB → Three.js）：'+detail));
+     });
    };
    loadModel();
   })();
