@@ -1271,6 +1271,9 @@ function initArday3D(){
   function setRoom(mode){
    roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
+   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living,finish=s.roomFinishes?.[roomMode];
+   if(finish?.wallpaper){const color=finish.wallpaper==='buy-wallpaper-deepblue'?0x243b59:0x8b929c;(root.userData.wallMeshes||[]).forEach(mesh=>{mesh.material=M(color);mesh.material.side=T.DoubleSide})}
+   if(finish?.floor){root.userData.floorMesh.material=M(finish.floor==='buy-floor-concrete'?0x69727b:0x424d5b)}
    const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46};scene.background.set(colors[roomMode]);
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:13.4;applyCamera();
