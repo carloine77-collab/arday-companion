@@ -37,6 +37,16 @@ if((s.furnitureCatalogVersion||0)<2){
  s.roomPositions=s.roomPositions||{};s.roomPositions.living={};
  s.furnitureCatalogVersion=2;
 }
+if((s.roomFurnishingMigration||0)<1){
+ s.placedFurniture=s.placedFurniture||[];
+ s.ownedFurniture=s.ownedFurniture||[];
+ const roomFurniture=s.placedFurniture.filter(item=>item&&['bedroom','kitchen'].includes(item.room));
+ roomFurniture.forEach(item=>{if(item.name&&!s.ownedFurniture.includes(item.name))s.ownedFurniture.push(item.name)});
+ s.placedFurniture=s.placedFurniture.filter(item=>!item||!['bedroom','kitchen'].includes(item.room));
+ s.furnitureLayout=s.furnitureLayout||{};s.furnitureLayout.bedroom={};s.furnitureLayout.kitchen={};
+ s.roomPositions=s.roomPositions||{};s.roomPositions.bedroom={};s.roomPositions.kitchen={};
+ s.roomFurnishingMigration=1;
+}
 s.ownedFurniture=s.ownedFurniture||[];s.placedFurniture=s.placedFurniture||[];
 s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.roomCondition=typeof s.roomCondition==='number'?s.roomCondition:92;s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
