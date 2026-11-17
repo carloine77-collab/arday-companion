@@ -686,3 +686,62 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .interaction-view>.choice:nth-of-type(4){background:linear-gradient(145deg,#e0e4e8,#cfd8df)!important}
 .interaction-view>.choice:nth-of-type(5){background:linear-gradient(145deg,#e9e0d5,#d9cfc3)!important}
 @media(min-width:600px){.drawer .choices.interaction-view{gap:16px!important;padding:17px 15px 30px!important}.interaction-view>.choice{min-height:145px!important;padding:20px 18px!important;font-size:16px!important}}
+
+/* COMPLETE ART DIRECTION RESET — SHOP / INTERACTION */
+.drawer.shop-drawer{background:#d8d2c6!important;border-radius:25px 25px 0 0!important;overflow:hidden!important}
+.drawer.shop-drawer #drawerTitle{padding:16px 21px 12px!important;background:#202d3b!important;color:#f2ecdf!important;font:500 14px Georgia,"Noto Serif SC",serif!important;letter-spacing:.12em!important}
+.drawer .choices.shop-content{display:flex!important;flex-direction:column!important;gap:0!important;padding:0 17px calc(34px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;background:#dcd5c8!important;background-image:radial-gradient(#343e4a12 .7px,transparent .7px)!important;background-size:6px 6px!important;color:#263343!important}
+.shop-content .shop-masthead{position:relative!important;display:flex!important;flex-direction:column!important;min-height:238px!important;margin:0 -17px 15px!important;padding:19px 23px 21px!important;overflow:hidden!important;background:#253448!important;color:#f3ecdd!important}
+.shop-content .shop-kicker{display:flex;justify-content:space-between;align-items:center;color:#d2c7b1;font:700 9px Arial,sans-serif;letter-spacing:.22em}
+.shop-content .shop-kicker span{font:italic 10px Georgia,serif;letter-spacing:.12em}
+.shop-content .shop-coverline{display:flex;justify-content:space-between;align-items:flex-start;margin-top:21px;color:#d6c6a5}
+.shop-content .shop-cover-number{font:italic 14px Georgia,serif}
+.shop-content .shop-cover-season{text-align:right;font:700 8px/1.5 Arial,sans-serif;letter-spacing:.18em}
+.shop-content .shop-cover-title{position:relative;z-index:1;margin-top:3px;color:#f5eddf;font:500 clamp(43px,9vw,68px)/.83 Georgia,"Times New Roman",serif;letter-spacing:-.065em}
+.shop-content .shop-cover-title i{color:#d9bd8b;font-weight:400}
+.shop-content .shop-cover-note{position:relative;z-index:1;margin-top:16px;color:#e0d6c4;font:12px "Noto Serif SC",serif;letter-spacing:.12em}
+.shop-content .shop-cover-stamp{position:absolute;right:20px;bottom:22px;display:grid;place-content:center;width:72px;height:72px;border:1px solid #c7b58b;border-radius:50%;color:#d9c69f;text-align:center;font:italic 9px/1.4 Georgia,serif;letter-spacing:.1em;transform:rotate(10deg)}
+.shop-content .shop-categories{display:flex!important;gap:25px!important;align-items:center!important;margin:0 0 12px!important;padding:8px 3px 12px!important;border:0!important;background:transparent!important}
+.shop-content .shop-categories:after{content:"SELECTED FOR THE HOME";margin-left:auto;color:#89909a;font:8px Arial,sans-serif;letter-spacing:.16em}
+.shop-content .shop-category{position:relative!important;min-height:42px!important;padding:0 1px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#7c7b75!important;font:italic 19px Georgia,"Noto Serif SC",serif!important;letter-spacing:0!important}
+.shop-content .shop-category.active{color:#26384c!important;font-weight:700!important}
+.shop-content .shop-category.active:after{content:"✳";position:absolute;left:calc(50% - 5px);bottom:-11px;width:auto;height:auto;background:none!important;color:#b29b70!important;font:10px Georgia,serif}
+.shop-content .shop-level-one{display:flex!important;flex-wrap:wrap!important;gap:7px!important;padding:6px 0 12px!important;border:0!important;background:transparent!important}
+.shop-content .shop-group{min-height:31px!important;padding:6px 11px!important;border:0!important;border-radius:20px!important;background:#c9c4b8!important;color:#4c5967!important;font:600 10px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.06em!important}
+.shop-content .shop-group.active{background:#34475c!important;color:#f5eddf!important;box-shadow:none!important}
+.shop-content .shop-level-two{display:flex!important;flex-flow:row wrap!important;align-items:center!important;gap:7px 8px!important;width:100%!important;margin:0 0 12px!important;padding:10px 0 12px!important;border:0!important;background:transparent!important;overflow:visible!important;white-space:normal!important}
+.shop-content .shop-level-two:after{content:"CURATED OBJECTS  /  ARDAY EDITION";flex:1 0 100%;padding:2px 0 0;color:#8a8e8e;font:8px Arial,sans-serif;letter-spacing:.2em}
+.shop-content .shop-furniture-type{min-height:30px!important;padding:6px 10px!important;border:1px solid #b9b4a8!important;border-radius:20px!important;background:transparent!important;color:#5b6470!important;font:10px Arial,"Noto Serif SC",sans-serif!important}
+.shop-content .shop-furniture-type.active{border-color:#34475c!important;background:#34475c!important;color:#f4eddf!important}
+.shop-content .shop-search{height:42px!important;margin:0 0 13px!important;padding:0 14px!important;border:0!important;border-radius:3px!important;background:#eee8dc!important;color:#344256!important;box-shadow:none!important;font:italic 13px Georgia,"Noto Serif SC",serif!important}
+.shop-content .shop-search::placeholder{color:#8e8d84}
+.shop-content .shop-product-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;padding:0 0 20px!important;background:transparent!important}
+.shop-content .shop-product-card{position:relative!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:104px auto auto auto!important;gap:5px!important;align-content:start!important;min-width:0!important;min-height:190px!important;padding:0 0 13px!important;overflow:hidden!important;border:0!important;border-radius:2px!important;background:#f0eadf!important;box-shadow:0 5px 12px #28334313!important;text-align:left!important}
+.shop-content .shop-product-card:before{content:"ARDAY  /  OBJECT";position:absolute;z-index:1;left:11px;top:9px;width:auto;height:auto;border:0!important;color:#f4eee1!important;font:7px Arial,sans-serif;letter-spacing:.19em}
+.shop-content .shop-product-icon{grid-column:1!important;grid-row:1!important;display:grid!important;place-items:center!important;width:100%!important;height:104px!important;margin:0!important;border-radius:0!important;background:#d6d4ca!important;color:#33485e!important;font:44px Georgia,serif!important;filter:grayscale(.62) saturate(.35)!important}
+.shop-content .shop-product-info{grid-column:1!important;grid-row:2!important;min-width:0!important;padding:7px 12px 0!important}
+.shop-content .shop-product-info strong{display:block;color:#26384b!important;font:600 15px/1.3 Georgia,"Noto Serif SC",serif!important;overflow-wrap:anywhere}
+.shop-content .shop-product-price{grid-column:1!important;grid-row:3!important;padding:0 12px!important;color:#6c7780!important;font:italic 18px Georgia,serif!important}
+.shop-content .shop-product-buy{grid-column:1!important;grid-row:4!important;justify-self:start!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:76px!important;min-height:30px!important;margin:3px 12px 0!important;padding:6px 13px!important;border:0!important;border-radius:1px!important;background:#34475c!important;color:#f3eddf!important;box-shadow:none!important;font:700 9px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.2em!important}
+.shop-content .shop-product-card:active{transform:scale(.985)!important}
+@media(min-width:600px){.shop-content .shop-masthead{min-height:270px!important;padding:23px 30px 24px!important}.shop-content .shop-cover-title{font-size:76px!important}.shop-content .shop-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:15px!important}.shop-content .shop-product-card{min-height:205px!important;grid-template-rows:118px auto auto auto!important}.shop-content .shop-product-icon{height:118px!important;font-size:48px!important}}
+@media(max-width:430px){.shop-content .shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.shop-content .shop-product-card{grid-template-rows:86px auto auto auto!important;min-height:174px!important}.shop-content .shop-product-icon{height:86px!important;font-size:36px!important}}
+/* Interaction is now an editorial activity poster, not the old button grid. */
+.drawer .choices.interaction-view{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start!important;align-items:stretch!important;gap:13px!important;padding:0 16px 30px!important;background:#e2dbcf!important;background-image:radial-gradient(#303c4b12 .7px,transparent .7px)!important;background-size:6px 6px!important}
+.interaction-view .interaction-masthead{position:relative!important;grid-column:1/-1!important;min-height:220px!important;margin:0 -16px 5px!important;padding:18px 23px 19px!important;overflow:hidden!important;background:#b7c1c1!important;color:#25364a!important}
+.interaction-view .interaction-overline{display:flex;justify-content:space-between;color:#435567;font:700 8px Arial,sans-serif;letter-spacing:.2em}
+.interaction-view .interaction-overline span{font:italic 10px Georgia,serif;letter-spacing:.08em}
+.interaction-view .interaction-bigtitle{position:relative;z-index:1;margin-top:29px;color:#25364a;font:500 clamp(48px,11vw,76px)/.77 Georgia,"Times New Roman",serif;letter-spacing:-.075em}
+.interaction-view .interaction-bigtitle i{color:#f2eddf;font-weight:400}
+.interaction-view .interaction-subtitle{position:relative;z-index:1;margin-top:17px;color:#34485b;font:12px "Noto Serif SC",serif;letter-spacing:.12em}
+.interaction-view .interaction-asterisk{position:absolute;right:22px;bottom:25px;color:#f2eddf;font:70px Georgia,serif;line-height:1}
+.interaction-view:before,.interaction-view:after{display:none!important}
+.interaction-view>.choice{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-end!important;gap:8px!important;min-width:0!important;min-height:145px!important;padding:17px 14px 15px!important;overflow:hidden!important;border:0!important;border-radius:1px!important;background:#f0eadf!important;color:#28394b!important;box-shadow:0 5px 13px #27384a12!important;text-align:left!important;font:600 17px/1.15 Georgia,"Noto Serif SC",serif!important}
+.interaction-view>.choice:before{content:"";position:absolute;right:-22px;top:-25px;width:105px;height:105px;border:1px solid #7e8b8c55;border-radius:50%;box-shadow:0 0 0 9px #7e8b8c12,0 0 0 19px #7e8b8c0b!important}
+.interaction-view>.choice:after{content:"";position:absolute;right:14px;top:13px;width:24px;height:24px;border:1px solid #a5a18f;border-radius:50%}
+.interaction-view>.choice .emoji{display:block!important;margin:0 0 auto!important;color:#526579!important;font:29px Georgia,serif!important;filter:grayscale(.5) saturate(.45)!important}
+.interaction-view>.choice small{margin-top:2px!important;color:#77828a!important;font:italic 10px Georgia,serif!important}
+.interaction-view>.choice:nth-of-type(odd){background:#e5e4dc!important}
+.interaction-view>.choice:nth-of-type(even){background:#eee7da!important}
+.interaction-view>.choice:active{transform:scale(.985)!important}
+@media(min-width:600px){.drawer .choices.interaction-view{gap:16px!important;padding:0 22px 34px!important}.interaction-view .interaction-masthead{min-height:270px!important;margin:0 -22px 7px!important;padding:22px 30px!important}.interaction-view .interaction-bigtitle{font-size:84px!important}.interaction-view>.choice{min-height:175px!important;padding:20px!important;font-size:20px!important}}
