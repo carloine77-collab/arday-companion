@@ -237,10 +237,9 @@ function slotClick(di,h){
  $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
  $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+playerActivityOptions.map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x.icon+'</span>'+x.label+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
  $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
-  let i=+b.dataset.p,option=playerActivityOptions[i],names=playerActivityOptions.map(x=>x.label),pref=option.activity,score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(pref==='cookTogether'&&s.hunger<40?12:0)+(pref==='computerPlay'&&s.fun<40?10:0);
+  let i=+b.dataset.p,option=playerActivityOptions[i],names=playerActivityOptions.map(x=>x.label),pref=option.activity,score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences[pref]||0)*4+(pref==='computerPlay'&&s.fun<40?10:0);
   let accepted=score>12+(di*1.5);
-  if(accepted&&pref==='cookTogether'){s.pendingCookingSlot={key,start:h};openKitchenPanel(true);return;}
-  else if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
+  if(accepted){s.calendar.days[key].push({start:h,end:h+1,title:names[i],kind:'proposal',byPlayer:true,withPlayer:true,activity:pref});s.calendar.days[key].sort((a,b)=>a.start-b.start);remember('planned','约定：'+names[i],1);say('可以，我把这段时间留给我们。');}
   else{change({bored:1});s.rejections=(s.rejections||0)+1;if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];say(['这个时间我不太想这样安排。我们换个时间，或者各自安排也可以。','我知道你想和我一起，不过我现在确实不想这么做。希望你别把拒绝当成对你的否定。','这次我想说得明确一点：不。我有自己的计划。'][Math.min(2,s.rejections-1)]);}
   save();render();renderCalendar();$('drawer').classList.remove('open');toast(accepted?'阿尔接受了邀请':'阿尔拒绝了这次邀请 · 可以换个时间或活动');
  });
@@ -363,7 +362,7 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 
 
 
-const playerActivityOptions=[{label:'烹饪',icon:'🍳',activity:'cookTogether'},{label:'阅读',icon:'📖',activity:'read'},{label:'休息',icon:'☁',activity:'rest'},{label:'外出',icon:'🌿',activity:'walk'},{label:'电脑游戏',icon:'▣',activity:'computerPlay'},{label:'聊天',icon:'💬',activity:'chat'}];
+const playerActivityOptions=[{label:'阅读',icon:'📖',activity:'read'},{label:'休息',icon:'☁',activity:'rest'},{label:'外出',icon:'🌿',activity:'walk'},{label:'电脑游戏',icon:'▣',activity:'computerPlay'},{label:'聊天',icon:'💬',activity:'chat'}];
 function findAvailableSlot(now=new Date(),duration=1){
  const today=keyAt(now),hour=now.getHours();
  for(let offset=0;offset<=2;offset++){
@@ -415,13 +414,7 @@ function ensureScheduleAt(value){
  const currentKey=keyAt(Date.now()),requestedKey=keyAt(value);
  if(!s.calendar)s.calendar={anchor:currentKey,days:{},version:5};
  s.calendar.days=s.calendar.days||{};
- if((s.calendar.version||0)<7){
-  Object.keys(s.calendar.days).forEach(k=>{
-   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['cook','cooking'].includes(ev.activity)&&ev.title!=='烹饪');
-   if(!s.calendar.days[k].length)delete s.calendar.days[k];
-  });
-  s.calendar.version=7;
- }
+ // Apply migrations in ascending order. Never advance the version before older migrations run.
  if((s.calendar.version||0)<6){
   s.calendar.anchor=currentKey;
   Object.keys(s.calendar.days).forEach(k=>{
@@ -429,6 +422,22 @@ function ensureScheduleAt(value){
    if(!s.calendar.days[k].length)delete s.calendar.days[k];
   });
   s.sleepPlans={};s.calendar.version=6;
+ }
+ if((s.calendar.version||0)<7){
+  Object.keys(s.calendar.days).forEach(k=>{
+   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['cook','cooking','cookTogether'].includes(ev.activity)&&!['烹饪','一起做饭'].includes(ev.title));
+   if(!s.calendar.days[k].length)delete s.calendar.days[k];
+  });
+  s.calendar.version=7;
+ }
+ if((s.calendar.version||0)<8){
+  Object.keys(s.calendar.days).forEach(k=>{
+   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['cook','cooking','cookTogether'].includes(ev.activity)&&!['烹饪','一起做饭'].includes(ev.title));
+   if(!s.calendar.days[k].length)delete s.calendar.days[k];
+  });
+  if(s.sharedGoal?.id==='meal'||s.sharedGoal?.action==='cookTogether')s.sharedGoal=null;
+  s.pendingCookingSlot=null;
+  s.calendar.version=8;
  }
  if(s.calendar.anchor!==currentKey){
   s.calendar.anchor=currentKey;
@@ -593,8 +602,8 @@ function openFurnitureActions(kind){
  const sets={
   sofa:{title:'沙发',items:[['休息','rest'],['聊天','chat']]},
   dining:{title:'餐桌',items:[['用餐','eat'],['聊天','chat']]},
-  fridge:{title:'冰箱',items:[['烹饪','cook']]},
-  stove:{title:'灶台',items:[['烹饪','cook']]},
+  fridge:{title:'冰箱',openKitchen:true},
+  stove:{title:'灶台',openKitchen:true},
   sink:{title:'水槽',items:[['洗漱','wash']]},
   bed:{title:'床',items:[['休息','rest']]},
   chair:{title:'椅子',items:[['休息','rest'],['聊天','chat']]},
@@ -604,6 +613,7 @@ function openFurnitureActions(kind){
   bouquet:{title:'捧花摆件',items:[['聊天','chat']]}
  };
  const set=sets[kind];if(!set)return;
+ if(set.openKitchen){openKitchenPanel();return}
  $('drawerTitle').textContent=set.title+' · 互动';
  $('choices').innerHTML='';
  set.items.forEach(([label,activity])=>{
@@ -690,7 +700,6 @@ function ardayLine(kind, fallback){
 }
 function sharedGoalCatalog(){
  return [
-  {id:'meal',title:'认真做几顿晚饭',detail:'不赶时间地一起准备两顿晚餐。',target:2,unit:'顿共同料理',action:'cookTogether'},
   {id:'outing',title:'找一天出门走走',detail:'把手头的事情放一放，一起出门散步两次。',target:2,unit:'次共同出门',action:'walk'}
  ];
 }
@@ -1474,8 +1483,8 @@ function initArday3D(){
   function updateActivity(a){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave'};
    activeActivity=act;
-   const loc=act==='sleep'?'bed':(['cook','cookTogether'].includes(act)?'kitchen':meta.location);
-   const characterRoom=act==='sleep'?'bedroom':(['cook','cookTogether'].includes(act)?'kitchen':'living');
+   const loc=act==='sleep'?'bed':meta.location;
+   const characterRoom=act==='sleep'?'bedroom':'living';
    person.visible=characterRoom===roomMode;
    let p=positions[loc]||positions.center,faceAngle=person.rotation.y;
    const deskActivities=['read','write','work','computerWork','computerPlay'];
