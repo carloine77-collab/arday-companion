@@ -1558,6 +1558,38 @@ function initArday3D(){
   s.placedFurniture=s.placedFurniture||[];
   if(!s.placedFurniture.some(item=>item.name==='沙发'&&item.room==='living'))s.placedFurniture.push({id:'arday-cream-walnut-sofa',name:'沙发',room:'living',x:-2.55,y:0,z:1.05,rotation:0,supportId:null});
   (s.placedFurniture||[]).forEach(record=>createOwnedFurniture(record.name,record));
+  // Replace the temporary sofa geometry with the committed GLB asset.
+  (function loadCreamWalnutSofa(){
+   const sofa=furnitureRegistry.find(item=>item.name==='沙发'&&item.room==='living');
+   if(!sofa||window.__ardaySofaLoading)return;
+   window.__ardaySofaLoading=true;
+   const loadModel=()=>{
+    fetch('https://raw.githubusercontent.com/carloine77-collab/arday-companion/main/assets/arday_sofa.glb.gz.b64')
+     .then(r=>{if(!r.ok)throw new Error('sofa asset HTTP '+r.status);return r.text()})
+     .then(encoded=>{
+      const binary=Uint8Array.from(atob(encoded.trim()),ch=>ch.charCodeAt(0));
+      return new Response(new Blob([binary]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+     })
+     .then(buffer=>new Promise((resolve,reject)=>{
+      new T.GLTFLoader().parse(buffer,'',gltf=>resolve(gltf.scene),reject);
+     }))
+     .then(model=>{
+      const bounds=new T.Box3().setFromObject(model),size=bounds.getSize(new T.Vector3()),center=bounds.getCenter(new T.Vector3());
+      const scale=Math.min(2.25/size.x,.94/size.y,1.12/size.z);
+      model.scale.setScalar(scale);model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
+      sofa.group.clear();sofa.group.add(model);
+      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+      sofa.group.updateMatrixWorld(true);console.info('[Arday] GLB sofa loaded',size.toArray());
+     })
+     .catch(error=>{console.error('[Arday] GLB sofa load failed',error);window.__ardaySofaLoading=false});
+   };
+   const attachLoader=()=>{
+    if(T.GLTFLoader){loadModel();return}
+    const tag=document.createElement('script');tag.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+    tag.onload=loadModel;tag.onerror=()=>{window.__ardaySofaLoading=false;console.error('[Arday] GLTFLoader CDN failed')};document.head.appendChild(tag);
+   };
+   attachLoader();
+  })();
   function furnitureCorners(item,x=item.group.position.x,z=item.group.position.z,angle=item.group.rotation.y){
    const co=Math.cos(angle),si=Math.sin(angle),hx=item.width/2,hz=item.depth/2;
    return [[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([lx,lz])=>[x+lx*co+lz*si,z-lx*si+lz*co]);
