@@ -1483,9 +1483,9 @@ function initArday3D(){
     if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z]}
    }
    if(['read','tidy'].includes(act)){const shelf=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('书架'));if(shelf){const seat=furnitureRegistry.filter(it=>it.room===characterRoom&&(it.name==='椅子'||it.name.startsWith('椅子·'))).sort((a,b)=>Math.hypot(a.group.position.x-shelf.group.position.x,a.group.position.z-shelf.group.position.z)-Math.hypot(b.group.position.x-shelf.group.position.x,b.group.position.z-shelf.group.position.z))[0];const offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2]);}}
-   if(['rest','chat','company'].includes(act)){const sofa=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('沙发'));if(sofa){const offset=new T.Vector3(0,0,-(sofa.depth/2+.58)).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+offset.x,0,sofa.group.position.z+offset.z];faceAngle=Math.atan2(sofa.group.position.x-p[0],sofa.group.position.z-p[2]);}}
+   if(['rest','chat','company'].includes(act)){const sofa=furnitureRegistry.find(it=>it.room===characterRoom&&it.name.startsWith('沙发'));if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI;}}
    if(act==='eat'||act==='food'){const table=furnitureRegistry.find(it=>it.room===characterRoom&&it.name==='餐桌');if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2]);}}
-   if(act==='sleep'){const bedItem=furnitureRegistry.find(it=>it.room==='bedroom'&&it.name.startsWith('床'));if(bedItem){const local=new T.Vector3(0,0,1.55).applyAxisAngle(new T.Vector3(0,1,0),bedItem.group.rotation.y);p=[bedItem.group.position.x+local.x,.86,bedItem.group.position.z+local.z];faceAngle=bedItem.group.rotation.y;}}
+   if(act==='sleep'){const bedItem=furnitureRegistry.find(it=>it.room==='bedroom'&&it.name.startsWith('床'));if(bedItem){const local=new T.Vector3(0,.92,.04).applyAxisAngle(new T.Vector3(0,1,0),bedItem.group.rotation.y);p=[bedItem.group.position.x+local.x,bedItem.group.position.y+local.y,bedItem.group.position.z+local.z];faceAngle=bedItem.group.rotation.y;}}
    target.set(...p);pose=meta.pose||'wave';activityFacing=faceAngle;if(['rest','company','sitChair',...deskActivities].includes(act)||act==='bouquet'||act==='sleep')person.rotation.y=faceAngle;basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
@@ -1505,7 +1505,7 @@ function initArday3D(){
   canvas.style.touchAction='none';canvas.style.pointerEvents='none';
   gestureSurface.style.touchAction='none';
   gestureSurface.addEventListener('pointerdown',e=>{
-   if(e.target.closest('button:not(.furniture-hotspot),[role="button"],input,select,textarea,a,.calendar-view,.drawer,.decorate-tools'))return;
+   if(e.target.closest('button,[role="button"],input,select,textarea,a,.calendar-view,.drawer,.decorate-tools'))return;
    if(e.pointerType==='mouse'&&e.button!==0)return;
    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
    raycaster.setFromCamera(pointerNdc,camera);
