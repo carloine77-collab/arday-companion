@@ -124,9 +124,9 @@
 .stage.three-ready>.kitchen-scene{display:none!important}
 .stage.three-ready.calendar-mode>.three-scene{display:none}
 
-.three-scene{pointer-events:auto;touch-action:none;cursor:grab}
+.three-scene{pointer-events:none!important;touch-action:pan-y;cursor:grab}
 .three-scene:active{cursor:grabbing}
-.three-scene canvas{touch-action:none}
+.three-scene canvas{pointer-events:none!important;touch-action:none!important}
 .bedroom-switch{position:absolute;left:12px;top:12px;z-index:10;min-height:43px;padding:0 13px;border:1px solid #dfcdb4;border-radius:12px;background:#fff9edee;font-size:12px;font-weight:700}
 .camera-hint{position:absolute;left:50%;top:62px;transform:translateX(-50%);z-index:5;padding:5px 10px;border-radius:10px;background:#fff9edc9;color:#6e5b47;font-size:10px;pointer-events:none;white-space:nowrap}
 .stage.kitchen-mode .bedroom-switch,.stage.bedroom-mode .bedroom-switch{background:#fff9edee}
@@ -1193,13 +1193,30 @@ function initArday3D(){
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius;
-  const canvas=renderer.domElement;
-  canvas.style.touchAction='none';
-  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1)drag={x:e.clientX,y:e.clientY};if(pointers.size===2){const p=[...pointers.values()];pinchStart=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);pinchRadius=radius}e.preventDefault()});
-  canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const old=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1&&drag){theta-=(e.clientX-old.x)*.008;phi+=(e.clientY-old.y)*.006;applyCamera()}else if(pointers.size===2){const p=[...pointers.values()],d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);if(pinchStart>0){radius=pinchRadius*pinchStart/Math.max(1,d);applyCamera()}}e.preventDefault()});
+  // Camera gestures are handled by the stage, not the canvas. The canvas itself
+  // is click-through so it can never steal taps from the footer or room controls.
+  const canvas=renderer.domElement,gestureSurface=stage;
+  canvas.style.touchAction='none';canvas.style.pointerEvents='none';
+  gestureSurface.style.touchAction='pan-y';
+  gestureSurface.addEventListener('pointerdown',e=>{
+   if(e.target.closest('button,[role="button"],input,select,textarea,a'))return;
+   if(e.pointerType==='mouse'&&e.button!==0)return;
+   gestureSurface.setPointerCapture(e.pointerId);
+   pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+   if(pointers.size===1)drag={x:e.clientX,y:e.clientY};
+   if(pointers.size===2){const p=[...pointers.values()];pinchStart=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);pinchRadius=radius}
+   e.preventDefault();
+  });
+  gestureSurface.addEventListener('pointermove',e=>{
+   if(!pointers.has(e.pointerId))return;
+   const old=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+   if(pointers.size===1&&drag){theta-=(e.clientX-old.x)*.008;phi+=(e.clientY-old.y)*.006;applyCamera()}
+   else if(pointers.size===2){const p=[...pointers.values()],d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);if(pinchStart>0){radius=pinchRadius*pinchStart/Math.max(1,d);applyCamera()}}
+   e.preventDefault();
+  });
   function endPointer(e){pointers.delete(e.pointerId);if(pointers.size===0)drag=null;if(pointers.size===1){const p=[...pointers.values()][0];drag={x:p.x,y:p.y}}}
-  canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
-  canvas.addEventListener('wheel',e=>{radius=Math.max(7.2,Math.min(21,radius+e.deltaY*.012));applyCamera();e.preventDefault()},{passive:false});
+  gestureSurface.addEventListener('pointerup',endPointer);gestureSurface.addEventListener('pointercancel',endPointer);
+  gestureSurface.addEventListener('wheel',e=>{if(e.target.closest('button'))return;radius=Math.max(7.2,Math.min(21,radius+e.deltaY*.012));applyCamera();e.preventDefault()},{passive:false});
   function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;person.position.lerp(target,1-Math.pow(.002,dt));phase+=dt*(pose==='walk'?8:2);
    if(pose==='walk'){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.48;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.55});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.28;a.elbow.rotation.x=-.12})}
    else if(pose==='wave'){arms[1].shoulder.rotation.x=Math.sin(t*.004)*.22;arms[1].elbow.rotation.x=-.85+Math.sin(t*.006)*.22}
