@@ -1744,7 +1744,7 @@ function initArday3D(){
      box(0,.92,.31,1.78,.16,.13,walnut);for(const x of [-.82,.82]){const roll=soft(x,.78,.18,.18,.12,.48,fabricShade);roll.rotation.z=x<0?-.08:.08}
      width=2.35;depth=1.12;
     }else if(name==='羊毛沙发'||name==='休闲沙发'){
-     const customStart=group.children.length;
+     const customStart=0;
      if(name==='羊毛沙发'){
       width=2.55;depth=1.28;height=.88;
       box(0,.25,0,2.34,.2,.96,walnut);
@@ -1872,21 +1872,47 @@ function initArday3D(){
      }
     }
    }else if(modelName==='书桌'||modelName==='餐桌'){
-    action=()=>modelName==='书桌'?openFurnitureActions('desk',id):openFurnitureActions('dining',id);const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
-    if(dining&&variant==='浅橡木长桌'){box(0,.83,0,2.05,.13,1.12,m.oak);box(0,.91,0,1.98,.025,1.05,m.cream);for(const x of [-.82,.82])for(const z of [-.39,.39])box(x,.4,z,.12,.76,.12,m.wood);box(0,.38,0,1.5,.08,.08,m.wood)}else if(dining){cyl(0,.4,0,.13,.2,.72,m.wood,12);cyl(0,.12,0,.62,.62,.13,m.oak,12);cyl(0,.82,0,.08,.08,.1,m.gold,12);cyl(0,.88,0,.62,.58,.12,m.wood,12);cyl(0,.95,0,.57,.57,.035,m.cream,12)}
-    else{box(0,.78,0,1.55,.12,.82,m.wood);box(0,.86,0,1.48,.025,.75,m.cream);if(variant==='白蜡木极简'){m.wood.color.setHex(0xc4a77f);m.oak.color.setHex(0xe0cba7)}else if(variant==='深胡桃木复古'){m.wood.color.setHex(0x503a2d);m.oak.color.setHex(0x74543a)}if(variant==='抽屉工作台'){box(0,.61,.28,.92,.28,.35,m.oak);for(const x of [-.32,.32])cyl(x,.62,.47,.025,.025,.04,m.gold,10)}for(const x of [-.52,.52]){box(x,.38,0,.12,.72,.72,m.wood);box(x,.4,.38,.68,.06,.08,m.oak)}box(0,.59,-.34,1.25,.28,.1,m.wood);for(const x of [-.42,0,.42])cyl(x,.59,-.275,.025,.025,.04,m.gold,10);box(0,1.02,-.34,1.2,.26,.08,m.oak)}
-    // Desk edge banding, under-top apron and visible joinery details.
-    const topEdge=mat(variant==='深胡桃木复古'?0x3c2b22:0xa98259,.62);
-    box(0,.842,.414,1.49,.018,.018,topEdge);
-    for(const x of [-.52,.52]){
-     box(x,.68,-.27,.095,.17,.055,m.oak);
-     const footCap=new T.Mesh(new T.CylinderGeometry(.067,.067,.035,12),m.dark);
-     footCap.position.set(x,.025,.31);group.add(footCap);
+    action=()=>modelName==='书桌'?openFurnitureActions('desk',id):openFurnitureActions('dining',id);
+    const dining=modelName==='餐桌';width=dining?1.95:1.62;depth=dining?1.15:.88;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
+    if(dining&&variant==='浅橡木长桌'){
+     box(0,.83,0,2.05,.13,1.12,m.oak);box(0,.91,0,1.98,.025,1.05,m.cream);
+     for(const x of [-.82,.82])for(const z of [-.39,.39])box(x,.4,z,.12,.76,.12,m.wood);
+     box(0,.38,0,1.5,.08,.08,m.wood);
+     for(const x of [-.82,.82])box(x,.9,.57,.08,.08,.08,m.gold);
+    }else if(dining){
+     cyl(0,.4,0,.13,.2,.72,m.wood,12);cyl(0,.12,0,.62,.62,.13,m.oak,12);
+     cyl(0,.82,0,.08,.08,.1,m.gold,12);cyl(0,.88,0,.62,.58,.12,m.wood,12);cyl(0,.95,0,.57,.57,.035,m.cream,12);
+    }else if(variant==='白蜡木极简'){
+     const top=mat(0xe0cba7,.58);box(0,.78,0,1.62,.095,.86,m.oak);box(0,.835,0,1.58,.025,.82,top);
+     for(const x of [-.64,.64]){
+      const legA=box(x,.4,-.29,.055,.72,.055,m.wood);legA.rotation.z=x<0?-.045:.045;
+      const legB=box(x,.4,.29,.055,.72,.055,m.wood);legB.rotation.z=x<0?-.045:.045;
+     }
+     box(0,.67,-.31,1.3,.055,.06,m.oak);
+    }else if(variant==='深胡桃木复古'){
+     const walnut=mat(0x503626,.58),edge=mat(0x76543a,.56);
+     box(0,.79,0,1.7,.16,.92,walnut);box(0,.88,0,1.72,.035,.94,edge);
+     box(0,.58,-.32,1.42,.27,.12,walnut);
+     for(const x of [-.48,0,.48]){
+      box(x,.58,-.247,.42,.2,.025,edge);
+      const knob=new T.Mesh(new T.SphereGeometry(.028,12,8),m.gold);knob.position.set(x,.58,-.22);group.add(knob);
+     }
+     for(const x of [-.68,.68])for(const z of [-.34,.34]){
+      const leg=new T.Mesh(new T.CylinderGeometry(.045,.075,.68,12),walnut);leg.position.set(x,.39,z);group.add(leg);
+     }
+     box(0,.36,0,1.38,.07,.72,edge);
+    }else{
+     const carcass=mat(0xb18a61,.7),front=mat(0xd9c4a6,.72);
+     box(-.43,.42,0,.58,.72,.78,carcass);
+     for(let i=0;i<3;i++){
+      const y=.2+i*.22;box(-.43,y,.405,.52,.19,.025,front);
+      cyl(-.43,y,.445,.025,.025,.035,m.gold,10);
+     }
+     box(.42,.78,0,1.0,.1,.86,m.oak);box(.42,.835,0,.98,.025,.82,m.cream);
+     for(const z of [-.34,.34])box(.42,.39,z,.09,.72,.09,m.wood);
+     box(0,.73,-.37,.95,.1,.08,m.oak);
     }
-    for(let i=0;i<9;i++){
-     const x=-.58+i*.145;
-     box(x,.875,.02,.008,.008,.66,m.oak);
-    }
+    for(const z of [-depth/2,depth/2])box(0,height-.012,z,width*.94,.018,.018,m.oak);
    }else if(modelName==='椅子'||modelName==='餐桌椅'){
     action=()=>openFurnitureActions('chair',id);
     width=variant==='软包扶手椅'?.92:.72;depth=.78;height=1.05;
