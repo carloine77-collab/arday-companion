@@ -93,7 +93,9 @@ s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
-function say(t){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});b.textContent=String(t||'');Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'})}
+let dialogueTimer=null;
+function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
+function saySystem(t){say(t,'system')}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
 function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)+Number(v||0)))})}
@@ -422,8 +424,8 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 
 
 function rejectActivityProposal(activity){
- const refusals={chat:['我想先自己待一会儿，晚些再聊吧。','今天暂时没有聊天的兴致。'],computerPlay:['现在不太想玩电脑游戏。','这会儿想做点别的。'],walk:['外面我暂时不想去。','今天不想出门，改天吧。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
- const lines=refusals[activity]||['这会儿不太想做。','我有自己的安排，换个时间吧。'];
+ const refusals={chat:['稍等，我把手上的事忙完。','抱歉，或许我们应该做点别的事。'],computerPlay:['玩物丧志啊。','你有推荐的游戏？我记下了，之后会玩的。'],walk:['我们一起窝在家里吧。','今天似乎很冷。'],read:['我今天读过书啦，该你读书了。','没什么有趣的书。'],rest:['我可不累，还是说，你想去床上做点别的事？','生前何必久睡，死后自会长眠。']};
+ const lines=refusals[activity]||['如果我拒绝你，你会伤心吗？','我很不想拒绝你，但是……'];
  say(lines[Math.floor(Math.random()*lines.length)]);s.rejections=(s.rejections||0)+1;
  if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];
 }
@@ -614,7 +616,7 @@ function openKitchenPanel(){
  }).join('')||'<p class="kitchen-empty-note">还没有收藏其他菜谱，可以去商店的「书籍 · 菜谱」选购。</p>';
  $('drawerTitle').textContent='厨房 · 烹饪';
  $('choices').className='choices cooking-panel';
- $('choices').innerHTML='<header class="kitchen-hero"><div class="kitchen-hero-copy"><span class="kitchen-eyebrow">HOME KITCHEN / DAILY MENU</span><h2>把今天的饭，<em>好好做好。</em></h2><p>用冰箱里的食材，准备一顿简单的家常料理。</p></div><div class="kitchen-hero-mark">餐</div></header><section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div><small>按现有食材制作</small></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><p>完成的料理会收入物品栏，取出后可摆放在房间中</p><button type="button" id="kitchen-close">离开厨房</button></footer>';
+   $('choices').innerHTML='<section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><button type="button" id="kitchen-close">离开厨房</button></footer>;
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));
  $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
  $('drawer').classList.add('open');
@@ -640,7 +642,7 @@ function finishImmediateInteraction(at=Date.now()){
   remember('shared',activityLabel(activity)+' · 即时互动',1);
  }
  presentActivity(s.currentActivity||'idle',s.currentActivityAnchor||null);
- say('好了。我们接着做刚才的事吧。');
+ say('还行。下次也要和我一起。');
  save();render();return true;
 }
 function refreshImmediateInteraction(at=Date.now()){
@@ -657,23 +659,23 @@ function beginImmediateInteraction(action,options={}){
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now);
  const availability=resolveCharacterAvailability(new Date(now));
  if(availability.status!=='available'){
-  const messages={sleeping:'我现在已经睡下了，暂时不回应其他安排。',working:'我正在工作，结束以后再来找我吧。',eating:'我正在吃饭，等吃完再说。',outside:'我已经出门了，回来以后再一起做吧。',busy:'我现在有其他安排，暂时无法回应。'};
-  say(messages[availability.status]||messages.busy);return false;
+  const messages={sleeping:'别吵。',working:'正在工作中，有事请留言。',eating:'你也想来一起吃饭吗？坐下吧。',outside:'有事请留言。',busy:'等阿尔回来再告诉他吧。'};
+  if(availability.status==='busy')saySystem(messages.busy);else say(messages[availability.status]||messages.busy);return false;
  }
- if(s.activeInteraction&&now<Number(s.activeInteraction.endsAt||0)){say('等我把手头这件事做完，好吗？');return false}
+ if(s.activeInteraction&&now<Number(s.activeInteraction.endsAt||0)){say('这么贪心？三心二意可不好。');return false}
  const requiredFurniture=meta.requires;
- if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture)){say('家里还没有适合进行这项活动的家具。');return false}
+ if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture)){saySystem('家里还没有适合进行这项活动的家具。');return false}
  const sourceFurniture=(s.placed||[]).find(item=>item.id===options.furnitureId);
- if(options.source==='furniture'&&sourceFurniture&&!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){say('这件家具附近还没有适合进行这项活动的设备。');return false}
+ if(options.source==='furniture'&&sourceFurniture&&!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){saySystem('这件家具附近还没有适合进行这项活动的设备。');return false}
  const furnitureId=String(options.furnitureId||options.furnitureKind||'unspecified');
  const attemptKey=hourKey,attemptId=furnitureId+'|'+activity,attempts=s.interactionAttempts[attemptKey]||[];
- if(attempts.includes(attemptId)){say('这一个小时里，我们已经为这件事问过一次了。');return false}
+ if(attempts.includes(attemptId)){say('这么想做的话，明天吧。');return false}
  s.interactionAttempts[attemptKey]=[...attempts,attemptId];
  Object.keys(s.interactionAttempts).forEach(key=>{if(key.slice(0,10)<hourKey.slice(0,10))delete s.interactionAttempts[key]});save();
  if(Math.random()<immediateInteractionRefusalRate){rejectActivityProposal(activity);save();return false}
  const startedAt=now;
  s.activeInteraction={activity,anchor:options.anchor||meta.anchor||null,furnitureId,room:sourceFurniture?.room||'living',startedAt,endsAt:startedAt+immediateInteractionDuration,interrupted:{activity:s.currentActivity||availability.activity||'idle',anchor:s.currentActivityAnchor||null},presentationHourKey:hourKey};
- presentActivity(activity,s.activeInteraction.anchor,s.activeInteraction.room,furnitureId);say('好，陪你一会儿。');save();return true;
+ presentActivity(activity,s.activeInteraction.anchor,s.activeInteraction.room,furnitureId);say('想让我陪你？那我勉为其难试试吧。');save();return true;
 }
 function presentActivity(activity,anchor=null,room=null,furnitureId=null){
  const a=normalizeActivity(activity);if(!activityMeta[a])return;updateArday3D(a,anchor,room,furnitureId);
@@ -774,13 +776,13 @@ function processActivityAt(value){
  let placedMealEaten=false;
  if([7,12,18].includes(hour)){
   const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？谢谢，我正好饿了。');remember('meal','Arday吃了'+dishName,2);}
+  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
  if(meta){
   const effects={...(meta.effect||{})};if(activity==='sleep')effects.energy=Number(energyConfig.sleepRecoveryPerHour)||1;else if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
-  if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
+  if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('好饿。今天我能得到神明的投喂吗？');delete effects.hunger}
   change(effects);
   
   if(['read','write','chat','computerPlay','watchTV','listenRecords','walk','rest','music','wash'].includes(activity)){
@@ -1564,8 +1566,8 @@ function initArday3D(){
   // The back wall remains solid behind it; no dynamic wall cut-outs are used.
   const wallObjects=[
    registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read',false,{source:'window',furnitureId:'living-window',anchor:'shelf'})}),
-   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('窗外的光线落在床边。')}),
-   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('厨房窗边透进一些光。')}),
+   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('真的是在好奇窗户吗？看着我。')}),
+   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('差点忘了开窗通风，感谢提醒。')}),
    registerWallObject({id:'living-bedroom-door',name:'卧室门',room:'living',group:livingBedroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bedroom')}),
    registerWallObject({id:'living-kitchen-door',name:'厨房门',room:'living',group:livingKitchenDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('kitchen')}),
    registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
@@ -1613,7 +1615,7 @@ function initArday3D(){
    const cyl=(x,y,z,top,bottom,h,material)=>{const o=new T.Mesh(new T.CylinderGeometry(top,bottom,h,20),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;return o};
    const sphere=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,20,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;return o};
    const restoring=!!record&&['x','y','z','rotation','wallSide','wallOffset'].some(key=>Object.prototype.hasOwnProperty.call(record,key));
-   let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
+   let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>{};
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
    if(modelName==='床'){
     action=()=>openFurnitureActions('bed',id);
