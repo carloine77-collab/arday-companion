@@ -1095,3 +1095,10 @@ html body .stage .drawer.profile-expanded.open .choices{
 .furniture-wheel-empty{color:#9a8973;font-size:9px;}
 .furniture-wheel-status{position:absolute;left:50%;top:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:220px;padding:6px 10px;border:1px solid #d9c9b4;border-radius:10px;background:rgba(250,246,237,.97);color:#78634d;font-size:10px;line-height:1.4;text-align:center;pointer-events:none;z-index:3;}
 @media(max-width:700px){.furniture-wheel-center{width:66px;height:66px}.furniture-wheel-action{width:58px;height:58px}.furniture-wheel-label{font-size:9px}}
+
+/* Cooking panel close affordance */
+.stage .drawer .choices.cooking-panel{position:relative!important;padding-top:4px!important}
+.kitchen-close{position:absolute;top:7px;right:7px;z-index:8;width:34px;height:34px;display:grid;place-items:center;border:1px solid #bba78d;border-radius:50%;background:#f8f1e7;color:#594733;font:400 24px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 2px 8px #493a291c}
+.kitchen-close:hover{background:#e8d9c5}
+.kitchen-close:focus-visible{outline:2px solid #98795a;outline-offset:2px}
+.kitchen-hero{padding-right:54px}
