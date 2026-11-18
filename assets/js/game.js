@@ -2702,7 +2702,7 @@ function initArday3D(){
     }
     const ring=new T.Mesh(new T.TorusGeometry(.22,.025,8,32),timber);ring.rotation.x=Math.PI/2;ring.position.y=.29;group.add(ring);
     for(let i=0;i<8;i++){const a=i*Math.PI/4;const tack=sphere(Math.cos(a)*.29,.67,Math.sin(a)*.29,.018,.018,.018,brass)}
-   }else{toast('没有找到这种家具模型：'+name);return null}}else{toast('没有找到这种家具模型：'+name);return null}
+   }else{toast('没有找到这种家具模型：'+name);return null}
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
    if(modelName==='椅子'||modelName==='餐桌椅'){const seatEdge=mat(0x9c8064,.9);for(const x of [-.29,.29]){box(x,.565,.34,.025,.025,.025,m.gold)}if(variant==='软包扶手椅'){for(const x of [-.3,.3]){const piping= new T.Mesh(new T.TorusGeometry(.27,.008,6,24,Math.PI),seatEdge);piping.position.set(x,.66,-.19);piping.rotation.y=Math.PI/2;group.add(piping)}}}
