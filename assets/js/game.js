@@ -2153,7 +2153,7 @@ function initArday3D(){
      const mirrorFrame=new T.Mesh(new T.SphereGeometry(.32,28,20),m.oak);mirrorFrame.position.set(0,1.62,-.23);mirrorFrame.scale.set(1,.82,.13);group.add(mirrorFrame);
      const mirror=new T.Mesh(new T.SphereGeometry(.28,28,20),mat(0x9eafb0,.2,.16));mirror.position.set(0,1.62,-.205);mirror.scale.set(1,.82,.1);group.add(mirror);
     }
-   }else if(modelName==='全身镜'){else if(modelName==='全身镜'){
+   }else if(modelName==='全身镜'){
     width=.82;depth=.22;height=1.98;
     const frame=mat(variant==='黄铜拱形'?0xb89a62:0x77563d,.55,.35);
     box(0,.94,0,.78,1.86,.1,frame);box(0,.94,.058,.66,1.72,.025,mat(0x9eb2b5,.18,.22));
