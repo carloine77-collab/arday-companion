@@ -993,3 +993,15 @@ html body .stage .drawer.profile-expanded.open .choices{
 /* Keep the room label clear of the bottom-left camera controls. */
 .stage #roomLabel{left:12px!important;top:12px!important;bottom:auto!important;}
 @media(max-width:700px){.stage #roomLabel{left:7px!important;top:7px!important;}}
+
+/* Compact contextual furniture actions: keep the room visible and the menu close to the scene. */
+.drawer.furniture-drawer{left:auto;right:12px;bottom:12px;width:min( min(92%,360px),calc(100% - 24px));max-height:min(38%,220px);padding:10px 12px;border-radius:15px;transform:translateY(12px);overflow:auto}
+.drawer.furniture-drawer.open{transform:translateY(0)}
+.drawer.furniture-drawer .drawer-head{margin-bottom:7px;gap:10px}
+.drawer.furniture-drawer .drawer-head strong{font:600 14px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;letter-spacing:.02em}
+.drawer.furniture-drawer .furniture-close{width:36px;height:36px;flex:0 0 36px;padding:0;border:0;border-radius:50%;font-size:22px;line-height:1;background:#f1e5d4}
+.drawer.furniture-drawer .furniture-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.drawer.furniture-drawer .furniture-choices .choice{min-height:48px;padding:10px 9px;border-radius:11px;font-size:13px;display:flex;align-items:center;justify-content:center}
+.drawer.furniture-drawer .furniture-empty{grid-column:1/-1;padding:10px 4px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:700px){.drawer.furniture-drawer{right:8px;bottom:8px;width:min( min(92%,340px),calc(100% - 16px));max-height:min(36%,190px);padding:9px 10px}.drawer.furniture-drawer .furniture-choices .choice{min-height:48px;font-size:13px}}
+@media(orientation:landscape) and (max-height:560px){.drawer.furniture-drawer{max-height:46%;width:min( min(82%,380px),calc(100% - 16px));right:8px;bottom:8px}}
