@@ -624,7 +624,7 @@ function chooseAutonomousActivity(){
   if(id==='rest')personality+=Math.max(0,45-(Number(s.energy)||0))*.22;
   if(id==='computerPlay')personality+=Math.max(0,50-(Number(s.fun)||0))*.16;
   const repeatPenalty=recent.filter(x=>x===id).length*3.2;
-  const preference=(Number(s.preferences?.[id==='read'?'reading':id])||0)*1.8;
+  const preference=(Number(s.preferences?.[id==='read'?'reading':id==='write'?'writing':id])||0)*1.8;
   const temperamentBias=id==='rest'?(1-temperament.composed)*1.5:0;
   return {activity:id,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
  }).filter(item=>Number.isFinite(item.score)&&item.score>=0);
@@ -670,8 +670,10 @@ function processActivityAt(value){
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
   change(effects);
   
-  if(activity==='music')s.preferences.music=(s.preferences.music||0)+1;
-  if(activity==='read')s.preferences.reading=(s.preferences.reading||0)+1;
+  if(['read','write','chat','computerPlay','walk','rest','music','wash'].includes(activity)){
+   const preferenceKey=activity==='read'?'reading':activity==='write'?'writing':activity;
+   s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
+  }
   // Scene presentation is applied once after the authoritative state is committed.
  }
  if(sessionStart){
