@@ -1153,6 +1153,26 @@ function initArday3D(){
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
+  // A restrained studio equirectangular environment gives metal, glass and polished wood something to reflect.
+  const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;
+  const environmentContext=environmentCanvas.getContext('2d');
+  const environmentGradient=environmentContext.createLinearGradient(0,0,0,512);
+  environmentGradient.addColorStop(0,'#45494d');environmentGradient.addColorStop(.42,'#77766e');environmentGradient.addColorStop(.72,'#a49b8c');environmentGradient.addColorStop(1,'#55514b');
+  environmentContext.fillStyle=environmentGradient;environmentContext.fillRect(0,0,1024,512);
+  const softbox=(x,y,w,h,alpha)=>{
+   const glow=environmentContext.createRadialGradient(x+w/2,y+h/2,8,x+w/2,y+h/2,Math.max(w,h)*.72);
+   glow.addColorStop(0,`rgba(255,246,229,${alpha})`);glow.addColorStop(.55,`rgba(232,224,210,${alpha*.42})`);glow.addColorStop(1,'rgba(232,224,210,0)');
+   environmentContext.fillStyle=glow;environmentContext.fillRect(x-w*.4,y-h*.4,w*1.8,h*1.8);
+   environmentContext.fillStyle=`rgba(255,250,239,${alpha*.55})`;environmentContext.fillRect(x,y,w,h);
+  };
+  softbox(112,84,86,238,.58);softbox(470,48,142,174,.48);softbox(824,104,72,210,.5);
+  const floorBounce=environmentContext.createLinearGradient(0,300,0,512);
+  floorBounce.addColorStop(0,'rgba(225,197,158,0)');floorBounce.addColorStop(1,'rgba(225,197,158,.24)');
+  environmentContext.fillStyle=floorBounce;environmentContext.fillRect(0,300,1024,212);
+  const environmentTexture=new T.CanvasTexture(environmentCanvas);
+  environmentTexture.mapping=T.EquirectangularReflectionMapping;environmentTexture.encoding=T.sRGBEncoding;
+  environmentTexture.generateMipmaps=true;environmentTexture.minFilter=T.LinearMipmapLinearFilter;
+  scene.environment=environmentTexture;
   host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
   const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
   const sun=new T.DirectionalLight(0xfff1dc,1.35);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
