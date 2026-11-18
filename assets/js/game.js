@@ -1199,11 +1199,26 @@ function initArday3D(){
     for(let i=0;i<900;i++){const r=2+rand()*13;ctx.fillStyle=rand()>.48?'rgba(255,255,255,.055)':'rgba(83,72,61,.045)';ctx.beginPath();ctx.arc(rand()*512,rand()*512,r,0,Math.PI*2);ctx.fill()}
     for(let i=0;i<38;i++){ctx.beginPath();const y=rand()*512;ctx.moveTo(0,y);ctx.bezierCurveTo(150,y-8,350,y+8,512,y+(rand()-.5)*12);ctx.strokeStyle='rgba(95,81,68,.035)';ctx.lineWidth=1+rand()*2;ctx.stroke()}
    }else{
-    // Floor finish: broad, low-contrast mineral variation only. Repeating
-    // tile borders and sharp bump detail shimmer at iPad's oblique camera angle.
-    for(let i=0;i<1100;i++){
-     const r=1+rand()*5;ctx.fillStyle=rand()>.5?'rgba(255,255,255,.035)':'rgba(52,48,43,.025)';
-     ctx.beginPath();ctx.arc(rand()*512,rand()*512,r,0,Math.PI*2);ctx.fill();
+    // Warm timber floor with restrained grain and low-contrast plank seams.
+    // Keep all detail in the texture (no raised strips) to avoid z-fighting.
+    for(let i=0;i<95;i++){
+     const y=rand()*512,x=rand()*512,len=35+rand()*150;
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(Math.min(512,x+len),y+(rand()-.5)*2);
+     ctx.strokeStyle=rand()>.5?'rgba(91,63,42,.045)':'rgba(255,246,230,.075)';ctx.lineWidth=.7+rand()*.5;ctx.stroke();
+    }
+    for(let row=0;row<4;row++){
+     const x=row*128+.5;
+     ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,512);
+     ctx.strokeStyle='rgba(86,63,45,.095)';ctx.lineWidth=1;ctx.stroke();
+     const seamY=(row%2)*64+128;
+     for(let y=seamY;y<512;y+=128){
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+128,y);
+      ctx.strokeStyle='rgba(86,63,45,.075)';ctx.lineWidth=.8;ctx.stroke();
+     }
+    }
+    for(let i=0;i<900;i++){
+     ctx.fillStyle=rand()>.5?'rgba(255,255,255,.035)':'rgba(67,48,34,.025)';
+     ctx.fillRect(rand()*512,rand()*512,1,1);
     }
    }
    const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(kind==='wood'?1.5:kind==='wall'?2:kind==='floor'?1.15:3,kind==='wood'?3:kind==='wall'?2:kind==='floor'?1.15:3);texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());painterTextureCache.set(kind,texture);return texture;
@@ -1274,10 +1289,10 @@ function initArday3D(){
    mesh.rotation.x=-Math.PI/2;mesh.position.y=.012;mesh.renderOrder=0;mesh.userData.furnitureContactShadow=true;mesh.castShadow=false;mesh.receiveShadow=false;group.add(mesh);return mesh;
   }
   function roomShell(group,wallColor,floorColor){
-   const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.0015),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
+   const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.0025),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
    const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
-   const backWallParts=[[-5.125,2.35,2.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
+   const backWallParts=[[-4.625,2.35,1.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
    const backWallSegments=backWallParts.map(([x,y,w,h])=>box(backWallGroup,x,y,-4.08,w,h,.2,wallMaterial));
    group.userData.backWallSegments=backWallSegments;group.userData.backWallMaterial=wallMaterial;group.userData.wallMeshes=backWallSegments;
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
@@ -1301,7 +1316,7 @@ function initArday3D(){
    // displays. Keep the floor's subtle painter texture, not floating seams.
   }
   // Three distinct interiors; only one room is visible at a time.
-  const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0x8c7966);
+  const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0xc4a783);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
   const addWindowView=(windowGroup,centerY)=>{const view=new T.Mesh(new T.PlaneGeometry(2.1,1.85),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false}));view.position.set(0,centerY,-.105);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;windowGroup.add(view);const pane=box(windowGroup,0,centerY,-.045,2.1,1.85,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
   addWindowView(livingWindow,2.6);
@@ -1309,13 +1324,13 @@ function initArday3D(){
   addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4,2.6);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
-  const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
+  const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0xb99b83);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
   addWindowView(bedroomWindow,2.6);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
   addWindowDressing(bedroomWindow,2.1,1.85,0xb9a9a0,2.6);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
-  const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
+  const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0xc0a487);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
   addWindowView(kitchenWindow,2.6);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(kitchenWindow,x,y,0,w,h,.1,M(0x9a7655));
@@ -1444,7 +1459,7 @@ function initArday3D(){
   function registerWallObject({id,name,room,group,axis,side,range,anchor,action}){
    group.userData.furnitureKey=id;group.userData.roomKey=room;group.userData.wallObject=true;
    const saved=s.placed?.find(item=>item.id===id),savedSide=id.includes('window')?'back':(saved?.wallSide||side);
-   const offset=saved?.offset??saved?.position??(savedSide==='back'||savedSide==='front'?group.position.x:group.position.z);
+   const offset=saved?.wallOffset??saved?.offset??saved?.position??(savedSide==='back'||savedSide==='front'?group.position.x:group.position.z);
    wallTransform(group,savedSide,offset,saved?.y??group.position.y);
    const button=document.createElement('button');button.className='hotspot furniture-hotspot wall-hotspot spot-'+id;button.type='button';button.textContent=id.includes('door')?'门':'窗';button.setAttribute('aria-label',name);button.dataset.object=name;stage.appendChild(button);
    const item={id,name,room,group,button,wallAxis:savedSide==='back'||savedSide==='front'?'x':'z',wallSide:savedSide,wallRange:range,anchor:anchor||[0,0],action,width:0,depth:0,wallAnchorY:(anchor?.[1]??2.55)-group.position.y};
@@ -1474,10 +1489,8 @@ function initArday3D(){
     const leftWidth=Math.max(.001,openingLeft-left),rightWidth=Math.max(.001,right-openingRight);
     const set=(mesh,x,y,w,h)=>{
      const width=Math.max(.001,w),height=Math.max(.001,h);
-     if(mesh.geometry.parameters.width!==width||mesh.geometry.parameters.height!==height){
-      mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(width,height,.2);
-     }
-     mesh.position.set(x,y,-4.08);mesh.geometry.computeBoundingBox();mesh.geometry.computeBoundingSphere();
+     mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(width,height,.2);
+     mesh.position.set(x,y,-4.08);mesh.updateMatrix();mesh.geometry.computeBoundingBox();mesh.geometry.computeBoundingSphere();
     };
     set(segments[0],(left+openingLeft)/2,2.35,leftWidth,4.8);
     set(segments[1],(openingRight+right)/2,2.35,rightWidth,4.8);
@@ -1880,17 +1893,17 @@ function initArday3D(){
     const computer=sourceFurniture?.name==='电脑'?sourceFurniture:furniture(it=>it.name==='电脑'&&it.supportId)[0];
     const desk=sourceFurniture?.name.startsWith('书桌')?sourceFurniture:(computer&&furniture(it=>it.id===computer.supportId)[0])||furniture(it=>it.name.startsWith('书桌'))[0];
     if(desk){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),desk.group.position);
-     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=Math.atan2(desk.group.position.x-seat.group.position.x,desk.group.position.z-seat.group.position.z)}
+     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=seat.group.rotation.y}
      else{const offset=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+offset.x,0,desk.group.position.z+offset.z];faceAngle=Math.atan2(desk.group.position.x-p[0],desk.group.position.z-p[2])}}
    }else if(anchor==='shelf'){
-    const shelf=furniture(it=>it.name.startsWith('书架'))[0];if(shelf){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2])}
+    const shelf=furniture(it=>it.name.startsWith('书架'))[0];if(shelf){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=seat?seat.group.rotation.y:Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2])}
    }else if(anchor==='sofa'){
     const sofa=furniture(it=>it.name.startsWith('沙发'))[0];if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI}
    }else if(anchor==='table'){
     const table=furniture(it=>it.name.startsWith('餐桌'))[0];if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2])}
    }else if(anchor==='chair'){
     const selectedChair=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride)[0]:null;
-    const chair=selectedChair||furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),roomMode)[0];if(chair){const offset=new T.Vector3(0,0,-.58).applyAxisAngle(new T.Vector3(0,1,0),chair.group.rotation.y);p=[chair.group.position.x+offset.x,0,chair.group.position.z+offset.z];faceAngle=chair.group.rotation.y+Math.PI}
+    const chair=selectedChair||furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),roomMode)[0];if(chair){p=[chair.group.position.x,0,chair.group.position.z];faceAngle=chair.group.rotation.y}
    }else if(anchor==='bouquet'){
     const bouquet=furniture(it=>it.name==='捧花摆件')[0];if(bouquet){p=[bouquet.group.position.x,0,bouquet.group.position.z+.9];faceAngle=Math.PI}
    }else if(anchor==='bed'){
@@ -1973,6 +1986,7 @@ function initArday3D(){
       }
       if(best&&canPlaceOnWall(item,best.side,best.offset)){
        wallTransform(g,best.side,best.offset,Math.max(.05,Math.min(4.5,best.point.y+furnitureDrag.wallYOffset)));
+       g.userData.syncWallOpening?.();
        item.wallSide=best.side;item.wallAxis=best.side==='back'||best.side==='front'?'x':'z';
       }
      }else{
