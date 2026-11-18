@@ -1310,8 +1310,8 @@ function initArday3D(){
    const trimMat=M(0xe7d4ba);trimMat.transparent=false;trimMat.depthWrite=true;
    // End trim at the exact inner-face junctions; the previous 8.12
    // length projected 8 cm beyond both front/back wall junctions.
-   box(leftWallGroup,-5.22,.13,0,.12,.18,7.96,trimMat);
-   box(rightWallGroup,5.22,.13,0,.12,.18,7.96,trimMat.clone());
+   box(leftWallGroup,-5.22,.13,0,.12,.18,8.16,trimMat);
+   box(rightWallGroup,5.22,.13,0,.12,.18,8.16,trimMat.clone());
    // The old raised plank strips caused high-contrast shimmering on iPad
    // displays. Keep the floor's subtle painter texture, not floating seams.
   }
