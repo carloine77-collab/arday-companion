@@ -2016,7 +2016,7 @@ const cameraPanButton=$('cameraPan'),cameraOrbitButton=$('cameraOrbit');
 function setCameraGestureMode(mode){cameraGestureMode=mode==='orbit'?'orbit':'pan';cameraPanButton?.classList.toggle('active',cameraGestureMode==='pan');cameraOrbitButton?.classList.toggle('active',cameraGestureMode==='orbit');cameraPanButton?.setAttribute('aria-pressed',cameraGestureMode==='pan'?'true':'false');cameraOrbitButton?.setAttribute('aria-pressed',cameraGestureMode==='orbit'?'true':'false');}
 cameraPanButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('pan')});
 cameraOrbitButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('orbit')});
-initArday3D();updateArday3D();
+initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activity,s.activeInteraction.anchor||null);else updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
 
