@@ -2925,15 +2925,30 @@ function initArday3D(){
     let placed=false;
     if(surfaceType==='ceiling'){group.position.set(0,4.45,0);placed=true;}
     else if(surfaceType==='tabletop'&&supports.length){
-     const offsetsFor=(surface)=>modelName==='电脑'?[[0,0],[-.3,0],[.3,0],[0,.14],[0,-.14]]:[[0,0],[-surface.width*.24,0],[surface.width*.24,0],[0,-surface.depth*.24],[0,surface.depth*.24],[-surface.width*.2,-surface.depth*.2],[surface.width*.2,-surface.depth*.2]];
+     // Validate against the usable top and objects already resting on that same
+     // support. Nearby chairs and cabinet fronts must not block tabletop placement.
      for(const candidate of supports){
-      support=candidate;item.supportId=support.id;
+      support=candidate;
+      const topW=Math.max(.2,Number(support.width)||.2),topD=Math.max(.2,Number(support.depth)||.2);
+      const halfW=item.width/2,halfD=item.depth/2,limitX=topW/2-halfW-.07,limitZ=topD/2-halfD-.07;
+      if(limitX<-.001||limitZ<-.001)continue;
+      const positions=[[0,0]],stepX=Math.max(.42,item.width+.08),stepZ=Math.max(.42,item.depth+.08);
+      for(let oz=-limitZ;oz<=limitZ+.001;oz+=stepZ)for(let ox=-limitX;ox<=limitX+.001;ox+=stepX)if(Math.abs(ox)>.02||Math.abs(oz)>.02)positions.push([ox,oz]);
+      for(const oz of [-limitZ,limitZ])for(const ox of [-limitX,limitX])if(limitX>0||limitZ>0)positions.push([ox,oz]);
       const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
-      for(const [ox,oz] of offsetsFor(support)){
+      for(const [ox,oz] of positions){
+       const occupied=furnitureRegistry.some(other=>{
+        if(other===item||other.id===support.id||other.room!==room||other.supportId!==support.id)return false;
+        const dx=other.group.position.x-support.group.position.x,dz=other.group.position.z-support.group.position.z;
+        const localX=dx*co-dz*si,localZ=dx*si+dz*co,relativeAngle=other.group.rotation.y-support.group.rotation.y;
+        const otherHalfX=(Math.abs(Math.cos(relativeAngle))*other.width+Math.abs(Math.sin(relativeAngle))*other.depth)/2;
+        const otherHalfZ=(Math.abs(Math.sin(relativeAngle))*other.width+Math.abs(Math.cos(relativeAngle))*other.depth)/2;
+        return Math.abs(localX-ox)<halfW+otherHalfX+.06&&Math.abs(localZ-oz)<halfD+otherHalfZ+.06;
+       });
+       if(occupied)continue;
        const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
-       group.position.set(x,support.group.position.y+support.surfaceY+.015,z);
-       group.rotation.y=support.group.rotation.y;
-       if(canPlaceFurniture(item,x,z,group.rotation.y)){placed=true;break}
+       item.supportId=support.id;group.position.set(x,support.group.position.y+support.surfaceY+.015,z);group.rotation.y=support.group.rotation.y;
+       placed=true;break;
       }
       if(placed)break;
      }
