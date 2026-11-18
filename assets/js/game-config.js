@@ -893,20 +893,20 @@ window.ArdayGameConfig = {
    eggRice:{name:'蛋炒饭',ingredients:{rice:1,egg:1},hunger:30,starter:true},
    tomatoEgg:{name:'番茄炒蛋',ingredients:{tomato:1,egg:2},hunger:28,starter:true},
    vegetableSoup:{name:'蔬菜汤',ingredients:{vegetable:2},hunger:22,starter:true},
-   beefNoodles:{name:'红烧牛肉面',ingredients:{beef:1,noodles:1,vegetable:1},hunger:42},
-   mushroomRisotto:{name:'奶油蘑菇烩饭',ingredients:{rice:1,mushroom:2,oil:1},hunger:36},
+   beefNoodles:{name:'牛肉面',ingredients:{beef:1,noodles:1,vegetable:1},hunger:42},
+   mushroomRisotto:{name:'奶油蘑菇饭',ingredients:{rice:1,mushroom:2,oil:1},hunger:36},
    eggToast:{name:'香煎蛋吐司',ingredients:{bread:2,egg:1,oil:1},hunger:32},
-   tofuStew:{name:'豆腐蔬菜煲',ingredients:{tofu:1,vegetable:1,mushroom:1},hunger:34},
-   potatoBeef:{name:'土豆炖牛肉',ingredients:{potato:2,beef:1},hunger:45},
+   tofuStew:{name:'豆腐煲',ingredients:{tofu:1,vegetable:1,mushroom:1},hunger:34},
+   potatoBeef:{name:'土豆牛肉',ingredients:{potato:2,beef:1},hunger:45},
    potatoPancake:{name:'葱香土豆饼',ingredients:{potato:1,flour:1,egg:1,oil:1},hunger:34}
   },
   ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包'},
   bookCategories: {'菜谱':[
-   ['红烧牛肉面 · 家常面馆','📖','buy-recipe-beefNoodles','38','解锁红烧牛肉面的制作方法'],
-   ['奶油蘑菇烩饭 · 西式家常','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇烩饭的制作方法'],
-   ['香煎蛋吐司 · 早餐手册','📖','buy-recipe-eggToast','28','解锁香煎蛋吐司的制作方法'],
-   ['豆腐蔬菜煲 · 清淡食谱','📖','buy-recipe-tofuStew','35','解锁豆腐蔬菜煲的制作方法'],
-   ['土豆炖牛肉 · 慢炖料理','📖','buy-recipe-potatoBeef','45','解锁土豆炖牛肉的制作方法'],
-   ['葱香土豆饼 · 家常面点','📖','buy-recipe-potatoPancake','32','解锁葱香土豆饼的制作方法']
+   ['牛肉面','📖','buy-recipe-beefNoodles','38','解锁红烧牛肉面的制作方法'],
+   ['奶油蘑菇饭','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇烩饭的制作方法'],
+   ['香煎蛋吐司','📖','buy-recipe-eggToast','28','解锁香煎蛋吐司的制作方法'],
+   ['豆腐煲','📖','buy-recipe-tofuStew','35','解锁豆腐蔬菜煲的制作方法'],
+   ['土豆牛肉','📖','buy-recipe-potatoBeef','45','解锁土豆炖牛肉的制作方法'],
+   ['葱香土豆饼','📖','buy-recipe-potatoPancake','32','解锁葱香土豆饼的制作方法']
   ]}
 };
