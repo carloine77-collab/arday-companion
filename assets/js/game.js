@@ -2047,22 +2047,46 @@ function initArday3D(){
     for(const z of [-depth/2,depth/2])box(0,height-.012,z,width*.94,.018,.018,m.oak);
    }else if(modelName==='椅子'||modelName==='餐桌椅'){
     action=()=>openFurnitureActions('chair',id);
-    width=variant==='软包扶手椅'?.92:.72;depth=.78;height=1.05;
-    if(variant==='藤编餐椅'){box(0,.49,0,.72,.12,.66,m.wood);box(0,.56,.015,.66,.07,.6,m.oak);legs(.7,.64,.48,.06);for(let x=-.25;x<=.251;x+=.09){const slat=box(x,.83,-.28,.025,.48,.045,m.gold);slat.rotation.z=x*-.12}box(0,1.08,-.29,.74,.1,.1,m.wood);}
-    else if(variant==='软包扶手椅'){
-     // Upholstered lounge chair: wide seat, padded back and projecting arm rests.
-     box(0,.49,0,.82,.17,.72,m.wood);box(0,.61,.015,.76,.16,.68,m.fabric);
-     box(0,1.0,-.29,.78,.78,.16,m.wood);box(0,1.0,-.195,.68,.62,.08,m.fabric);
-     for(const x of [-.42,.42]){box(x,.72,-.015,.12,.52,.68,m.wood);box(x,.86,-.02,.14,.2,.62,m.fabric)}
-     legs(.82,.72,.48,.075);
+    width=variant==='软包扶手椅'?.98:.78;depth=.82;height=1.08;
+    if(variant==='藤编餐椅'){
+     width=.78;depth=.82;
+     const cane=mat(0xc39b6d,.96),wood=mat(0x76543d,.62),edge=mat(0x98724d,.66);
+     box(0,.52,0,.74,.13,.7,wood);box(0,.59,.015,.7,.055,.66,edge);
+     legs(.72,.66,.5,.055);
+     // Dense crossed cane strips replace the former decorative metal-looking slats.
+     for(let i=-3;i<=3;i++){const a=box(i*.085,.625,.015,.012,.012,.62,cane);a.rotation.y=.16;const b=box(0,.627,i*.085,.66,.012,.012,cane);b.rotation.y=-.12}
+     for(const x of [-.32,.32]){
+      const post=box(x,.88,-.31,.065,.58,.065,wood);post.rotation.z=x*.08;
+      for(let y=.69;y<=1.08;y+=.075)box(x,.78+(y-.69),-.31,.075,.018,.07,edge);
+     }
+     const crest=new T.CatmullRomCurve3([new T.Vector3(-.35,1.12,-.31),new T.Vector3(-.25,1.18,-.31),new T.Vector3(0,1.2,-.31),new T.Vector3(.25,1.18,-.31),new T.Vector3(.35,1.12,-.31)]);
+     group.add(new T.Mesh(new T.TubeGeometry(crest,24,.035,8,false),wood));
+     for(let x=-.25;x<=.251;x+=.08){const strand=box(x,.88,-.31,.012,.38,.018,cane);}
+    }else if(variant==='软包扶手椅'){
+     width=1.02;depth=.9;height=1.12;
+     const upholstery=mat(0xd8cbb8,.96),piping=mat(0xa68b6d,.78),frame=mat(0x76543d,.62);
+     box(0,.49,0,.88,.18,.78,frame);box(0,.61,.015,.84,.18,.74,upholstery);
+     box(0,1.0,-.31,.86,.78,.18,frame);box(0,1.0,-.205,.76,.65,.08,upholstery);
+     for(const x of [-.46,.46]){
+      const arm=box(x,.76,-.005,.13,.48,.76,frame);
+      box(x,.91,.015,.15,.15,.72,upholstery);
+      box(x,.69,.31,.15,.13,.12,piping);
+     }
+     for(const x of [-.34,.34])for(const z of [-.28,.28]){const leg=box(x,.23,z,.075,.46,.075,frame);leg.rotation.z=x*.045}
+     for(let x=-.3;x<=.301;x+=.15){const seam=box(x,.705,.39,.012,.012,.018,piping)}
     }else{
-     // Windsor chair: open spindle back, shaped crest rail and turned legs.
-     box(0,.49,0,.62,.12,.62,m.oak);legs(.62,.62,.48,.065);
-     box(0,.98,-.29,.68,.12,.09,m.wood);
-     for(let x=-.25;x<=.251;x+=.125)cyl(x,.79,-.29,.025,.025,.42,m.oak,8);
-     for(const x of [-.3,.3])box(x,.62,.02,.07,.5,.07,m.wood);
+     // Windsor-style curved crest rail, turned front legs and narrow vertical spindles.
+     const wood=mat(0x805a3c,.58),edge=mat(0xa47b51,.56);
+     box(0,.51,0,.66,.13,.66,m.oak);
+     for(const x of [-.25,.25])for(const z of [-.24,.24]){const leg=cyl(x,.3,z,.038,.052,.58,wood,12);sphere(x,.56,z,.065,.045,.065,edge)}
+     for(const z of [-.23,.23])box(0,.32,z,.54,.045,.045,wood);
+     for(let x=-.25;x<=.251;x+=.125){const spindle=cyl(x,.83,-.29,.022,.022,.48,wood,10);sphere(x,.63,-.29,.038,.035,.038,edge)}
+     const crest=new T.CatmullRomCurve3([new T.Vector3(-.34,1.08,-.29),new T.Vector3(-.3,1.17,-.29),new T.Vector3(-.15,1.21,-.29),new T.Vector3(0,1.22,-.29),new T.Vector3(.15,1.21,-.29),new T.Vector3(.3,1.17,-.29),new T.Vector3(.34,1.08,-.29)]);
+     group.add(new T.Mesh(new T.TubeGeometry(crest,28,.045,10,false),wood));
+     for(const x of [-.32,.32]){const post=box(x,.78,-.29,.065,.58,.065,wood);post.rotation.z=x*.08}
+     for(const x of [-.3,.3]){const arm=box(x,.7,-.01,.075,.07,.58,wood);arm.rotation.z=x*.06}
     }
-   }else if(modelName==='电脑'){
+   }else if(modelName==='电脑'){else if(modelName==='电脑'){
     action=()=>openFurnitureActions('computer',id);
     width=.72;depth=.55;height=.72;surfaceType='tabletop';surfaceY=.04;
     box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);box(0,.245,-.16,.075,.12,.09,m.metal);box(0,.18,-.16,.34,.035,.22,m.metal);
@@ -2209,15 +2233,36 @@ function initArday3D(){
     }
     box(0,2.34,-.015,2.5,.035,.045,m.wood);
    }else if(modelName==='办公椅'){
-    width=.76;depth=.76;height=1.22;
-    const mesh=mat(0x30363a,.94),frame=mat(0x555b60,.48,.62),fabric=mat(0x252a2e,.98);
-    cyl(0,.39,0,.07,.07,.48,frame,20);cyl(0,.15,0,.11,.11,.08,frame,20);
-    for(let i=0;i<5;i++){const a=i*Math.PI*2/5,x=Math.cos(a),z=Math.sin(a),leg=box(x*.25,.105,z*.25,.48,.045,.055,frame);leg.rotation.y=-a;const wheel=cyl(x*.47,.075,z*.47,.045,.045,.08,mesh,12);wheel.rotation.x=Math.PI/2}
-    box(0,.57,.02,.62,.15,.62,mesh);box(0,.67,.02,.56,.12,.56,fabric);
-    const back=box(0,.98,-.27,.58,.62,.12,mesh);back.rotation.x=-.08;
-    const backPad=box(0,1.0,-.195,.49,.52,.045,fabric);backPad.rotation.x=-.08;
-    for(const x of [-.34,.34]){box(x,.68,-.02,.06,.32,.06,frame);box(x,.82,-.02,.1,.07,.32,mesh)}
-   }else if(modelName==='坐垫'){
+    width=.78;depth=.82;height=1.28;
+    const frame=mat(0x454b50,.46,.72),mesh=mat(0x30383d,.96),fabric=mat(0x252b30,.98),trim=mat(0x68747a,.5,.5);
+    // Five-spoke aluminium base, central gas lift and individual caster housings.
+    cyl(0,.38,0,.055,.055,.48,frame,20);cyl(0,.16,0,.105,.105,.09,frame,20);
+    for(let i=0;i<5;i++){
+     const a=i*Math.PI*2/5,x=Math.cos(a),z=Math.sin(a);
+     const spoke=box(x*.23,.12,z*.23,.52,.045,.065,frame);spoke.rotation.y=-a;
+     const fork=box(x*.46,.105,z*.46,.07,.09,.075,frame);
+     const wheel=cyl(x*.49,.075,z*.49,.052,.052,.12,mesh,14);wheel.rotation.x=Math.PI/2;
+    }
+    // Separate seat pan, rounded cushion and adjustable arm supports.
+    box(0,.57,.025,.68,.14,.66,frame);
+    const cushion=new T.Mesh(new T.CapsuleGeometry(.29,.09,5,12),fabric);cushion.rotation.x=Math.PI/2;cushion.position.set(0,.67,.035);cushion.scale.set(1,.9,1);group.add(cushion);
+    box(0,.75,-.245,.12,.12,.12,frame);
+    for(const x of [-.37,.37]){
+     box(x,.79,-.015,.065,.38,.065,frame);
+     box(x,.98,.02,.1,.07,.34,mesh);
+     box(x,.82,.025,.13,.045,.34,trim);
+    }
+    // Open mesh back with a visible perimeter frame, lumbar arc and headrest.
+    for(const x of [-.29,.29]){const rail=box(x,1.04,-.28,.045,.62,.055,frame);rail.rotation.x=-.08}
+    box(0,1.32,-.28,.58,.045,.055,frame);box(0,.76,-.25,.58,.045,.055,frame);
+    for(let row=0;row<9;row++)for(let col=0;col<13;col++){
+     const x=-.25+col*.041,y=.81+row*.058;
+     if((row+col)%2===0)box(x,y,-.252,.012,.012,.012,mesh);
+    }
+    const lumbar=new T.CatmullRomCurve3([new T.Vector3(-.24,.91,-.29),new T.Vector3(-.12,.86,-.31),new T.Vector3(0,.85,-.32),new T.Vector3(.12,.86,-.31),new T.Vector3(.24,.91,-.29)]);
+    group.add(new T.Mesh(new T.TubeGeometry(lumbar,20,.025,8,false),trim));
+    box(0,1.43,-.27,.34,.16,.1,fabric);box(0,1.43,-.32,.3,.11,.035,mesh);
+   }else if(modelName==='坐垫'){else if(modelName==='坐垫'){
     width=.78;depth=.78;height=.18;surfaceType='floor';box(0,.09,0,.78,.15,.78,m.fabric);const pad=sphere(0,.17,0,.37,.09,.37,m.sofa2);pad.scale.y=.7;for(const x of [-.29,.29])for(const z of [-.29,.29])sphere(x,.16,z,.035,.018,.035,m.cream);
    }else if(modelName==='伞架'){
     width=.62;depth=.62;height=1.12;
@@ -2523,8 +2568,20 @@ function initArday3D(){
     const lapel=box(.19,1.34,.17,.22,.22,.025,m.cream);lapel.rotation.z=-.1;
     const scarf=box(-.2,1.26,.12,.1,.78,.035,mat(0x8a9b91,.96));scarf.rotation.z=.12;
    }else if(modelName==='凳子'){
-    width=.62;depth=.62;height=.68;action=()=>openFurnitureActions('chair',id);box(0,.58,0,.62,.12,.62,m.oak);legs(.58,.58,.52,.065);box(0,.31,0,.5,.045,.5,m.wood);
-   }else{toast('没有找到这种家具模型：'+name);return null}
+    width=.66;depth=.66;height=.72;action=()=>openFurnitureActions('chair',id);
+    const timber=mat(0x76543d,.62),seat=mat(0xc9b89f,.96),brass=mat(0x9b805f,.48,.55);
+    // A round upholstered perch with four splayed legs and a circular footrest.
+    cyl(0,.57,0,.34,.34,.13,timber,32);
+    cyl(0,.655,0,.33,.33,.07,seat,32);
+    const piping=new T.Mesh(new T.TorusGeometry(.315,.012,8,40),brass);piping.rotation.x=Math.PI/2;piping.position.y=.69;group.add(piping);
+    for(let i=0;i<4;i++){
+     const a=Math.PI/4+i*Math.PI/2,x=Math.cos(a),z=Math.sin(a);
+     const leg=box(x*.19,.29,z*.19,.075,.58,.075,timber);leg.rotation.z=-x*.13;leg.rotation.x=z*.13;
+     sphere(x*.29,.055,z*.29,.055,.045,.055,brass);
+    }
+    const ring=new T.Mesh(new T.TorusGeometry(.22,.025,8,32),timber);ring.rotation.x=Math.PI/2;ring.position.y=.29;group.add(ring);
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;const tack=sphere(Math.cos(a)*.29,.67,Math.sin(a)*.29,.018,.018,.018,brass)}
+   }else{toast('没有找到这种家具模型：'+name);return null}}else{toast('没有找到这种家具模型：'+name);return null}
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
    if(modelName==='椅子'||modelName==='餐桌椅'){const seatEdge=mat(0x9c8064,.9);for(const x of [-.29,.29]){box(x,.565,.34,.025,.025,.025,m.gold)}if(variant==='软包扶手椅'){for(const x of [-.3,.3]){const piping= new T.Mesh(new T.TorusGeometry(.27,.008,6,24,Math.PI),seatEdge);piping.position.set(x,.66,-.19);piping.rotation.y=Math.PI/2;group.add(piping)}}}
