@@ -1292,8 +1292,9 @@ function initArday3D(){
    const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.0018),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
    const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
-   const backWallParts=[[-4.625,2.35,1.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
-   const backWallSegments=backWallParts.map(([x,y,w,h])=>box(backWallGroup,x,y,-4.08,w,h,.2,wallMaterial));
+   // Keep the back wall continuous. Windows are complete surface-mounted
+   // assemblies with their own outdoor-view panels; never cut a hole in the shell.
+   const backWallSegments=[box(backWallGroup,0,2.35,-4.08,10.8,4.8,.2,wallMaterial)];
    group.userData.backWallSegments=backWallSegments;group.userData.backWallMaterial=wallMaterial;group.userData.wallMeshes=backWallSegments;
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
    const ceilingMaterial=M(0xe9e3d8);ceilingMaterial.transparent=true;ceilingMaterial.opacity=.22;ceilingMaterial.depthWrite=false;ceilingMaterial.side=T.DoubleSide;group.userData.ceilingMesh=box(group,0,4.78,0,10.8,.12,8.4,ceilingMaterial);group.userData.ceilingMesh.visible=false;group.userData.ceilingMesh.castShadow=false;group.userData.ceilingMesh.renderOrder=8;
@@ -1318,7 +1319,7 @@ function initArday3D(){
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0xc4a783);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
-  const addWindowView=(windowGroup,centerY)=>{const view=new T.Mesh(new T.PlaneGeometry(2.1,1.85),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false}));view.position.set(0,centerY,-.105);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;windowGroup.add(view);const pane=box(windowGroup,0,centerY,-.045,2.1,1.85,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
+  const addWindowView=(windowGroup,centerY)=>{const view=new T.Mesh(new T.PlaneGeometry(2.1,1.85),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false,side:T.DoubleSide}));view.position.set(0,centerY,.012);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;view.userData.windowScenery=true;windowGroup.add(view);const pane=box(windowGroup,0,centerY,.066,2.1,1.85,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
   addWindowView(livingWindow,2.6);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
   addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4,2.6);
@@ -1420,7 +1421,7 @@ function initArday3D(){
    else if(side==='front'){group.position.set(clamped,y,3.89);group.rotation.y=Math.PI}
    else if(side==='left'){group.position.set(-5.16,y,clamped);group.rotation.y=Math.PI/2}
    else{group.position.set(5.16,y,clamped);group.rotation.y=-Math.PI/2}
-   group.userData?.syncWallOpening?.();
+
   }
   function wallOffset(item){return item.wallSide==='back'||item.wallSide==='front'?item.group.position.x:item.group.position.z}
   function canPlaceOnWall(item,side,offset){
@@ -1477,33 +1478,8 @@ function initArday3D(){
    document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
    updateArday3D();
   }
-  function bindWindowOpening(roomGroup,windowGroup){
-   const segments=roomGroup.userData.backWallSegments;
-   if(!segments||segments.length!==4)return;
-   const sync=()=>{
-    // Derive the wall aperture from the live window transform. The opening
-    // spans the actual 10.8 m wall, rather than the old asymmetric segment bounds.
-    const center=windowGroup.position.x,halfWidth=1.1,left=-5.4,right=5.4;
-    const openingLeft=Math.max(left,Math.min(right,center-halfWidth));
-    const openingRight=Math.max(left,Math.min(right,center+halfWidth));
-    const leftWidth=Math.max(.001,openingLeft-left),rightWidth=Math.max(.001,right-openingRight);
-    const set=(mesh,x,y,w,h)=>{
-     const width=Math.max(.001,w),height=Math.max(.001,h);
-     mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(width,height,.2);
-     // applyInkOutlines() adds an inverted-hull child using the original
-     // geometry. Replace that child too, otherwise it keeps drawing the old
-     // wall silhouette over the moved aperture and the opening looks fixed.
-     mesh.children.filter(child=>child.userData?.inkOutline).forEach(child=>{child.geometry=mesh.geometry;});
-     mesh.position.set(x,y,-4.08);mesh.updateMatrix();mesh.geometry.computeBoundingBox();mesh.geometry.computeBoundingSphere();
-    };
-    set(segments[0],(left+openingLeft)/2,2.35,leftWidth,4.8);
-    set(segments[1],(openingRight+right)/2,2.35,rightWidth,4.8);
-    set(segments[2],center,.81,2.2,1.72);
-    set(segments[3],center,4.14,2.2,1.22);
-   };
-   windowGroup.userData.syncWallOpening=sync;sync();
-  }
-  bindWindowOpening(living,livingWindow);bindWindowOpening(bedroom,bedroomWindow);bindWindowOpening(kitchen,kitchenWindow);
+  // The outdoor view is part of each movable window assembly.
+  // The back wall remains solid behind it; no dynamic wall cut-outs are used.
   const wallObjects=[
    registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read',false,{source:'window',furnitureId:'living-window',anchor:'shelf'})}),
    registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('窗外的光线落在床边。')}),
@@ -1990,7 +1966,7 @@ function initArday3D(){
       }
       if(best&&canPlaceOnWall(item,best.side,best.offset)){
        wallTransform(g,best.side,best.offset,Math.max(.05,Math.min(4.5,best.point.y+furnitureDrag.wallYOffset)));
-       g.userData.syncWallOpening?.();
+
        item.wallSide=best.side;item.wallAxis=best.side==='back'||best.side==='front'?'x':'z';
       }
      }else{
@@ -2062,7 +2038,7 @@ function initArday3D(){
    if(e.target.closest('button,.day-timeline,.calendar-view,.drawer,input,textarea,select'))return;
    targetRadius+=e.deltaY*.012;applyCamera();e.preventDefault();
   },{passive:false});
-  function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;[livingWindow,bedroomWindow,kitchenWindow].forEach(w=>w.userData.syncWallOpening?.());updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
+  function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
    let delta=target.clone().sub(person.position),distance=delta.length(),moving=distance>.075;
    if(moving){const step=Math.min(distance,(pose==='idleWalk'?1.7:1.55)*dt);person.position.add(delta.normalize().multiplyScalar(step));}
    if(pose==='walk'&&activeActivity==='walk'){if(moving)walkPauseUntil=0;else if(!walkPauseUntil)walkPauseUntil=t+650;else if(t>=walkPauseUntil){walkIndex=(walkIndex+1)%walkRoute.length;target.set(...walkRoute[walkIndex]);walkPauseUntil=0;}}
