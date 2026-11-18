@@ -1115,7 +1115,7 @@ function initArday3D(){
   }
   function registerFurniture({id,name,room,group,width,depth,anchor=[0,0],action,wallAxis=null,wallSide=null,wallRange=4.5}){
    group.userData.furnitureKey=id;group.userData.roomKey=room;
-   const saved=s.furnitureLayout?.[room]?.[id];
+   const saved=arguments[0]?.record||s.placedFurniture?.find(item=>item.id===id)||s.furnitureLayout?.[room]?.[id];
    if(wallAxis){
     const side=saved?.wallSide||wallSide||(wallAxis==='x'?'back':'right');
     const offset=saved?.offset??saved?.position??(side==='back'||side==='front'?(saved?.x??group.position.x):(saved?.z??group.position.z));
@@ -1434,12 +1434,20 @@ function initArday3D(){
    });
   }
   function persistFurniture(item){
-   s.furnitureLayout=s.furnitureLayout||{};
-   s.furnitureLayout[item.room]=s.furnitureLayout[item.room]||{};
-   s.furnitureLayout[item.room][item.id]=item.wallAxis?{wallSide:item.wallSide,offset:wallOffset(item),y:item.group.position.y}:{x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null};
-   s.roomPositions=s.roomPositions||{};s.roomPositions[item.room]=s.roomPositions[item.room]||{};
-   s.roomPositions[item.room][item.id]=[item.group.position.x,item.group.position.z];
-   if(item.owned&&s.placedFurniture){const saved=s.placedFurniture.find(x=>x.id===item.id);if(saved){saved.x=item.group.position.x;saved.y=item.group.position.y;saved.z=item.group.position.z;saved.rotation=item.group.rotation.y;saved.supportId=item.supportId||null;if(item.dyeColor)saved.dyeColor=item.dyeColor;if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}}}
+   if(item.owned){
+    s.placedFurniture=s.placedFurniture||[];
+    let saved=s.placedFurniture.find(x=>x.id===item.id);
+    if(!saved){saved={id:item.id,name:item.name,room:item.room};s.placedFurniture.push(saved)}
+    Object.assign(saved,{x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null});
+    if(item.dyeColor)saved.dyeColor=item.dyeColor;
+    if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}
+   }else{
+    s.furnitureLayout=s.furnitureLayout||{};
+    s.furnitureLayout[item.room]=s.furnitureLayout[item.room]||{};
+    s.furnitureLayout[item.room][item.id]=item.wallAxis?{wallSide:item.wallSide,offset:wallOffset(item),y:item.group.position.y}:{x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null};
+    s.roomPositions=s.roomPositions||{};s.roomPositions[item.room]=s.roomPositions[item.room]||{};
+    s.roomPositions[item.room][item.id]=[item.group.position.x,item.group.position.z];
+   }
    save();
   }
   function selectFurniture(item){selectedFurniture=item;rotateFurnitureButton.disabled=!!item.wallAxis;removeFurnitureButton.disabled=!item.owned;refreshDyePalette();}
