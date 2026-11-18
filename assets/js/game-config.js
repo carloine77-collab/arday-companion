@@ -67,10 +67,8 @@ window.ArdayGameConfig = {
     ['书架·白蜡木开放格','▤','buy-furniture-bookshelf-ash','680','浅木色开放式书架'],
     ['书架·深胡桃木书柜','▤','buy-furniture-bookshelf-walnut','920','深色木质书柜']
    ],
-   '椅子':[
-    ['椅子·温莎木椅','▰','buy-furniture-chair','180','经典温莎椅'],
-    ['椅子·藤编餐椅','▰','buy-furniture-chair-rattan','240','藤编靠背'],
-    ['椅子·软包扶手椅','▰','buy-furniture-dining-chair','220','适合长时间阅读'],
+   '办公椅':[
+    ['办公椅·黑色网布','▰','buy-furniture-office-chair','460','可调节高度与带轮底座'],
     ['阅读椅·奶油弧背','▰','buy-furniture-reading-chair','520','弧形软包靠背']
    ],
    '电脑':[
