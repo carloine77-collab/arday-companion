@@ -29,27 +29,29 @@ const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
 s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=(Array.isArray(s.furniture)?s.furniture:base.furniture.slice()).filter(item=>item!=='沙发');
-s.ownedFurniture=s.ownedFurniture||[];
-s.placedFurniture=s.placedFurniture||[];
-if((s.furnitureCatalogVersion||0)<2){
- s.ownedFurniture=[];s.placedFurniture=[];s.furniture=[];
- s.furnitureLayout=s.furnitureLayout||{};s.furnitureLayout.living={};
- s.roomPositions=s.roomPositions||{};s.roomPositions.living={};
- s.furnitureCatalogVersion=2;
+// Preserve legacy furniture data during schema upgrades. These version flags
+// must never be used as a reason to clear player-owned or placed objects.
+s.ownedFurniture=Array.isArray(s.ownedFurniture)?s.ownedFurniture:[];
+s.placedFurniture=Array.isArray(s.placedFurniture)?s.placedFurniture:[];
+s.furniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
+s.furnitureLayout=s.furnitureLayout&&typeof s.furnitureLayout==='object'?s.furnitureLayout:{};
+s.roomPositions=s.roomPositions&&typeof s.roomPositions==='object'?s.roomPositions:{};
+for(const roomName of ['living','bedroom','kitchen']){
+ s.furnitureLayout[roomName]=s.furnitureLayout[roomName]&&typeof s.furnitureLayout[roomName]==='object'?s.furnitureLayout[roomName]:{};
+ s.roomPositions[roomName]=s.roomPositions[roomName]&&typeof s.roomPositions[roomName]==='object'?s.roomPositions[roomName]:{};
 }
-if((s.roomFurnishingMigration||0)<1){
- if(!Array.isArray(s.placedFurniture))s.placedFurniture=[];
- if(!Array.isArray(s.ownedFurniture))s.ownedFurniture=[];
- const roomFurniture=s.placedFurniture.filter(item=>item&&typeof item==='object'&&['bedroom','kitchen'].includes(item.room));
- roomFurniture.forEach(item=>{if(typeof item.name==='string'&&item.name&&!s.ownedFurniture.includes(item.name))s.ownedFurniture.push(item.name)});
- s.placedFurniture=s.placedFurniture.filter(item=>item&&typeof item==='object'&&!['bedroom','kitchen'].includes(item.room));
- s.furnitureLayout=s.furnitureLayout&&typeof s.furnitureLayout==='object'?s.furnitureLayout:{};
- s.furnitureLayout.bedroom={};s.furnitureLayout.kitchen={};
- s.roomPositions=s.roomPositions&&typeof s.roomPositions==='object'?s.roomPositions:{};
- s.roomPositions.bedroom={};s.roomPositions.kitchen={};
- s.roomFurnishingMigration=1;
-}
-s.ownedFurniture=s.ownedFurniture||[];s.placedFurniture=s.placedFurniture||[];
+s.placedFurniture.forEach((item,index)=>{
+ if(!item||typeof item!=='object')return;
+ if(typeof item.name!=='string'||!item.name.trim())return;
+ if(!item.id)item.id='legacy-placed-'+(item.room||'unknown')+'-'+index;
+ if(!['living','bedroom','kitchen'].includes(item.room))item.room='living';
+ if(!Number.isFinite(Number(item.x)))item.x=0;
+ if(!Number.isFinite(Number(item.y)))item.y=0;
+ if(!Number.isFinite(Number(item.z)))item.z=0;
+ if(!Number.isFinite(Number(item.rotation)))item.rotation=0;
+});
+s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
+s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
