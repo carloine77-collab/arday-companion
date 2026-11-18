@@ -2324,8 +2324,24 @@ function initArday3D(){
    }else if(modelName==='海报'){
     width=.92;depth=.12;height=1.25;wallAxis='x';wallSide='back';anchor=[0,2.05];box(0,0,0,.92,1.25,.07,m.wood);box(0,0,.045,.82,1.15,.025,m.cream);box(0,.17,.062,.7,.42,.012,m.clay);const sunDisk=new T.Mesh(new T.CircleGeometry(.16,24),m.gold);sunDisk.position.set(.18,.31,.075);group.add(sunDisk);for(let i=0;i<4;i++)box(-.2+i*.13,-.25,.07,.075,.34,.018,[m.leaf,m.oak,m.dark,m.clay][i]);
    }else if(modelName==='门'){
-    width=1.2;depth=.16;height=2.35;wallAxis='x';wallSide='back';anchor=[0,2.55];box(-.61,0,0,.12,2.35,.18,m.wood);box(.61,0,0,.12,2.35,.18,m.wood);box(0,1.12,0,1.34,.12,.18,m.oak);box(0,0,.04,1.08,2.2,.07,m.wood);box(0,0,.085,.88,1.98,.025,m.oak);for(const y of [-.65,0,.65])box(0,y,.105,.82,.018,.018,m.gold);cyl(.39,-.02,.15,.035,.035,.045,m.gold,12);
-   }else if(modelName==='懒人沙发'){
+    width=1.24;depth=.2;height=2.38;wallAxis='x';wallSide='back';anchor=[0,2.55];
+    const timber=mat(0x76513a,.58),panel=mat(0xa9845e,.62),shadow=mat(0x4b3426,.78);
+    // Full casing, recessed door leaf, three raised panels and a proper threshold.
+    box(-.62,0,0,.12,2.4,.2,timber);box(.62,0,0,.12,2.4,.2,timber);box(0,1.18,0,1.36,.14,.2,timber);
+    box(0,0,.035,1.08,2.22,.075,shadow);
+    box(0,0,.08,1.02,2.16,.055,panel);
+    for(const y of [-.68,.02,.68]){
+     const h=y===.02?.42:.48;
+     box(0,y,.115,.78,h,.045,timber);
+     box(0,y,.143,.7,h-.08,.018,panel);
+    }
+    box(0,-1.13,.12,1.05,.035,.025,m.oak);
+    for(const x of [-.46,.46])for(const y of [-1.02,1.02])box(x,y,.13,.035,.035,.025,m.gold);
+    // Lever handle, circular rose and separate lock escutcheon.
+    cyl(.39,-.02,.16,.065,.065,.025,m.gold,18);
+    box(.47,-.02,.19,.19,.035,.035,m.gold);
+    cyl(.39,-.25,.16,.035,.035,.025,m.metal,14);
+   }}else if(modelName==='懒人沙发'){
     width=1.5;depth=1.25;height=.85;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(0xb7a18d,.98),welt=mat(0x8d7866,.9);
     const bean=(x,y,z,sx,sy,sz,rot=0)=>{
@@ -2407,16 +2423,80 @@ function initArday3D(){
      const pillow=sphere(x,.52,-.62,.34,.13,.24,m.cream);pillow.rotation.x=-.16;
     }
    }else if(modelName==='哑铃架'){
-    width=1.25;depth=.58;height=.92;for(const x of [-.52,.52]){box(x,.44,0,.06,.84,.52,m.dark);box(x,.88,0,.12,.07,.58,m.metal)}for(const y of [.32,.65]){box(0,y,0,1.15,.055,.42,m.metal);for(const x of [-.38,-.12,.12,.38]){cyl(x,y+.09,0,.11,.11,.18,m.dark,16);cyl(x,y+.09,.1,.12,.12,.035,m.metal,16)}}box(0,.06,0,1.22,.1,.54,m.dark);
-   }else if(modelName==='窗'){
-    width=2.1;depth=.16;height=1.35;wallAxis='x';wallSide='back';anchor=[0,2.65];for(const x of [-1.02,1.02])box(x,0,0,.09,1.4,.16,m.wood);for(const y of [-.67,.67])box(0,y,0,2.12,.09,.16,m.wood);const glass=mat(0xaec8cf,.12,.08);glass.transparent=true;glass.opacity=.3;box(0,0,.015,1.92,1.18,.025,glass);box(0,0,.075,.055,1.2,.05,m.wood);box(0,0,.08,1.95,.055,.05,m.wood);
-   }else if(modelName==='上床下桌'){
+    width=1.35;depth=.68;height=1.02;
+    const frame=mat(0x343b40,.42,.72),chrome=mat(0xaeb8bb,.28,.78),rubber=mat(0x252a2d,.92);
+    // Two-tier steel rack with end uprights, stabilising feet and loaded dumbbells.
+    for(const x of [-.59,.59]){
+     box(x,.48,0,.065,.9,.58,frame);
+     box(x,.91,0,.12,.08,.64,chrome);
+     box(x,.08,0,.16,.12,.68,frame);
+     for(const y of [.35,.72]){
+      box(0,y,0,1.18,.065,.5,frame);
+      box(0,y+.06,.22,1.18,.045,.045,chrome);
+      for(const dx of [-.47,-.16,.16,.47]){
+       const weight=cyl(dx,y+.15,0,.105,.105,.16,rubber,18);
+       cyl(dx,y+.15,.095,.11,.11,.025,chrome,18);
+       cyl(dx,y+.15,-.095,.11,.11,.025,chrome,18);
+       cyl(dx,y+.15,0,.025,.025,.18,chrome,10);
+      }
+     }
+    }
+    for(let i=0;i<3;i++){const plate=cyl(-.55+i*.09,.1,-.34,.09,.09,.035,rubber,18);plate.rotation.x=Math.PI/2}
+   }}else if(modelName==='窗'){
+    width=2.12;depth=.2;height=1.48;wallAxis='x';wallSide='back';anchor=[0,2.65];
+    const timber=mat(0x76543d,.58),glass=mat(0xa9c5ce,.12,.08);glass.transparent=true;glass.opacity=.28;
+    // Deep reveal, four glazed panes, cross muntins and a projecting sill.
+    box(0,0,0,2.12,1.48,.16,timber);
+    box(0,0,.085,1.94,1.3,.025,glass);
+    for(const x of [-1.02,0,1.02])box(x,0,.12,.075,1.38,.12,m.oak);
+    for(const y of [-.68,0,.68])box(0,y,.12,2.02,.075,.12,m.oak);
+    box(0,-.79,.19,2.2,.13,.32,m.wood);
+    box(0,.79,.12,2.18,.08,.2,m.wood);
+    for(const x of [-.48,.48]){box(x,0,.2,.018,.98,.018,m.gold)}
+    for(const x of [-.93,.93])cyl(x,0,.19,.025,.025,.06,m.gold,10);
+    // A narrow central latch and two small hinge plates.
+    box(.045,-.02,.2,.035,.18,.025,m.gold);
+    for(const y of [-.48,.48])box(-1.0,y,.19,.08,.1,.025,m.metal);
+   }}else if(modelName==='上床下桌'){
     width=3.0;depth=2.0;height=2.75;action=()=>openFurnitureActions('bed',id);for(const x of [-1.35,1.35]){box(x,1.35,0,.12,2.65,.12,m.wood);box(x,2.63,0,.18,.12,1.9,m.oak)}box(0,2.18,-.72,2.7,.16,.78,m.wood);box(0,2.3,-.72,2.65,.22,.72,m.fabric);box(0,2.55,-1.58,2.7,.5,.12,m.cream);for(const x of [-1.25,1.25])box(x,.82,.35,.1,1.6,.1,m.wood);box(0,.92,0,2.55,.12,.82,m.oak);box(0,.99,0,2.5,.04,.78,m.cream);for(const x of [-1.1,1.1])box(x,.45,0,.08,.88,.72,m.wood);for(let i=0;i<6;i++)box(-.22+i*.09,.18,.18,.045,.012,.3,m.gold);for(let i=0;i<5;i++){const step=box(-1.5,.22+i*.36,.65-i*.28,.38,.06,.24,m.oak);step.rotation.z=.0}
    }else if(modelName==='钢琴'){
-    width=1.55;depth=.85;height=1.28;box(0,.68,0,1.5,1.18,.72,m.dark);box(0,1.27,.12,1.52,.12,.78,m.wood);box(0,.45,.39,1.42,.12,.12,m.cream);box(0,.53,.45,1.42,.035,.08,m.dark);for(let i=0;i<28;i++){const x=-.68+i*.05;box(x,.52,.51,.045,.11,.04,m.cream);if(i%7!==2&&i%7!==6)box(x+.023,.585,.535,.025,.07,.025,m.dark)}box(0,1.5,-.12,.8,.42,.05,m.wood);for(const x of [-.52,.52])box(x,.09,-.2,.08,.18,.08,m.dark);box(0,.22,.9,.78,.36,.38,m.wood);
-   }else if(modelName==='洗衣机'){
-    width=.86;depth=.82;height=1.22;box(0,.61,0,.82,1.18,.78,m.cream);box(0,1.03,.405,.72,.2,.025,m.metal);for(let i=0;i<3;i++)cyl(-.23+i*.22,1.03,.43,.035,.035,.025,m.dark,12);const rim=new T.Mesh(new T.TorusGeometry(.27,.045,12,32),m.metal);rim.position.set(0,.51,.405);group.add(rim);const glass=new T.Mesh(new T.CircleGeometry(.235,32),mat(0x5d7b86,.18,.12));glass.position.set(0,.51,.414);group.add(glass);cyl(0,.51,.425,.025,.025,.02,m.gold,12);
-   }else if(modelName==='酒柜'){
+    width=1.62;depth=.92;height=1.42;
+    const caseMat=mat(0x292a2b,.28,.46),wood=mat(0x62452f,.56),ivory=mat(0xf0eadc,.35),ebony=mat(0x18191b,.24);
+    // Upright piano cabinet with fallboard, keyboard cheeks, music desk and pedals.
+    box(0,.68,0,1.56,1.18,.76,caseMat);
+    box(0,1.29,-.02,1.62,.12,.82,wood);
+    box(0,.51,.405,1.42,.16,.12,wood);
+    box(0,.57,.47,1.38,.055,.1,ebony);
+    for(let i=0;i<52;i++){
+     const x=-.665+i*.026;
+     box(x,.59,.535,.024,.12,.045,ivory);
+     if(i%7!==2&&i%7!==6&&i%7!==1&&i%7!==4){const black=box(x+.013,.66,.56,.014,.075,.035,ebony)}
+    }
+    box(0,.82,.34,1.36,.035,.08,wood);
+    box(0,1.02,-.24,.96,.42,.06,caseMat);
+    box(0,1.04,-.195,.86,.32,.018,wood);
+    for(let i=0;i<5;i++)box(-.34+i*.17,1.04,-.18,.012,.24,.012,m.gold);
+    for(const x of [-.62,.62])box(x,.08,-.22,.1,.16,.1,caseMat);
+    for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,chrome);pedal.rotation.x=-.18}
+    box(0,.16,.22,.62,.055,.22,caseMat);
+   }}else if(modelName==='洗衣机'){
+    width=.92;depth=.86;height=1.28;
+    const enamel=mat(0xe8e5df,.34,.18),steel=mat(0xaeb7b9,.28,.58),dark=mat(0x34434a,.18,.24),rubber=mat(0x252a2d,.88);
+    box(0,.63,0,.88,1.22,.82,enamel);
+    box(0,1.17,.42,.8,.18,.025,steel);
+    box(0,1.18,.44,.58,.12,.012,dark);
+    for(let i=0;i<3;i++){cyl(-.25+i*.25,1.18,.46,.035,.035,.025,m.metal,12);sphere(-.25+i*.25,1.18,.48,.012,.012,.012,m.gold)}
+    // Deep porthole with rubber gasket, glass drum and concentric inner rings.
+    const gasket=new T.Mesh(new T.TorusGeometry(.29,.055,14,40),rubber);gasket.position.set(0,.58,.43);group.add(gasket);
+    const rim=new T.Mesh(new T.TorusGeometry(.255,.025,12,40),steel);rim.position.set(0,.58,.46);group.add(rim);
+    const glass=new T.Mesh(new T.CircleGeometry(.225,40),dark);glass.position.set(0,.58,.445);group.add(glass);
+    const drum=new T.Mesh(new T.TorusGeometry(.16,.012,8,32),steel);drum.position.set(0,.58,.46);group.add(drum);
+    sphere(0,.58,.465,.11,.11,.012,mat(0x718c94,.22,.12));
+    box(-.22,.98,.445,.22,.035,.018,m.cream);
+    box(.25,.98,.445,.22,.035,.018,m.cream);
+    for(const x of [-.34,.34])box(x,.06,.28,.1,.12,.12,rubber);
+    box(0,.06,-.3,.72,.12,.12,rubber);
+   }}else if(modelName==='酒柜'){
     width=1.25;depth=.58;height=1.72;surfaceType='table';surfaceY=1.75;
     const wood=mat(0x503626,.62),back=mat(0x34251e,.82),glass=mat(0xc9dadd,.14,.12);glass.transparent=true;glass.opacity=.2;
     box(0,.84,0,1.2,1.62,.54,wood);box(0,1.68,0,1.28,.08,.62,m.oak);
@@ -2518,28 +2598,69 @@ function initArday3D(){
     // Small brass hanging rail unifies the asymmetrical gallery arrangement.
     box(0,.78,.015,1.45,.025,.035,m.gold);
    }else if(modelName==='跑步机'){
-    width=.82;depth=1.85;height=1.35;box(0,.14,0,.78,.16,1.78,m.dark);box(0,.235,0,.64,.025,1.58,m.metal);for(const x of [-.28,.28]){const rail=box(x,.72,-.55,.045,1.05,.045,m.metal);rail.rotation.x=-.18;const grip=box(x,.94,-.92,.08,.08,.42,m.dark);grip.rotation.x=.1}box(0,1.08,-.9,.5,.28,.12,m.dark);box(0,1.1,-.835,.38,.16,.015,m.screen);for(const x of [-.33,.33])box(x,.07,.8,.08,.14,.08,m.dark);
-   }else if(modelName==='游戏机'){
-    width=.62;depth=.42;height=.25;surfaceType='tabletop';surfaceY=.04;box(0,.12,0,.62,.2,.38,m.dark);box(0,.225,0,.52,.018,.3,m.cream);for(let i=0;i<8;i++)box(-.23+i*.065,.24,.08,.018,.012,.18,m.metal);for(const x of [-.28,.28]){const pad=sphere(x,.1,.32,.14,.06,.1,m.dark);pad.scale.y=.6}for(let i=0;i<4;i++)cyl(-.09+i*.06,.23,-.17,.012,.012,.02,m.gold,8);
-   }else if(modelName==='置物架'){
-    width=1.25;depth=.48;height=1.9;
-    const frame=mat(0x51463d,.48,.58);
-    for(const x of [-.56,.56])for(const z of [-.18,.18])box(x,.95,z,.045,1.86,.045,frame);
-    for(let i=0;i<5;i++){
-     const y=.12+i*.42;box(0,y,0,1.18,.045,.44,m.oak);
-     for(let j=0;j<3;j++){
-      const x=-.36+j*.36;
-      const item=[m.cream,m.clay,m.leaf][j];
-      box(x,y+.11,.04,.2,.16,.22,item);
-      box(x,y+.2,.04,.12,.018,.14,m.gold);
+    width=.9;depth=1.92;height=1.48;
+    const frame=mat(0x343b40,.42,.72),belt=mat(0x20272b,.94),rail=mat(0x858f92,.42,.65),rubber=mat(0x171c20,.98);
+    // Deep running deck with a continuous belt, end rollers and side foot rails.
+    box(0,.19,0,.84,.22,1.82,frame);
+    box(0,.315,0,.68,.025,1.62,belt);
+    for(const z of [-.82,.82])cyl(0,.32,z,.035,.035,.7,rail,20);
+    for(const x of [-.39,.39]){
+     box(x,.34,0,.09,.045,1.72,rubber);
+     box(x,.2,-.78,.1,.12,.16,frame);
+     box(x,.2,.78,.1,.12,.16,frame);
+     const upright=box(x,.83,-.62,.055,1.05,.055,rail);upright.rotation.x=-.18;
+     const grip=box(x,.99,-1.02,.11,.09,.48,rubber);grip.rotation.x=.12;
+    }
+    box(0,1.27,-.98,.62,.34,.15,frame);
+    box(0,1.29,-.895,.49,.22,.018,m.screen);
+    box(0,1.12,-.88,.5,.035,.08,m.metal);
+    for(let i=0;i<5;i++)cyl(-.19+i*.095,1.12,-.865,.018,.018,.018,i===2?m.clay:m.gold,10);
+    for(const x of [-.27,.27]){const safety=box(x,1.08,-.82,.045,.025,.1,m.clay);safety.rotation.z=x*.12}
+    for(const x of [-.3,.3])for(const z of [-.72,.72])cyl(x,.075,z,.045,.045,.08,rubber,12);
+   }}else if(modelName==='游戏机'){
+    width=.72;depth=.48;height=.34;surfaceType='tabletop';surfaceY=.04;
+    const shell=mat(0x30363b,.38,.58),edge=mat(0x555e64,.42,.55),vent=mat(0x171d22,.9),light=mat(0x8caeaa,.3,.2);
+    // Low console chassis with layered shell, front ports and top ventilation.
+    box(0,.13,0,.68,.2,.42,shell);
+    box(0,.235,0,.65,.035,.4,edge);
+    box(0,.258,0,.55,.012,.31,shell);
+    for(let i=0;i<13;i++)box(-.25+i*.042,.267,-.12,.012,.008,.12,vent);
+    for(const x of [-.25,.25]){box(x,.13,.215,.1,.055,.012,vent);cyl(x,.13,.23,.018,.018,.012,light,10)}
+    for(const x of [-.24,.24]){const foot=box(x,.025,-.13,.12,.05,.12,vent)}
+    // Two separate controllers with grips, thumb sticks, D-pad and face buttons.
+    for(const x of [-.29,.29]){
+     const pad=new T.Mesh(new T.SphereGeometry(1,24,16),shell);pad.position.set(x,.105,.39);pad.scale.set(.15,.065,.105);group.add(pad);
+     for(const side of [-1,1]){const grip=new T.Mesh(new T.SphereGeometry(1,18,12),shell);grip.position.set(x+side*.075,.07,.43);grip.scale.set(.055,.06,.1);group.add(grip)}
+     cyl(x-.045,.17,.36,.022,.022,.018,light,12);
+     cyl(x+.045,.17,.36,.022,.022,.018,m.gold,12);
+     for(let k=0;k<4;k++)sphere(x+.035+(k%2)*.035,.17,.405+Math.floor(k/2)*.035,.012,.012,.012,k%2?m.clay:m.cream);
+    }
+   }}else if(modelName==='置物架'){
+    width=1.3;depth=.52;height=1.92;
+    const frame=mat(0x51463d,.46,.62),shelf=mat(0xb28c62,.66),back=mat(0x75604c,.88);
+    for(const x of [-.59,.59])for(const z of [-.2,.2])box(x,.96,z,.055,1.88,.055,frame);
+    // Five distinct shelves with raised lips, diagonal rear bracing and varied stored objects.
+    for(let level=0;level<5;level++){
+     const y=.13+level*.42;
+     box(0,y,0,1.22,.055,.48,shelf);
+     box(0,y+.045,.235,1.18,.045,.035,frame);
+     for(const x of [-.55,.55])box(x,y+.08,-.18,.035,.16,.035,frame);
+     if(level===0){
+      for(let k=0;k<4;k++){const pot=cyl(-.39+k*.25,y+.17,.02,.065,.075,.2,k%2?m.clay:m.cream,14);cyl(-.39+k*.25,y+.28,.02,.055,.055,.025,m.leaf,14)}
+     }else if(level===1){
+      for(let k=0;k<5;k++){const book=box(-.45+k*.18,y+.16,.02,.13,.24,.24,[m.clay,m.cream,m.leaf,m.oak,m.fabric][k]);book.rotation.z=(k-2)*.035}
+     }else if(level===2){
+      for(let k=0;k<3;k++){const basket=box(-.38+k*.38,y+.12,.02,.29,.17,.3,mat(k===1?0xb99a73:0x9a7d5c,.94));for(let q=0;q<4;q++)box(-.48+k*.38+q*.06,y+.12,.18,.012,.13,.012,m.cream)}
+     }else if(level===3){
+      for(let k=0;k<3;k++){const frameBox=box(-.37+k*.37,y+.16,.02,.26,.24,.18,k===1?m.clay:m.cream);box(-.37+k*.37,y+.17,.12,.18,.16,.012,m.gold)}
+     }else{
+      const plant=cyl(-.35,y+.12,.02,.07,.09,.17,m.clay,14);
+      for(let k=0;k<5;k++){const leaf=sphere(-.35+Math.cos(k*1.25)*.09,y+.28+Math.sin(k*1.25)*.04,.02,.07,.12,.035,m.leaf);leaf.rotation.z=Math.cos(k*1.25)*.5}
+      for(let k=0;k<3;k++)box(.12+k*.14,y+.13,.02,.11,.2,.2,m.cream);
      }
-     for(const x of [-.52,.52])box(x,y-.04,0,.035,.12,.44,frame);
     }
-    // Rear diagonal braces distinguish the utility rack from a closed bookcase.
-    for(const side of [-1,1]){
-     const brace=box(side*.34,.95,-.205,.025,1.72,.025,frame);brace.rotation.z=side*.34;
-    }
-   }else if(modelName==='衣帽架'){
+    for(const side of [-1,1]){const brace=box(side*.35,.96,-.225,.028,1.72,.028,frame);brace.rotation.z=side*.34}
+   }}else if(modelName==='衣帽架'){
     width=.82;depth=.82;height=2.05;
     const wood=mat(0x76543d,.62),brass=mat(0xb69a68,.48,.65);
     cyl(0,.075,0,.34,.34,.14,m.dark,24);
