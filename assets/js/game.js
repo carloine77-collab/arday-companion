@@ -993,8 +993,9 @@ function initArday3D(){
  try{
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xd9d7d1);
   const camera=new T.PerspectiveCamera(38,1,.1,80);
-  const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,window.matchMedia('(pointer: coarse)').matches?1.15:1.35));renderer.outputEncoding=T.sRGBEncoding;
+  const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
+  const renderer=new T.WebGLRenderer({antialias:!isTouchDevice,alpha:false,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.15:1.35));renderer.outputEncoding=T.sRGBEncoding;
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
   const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
@@ -1238,7 +1239,7 @@ function initArday3D(){
   const legs=[];for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.14,.83,0);rig.add(hip);limb(hip,0,-.22,0,.105,.12,.43,trouserMat);const knee=new T.Group();knee.position.set(0,-.43,0);hip.add(knee);ell(knee,0,0,0,.083,.09,.08,trouserMat,10);limb(knee,0,-.19,.005,.067,.078,.36,trouserMat);ell(knee,0,-.395,.075,.09,.07,.18,shoeMat,12);box(knee,0,-.445,.13,.15,.025,.16,CM(0x242126));box(knee,0,-.425,.125,.155,.018,.17,CM(0x65534d));legs.push({hip,knee,side})}
   const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
   const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
-  let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0;
+  let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0,lastHotspotUpdate=0;
   let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0);
   function applyCamera(){targetPhi=Math.max(.48,Math.min(1.42,targetPhi));targetRadius=Math.max(7.2,Math.min(21,targetRadius))}
@@ -1627,6 +1628,7 @@ function initArday3D(){
    item.group.rotation.y=next;moveSupportedFurniture(item,ox,oy,oz,oa);persistFurniture(item);updateFurnitureHotspots();
   };
   function updateFurnitureHotspots(){
+   const now=performance.now();if(now-lastHotspotUpdate<33)return;lastHotspotUpdate=now;
    const rect=stage.getBoundingClientRect();
    for(const item of furnitureRegistry){
     const b=item.button;if(!b)continue;
