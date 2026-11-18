@@ -873,8 +873,9 @@ function openFurnitureActions(kind,furnitureId=null){
  const center=document.createElement('div');center.className='furniture-wheel-center';center.style.left=radius+'px';center.style.top=radius+'px';
  const title=document.createElement('span');title.className='furniture-wheel-title';title.textContent=set.title;
  const subtitle=document.createElement('span');subtitle.className='furniture-wheel-subtitle';subtitle.textContent='选择互动';
- const close=document.createElement('button');close.type='button';close.className='furniture-wheel-close';close.setAttribute('aria-label','关闭互动菜单');close.textContent='×';close.onclick=closeFurnitureActions;
- center.append(title,subtitle,close);wheel.appendChild(center);
+ center.setAttribute('role','button');center.setAttribute('tabindex','0');center.setAttribute('aria-label','关闭'+set.title+'互动菜单');center.title='点击关闭';
+ center.onclick=closeFurnitureActions;center.onkeydown=(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();closeFurnitureActions()}};
+ center.append(title,subtitle);wheel.appendChild(center);
  const symbols={read:'▤',write:'✎',chat:'♡',computerPlay:'⌘',watchTV:'▣',listenRecords:'♫',rest:'☾',music:'♫',wash:'◌',bouquet:'✿',admireFlowers:'✿',smellFlowers:'❀',sleep:'☾',cook:'♨'};
  if(actions.length){
   actions.forEach(([activity,context],index)=>{
