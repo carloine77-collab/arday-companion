@@ -1,6 +1,6 @@
 window.ArdayGameConfig = {
   shopCatalog: {
- '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4']],
+ '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6']],
  furnitureCategories:{
   '起居空间':{
    '沙发':[['沙发·亚麻燕麦','▰','buy-furniture-sofa-linen','1180',''],['沙发·雾蓝绒布','▰','buy-furniture-sofa-blue','1480',''],['沙发·复古高背','▰','buy-furniture-sofa','880','']],
@@ -93,6 +93,22 @@ window.ArdayGameConfig = {
  recordPlayer:{title:'唱片机',activities:{listenRecords:{anchor:'sofa'}}},
 
  },
-   recipes: {eggRice:{name:'蛋炒饭',ingredients:{rice:1,egg:1},hunger:30},tomatoEgg:{name:'番茄炒蛋',ingredients:{tomato:1,egg:2},hunger:28},vegetableSoup:{name:'蔬菜汤',ingredients:{vegetable:2},hunger:22}},
-  ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄'}
+   recipes: {
+   eggRice:{name:'蛋炒饭',ingredients:{rice:1,egg:1},hunger:30,starter:true},
+   tomatoEgg:{name:'番茄炒蛋',ingredients:{tomato:1,egg:2},hunger:28,starter:true},
+   vegetableSoup:{name:'蔬菜汤',ingredients:{vegetable:2},hunger:22,starter:true},
+   beefNoodles:{name:'红烧牛肉面',ingredients:{beef:1,noodles:1,vegetable:1},hunger:42},
+   mushroomRisotto:{name:'奶油蘑菇烩饭',ingredients:{rice:1,mushroom:2,oil:1},hunger:36},
+   eggToast:{name:'香煎蛋吐司',ingredients:{bread:2,egg:1,oil:1},hunger:32},
+   tofuStew:{name:'豆腐蔬菜煲',ingredients:{tofu:1,vegetable:1,mushroom:1},hunger:34},
+   potatoBeef:{name:'土豆炖牛肉',ingredients:{potato:2,beef:1},hunger:45}
+  },
+  ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包'},
+  bookCategories: {'菜谱':[
+   ['红烧牛肉面 · 家常面馆','📖','buy-recipe-beefNoodles','38','解锁红烧牛肉面的制作方法'],
+   ['奶油蘑菇烩饭 · 西式家常','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇烩饭的制作方法'],
+   ['香煎蛋吐司 · 早餐手册','📖','buy-recipe-eggToast','28','解锁香煎蛋吐司的制作方法'],
+   ['豆腐蔬菜煲 · 清淡食谱','📖','buy-recipe-tofuStew','35','解锁豆腐蔬菜煲的制作方法'],
+   ['土豆炖牛肉 · 慢炖料理','📖','buy-recipe-potatoBeef','45','解锁土豆炖牛肉的制作方法']
+  ]}
 };
