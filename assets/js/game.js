@@ -1180,17 +1180,17 @@ function initArday3D(){
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
-  addWindowView(bedroomWindow,2.65);
-  for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
-  addWindowDressing(bedroomWindow,2.0,1.7,0xb9a9a0,2.65);
+  addWindowView(bedroomWindow,2.6);
+  for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
+  addWindowDressing(bedroomWindow,2.1,1.85,0xb9a9a0,2.6);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
-  addWindowView(kitchenWindow,2.65);
-  for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
-  addWindowDressing(kitchenWindow,1.8,1.5,0xd0c4b1,2.65);
-  box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
-  for(let x=-3.4;x<=3.4;x+=.48)for(let y=1.62;y<=2.38;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
+  addWindowView(kitchenWindow,2.6);
+  for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(kitchenWindow,x,y,0,w,h,.1,M(0x9a7655));
+  addWindowDressing(kitchenWindow,2.1,1.85,0xd0c4b1,2.6);
+  box(kitchen,0,1.12,-3.91,7.7,.55,.08,M(0xc98d6d));
+  for(let x=-3.4;x<=3.4;x+=.48)for(let y=.88;y<=1.35;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
   // Three-dimensional hinged doors are part of each room, not UI overlays.
   function roomDoor(parent,z,label,target,color){
    const g=new T.Group();g.position.set(5.18,0,z);g.rotation.y=Math.PI/2;g.userData.roomTarget=target;g.userData.wallObject=true;parent.add(g);
