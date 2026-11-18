@@ -6,6 +6,8 @@
 
 (()=>{
 const {activityMeta,shopCatalog,recipes,ingredientNames,furnitureActivities}=window.ArdayGameConfig;
+const characterStats=window.ArdayGameConfig.characterStats||{energy:{hourlyDecay:.45,sleepRecoveryPerHour:13,activityEffects:{}},needs:{hungerHourlyDecay:.8,cleanHourlyDecay:.25,funHourlyDecay:.3}};
+const energyConfig=characterStats.energy||{};const energyEffects=energyConfig.activityEffects||{};const needDecay=characterStats.needs||{};
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 // Hard-isolate the footer from all room/WebGL stacking contexts.
 const bubbleNodes=document.querySelectorAll('.bubble,.dialogue-pill');bubbleNodes.forEach((node,i)=>{if(i>0)node.remove()});
@@ -317,26 +319,28 @@ function respondToChat(text){
 
 function buildDay(key){
  const plans=s.sleepPlans||(s.sleepPlans={});
- // At midnight calculate the sleep needed to restore the current energy deficit.
- // Sleep restores 13 points/hour and ordinary hourly decay removes 0.45.
  if(!plans[key]){
-  const deficit=Math.max(0,100-Math.max(0,Math.min(100,Number(s.energy)||0)));
-  const duration=Math.ceil(deficit/12.55);
-  const bedtime=22;
-  const wake=(bedtime+duration)%24;
-  plans[key]={bedtime,duration,wake,energyAtPlanning:s.energy,recoveryRate:12.55,plannedAt:Date.now()};
+  const currentEnergy=Math.max(0,Math.min(100,Number(s.energy)||0));
+  const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||13);
+  const decay=Math.max(0,Number(energyConfig.hourlyDecay)||0);
+  const netRecovery=Math.max(.01,recovery-decay);
+  const deficit=Math.max(0,100-currentEnergy);
+  const duration=Math.ceil(deficit/netRecovery);
+  const bedtime=22,wake=(bedtime+duration)%24;
+  plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,plannedAt:Date.now()};
  }
  const p=plans[key],previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate);
  const previous=plans[previousKey]||{duration:8,bedtime:22,wake:6};
  const d=[];
  const add=(start,end,title,kind='routine',activity='idle')=>{if(end>start)d.push({start,end,title,kind,activity})};
- // Only physiological routines are pre-booked. All remaining hours are genuinely
- // autonomous time and can be replaced by a player proposal before they occur.
- add(0,previous.wake,'睡眠 · '+previous.duration+'小时','routine','sleep');
- add(previous.wake,previous.wake+1,'早餐','routine','eat');
+ if(previous.duration>0)add(0,previous.wake,'睡眠 · '+previous.duration+'小时','routine','sleep');
+ add(7,8,'早餐','routine','eat');
  add(12,13,'午餐','routine','eat');
  add(18,19,'晚餐','routine','eat');
- add(p.bedtime,24,'睡眠 · '+p.duration+'小时','routine','sleep');
+ if(p.duration>0)add(p.bedtime,24,'睡眠 · '+p.duration+'小时','routine','sleep');
+ const occupied=new Set();
+ d.forEach(ev=>{for(let h=Math.max(0,ev.start);h<Math.min(24,ev.end);h++)occupied.add(h)});
+ for(let hour=0;hour<24;hour++)if(!occupied.has(hour))d.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});
  return d.sort((a,b)=>a.start-b.start);
 }
 function ensureSchedule(){ensureScheduleAt(Date.now())}
@@ -346,7 +350,7 @@ function renderCalendar(){
  const labels=['今天','明天','后天'];
  let html='<div class="calendar-editorial-masthead"><div class="calendar-masthead-copy"><span class="calendar-eyebrow">ARDAY COMPANION　 /　 THE DAILY EDITION</span><div class="calendar-display-title">日程<span class="calendar-title-mark"></span></div><div class="calendar-subtitle">A QUIET RECORD OF ORDINARY DAYS</div></div><div class="calendar-date-stamp"><span>ISSUE</span><strong>'+String(d.getDate()).padStart(2,'0')+'</strong><small>'+dayLabel(d)+'</small></div><span class="calendar-ornament calendar-ornament-one"></span><span class="calendar-ornament calendar-ornament-two"></span></div><div class="calendar-day-tabs">'+labels.map((x,i)=>'<button class="'+(selectedCalendarDay===i?'active':'')+'" data-day-select="'+i+'"><span class="calendar-tab-index">0'+(i+1)+'</span><span class="calendar-tab-label">'+x+'</span><small>'+dayLabel(plusDays(anchor,i))+'</small></button>').join('')+'</div>';
  html+='<section class="day-card '+(selectedCalendarDay===0?'today':'')+'"><div class="day-card-head"><strong>'+labels[selectedCalendarDay]+' · '+dayLabel(d)+'</strong></div><div class="day-timeline">';
- for(let hour=0;hour<24;hour++){let ev=eventAt(key,hour),isNow=selectedCalendarDay===0&&now.getHours()===hour;let label=ev?ev.title:'空闲时间';html+='<div class="day-slot"><time>'+pad(hour)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':ev.activity==='sleep'?'sleep':ev.kind==='work'?'work':'busy'):'free')+(isNow?' now':'')+'" data-day="'+selectedCalendarDay+'" data-hour="'+hour+'">'+label+'</button></div>'}
+ for(let hour=0;hour<24;hour++){let ev=eventAt(key,hour),isNow=selectedCalendarDay===0&&now.getHours()===hour;let label=ev?ev.title:'自主安排';html+='<div class="day-slot"><time>'+pad(hour)+':00</time><button class="'+(ev?(ev.kind==='proposal'?'proposal':ev.activity==='sleep'?'sleep':ev.kind==='work'?'work':'busy'):'free')+(isNow?' now':'')+'" data-day="'+selectedCalendarDay+'" data-hour="'+hour+'">'+label+'</button></div>'}
  html+='</div></section>';
  $('calendarContent').innerHTML=html;
  $('calendarContent').querySelectorAll('[data-day-select]').forEach(b=>b.onclick=()=>{selectedCalendarDay=+b.dataset.daySelect;renderCalendar()});
@@ -458,6 +462,10 @@ function ensureScheduleAt(value){
   delete s.pendingWork;
   s.calendar.version=12;
  }
+ if((s.calendar.version||0)<13){
+  Object.keys(s.calendar.days).forEach(key=>{const day=s.calendar.days[key]||[];for(let hour=0;hour<24;hour++){if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true})}day.sort((a,b)=>a.start-b.start);s.calendar.days[key]=day});
+  s.calendar.version=13;
+ }
  if((s.calendar.version||0)<11){
   // Remove obsolete schedule activities by validating against the canonical activity registry.
   Object.keys(s.calendar.days).forEach(k=>{
@@ -483,7 +491,7 @@ function ensureScheduleAt(value){
   Object.keys(s.sleepPlans||{}).forEach(k=>{if(k<currentKey)delete s.sleepPlans[k]});
   addEvent('新的一天','阿尔已经开始安排新一天的生活。','daily');
  }
- const ensureDay=key=>{if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key)};
+ const ensureDay=key=>{if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);const day=s.calendar.days[key];for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});day.sort((a,b)=>a.start-b.start)};
  ensureDay(currentKey);
  for(let i=1;i<=2;i++)ensureDay(dayKey(plusDays(dayAnchor(),i)));
  if(requestedKey>=currentKey)ensureDay(requestedKey);
@@ -584,27 +592,53 @@ function presentActivity(activity){
  if(!activityMeta[a])return;
  updateArday3D();
 }
+function hasAutonomyFurniture(requirement){
+ const names=(s.placed||[]).filter(item=>item&&item.kind!=='scene').map(item=>item.name);
+ const all=[...names,...(s.inventory||[]).filter(item=>item?.kind==='furniture').map(item=>item.name)];
+ if(requirement==='desk')return all.some(name=>name.includes('书桌'));
+ if(requirement==='computer')return all.some(name=>name.includes('电脑'));
+ if(requirement==='bookshelf')return all.some(name=>name.includes('书架'));
+ if(requirement==='sink')return all.some(name=>name.includes('水槽'));
+ if(requirement==='seat')return all.some(name=>/沙发|椅子|床/.test(name));
+ return true;
+}
 function chooseAutonomousActivity(){
- const available=Object.entries(activityMeta).filter(([id,meta])=>{
-  if(!meta.autonomous||!meta.autonomy)return false;
-  if(meta.requires==='desk'&&!has('书桌'))return false;
-  if(meta.requires==='computer'&&!has('电脑'))return false;
-  return true;
- }).map(([id,meta])=>{
-  const spec=meta.autonomy,level=Number(s[spec.need]??50);
-  return {activity:id,score:Math.max(0,spec.threshold-level)*spec.weight+(spec.base||0)+Math.random()*4};
- });
- return available.sort((a,b)=>b.score-a.score)[0]?.activity||'rest';
+ const recent=(s.activityLog||[]).slice(-5).map(item=>item.activity);
+ const temperament=typeof ardayTemperament==='function'?ardayTemperament():{composed:.6,indirect:.4};
+ const description=(s.personality?.description||'').toLowerCase();
+ const candidates=Object.entries(activityMeta).filter(([id,meta])=>meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires)).map(([id,meta])=>{
+  const spec=meta.autonomy,level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
+  let personality=0;
+  if(/好奇|求知|敏锐|聪明|善于思考|理性/.test(description)&&['read','write'].includes(id))personality+=5;
+  if(/安静|内向|独处|疏离/.test(description)&&['read','music','rest'].includes(id))personality+=4;
+  if(/活泼|外向|热情|健谈/.test(description)&&['chat','walk'].includes(id))personality+=4;
+  if(/自律|认真|勤奋|专注/.test(description)&&id==='write')personality+=4;
+  if(id==='chat')personality+=(Number(s.friend)||0)*.045+(Number(s.attach)||0)*.025;
+  if(id==='rest')personality+=Math.max(0,45-(Number(s.energy)||0))*.22;
+  if(id==='computerPlay')personality+=Math.max(0,50-(Number(s.fun)||0))*.16;
+  const repeatPenalty=recent.filter(x=>x===id).length*3.2;
+  const preference=(Number(s.preferences?.[id])||0)*1.8;
+  const temperamentBias=id==='rest'?(1-temperament.composed)*1.5:0;
+  return {activity:id,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
+ }).filter(item=>Number.isFinite(item.score)&&item.score>=0);
+ if(!candidates.length)return 'walk';
+ const max=Math.max(...candidates.map(item=>item.score));
+ const weighted=candidates.map(item=>({...item,weight:Math.max(.15,item.score-max+5)}));
+ const total=weighted.reduce((sum,item)=>sum+item.weight,0);
+ let roll=Math.random()*total;
+ for(const item of weighted){roll-=item.weight;if(roll<=0)return item.activity}
+ return weighted[weighted.length-1].activity;
 }
 function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'idle'}
 // Resolve every hour through the calendar. Autonomous choice fills only an unassigned slot;
 // fixed routines and player proposals already exist as calendar events and take precedence.
 function resolveScheduledActivity(key,hour){
  let ev=eventAt(key,hour);
- if(!ev||normalizeActivity(ev.activity)==='idle'){
+ if(!ev||ev.activity==='autonomous'||normalizeActivity(ev.activity)==='idle'){
   const activity=chooseAutonomousActivity(),meta=activityMeta[activity]||{title:'自己的时间'};
-  writeBlockForKey(key,hour,hour+1,{title:meta.title,kind:'autonomous',activity,autonomous:true,source:'simulation'});
-  ev=eventAt(key,hour);
+  if(ev){ev.title=meta.menuLabel||meta.title;ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'simulation';ev.unresolved=false;ev.resolvedAt=Date.now()}
+  else{writeBlockForKey(key,hour,hour+1,{title:meta.menuLabel||meta.title,kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now()});ev=eventAt(key,hour)}
+  if($('stage').classList.contains('calendar-mode'))renderCalendar();
  }
  return {event:ev,activity:normalizeActivity(ev?.activity||'idle')};
 }
@@ -612,7 +646,8 @@ function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
  // Preserve fractional hourly decay; integer clamping would round small losses to zero.
- for(const [k,loss] of Object.entries({energy:.45,hunger:.8,clean:.25,fun:.3}))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
+ const hourlyLoss={energy:Number(energyConfig.hourlyDecay)||0,hunger:Number(needDecay.hungerHourlyDecay)||0,clean:Number(needDecay.cleanHourlyDecay)||0,fun:Number(needDecay.funHourlyDecay)||0};
+ for(const [k,loss] of Object.entries(hourlyLoss))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
  
  const resolved=resolveScheduledActivity(key,hour);
  let ev=resolved.event,activity=resolved.activity;
@@ -624,7 +659,7 @@ function processActivityAt(value){
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
  if(meta){
-  const effects={...(meta.effect||{})};
+  const effects={...(meta.effect||{})};if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
   change(effects);
   
