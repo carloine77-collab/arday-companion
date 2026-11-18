@@ -1621,11 +1621,26 @@ function initArday3D(){
     }
    }else if(modelName==='床头柜'){
     const woven=variant==='藤编抽屉';width=.88;depth=.78;height=.92;
-    if(woven){m.wood.color.setHex(0xb18a61);m.sofa2.color.setHex(0xd9bd94)}
-    box(0,.47,0,.86,.76,.72,m.wood);box(0,.87,.02,.94,.1,.8,m.cream);
-    for(const y of [.32,.62]){box(0,y,.37,.76,.25,.035,m.sofa2);if(woven){for(let line=-.09;line<=.091;line+=.045)box(0,y+line,.393,.68,.012,.012,m.oak)}for(const x of [-.19,.19])cyl(x,y,.405,.018,.018,.035,m.gold,10)}
-    for(const x of [-.34,.34])box(x,.08,-.27,.09,.16,.09,m.dark);
-   }else if(modelName==='台灯'){
+    if(woven){
+     const cane=mat(0xc5a47a,.94),frame=mat(0x76543d,.66),shadow=mat(0x4e3829,.82);
+     box(0,.48,0,.82,.72,.68,frame);box(0,.87,0,.94,.1,.78,m.oak);
+     // A single deep rattan basket drawer and an open lower shelf replace the standard twin-drawer front.
+     box(0,.63,.36,.72,.38,.035,shadow);box(0,.63,.39,.7,.34,.035,cane);
+     for(let x=-.31;x<=.311;x+=.055){const strand=box(x,.63,.414,.012,.31,.012,m.oak);strand.rotation.z=.12}
+     for(let y=.49;y<=.771;y+=.055){const strand=box(0,y,.42,.68,.012,.012,m.cream);strand.rotation.y=.08}
+     box(0,.31,.36,.72,.045,.035,m.oak);
+     box(0,.25,0,.76,.045,.58,m.oak);
+     for(const x of [-.32,.32]){
+      const leg=box(x,.14,.25,.07,.28,.07,frame);leg.rotation.z=x*.12;
+      const rear=box(x,.14,-.25,.07,.28,.07,frame);rear.rotation.z=x*.12;
+     }
+     box(0,.45,.43,.14,.025,.025,m.gold);
+    }else{
+     box(0,.47,0,.86,.76,.72,m.wood);box(0,.87,.02,.94,.1,.8,m.cream);
+     for(const y of [.32,.62]){box(0,y,.37,.76,.25,.035,m.sofa2);for(const x of [-.19,.19])cyl(x,y,.405,.018,.018,.035,m.gold,10)}
+     for(const x of [-.34,.34])box(x,.08,-.27,.09,.16,.09,m.dark);
+    }
+   }else if(modelName==='台灯'){else if(modelName==='台灯'){
     width=.48;depth=.48;height=.92;surfaceType='tabletop';surfaceY=.9;
     if(variant==='蘑菇'){cyl(0,.12,0,.19,.22,.2,m.gold,16);cyl(0,.43,0,.055,.075,.48,m.cream,16);const dome=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),m.cream);dome.scale.set(.31,.2,.31);dome.position.y=.72;group.add(dome)}else if(variant==='琥珀玻璃'){cyl(0,.12,0,.18,.2,.18,m.gold,20);cyl(0,.36,0,.07,.09,.38,m.metal,16);const globe=new T.Mesh(new T.SphereGeometry(.25,24,16),mat(0xc68b4f,.22,.12));globe.scale.set(1,.82,1);globe.position.y=.65;group.add(globe)}else if(variant==='陶瓷折线'){cyl(0,.12,0,.2,.22,.2,m.clay,16);const stem=new T.Mesh(new T.CylinderGeometry(.09,.16,.48,8),m.cream);stem.position.y=.43;group.add(stem);const shade=new T.Mesh(new T.CylinderGeometry(.28,.12,.28,12),m.cream);shade.position.y=.82;group.add(shade)}else{cyl(0,.12,0,.18,.2,.2,m.dark,16);cyl(0,.48,0,.045,.07,.58,m.gold,12);const shade=new T.Mesh(new T.CylinderGeometry(.27,.12,.3,16),m.cream);shade.position.y=.88;group.add(shade)}
    }else if(modelName==='壁灯'){
@@ -1780,10 +1795,36 @@ function initArday3D(){
     box(0,.12,0,1.22,.16,.72,m.dark);
    }else if(modelName==='地毯'){
     width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
-    box(0,.035,0,width,.07,depth,m.fabric);box(0,.074,0,3.48,.012,2.48,m.cream);box(0,.083,0,3.25,.012,2.25,m.fabric);
+    const wool=name==='羊毛地毯',bedroom=name==='卧室地毯';
+    box(0,.035,0,width,.07,depth,m.fabric);
+    const base=box(0,.074,0,3.48,.012,2.48,m.cream);
+    box(0,.083,0,3.25,.012,2.25,m.fabric);
     for(const x of [-1.7,1.7])for(const z of [-1.2,1.2])box(x,.092,z,.14,.012,.14,m.gold);
-    for(let x=-1.5;x<=1.5;x+=.24){box(x,.08,-1.34,.018,.018,.14,m.gold);box(x,.08,1.34,.018,.018,.14,m.gold)}
-    if(variant==='羊毛米白'){m.fabric.color.setHex(0xd8cdbb);m.sofa2.color.setHex(0xc6b8a2);m.cream.color.setHex(0xf0e8da)}if(variant==='波斯绛红'){
+    if(wool){
+     // Thick wool pile: raised irregular tufts and short fringe make this visibly softer than the flat bedroom rug.
+     const pile=mat(0xe9e1d4,.98),shade=mat(0xc8bca9,.98);
+     for(let row=0;row<8;row++)for(let col=0;col<17;col++){
+      const x=-1.48+col*.185+(row%2)*.045,z=-.98+row*.28;
+      const tuft=sphere(x,.104,z,.075,.018,.075,(row+col)%4===0?shade:pile);
+      tuft.scale.y=.55;
+     }
+     for(const z of [-1.28,1.28])for(let x=-1.58;x<=1.581;x+=.12){
+      const fringe=box(x,.07,z,.018,.025,.14,pile);fringe.rotation.y=(Math.round(x*10)%2)*.12;
+     }
+     for(const x of [-1.68,1.68])for(let z=-1.15;z<=1.151;z+=.12)box(x,.07,z,.14,.025,.018,pile);
+    }else if(bedroom){
+     // Bedroom rug: a restrained central medallion, double inset border and corner rosettes.
+     const border=mat(0xb69b78,.72),motif=mat(0x9c8064,.82);
+     for(const z of [-1.13,1.13])box(0,.105,z,3.28,.018,.035,border);
+     for(const x of [-1.58,1.58])box(x,.105,0,.035,.018,2.28,border);
+     for(const x of [-1.42,1.42])for(const z of [-.98,.98]){
+      const rosette=new T.Mesh(new T.OctahedronGeometry(.16,1),motif);rosette.position.set(x,.12,z);rosette.scale.set(1,.12,1);group.add(rosette);
+      const center=sphere(x,.14,z,.045,.018,.045,m.gold);
+     }
+     const medallion=new T.Mesh(new T.TorusGeometry(.48,.018,8,48),border);medallion.rotation.x=Math.PI/2;medallion.position.y=.115;group.add(medallion);
+     const inner=new T.Mesh(new T.TorusGeometry(.34,.012,8,48),motif);inner.rotation.x=Math.PI/2;inner.position.y=.118;group.add(inner);
+     for(let i=0;i<8;i++){const a=i*Math.PI/4;const leaf=sphere(Math.cos(a)*.28,.125,Math.sin(a)*.28,.11,.012,.045,motiffix);leaf.rotation.y=-a;}
+    }else if(variant==='波斯绛红'){
      for(let x=-1.25;x<=1.25;x+=.42)for(let z=-.82;z<=.82;z+=.42){const motif=new T.Mesh(new T.OctahedronGeometry(.105,0),m.gold);motif.position.set(x,.105,z);motif.scale.y=.12;group.add(motif)}
      box(0,.105,0,.08,.012,1.9,m.cream);
     }else if(variant==='奶油棋盘'){
@@ -1792,7 +1833,7 @@ function initArday3D(){
      for(let z=-.82;z<=.82;z+=.28)box(0,.105,z,2.95,.012,.025,m.cream);
      for(const x of [-1.52,1.52])for(let z=-.9;z<=.9;z+=.3)box(x,.11,z,.055,.018,.055,m.gold);
     }
-   }else if(modelName==='沙发'){
+   }else if(modelName==='沙发'){else if(modelName==='沙发'){
     width=2.35;depth=1.12;height=.94;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(variant==='雾蓝绒布'?0x657f94:variant==='亚麻燕麦'?0xc4ad91:0xe4d9c7,.96),fabricShade=mat(variant==='雾蓝绒布'?0x91a4b2:variant==='亚麻燕麦'?0xe1d3bd:0xd3c5b1,.98),welt=mat(variant==='雾蓝绒布'?0x526b80:variant==='亚麻燕麦'?0xb69c7d:0xc2b39e,.92),walnut=mat(variant==='雾蓝绒布'?0x594b43:variant==='亚麻燕麦'?0x76543a:0x67452f,.62),walnutEdge=mat(variant==='雾蓝绒布'?0x71808a:variant==='亚麻燕麦'?0x987451:0x8a6344,.58);
     applyPainterMap(fabric,fabricMap,.026);applyPainterMap(fabricShade,fabricMap,.022);applyPainterMap(welt,fabricMap,.016);
@@ -2082,12 +2123,37 @@ function initArday3D(){
     const count=cream?3:4;for(let i=0;i<count;i++){const y=.2+i*(cream?.27:.21);box(0,y,.305,1.02,cream?.23:.18,.035,front);for(const x of [-.38,.38])cyl(x,y,.34,.022,.022,.04,m.gold,10)}
     for(const x of [-.48,.48])box(x,.07,-.22,.09,.14,.09,m.dark);
    }else if(modelName==='梳妆台'){
-    width=1.42;depth=.62;height=1.52;surfaceType='table';surfaceY=.86;
-    box(0,.72,0,1.38,.12,.6,m.oak);for(const x of [-.55,.55]){box(x,.4,0,.25,.58,.55,m.wood);box(x,.42,.29,.2,.28,.025,m.sofa2);cyl(x,.42,.32,.022,.022,.04,m.gold,10)}
-    for(const x of [-.48,.48])box(x,.14,-.2,.065,.28,.065,m.wood);
-    box(0,1.52,-.24,.72,.7,.055,m.wood);box(0,1.52,-.2,.62,.59,.025,mat(0x9eafb0,.22,.18));
-    const arch=new T.Mesh(new T.CircleGeometry(.28,32,0,Math.PI),m.cream);arch.position.set(0,1.55,-.18);group.add(arch);
-   }else if(modelName==='全身镜'){
+    width=1.42;depth=.68;height=1.62;surfaceType='table';surfaceY=.9;
+    if(name==='复古妆台'){
+     const walnut=mat(0x563b2b,.58),trim=mat(0x94704b,.52),ivory=mat(0xe6d7c2,.78);
+     box(0,.86,0,1.48,.12,.66,walnut);box(0,.92,0,1.5,.035,.68,trim);
+     // Three shallow drawers, a shaped apron and cabriole-style legs give the vintage vanity its own silhouette.
+     for(const x of [-.45,0,.45]){box(x,.68,.34,.4,.23,.045,ivory);box(x,.68,.37,.36,.19,.018,walnut);cyl(x,.68,.405,.025,.025,.045,m.gold,12)}
+     const apron=box(0,.48,.04,1.12,.18,.48,walnut);
+     for(const x of [-.58,.58])for(const z of [-.22,.22]){
+      const leg=box(x,.25,z,.075,.48,.075,walnut);leg.rotation.z=x<0?-.12:.12;
+      sphere(x*1.08,.48,z,.075,.055,.075,trim);
+     }
+     box(0,1.18,-.22,.14,.5,.1,walnut);
+     const frame=new T.Mesh(new T.SphereGeometry(.39,28,20),trim);frame.position.set(0,1.65,-.2);frame.scale.set(1,.82,.12);group.add(frame);
+     const glass=new T.Mesh(new T.SphereGeometry(.34,28,20),mat(0x9eafb0,.2,.16));glass.position.set(0,1.65,-.185);glass.scale.set(1,.82,.1);group.add(glass);
+     for(const x of [-.3,.3])sphere(x,1.98,-.18,.045,.07,.045,m.gold);
+     sphere(0,2.02,-.18,.075,.075,.045,m.gold);
+     width=1.55;height=2.12;
+    }else{
+     const top=mat(0xd9c7ae,.62),body=mat(0xe8ddcc,.8);
+     box(0,.84,0,1.38,.1,.62,top);
+     box(0,.66,.25,.76,.24,.035,body);box(0,.66,.28,.68,.19,.018,m.cream);
+     cyl(0,.66,.31,.025,.025,.045,m.gold,12);
+     for(const x of [-.56,.56]){
+      const leg=box(x,.4,0,.075,.72,.075,m.wood);leg.rotation.z=x*.045;
+      box(x,.4,.28,.16,.28,.035,body);
+     }
+     box(0,1.4,-.23,.08,.92,.08,m.wood);
+     const mirrorFrame=new T.Mesh(new T.SphereGeometry(.32,28,20),m.oak);mirrorFrame.position.set(0,1.62,-.23);mirrorFrame.scale.set(1,.82,.13);group.add(mirrorFrame);
+     const mirror=new T.Mesh(new T.SphereGeometry(.28,28,20),mat(0x9eafb0,.2,.16));mirror.position.set(0,1.62,-.205);mirror.scale.set(1,.82,.1);group.add(mirror);
+    }
+   }else if(modelName==='全身镜'){else if(modelName==='全身镜'){
     width=.82;depth=.22;height=1.98;
     const frame=mat(variant==='黄铜拱形'?0xb89a62:0x77563d,.55,.35);
     box(0,.94,0,.78,1.86,.1,frame);box(0,.94,.058,.66,1.72,.025,mat(0x9eb2b5,.18,.22));
