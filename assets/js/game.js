@@ -2316,16 +2316,8 @@ function initArday3D(){
     width=.62;depth=.62;height=.68;action=()=>openFurnitureActions('chair',id);box(0,.58,0,.62,.12,.62,m.oak);legs(.58,.58,.52,.065);box(0,.31,0,.5,.045,.5,m.wood);
    }else{toast('没有找到这种家具模型：'+name);return null}
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
-   if(modelName==='床'||modelName==='上床下桌'){for(const x of [-1.36,1.36]){const finial=sphere(x,1.78,-1.57,.075,.075,.075,m.gold);finial.scale.set(.075,.075,.075)}box(0,.73,1.68,2.78,.035,.035,m.cream)}
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
-   if(modelName==='衣柜'){for(const x of [-.45,.45]){for(const y of [.25,2.2])box(x, y,.426,.72,.035,.025,m.oak);for(const side of [-1,1])box(x+side*.36,1.25,.426,.025,1.9,.025,m.oak);box(x+(x<0?.28:-.28),1.25,.474,.025,.42,.025,m.gold)}box(0,2.52,.02,1.96,.07,.84,m.cream)}
-   if(modelName==='橱柜'){for(const x of [-.92,0,.92]){box(x,.49,.442,.72,.72,.018,m.oak);box(x,.49,.454,.66,.66,.012,m.sofa2);cyl(x+(x<0?.25:-.25),.49,.475,.022,.022,.035,m.gold,10)}box(0,1.065,0,2.94,.035,.92,m.oak)}
-   if(modelName==='冰箱'){box(0,2.12,.468,.72,.018,.012,m.cream);for(const y of [1.43,.52])box(0,y,.468,.82,.018,.012,m.cream)}
-   if(modelName==='水槽'){for(const x of [-.48,.48]){cyl(x,1.02,-.25,.045,.045,.06,m.gold,12);const handle=box(x,1.055,-.25,.12,.025,.035,m.metal);handle.rotation.z=x*.18}box(0,.91,.477,.96,.025,.018,m.oak)}
-   if(modelName==='书桌'||modelName==='餐桌'){for(const x of [-.42,.42]){const ferrule=new T.Mesh(new T.CylinderGeometry(.068,.068,.09,12),m.gold);ferrule.position.set(x,.105,.0);group.add(ferrule)}box(0,.16,.0,width*.72,.035,depth*.72,m.oak);for(const x of [-width*.42,width*.42])box(x,height-.07,0,.025,.045,depth*.86,m.gold)}
    if(modelName==='椅子'||modelName==='餐桌椅'){const seatEdge=mat(0x9c8064,.9);for(const x of [-.29,.29]){box(x,.565,.34,.025,.025,.025,m.gold)}if(variant==='软包扶手椅'){for(const x of [-.3,.3]){const piping= new T.Mesh(new T.TorusGeometry(.27,.008,6,24,Math.PI),seatEdge);piping.position.set(x,.66,-.19);piping.rotation.y=Math.PI/2;group.add(piping)}}}
-   if(modelName==='书架'){for(let level=0;level<3;level++)for(let j=0;j<4;j++){const x=-.39+j*.26,y=.34+level*.55;box(x,y+.02,.105,.105,.018,.012,m.gold)}}
-   if(modelName==='书桌'||modelName==='餐桌'){for(const x of [-.42,.42]){const ferrule=new T.Mesh(new T.CylinderGeometry(.068,.068,.09,12),m.gold);ferrule.position.set(x,.105,.0);group.add(ferrule)}box(0,.16,.0,width*.72,.035,depth*.72,m.oak)}
    if(modelName==='电脑'){const screenGlow=box(0,.49,-.112,.62,.012,.006,mat(0x6b9eb1,.28));screenGlow.material.emissive=new T.Color(0x23485b);screenGlow.material.emissiveIntensity=.28;for(let row=0;row<3;row++)for(let col=0;col<10;col++)box(-.27+col*.06,.104+row*.002,.105+row*.047,.035,.006,.025,m.metal)}
    let modelMeshCount=0;
    group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
