@@ -1441,7 +1441,7 @@ function initArday3D(){
   }
   function registerWallObject({id,name,room,group,axis,side,range,anchor,action}){
    group.userData.furnitureKey=id;group.userData.roomKey=room;group.userData.wallObject=true;
-   const saved=s.placed?.find(item=>item.id===id),savedSide=saved?.wallSide||side;
+   const saved=s.placed?.find(item=>item.id===id),savedSide=id.includes('window')?'back':(saved?.wallSide||side);
    const offset=saved?.offset??saved?.position??(savedSide==='back'||savedSide==='front'?group.position.x:group.position.z);
    wallTransform(group,savedSide,offset,saved?.y??group.position.y);
    const button=document.createElement('button');button.className='hotspot furniture-hotspot wall-hotspot spot-'+id;button.type='button';button.textContent=id.includes('door')?'门':'窗';button.setAttribute('aria-label',name);button.dataset.object=name;stage.appendChild(button);
@@ -1951,7 +1951,7 @@ function initArday3D(){
        {side:'front',plane:new T.Plane(new T.Vector3(0,0,1),-3.89),visible:()=>roomGroup.userData.frontWall?.visible!==false},
        {side:'left',plane:new T.Plane(new T.Vector3(1,0,0),5.16),visible:()=>roomGroup.userData.leftWall?.visible!==false},
        {side:'right',plane:new T.Plane(new T.Vector3(1,0,0),-5.16),visible:()=>roomGroup.userData.rightWall?.visible!==false}
-      ];
+      ].filter(candidate=>!item.id.includes('window')||candidate.side==='back');
       let best=null;
       for(const candidate of candidates){
        if(!candidate.visible())continue;
