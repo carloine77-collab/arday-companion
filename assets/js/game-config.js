@@ -101,7 +101,8 @@ window.ArdayGameConfig = {
    mushroomRisotto:{name:'奶油蘑菇烩饭',ingredients:{rice:1,mushroom:2,oil:1},hunger:36},
    eggToast:{name:'香煎蛋吐司',ingredients:{bread:2,egg:1,oil:1},hunger:32},
    tofuStew:{name:'豆腐蔬菜煲',ingredients:{tofu:1,vegetable:1,mushroom:1},hunger:34},
-   potatoBeef:{name:'土豆炖牛肉',ingredients:{potato:2,beef:1},hunger:45}
+   potatoBeef:{name:'土豆炖牛肉',ingredients:{potato:2,beef:1},hunger:45},
+   potatoPancake:{name:'葱香土豆饼',ingredients:{potato:1,flour:1,egg:1,oil:1},hunger:34}
   },
   ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包'},
   bookCategories: {'菜谱':[
@@ -109,6 +110,7 @@ window.ArdayGameConfig = {
    ['奶油蘑菇烩饭 · 西式家常','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇烩饭的制作方法'],
    ['香煎蛋吐司 · 早餐手册','📖','buy-recipe-eggToast','28','解锁香煎蛋吐司的制作方法'],
    ['豆腐蔬菜煲 · 清淡食谱','📖','buy-recipe-tofuStew','35','解锁豆腐蔬菜煲的制作方法'],
-   ['土豆炖牛肉 · 慢炖料理','📖','buy-recipe-potatoBeef','45','解锁土豆炖牛肉的制作方法']
+   ['土豆炖牛肉 · 慢炖料理','📖','buy-recipe-potatoBeef','45','解锁土豆炖牛肉的制作方法'],
+   ['葱香土豆饼 · 家常面点','📖','buy-recipe-potatoPancake','32','解锁葱香土豆饼的制作方法']
   ]}
 };
