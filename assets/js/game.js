@@ -223,7 +223,6 @@ function slotClick(di,h){
     const conflict=(s.calendar.days[key]||[]).some(x=>x!==ev&&n<x.end&&n+duration>x.start);
     if(conflict){toast('这个时段已有其他安排');return}
     ev.start=n;ev.end=n+duration;
-    if(s.pendingWork?.day===key&&s.pendingWork.start===oldStart){s.pendingWork.start=n;s.pendingWork.end=n+duration}
     s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')
    };
   $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
@@ -419,6 +418,10 @@ function ensureScheduleAt(value){
   });
   s.sleepPlans={};s.calendar.version=6;
  }
+ if((s.calendar.version||0)<12){
+  delete s.pendingWork;
+  s.calendar.version=12;
+ }
  if((s.calendar.version||0)<11){
   // Remove obsolete schedule activities by validating against the canonical activity registry.
   Object.keys(s.calendar.days).forEach(k=>{
@@ -471,19 +474,16 @@ function writeBlockForKey(key,start,end,block){
 }
 
 function settleWorkAt(key,hour,at=Date.now()){
- if(s.job?.active&&key>=s.job.startDate&&hour>=s.job.end){
-  s.job.paidDays=s.job.paidDays||[];
-  if(!s.job.paidDays.includes(key)){s.job.paidDays.push(key);s.personalMoney+=s.job.salary;moneyRecord('personal','income',s.job.salary,s.job.title+' · 日薪',at);addEvent('今日薪资到账','阿尔完成了'+s.job.title+'的工作，获得日薪 ¥'+s.job.salary+'。','daily');remember('salary','获得'+s.job.title+'日薪 ¥'+s.job.salary,1);return true;}
- }
- if(!s.pendingWork||s.pendingWork.paid)return false;
- const p=s.pendingWork;
- if(key>p.day||(key===p.day&&hour+1>=p.end)){
-  p.paid=true;const pay=Math.max(0,Number(p.pay)||0);s.personalMoney+=pay;
-  moneyRecord('personal','income',pay,'完成工作委托',at);
-  addEvent('工作报酬到账','阿尔完成工作，获得个人收入 ¥'+pay+'。','daily');
-  remember('work','完成工作，个人收入 ¥'+pay,2);return true;
- }
- return false;
+ const job=s.job;
+ if(!job?.active||key<job.startDate||hour<job.end)return false;
+ job.paidDays=job.paidDays||[];
+ if(job.paidDays.includes(key))return false;
+ job.paidDays.push(key);
+ s.personalMoney+=Math.max(0,Number(job.salary)||0);
+ moneyRecord('personal','income',Math.max(0,Number(job.salary)||0),job.title+' · 日薪',at);
+ addEvent('今日薪资到账','阿尔完成了'+job.title+'的工作，获得日薪 ¥'+job.salary+'。','daily');
+ remember('salary','获得'+job.title+'日薪 ¥'+job.salary,1);
+ return true;
 }
 
 function applyOffline(){
