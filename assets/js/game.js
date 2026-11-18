@@ -3058,13 +3058,16 @@ function initArday3D(){
     for(const support of candidates){
      const dx=x-support.group.position.x,dz=z-support.group.position.z,co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
      const localX=dx*co-dz*si,localZ=dx*si+dz*co;
-     const limitX=support.width/2-item.width/2-.018,limitZ=support.depth/2-item.depth/2-.018;
+     const fit=Math.min(1,(support.width-.036)/item.width,(support.depth-.036)/item.depth);
+     if(!Number.isFinite(fit)||fit<.62)continue;
+     const itemWidth=item.width*fit,itemDepth=item.depth*fit;
+     const limitX=support.width/2-itemWidth/2-.018,limitZ=support.depth/2-itemDepth/2-.018;
      if(limitX<0||limitZ<0)continue;
      const snapRange=.42;
      if(Math.abs(localX)>limitX+snapRange||Math.abs(localZ)>limitZ+snapRange)continue;
      const clampedX=Math.max(-limitX,Math.min(limitX,localX)),clampedZ=Math.max(-limitZ,Math.min(limitZ,localZ));
      const distance=Math.hypot(localX-clampedX,localZ-clampedZ);
-     if(!best||distance<best.distance)best={support,x:support.group.position.x+clampedX*co+clampedZ*si,z:support.group.position.z-clampedX*si+clampedZ*co,distance};
+     if(!best||distance<best.distance)best={support,x:support.group.position.x+clampedX*co+clampedZ*si,z:support.group.position.z-clampedX*si+clampedZ*co,distance,fit};
     }
     return best;
    }
@@ -3256,7 +3259,7 @@ function persistFurniture(item){
        let support=null,overlapSupport=null,nx=rawX,nz=rawZ;
        if(item.surfaceType==='tabletop'||['电脑','捧花摆件'].includes(item.name)){
         const snap=findTabletopSnap(item,rawX,rawZ);
-        if(snap){support=snap.support;nx=snap.x;nz=snap.z}
+        if(snap){support=snap.support;nx=snap.x;nz=snap.z;if(snap.fit<.999){g.scale.multiplyScalar(snap.fit);item.width*=snap.fit;item.depth*=snap.fit;item.footprintScale=(item.footprintScale||1)*snap.fit}}
         else if(previousSupport){
          const old=furnitureRegistry.find(other=>other.id===previousSupport);
          if(old&&window.ArdayFurniturePlacement.rectsOverlap(window.ArdayFurniturePlacement.corners(item,rawX,rawZ,g.rotation.y),window.ArdayFurniturePlacement.corners(old)))overlapSupport=old;
