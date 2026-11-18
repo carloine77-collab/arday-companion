@@ -779,7 +779,7 @@ window.ArdayGameConfig = {
   "建筑类": {
     "窗": [
       [
-        "窗",
+        "默认窗户",
         "▧",
         "buy-furniture-catalog-045",
         "780",
@@ -804,7 +804,7 @@ window.ArdayGameConfig = {
     ],
     "门": [
       [
-        "门",
+        "默认室内木门",
         "▧",
         "buy-furniture-catalog-023",
         "680",
@@ -866,7 +866,6 @@ window.ArdayGameConfig = {
  watchTV:{title:'看电视',playerSelectable:true,playerIcon:'▣',autonomous:true,autonomy:{need:'fun',threshold:66,weight:1.05},requires:'television',menuLabel:'看电视',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:14}},
  listenRecords:{title:'听唱片',playerSelectable:true,playerIcon:'♫',autonomous:true,autonomy:{need:'fun',threshold:62,weight:.95},requires:'recordPlayer',menuLabel:'听唱片',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:12}},
  music:{title:'听音乐',autonomous:true,autonomy:{need:'fun',threshold:64,weight:.9},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10}},
- tea:{title:'一起喝茶',playerSelectable:true,autonomous:false,menuLabel:'一起喝茶',location:'table',pose:'sit',anchor:'table',effect:{fun:5,hunger:2}},
  walk:{title:'散步',playerSelectable:true,playerIcon:'🌿',autonomous:true,autonomy:{need:'fun',threshold:60,weight:.18,base:2},menuLabel:'外出',location:'outside',pose:'walk',anchor:'default',effect:{fun:9,clean:-1}},
  game:{title:'玩游戏',autonomous:false,menuLabel:'玩游戏',location:'rug',pose:'wave',anchor:'default',effect:{fun:11}},
  company:{title:'自由相处',autonomous:false,menuLabel:'自由相处',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:4}},
@@ -877,7 +876,7 @@ window.ArdayGameConfig = {
 },
   furnitureActivities: {
  sofa:{title:'沙发',activities:{rest:{anchor:'sofa'},chat:{anchor:'sofa'},watchTV:{anchor:'sofa'},listenRecords:{anchor:'sofa'}}},
- dining:{title:'餐桌',activities:{tea:{anchor:'table'},chat:{anchor:'table'}}},
+ dining:{title:'餐桌',activities:{chat:{anchor:'table'}}},
  fridge:{title:'冰箱',action:'kitchen'},
  stove:{title:'灶台',action:'kitchen'},
  sink:{title:'水槽',activities:{wash:{anchor:'default'}}},
