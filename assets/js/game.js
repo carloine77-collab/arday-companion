@@ -2477,7 +2477,7 @@ function initArday3D(){
     box(0,1.04,-.195,.86,.32,.018,wood);
     for(let i=0;i<5;i++)box(-.34+i*.17,1.04,-.18,.012,.24,.012,m.gold);
     for(const x of [-.62,.62])box(x,.08,-.22,.1,.16,.1,caseMat);
-    for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,chrome);pedal.rotation.x=-.18}
+    for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,m.metal);pedal.rotation.x=-.18}
     box(0,.16,.22,.62,.055,.22,caseMat);
    }}else if(modelName==='洗衣机'){
     width=.92;depth=.86;height=1.28;
