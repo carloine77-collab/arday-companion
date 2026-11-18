@@ -1098,10 +1098,26 @@ function initArday3D(){
    });
   }
   const m={wall:M(0xd8d5ce),floor:M(0x8b7764),wood:M(0x513a2b),oak:M(0x806044),sofa:M(0xd9cdbb),sofa2:M(0xc4b49e),skin:M(0xd9a17c),hair:M(0x302629),shirt:M(0x526575),pants:M(0x454c5c),glass:new T.MeshPhysicalMaterial({color:0xd7e5e7,roughness:.12,metalness:.04,transparent:true,opacity:.24,reflectivity:.72,clearcoat:.85,clearcoatRoughness:.08,depthWrite:false,side:T.DoubleSide}),rug:M(0xb2a18c),leaf:M(0x64775d),dark:M(0x423a36),cream:M(0xf1eee7)};
+  m.glass.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`float glassFresnel=pow(1.0-abs(dot(normalize(normal),normalize(vViewPosition))),4.0);outgoingLight=mix(outgoingLight,vec3(.66,.79,.84),glassFresnel*.24);\n#include <opaque_fragment>`)};
+  m.glass.customProgramCacheKey=()=> 'arday-window-glass-fresnel-v1';
   function box(parent,x,y,z,w,h,d,material){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function cyl(parent,x,y,z,r,h,material,seg=14){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,seg),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   const roomFloorMap=createPainterTexture('floor'),roomWallMap=createPainterTexture('wall');
+  function addWindowDressing(windowGroup,width,height,color=0xc8b9a8){
+   const fabric=new T.MeshStandardMaterial({color,roughness:.96,side:T.DoubleSide});
+   const rod=cyl(windowGroup,0,height*.5+.11,.12,.035,.035,width+.24,M(0x9a7655,.42));rod.rotation.z=Math.PI/2;
+   for(const side of [-1,1]){
+    const geometry=new T.PlaneGeometry(.58,height,18,28),positions=geometry.attributes.position;
+    for(let i=0;i<positions.count;i++){const x=positions.getX(i),y=positions.getY(i),v=(y+height/2)/height;positions.setX(i,x+Math.sin((x+.29)*42)*.022+Math.sin(v*8)*.012)}
+    geometry.computeVertexNormals();
+    const panel=new T.Mesh(geometry,fabric);panel.position.set(side*(width*.5-.3),height*.5,.13);panel.castShadow=true;panel.receiveShadow=true;windowGroup.add(panel);
+    const tie=new T.Mesh(new T.TorusGeometry(.19,.018,8,24),M(0xb18b58,.48));tie.position.set(side*(width*.5-.3),height*.43,.17);tie.scale.set(1,.55,1);windowGroup.add(tie);
+    for(let j=0;j<4;j++){const ring=new T.Mesh(new T.TorusGeometry(.035,.009,6,12),M(0x9a7655,.4));ring.position.set(side*(width*.5-.3)+side*(-.21+j*.14),height+.1,.12);ring.rotation.x=Math.PI/2;windowGroup.add(ring)}
+   }
+   for(const side of [-1,1]){const finial=new T.Mesh(new T.SphereGeometry(.055,10,8),M(0xb18b58,.42));finial.position.set(side*(width*.5+.12),height+.11,.12);windowGroup.add(finial)}
+  }
+
   // Shared procedural textures keep contact shading and lamp bloom consistent without per-object canvases.
   function radialTexture(inner,outer){
    const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
@@ -1141,17 +1157,20 @@ function initArday3D(){
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
   box(livingWindow,0,2.6,0,2.1,1.85,.06,m.glass);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
+  addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
   box(bedroomWindow,0,2.65,0,2.0,1.7,.06,m.glass);
   for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
+  addWindowDressing(bedroomWindow,2.0,1.7,0xb9a9a0);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
   box(kitchenWindow,0,2.65,0,1.8,1.5,.06,m.glass);
   for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
+  addWindowDressing(kitchenWindow,1.8,1.5,0xd0c4b1);
   box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=1.62;y<=2.38;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
   // Three-dimensional hinged doors are part of each room, not UI overlays.
