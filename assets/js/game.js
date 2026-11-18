@@ -1230,7 +1230,7 @@ function initArday3D(){
       #include <tonemapping_fragment>`
     );
    };
-   material.customProgramCacheKey=()=> 'arday-soft-light-v3';
+   material.customProgramCacheKey=()=> 'arday-soft-light-v4';
       return material;
   }
   const M=(color,roughness=.82,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,roughness)),metalness:Math.max(0,Math.min(.9,metalness))}));
