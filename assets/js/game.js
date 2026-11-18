@@ -6,7 +6,7 @@
 
 (()=>{
 const {activityMeta,shopCatalog,recipes,ingredientNames,furnitureActivities}=window.ArdayGameConfig;
-const characterStats=window.ArdayGameConfig.characterStats||{energy:{hourlyDecay:.45,sleepRecoveryPerHour:13,activityEffects:{}},needs:{hungerHourlyDecay:.8,cleanHourlyDecay:.25,funHourlyDecay:.3}};
+const characterStats=window.ArdayGameConfig.characterStats||{};
 const energyConfig=characterStats.energy||{};const energyEffects=energyConfig.activityEffects||{};const needDecay=characterStats.needs||{};
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
 // Hard-isolate the footer from all room/WebGL stacking contexts.
@@ -325,7 +325,7 @@ function buildDay(key){
   const decay=Math.max(0,Number(energyConfig.hourlyDecay)||0);
   const netRecovery=Math.max(.01,recovery-decay);
   const deficit=Math.max(0,100-currentEnergy);
-  const duration=Math.ceil(deficit/netRecovery);
+  const duration=Math.max(1,Math.ceil(deficit/netRecovery));
   const bedtime=22,wake=(bedtime+duration)%24;
   plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,plannedAt:Date.now()};
  }
@@ -664,7 +664,7 @@ function processActivityAt(value){
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
  if(meta){
-  const effects={...(meta.effect||{})};if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
+  const effects={...(meta.effect||{})};if(activity==='sleep')effects.energy=Number(energyConfig.sleepRecoveryPerHour)||1;else if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
   change(effects);
   
