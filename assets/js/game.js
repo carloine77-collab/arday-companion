@@ -649,6 +649,8 @@ const immediateInteractionDuration=120000;
 const immediateInteractionRefusalRate=.3;
 function finishImmediateInteraction(at=Date.now()){
  const interaction=s.activeInteraction;if(!interaction||at<Number(interaction.endsAt||0))return false;
+ const currentKey=keyAt(at),currentHour=new Date(at).getHours();
+ if(s.lastUnifiedHourKey!==currentKey+'-'+currentHour)processActivityAt(at);
  s.activeInteraction=null;
  const activity=normalizeActivity(interaction.activity),meta=activityMeta[activity];
  if(meta){
@@ -663,7 +665,12 @@ function finishImmediateInteraction(at=Date.now()){
   if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
   remember('shared',activityLabel(activity)+' · 即时互动',1);
  }
- presentActivity(s.currentActivity||'idle',s.currentActivityAnchor||null);
+ const scheduled=eventAt(keyAt(at),new Date(at).getHours());
+ const restoredActivity=normalizeActivity(scheduled?.activity||s.currentActivity||'idle');
+ const restoredMeta=activityMeta[restoredActivity]||{};
+ s.currentActivity=restoredActivity;
+ s.currentActivityAnchor=scheduled?.anchor||restoredMeta.anchor||null;
+ presentActivity(restoredActivity,s.currentActivityAnchor,scheduled?.room||null,scheduled?.furnitureId||null);
  say('还行。下次也要和我一起。');
  save();render();return true;
 }
@@ -780,8 +787,10 @@ function scheduledFurnitureIsValid(ev){
  if(!ev?.furnitureId)return ev?.activity==='idle';
  const item=(s.placed||[]).find(entry=>String(entry.id)===String(ev.furnitureId));
  if(!item)return false;
- const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],meta=activityMeta[normalizeActivity(ev.activity)];
- return !!set?.activities?.[normalizeActivity(ev.activity)]&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room);
+ const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],activity=normalizeActivity(ev.activity),meta=activityMeta[activity];
+ const valid=!!set?.activities?.[activity]&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room);
+ if(valid&&ev.room!==item.room)ev.room=item.room;
+ return valid;
 }
 function resolveScheduledActivity(key,hour){
  let ev=eventAt(key,hour);
