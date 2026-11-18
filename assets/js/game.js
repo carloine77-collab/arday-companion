@@ -688,7 +688,7 @@ function hasAutonomyFurniture(requirement,room=null){
  if(requirement==='bookshelf')return names.some(name=>name.includes('书架'));
  if(requirement==='readingSpot')return names.some(name=>/书架|书桌/.test(name));
  if(requirement==='sink')return names.some(name=>name.includes('水槽'));
- if(requirement==='seat')return names.some(name=>/沙发|椅子|床/.test(name));
+ if(requirement==='seat')return names.some(name=>/沙发|椅子|阅读椅|床/.test(name));
  return true;
 }
 function furnitureKindForPlaced(item){
@@ -698,8 +698,8 @@ function furnitureKindForPlaced(item){
  if(/^冰箱/.test(name))return 'fridge';
  if(/灶台/.test(name))return 'stove';
  if(/水槽/.test(name))return 'sink';
- if(/^床|上床下桌|榻榻米/.test(name))return 'bed';
- if(/椅子|餐椅|凳子/.test(name))return 'chair';
+ if(/^床|上床下桌/.test(name))return 'bed';
+ if(/椅子|阅读椅|餐椅|凳子/.test(name))return 'chair';
  if(/书架|书柜/.test(name))return 'bookshelf';
  if(/书桌/.test(name))return 'desk';
  if(/^电脑/.test(name))return 'computer';
@@ -741,7 +741,7 @@ function chooseAutonomousActivity(){
   const temperamentBias=id==='rest'?(1-temperament.composed)*1.5:0;
   return {...option,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
  }).filter(item=>Number.isFinite(item.score)&&item.score>=0);
- if(!candidates.length)return {activity:'walk',room:'living',anchor:'default',furnitureId:null,furnitureKind:null};
+ if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
  const weighted=candidates.map(item=>({...item,weight:Math.max(.15,item.score-max+5)}));
  const total=weighted.reduce((sum,item)=>sum+item.weight,0);
@@ -816,7 +816,7 @@ function activityLabel(activity){
 }
 function furnitureRequirementAvailable(requirement,room){
  if(!requirement)return true;
- const patterns={desk:/书桌/,computer:/电脑/,television:/^电视$/,recordPlayer:/^唱片机$/,bookshelf:/书架/,readingSpot:/书架|书桌/,sink:/水槽/,seat:/沙发|椅子|床/,bouquet:/^捧花摆件$/};
+ const patterns={desk:/书桌/,computer:/电脑/,television:/^电视$/,recordPlayer:/^唱片机$/,bookshelf:/书架/,readingSpot:/书架|书桌/,sink:/水槽/,seat:/沙发|椅子|阅读椅|床/,bouquet:/^捧花摆件$/};
  const pattern=patterns[requirement];if(!pattern)return true;
  return (s.placed||[]).some(item=>item&&item.room===room&&pattern.test(item.name||''));
 }
