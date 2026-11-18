@@ -646,7 +646,7 @@ function refreshImmediateInteraction(at=Date.now()){
  const interaction=s.activeInteraction;if(!interaction)return false;
  if(at>=Number(interaction.endsAt||0))return finishImmediateInteraction(at);
  const hourKey=keyAt(at)+'-'+new Date(at).getHours();
- if(interaction.presentationHourKey!==hourKey){interaction.presentationHourKey=hourKey;presentActivity(interaction.activity,interaction.anchor||null,interaction.room||null)}
+ if(interaction.presentationHourKey!==hourKey){interaction.presentationHourKey=hourKey;presentActivity(interaction.activity,interaction.anchor||null,interaction.room||null,interaction.furnitureId||null)}
  return true;
 }
 function beginImmediateInteraction(action,options={}){
@@ -672,10 +672,10 @@ function beginImmediateInteraction(action,options={}){
  if(Math.random()<immediateInteractionRefusalRate){rejectActivityProposal(activity);save();return false}
  const startedAt=now;
  s.activeInteraction={activity,anchor:options.anchor||meta.anchor||null,furnitureId,room:sourceFurniture?.room||'living',startedAt,endsAt:startedAt+immediateInteractionDuration,interrupted:{activity:s.currentActivity||availability.activity||'idle',anchor:s.currentActivityAnchor||null},presentationHourKey:hourKey};
- presentActivity(activity,s.activeInteraction.anchor,s.activeInteraction.room);say('好，陪你一会儿。');save();return true;
+ presentActivity(activity,s.activeInteraction.anchor,s.activeInteraction.room,furnitureId);say('好，陪你一会儿。');save();return true;
 }
-function presentActivity(activity,anchor=null,room=null){
- const a=normalizeActivity(activity);if(!activityMeta[a])return;updateArday3D(a,anchor,room);
+function presentActivity(activity,anchor=null,room=null,furnitureId=null){
+ const a=normalizeActivity(activity);if(!activityMeta[a])return;updateArday3D(a,anchor,room,furnitureId);
 }
 function hasAutonomyFurniture(requirement){
  const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string').map(item=>item.name);
@@ -1830,14 +1830,16 @@ function initArday3D(){
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);updateDaylight(true);
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:13.4;applyCamera();
   }
-  function updateActivity(a,anchorOverride,roomOverride){
+  function updateActivity(a,anchorOverride,roomOverride,furnitureIdOverride){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave',anchor:'default'};
    activeActivity=act;const characterRoom=roomOverride==='bedroom'||roomOverride==='kitchen'?roomOverride:(act==='sleep'?'bedroom':'living');person.visible=characterRoom===roomMode;
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
    if(anchor==='desk'){
-    const computer=furniture(it=>it.name==='电脑')[0],desk=(computer&&furniture(it=>it.id===computer.supportId)[0])||furniture(it=>it.name.startsWith('书桌'))[0];
+    const sourceFurniture=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride)[0]:null;
+    const computer=sourceFurniture?.name==='电脑'?sourceFurniture:furniture(it=>it.name==='电脑'&&it.supportId)[0];
+    const desk=sourceFurniture?.name.startsWith('书桌')?sourceFurniture:(computer&&furniture(it=>it.id===computer.supportId)[0])||furniture(it=>it.name.startsWith('书桌'))[0];
     if(desk){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),desk.group.position);
      if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=Math.atan2(desk.group.position.x-seat.group.position.x,desk.group.position.z-seat.group.position.z)}
      else{const offset=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+offset.x,0,desk.group.position.z+offset.z];faceAngle=Math.atan2(desk.group.position.x-p[0],desk.group.position.z-p[2])}}
@@ -2091,9 +2093,9 @@ function initArday3D(){
   return false;
  }
 }
-function updateArday3D(activity=s.currentActivity||'idle',anchor=s.currentActivityAnchor||null,room=null){
+function updateArday3D(activity=s.currentActivity||'idle',anchor=s.currentActivityAnchor||null,room=null,furnitureId=null){
  const stage=$('stage'),mode=stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
- if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor,room)}
+ if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor,room,furnitureId)}
  else{
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
