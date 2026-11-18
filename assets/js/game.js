@@ -1109,6 +1109,13 @@ function initArday3D(){
   function ball(parent,x,y,z,sx,sy,sz,material,seg=14){const o=new T.Mesh(new T.SphereGeometry(1,seg,10),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   function cyl(parent,x,y,z,r,h,material,seg=14){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,seg),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
   const roomFloorMap=createPainterTexture('floor'),roomWallMap=createPainterTexture('wall');
+  const outdoorCanvas=document.createElement('canvas');outdoorCanvas.width=512;outdoorCanvas.height=384;
+  const outdoorCtx=outdoorCanvas.getContext('2d'),outdoorGradient=outdoorCtx.createLinearGradient(0,0,0,384);
+  outdoorGradient.addColorStop(0,'#a9c8d0');outdoorGradient.addColorStop(.58,'#e7d8bd');outdoorGradient.addColorStop(1,'#b7b49b');outdoorCtx.fillStyle=outdoorGradient;outdoorCtx.fillRect(0,0,512,384);
+  outdoorCtx.fillStyle='rgba(255,239,198,.8)';outdoorCtx.beginPath();outdoorCtx.arc(390,92,34,0,Math.PI*2);outdoorCtx.fill();
+  for(let i=0;i<8;i++){const x=i*78-25,h=65+(i*37)%95;outdoorCtx.fillStyle=i%2?'#81958b':'#71877f';outdoorCtx.fillRect(x,260-h,58,h);outdoorCtx.fillStyle='#647c72';for(let y=260-h;y<260;y+=28)outdoorCtx.fillRect(x+8,y,42,3)}
+  outdoorCtx.fillStyle='#627c6e';outdoorCtx.beginPath();outdoorCtx.moveTo(0,300);outdoorCtx.quadraticCurveTo(130,250,250,302);outdoorCtx.quadraticCurveTo(390,255,512,294);outdoorCtx.lineTo(512,384);outdoorCtx.lineTo(0,384);outdoorCtx.fill();
+  const outdoorTexture=new T.CanvasTexture(outdoorCanvas);outdoorTexture.encoding=T.sRGBEncoding;
   function addWindowDressing(windowGroup,width,height,color=0xc8b9a8){
    const fabric=new T.MeshStandardMaterial({color,roughness:.96,side:T.DoubleSide});
    const rod=cyl(windowGroup,0,height+.11,.12,.035,width+.24,M(0x9a7655,.42),16);rod.rotation.z=Math.PI/2;
@@ -1140,8 +1147,9 @@ function initArday3D(){
   function roomShell(group,wallColor,floorColor){
    const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.008),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
-   group.userData.backWall=box(group,0,2.35,-4.08,10.8,4.8,.2,wallMaterial);
-   group.userData.wallMeshes=[group.userData.backWall];
+   const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
+   const backWallParts=[[-4.55,2.35,3.7,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
+   group.userData.wallMeshes=backWallParts.map(([x,y,w,h])=>box(backWallGroup,x,y,-4.08,w,h,.2,wallMaterial));
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
    const ceilingMaterial=M(0xe9e3d8);ceilingMaterial.transparent=true;ceilingMaterial.opacity=.22;ceilingMaterial.depthWrite=false;ceilingMaterial.side=T.DoubleSide;group.userData.ceilingMesh=box(group,0,4.78,0,10.8,.12,8.4,ceilingMaterial);group.userData.ceilingMesh.visible=false;group.userData.ceilingMesh.castShadow=false;group.userData.ceilingMesh.renderOrder=8;
    const sideWallMaterial=M(wallColor);sideWallMaterial.transparent=true;sideWallMaterial.opacity=1;sideWallMaterial.depthWrite=false;
@@ -1160,20 +1168,21 @@ function initArday3D(){
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0x8c7966);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
-  box(livingWindow,0,2.6,0,2.1,1.85,.06,m.glass);
+  const addWindowView=(windowGroup,width,height)=>{const view=new T.Mesh(new T.PlaneGeometry(width-.08,height-.08),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false}));view.position.set(0,height/2,-.105);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;windowGroup.add(view);const pane=box(windowGroup,0,height/2,-.045,width-.08,height-.08,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
+  addWindowView(livingWindow,2.1,1.85);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
   addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
-  box(bedroomWindow,0,2.65,0,2.0,1.7,.06,m.glass);
+  addWindowView(bedroomWindow,2.0,1.7);
   for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
   addWindowDressing(bedroomWindow,2.0,1.7,0xb9a9a0);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
-  box(kitchenWindow,0,2.65,0,1.8,1.5,.06,m.glass);
+  addWindowView(kitchenWindow,1.8,1.5);
   for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
   addWindowDressing(kitchenWindow,1.8,1.5,0xd0c4b1);
   box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
@@ -1351,7 +1360,7 @@ function initArday3D(){
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
    if(modelName==='床'){
-    width=3.1;depth=3.45;height=1.25;action=()=>perform('sleep');const oakFrame=variant==='浅橡木框架',frameMat=oakFrame?m.oak:m.wood,headMat=oakFrame?m.cream:m.fabric;box(0,.28,0,3.05,.28,3.38,m.dark);box(0,.48,0,3.12,.18,3.42,frameMat);box(0,.67,.12,2.94,.22,3.12,m.fabric);box(0,.81,.62,2.84,.12,1.45,m.sofa2);box(0,1.02,-1.58,3.12,1.45,.2,frameMat);box(0,1.03,-1.45,2.94,1.2,.12,headMat);for(const x of [-1.43,1.43])box(x,1,-1.52,.16,1.28,.22,frameMat);for(const x of [-.88,.88]){const pillow=sphere(x,.94,-.82,.48,.13,.34,m.cream);pillow.rotation.x=-.12}box(0,.84,.92,2.82,.045,.72,m.sofa);
+    width=3.1;depth=3.45;height=1.25;action=()=>perform('sleep');const oakFrame=variant==='浅橡木框架',frameMat=oakFrame?m.oak:m.wood,headMat=oakFrame?m.cream:m.fabric,duvet=mat(oakFrame?0xe4ddd0:0xcfc4b6,.98),duvetEdge=mat(oakFrame?0xc8bca9:0xb6a797,.94),piping=mat(oakFrame?0xb29b7d:0x9b8878,.86);box(0,.22,0,2.92,.2,3.2,m.dark);box(0,.38,0,3.12,.16,3.42,frameMat);for(const x of [-1.35,1.35])for(const z of [-1.48,1.48])box(x,.17,z,.12,.28,.12,frameMat);box(0,.59,.08,2.92,.28,3.12,m.fabric);box(0,.75,-.04,2.82,.08,2.96,m.sofa2);box(0,1.08,-1.59,3.12,1.48,.22,frameMat);box(0,1.08,-1.45,2.82,1.18,.12,headMat);box(0,.98,-1.365,2.48,.82,.035,m.sofa2);for(const x of [-1.22,1.22]){box(x,1.05,-1.45,.055,1.12,.16,frameMat);box(x,1.62,-1.45,.16,.12,.17,frameMat)}for(const x of [-.82,.82]){const pillow=sphere(x,.91,-.88,.52,.14,.36,m.cream);pillow.rotation.x=-.16;const seam=sphere(x,.91,-.88,.5,.012,.345,piping);seam.position.z-=.008}const cover=sphere(0,.81,.57,1.36,.12,1.13,duvet);cover.position.y=.82;cover.rotation.x=-.025;box(0,.76,1.63,2.72,.12,.38,duvet);for(let i=0;i<5;i++){const x=-1.02+i*.51;const fold=sphere(x,.91,.52,.025,.012,.92,duvetEdge);fold.rotation.y=(i-2)*.035}box(0,.79,1.08,2.74,.035,.035,piping);
    }else if(modelName==='床头柜'){
     width=.88;depth=.78;height=.92;box(0,.47,0,.86,.76,.72,m.wood);box(0,.87,.02,.94,.1,.8,m.cream);for(const y of [.32,.62]){box(0,y,.37,.76,.25,.035,m.sofa2);for(const x of [-.19,.19])cyl(x,y,.405,.018,.018,.035,m.gold,10)}for(const x of [-.34,.34])box(x,.08,-.27,.09,.16,.09,m.dark);
    }else if(modelName==='台灯'){
