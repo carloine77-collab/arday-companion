@@ -119,7 +119,7 @@ let inventoryCategory='全部';
 let inventoryGrid=null;
 let shopFurnitureGroup='起居空间';
 let shopFurnitureType='沙发';
-const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-floor-lamp-paper':'落地灯·纸罩','buy-floor-lamp-arc':'落地灯·黄铜弧形','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
+const furnitureNameById={'buy-furniture-television':'电视','buy-furniture-record-player':'唱片机','buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-floor-lamp-paper':'落地灯·纸罩','buy-floor-lamp-arc':'落地灯·黄铜弧形','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
 function addInventoryItem(name,kind='food',id=null){const parts=name.split('·'),entity={id:id||('inv-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)),name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''};s.inventory.push(entity);return entity}
 function addItem(name){return addInventoryItem(name,'food')}
 function purchase(id,label,cost){
@@ -431,8 +431,8 @@ function proposeActivityNow(action,force=false,options={}){
  const a=normalizeActivity(action),now=new Date();
  if(a==='idle'||!activityMeta[a])return false;
  if((a==='walk'||a==='computerPlay')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
- if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
- if(a==='computerPlay'&&!(s.placed||[]).some(x=>x.name==='电脑')){say('电脑还没有摆进房间，暂时玩不了电脑游戏。');return false}
+ const requiredFurniture=activityMeta[a].requires;
+ if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture)){say('家里还没有适合进行这项活动的家具。');return false}
  const slot=options.slot||findAvailableSlot(now,1),dayOffset=Number(options.dayOffset)||0;
  if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
  if(!scheduleSlotAvailable(slot.key,slot.start,1)){say('这个时间已经有其他安排了。我们换个时间吧。');return false}
@@ -623,6 +623,8 @@ function hasAutonomyFurniture(requirement){
  const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string').map(item=>item.name);
  if(requirement==='desk')return names.some(name=>name.includes('书桌'));
  if(requirement==='computer')return names.some(name=>name.includes('电脑'));
+ if(requirement==='television')return names.some(name=>name==='电视');
+ if(requirement==='recordPlayer')return names.some(name=>name==='唱片机');
  if(requirement==='bookshelf')return names.some(name=>name.includes('书架'));
  if(requirement==='readingSpot')return names.some(name=>/书架|书桌/.test(name));
  if(requirement==='sink')return names.some(name=>name.includes('水槽'));
@@ -690,7 +692,7 @@ function processActivityAt(value){
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('我有点饿了，不过桌上还没有准备好的饭菜。');delete effects.hunger}
   change(effects);
   
-  if(['read','write','chat','computerPlay','walk','rest','music','wash'].includes(activity)){
+  if(['read','write','chat','computerPlay','watchTV','listenRecords','walk','rest','music','wash'].includes(activity)){
    const preferenceKey=activity==='read'?'reading':activity==='write'?'writing':activity;
    s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
   }
@@ -1528,6 +1530,23 @@ function initArday3D(){
     box(0,.07,.15,.68,.045,.23,m.dark);box(0,.096,.15,.6,.012,.17,m.cream);
     for(const x of [-.43,.43]){box(x,.2,-.14,.085,.22,.12,m.wood);box(x,.2,-.072,.045,.12,.012,m.dark);cyl(x,.2,-.06,.018,.018,.012,m.gold,10)}
     box(0,.74,-.12,.16,.018,.012,m.gold);
+   }else if(modelName==='电视'){
+    action=()=>openFurnitureActions('television');width=1.62;depth=.58;height=1.42;surfaceType='floor';surfaceY=.04;
+    box(0,.32,0,1.55,.58,.52,m.wood);box(0,.64,-.015,1.48,.045,.49,m.oak);box(0,.68,-.015,1.42,.025,.45,m.cream);
+    for(const x of [-.57,.57])box(x,.075,.12,.09,.15,.1,m.dark);
+    box(0,1.2,-.12,1.48,.92,.095,m.dark);box(0,1.2,-.174,1.39,.82,.012,m.screen);
+    const tvGlow=box(0,1.2,-.181,1.32,.74,.006,mat(0x66899a,.3));tvGlow.material.emissive=new T.Color(0x1d3542);tvGlow.material.emissiveIntensity=.16;
+    box(0,.75,-.12,.12,.16,.09,m.metal);box(0,.66,-.12,.48,.045,.2,m.metal);
+   }else if(modelName==='唱片机'){
+    action=()=>openFurnitureActions('recordPlayer');width=.92;depth=.78;height=.92;surfaceType='floor';surfaceY=.04;
+    box(0,.48,0,.88,.2,.72,m.wood);box(0,.59,-.01,.9,.055,.74,m.oak);
+    for(const x of [-.34,.34])for(const z of [-.25,.25])box(x,.13,z,.065,.24,.065,m.dark);
+    cyl(0,.64,-.035,.27,.27,.045,m.metal,32);cyl(0,.672,-.035,.235,.235,.018,m.dark,40);
+    for(let r=.07;r<.22;r+=.035){const groove=new T.Mesh(new T.TorusGeometry(r,.003,4,48),m.metal);groove.rotation.x=Math.PI/2;groove.position.set(0,.684,-.035);group.add(groove)}
+    cyl(0,.686,-.035,.035,.035,.012,m.gold,20);
+    const arm=box(.22,.71,-.02,.025,.025,.34,m.metal);arm.rotation.x=-.08;arm.rotation.y=-.24;
+    sphere(.22,.72,-.19,.035,.025,.035,m.gold);
+    box(0,.79,.27,.72,.025,.08,m.cream);
    }else if(modelName==='捧花摆件'){
     action=()=>openFurnitureActions('bouquet');
     width=.42;depth=.42;height=.72;surfaceType='floor';surfaceY=.04;
