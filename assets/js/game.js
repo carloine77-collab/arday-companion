@@ -28,11 +28,25 @@ window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;
 const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=(Array.isArray(s.furniture)?s.furniture:base.furniture.slice()).filter(item=>item!=='沙发');
+s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.inventory=Array.isArray(s.inventory)?s.inventory.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=(Array.isArray(s.furniture)?s.furniture:base.furniture.slice()).filter(item=>item!=='沙发');
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
-s.ownedFurniture=Array.isArray(s.ownedFurniture)?s.ownedFurniture:[];
-s.placedFurniture=Array.isArray(s.placedFurniture)?s.placedFurniture:[];
+// Canonical item model: inventory holds unplaced item entities; placed holds
+// placed furniture/food entities. Legacy arrays are read once, then discarded.
+const legacyItems=Array.isArray(s.inventory)?s.inventory:[];
+const legacyOwnedFurniture=Array.isArray(s.inventory)?s.inventory:[];
+const legacyPlaced=Array.isArray(s.placed)?s.placed:[];
+const makeInventoryEntity=(name,kind,index)=>({id:'inv-legacy-'+kind+'-'+index,name,kind});
+if(!Array.isArray(s.inventory)){
+ s.inventory=[
+  ...legacyItems.filter(name=>typeof name==='string').map((name,index)=>makeInventoryEntity(name,'food',index)),
+  ...legacyOwnedFurniture.filter(name=>typeof name==='string').map((name,index)=>makeInventoryEntity(name,name.startsWith('成品食物·')?'food':'furniture',index))
+ ];
+}else{
+ s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&typeof item.id==='string');
+}
+s.placed=legacyPlaced;
+delete s.inventory;delete s.inventory;delete s.placed;
 s.furniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
 s.furnitureLayout=s.furnitureLayout&&typeof s.furnitureLayout==='object'?s.furnitureLayout:{};
 s.roomPositions=s.roomPositions&&typeof s.roomPositions==='object'?s.roomPositions:{};
@@ -40,7 +54,7 @@ for(const roomName of ['living','bedroom','kitchen']){
  s.furnitureLayout[roomName]=s.furnitureLayout[roomName]&&typeof s.furnitureLayout[roomName]==='object'?s.furnitureLayout[roomName]:{};
  s.roomPositions[roomName]=s.roomPositions[roomName]&&typeof s.roomPositions[roomName]==='object'?s.roomPositions[roomName]:{};
 }
-s.placedFurniture.forEach((item,index)=>{
+s.placed.forEach((item,index)=>{
  if(!item||typeof item!=='object')return;
  if(typeof item.name!=='string'||!item.name.trim())return;
  if(!item.id)item.id='legacy-placed-'+(item.room||'unknown')+'-'+index;
@@ -66,7 +80,7 @@ function dayKey(value){const d=value instanceof Date?value:new Date(value);if(Nu
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
-function has(item){return s.items.includes(item)||s.furniture.includes(item)||s.ownedFurniture.includes(item)||(s.placedFurniture||[]).some(x=>x.name===item)}
+function has(item){return s.inventory.some(x=>x.name===item)||s.furniture.includes(item)||(s.placed||[]).some(x=>x.name===item)}
 function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(type==='shared-goal-proposal'||type==='long')return 'proposal';if(type==='player-action')return 'player';if(type.startsWith('life-'))return 'random';return 'daily'}
 function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,category:eventCategory({type}),choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
@@ -86,13 +100,14 @@ let inventoryGrid=null;
 let shopFurnitureGroup='起居空间';
 let shopFurnitureType='沙发';
 const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
-function addItem(name){s.items.push(name)}
+function addInventoryItem(name,kind='food'){s.inventory.push({id:'inv-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),name,kind})}
+function addItem(name){addInventoryItem(name,'food')}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
  if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}s.money-=cost;arday3D.applyRoomFinish(id);const scope=id.startsWith('buy-wallpaper-')?'全屋墙面':'当前房间地面';addEvent('你更换了房间饰面',label+'已应用于'+scope+'。','player-action');remember('purchase','房间装修：'+label,2);say('已经换上新的'+label+'。');save();render();toast('装修完成：'+label);openTab('商店',true);return}
  if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')){
   const furnitureName=furnitureNameById[id];if(!furnitureName){toast('商品信息不存在');return}
-  s.money-=cost;s.ownedFurniture.push(furnitureName);addEvent('你购入了一件家具',label+'已放入物品栏。','player-action');
+  s.money-=cost;addInventoryItem(furnitureName,'furniture');addEvent('你购入了一件家具',label+'已放入物品栏。','player-action');
   remember('purchase',label,2);save();render();toast('购入：'+label);return;
  }
  s.money-=cost;
@@ -139,9 +154,9 @@ function openTab(name,force=false){
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
-  s.items.forEach((item,index)=>{if(item!=='修理工具')tabEntries.push([item,itemIcons[item]||'▧','use-inventory-'+index,0,'','食物'])});
+   s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':'食物';tabEntries.push([item,itemIcons[item]||'▧',(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
-  s.ownedFurniture.forEach((item,index)=>tabEntries.push([item,item.startsWith('成品食物·')?'🍽️':'▧','place-owned-'+index,0,'',item.startsWith('成品食物·')?'食物':'家具']));
+   
   const nav=document.createElement('div');nav.className='inventory-categories';
   ['全部','食物','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;openTab('物品',true)};nav.appendChild(button)});
   $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
@@ -153,17 +168,17 @@ function openTab(name,force=false){
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
    if(id.startsWith('use-inventory-')){
-    const index=Number(id.slice('use-inventory-'.length)),item=s.items[index];
+    const index=Number(id.slice('use-inventory-'.length)),entity=s.inventory[index],item=entity?.name;
     if(!item){openTab('物品',true);return}
-    if(item==='点心'){s.items.splice(index,1);change({hunger:25,fun:2});say('点心正好派上用场。')}
+    if(item==='点心'){s.inventory.splice(index,1);change({hunger:25,fun:2});say('点心正好派上用场。')}
     
     save();render();openTab('物品',true);return;
    }
    if(id.startsWith('place-owned-')){
-    const index=Number(id.slice('place-owned-'.length)),item=s.ownedFurniture[index];
+    const index=Number(id.slice('place-owned-'.length)),entity=s.inventory[index],item=entity?.name;
     if(!item){toast('这件物品已不在库存中');openTab('物品',true);return}
     if(!arday3D?.placeOwnedFurniture||!arday3D.placeOwnedFurniture(item)){toast('当前场景无法放置这件家具');return}
-    s.ownedFurniture.splice(index,1);addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
+    s.inventory.splice(index,1);addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
    }
    if(id==='kitchen'){openKitchenPanel(false);return}
    if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
@@ -172,7 +187,7 @@ function openTab(name,force=false){
    if(id==='profile'){renderProfile();return}
    if(id==='chat'){perform('chat');}
    else if(id==='collection'){showCollection();return}
-   else if(id==='use-food'){let i=s.items.indexOf('点心');if(i<0){toast('物品栏里没有点心');return}s.items.splice(i,1);change({hunger:25,fun:2});say('点心正好派上用场。');}
+   else if(id==='use-food'){let i=s.inventory.findIndex(x=>x.name==='点心');if(i<0){toast('物品栏里没有点心');return}s.inventory.splice(i,1);change({hunger:25,fun:2});say('点心正好派上用场。');}
    else perform(id);
    save();render();$('drawerTitle').textContent=name+' · ¥ '+s.money;
   };
@@ -389,7 +404,7 @@ function proposeActivityNow(action,force=false,options={}){
  if(a==='idle'||!activityMeta[a])return false;
  if((a==='walk'||a==='computerPlay')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
  if(a==='write'&&!has('书桌')){say('没有书桌，我暂时不想在这里写东西。');return false}
- if(a==='computerPlay'&&!(s.placedFurniture||[]).some(x=>x.name==='电脑')){say('电脑还没有摆进房间，暂时玩不了电脑游戏。');return false}
+ if(a==='computerPlay'&&!(s.placed||[]).some(x=>x.name==='电脑')){say('电脑还没有摆进房间，暂时玩不了电脑游戏。');return false}
  const slot=options.slot||findAvailableSlot(now,1),dayOffset=Number(options.dayOffset)||0;
  if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
  if(!scheduleSlotAvailable(slot.key,slot.start,1)){say('这个时间已经有其他安排了。我们换个时间吧。');return false}
@@ -543,7 +558,7 @@ function openKitchenPanel(){
  $('choices').innerHTML='<section class="cooking-stock"><div class="cooking-section-title">冰箱库存</div><div class="cooking-stock-list">'+stock+'</div></section><section class="cooking-recipes"><div class="cooking-section-title">选择菜品</div>'+cards+'</section><div class="cooking-footer"><span>成品会放入物品栏，可摆放在任意房间</span><button type="button" id="kitchen-close">完成</button></div>';
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open');
 }
-function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;s.ownedFurniture.push(itemName);addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
+function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;addInventoryItem(itemName,'food');addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
 // Presentation only. The schedule processor is the sole writer of currentActivity.
 function presentActivity(activity){
  const a=normalizeActivity(activity);
@@ -584,8 +599,8 @@ function processActivityAt(value){
  let ev=resolved.event,activity=resolved.activity;
  let placedMealEaten=false;
  if([7,12,18].includes(hour)){
-  const meal=(s.placedFurniture||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placedFurniture=s.placedFurniture.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？谢谢，我正好饿了。');remember('meal','Arday吃了'+dishName,2);}
+  const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
+  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？谢谢，我正好饿了。');remember('meal','Arday吃了'+dishName,2);}
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
@@ -1367,7 +1382,7 @@ function initArday3D(){
    let x=record?.x??0,z=record?.z??0,y=record?.y??(wallAxis?2.65:0),rotation=record?.rotation||0;
    // Wall cabinets are modeled around their local origin; legacy saves stored them at floor height.
    if(modelName==='吊柜'&&(!Number.isFinite(y)||y<1.6))y=2.65;if(modelName==='壁灯'&&(!Number.isFinite(y)||y<2.5))y=3.15;if(modelName==='吊灯'&&(!Number.isFinite(y)||y<4))y=4.45;
-   if(record?.supportId){const savedSupport=s.placedFurniture?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.modelName==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support&&support.surfaceType==='table'){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}else{supportId=null;y=0}}
+   if(record?.supportId){const savedSupport=s.placed?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.modelName==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support&&support.surfaceType==='table'){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}else{supportId=null;y=0}}
    if(modelName==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
    if(!wallAxis&&surfaceType==='floor'&&modelName!=='地毯'&&modelName!=='卧室地毯'){const shadowCanvas=document.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=128;const cx=shadowCanvas.getContext('2d'),gradient=cx.createRadialGradient(64,64,8,64,64,62);gradient.addColorStop(0,'rgba(34,27,22,0.22)');gradient.addColorStop(.55,'rgba(34,27,22,0.1)');gradient.addColorStop(1,'rgba(34,27,22,0)');cx.fillStyle=gradient;cx.fillRect(0,0,128,128);const shadowTexture=new T.CanvasTexture(shadowCanvas);const contact=new T.Mesh(new T.PlaneGeometry(width*1.16,depth*1.16),new T.MeshBasicMaterial({map:shadowTexture,transparent:true,depthWrite:false,toneMapped:false}));contact.rotation.x=-Math.PI/2;contact.position.y=.012;contact.renderOrder=0;contact.userData.furnitureContactShadow=true;group.add(contact)}
    if(modelName==='台灯'||modelName==='壁灯'||modelName==='吊灯'){const isCeiling=modelName==='吊灯',lampPoint=new T.PointLight(0xffd39a,isCeiling?3.2:1.35,isCeiling?9.5:5.5,1.7);lampPoint.position.set(0,isCeiling?-.56:modelName==='台灯'?.72:-.02,isCeiling?0:modelName==='壁灯'?.24:0);lampPoint.castShadow=false;group.add(lampPoint);practicalLights.push({light:lampPoint,base:lampPoint.intensity});const bulb=new T.Mesh(new T.SphereGeometry(isCeiling?.105:.075,16,12),new T.MeshBasicMaterial({color:0xffe4b5,toneMapped:false}));bulb.position.copy(lampPoint.position);group.add(bulb);group.userData.lampLight=lampPoint}
@@ -1378,7 +1393,7 @@ function initArday3D(){
    if(record?.dyeColor)item.dyeMaterials.forEach(material=>material.color.setHex(record.dyeColor));item.dyeColor=record?.dyeColor||null;
    if(record){
     if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,modelName==='吊柜'?y:(record.y??y));item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z';item.wallAnchorY=(anchor?.[1]??2.55)-group.position.y}
-    else{const legacyRugSupport=record.supportId&&s.placedFurniture?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
+    else{const legacyRugSupport=record.supportId&&s.placed?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
    }
    else{
     let support=null;
@@ -1410,14 +1425,14 @@ function initArday3D(){
     }
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
-   s.placedFurniture=s.placedFurniture||[];
-   if(!record)s.placedFurniture.push({id,name,room,x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
+   s.placed=s.placed||[];
+   if(!record)s.placed.push({id,name,room,x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
    persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
-  s.placedFurniture=s.placedFurniture||[];
-  s.placedFurniture=s.placedFurniture.filter(item=>item?.id!=='arday-cream-walnut-sofa');
-  (s.placedFurniture||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string').forEach(record=>createOwnedFurniture(record.name,record));
+  s.placed=s.placed||[];
+  s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
+  (s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string').forEach(record=>createOwnedFurniture(record.name,record));
 
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
@@ -1439,17 +1454,17 @@ function initArday3D(){
    s.furnitureLayout[item.room][item.id]=item.wallAxis?{wallSide:item.wallSide,offset:wallOffset(item),y:item.group.position.y}:{x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null};
    s.roomPositions=s.roomPositions||{};s.roomPositions[item.room]=s.roomPositions[item.room]||{};
    s.roomPositions[item.room][item.id]=[item.group.position.x,item.group.position.z];
-   if(item.owned&&s.placedFurniture){const saved=s.placedFurniture.find(x=>x.id===item.id);if(saved){saved.x=item.group.position.x;saved.y=item.group.position.y;saved.z=item.group.position.z;saved.rotation=item.group.rotation.y;saved.supportId=item.supportId||null;if(item.dyeColor)saved.dyeColor=item.dyeColor;if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}}}
+   if(item.owned&&s.placed){const saved=s.placed.find(x=>x.id===item.id);if(saved){saved.x=item.group.position.x;saved.y=item.group.position.y;saved.z=item.group.position.z;saved.rotation=item.group.rotation.y;saved.supportId=item.supportId||null;if(item.dyeColor)saved.dyeColor=item.dyeColor;if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}}}
    save();
   }
   function selectFurniture(item){selectedFurniture=item;rotateFurnitureButton.disabled=!!item.wallAxis;removeFurnitureButton.disabled=!item.owned;refreshDyePalette();}
   const rotateFurnitureButton=document.createElement('button');
   rotateFurnitureButton.type='button';rotateFurnitureButton.id='rotateFurnitureButton';rotateFurnitureButton.textContent='↻';rotateFurnitureButton.disabled=true;
   const removeFurnitureButton=document.createElement('button');removeFurnitureButton.type='button';removeFurnitureButton.id='removeFurnitureButton';removeFurnitureButton.textContent='⌫';removeFurnitureButton.disabled=true;removeFurnitureButton.setAttribute('aria-label','回收家具');
-  removeFurnitureButton.onclick=()=>{const item=selectedFurniture;if(!item?.owned)return;const children=furnitureRegistry.filter(x=>x.supportId===item.id);children.forEach(child=>{if(child.owned){s.ownedFurniture.push(child.name);s.placedFurniture=s.placedFurniture.filter(x=>x.id!==child.id)}child.group.parent?.remove(child.group);child.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(child),1)});s.ownedFurniture.push(item.name);s.placedFurniture=s.placedFurniture.filter(x=>x.id!==item.id);delete s.furnitureLayout?.[item.room]?.[item.id];delete s.roomPositions?.[item.room]?.[item.id];item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);selectedFurniture=null;removeFurnitureButton.disabled=true;rotateFurnitureButton.disabled=true;refreshDyePalette();save();updateFurnitureHotspots()};
+  removeFurnitureButton.onclick=()=>{const item=selectedFurniture;if(!item?.owned)return;const children=furnitureRegistry.filter(x=>x.supportId===item.id);children.forEach(child=>{if(child.owned){addInventoryItem(child.name,'furniture');s.placed=s.placed.filter(x=>x.id!==child.id)}child.group.parent?.remove(child.group);child.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(child),1)});addInventoryItem(item.name,'furniture');s.placed=s.placed.filter(x=>x.id!==item.id);delete s.furnitureLayout?.[item.room]?.[item.id];delete s.roomPositions?.[item.room]?.[item.id];item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);selectedFurniture=null;removeFurnitureButton.disabled=true;rotateFurnitureButton.disabled=true;refreshDyePalette();save();updateFurnitureHotspots()};
   const dyePalette=document.createElement('div');dyePalette.className='furniture-dye-palette';dyePalette.hidden=true;
   const dyeColors=[['燕麦','#c7ad8d'],['奶油','#e8dfcf'],['陶土','#ad6955'],['鼠尾草','#89917b'],['雾蓝','#71899a'],['石墨','#55565a'],['酒红','#80565a'],['暖灰','#a5a09a'],['橄榄','#777b55'],['浅粉','#d4aaa4'],['胡桃','#634b3d'],['象牙','#f2eadb'],['雾紫','#96899e'],['灰绿','#aab4a1'],['焦糖','#b77d4f'],['海盐','#a9c0c4'],['莓果','#985f70'],['深海','#40596d'],['麦芽','#d5bd91'],['黑咖','#403a35'],['珊瑚','#c98272'],['冰川','#d2dfe0']];
-  function refreshDyePalette(){dyePalette.replaceChildren();const item=selectedFurniture;dyePalette.hidden=!(item?.owned&&item.dyeMaterials?.length);if(dyePalette.hidden)return;dyeColors.forEach(([name,color])=>{const b=document.createElement('button');b.type='button';b.className='dye-swatch';b.style.setProperty('--swatch',color);b.setAttribute('aria-label',name);b.title=name;b.setAttribute('aria-pressed',item.dyeColor===parseInt(color.slice(1),16));b.onclick=()=>{const hex=parseInt(color.slice(1),16);item.dyeMaterials.forEach(material=>material.color.setHex(hex));item.dyeColor=hex;const saved=s.placedFurniture.find(x=>x.id===item.id);if(saved)saved.dyeColor=hex;save();refreshDyePalette()};dyePalette.appendChild(b)})}
+  function refreshDyePalette(){dyePalette.replaceChildren();const item=selectedFurniture;dyePalette.hidden=!(item?.owned&&item.dyeMaterials?.length);if(dyePalette.hidden)return;dyeColors.forEach(([name,color])=>{const b=document.createElement('button');b.type='button';b.className='dye-swatch';b.style.setProperty('--swatch',color);b.setAttribute('aria-label',name);b.title=name;b.setAttribute('aria-pressed',item.dyeColor===parseInt(color.slice(1),16));b.onclick=()=>{const hex=parseInt(color.slice(1),16);item.dyeMaterials.forEach(material=>material.color.setHex(hex));item.dyeColor=hex;const saved=s.placed.find(x=>x.id===item.id);if(saved)saved.dyeColor=hex;save();refreshDyePalette()};dyePalette.appendChild(b)})}
   rotateFurnitureButton.onclick=()=>{
    const item=selectedFurniture;if(!item){toast('请先选中一件家具');return}
    const next=item.group.rotation.y+Math.PI/12;
