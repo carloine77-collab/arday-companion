@@ -88,6 +88,8 @@ s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
 s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
+s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
+s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
@@ -575,6 +577,7 @@ function tick(){
  // On a fresh install or when reopening within the same hour, initialize the
  // current activity once. Replay above handles all completed intervening hours.
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now.getTime());
+ refreshImmediateInteraction(now.getTime());
  ensurePersonalGoal(Date.now());updatePersonalGoal('balance',Date.now());
  generateDailyEvents();
 
@@ -614,10 +617,60 @@ function openKitchenPanel(){
 }
 function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;addInventoryItem(itemName,'food');addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
 // Presentation only. The schedule processor is the sole writer of currentActivity.
-function presentActivity(activity){
- const a=normalizeActivity(activity);
- if(!activityMeta[a])return;
- updateArday3D();
+const immediateInteractionDuration=120000;
+const immediateInteractionRefusalRate=.3;
+function finishImmediateInteraction(at=Date.now()){
+ const interaction=s.activeInteraction;if(!interaction||at<Number(interaction.endsAt||0))return false;
+ s.activeInteraction=null;
+ const activity=normalizeActivity(interaction.activity),meta=activityMeta[activity];
+ if(meta){
+  const effects={...(meta.effect||{})};
+  if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
+  change(effects);
+  const preferenceKey=activity==='read'?'reading':activity==='write'?'writing':activity;
+  if(['read','write','chat','computerPlay','watchTV','listenRecords','rest','music','wash'].includes(activity))s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
+  if(['read','write'].includes(activity))updatePersonalGoal(activity,at);
+  relation(activity);
+  s.activityLog=s.activityLog||[];s.activityLog.push({activity,key:keyAt(at),hour:new Date(at).getHours(),at,withPlayer:true,immediate:true});
+  if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
+  remember('shared',activityLabel(activity)+' · 即时互动',1);
+ }
+ presentActivity(s.currentActivity||'idle',s.currentActivityAnchor||null);
+ say('好了。我们接着做刚才的事吧。');
+ save();render();return true;
+}
+function refreshImmediateInteraction(at=Date.now()){
+ const interaction=s.activeInteraction;if(!interaction)return false;
+ if(at>=Number(interaction.endsAt||0))return finishImmediateInteraction(at);
+ const hourKey=keyAt(at)+'-'+new Date(at).getHours();
+ if(interaction.presentationHourKey!==hourKey){interaction.presentationHourKey=hourKey;presentActivity(interaction.activity,interaction.anchor||null)}
+ return true;
+}
+function beginImmediateInteraction(action,options={}){
+ const activity=normalizeActivity(action),meta=activityMeta[activity];
+ if(!meta||activity==='idle')return false;
+ const now=Date.now(),hourKey=keyAt(now)+'-'+new Date(now).getHours();
+ if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now);
+ const availability=resolveCharacterAvailability(new Date(now));
+ if(availability.status!=='available'){
+  const messages={sleeping:'我现在已经睡下了，暂时不回应其他安排。',working:'我正在工作，结束以后再来找我吧。',eating:'我正在吃饭，等吃完再说。',outside:'我已经出门了，回来以后再一起做吧。',busy:'我现在有其他安排，暂时无法回应。'};
+  say(messages[availability.status]||messages.busy);return false;
+ }
+ if(s.activeInteraction&&now<Number(s.activeInteraction.endsAt||0)){say('等我把手头这件事做完，好吗？');return false}
+ const requiredFurniture=meta.requires;
+ if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture)){say('家里还没有适合进行这项活动的家具。');return false}
+ const furnitureId=String(options.furnitureId||options.furnitureKind||'unspecified');
+ const attemptKey=hourKey,attemptId=furnitureId+'|'+activity,attempts=s.interactionAttempts[attemptKey]||[];
+ if(attempts.includes(attemptId)){say('这一个小时里，我们已经为这件事问过一次了。');return false}
+ s.interactionAttempts[attemptKey]=[...attempts,attemptId];
+ Object.keys(s.interactionAttempts).forEach(key=>{if(key.slice(0,10)<hourKey.slice(0,10))delete s.interactionAttempts[key]});save();
+ if(Math.random()<immediateInteractionRefusalRate){rejectActivityProposal(activity);save();return false}
+ const startedAt=now;
+ s.activeInteraction={activity,anchor:options.anchor||meta.anchor||null,furnitureId,startedAt,endsAt:startedAt+immediateInteractionDuration,interrupted:{activity:s.currentActivity||availability.activity||'idle',anchor:s.currentActivityAnchor||null},presentationHourKey:hourKey};
+ presentActivity(activity,s.activeInteraction.anchor);say('好，陪你一会儿。');save();return true;
+}
+function presentActivity(activity,anchor=null){
+ const a=normalizeActivity(activity);if(!activityMeta[a])return;updateArday3D(a,anchor);
 }
 function hasAutonomyFurniture(requirement){
  const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string').map(item=>item.name);
@@ -723,7 +776,7 @@ function activityLabel(activity){
  const meta=activityMeta[normalizeActivity(activity)];
  return meta?.menuLabel||meta?.title||activity;
 }
-function openFurnitureActions(kind){
+function openFurnitureActions(kind,furnitureId=null){
  const set=furnitureActivities[kind];if(!set)return;
  if(set.action==='kitchen'){openKitchenPanel();return}
  $('drawerTitle').textContent=set.title+' · 互动';
@@ -731,7 +784,7 @@ function openFurnitureActions(kind){
  Object.entries(set.activities||{}).forEach(([activity,context])=>{
   if(!activityMeta[activity])return;
   const b=document.createElement('button');b.className='choice';b.type='button';b.textContent=activityLabel(activity);
-  b.onclick=()=>{$('drawer').classList.remove('open');perform(activity,true,{anchor:context?.anchor||null,source:'furniture'})};
+  b.onclick=()=>{$('drawer').classList.remove('open');perform(activity,true,{anchor:context?.anchor||null,source:'furniture',furnitureId,furnitureKind:kind})};
   $('choices').appendChild(b);
  });
  $('drawer').classList.add('open');
@@ -739,15 +792,17 @@ function openFurnitureActions(kind){
 function resolveCharacterAvailability(at=new Date()){
  const hour=at.getHours(),key=keyAt(at),ev=eventAt(key,hour);
  const activity=normalizeActivity(ev?.activity||(s.lastUnifiedHourKey===key+'-'+hour?s.currentActivity:'idle'));
- if(['sleep'].includes(activity))return {status:'sleeping',activity,event:ev,key,hour};
- if(['work','computerWork'].includes(activity))return {status:'working',activity,event:ev,key,hour};
+ if(activity==='sleep')return {status:'sleeping',activity,event:ev,key,hour};
+ if(['work','computerWork'].includes(activity)||ev?.kind==='work')return {status:'working',activity,event:ev,key,hour};
+ if(['eat','food'].includes(activity))return {status:'eating',activity,event:ev,key,hour};
+ if(activity==='walk')return {status:'outside',activity,event:ev,key,hour};
  if(ev&&['busy','unavailable'].includes(ev.kind))return {status:'busy',activity,event:ev,key,hour};
  return {status:'available',activity,event:ev,key,hour};
 }
 function ardayUnavailable(){return resolveCharacterAvailability().status!=='available'}
 function busyBubble(){say('等Arday回家后和他商量吧。')}
 function busyBubble(){say('等Arday回家后和他商量吧。')}
-function perform(action,force=false,options={}){proposeActivityNow(action,force,options)}
+function perform(action,force=false,options={}){if(options.source==='furniture'||options.source==='window')return beginImmediateInteraction(action,options);proposeActivityNow(action,force,options)}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
@@ -1330,7 +1385,7 @@ function initArday3D(){
    updateArday3D();
   }
   const wallObjects=[
-   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read')}),
+   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read',false,{source:'window',furnitureId:'living-window',anchor:'shelf'})}),
    registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('窗外的光线落在床边。')}),
    registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('厨房窗边透进一些光。')}),
    registerWallObject({id:'living-bedroom-door',name:'卧室门',room:'living',group:livingBedroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bedroom')}),
@@ -1418,7 +1473,7 @@ function initArday3D(){
      box(0,.22,.425,.95,.38,.035,m.metal);box(0,.22,.45,.76,.25,.018,m.dark);
     }
    }else if(modelName==='水槽'){
-    action=()=>openFurnitureActions('sink');width=1.35;depth=.88;height=.98;box(0,.43,0,1.35,.86,.88,m.wood);box(0,.91,0,1.43,.12,.94,m.cream);box(0,.99,-.02,.82,.035,.55,m.metal);box(0,1.01,-.02,.72,.025,.45,m.dark);for(const x of [-.55,.55])box(x,.51,.455,.24,.78,.035,m.sofa2);cyl(0,1.22,-.25,.035,.035,.4,m.metal);cyl(0,1.41,-.08,.035,.035,.38,m.metal);cyl(0,1.24,.02,.09,.09,.045,m.gold,12);
+    action=()=>openFurnitureActions('sink',id);width=1.35;depth=.88;height=.98;box(0,.43,0,1.35,.86,.88,m.wood);box(0,.91,0,1.43,.12,.94,m.cream);box(0,.99,-.02,.82,.035,.55,m.metal);box(0,1.01,-.02,.72,.025,.45,m.dark);for(const x of [-.55,.55])box(x,.51,.455,.24,.78,.035,m.sofa2);cyl(0,1.22,-.25,.035,.035,.4,m.metal);cyl(0,1.41,-.08,.035,.035,.38,m.metal);cyl(0,1.24,.02,.09,.09,.045,m.gold,12);
    }else if(modelName==='地毯'){
     width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
     box(0,.035,0,width,.07,depth,m.fabric);box(0,.074,0,3.48,.012,2.48,m.cream);box(0,.083,0,3.25,.012,2.25,m.fabric);
@@ -1434,7 +1489,7 @@ function initArday3D(){
      for(const x of [-1.52,1.52])for(let z=-.9;z<=.9;z+=.3)box(x,.11,z,.055,.018,.055,m.gold);
     }
    }else if(modelName==='沙发'){
-    width=2.35;depth=1.12;height=.94;action=()=>openFurnitureActions('sofa');
+    width=2.35;depth=1.12;height=.94;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(variant==='雾蓝绒布'?0x657f94:variant==='亚麻燕麦'?0xc4ad91:0xe4d9c7,.96),fabricShade=mat(variant==='雾蓝绒布'?0x91a4b2:variant==='亚麻燕麦'?0xe1d3bd:0xd3c5b1,.98),welt=mat(variant==='雾蓝绒布'?0x526b80:variant==='亚麻燕麦'?0xb69c7d:0xc2b39e,.92),walnut=mat(variant==='雾蓝绒布'?0x594b43:variant==='亚麻燕麦'?0x76543a:0x67452f,.62),walnutEdge=mat(variant==='雾蓝绒布'?0x71808a:variant==='亚麻燕麦'?0x987451:0x8a6344,.58);
     applyPainterMap(fabric,fabricMap,.026);applyPainterMap(fabricShade,fabricMap,.022);applyPainterMap(welt,fabricMap,.016);
     applyPainterMap(walnut,woodMap,.014);applyPainterMap(walnutEdge,woodMap,.012);
@@ -1496,18 +1551,18 @@ function initArday3D(){
     }
     sphere(0,1.77,0,.14,.16,.14,m.leaf);
    }else if(modelName==='书架'){
-    action=()=>openFurnitureActions('bookshelf');width=1.45;depth=.55;height=2.1;
+    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.55;height=2.1;
     for(const x of [-.62,.62]){const side=box(x,1.02,0,.09,2.04,.46,m.wood);side.rotation.z=x<0?-.055:.055}
     for(const [y,w,d] of [[.18,1.3,.5],[.72,1.18,.46],[1.28,1.05,.42],[1.82,.92,.38]])box(0,y,0,w,.075,d,m.oak);
     for(let level=0;level<3;level++)for(let j=0;j<4;j++){const ht=.26+(j%2)*.1;box(-.39+j*.26,.34+level*.55,-.035,.15,ht,.25,[m.clay,m.leaf,m.gold,m.dark][j])}
     if(variant==='玻璃门书柜'){const glass=mat(0xc4d8d9,.18,.12);glass.transparent=true;glass.opacity=.3;box(-.3,1.02,.245,.55,1.7,.025,glass);box(.3,1.02,.245,.55,1.7,.025,glass);box(0,1.02,.265,.035,1.78,.04,m.gold);for(const x of [-.06,.06])cyl(x,1.02,.29,.018,.018,.045,m.gold,10)}
     const braceL=box(-.39,1.02,-.22,.045,1.75,.04,m.gold);braceL.rotation.z=-.28;const braceR=box(.39,1.02,-.22,.045,1.75,.04,m.gold);braceR.rotation.z=.28;
    }else if(modelName==='书桌'||modelName==='餐桌'){
-    action=()=>modelName==='书桌'?openFurnitureActions('desk'):openFurnitureActions('dining');const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
+    action=()=>modelName==='书桌'?openFurnitureActions('desk',id):openFurnitureActions('dining',id);const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
     if(dining&&variant==='浅橡木长桌'){box(0,.83,0,2.05,.13,1.12,m.oak);box(0,.91,0,1.98,.025,1.05,m.cream);for(const x of [-.82,.82])for(const z of [-.39,.39])box(x,.4,z,.12,.76,.12,m.wood);box(0,.38,0,1.5,.08,.08,m.wood)}else if(dining){cyl(0,.4,0,.13,.2,.72,m.wood,12);cyl(0,.12,0,.62,.62,.13,m.oak,12);cyl(0,.82,0,.08,.08,.1,m.gold,12);cyl(0,.88,0,.62,.58,.12,m.wood,12);cyl(0,.95,0,.57,.57,.035,m.cream,12)}
     else{box(0,.78,0,1.55,.12,.82,m.wood);box(0,.86,0,1.48,.025,.75,m.cream);if(variant==='抽屉工作台'){box(0,.61,.28,.92,.28,.35,m.oak);for(const x of [-.32,.32])cyl(x,.62,.47,.025,.025,.04,m.gold,10)}for(const x of [-.52,.52]){box(x,.38,0,.12,.72,.72,m.wood);box(x,.4,.38,.68,.06,.08,m.oak)}box(0,.59,-.34,1.25,.28,.1,m.wood);for(const x of [-.42,0,.42])cyl(x,.59,-.275,.025,.025,.04,m.gold,10);box(0,1.02,-.34,1.2,.26,.08,m.oak)}
    }else if(modelName==='椅子'||modelName==='餐桌椅'){
-    action=()=>openFurnitureActions('chair');
+    action=()=>openFurnitureActions('chair',id);
     width=variant==='软包扶手椅'?.92:.72;depth=.78;height=1.05;
     if(variant==='藤编餐椅'){box(0,.49,0,.72,.12,.66,m.wood);box(0,.56,.015,.66,.07,.6,m.oak);legs(.7,.64,.48,.06);for(let x=-.25;x<=.251;x+=.09){const slat=box(x,.83,-.28,.025,.48,.045,m.gold);slat.rotation.z=x*-.12}box(0,1.08,-.29,.74,.1,.1,m.wood);}
     else if(variant==='软包扶手椅'){
@@ -1524,21 +1579,21 @@ function initArday3D(){
      for(const x of [-.3,.3])box(x,.62,.02,.07,.5,.07,m.wood);
     }
    }else if(modelName==='电脑'){
-    action=()=>openFurnitureActions('computer');
+    action=()=>openFurnitureActions('computer',id);
     width=.72;depth=.55;height=.72;surfaceType='floor';surfaceY=.04;
     box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);box(0,.245,-.16,.075,.12,.09,m.metal);box(0,.18,-.16,.34,.035,.22,m.metal);
     box(0,.07,.15,.68,.045,.23,m.dark);box(0,.096,.15,.6,.012,.17,m.cream);
     for(const x of [-.43,.43]){box(x,.2,-.14,.085,.22,.12,m.wood);box(x,.2,-.072,.045,.12,.012,m.dark);cyl(x,.2,-.06,.018,.018,.012,m.gold,10)}
     box(0,.74,-.12,.16,.018,.012,m.gold);
    }else if(modelName==='电视'){
-    action=()=>openFurnitureActions('television');width=1.62;depth=.58;height=1.42;surfaceType='floor';surfaceY=.04;
+    action=()=>openFurnitureActions('television',id);width=1.62;depth=.58;height=1.42;surfaceType='floor';surfaceY=.04;
     box(0,.32,0,1.55,.58,.52,m.wood);box(0,.64,-.015,1.48,.045,.49,m.oak);box(0,.68,-.015,1.42,.025,.45,m.cream);
     for(const x of [-.57,.57])box(x,.075,.12,.09,.15,.1,m.dark);
     box(0,1.2,-.12,1.48,.92,.095,m.dark);box(0,1.2,-.174,1.39,.82,.012,m.screen);
     const tvGlow=box(0,1.2,-.181,1.32,.74,.006,mat(0x66899a,.3));tvGlow.material.emissive=new T.Color(0x1d3542);tvGlow.material.emissiveIntensity=.16;
     box(0,.75,-.12,.12,.16,.09,m.metal);box(0,.66,-.12,.48,.045,.2,m.metal);
    }else if(modelName==='唱片机'){
-    action=()=>openFurnitureActions('recordPlayer');width=.92;depth=.78;height=.92;surfaceType='floor';surfaceY=.04;
+    action=()=>openFurnitureActions('recordPlayer',id);width=.92;depth=.78;height=.92;surfaceType='floor';surfaceY=.04;
     box(0,.48,0,.88,.2,.72,m.wood);box(0,.59,-.01,.9,.055,.74,m.oak);
     for(const x of [-.34,.34])for(const z of [-.25,.25])box(x,.13,z,.065,.24,.065,m.dark);
     cyl(0,.64,-.035,.27,.27,.045,m.metal,32);cyl(0,.672,-.035,.235,.235,.018,m.dark,40);
@@ -1548,7 +1603,7 @@ function initArday3D(){
     sphere(.22,.72,-.19,.035,.025,.035,m.gold);
     box(0,.79,.27,.72,.025,.08,m.cream);
    }else if(modelName==='捧花摆件'){
-    action=()=>openFurnitureActions('bouquet');
+    action=()=>openFurnitureActions('bouquet',id);
     width=.42;depth=.42;height=.72;surfaceType='floor';surfaceY=.04;
     const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.11,0),new T.Vector2(.17,.08),new T.Vector2(.2,.28),new T.Vector2(.13,.42),new T.Vector2(.085,.48)],18),m.clay);vase.position.y=.08;group.add(vase);
     cyl(0,.56,0,.11,.11,.035,m.gold,16);
@@ -1946,9 +2001,9 @@ function initArday3D(){
   return false;
  }
 }
-function updateArday3D(){
+function updateArday3D(activity=s.currentActivity||'idle',anchor=s.currentActivityAnchor||null){
  const stage=$('stage'),mode=stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
- if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(s.currentActivity||'idle',s.currentActivityAnchor||null)}
+ if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor)}
  else{
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
@@ -1973,6 +2028,7 @@ showCurrentScheduleBubble();
  window.addEventListener('pageshow',()=>{tick();updateArday3D();});
  window.addEventListener('pagehide',()=>{save();});
  setInterval(tick,30000);
+ setInterval(()=>{if(s.activeInteraction&&Date.now()>=Number(s.activeInteraction.endsAt||0))finishImmediateInteraction(Date.now())},1000);
  setInterval(()=>{const key=keyAt(Date.now());if(s.calendar?.anchor!==key){ensureScheduleAt(Date.now());save();renderCalendar()}render()},60000);
 
 })();
