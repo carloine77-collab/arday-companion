@@ -2122,9 +2122,27 @@ function initArday3D(){
     else if(variant==='米白石材'){box(0,.43,0,1.44,.11,.9,mat(0xe5dfd4,.34));for(const x of [-.54,.54])for(const z of [-.3,.3])box(x,.21,z,.075,.42,.075,m.dark)}
     else{box(0,.4,0,1.42,.12,.86,m.wood);box(0,.47,0,1.38,.035,.82,m.oak);for(const x of [-.58,.58])for(const z of [-.32,.32])box(x,.2,z,.075,.38,.075,m.wood);for(const x of [-.36,.36]){box(x,.27,.44,.48,.19,.035,m.oak);cyl(x,.27,.47,.025,.025,.045,m.gold,10)}}
    }else if(modelName==='边桌'){
-    width=.62;depth=.62;height=.62;surfaceType='table';surfaceY=.66;
-    if(variant==='黄铜圆桌'){cyl(0,.6,0,.31,.31,.055,m.gold,32);cyl(0,.31,0,.035,.055,.55,m.metal,16);cyl(0,.055,0,.24,.24,.05,m.gold,24)}
-    else{box(0,.59,0,.62,.07,.62,m.oak);for(const x of [-.24,.24])for(const z of [-.24,.24])box(x,.29,z,.055,.55,.055,m.wood);box(0,.32,0,.52,.045,.52,m.wood)}
+    width=.72;depth=.72;height=.68;surfaceType='table';surfaceY=.7;
+    if(variant==='黄铜圆桌'){
+     const brass=mat(0xb58c54,.32,.78),dark=mat(0x6c5946,.48,.55);
+     cyl(0,.64,0,.34,.34,.075,brass,40);
+     const inset=new T.Mesh(new T.TorusGeometry(.285,.012,8,48),dark);inset.rotation.x=Math.PI/2;inset.position.y=.682;group.add(inset);
+     cyl(0,.34,0,.055,.075,.52,brass,24);
+     for(let i=0;i<12;i++){const a=i*Math.PI/6,flute=box(Math.cos(a)*.047,.36,Math.sin(a)*.047,.012,.34,.012,dark);flute.rotation.y=-a}
+     cyl(0,.07,0,.255,.255,.07,brass,32);
+     const foot=new T.Mesh(new T.TorusGeometry(.22,.018,8,36),dark);foot.rotation.x=Math.PI/2;foot.position.y=.105;group.add(foot);
+     for(let i=0;i<3;i++){const a=i*Math.PI*2/3;cyl(Math.cos(a)*.18,.035,Math.sin(a)*.18,.035,.035,.045,m.dark,12)}
+    }else{
+     const walnut=mat(0x62442f,.62),edge=mat(0x9a704b,.58),brass=mat(0xb28b58,.34,.65);
+     box(0,.62,0,.72,.085,.72,walnut);box(0,.672,0,.68,.018,.68,edge);
+     box(0,.42,.366,.52,.24,.025,edge);box(0,.42,.385,.46,.18,.018,walnut);
+     for(const x of [-.13,.13])cyl(x,.42,.405,.018,.018,.035,brass,12);
+     for(const x of [-.27,.27])for(const z of [-.27,.27]){
+      const leg=new T.Mesh(new T.CylinderGeometry(.035,.055,.49,12),walnut);leg.position.set(x,.29,z);leg.rotation.z=-x*.12;leg.rotation.x=z*.12;group.add(leg);
+     }
+     box(0,.18,0,.58,.045,.58,edge);
+     for(const x of [-.24,.24])for(const z of [-.24,.24])cyl(x,.045,z,.035,.035,.045,m.dark,10);
+    }
    }else if(modelName==='电视柜'){
     width=2.15;depth=.58;height=.72;surfaceType='table';surfaceY=.78;
     box(0,.38,0,2.12,.68,.56,m.oak);box(0,.75,0,2.2,.09,.62,m.cream);
@@ -2141,10 +2159,28 @@ function initArday3D(){
      foot.position.set(x,.09,z);group.add(foot);
     }
    }else if(modelName==='斗柜'){
-    const cream=variant==='奶油三抽';width=1.18;depth=.62;height=1.08;
-    const body=cream?m.cream:m.wood,front=cream?m.sofa2:m.oak;box(0,.53,0,1.14,1.02,.58,body);box(0,1.06,0,1.22,.08,.65,front);
-    const count=cream?3:4;for(let i=0;i<count;i++){const y=.2+i*(cream?.27:.21);box(0,y,.305,1.02,cream?.23:.18,.035,front);for(const x of [-.38,.38])cyl(x,y,.34,.022,.022,.04,m.gold,10)}
-    for(const x of [-.48,.48])box(x,.07,-.22,.09,.14,.09,m.dark);
+    const cream=variant==='奶油三抽';width=1.28;depth=.68;height=1.18;
+    const body=cream?mat(0xe4d8c7,.82):mat(0x60432f,.62),front=cream?mat(0xf0e8dc,.9):mat(0x806044,.64),edge=mat(cream?0xbca88e:0x3d2d23,.68),brass=mat(0xb58d56,.35,.68);
+    box(0,.57,0,1.22,1.08,.61,body);
+    box(0,1.13,0,1.32,.1,.69,front);
+    for(const x of [-.57,.57])box(x,.59,.32,.055,.95,.055,edge);
+    const count=cream?3:4,drawerH=cream?.27:.205,spacing=cream?.31:.235;
+    for(let i=0;i<count;i++){
+     const y=.19+i*spacing;
+     box(0,y,.323,1.08,drawerH,.055,edge);
+     box(0,y,.357,1.015,drawerH-.045,.025,front);
+     box(0,y+drawerH*.36,.374,.92,.012,.012,edge);
+     if(cream){
+      for(const x of [-.32,.32]){const pull=new T.Mesh(new T.TorusGeometry(.025,.009,6,16),brass);pull.position.set(x,y,.39);group.add(pull)}
+     }else{
+      for(const x of [-.31,.31]){cyl(x,y,.39,.024,.024,.045,brass,12);box(x,y,.414,.065,.018,.018,brass)}
+     }
+    }
+    box(0,1.2,0,1.3,.035,.67,edge);
+    for(const x of [-.48,.48])for(const z of [-.23,.23]){
+     const foot=new T.Mesh(new T.CylinderGeometry(.045,.065,.17,12),body);foot.position.set(x,.085,z);foot.rotation.z=-x*.08;group.add(foot);
+    }
+    for(const x of [-.59,.59])box(x,.59,-.12,.035,.9,.035,front);
    }else if(modelName==='梳妆台'){
     width=1.42;depth=.68;height=1.62;surfaceType='table';surfaceY=.9;
     if(name==='复古妆台'){
@@ -2177,23 +2213,74 @@ function initArday3D(){
      const mirror=new T.Mesh(new T.SphereGeometry(.28,28,20),mat(0x9eafb0,.2,.16));mirror.position.set(0,1.62,-.205);mirror.scale.set(1,.82,.1);group.add(mirror);
     }
    }else if(modelName==='全身镜'){
-    width=.82;depth=.22;height=1.98;
-    const frame=mat(variant==='黄铜拱形'?0xb89a62:0x77563d,.55,.35);
-    box(0,.94,0,.78,1.86,.1,frame);box(0,.94,.058,.66,1.72,.025,mat(0x9eb2b5,.18,.22));
-    const arch=new T.Mesh(new T.SphereGeometry(.33,24,16,0,Math.PI*2,0,Math.PI/2),frame);arch.position.set(0,1.87,0);arch.scale.set(1.18,.65,.2);group.add(arch);
-    box(0,.08,.02,.88,.12,.34,m.dark);
+    width=.92;depth=.3;height=2.12;
+    const frame=mat(variant==='黄铜拱形'?0xb89a62:0x77563d,.42,variant==='黄铜拱形'?.62:.08);
+    const rear=mat(0x493b32,.72);
+    // Extruded arched frame and a shader-backed reflective face, rather than a flat grey panel.
+    const outer=new T.Shape();outer.moveTo(-.42,-.91);outer.lineTo(-.42,.48);outer.quadraticCurveTo(-.42,.98,0,.98);outer.quadraticCurveTo(.42,.98,.42,.48);outer.lineTo(.42,-.91);outer.closePath();
+    const frameGeo=new T.ExtrudeGeometry(outer,{depth:.12,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:.025,bevelThickness:.025,curveSegments:28});frameGeo.translate(0,1.05,0);
+    const frameMesh=new T.Mesh(frameGeo,frame);frameMesh.castShadow=true;frameMesh.receiveShadow=true;group.add(frameMesh);
+    const inner=new T.Shape();inner.moveTo(-.345,-.82);inner.lineTo(-.345,.47);inner.quadraticCurveTo(-.345,.84,0,.84);inner.quadraticCurveTo(.345,.84,.345,.47);inner.lineTo(.345,-.82);inner.closePath();
+    const mirrorMat=new T.ShaderMaterial({
+     uniforms:{edgeTint:{value:new T.Color(0x53636a)},silverTint:{value:new T.Color(0xd9e1e1)}},
+     vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+     fragmentShader:`uniform vec3 edgeTint;uniform vec3 silverTint;varying vec2 vUv;
+      void main(){float edge=pow(abs(vUv.x-.5)*2.0,2.2);float sweep=exp(-pow((vUv.x-.28)*8.0,2.0))*.18;float vertical=.34+.32*vUv.y;vec3 reflection=mix(edgeTint,silverTint,vertical);reflection=mix(reflection,vec3(.96,.97,.94),sweep);reflection=mix(reflection,edgeTint,edge*.28);gl_FragColor=vec4(reflection,1.0);}`,
+     side:T.DoubleSide,toneMapped:false
+    });
+    const mirror=new T.Mesh(new T.ShapeGeometry(inner,32),mirrorMat);mirror.position.set(0,1.05,.135);group.add(mirror);
+    const innerLine=new T.Mesh(new T.TorusGeometry(.02,.008,6,48),mat(0xd3bd91,.38,.55));innerLine.scale.set(18,39,1);innerLine.position.set(0,1.05,.14);group.add(innerLine);
+    box(0,.09,.02,.96,.14,.38,rear);
+    for(const side of [-1,1]){const foot=new T.Mesh(new T.CylinderGeometry(.045,.07,.28,12),frame);foot.position.set(side*.31,.16,-.02);foot.rotation.z=side*.08;group.add(foot)}
+    const support=box(0,.62,-.13,.055,1.1,.055,rear);support.rotation.x=-.2;
+    for(const y of [.34,1.72])for(const side of [-1,1])cyl(side*.405,y,.145,.018,.018,.025,m.gold,10);
    }else if(modelName==='餐边柜'){
-    width=1.85;depth=.58;height=1.12;surfaceType='table';surfaceY=1.16;
-    box(0,.55,0,1.82,1.02,.56,m.oak);box(0,1.1,0,1.9,.1,.62,m.cream);
-    for(const x of [-.62,0,.62]){box(x,.56,.29,.55,.84,.035,m.sofa2);box(x,.56,.315,.48,.72,.018,m.cream);cyl(x,.56,.35,.022,.022,.045,m.gold,10)}
-    for(const x of [-.78,.78])box(x,.08,-.2,.08,.16,.08,m.dark);
+    width=1.92;depth=.64;height=1.22;surfaceType='table';surfaceY=1.26;
+    const carcass=mat(0x76543d,.66),front=mat(0xc5a47e,.72),dark=mat(0x47372d,.78),brass=mat(0xb58d56,.34,.68),stone=mat(0xe5ded1,.42);
+    box(0,.58,0,1.86,1.08,.6,carcass);
+    box(0,1.16,0,1.98,.1,.68,stone);
+    box(0,1.105,0,1.9,.035,.64,front);
+    // Two paneled cupboards flank an open central display bay.
+    for(const x of [-.62,.62]){
+     box(x,.58,.315,.56,.88,.045,front);
+     box(x,.58,.344,.47,.76,.018,carcass);
+     box(x,.58,.357,.42,.7,.012,front);
+     for(const y of [.25,.9])box(x,y,.37,.38,.012,.012,brass);
+     cyl(x+(x<0?.17:-.17),.58,.39,.024,.024,.04,brass,12);
+     for(const z of [-.2,.2]){const foot=new T.CylinderGeometry(.035,.05,.16,10);const f=new T.Mesh(foot,carcass);f.position.set(x,.08,z);group.add(f)}
+    }
+    box(0,.36,.28,.58,.035,.12,dark);box(0,.75,.28,.58,.035,.12,dark);
+    for(const y of [.44,.83]){
+     box(0,y,.16,.55,.025,.25,front);
+     for(let k=0;k<3;k++){const bottle=cyl(-.17+k*.17,y+.11,.2,.035,.035,.19,k===1?m.leaf:m.clay,12);cyl(-.17+k*.17,y+.22,.2,.022,.022,.045,brass,10)}
+    }
+    box(0,1.22,.34,.48,.035,.025,brass);
+    for(const x of [-.88,.88])for(const z of [-.22,.22]){const foot=new T.CylinderGeometry(.04,.055,.17,10);const f=new T.Mesh(foot,carcass);f.position.set(x,.085,z);group.add(f)}
    }else if(modelName==='阅读椅'){
-    width=1.02;depth=.98;height=1.12;
-    const upholstery=mat(0xd8cbb8,.96),trim=mat(0x8a694c,.72);
-    box(0,.48,0,.94,.18,.82,trim);box(0,.61,.02,.88,.18,.78,upholstery);
-    const back=box(0,.98,-.34,.9,.78,.17,upholstery);back.rotation.x=-.12;
-    for(const x of [-.48,.48]){box(x,.73,-.02,.13,.42,.74,trim);box(x,.86,-.02,.14,.18,.68,upholstery)}
-    legs(.9,.78,.46,.065);
+    width=1.08;depth=1.02;height=1.24;action=()=>openFurnitureActions('chair',id);
+    const timber=mat(0x76543d,.58),upholstery=mat(0xd8cbb8,.96),shade=mat(0xbcae9e,.98),piping=mat(0x9b8068,.82);
+    applyPainterMap(upholstery,fabricMap,.024);applyPainterMap(shade,fabricMap,.022);
+    // A deep wingback reading chair with a sprung seat, rolled arms and a tall enveloping back.
+    box(0,.35,0,.96,.18,.88,timber);
+    const seat=sphere(0,.57,.04,.49,.17,.43,upholstery,28);seat.scale.y=.78;
+    const seatTop=sphere(0,.65,.055,.445,.09,.385,shade,28);
+    const back=sphere(0,1.02,-.34,.47,.56,.15,upholstery,28);back.rotation.x=-.12;
+    const innerBack=sphere(0,1.03,-.235,.365,.43,.055,shade,24);innerBack.rotation.x=-.12;
+    for(const side of [-1,1]){
+     const wing=sphere(side*.405,1.02,-.27,.105,.48,.18,upholstery,20);wing.rotation.z=-side*.13;
+     const armBase=box(side*.43,.68,-.005,.16,.17,.68,timber);armBase.rotation.x=-.06;
+     const arm=sphere(side*.43,.81,.015,.115,.105,.36,upholstery,20);arm.rotation.x=-.05;
+     const armEdge=new T.CatmullRomCurve3([new T.Vector3(side*.43,.86,-.29),new T.Vector3(side*.43,.89,-.12),new T.Vector3(side*.43,.89,.12),new T.Vector3(side*.43,.84,.31)]);
+     group.add(new T.Mesh(new T.TubeGeometry(armEdge,20,.012,7,false),piping));
+     for(const z of [-.28,.28]){const leg=new T.Mesh(new T.CylinderGeometry(.035,.052,.42,12),timber);leg.position.set(side*.39,.2,z);leg.rotation.z=-side*.08;group.add(leg)}
+    }
+    const backSeam=new T.CatmullRomCurve3([new T.Vector3(-.34,.72,-.21),new T.Vector3(-.37,1.02,-.19),new T.Vector3(-.3,1.35,-.2),new T.Vector3(0,1.48,-.2),new T.Vector3(.3,1.35,-.2),new T.Vector3(.37,1.02,-.19),new T.Vector3(.34,.72,-.21)]);
+    group.add(new T.Mesh(new T.TubeGeometry(backSeam,42,.009,6,false),piping));
+    for(const x of [-.16,0,.16])for(const y of [.91,1.12])sphere(x,y,-.177,.018,.018,.012,m.gold,10);
+    const frontSeam=new T.CatmullRomCurve3([new T.Vector3(-.37,.67,.37),new T.Vector3(-.2,.7,.42),new T.Vector3(0,.7,.43),new T.Vector3(.2,.7,.42),new T.Vector3(.37,.67,.37)]);
+    group.add(new T.Mesh(new T.TubeGeometry(frontSeam,24,.009,6,false),piping));
+    for(const z of [-.27,.27]){const rail=box(0,.18,z,.78,.06,.055,timber)}
+    for(const side of [-1,1]){const brace=box(side*.4,.2,0,.045,.06,.5,timber);brace.rotation.z=side*.08}
    }else if(modelName==='花瓶'){
     width=.5;depth=.5;height=.88;surfaceType='tabletop';surfaceY=.04;
     const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.12,0),new T.Vector2(.2,.08),new T.Vector2(.22,.32),new T.Vector2(.13,.57),new T.Vector2(.09,.7)],24),m.clay);vase.position.y=.08;group.add(vase);
@@ -2262,7 +2349,23 @@ function initArday3D(){
     group.add(new T.Mesh(new T.TubeGeometry(lumbar,20,.025,8,false),trim));
     box(0,1.43,-.27,.34,.16,.1,fabric);box(0,1.43,-.32,.3,.11,.035,mesh);
    }else if(modelName==='坐垫'){
-    width=.78;depth=.78;height=.18;surfaceType='floor';box(0,.09,0,.78,.15,.78,m.fabric);const pad=sphere(0,.17,0,.37,.09,.37,m.sofa2);pad.scale.y=.7;for(const x of [-.29,.29])for(const z of [-.29,.29])sphere(x,.16,z,.035,.018,.035,m.cream);
+    width=.82;depth=.82;height=.2;surfaceType='floor';
+    const textile=mat(0xb9a1a0,.98),shadow=mat(0x97847f,.98),piping=mat(0xeee1cf,.92);
+    applyPainterMap(textile,fabricMap,.03);applyPainterMap(shadow,fabricMap,.025);
+    // Soft, overfilled cushion with rounded loft, double piping and four corner gathers.
+    const base=sphere(0,.105,0,.405,.105,.405,shadow,28);base.scale.y=.72;
+    const crown=sphere(0,.17,0,.39,.115,.39,textile,32);crown.scale.y=.82;
+    const seam=new T.CatmullRomCurve3([
+     new T.Vector3(-.31,.19,-.29),new T.Vector3(-.37,.21,0),new T.Vector3(-.29,.19,.31),
+     new T.Vector3(0,.2,.37),new T.Vector3(.31,.19,.29),new T.Vector3(.37,.21,0),
+     new T.Vector3(.29,.19,-.31),new T.Vector3(0,.2,-.37),new T.Vector3(-.31,.19,-.29)
+    ]);
+    group.add(new T.Mesh(new T.TubeGeometry(seam,64,.009,7,false),piping));
+    for(const x of [-.28,.28])for(const z of [-.28,.28]){
+     const gather=sphere(x,.16,z,.065,.045,.065,shadow,14);gather.rotation.y=Math.atan2(z,x);
+     sphere(x*.82,.235,z*.82,.018,.012,.018,piping,10);
+    }
+    sphere(0,.265,0,.022,.012,.022,piping,10);
    }else if(modelName==='伞架'){
     width=.62;depth=.62;height=1.12;
     const vessel=mat(0x555b60,.38,.42),rim=mat(0x9a805f,.48,.58);
@@ -2321,7 +2424,22 @@ function initArday3D(){
      const support=box(x,.63,-.28,.06,.3,.06,frame);
     }
    }else if(modelName==='海报'){
-    width=.92;depth=.12;height=1.25;wallAxis='x';wallSide='back';anchor=[0,2.05];box(0,0,0,.92,1.25,.07,m.wood);box(0,0,.045,.82,1.15,.025,m.cream);box(0,.17,.062,.7,.42,.012,m.clay);const sunDisk=new T.Mesh(new T.CircleGeometry(.16,24),m.gold);sunDisk.position.set(.18,.31,.075);group.add(sunDisk);for(let i=0;i<4;i++)box(-.2+i*.13,-.25,.07,.075,.34,.018,[m.leaf,m.oak,m.dark,m.clay][i]);
+    width=1.02;depth=.14;height=1.32;wallAxis='x';wallSide='back';anchor=[0,2.05];
+    const frame=mat(0x6c4c35,.62),matte=mat(0xe9dfcf,.92),ink=mat(0x354b50,.9),clay=mat(0xb96f55,.9),gold=mat(0xc59b59,.42,.38);
+    box(0,0,0,1.02,1.32,.085,frame);
+    box(0,0,.048,.94,1.24,.025,gold);
+    box(0,0,.066,.88,1.18,.018,matte);
+    box(0,0,.078,.78,1.08,.012,mat(0xd5d8cf,.95));
+    // Layered mid-century landscape artwork with overlapping cut-paper hills and a sun disc.
+    const sky=new T.Mesh(new T.PlaneGeometry(.74,.52),mat(0xb9c9c4,.98));sky.position.set(0,.23,.09);group.add(sky);
+    const sunDisk=new T.Mesh(new T.CircleGeometry(.145,40),gold);sunDisk.position.set(.19,.39,.101);group.add(sunDisk);
+    const hill1=new T.Shape();hill1.moveTo(-.37,-.02);hill1.quadraticCurveTo(-.18,.32,.02,.08);hill1.quadraticCurveTo(.22,-.05,.37,.16);hill1.lineTo(.37,-.27);hill1.lineTo(-.37,-.27);hill1.closePath();
+    const hill2=new T.Shape();hill2.moveTo(-.37,-.16);hill2.quadraticCurveTo(-.12,.06,.08,-.13);hill2.quadraticCurveTo(.23,-.25,.37,-.07);hill2.lineTo(.37,-.27);hill2.lineTo(-.37,-.27);hill2.closePath();
+    const h1=new T.Mesh(new T.ShapeGeometry(hill1),clay);h1.position.set(0,.13,.108);group.add(h1);
+    const h2=new T.Mesh(new T.ShapeGeometry(hill2),ink);h2.position.set(0,.13,.112);group.add(h2);
+    for(let i=0;i<5;i++){const line=box(-.2+i*.1,-.43,.105,.055,.012,.01,i%2?gold:ink)}
+    for(const x of [-.405,.405])for(const y of [-.56,.56])cyl(x,y,.075,.018,.018,.018,gold,10);
+    box(0,.63,.075,.72,.018,.012,frame);
    }else if(modelName==='门'){
     width=1.24;depth=.2;height=2.38;wallAxis='x';wallSide='back';anchor=[0,2.55];
     const timber=mat(0x76513a,.58),panel=mat(0xa9845e,.62),shadow=mat(0x4b3426,.78);
