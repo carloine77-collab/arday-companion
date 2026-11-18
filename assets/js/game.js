@@ -2959,11 +2959,37 @@ function initArday3D(){
      // cabinet has a narrower top than the plate, fit the dish to the largest
      // available support instead of silently falling through to the floor.
      if(!placed&&supports.length){
-      const best=supports.slice().sort((a,b)=>b.width*b.depth-a.width*a.depth)[0];
-      const fit=Math.min(1,(best.width-.06)/item.width,(best.depth-.06)/item.depth);
-      if(Number.isFinite(fit)&&fit>0){
-       const scale=Math.max(.5,fit);group.scale.setScalar(scale);item.width*=scale;item.depth*=scale;item.footprintScale=scale;
-       item.supportId=best.id;group.position.set(best.group.position.x,best.group.position.y+best.surfaceY+.015,best.group.position.z);group.rotation.y=best.group.rotation.y;placed=true;
+      // Last-resort fitting must still find a genuinely free slot. The old
+      // fallback always centered the dish on the largest top, stacking a
+      // second dish directly over the first one.
+      const orderedSupports=supports.slice().sort((a,b)=>b.width*b.depth-a.width*a.depth);
+      for(const candidate of orderedSupports){
+       const fit=Math.min(1,(candidate.width-.036)/item.width,(candidate.depth-.036)/item.depth);
+       if(!Number.isFinite(fit)||fit<.62)continue;
+       const fittedWidth=item.width*fit,fittedDepth=item.depth*fit;
+       const limitX=candidate.width/2-fittedWidth/2-.018,limitZ=candidate.depth/2-fittedDepth/2-.018;
+       if(limitX<0||limitZ<0)continue;
+       const stepX=fittedWidth+.035,stepZ=fittedDepth+.035,positions=[[0,0]];
+       for(let oz=-limitZ;oz<=limitZ+.001;oz+=stepZ)for(let ox=-limitX;ox<=limitX+.001;ox+=stepX)positions.push([ox,oz]);
+       for(const oz of [-limitZ,limitZ])for(const ox of [-limitX,limitX])positions.push([ox,oz]);
+       const co=Math.cos(candidate.group.rotation.y),si=Math.sin(candidate.group.rotation.y);
+       const unique=positions.filter((point,index)=>positions.findIndex(p=>Math.abs(p[0]-point[0])<.01&&Math.abs(p[1]-point[1])<.01)===index);
+       for(const [ox,oz] of unique){
+        const occupied=furnitureRegistry.some(other=>{
+         if(other===item||other.id===candidate.id||other.room!==room||other.supportId!==candidate.id)return false;
+         const dx=other.group.position.x-candidate.group.position.x,dz=other.group.position.z-candidate.group.position.z;
+         const localX=dx*co-dz*si,localZ=dx*si+dz*co,da=other.group.rotation.y-candidate.group.rotation.y;
+         const otherHalfX=(Math.abs(Math.cos(da))*other.width+Math.abs(Math.sin(da))*other.depth)/2;
+         const otherHalfZ=(Math.abs(Math.sin(da))*other.width+Math.abs(Math.cos(da))*other.depth)/2;
+         return Math.abs(localX-ox)<fittedWidth/2+otherHalfX+.025&&Math.abs(localZ-oz)<fittedDepth/2+otherHalfZ+.025;
+        });
+        if(occupied)continue;
+        if(fit<.999){group.scale.setScalar(fit);item.width=fittedWidth;item.depth=fittedDepth;item.footprintScale=(item.footprintScale||1)*fit}
+        item.supportId=candidate.id;
+        group.position.set(candidate.group.position.x+ox*co+oz*si,candidate.group.position.y+candidate.surfaceY+.015,candidate.group.position.z-ox*si+oz*co);
+        group.rotation.y=candidate.group.rotation.y;placed=true;break;
+       }
+       if(placed)break;
       }
      }
     }else{
