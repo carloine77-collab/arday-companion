@@ -1588,6 +1588,20 @@ function initArday3D(){
      for(let x=-mattressW/2+.35;x<=mattressW/2-.3;x+=.42)box(x,1.04,-1.425,.018,1.05,.018,piping);
      for(const x of [-mattressW*.28,0,mattressW*.28])for(const y of [.68,1.02,1.36])sphere(x,y,-1.35,.035,.035,.018,piping);
      box(0,.74,.55,mattressW-.2,.1,1.72,m.cream);
+    }else if(isDouble){
+     // Double bed: wide upholstered wingback headboard with a split pair of sleeping pillows.
+     box(0,.98,-1.62,mattressW+.22,1.34,.22,m.wood);
+     box(0,.98,-1.48,mattressW-.08,1.14,.08,textile);
+     for(const x of [-mattressW/2+.08,mattressW/2-.08]){
+      const wing=box(x,.98,-1.38,.16,1.2,.32,m.cream);wing.rotation.y=x<0?-.1:.1;
+     }
+     for(const x of [-mattressW*.25,mattressW*.25]){
+      const pillow=sphere(x,.92,-.88,.56,.16,.36,m.cream);pillow.rotation.x=-.14;
+      for(const side of [-1,1])box(x+side*.25,.92,-.88,.012,.012,.3,piping);
+     }
+     box(0,.7,.54,mattressW-.16,.12,1.82,m.cream);
+     box(0,.73,1.48,mattressW*.84,.15,.38,textile);
+     for(const x of [-.62,0,.62])box(x,.99,-1.41,.025,.82,.018,piping);
     }else{
      box(0,.94,-1.62,mattressW+.12,1.22,.2,m.wood);
      box(0,.97,-1.49,mattressW-.08,.98,.06,m.fabric);
@@ -1909,7 +1923,22 @@ function initArday3D(){
      for(const y of [.16,.68,1.2,1.72,2.0])box(0,y,.015,1.42,.075,.55,shelf);
      for(const x of [-.46,0,.46])box(x,1.08,.015,.055,1.82,.52,frame);
      for(const x of [-.68,.68])box(x,1.05,0,.09,2.1,.58,frame);
+    }else if(variant==='深胡桃木书柜'){
+     // Vintage library cabinet: crown moulding, open upper shelves and closed lower doors.
+     box(0,1.05,0,1.48,2.1,.55,frame);
+     box(0,2.12,0,1.62,.12,.68,shelf);
+     box(0,1.65,-.25,1.3,.82,.035,mat(0x3e2b20,.82));
+     for(const y of [1.3,1.72,2.02])box(0,y,-.01,1.34,.055,.5,shelf);
+     for(const x of [-.58,.58])box(x,1.58,.04,.075,1.0,.58,frame);
+     box(0,.4,.29,1.4,.68,.035,frame);
+     for(const x of [-.34,.34]){
+      box(x,.4,.315,.64,.58,.025,shelf);
+      for(const dx of [-.28,.28])box(x+dx,.4,.34,.018,.52,.018,m.oak);
+      cyl(x+(x<0?.22:-.22),.4,.37,.025,.025,.05,m.gold,10);
+     }
+     for(const x of [-.7,.7])box(x,1.05,.02,.08,2.08,.62,frame);
     }else{
+     // Glass-front display bookcase with framed double doors and a central meeting stile.
      box(0,1.05,0,1.48,2.1,.55,frame);
      box(0,.28,.29,1.38,.48,.035,shelf);
      for(const y of [.68,1.2,1.72])box(0,y,0,1.34,.055,.5,shelf);
