@@ -125,7 +125,7 @@ function addItem(name){return addInventoryItem(name,'food')}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
  if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}s.money-=cost;arday3D.applyRoomFinish(id);const scope=id.startsWith('buy-wallpaper-')?'全屋墙面':'当前房间地面';addEvent('你更换了房间饰面',label+'已应用于'+scope+'。','player-action');remember('purchase','房间装修：'+label,2);say('已经换上新的'+label+'。');save();render();toast('装修完成：'+label);openTab('商店',true);return}
- if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')){
+ if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-')){
   const furnitureName=furnitureNameById[id];if(!furnitureName){toast('商品信息不存在');return}
   s.money-=cost;addInventoryItem(furnitureName,'furniture');addEvent('你购入了一件家具',label+'已放入物品栏。','player-action');
   remember('purchase',label,2);save();render();toast('购入：'+label);return;
