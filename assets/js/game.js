@@ -458,13 +458,14 @@ function ensureScheduleAt(value){
   });
   s.sleepPlans={};s.calendar.version=6;
  }
- if((s.calendar.version||0)<12){
-  delete s.pendingWork;
-  s.calendar.version=12;
+ if((s.calendar.version||0)<9){
+  Object.keys(s.calendar.days).forEach(k=>{s.calendar.days[k]=(s.calendar.days[k]||[]).map(ev=>ev.autonomous?{...ev,kind:'autonomous',source:ev.source||'simulation'}:ev)});
+  s.calendar.version=9;
  }
- if((s.calendar.version||0)<13){
-  Object.keys(s.calendar.days).forEach(key=>{const day=s.calendar.days[key]||[];for(let hour=0;hour<24;hour++){if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true})}day.sort((a,b)=>a.start-b.start);s.calendar.days[key]=day});
-  s.calendar.version=13;
+ if((s.calendar.version||0)<10){
+  const fixed=new Set(['read','rest','computerPlay','walk','chat']);
+  Object.keys(s.calendar.days).forEach(k=>{s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!(ev.kind==='personal'&&fixed.has(ev.activity)))});
+  s.calendar.version=10;
  }
  if((s.calendar.version||0)<11){
   // Remove obsolete schedule activities by validating against the canonical activity registry.
@@ -476,15 +477,19 @@ function ensureScheduleAt(value){
   if(s.sharedGoal?.id==='meal')s.sharedGoal=null;
   s.calendar.version=11;
  }
- if((s.calendar.version||0)<9){
-  Object.keys(s.calendar.days).forEach(k=>{s.calendar.days[k]=(s.calendar.days[k]||[]).map(ev=>ev.autonomous?{...ev,kind:'autonomous',source:ev.source||'simulation'}:ev)});
-  s.calendar.version=9;
+ if((s.calendar.version||0)<12){
+  delete s.pendingWork;
+  s.calendar.version=12;
  }
- if((s.calendar.version||0)<10){
-  const fixed=new Set(['read','rest','computerPlay','walk','chat']);
-  Object.keys(s.calendar.days).forEach(k=>{s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!(ev.kind==='personal'&&fixed.has(ev.activity)))});
-  s.calendar.version=10;
+ if((s.calendar.version||0)<13){
+  Object.keys(s.calendar.days).forEach(key=>{const day=s.calendar.days[key]||[];for(let hour=0;hour<24;hour++){if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true})}day.sort((a,b)=>a.start-b.start);s.calendar.days[key]=day});
+  s.calendar.version=13;
  }
+ 
+ 
+ 
+ 
+ 
  if(s.calendar.anchor!==currentKey){
   s.calendar.anchor=currentKey;
   Object.keys(s.calendar.days).forEach(k=>{if(k<currentKey)delete s.calendar.days[k]});
@@ -593,13 +598,13 @@ function presentActivity(activity){
  updateArday3D();
 }
 function hasAutonomyFurniture(requirement){
- const names=(s.placed||[]).filter(item=>item&&item.kind!=='scene').map(item=>item.name);
- const all=[...names,...(s.inventory||[]).filter(item=>item?.kind==='furniture').map(item=>item.name)];
- if(requirement==='desk')return all.some(name=>name.includes('书桌'));
- if(requirement==='computer')return all.some(name=>name.includes('电脑'));
- if(requirement==='bookshelf')return all.some(name=>name.includes('书架'));
- if(requirement==='sink')return all.some(name=>name.includes('水槽'));
- if(requirement==='seat')return all.some(name=>/沙发|椅子|床/.test(name));
+ const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string').map(item=>item.name);
+ if(requirement==='desk')return names.some(name=>name.includes('书桌'));
+ if(requirement==='computer')return names.some(name=>name.includes('电脑'));
+ if(requirement==='bookshelf')return names.some(name=>name.includes('书架'));
+ if(requirement==='readingSpot')return names.some(name=>/书架|书桌/.test(name));
+ if(requirement==='sink')return names.some(name=>name.includes('水槽'));
+ if(requirement==='seat')return names.some(name=>/沙发|椅子|床/.test(name));
  return true;
 }
 function chooseAutonomousActivity(){
