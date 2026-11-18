@@ -2229,7 +2229,7 @@ function initArday3D(){
      side:T.DoubleSide,toneMapped:false
     });
     const mirror=new T.Mesh(new T.ShapeGeometry(inner,32),mirrorMat);mirror.position.set(0,1.05,.135);group.add(mirror);
-    const innerLine=new T.Mesh(new T.TorusGeometry(.02,.008,6,48),mat(0xd3bd91,.38,.55));innerLine.scale.set(18,39,1);innerLine.position.set(0,1.05,.14);group.add(innerLine);
+    const innerLine=new T.CatmullRomCurve3([new T.Vector3(-.35,.23,.145),new T.Vector3(-.35,1.48,.145),new T.Vector3(-.34,1.68,.145),new T.Vector3(0,1.82,.145),new T.Vector3(.34,1.68,.145),new T.Vector3(.35,1.48,.145),new T.Vector3(.35,.23,.145)]);group.add(new T.Mesh(new T.TubeGeometry(innerLine,42,.008,6,false),mat(0xd3bd91,.38,.55)));
     box(0,.09,.02,.96,.14,.38,rear);
     for(const side of [-1,1]){const foot=new T.Mesh(new T.CylinderGeometry(.045,.07,.28,12),frame);foot.position.set(side*.31,.16,-.02);foot.rotation.z=side*.08;group.add(foot)}
     const support=box(0,.62,-.13,.055,1.1,.055,rear);support.rotation.x=-.2;
