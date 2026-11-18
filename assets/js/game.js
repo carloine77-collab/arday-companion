@@ -1220,10 +1220,13 @@ function initArday3D(){
     shader.fragmentShader=shader.fragmentShader.replace(
      '#include <tonemapping_fragment>',
      `float inkLuminance=dot(outgoingLight,vec3(0.2126,0.7152,0.0722));
-      float softContrast=smoothstep(0.015,0.98,inkLuminance);
-      outgoingLight*=mix(0.94,1.035,softContrast);
+      float inkShadow=smoothstep(0.12,0.25,inkLuminance);
+      float inkMid=smoothstep(0.38,0.58,inkLuminance);
+      float inkBand=mix(0.79,0.91,inkShadow);
+      inkBand=mix(inkBand,1.035,inkMid);
+      outgoingLight*=inkBand;
       float paperGrain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5;
-      outgoingLight*=1.0+paperGrain*0.006;
+      outgoingLight*=1.0+paperGrain*0.012;
       #include <tonemapping_fragment>`
     );
    };
@@ -1280,9 +1283,9 @@ function initArday3D(){
   function applyPainterMap(material,texture,bump){if(!material)return material;material.map=texture;material.bumpMap=texture;material.bumpScale=bump;material.needsUpdate=true;return material}
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
   const inkOutlineMaterial=new T.ShaderMaterial({
-   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.62},outlineThickness:{value:.0065}},
+   uniforms:{outlineColor:{value:new T.Color(0x302824)},outlineAlpha:{value:.78},outlineThickness:{value:.0052}},
    vertexShader:`uniform float outlineThickness;
-    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float width=outlineThickness*(1.0+0.035*wobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
+    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float fineWobble=sin(position.x*31.0+position.z*23.0)*.35;float width=outlineThickness*(1.0+0.075*wobble+0.018*fineWobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
    fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
     void main(){gl_FragColor=vec4(outlineColor,outlineAlpha);}`,
    side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
@@ -1576,7 +1579,19 @@ function initArday3D(){
    if(modelName==='沙发'&&variant==='鼠尾草绿'){m.fabric.color.setHex(0x82927b);m.sofa2.color.setHex(0xb2bba6);m.wood.color.setHex(0x665443)}
    if(modelName==='沙发'&&variant==='暖灰羊毛'){m.fabric.color.setHex(0xaaa69d);m.sofa2.color.setHex(0xd1cbc0);m.wood.color.setHex(0x71665a)}
    if(modelName==='沙发'&&variant==='亚麻燕麦'){m.fabric.color.setHex(0xc4ad91);m.sofa2.color.setHex(0xe1d3bd);m.wood.color.setHex(0x76543a)}
-   const box=(x,y,z,w,h,d,material)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
+   // Furniture uses softly bevelled silhouettes instead of razor-sharp box primitives.
+   function softBoxGeometry(w,h,d){
+    const radius=Math.max(.012,Math.min(w,h,d)*.085),x=w/2,y=h/2,r=radius;
+    const shape=new T.Shape();
+    shape.moveTo(-x+r,-y);shape.lineTo(x-r,-y);shape.quadraticCurveTo(x,-y,x,-y+r);
+    shape.lineTo(x,y-r);shape.quadraticCurveTo(x,y,x-r,y);
+    shape.lineTo(-x+r,y);shape.quadraticCurveTo(-x,y,-x,y-r);
+    shape.lineTo(-x,-y+r);shape.quadraticCurveTo(-x,-y,-x+r,-y);
+    const bevel=Math.min(r*.42,d*.12);
+    const geometry=new T.ExtrudeGeometry(shape,{depth:Math.max(.008,d-bevel*2),steps:1,bevelEnabled:true,bevelSegments:2,bevelThickness:bevel,bevelSize:bevel,curveSegments:4});
+    geometry.translate(0,0,-d/2+bevel);geometry.computeVertexNormals();return geometry;
+   }
+   const box=(x,y,z,w,h,d,material)=>{const o=new T.Mesh(softBoxGeometry(w,h,d),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
    const cyl=(x,y,z,top,bottom,h,material)=>{const o=new T.Mesh(new T.CylinderGeometry(top,bottom,h,20),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;return o};
    const sphere=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,20,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;return o};
    const restoring=!!record&&['x','y','z','rotation','wallSide','wallOffset'].some(key=>Object.prototype.hasOwnProperty.call(record,key));
