@@ -177,7 +177,7 @@ function openTab(name,force=false){
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
-  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':'食物';tabEntries.push([item,itemIcons[item]||'▧',(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
+  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':'食物';const icon=item==='点心'?'🥐':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   
   const nav=document.createElement('div');nav.className='inventory-categories';
@@ -193,8 +193,14 @@ function openTab(name,force=false){
    if(id.startsWith('use-inventory-')){
     const index=Number(id.slice('use-inventory-'.length)),entity=s.inventory[index],item=entity?.name;
     if(!item){openTab('物品',true);return}
+    if(item.startsWith('成品食物·')){
+     if(!arday3D?.placeOwnedFurniture){toast('场景尚未就绪，暂时无法取出料理');return}
+     s.inventory.splice(index,1);
+     if(!arday3D.placeOwnedFurniture(entity)){s.inventory.splice(index,0,entity);save();toast('当前房间没有合适的位置放置料理');return}
+     addEvent('你取出了一份料理',item.split('·').slice(1).join('·')+'已摆放在当前房间。','player-action');
+     save();say('把料理摆出来了。');toast('料理已取出');openTab('物品',true);return;
+    }
     if(item==='点心'){s.inventory.splice(index,1);change({hunger:25,fun:2});say('点心正好派上用场。')}
-    
     save();render();openTab('物品',true);return;
    }
    if(id.startsWith('place-owned-')){
@@ -613,13 +619,24 @@ function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');i
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
 function openKitchenPanel(){
- $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
+ $('drawer').classList.remove('furniture-drawer','shop-drawer','profile-expanded');
+ $('drawer').querySelector('.furniture-close')?.remove();
  kitchenOpen();
- const stock=Object.entries(ingredientNames).map(([key,label])=>'<span class="cooking-stock-item">'+label+' <b>×'+pantryCount(key)+'</b></span>').join('');
- const cards=Object.entries(recipes).map(([id,recipe])=>{const enough=canCook(id),ingredients=Object.entries(recipe.ingredients).map(([key,count])=>ingredientNames[key]+' ×'+count).join('　·　');return '<article class="cooking-card"><div class="cooking-dish-icon">'+(id==='eggRice'?'🍚':id==='tomatoEgg'?'🍳':'🥣')+'</div><div class="cooking-dish-copy"><strong>'+recipe.name+'</strong><small>'+ingredients+'</small></div><button type="button" class="cooking-make" data-recipe="'+id+'" '+(enough?'':'disabled')+'>'+(enough?'制作':'缺少食材')+'</button></article>'}).join('');
- $('drawerTitle').textContent='烹饪';$('choices').className='choices cooking-panel';
- $('choices').innerHTML='<section class="cooking-stock"><div class="cooking-section-title">冰箱库存</div><div class="cooking-stock-list">'+stock+'</div></section><section class="cooking-recipes"><div class="cooking-section-title">选择菜品</div>'+cards+'</section><div class="cooking-footer"><span>成品会放入物品栏，可摆放在任意房间</span><button type="button" id="kitchen-close">完成</button></div>';
- $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));$('kitchen-close').onclick=()=>$('drawer').classList.remove('open');$('drawer').classList.add('open');
+ const stock=Object.entries(ingredientNames).map(([key,label])=>{
+  const count=pantryCount(key),icon={rice:'🍚',egg:'🥚',vegetable:'🥬',tomato:'🍅'}[key]||'🥕';
+  return '<div class="kitchen-ingredient'+(count?' stocked':' empty')+'"><span class="kitchen-ingredient-icon">'+icon+'</span><span class="kitchen-ingredient-name">'+label+'</span><strong>×'+count+'</strong></div>';
+ }).join('');
+ const cards=Object.entries(recipes).map(([id,recipe])=>{
+  const enough=canCook(id),parts=Object.entries(recipe.ingredients),ingredients=parts.map(([key,count])=>'<span class="kitchen-recipe-ingredient'+(pantryCount(key)>=count?' ready':' missing')+'">'+ingredientNames[key]+' <b>×'+count+'</b></span>').join('');
+  const icon=id==='eggRice'?'🍚':id==='tomatoEgg'?'🍳':'🥣',missing=parts.filter(([key,count])=>pantryCount(key)<count).map(([key,count])=>ingredientNames[key]+' '+(count-pantryCount(key))+'份');
+  return '<article class="kitchen-recipe-card"><div class="kitchen-recipe-art">'+icon+'</div><div class="kitchen-recipe-main"><div class="kitchen-recipe-heading"><strong>'+recipe.name+'</strong><span class="kitchen-recipe-benefit">饱腹 +'+recipe.hunger+'</span></div><div class="kitchen-recipe-ingredients">'+ingredients+'</div>'+(enough?'<p class="kitchen-recipe-note">食材齐全，可以开始烹饪</p>':'<p class="kitchen-recipe-note missing-note">还需要 '+missing.join('、')+'</p>')+'</div><button type="button" class="kitchen-cook-button" data-recipe="'+id+'" '+(enough?'':'disabled')+'>'+(enough?'开始制作':'食材不足')+'</button></article>';
+ }).join('');
+ $('drawerTitle').textContent='厨房 · 烹饪';
+ $('choices').className='choices cooking-panel';
+ $('choices').innerHTML='<header class="kitchen-hero"><div class="kitchen-hero-copy"><span class="kitchen-eyebrow">HOME KITCHEN / DAILY MENU</span><h2>把今天的饭，<em>好好做好。</em></h2><p>用冰箱里的食材，准备一顿简单的家常料理。</p></div><div class="kitchen-hero-mark">餐</div></header><section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div><small>按现有食材制作</small></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><p>完成的料理会收入物品栏，取出后可摆放在房间中</p><button type="button" id="kitchen-close">离开厨房</button></footer>';
+ $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));
+ $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
+ $('drawer').classList.add('open');
 }
 function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;addInventoryItem(itemName,'food');addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
 // Presentation only. The schedule processor is the sole writer of currentActivity.
