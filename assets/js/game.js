@@ -1181,7 +1181,7 @@ function initArday3D(){
   function createPainterTexture(kind){
    if(painterTextureCache.has(kind))return painterTextureCache.get(kind);
    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
-   const ctx=canvas.getContext('2d'),bases={wood:'#c8aa86',fabric:'#c9c1b8',ceramic:'#e6e0d5',wall:'#d8d0c4',floor:'#9b9185'};
+   const ctx=canvas.getContext('2d'),bases={wood:'#c8aa86',fabric:'#c9c1b8',ceramic:'#e6e0d5',wall:'#d8d0c4',floor:'#c7a57f'};
    ctx.fillStyle=bases[kind]||'#d8d0c4';ctx.fillRect(0,0,512,512);
    let seed=kind.length*7919;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
    if(kind==='wood'){
@@ -1289,7 +1289,7 @@ function initArday3D(){
    mesh.rotation.x=-Math.PI/2;mesh.position.y=.012;mesh.renderOrder=0;mesh.userData.furnitureContactShadow=true;mesh.castShadow=false;mesh.receiveShadow=false;group.add(mesh);return mesh;
   }
   function roomShell(group,wallColor,floorColor){
-   const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.0025),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
+   const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.0018),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
    const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
    const backWallParts=[[-4.625,2.35,1.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
@@ -1301,8 +1301,8 @@ function initArday3D(){
    group.userData.leftWall=leftWallGroup;group.userData.rightWall=rightWallGroup;group.userData.frontWall=frontWallGroup;
    // Side walls terminate exactly at the front/back wall planes; all four
    // exterior faces now share the same room footprint without overhangs.
-   const leftWall=box(leftWallGroup,-5.3,2.35,0,.2,4.8,7.96,sideWallMaterial);leftWall.castShadow=false;
-   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,7.96,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
+   const leftWall=box(leftWallGroup,-5.3,2.35,0,.2,4.8,8.16,sideWallMaterial);leftWall.castShadow=false;
+   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,8.16,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
    const frontWall=box(frontWallGroup,0,2.35,4.08,10.8,4.8,.2,sideWallMaterial.clone());frontWall.material.transparent=true;frontWall.material.depthWrite=false;frontWall.castShadow=false;
    group.userData.wallMeshes.push(leftWall,rightWall,frontWall);
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
@@ -1490,6 +1490,10 @@ function initArday3D(){
     const set=(mesh,x,y,w,h)=>{
      const width=Math.max(.001,w),height=Math.max(.001,h);
      mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(width,height,.2);
+     // applyInkOutlines() adds an inverted-hull child using the original
+     // geometry. Replace that child too, otherwise it keeps drawing the old
+     // wall silhouette over the moved aperture and the opening looks fixed.
+     mesh.children.filter(child=>child.userData?.inkOutline).forEach(child=>{child.geometry=mesh.geometry;});
      mesh.position.set(x,y,-4.08);mesh.updateMatrix();mesh.geometry.computeBoundingBox();mesh.geometry.computeBoundingSphere();
     };
     set(segments[0],(left+openingLeft)/2,2.35,leftWidth,4.8);
