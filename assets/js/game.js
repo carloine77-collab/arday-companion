@@ -1640,7 +1640,7 @@ function initArday3D(){
      for(const y of [.32,.62]){box(0,y,.37,.76,.25,.035,m.sofa2);for(const x of [-.19,.19])cyl(x,y,.405,.018,.018,.035,m.gold,10)}
      for(const x of [-.34,.34])box(x,.08,-.27,.09,.16,.09,m.dark);
     }
-   }else if(modelName==='台灯'){else if(modelName==='台灯'){
+   }else if(modelName==='台灯'){
     width=.48;depth=.48;height=.92;surfaceType='tabletop';surfaceY=.9;
     if(variant==='蘑菇'){cyl(0,.12,0,.19,.22,.2,m.gold,16);cyl(0,.43,0,.055,.075,.48,m.cream,16);const dome=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),m.cream);dome.scale.set(.31,.2,.31);dome.position.y=.72;group.add(dome)}else if(variant==='琥珀玻璃'){cyl(0,.12,0,.18,.2,.18,m.gold,20);cyl(0,.36,0,.07,.09,.38,m.metal,16);const globe=new T.Mesh(new T.SphereGeometry(.25,24,16),mat(0xc68b4f,.22,.12));globe.scale.set(1,.82,1);globe.position.y=.65;group.add(globe)}else if(variant==='陶瓷折线'){cyl(0,.12,0,.2,.22,.2,m.clay,16);const stem=new T.Mesh(new T.CylinderGeometry(.09,.16,.48,8),m.cream);stem.position.y=.43;group.add(stem);const shade=new T.Mesh(new T.CylinderGeometry(.28,.12,.28,12),m.cream);shade.position.y=.82;group.add(shade)}else{cyl(0,.12,0,.18,.2,.2,m.dark,16);cyl(0,.48,0,.045,.07,.58,m.gold,12);const shade=new T.Mesh(new T.CylinderGeometry(.27,.12,.3,16),m.cream);shade.position.y=.88;group.add(shade)}
    }else if(modelName==='壁灯'){
@@ -1823,7 +1823,7 @@ function initArday3D(){
      }
      const medallion=new T.Mesh(new T.TorusGeometry(.48,.018,8,48),border);medallion.rotation.x=Math.PI/2;medallion.position.y=.115;group.add(medallion);
      const inner=new T.Mesh(new T.TorusGeometry(.34,.012,8,48),motif);inner.rotation.x=Math.PI/2;inner.position.y=.118;group.add(inner);
-     for(let i=0;i<8;i++){const a=i*Math.PI/4;const leaf=sphere(Math.cos(a)*.28,.125,Math.sin(a)*.28,.11,.012,.045,motiffix);leaf.rotation.y=-a;}
+     for(let i=0;i<8;i++){const a=i*Math.PI/4;const leaf=sphere(Math.cos(a)*.28,.125,Math.sin(a)*.28,.11,.012,.045,gold);leaf.rotation.y=-a;}
     }else if(variant==='波斯绛红'){
      for(let x=-1.25;x<=1.25;x+=.42)for(let z=-.82;z<=.82;z+=.42){const motif=new T.Mesh(new T.OctahedronGeometry(.105,0),m.gold);motif.position.set(x,.105,z);motif.scale.y=.12;group.add(motif)}
      box(0,.105,0,.08,.012,1.9,m.cream);
@@ -1833,7 +1833,7 @@ function initArday3D(){
      for(let z=-.82;z<=.82;z+=.28)box(0,.105,z,2.95,.012,.025,m.cream);
      for(const x of [-1.52,1.52])for(let z=-.9;z<=.9;z+=.3)box(x,.11,z,.055,.018,.055,m.gold);
     }
-   }else if(modelName==='沙发'){else if(modelName==='沙发'){
+   }else if(modelName==='沙发'){
     width=2.35;depth=1.12;height=.94;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(variant==='雾蓝绒布'?0x657f94:variant==='亚麻燕麦'?0xc4ad91:0xe4d9c7,.96),fabricShade=mat(variant==='雾蓝绒布'?0x91a4b2:variant==='亚麻燕麦'?0xe1d3bd:0xd3c5b1,.98),welt=mat(variant==='雾蓝绒布'?0x526b80:variant==='亚麻燕麦'?0xb69c7d:0xc2b39e,.92),walnut=mat(variant==='雾蓝绒布'?0x594b43:variant==='亚麻燕麦'?0x76543a:0x67452f,.62),walnutEdge=mat(variant==='雾蓝绒布'?0x71808a:variant==='亚麻燕麦'?0x987451:0x8a6344,.58);
     applyPainterMap(fabric,fabricMap,.026);applyPainterMap(fabricShade,fabricMap,.022);applyPainterMap(welt,fabricMap,.016);
