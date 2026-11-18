@@ -616,7 +616,7 @@ function openKitchenPanel(){
  }).join('')||'<p class="kitchen-empty-note">还没有收藏其他菜谱，可以去商店的「书籍 · 菜谱」选购。</p>';
  $('drawerTitle').textContent='厨房 · 烹饪';
  $('choices').className='choices cooking-panel';
-   $('choices').innerHTML='<section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><button type="button" id="kitchen-close">离开厨房</button></footer>;
+   $('choices').innerHTML='<section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><button type="button" id="kitchen-close">离开厨房</button></footer>';
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));
  $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
  $('drawer').classList.add('open');
