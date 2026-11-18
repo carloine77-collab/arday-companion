@@ -25,7 +25,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},readyMeals:[],preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
+const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
 s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.items=Array.isArray(s.items)?s.items.filter(item=>!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(item)):[];s.furniture=(Array.isArray(s.furniture)?s.furniture:base.furniture.slice()).filter(item=>item!=='沙发');
@@ -50,7 +50,7 @@ if((s.roomFurnishingMigration||0)<1){
  s.roomFurnishingMigration=1;
 }
 s.ownedFurniture=s.ownedFurniture||[];s.placedFurniture=s.placedFurniture||[];
-s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.readyMeals=s.readyMeals||[];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
+s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
 const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
@@ -164,7 +164,6 @@ function openTab(name,force=false){
     s.ownedFurniture.splice(index,1);addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
    }
    if(id==='kitchen'){openKitchenPanel(false);return}
-   if(id==='cook-together'){if(Math.random()>.67){s.rejections=(s.rejections||0)+1;say(['今天不想一起做饭。你先决定吃什么吧。','厨房先留给我自己待会儿用，暂时不需要搭档。','做饭可以改天，我现在没这个兴致。'][Math.floor(Math.random()*3)]);save();return}openKitchenPanel(true);return}
    if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
    if(id.startsWith('buy-')){purchase(id,label,+cost);return}
    if(id==='events'){renderEvents();return}
@@ -420,21 +419,16 @@ function ensureScheduleAt(value){
   });
   s.sleepPlans={};s.calendar.version=6;
  }
- if((s.calendar.version||0)<7){
+ if((s.calendar.version||0)<11){
+  // Remove obsolete schedule activities by validating against the canonical activity registry.
   Object.keys(s.calendar.days).forEach(k=>{
-   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['cook','cooking','cookTogether'].includes(ev.activity)&&!['烹饪','一起做饭'].includes(ev.title));
+   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!ev.activity||!!activityMeta[ev.activity]);
    if(!s.calendar.days[k].length)delete s.calendar.days[k];
   });
-  s.calendar.version=7;
- }
- if((s.calendar.version||0)<8){
-  Object.keys(s.calendar.days).forEach(k=>{
-   s.calendar.days[k]=(s.calendar.days[k]||[]).filter(ev=>!['cook','cooking','cookTogether'].includes(ev.activity)&&!['烹饪','一起做饭'].includes(ev.title));
-   if(!s.calendar.days[k].length)delete s.calendar.days[k];
-  });
-  if(s.sharedGoal?.id==='meal'||s.sharedGoal?.action==='cookTogether')s.sharedGoal=null;
-  s.pendingCookingSlot=null;
-  s.calendar.version=8;
+  s.activityLog=(s.activityLog||[]).filter(entry=>!entry.activity||!!activityMeta[entry.activity]);
+  if(s.sharedGoal?.id==='meal')s.sharedGoal=null;
+  delete s.pendingCookingSlot;
+  s.calendar.version=11;
  }
  if((s.calendar.version||0)<9){
   Object.keys(s.calendar.days).forEach(k=>{s.calendar.days[k]=(s.calendar.days[k]||[]).map(ev=>ev.autonomous?{...ev,kind:'autonomous',source:ev.source||'simulation'}:ev)});
@@ -567,7 +561,7 @@ function chooseAutonomousActivity(){
  });
  return available.sort((a,b)=>b.score-a.score)[0]?.activity||'rest';
 }
-function normalizeActivity(a){return ({reading:'read',listen:'music',cooking:'idle',cook:'idle',cookTogether:'idle'})[a]||a||'idle'}
+function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'idle'}
 // Resolve every hour through the calendar. Autonomous choice fills only an unassigned slot;
 // fixed routines and player proposals already exist as calendar events and take precedence.
 function resolveScheduledActivity(key,hour){
@@ -643,7 +637,7 @@ function openFurnitureActions(kind){
 }
 function ardayUnavailable(){const now=new Date(),hourKey=keyAt(now)+'-'+now.getHours(),ev=eventAt(keyAt(now),now.getHours()),activity=normalizeActivity(ev?.activity||(s.lastUnifiedHourKey===hourKey?s.currentActivity:'idle'));return ['sleep','work','computerWork'].includes(activity)}
 function busyBubble(){say('等Arday回家后和他商量吧。')}
-function perform(action,force=false,options={}){if(action==='cook'||action==='cookTogether'){openKitchenPanel();return}proposeActivityNow(action,force,options)}
+function perform(action,force=false,options={}){proposeActivityNow(action,force,options)}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
