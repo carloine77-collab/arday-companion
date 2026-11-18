@@ -861,8 +861,8 @@ function openFurnitureActions(kind,furnitureId=null){
  const margin=radius+34;
  cx=Math.max(margin,Math.min(stageRect.width-margin,cx));
  cy=Math.max(margin,Math.min(stageRect.height-margin,cy));
- wheel.style.left=cx+'px';wheel.style.top=cy+'px';wheel.style.setProperty('--wheel-radius',radius+'px');
- const center=document.createElement('div');center.className='furniture-wheel-center';
+ wheel.style.left=cx+'px';wheel.style.top=cy+'px';wheel.style.width=(radius*2)+'px';wheel.style.height=(radius*2)+'px';wheel.style.setProperty('--wheel-radius',radius+'px');
+ const center=document.createElement('div');center.className='furniture-wheel-center';center.style.left=radius+'px';center.style.top=radius+'px';
  const title=document.createElement('span');title.className='furniture-wheel-title';title.textContent=set.title;
  const close=document.createElement('button');close.type='button';close.className='furniture-wheel-close';close.setAttribute('aria-label','关闭互动菜单');close.textContent='×';close.onclick=closeFurnitureActions;
  center.append(title,close);wheel.appendChild(center);
