@@ -40,6 +40,7 @@ window.ArdayGameConfig = {
 
 },
   characterStats: {
+   personalityTraits: ['洞察人心','从容不羁','疏离矜贵','聪敏自持'],
    energy: {
     hourlyDecay: 0.45,
     sleepRecoveryPerHour: 13,
