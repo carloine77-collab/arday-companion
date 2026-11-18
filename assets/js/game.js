@@ -2341,7 +2341,7 @@ function initArday3D(){
     cyl(.39,-.02,.16,.065,.065,.025,m.gold,18);
     box(.47,-.02,.19,.19,.035,.035,m.gold);
     cyl(.39,-.25,.16,.035,.035,.025,m.metal,14);
-   }}else if(modelName==='懒人沙发'){
+   }else if(modelName==='懒人沙发'){
     width=1.5;depth=1.25;height=.85;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(0xb7a18d,.98),welt=mat(0x8d7866,.9);
     const bean=(x,y,z,sx,sy,sz,rot=0)=>{
@@ -2442,7 +2442,7 @@ function initArday3D(){
      }
     }
     for(let i=0;i<3;i++){const plate=cyl(-.55+i*.09,.1,-.34,.09,.09,.035,rubber,18);plate.rotation.x=Math.PI/2}
-   }}else if(modelName==='窗'){
+   }else if(modelName==='窗'){
     width=2.12;depth=.2;height=1.48;wallAxis='x';wallSide='back';anchor=[0,2.65];
     const timber=mat(0x76543d,.58),glass=mat(0xa9c5ce,.12,.08);glass.transparent=true;glass.opacity=.28;
     // Deep reveal, four glazed panes, cross muntins and a projecting sill.
@@ -2457,7 +2457,7 @@ function initArday3D(){
     // A narrow central latch and two small hinge plates.
     box(.045,-.02,.2,.035,.18,.025,m.gold);
     for(const y of [-.48,.48])box(-1.0,y,.19,.08,.1,.025,m.metal);
-   }}else if(modelName==='上床下桌'){
+   }else if(modelName==='上床下桌'){
     width=3.0;depth=2.0;height=2.75;action=()=>openFurnitureActions('bed',id);for(const x of [-1.35,1.35]){box(x,1.35,0,.12,2.65,.12,m.wood);box(x,2.63,0,.18,.12,1.9,m.oak)}box(0,2.18,-.72,2.7,.16,.78,m.wood);box(0,2.3,-.72,2.65,.22,.72,m.fabric);box(0,2.55,-1.58,2.7,.5,.12,m.cream);for(const x of [-1.25,1.25])box(x,.82,.35,.1,1.6,.1,m.wood);box(0,.92,0,2.55,.12,.82,m.oak);box(0,.99,0,2.5,.04,.78,m.cream);for(const x of [-1.1,1.1])box(x,.45,0,.08,.88,.72,m.wood);for(let i=0;i<6;i++)box(-.22+i*.09,.18,.18,.045,.012,.3,m.gold);for(let i=0;i<5;i++){const step=box(-1.5,.22+i*.36,.65-i*.28,.38,.06,.24,m.oak);step.rotation.z=.0}
    }else if(modelName==='钢琴'){
     width=1.62;depth=.92;height=1.42;
@@ -2479,7 +2479,7 @@ function initArday3D(){
     for(const x of [-.62,.62])box(x,.08,-.22,.1,.16,.1,caseMat);
     for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,m.metal);pedal.rotation.x=-.18}
     box(0,.16,.22,.62,.055,.22,caseMat);
-   }}else if(modelName==='洗衣机'){
+   }else if(modelName==='洗衣机'){
     width=.92;depth=.86;height=1.28;
     const enamel=mat(0xe8e5df,.34,.18),steel=mat(0xaeb7b9,.28,.58),dark=mat(0x34434a,.18,.24),rubber=mat(0x252a2d,.88);
     box(0,.63,0,.88,1.22,.82,enamel);
@@ -2496,7 +2496,7 @@ function initArday3D(){
     box(.25,.98,.445,.22,.035,.018,m.cream);
     for(const x of [-.34,.34])box(x,.06,.28,.1,.12,.12,rubber);
     box(0,.06,-.3,.72,.12,.12,rubber);
-   }}else if(modelName==='酒柜'){
+   }else if(modelName==='酒柜'){
     width=1.25;depth=.58;height=1.72;surfaceType='table';surfaceY=1.75;
     const wood=mat(0x503626,.62),back=mat(0x34251e,.82),glass=mat(0xc9dadd,.14,.12);glass.transparent=true;glass.opacity=.2;
     box(0,.84,0,1.2,1.62,.54,wood);box(0,1.68,0,1.28,.08,.62,m.oak);
@@ -2617,7 +2617,7 @@ function initArday3D(){
     for(let i=0;i<5;i++)cyl(-.19+i*.095,1.12,-.865,.018,.018,.018,i===2?m.clay:m.gold,10);
     for(const x of [-.27,.27]){const safety=box(x,1.08,-.82,.045,.025,.1,m.clay);safety.rotation.z=x*.12}
     for(const x of [-.3,.3])for(const z of [-.72,.72])cyl(x,.075,z,.045,.045,.08,rubber,12);
-   }}else if(modelName==='游戏机'){
+   }else if(modelName==='游戏机'){
     width=.72;depth=.48;height=.34;surfaceType='tabletop';surfaceY=.04;
     const shell=mat(0x30363b,.38,.58),edge=mat(0x555e64,.42,.55),vent=mat(0x171d22,.9),light=mat(0x8caeaa,.3,.2);
     // Low console chassis with layered shell, front ports and top ventilation.
@@ -2635,7 +2635,7 @@ function initArday3D(){
      cyl(x+.045,.17,.36,.022,.022,.018,m.gold,12);
      for(let k=0;k<4;k++)sphere(x+.035+(k%2)*.035,.17,.405+Math.floor(k/2)*.035,.012,.012,.012,k%2?m.clay:m.cream);
     }
-   }}else if(modelName==='置物架'){
+   }else if(modelName==='置物架'){
     width=1.3;depth=.52;height=1.92;
     const frame=mat(0x51463d,.46,.62),shelf=mat(0xb28c62,.66),back=mat(0x75604c,.88);
     for(const x of [-.59,.59])for(const z of [-.2,.2])box(x,.96,z,.055,1.88,.055,frame);
@@ -2660,7 +2660,7 @@ function initArday3D(){
      }
     }
     for(const side of [-1,1]){const brace=box(side*.35,.96,-.225,.028,1.72,.028,frame);brace.rotation.z=side*.34}
-   }}else if(modelName==='衣帽架'){
+   }else if(modelName==='衣帽架'){
     width=.82;depth=.82;height=2.05;
     const wood=mat(0x76543d,.62),brass=mat(0xb69a68,.48,.65);
     cyl(0,.075,0,.34,.34,.14,m.dark,24);
