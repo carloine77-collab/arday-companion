@@ -1966,7 +1966,7 @@ function initArday3D(){
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
-    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','computerPlay'].includes(activeActivity),watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='tea'||activeActivity==='company',inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash',resting=activeActivity==='rest'||activeActivity==='sitChair';
+    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','computerPlay'].includes(activeActivity),watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='tea'||activeActivity==='company',drinkingTea=activeActivity==='tea',inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
@@ -1978,6 +1978,7 @@ function initArday3D(){
       if(watching){shoulderX=.04+Math.sin(t*.0018+i)*.025;elbowX=-.22;shoulderZ=i===0?.18:-.18}
       if(listening){shoulderX=.02+Math.sin(t*.0015+i*2)*.035;elbowX=-.3+Math.sin(t*.0012+i)*.035;shoulderZ=i===0?.22:-.2}
       if(conversing){shoulderX=.12+Math.sin(t*.004+i*1.8)*.12;elbowX=-.42+Math.sin(t*.003+i*2)*.12;shoulderZ=i===0?.28:-.24}
+      if(drinkingTea&&i===0){shoulderX=.46+Math.sin(t*.0017)*.035;elbowX=-.86;shoulderZ=.34}
       if(inspecting){shoulderX=.18+Math.sin(t*.002+i)*.035;elbowX=-.62;shoulderZ=i===0?.3:-.22}
       if(smelling){shoulderX=.26+Math.sin(t*.003+i)*.04;elbowX=-.78;shoulderZ=i===0?.36:-.28}
       if(washing){shoulderX=.35+Math.sin(t*.007+i*2)*.09;elbowX=-.9+Math.sin(t*.008+i)*.06;shoulderZ=i===0?.3:-.3}
@@ -1991,6 +1992,7 @@ function initArday3D(){
      if(watching){head.rotation.y+=(Math.sin(t*.0007)*.1-head.rotation.y)*.025;head.rotation.x+=(-.035-head.rotation.x)*.025}
      if(listening){head.rotation.z+=(Math.sin(t*.0011)*.035-head.rotation.z)*.035;head.rotation.x+=(-.055-head.rotation.x)*.025}
      if(conversing){head.rotation.y+=(Math.sin(t*.002)*.18-head.rotation.y)*.045;head.rotation.x+=(Math.sin(t*.0027)*.045-head.rotation.x)*.04}
+     if(drinkingTea){head.rotation.x+=(-.08+Math.sin(t*.0017)*.035-head.rotation.x)*.04}
      if(inspecting){head.rotation.x+=(-.16+Math.sin(t*.0015)*.025-head.rotation.x)*.035;head.rotation.y+=(Math.sin(t*.0012)*.12-head.rotation.y)*.035}
      if(smelling){head.rotation.x+=(-.24-head.rotation.x)*.045;head.rotation.y+=(Math.sin(t*.001)*.035-head.rotation.y)*.04}
      if(washing){head.rotation.x+=(-.12+Math.sin(t*.002)*.025-head.rotation.x)*.04}
