@@ -1515,6 +1515,7 @@ function initArday3D(){
    const box=(x,y,z,w,h,d,material)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
    const cyl=(x,y,z,top,bottom,h,material)=>{const o=new T.Mesh(new T.CylinderGeometry(top,bottom,h,20),material);o.position.set(x,y,z);group.add(o);o.castShadow=true;return o};
    const sphere=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,20,14),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;return o};
+   const restoring=!!record&&['x','y','z','rotation','wallSide','wallOffset'].some(key=>Object.prototype.hasOwnProperty.call(record,key));
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
    if(modelName==='床'){
@@ -1677,7 +1678,7 @@ function initArday3D(){
     }
    }else if(modelName==='电脑'){
     action=()=>openFurnitureActions('computer',id);
-    width=.72;depth=.55;height=.72;surfaceType='floor';surfaceY=.04;
+    width=.72;depth=.55;height=.72;surfaceType='tabletop';surfaceY=.04;
     box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);box(0,.245,-.16,.075,.12,.09,m.metal);box(0,.18,-.16,.34,.035,.22,m.metal);
     box(0,.07,.15,.68,.045,.23,m.dark);box(0,.096,.15,.6,.012,.17,m.cream);
     for(const x of [-.43,.43]){box(x,.2,-.14,.085,.22,.12,m.wood);box(x,.2,-.072,.045,.12,.012,m.dark);cyl(x,.2,-.06,.018,.018,.012,m.gold,10)}
@@ -1735,13 +1736,13 @@ function initArday3D(){
    item.owned=true;item.kind=record?.kind||(name.startsWith('成品食物·')?'food':'furniture');if(group.userData.lampLight){item.lightOn=record?.lightOn!==false;const light=practicalLights.find(x=>x.light===group.userData.lampLight);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}}item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    item.dyeMaterials=[];group.traverse(object=>{if(object.isMesh&&object.material){const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(material=>{if(material?.map===fabricMap&&!item.dyeMaterials.includes(material))item.dyeMaterials.push(material)})}});
    if(record?.dyeColor)item.dyeMaterials.forEach(material=>material.color.setHex(record.dyeColor));item.dyeColor=record?.dyeColor||null;
-   if(record){
+   if(restoring){
     if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,modelName==='吊柜'?y:(record.y??y));item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z';item.wallAnchorY=(anchor?.[1]??2.55)-group.position.y}
     else{const legacyRugSupport=record.supportId&&s.placed?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
    }
    else{
     let support=null;
-    if(surfaceType==='tabletop')support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
+    if(surfaceType==='tabletop'||['电脑','捧花摆件'].includes(modelName))support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
     let placed=false;
     if(surfaceType==='ceiling'){group.position.set(0,4.45,0);placed=true;}
     else if(surfaceType==='tabletop'&&support){
@@ -1776,7 +1777,25 @@ function initArday3D(){
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
-  (s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.kind!=='scene').forEach(record=>createOwnedFurniture(record.name,record));
+  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.kind!=='scene');
+  restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
+  // Resolve support relationships after every saved item exists. The old
+  // one-pass restore silently detached tabletop objects when their table
+  // appeared later in s.placed.
+  restoredFurnitureRecords.forEach(record=>{
+   if(!record.supportId)return;
+   const item=furnitureRegistry.find(entry=>entry.id===record.id);
+   if(!item)return;
+   const support=furnitureRegistry.find(entry=>entry.id===record.supportId&&entry.room===item.room);
+   if(support?.surfaceType==='table'){
+    item.supportId=support.id;item.allowSupportOverlap=false;
+    item.group.position.y=support.group.position.y+support.surfaceY+.015;
+    persistFurniture(item);
+   }else{
+    item.supportId=null;item.allowSupportOverlap=false;item.group.position.y=0;
+    persistFurniture(item);
+   }
+  });
 
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
