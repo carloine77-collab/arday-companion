@@ -1106,7 +1106,7 @@ function initArday3D(){
   const roomFloorMap=createPainterTexture('floor'),roomWallMap=createPainterTexture('wall');
   function addWindowDressing(windowGroup,width,height,color=0xc8b9a8){
    const fabric=new T.MeshStandardMaterial({color,roughness:.96,side:T.DoubleSide});
-   const rod=cyl(windowGroup,0,height*.5+.11,.12,.035,.035,width+.24,M(0x9a7655,.42));rod.rotation.z=Math.PI/2;
+   const rod=cyl(windowGroup,0,height+.11,.12,.035,width+.24,M(0x9a7655,.42),16);rod.rotation.z=Math.PI/2;
    for(const side of [-1,1]){
     const geometry=new T.PlaneGeometry(.58,height,18,28),positions=geometry.attributes.position;
     for(let i=0;i<positions.count;i++){const x=positions.getX(i),y=positions.getY(i),v=(y+height/2)/height;positions.setX(i,x+Math.sin((x+.29)*42)*.022+Math.sin(v*8)*.012)}
