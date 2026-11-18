@@ -821,7 +821,12 @@ function furnitureRequirementAvailable(requirement,room){
  return (s.placed||[]).some(item=>item&&item.room===room&&pattern.test(item.name||''));
 }
 function closeFurnitureActions(){
- document.querySelector('.furniture-wheel')?.remove();
+ const wheel=document.querySelector('.furniture-wheel');
+ if(wheel){
+  if(wheel._outsideHandler)document.removeEventListener('pointerdown',wheel._outsideHandler,true);
+  if(wheel._escapeHandler)document.removeEventListener('keydown',wheel._escapeHandler,true);
+  wheel.remove();
+ }
  const drawer=$('drawer');
  if(!drawer.classList.contains('furniture-drawer'))return;
  drawer.classList.remove('open');
@@ -848,30 +853,37 @@ function openFurnitureActions(kind,furnitureId=null){
  const stage=$('stage'),drawer=$('drawer');
  closeFurnitureActions();
  drawer.classList.remove('open','furniture-drawer','shop-drawer','profile-expanded');
- const room=(s.placed||[]).find(item=>item.id===furnitureId)?.room||(stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
+ const targetItem=furnitureRegistry.find(item=>String(item.id)===String(furnitureId));
+ const room=targetItem?.room||(s.placed||[]).find(item=>String(item.id)===String(furnitureId))?.room||(stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
  const actions=Object.entries(set.activities||{}).filter(([activity,meta])=>activityMeta[activity]&&furnitureRequirementAvailable(activityMeta[activity].requires,room));
  const blockedReason=furnitureInteractionBlockReason();
- const wheel=document.createElement('div');wheel.className='furniture-wheel';wheel.setAttribute('role','group');wheel.setAttribute('aria-label',set.title+'互动');
  const stageRect=stage.getBoundingClientRect();
- const hotspot=Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
+ const hotspot=targetItem?.button||Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
  const targetRect=hotspot?.getBoundingClientRect();
- const radius=Math.max(54,Math.min(82,(Math.min(stageRect.width,stageRect.height)-126)/2));
- let cx=targetRect?targetRect.left+targetRect.width/2-stageRect.left:stageRect.width/2;
- let cy=targetRect?targetRect.top+targetRect.height/2-stageRect.top:stageRect.height/2;
- const margin=radius+34;
- cx=Math.max(margin,Math.min(stageRect.width-margin,cx));
- cy=Math.max(margin,Math.min(stageRect.height-margin,cy));
+ // Keep the menu's origin exactly on the clicked furniture hotspot. Only its radius
+ // adapts to available room; never clamp the origin toward a screen corner.
+ const cx=targetRect?targetRect.left+targetRect.width/2-stageRect.left:stageRect.width/2;
+ const cy=targetRect?targetRect.top+targetRect.height/2-stageRect.top:stageRect.height/2;
+ const edgeSpace=Math.min(cx,stageRect.width-cx,cy,stageRect.height-cy);
+ const radius=Math.max(46,Math.min(88,edgeSpace-30,Math.min(stageRect.width,stageRect.height)*.22));
+ const wheel=document.createElement('div');wheel.className='furniture-wheel';wheel.setAttribute('role','group');wheel.setAttribute('aria-label',set.title+'互动');
  wheel.style.left=cx+'px';wheel.style.top=cy+'px';wheel.style.width=(radius*2)+'px';wheel.style.height=(radius*2)+'px';wheel.style.setProperty('--wheel-radius',radius+'px');
+ wheel.style.setProperty('--wheel-count',Math.max(actions.length,1));
  const center=document.createElement('div');center.className='furniture-wheel-center';center.style.left=radius+'px';center.style.top=radius+'px';
  const title=document.createElement('span');title.className='furniture-wheel-title';title.textContent=set.title;
+ const subtitle=document.createElement('span');subtitle.className='furniture-wheel-subtitle';subtitle.textContent='选择互动';
  const close=document.createElement('button');close.type='button';close.className='furniture-wheel-close';close.setAttribute('aria-label','关闭互动菜单');close.textContent='×';close.onclick=closeFurnitureActions;
- center.append(title,close);wheel.appendChild(center);
+ center.append(title,subtitle,close);wheel.appendChild(center);
+ const symbols={read:'▤',write:'✎',chat:'♡',computerPlay:'⌘',watchTV:'▣',listenRecords:'♫',rest:'☾',music:'♫',wash:'◌',bouquet:'✿',admireFlowers:'✿',smellFlowers:'❀',sleep:'☾',cook:'♨'};
  if(actions.length){
   actions.forEach(([activity,context],index)=>{
    const angle=(-90+index*(360/actions.length))*Math.PI/180;
-   const button=document.createElement('button');button.type='button';button.className='furniture-wheel-action';button.textContent=activityLabel(activity);
-   button.style.left=(radius+Math.cos(angle)*radius)+'px';
-   button.style.top=(radius+Math.sin(angle)*radius)+'px';
+   const button=document.createElement('button');button.type='button';button.className='furniture-wheel-action';
+   const icon=document.createElement('span');icon.className='furniture-wheel-icon';icon.setAttribute('aria-hidden','true');icon.textContent=symbols[activity]||'•';
+   const label=document.createElement('span');label.className='furniture-wheel-label';label.textContent=activityLabel(activity);
+   button.append(icon,label);
+   button.style.left=(radius+Math.cos(angle)*radius*.78)+'px';
+   button.style.top=(radius+Math.sin(angle)*radius*.78)+'px';
    button.disabled=!!blockedReason;
    button.setAttribute('aria-label',activityLabel(activity)+(blockedReason?'。'+blockedReason:''));
    button.onclick=()=>{
@@ -882,10 +894,14 @@ function openFurnitureActions(kind,furnitureId=null){
    wheel.appendChild(button);
   });
  }else{
-  const empty=document.createElement('span');empty.className='furniture-wheel-empty';empty.textContent='无可用互动';center.appendChild(empty);
+  const empty=document.createElement('span');empty.className='furniture-wheel-empty';empty.textContent='暂无可用互动';center.appendChild(empty);
  }
  if(blockedReason){const status=document.createElement('span');status.className='furniture-wheel-status';status.textContent=blockedReason;wheel.appendChild(status)}
  stage.appendChild(wheel);
+ wheel._outsideHandler=event=>{if(!wheel.contains(event.target)&&event.target!==hotspot)closeFurnitureActions()};
+ wheel._escapeHandler=event=>{if(event.key==='Escape')closeFurnitureActions()};
+ document.addEventListener('pointerdown',wheel._outsideHandler,true);
+ document.addEventListener('keydown',wheel._escapeHandler,true);
 }
 function resolveCharacterAvailability(at=new Date()){
  const hour=at.getHours(),key=keyAt(at),ev=eventAt(key,hour);
