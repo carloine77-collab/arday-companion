@@ -1005,3 +1005,19 @@ html body .stage .drawer.profile-expanded.open .choices{
 .drawer.furniture-drawer .furniture-empty{grid-column:1/-1;padding:10px 4px;color:var(--muted);font-size:12px;text-align:center}
 @media(max-width:700px){.drawer.furniture-drawer{right:8px;bottom:8px;width:min( min(92%,340px),calc(100% - 16px));max-height:min(36%,190px);padding:9px 10px}.drawer.furniture-drawer .furniture-choices .choice{min-height:48px;font-size:13px}}
 @media(orientation:landscape) and (max-height:560px){.drawer.furniture-drawer{max-height:46%;width:min( min(82%,380px),calc(100% - 16px));right:8px;bottom:8px}}
+
+
+/* Contextual furniture menu: communicate unavailable actions without hiding the reason. */
+.drawer.furniture-drawer .furniture-choices .choice:disabled{
+ opacity:.42!important;cursor:not-allowed!important;filter:saturate(.45);
+ box-shadow:none!important;transform:none!important;
+}
+.drawer.furniture-drawer .furniture-status{
+ grid-column:1/-1;padding:7px 9px;border-radius:9px;
+ background:rgba(126,105,82,.1);color:#78634d;
+ font-size:11px;line-height:1.45;text-align:left;
+}
+.drawer.furniture-drawer .furniture-choices .choice:focus-visible,
+.drawer.furniture-drawer .furniture-close:focus-visible{
+ outline:2px solid #8c765e;outline-offset:2px;
+}
