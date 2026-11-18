@@ -1714,7 +1714,7 @@ function initArday3D(){
      const diffuser=new T.Mesh(new T.CircleGeometry(.16,24),m.cream);diffuser.position.y=1.35;diffuser.rotation.x=-Math.PI/2;group.add(diffuser);
     }
    }else if(modelName==='成品食物'){
-    width=.82;depth=.82;height=.24;surfaceType='tabletop';
+    width=.68;depth=.68;height=.24;surfaceType='tabletop';
     const plate=mat(0xf4eee2,.28),plateEdge=mat(0xc9b99e,.32),rice=mat(0xf1e5c9,.92),egg=mat(0xe8bd58,.78),tomato=mat(0xc85e42,.82),green=mat(0x6f8c50,.9),meat=mat(0x8c5237,.86),noodle=mat(0xe6c77f,.84),broth=mat(0xb88a4f,.3),tofu=mat(0xe8d8b8,.9);
     cyl(0,.045,0,.365,.365,.055,plate,40);cyl(0,.076,0,.34,.34,.018,plateEdge,40);cyl(0,.088,0,.315,.315,.012,plate,40);
     const rim=new T.Mesh(new T.TorusGeometry(.315,.012,10,48),m.gold);rim.rotation.x=Math.PI/2;rim.position.y=.092;group.add(rim);
@@ -2930,13 +2930,16 @@ function initArday3D(){
      for(const candidate of supports){
       support=candidate;
       const topW=Math.max(.2,Number(support.width)||.2),topD=Math.max(.2,Number(support.depth)||.2);
-      const halfW=item.width/2,halfD=item.depth/2,limitX=topW/2-halfW-.07,limitZ=topD/2-halfD-.07;
+      const halfW=item.width/2,halfD=item.depth/2,edgeGap=.015,limitX=topW/2-halfW-edgeGap,limitZ=topD/2-halfD-edgeGap;
       if(limitX<-.001||limitZ<-.001)continue;
-      const positions=[[0,0]],stepX=Math.max(.42,item.width+.08),stepZ=Math.max(.42,item.depth+.08);
-      for(let oz=-limitZ;oz<=limitZ+.001;oz+=stepZ)for(let ox=-limitX;ox<=limitX+.001;ox+=stepX)if(Math.abs(ox)>.02||Math.abs(oz)>.02)positions.push([ox,oz]);
-      for(const oz of [-limitZ,limitZ])for(const ox of [-limitX,limitX])if(limitX>0||limitZ>0)positions.push([ox,oz]);
+      // Try center first, then a regular grid and all four corners. The previous
+      // single large step skipped valid positions on narrow desks and counters.
+      const positions=[[0,0]],stepX=item.width+.035,stepZ=item.depth+.035;
+      for(let oz=-limitZ;oz<=limitZ+.001;oz+=stepZ)for(let ox=-limitX;ox<=limitX+.001;ox+=stepX)positions.push([ox,oz]);
+      for(const oz of [-limitZ,limitZ])for(const ox of [-limitX,limitX])positions.push([ox,oz]);
+      const uniquePositions=positions.filter((point,index)=>positions.findIndex(p=>Math.abs(p[0]-point[0])<.01&&Math.abs(p[1]-point[1])<.01)===index);
       const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
-      for(const [ox,oz] of positions){
+      for(const [ox,oz] of uniquePositions){
        const occupied=furnitureRegistry.some(other=>{
         if(other===item||other.id===support.id||other.room!==room||other.supportId!==support.id)return false;
         const dx=other.group.position.x-support.group.position.x,dz=other.group.position.z-support.group.position.z;
