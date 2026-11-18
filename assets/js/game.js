@@ -1699,7 +1699,7 @@ function initArday3D(){
      const diffuser=new T.Mesh(new T.CircleGeometry(.16,24),m.cream);diffuser.position.y=1.35;diffuser.rotation.x=-Math.PI/2;group.add(diffuser);
     }
    }else if(modelName==='成品食物'){
-    width=.82;depth=.82;height=.24;surfaceType='floor';
+    width=.82;depth=.82;height=.24;surfaceType='tabletop';
     const plate=mat(0xf4eee2,.28),plateEdge=mat(0xc9b99e,.32),rice=mat(0xf1e5c9,.92),egg=mat(0xe8bd58,.78),tomato=mat(0xc85e42,.82),green=mat(0x6f8c50,.9),meat=mat(0x8c5237,.86),noodle=mat(0xe6c77f,.84),broth=mat(0xb88a4f,.3),tofu=mat(0xe8d8b8,.9);
     cyl(0,.045,0,.365,.365,.055,plate,40);cyl(0,.076,0,.34,.34,.018,plateEdge,40);cyl(0,.088,0,.315,.315,.012,plate,40);
     const rim=new T.Mesh(new T.TorusGeometry(.315,.012,10,48),m.gold);rim.rotation.x=Math.PI/2;rim.position.y=.092;group.add(rim);
@@ -2533,20 +2533,31 @@ function initArday3D(){
     }
    }else if(modelName==='鞋柜'){
     width=1.25;depth=.58;height=1.05;surfaceType='table';surfaceY=1.08;
-    const body=mat(0xb18a61,.72),front=mat(0xe4d8c7,.78);
-    box(0,.51,0,1.2,.98,.54,body);box(0,1.02,0,1.28,.08,.6,m.oak);
-    // Three tilted shoe compartments, each with a real flap and pull.
-    for(let i=0;i<3;i++){
-     const y=.22+i*.29;
-     const flap=box(0,y,.29,1.08,.25,.035,front);flap.rotation.x=-.13;
-     box(0,y-.13,.24,1.02,.025,.05,m.oak);
-     for(const x of [-.32,.32]){
-      const shoe=new T.Mesh(new T.SphereGeometry(1,16,10),i%2?m.dark:m.clay);
-      shoe.position.set(x,y-.015,.16);shoe.scale.set(.18,.07,.28);group.add(shoe);
+    const carcass=mat(0xb18a61,.72),front=mat(0xe4d8c7,.78),shadow=mat(0x594536,.86);
+    // Open-front three-tier shoe cabinet: the footwear is deliberately visible from the room.
+    box(0,.52,-.015,1.2,.98,.53,carcass);
+    box(0,1.02,0,1.3,.085,.62,m.oak);
+    box(0,.52,-.285,1.12,.9,.035,shadow);
+    for(const x of [-.59,.59])box(x,.53,.015,.075,.98,.59,front);
+    for(const y of [.15,.43,.71])box(0,y,0,1.12,.045,.52,m.oak);
+    for(const y of [.29,.57,.85])box(0,y,.278,1.12,.035,.045,carcass);
+    const shoeUpper=[mat(0x6f5141,.88),mat(0x343a40,.84),mat(0x9a6248,.88)];
+    const sole=mat(0xe6dfd1,.94),lace=mat(0xe8d9c5,.92);
+    for(let row=0;row<3;row++)for(const x of [-.27,.27]){
+     const baseY=.18+row*.28,upper=shoeUpper[(row+(x>0?1:0))%shoeUpper.length];
+     box(x,baseY+.018,.105,.17,.035,.31,sole);
+     const body=sphere(x,baseY+.09,.075,.083,.072,.145,upper);
+     body.rotation.x=-.06;
+     sphere(x,baseY+.09,.185,.08,.06,.085,upper);
+     box(x,baseY+.12,-.025,.105,.07,.075,upper);
+     box(x,baseY+.145,.045,.035,.065,.09,lace);
+     for(let k=0;k<3;k++){
+      const laceBar=box(x,baseY+.157,.025+k*.035,.075,.009,.012,lace);
+      laceBar.rotation.y=(k-1)*.12;
      }
-     cyl(0,y,.34,.022,.022,.035,m.gold,10);
     }
-    for(const x of [-.48,.48])box(x,.08,-.2,.09,.16,.09,m.dark);
+    for(const x of [-.49,.49])for(const y of [.31,.59,.87])cyl(x,y,.315,.012,.012,.018,m.gold,8);
+    for(const x of [-.49,.49])box(x,.08,-.2,.09,.16,.09,m.dark);
    }else if(modelName==='沙发床'){
     width=2.15;depth=1.5;height=.92;action=()=>openFurnitureActions('sofa',id);
     const frame=mat(0x76543a,.64),upholstery=mat(0xc9b9a5,.96),piping=mat(0x9f8972,.9);
@@ -2877,6 +2888,8 @@ function initArday3D(){
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
    if(modelName==='椅子'||modelName==='餐桌椅'){const seatEdge=mat(0x9c8064,.9);for(const x of [-.29,.29]){box(x,.565,.34,.025,.025,.025,m.gold)}if(variant==='软包扶手椅'){for(const x of [-.3,.3]){const piping= new T.Mesh(new T.TorusGeometry(.27,.008,6,24,Math.PI),seatEdge);piping.position.set(x,.66,-.19);piping.rotation.y=Math.PI/2;group.add(piping)}}}
    if(modelName==='电脑'){const screenGlow=box(0,.49,-.112,.62,.012,.006,mat(0x6b9eb1,.28));screenGlow.material.emissive=new T.Color(0x23485b);screenGlow.material.emissiveIntensity=.28;for(let row=0;row<3;row++)for(let col=0;col<10;col++)box(-.27+col*.06,.104+row*.002,.105+row*.047,.035,.006,.025,m.metal)}
+   const cabinetTopHeights={'床头柜':.94,'衣柜':2.52,'书架':2.16,'展示柜':2.08,'斗柜':1.22,'电视柜':.78,'橱柜':1.1,'鞋柜':1.08,'置物架':1.96,'酒柜':1.75};
+   if(Object.prototype.hasOwnProperty.call(cabinetTopHeights,modelName)){surfaceType='table';surfaceY=cabinetTopHeights[modelName]}
    let modelMeshCount=0;
    group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
    if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
@@ -2899,20 +2912,22 @@ function initArday3D(){
     else{const legacyRugSupport=record.supportId&&s.placed?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
    }
    else{
+    const supports=surfaceType==='tabletop'||['电脑','捧花摆件'].includes(modelName)?furnitureRegistry.filter(it=>it.room===room&&it.surfaceType==='table').sort((a,b)=>b.width*b.depth-a.width*a.depth):[];
     let support=null;
-    if(surfaceType==='tabletop'||['电脑','捧花摆件'].includes(modelName))support=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='table');
     let placed=false;
     if(surfaceType==='ceiling'){group.position.set(0,4.45,0);placed=true;}
-    else if(surfaceType==='tabletop'&&support){
-     item.supportId=support.id;
-     const siblings=furnitureRegistry.filter(it=>it.room===room&&it.supportId===support.id);
-     const offsets=modelName==='电脑'?[[0,0],[-.36,0],[.36,0],[0,.16],[0,-.16]]:siblings.some(it=>it.name==='电脑')?[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]]:[[.49,0],[-.49,0],[0,.25],[0,-.25],[0,0]];
-     const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
-     for(const [ox,oz] of offsets){
-      const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
-      group.position.set(x,support.group.position.y+support.surfaceY+.015,z);
-      group.rotation.y=support.group.rotation.y;
-      if(canPlaceFurniture(item,x,z,group.rotation.y)){placed=true;break}
+    else if(surfaceType==='tabletop'&&supports.length){
+     const offsetsFor=(surface)=>modelName==='电脑'?[[0,0],[-.3,0],[.3,0],[0,.14],[0,-.14]]:[[0,0],[-surface.width*.24,0],[surface.width*.24,0],[0,-surface.depth*.24],[0,surface.depth*.24],[-surface.width*.2,-surface.depth*.2],[surface.width*.2,-surface.depth*.2]];
+     for(const candidate of supports){
+      support=candidate;item.supportId=support.id;
+      const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
+      for(const [ox,oz] of offsetsFor(support)){
+       const x=support.group.position.x+ox*co+oz*si,z=support.group.position.z-ox*si+oz*co;
+       group.position.set(x,support.group.position.y+support.surfaceY+.015,z);
+       group.rotation.y=support.group.rotation.y;
+       if(canPlaceFurniture(item,x,z,group.rotation.y)){placed=true;break}
+      }
+      if(placed)break;
      }
     }else{
      if(surfaceType==='tabletop'){item.supportId=null;group.position.y=0}
@@ -2925,6 +2940,13 @@ function initArday3D(){
      }else{
       for(const point of candidates){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
      }
+    }
+    if(!placed&&surfaceType==='tabletop'){
+     // A cooked dish or small prop remains placeable on the floor when every top is full.
+     item.supportId=null;group.position.y=0;group.rotation.y=rotation;
+     const rug=furnitureRegistry.find(it=>it.room===room&&it.surfaceType==='rug');
+     const floorSpots=[...window.ArdayFurniturePlacement.rugCandidates(rug),[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
+     for(const point of floorSpots){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
     }
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
