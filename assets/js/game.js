@@ -1426,11 +1426,18 @@ function initArday3D(){
   }
   function wallOffset(item){return item.wallSide==='back'||item.wallSide==='front'?item.group.position.x:item.group.position.z}
   function canPlaceOnWall(item,side,offset){
-   const limit=side==='back'||side==='front'?4.5:3.25;
+   // Validate the full wall-mounted object's span, not only its center.
+   // Wall-mounted cabinets were previously allowed to overhang room edges.
+   const alongBack=side==='back'||side==='front';
+   const wallHalf=alongBack?5.0:3.65;
+   const width=item.id?.includes('window')?2.1:item.id?.includes('door')?1.2:(Number(item.width)||.35);
+   const half=width/2,limit=wallHalf-half;
    if(Math.abs(offset)>limit)return false;
    for(const other of furnitureRegistry){
     if(other===item||other.room!==item.room||!other.wallAxis||other.wallSide!==side)continue;
-    if(Math.abs(wallOffset(other)-offset)<(item.id.includes('door')||other.id.includes('door')?1.45:.65))return false;
+    const otherWidth=other.id?.includes('window')?2.1:other.id?.includes('door')?1.2:(Number(other.width)||.35);
+    const clearance=(width+otherWidth)/2+.12;
+    if(Math.abs(wallOffset(other)-offset)<clearance)return false;
    }
    return true;
   }
