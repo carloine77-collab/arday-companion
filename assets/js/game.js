@@ -422,7 +422,9 @@ function findAvailableSlot(now=new Date(),duration=1){
 function evaluateActivityProposal(activity,dayOffset=0){
  const score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences?.[activity]||0)*4+(activity==='computerPlay'&&s.fun<40?10:0);
  const survival=(activity==='rest'&&s.energy<28)||(activity==='eat'&&s.hunger<38);
- return survival||score>12+(Math.max(0,dayOffset)*1.5);
+ // The fresh-save baseline is 11.84; the former threshold of 12 rejected
+ // every ordinary invitation before preferences had time to develop.
+ return survival||score>8+(Math.max(0,dayOffset)*1.5);
 }
 function rejectActivityProposal(activity){
  const refusals={chat:['我想先自己待一会儿，晚些再聊吧。','今天暂时没有聊天的兴致。'],computerPlay:['现在不太想玩电脑游戏。','这会儿想做点别的。'],walk:['外面我暂时不想去。','今天不想出门，改天吧。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
@@ -1272,13 +1274,16 @@ function initArday3D(){
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
    const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
    const backWallParts=[[-5.125,2.35,2.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
-   group.userData.wallMeshes=backWallParts.map(([x,y,w,h])=>box(backWallGroup,x,y,-4.08,w,h,.2,wallMaterial));
+   const backWallSegments=backWallParts.map(([x,y,w,h])=>box(backWallGroup,x,y,-4.08,w,h,.2,wallMaterial));
+   group.userData.backWallSegments=backWallSegments;group.userData.backWallMaterial=wallMaterial;group.userData.wallMeshes=backWallSegments;
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
    const ceilingMaterial=M(0xe9e3d8);ceilingMaterial.transparent=true;ceilingMaterial.opacity=.22;ceilingMaterial.depthWrite=false;ceilingMaterial.side=T.DoubleSide;group.userData.ceilingMesh=box(group,0,4.78,0,10.8,.12,8.4,ceilingMaterial);group.userData.ceilingMesh.visible=false;group.userData.ceilingMesh.castShadow=false;group.userData.ceilingMesh.renderOrder=8;
    const sideWallMaterial=M(wallColor);sideWallMaterial.transparent=true;sideWallMaterial.opacity=1;sideWallMaterial.depthWrite=false;
    group.userData.leftWall=leftWallGroup;group.userData.rightWall=rightWallGroup;group.userData.frontWall=frontWallGroup;
-   const leftWall=box(leftWallGroup,-5.35,2.35,0,.2,4.8,8.4,sideWallMaterial);leftWall.castShadow=false;
-   const rightWall=box(rightWallGroup,5.35,2.35,0,.2,4.8,8.4,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
+   // Side walls terminate exactly at the front/back wall planes; all four
+   // exterior faces now share the same room footprint without overhangs.
+   const leftWall=box(leftWallGroup,-5.3,2.35,0,.2,4.8,8.16,sideWallMaterial);leftWall.castShadow=false;
+   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,8.16,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
    const frontWall=box(frontWallGroup,0,2.35,4.08,10.8,4.8,.2,sideWallMaterial.clone());frontWall.material.transparent=true;frontWall.material.depthWrite=false;frontWall.castShadow=false;
    group.userData.wallMeshes.push(leftWall,rightWall,frontWall);
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
@@ -1286,7 +1291,8 @@ function initArday3D(){
    const trimMat=M(0xe7d4ba);trimMat.transparent=false;trimMat.depthWrite=true;
    box(leftWallGroup,-5.22,.13,0,.12,.18,8.12,trimMat);
    box(rightWallGroup,5.22,.13,0,.12,.18,8.12,trimMat.clone());
-   for(let z=-3.55;z<3.7;z+=.92)box(group,0,.012,z,10.45,.018,.012,M(0xb58c68));
+   // The old raised plank strips caused high-contrast shimmering on iPad
+   // displays. Keep the floor's subtle painter texture, not floating seams.
   }
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0x8c7966);
@@ -1387,11 +1393,13 @@ function initArday3D(){
   const furnitureRegistry=[];
   const roomBounds={minX:-5.0,maxX:5.0,minZ:-3.65,maxZ:3.65};
   function wallTransform(group,side,offset,y=0){
-   const clamped=side==='back'||side==='front'?Math.max(-4.5,Math.min(4.5,offset)):Math.max(-3.25,Math.min(3.25,offset));
+   const maxOffset=group.userData?.wallObject&&String(group.userData.furnitureKey||'').includes('window')?4.25:4.5;
+   const clamped=side==='back'||side==='front'?Math.max(-maxOffset,Math.min(maxOffset,offset)):Math.max(-3.25,Math.min(3.25,offset));
    if(side==='back'){group.position.set(clamped,y,-3.89);group.rotation.y=0}
    else if(side==='front'){group.position.set(clamped,y,3.89);group.rotation.y=Math.PI}
    else if(side==='left'){group.position.set(-5.16,y,clamped);group.rotation.y=Math.PI/2}
    else{group.position.set(5.16,y,clamped);group.rotation.y=-Math.PI/2}
+   group.userData?.syncWallOpening?.();
   }
   function wallOffset(item){return item.wallSide==='back'||item.wallSide==='front'?item.group.position.x:item.group.position.z}
   function canPlaceOnWall(item,side,offset){
@@ -1448,6 +1456,23 @@ function initArday3D(){
    document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
    updateArday3D();
   }
+  function bindWindowOpening(roomGroup,windowGroup){
+   const segments=roomGroup.userData.backWallSegments;
+   if(!segments||segments.length!==4)return;
+   const sync=()=>{
+    const center=windowGroup.position.x,halfWidth=1.1,left=-5.4,right=5.4;
+    const leftWidth=Math.max(.05,center-halfWidth-left),rightWidth=Math.max(.05,right-(center+halfWidth));
+    const set=(mesh,x,y,w,h)=>{
+     mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(w,h,.2);mesh.position.set(x,y,-4.08);
+    };
+    set(segments[0],(left+center-halfWidth)/2,2.35,leftWidth,4.8);
+    set(segments[1],(center+halfWidth+right)/2,2.35,rightWidth,4.8);
+    set(segments[2],center,.81,2.2,1.72);
+    set(segments[3],center,4.14,2.2,1.22);
+   };
+   windowGroup.userData.syncWallOpening=sync;sync();
+  }
+  bindWindowOpening(living,livingWindow);bindWindowOpening(bedroom,bedroomWindow);bindWindowOpening(kitchen,kitchenWindow);
   const wallObjects=[
    registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read',false,{source:'window',furnitureId:'living-window',anchor:'shelf'})}),
    registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('窗外的光线落在床边。')}),
