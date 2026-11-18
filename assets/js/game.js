@@ -527,9 +527,10 @@ function ensureScheduleAt(value){
   addEvent('新的一天','阿尔已经开始安排新一天的生活。','daily');
  }
  const ensureDay=key=>{
-  const existing=s.calendar.days[key],previousPlan=s.sleepPlans?.[key],generated=buildDay(key);
+  const existing=s.calendar.days[key],previousPlan=s.sleepPlans?.[key];
+  const generated=(!existing||previousPlan!==s.sleepPlans?.[key])?buildDay(key):null;
   if(!existing)s.calendar.days[key]=generated;
-  else if(previousPlan!==s.sleepPlans?.[key]){
+  else if(generated){
    const preserved=existing.filter(ev=>ev.activity!=='sleep');
    s.calendar.days[key]=[...preserved,...generated.filter(ev=>ev.activity==='sleep')].sort((a,b)=>a.start-b.start);
   }
