@@ -44,7 +44,7 @@ window.ArdayGameConfig = {
     hourlyDecay: 0.45,
     sleepRecoveryPerHour: 13,
     activityEffects: {
-     sleep:13, rest:10, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
+     rest:10, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
      computerPlay:-3, music:-1, walk:-5, game:-3, write:-3, work:-4,
      sitChair:5, food:0, bouquet:0, tea:0, company:0
     }
