@@ -1286,8 +1286,8 @@ function initArday3D(){
    group.userData.leftWall=leftWallGroup;group.userData.rightWall=rightWallGroup;group.userData.frontWall=frontWallGroup;
    // Side walls terminate exactly at the front/back wall planes; all four
    // exterior faces now share the same room footprint without overhangs.
-   const leftWall=box(leftWallGroup,-5.3,2.35,0,.2,4.8,8.16,sideWallMaterial);leftWall.castShadow=false;
-   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,8.16,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
+   const leftWall=box(leftWallGroup,-5.3,2.35,0,.2,4.8,7.96,sideWallMaterial);leftWall.castShadow=false;
+   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,7.96,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
    const frontWall=box(frontWallGroup,0,2.35,4.08,10.8,4.8,.2,sideWallMaterial.clone());frontWall.material.transparent=true;frontWall.material.depthWrite=false;frontWall.castShadow=false;
    group.userData.wallMeshes.push(leftWall,rightWall,frontWall);
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
