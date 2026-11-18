@@ -1610,6 +1610,10 @@ function initArday3D(){
      const bowl=mat(0xd9cbb4,.26);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
      const soupRim=new T.Mesh(new T.TorusGeometry(.29,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.245;group.add(soupRim);
      for(let n=0;n<10;n++){const a=n*2.4,r=.08+(n%3)*.045;sphere(Math.cos(a)*r,.26,Math.sin(a)*r,.045,.03,.04,n%3===0?tomato:n%3===1?green:tofu)}
+    }else if(variant.includes('葱香土豆饼')){
+     const pancake=mat(0xc99a52,.9),crust=mat(0x9a6937,.92);cyl(0,.12,0,.27,.27,.035,plate,36);
+     for(let n=0;n<3;n++){const cake=cyl(0,.15+n*.035,0,.19,.19,.035,n===2?pancake:crust,32);cake.rotation.y=n*.18}
+     for(let n=0;n<12;n++){const a=n*2.4,r=.07+(n%3)*.035;sphere(Math.cos(a)*r,.265,Math.sin(a)*r,.012,.006,.025,green)}
     }else if(variant.includes('土豆炖牛肉')){
      const bowl=mat(0xd9cbb4,.26);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
      for(let n=0;n<7;n++){const a=n*2.4,r=.07+(n%3)*.05;const o=box(Math.cos(a)*r,.27,Math.sin(a)*r,.065,.05,.065,n%2?tofu:meat);o.rotation.y=a}
