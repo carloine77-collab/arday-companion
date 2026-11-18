@@ -1208,10 +1208,9 @@ function initArday3D(){
     );
    };
    material.customProgramCacheKey=()=> 'arday-soft-light-v3';
-   material.roughness=Math.max(material.roughness??.8,.62);
-   return material;
+      return material;
   }
-  const M=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness}));
+  const M=(color,roughness=.82,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,roughness)),metalness:Math.max(0,Math.min(.9,metalness))}));
   const painterTextureCache=new Map();
   function createPainterTexture(kind){
    if(painterTextureCache.has(kind))return painterTextureCache.get(kind);
@@ -1261,9 +1260,9 @@ function initArday3D(){
   function applyPainterMap(material,texture,bump){if(!material)return material;material.map=texture;material.bumpMap=texture;material.bumpScale=bump;material.needsUpdate=true;return material}
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
   const inkOutlineMaterial=new T.ShaderMaterial({
-   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.78},outlineThickness:{value:.0085}},
+   uniforms:{outlineColor:{value:new T.Color(0x40352f)},outlineAlpha:{value:.62},outlineThickness:{value:.0065}},
    vertexShader:`uniform float outlineThickness;
-    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float width=outlineThickness*(1.0+0.10*wobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
+    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float width=outlineThickness*(1.0+0.035*wobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
    fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
     void main(){gl_FragColor=vec4(outlineColor,outlineAlpha);}`,
    side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
@@ -1539,7 +1538,7 @@ function initArday3D(){
    const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
-   const mat=(color,rough=.78,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(rough,.62),metalness:Math.min(metalness,.45)}));
+   const mat=(color,rough=.78,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,rough)),metalness:Math.max(0,Math.min(.9,metalness))}));
    const m={wood:mat(0x946746),oak:mat(0xc39a70),fabric:mat(0xb9a1a0,.95),sofa:mat(0xb9a1a0,.95),sofa2:mat(0xd3c5b1,.98),cream:mat(0xeee1cf,.9),dark:mat(0x39434b,.45),metal:mat(0x858783,.3,.72),leaf:mat(0x477a4d,.9),leaf2:mat(0x88a968,.9),clay:mat(0xb56d50),gold:mat(0xc5a15d,.35,.5),wall:mat(0xf0e4d2),screen:mat(0x25465b,.2)};
    const fabricMap=createPainterTexture('fabric'),woodMap=createPainterTexture('wood'),ceramicMap=createPainterTexture('ceramic');
    [m.fabric,m.sofa,m.sofa2].forEach(material=>applyPainterMap(material,fabricMap,.018));
@@ -2760,7 +2759,7 @@ function initArday3D(){
    }
    s.placed=s.placed||[];
    if(!record)s.placed.push({id,name,room,kind:name.startsWith('成品食物·')?'food':'furniture',x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
-   persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
+   applyInkOutlines(group);renderer.shadowMap.needsUpdate=true;persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
@@ -2828,6 +2827,7 @@ function initArday3D(){
    Object.assign(saved,{name:item.name,room:item.room,itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null});
    if(item.dyeColor)saved.dyeColor=item.dyeColor;
    if(typeof item.lightOn==='boolean')saved.lightOn=item.lightOn;
+   renderer.shadowMap.needsUpdate=true;
    if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}
    save();
   }
