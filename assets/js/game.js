@@ -632,7 +632,7 @@ function finishImmediateInteraction(at=Date.now()){
   if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   change(effects);
   const preferenceKey=activity==='read'?'reading':activity==='write'?'writing':activity;
-  if(['read','write','chat','computerPlay','watchTV','listenRecords','rest','music','wash','tea','bouquet','admireFlowers','smellFlowers'].includes(activity))s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
+  if(['read','write','chat','computerPlay','watchTV','listenRecords','rest','music','wash','bouquet','admireFlowers','smellFlowers'].includes(activity))s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
   if(['read','write'].includes(activity))updatePersonalGoal(activity,at);
   relation(activity);
   s.activityLog=s.activityLog||[];s.activityLog.push({activity,key:keyAt(at),hour:new Date(at).getHours(),at,withPlayer:true,immediate:true});
@@ -895,7 +895,7 @@ function resolveCharacterAvailability(at=new Date()){
 function ardayUnavailable(){return resolveCharacterAvailability().status!=='available'}
 function busyBubble(){say('等Arday回家后和他商量吧。')}
 function busyBubble(){say('等Arday回家后和他商量吧。')}
-function perform(action,force=false,options={}){if(options.source==='furniture'||options.source==='window')return beginImmediateInteraction(action,options);proposeActivityNow(action,force,options)}
+function perform(action,force=false,options={}){if(options.source==='furniture'||options.source==='window')return beginImmediateInteraction(action,options);return false}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
 const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
@@ -3278,7 +3278,7 @@ function initArday3D(){
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
-    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','computerPlay'].includes(activeActivity),watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='tea'||activeActivity==='company',drinkingTea=activeActivity==='tea',inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash',resting=activeActivity==='rest'||activeActivity==='sitChair';
+    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','computerPlay'].includes(activeActivity),watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='company',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
