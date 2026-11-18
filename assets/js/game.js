@@ -1199,10 +1199,14 @@ function initArday3D(){
     for(let i=0;i<900;i++){const r=2+rand()*13;ctx.fillStyle=rand()>.48?'rgba(255,255,255,.055)':'rgba(83,72,61,.045)';ctx.beginPath();ctx.arc(rand()*512,rand()*512,r,0,Math.PI*2);ctx.fill()}
     for(let i=0;i<38;i++){ctx.beginPath();const y=rand()*512;ctx.moveTo(0,y);ctx.bezierCurveTo(150,y-8,350,y+8,512,y+(rand()-.5)*12);ctx.strokeStyle='rgba(95,81,68,.035)';ctx.lineWidth=1+rand()*2;ctx.stroke()}
    }else{
-    for(let y=0;y<512;y+=128)for(let x=0;x<512;x+=128){ctx.fillStyle='rgba(70,64,57,.035)';ctx.fillRect(x+2,y+2,124,124);for(let i=0;i<90;i++){ctx.fillStyle=rand()>.5?'rgba(255,255,255,.07)':'rgba(52,48,43,.055)';ctx.fillRect(x+rand()*128,y+rand()*128,1+rand()*3,1+rand()*2)}}
-    ctx.strokeStyle='rgba(255,255,255,.11)';ctx.lineWidth=2;for(let n=0;n<=512;n+=128){ctx.beginPath();ctx.moveTo(n,0);ctx.lineTo(n,512);ctx.moveTo(0,n);ctx.lineTo(512,n);ctx.stroke()}
+    // Floor finish: broad, low-contrast mineral variation only. Repeating
+    // tile borders and sharp bump detail shimmer at iPad's oblique camera angle.
+    for(let i=0;i<1100;i++){
+     const r=1+rand()*5;ctx.fillStyle=rand()>.5?'rgba(255,255,255,.035)':'rgba(52,48,43,.025)';
+     ctx.beginPath();ctx.arc(rand()*512,rand()*512,r,0,Math.PI*2);ctx.fill();
+    }
    }
-   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(kind==='wood'?1.5:kind==='wall'?2:3,kind==='wood'?3:kind==='wall'?2:3);texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());painterTextureCache.set(kind,texture);return texture;
+   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(kind==='wood'?1.5:kind==='wall'?2:kind==='floor'?1.15:3,kind==='wood'?3:kind==='wall'?2:kind==='floor'?1.15:3);texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());painterTextureCache.set(kind,texture);return texture;
   }
   function applyPainterMap(material,texture,bump){if(!material)return material;material.map=texture;material.bumpMap=texture;material.bumpScale=bump;material.needsUpdate=true;return material}
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
@@ -1270,7 +1274,7 @@ function initArday3D(){
    mesh.rotation.x=-Math.PI/2;mesh.position.y=.012;mesh.renderOrder=0;mesh.userData.furnitureContactShadow=true;mesh.castShadow=false;mesh.receiveShadow=false;group.add(mesh);return mesh;
   }
   function roomShell(group,wallColor,floorColor){
-   const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.008),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
+   const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.0015),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
    const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
    const backWallParts=[[-5.125,2.35,2.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
