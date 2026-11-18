@@ -86,7 +86,7 @@ s.placed.forEach((item,index)=>{
 });
 s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
 s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
-s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
+s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.unlockedRecipes=Array.isArray(s.unlockedRecipes)?s.unlockedRecipes:['eggRice','tomatoEgg','vegetableSoup'];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
@@ -116,7 +116,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 const tabs={'互动':Object.entries(activityMeta).filter(([,meta])=>meta.playerSelectable).map(([activity,meta])=>[meta.menuLabel||meta.title,meta.playerIcon||'•',activity]),'物品':[],'商店':[]};
 
-let shopCategory='食物食材';
+let shopCategory='食物食材';let shopBookType='菜谱';
 let inventoryCategory='全部';
 let inventoryGrid=null;
 let shopFurnitureGroup='起居空间';
@@ -127,6 +127,14 @@ function addItem(name){return addInventoryItem(name,'food')}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
  if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}s.money-=cost;arday3D.applyRoomFinish(id);const scope=id.startsWith('buy-wallpaper-')?'全屋墙面':'当前房间地面';addEvent('你更换了房间饰面',label+'已应用于'+scope+'。','player-action');remember('purchase','房间装修：'+label,2);say('已经换上新的'+label+'。');save();render();toast('装修完成：'+label);openTab('商店',true);return}
+ if(id.startsWith('buy-recipe-')){
+  const recipeId=id.slice('buy-recipe-'.length);
+  if(!recipes[recipeId]){toast('菜谱信息不存在');return}
+  if((s.unlockedRecipes||[]).includes(recipeId)){toast('这本菜谱已经收藏');return}
+  s.money-=cost;s.unlockedRecipes=s.unlockedRecipes||[];s.unlockedRecipes.push(recipeId);
+  addEvent('你购入了一本菜谱',label+'已加入家庭藏书。','player-action');
+  remember('purchase','购入菜谱：'+label,2);save();render();toast('已解锁：'+recipes[recipeId].name);openTab('商店',true);return;
+ }
  if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-')){
   const furnitureName=furnitureNameById[id];if(!furnitureName){toast('商品信息不存在');return}
   s.money-=cost;addInventoryItem(furnitureName,'furniture');addEvent('你购入了一件家具',label+'已放入物品栏。','player-action');
@@ -152,10 +160,17 @@ function openTab(name,force=false){
  if(name==='商店'){
   $('choices').classList.add('shop-content');
   const nav=document.createElement('div');nav.className='shop-categories';
-  ['食物食材','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  ['食物食材','家具','书籍'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   const shopMasthead=document.createElement('section');shopMasthead.className='shop-masthead';shopMasthead.innerHTML='<div class="shop-kicker">ARDAY JOURNAL <span>HOME & LIVING</span></div><div class="shop-coverline"><span class="shop-cover-number">№ 08</span><span class="shop-cover-season">THE ART OF<br>EVERYDAY LIVING</span></div><div class="shop-cover-title">Objects<br><i>with a story.</i></div><div class="shop-cover-note"></div><div class="shop-cover-stamp">A HOME<br>IN THE<br>MAKING</div>'; 
   $('choices').appendChild(shopMasthead);
   $('choices').appendChild(nav);
+  if(shopCategory==='书籍'){
+   const groups=shopCatalog.bookCategories||{};
+   if(!groups[shopBookType])shopBookType=Object.keys(groups)[0]||'';
+   const typeNav=document.createElement('div');typeNav.className='shop-level-two';
+   Object.keys(groups).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopBookType===type?' active':'');button.textContent=type;button.onclick=()=>{shopBookType=type;openTab('商店',true)};typeNav.appendChild(button)});
+   $('choices').appendChild(typeNav);
+  }
   if(shopCategory==='家具'){
    const groups=shopCatalog.furnitureCategories||{};
    if(!groups[shopFurnitureGroup])shopFurnitureGroup=Object.keys(groups)[0]||'';
@@ -168,11 +183,11 @@ function openTab(name,force=false){
    Object.keys(types).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFurnitureType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFurnitureType=type;openTab('商店',true)};typeNav.appendChild(button)});
    $('choices').appendChild(typeNav);
   }
-  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder='搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
+  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
   shopGrid=document.createElement('div');shopGrid.className='shop-product-grid';$('choices').appendChild(shopGrid);
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
- const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ const tabEntries=name==='商店'?(shopCategory==='家具'?[...(shopCatalog.furnitureCategories?.[shopFurnitureGroup]?.[shopFurnitureType]||[])]:shopCategory==='书籍'?[...(shopCatalog.bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  if(name==='互动'){$('choices').className='choices interaction-view';const hero=document.createElement('section');hero.className='interaction-masthead';hero.innerHTML='<div class="interaction-overline">A COMPANION JOURNAL <span>VOL. 01 / DAILY LIFE</span></div><div class="interaction-bigtitle">THE LITTLE<br><i>THINGS</i></div><div class="interaction-subtitle"></div><div class="interaction-asterisk"></div>'; $('choices').appendChild(hero);}
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
@@ -185,8 +200,8 @@ function openTab(name,force=false){
   $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
-  let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'));
-  if(isShop){const desc='';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong></span><span class="shop-product-price">'+(Number(cost)===0?'免费':'¥'+cost)+'</span><span class="shop-product-buy">购入</span>';}
+  let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
+  if(isShop){const desc='';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(description?'<small>'+description+'</small>':'')+'</span><span class="shop-product-price">'+(Number(cost)===0?'免费':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':'购入')+'</span>';}
   else b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
@@ -615,7 +630,7 @@ function relation(action){
 
 function pantryCount(k){return Math.max(0,Number(s.pantry?.[k]||0))}
 function canCook(id){const r=recipes[id];return !!r&&Object.entries(r.ingredients).every(([k,n])=>pantryCount(k)>=n)}
-function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);say('食材放进冰箱了。');save();render();openKitchenPanel(false)}
+function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);say('食材放进冰箱了。');save();render();openTab('商店',true)}
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
 function openKitchenPanel(){
@@ -623,14 +638,14 @@ function openKitchenPanel(){
  $('drawer').querySelector('.furniture-close')?.remove();
  kitchenOpen();
  const stock=Object.entries(ingredientNames).map(([key,label])=>{
-  const count=pantryCount(key),icon={rice:'🍚',egg:'🥚',vegetable:'🥬',tomato:'🍅'}[key]||'🥕';
+  const count=pantryCount(key),icon=({rice:'🍚',egg:'🥚',vegetable:'🥬',tomato:'🍅',oil:'🫒',flour:'🌾',potato:'🥔',beef:'🥩',noodles:'🍜',mushroom:'🍄',tofu:'◻️',bread:'🍞'})[key]||'🥕';
   return '<div class="kitchen-ingredient'+(count?' stocked':' empty')+'"><span class="kitchen-ingredient-icon">'+icon+'</span><span class="kitchen-ingredient-name">'+label+'</span><strong>×'+count+'</strong></div>';
  }).join('');
- const cards=Object.entries(recipes).map(([id,recipe])=>{
+ const cards=Object.entries(recipes).filter(([id])=>(s.unlockedRecipes||[]).includes(id)).map(([id,recipe])=>{
   const enough=canCook(id),parts=Object.entries(recipe.ingredients),ingredients=parts.map(([key,count])=>'<span class="kitchen-recipe-ingredient'+(pantryCount(key)>=count?' ready':' missing')+'">'+ingredientNames[key]+' <b>×'+count+'</b></span>').join('');
   const icon=id==='eggRice'?'🍚':id==='tomatoEgg'?'🍳':'🥣',missing=parts.filter(([key,count])=>pantryCount(key)<count).map(([key,count])=>ingredientNames[key]+' '+(count-pantryCount(key))+'份');
   return '<article class="kitchen-recipe-card"><div class="kitchen-recipe-art">'+icon+'</div><div class="kitchen-recipe-main"><div class="kitchen-recipe-heading"><strong>'+recipe.name+'</strong><span class="kitchen-recipe-benefit">饱腹 +'+recipe.hunger+'</span></div><div class="kitchen-recipe-ingredients">'+ingredients+'</div>'+(enough?'<p class="kitchen-recipe-note">食材齐全，可以开始烹饪</p>':'<p class="kitchen-recipe-note missing-note">还需要 '+missing.join('、')+'</p>')+'</div><button type="button" class="kitchen-cook-button" data-recipe="'+id+'" '+(enough?'':'disabled')+'>'+(enough?'开始制作':'食材不足')+'</button></article>';
- }).join('');
+ }).join('')||'<p class="kitchen-empty-note">还没有收藏其他菜谱，可以去商店的「书籍 · 菜谱」选购。</p>';
  $('drawerTitle').textContent='厨房 · 烹饪';
  $('choices').className='choices cooking-panel';
  $('choices').innerHTML='<header class="kitchen-hero"><div class="kitchen-hero-copy"><span class="kitchen-eyebrow">HOME KITCHEN / DAILY MENU</span><h2>把今天的饭，<em>好好做好。</em></h2><p>用冰箱里的食材，准备一顿简单的家常料理。</p></div><div class="kitchen-hero-mark">餐</div></header><section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div><small>按现有食材制作</small></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><p>完成的料理会收入物品栏，取出后可摆放在房间中</p><button type="button" id="kitchen-close">离开厨房</button></footer>';
@@ -638,7 +653,7 @@ function openKitchenPanel(){
  $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
  $('drawer').classList.add('open');
 }
-function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe)return;if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;addInventoryItem(itemName,'food');addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
+function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe||(s.unlockedRecipes||[]).indexOf(id)<0){toast('请先购买这道菜的菜谱');return}if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name;addInventoryItem(itemName,'food');addEvent('完成了一道料理',recipe.name+'已放入物品栏。','player-action');remember('cooking','亲手制作：'+recipe.name,2);say(recipe.name+'做好了。找个合适的位置摆出来吧。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
 // Presentation only. The schedule processor is the sole writer of currentActivity.
 const immediateInteractionDuration=120000;
 const immediateInteractionRefusalRate=.3;
@@ -1565,7 +1580,40 @@ function initArday3D(){
      const diffuser=new T.Mesh(new T.CircleGeometry(.16,24),m.cream);diffuser.position.y=1.35;diffuser.rotation.x=-Math.PI/2;group.add(diffuser);
     }
    }else if(modelName==='成品食物'){
-    width=.72;depth=.72;height=.16;surfaceType='floor';cyl(0,.055,0,.34,.34,.045,m.cream,32);const rim=new T.Mesh(new T.TorusGeometry(.29,.018,8,32),m.gold);rim.rotation.x=Math.PI/2;rim.position.y=.083;group.add(rim);const colors=variant.includes('番茄')?[0xc86b4d,0xf0c77c,0x66834b]:variant.includes('汤')?[0x9aaf78,0xd7b77b,0xb96f4f]:[0xe5bf69,0xd5a94e,0x7e9857];for(let i=0;i<7;i++){const angle=i*Math.PI*2/7,r=.13+(i%3)*.035,food=sphere(Math.cos(angle)*r,.12+(i%2)*.018,Math.sin(angle)*r,.09,.055,.075,mat(colors[i%3],.88));food.rotation.y=angle}for(let i=0;i<3;i++){const garnish=sphere((i-1)*.055,.18,.015,.025,.012,.055,m.leaf2);garnish.rotation.z=(i-1)*.35}
+    width=.82;depth=.82;height=.24;surfaceType='floor';
+    const plate=mat(0xf4eee2,.28),plateEdge=mat(0xc9b99e,.32),rice=mat(0xf1e5c9,.92),egg=mat(0xe8bd58,.78),tomato=mat(0xc85e42,.82),green=mat(0x6f8c50,.9),meat=mat(0x8c5237,.86),noodle=mat(0xe6c77f,.84),broth=mat(0xb88a4f,.3),tofu=mat(0xe8d8b8,.9);
+    cyl(0,.045,0,.365,.365,.055,plate,40);cyl(0,.076,0,.34,.34,.018,plateEdge,40);cyl(0,.088,0,.315,.315,.012,plate,40);
+    const rim=new T.Mesh(new T.TorusGeometry(.315,.012,10,48),m.gold);rim.rotation.x=Math.PI/2;rim.position.y=.092;group.add(rim);
+    const grain=(x,z,sx=.025,sz=.045,material=rice)=>sphere(x,.12,z,sx,.018,sz,material);
+    const noodleLine=(pts,material=noodle,r=.018)=>{const curve=new T.CatmullRomCurve3(pts.map(p=>new T.Vector3(p[0],.13,p[1])));group.add(new T.Mesh(new T.TubeGeometry(curve,28,r,8,false),material))};
+    if(variant.includes('蛋炒饭')){
+     for(let n=0;n<38;n++){const a=n*2.399,r=.045+Math.sqrt(n/38)*.225;grain(Math.cos(a)*r,Math.sin(a)*r,.018,.025,n%4===0?egg:n%7===0?green:rice)}
+     for(let n=0;n<8;n++){const a=n*2.4,r=.12+(n%3)*.035;const o=box(Math.cos(a)*r,.145,Math.sin(a)*r,.035,.022,.028,n%3===0?green:egg);o.rotation.y=a}
+    }else if(variant.includes('番茄炒蛋')){
+     for(let n=0;n<5;n++){const a=n*1.25,r=.12+(n%2)*.045;const o=sphere(Math.cos(a)*r,.145,Math.sin(a)*r,.09,.035,.055,tomato);o.rotation.y=-a}
+     for(let n=0;n<6;n++){const a=n*2.1,r=.09+(n%3)*.045;const o=sphere(Math.cos(a)*r,.16,Math.sin(a)*r,.075,.032,.052,egg);o.rotation.y=a}
+    }else if(variant.includes('蔬菜汤')){
+     const bowl=mat(0xe9dfca,.26);cyl(0,.15,0,.27,.31,.12,bowl,40);cyl(0,.205,0,.265,.265,.018,broth,40);
+     const soupRim=new T.Mesh(new T.TorusGeometry(.27,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.22;group.add(soupRim);
+     for(let n=0;n<12;n++){const a=n*2.4,r=.08+(n%3)*.045;sphere(Math.cos(a)*r,.24,Math.sin(a)*r,.045,.022,.04,n%3===0?tomato:n%3===1?green:tofu)}
+    }else if(variant.includes('红烧牛肉面')){
+     const bowl=mat(0xd9d0bf,.24);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
+     const soupRim=new T.Mesh(new T.TorusGeometry(.29,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.245;group.add(soupRim);
+     for(let n=0;n<5;n++){const a=n*1.25,r=.12+(n%2)*.04;noodleLine([[Math.cos(a)*r,Math.sin(a)*r],[Math.cos(a+.6)*r,Math.sin(a+.6)*r],[Math.cos(a+1.2)*r,Math.sin(a+1.2)*r]])}
+     for(let n=0;n<4;n++){const o=sphere(Math.cos(n*1.6)*.13,.275,Math.sin(n*1.6)*.13,.065,.018,.045,meat);o.rotation.y=n*.6}
+    }else if(variant.includes('奶油蘑菇烩饭')){
+     for(let n=0;n<34;n++){const a=n*2.399,r=.04+Math.sqrt(n/34)*.2;grain(Math.cos(a)*r,Math.sin(a)*r,.023,.03,n%6===0?green:rice)}
+     for(let n=0;n<8;n++){const a=n*2.1,r=.08+(n%3)*.045;const o=sphere(Math.cos(a)*r,.16,Math.sin(a)*r,.045,.025,.06,n%2?tofu:meat);o.rotation.y=a}
+    }else if(variant.includes('香煎蛋吐司')){
+     box(0,.125,0,.43,.07,.3,mat(0xc99657,.92));box(0,.16,0,.39,.018,.27,mat(0xf0d9a8,.9));sphere(0,.19,0,.13,.035,.11,egg);sphere(.025,.215,.005,.045,.012,.04,mat(0xf1d58a,.8));
+    }else if(variant.includes('豆腐蔬菜煲')){
+     const bowl=mat(0xd9cbb4,.26);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
+     const soupRim=new T.Mesh(new T.TorusGeometry(.29,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.245;group.add(soupRim);
+     for(let n=0;n<10;n++){const a=n*2.4,r=.08+(n%3)*.045;sphere(Math.cos(a)*r,.26,Math.sin(a)*r,.045,.03,.04,n%3===0?tomato:n%3===1?green:tofu)}
+    }else if(variant.includes('土豆炖牛肉')){
+     const bowl=mat(0xd9cbb4,.26);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
+     for(let n=0;n<7;n++){const a=n*2.4,r=.07+(n%3)*.05;const o=box(Math.cos(a)*r,.27,Math.sin(a)*r,.065,.05,.065,n%2?tofu:meat);o.rotation.y=a}
+    }
    }else if(modelName==='吊灯'){
     width=.72;depth=.72;height=.5;surfaceType='ceiling';cyl(0,.28,0,.07,.07,.12,m.gold,12);cyl(0,.04,0,.025,.025,.42,m.gold,10);if(variant==='乳白玻璃'){const globe=new T.Mesh(new T.SphereGeometry(.3,20,14),m.cream);globe.position.y=-.22;group.add(globe);cyl(0,-.48,0,.12,.12,.045,m.gold,12)}else{const shade=new T.Mesh(new T.CylinderGeometry(.34,.16,.28,20),m.cream);shade.position.y=-.25;group.add(shade);cyl(0,-.41,0,.18,.18,.035,m.gold,12)}
    }else if(modelName==='衣柜'){
