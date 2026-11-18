@@ -490,6 +490,13 @@ function ensureScheduleAt(value){
   Object.keys(s.calendar.days).forEach(key=>{const day=s.calendar.days[key]||[];for(let hour=0;hour<24;hour++){if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true})}day.sort((a,b)=>a.start-b.start);s.calendar.days[key]=day});
   s.calendar.version=13;
  }
+ if((s.calendar.version||0)<14){
+  Object.keys(s.calendar.days).forEach(key=>{
+   s.calendar.days[key]=(s.calendar.days[key]||[]).filter(ev=>!(ev.kind==='routine'&&ev.activity==='eat'));
+   [[7,'早餐'],[12,'午餐'],[18,'晚餐']].forEach(([hour,title])=>writeBlockForKey(key,hour,hour+1,{title,kind:'routine',activity:'eat'}));
+  });
+  s.calendar.version=14;
+ }
  
  
  
