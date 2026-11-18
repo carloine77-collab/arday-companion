@@ -28,7 +28,7 @@ window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;
 const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;s.furniture=(Array.isArray(s.furniture)?s.furniture:base.furniture.slice()).filter(item=>item!=='沙发');
+s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -45,8 +45,15 @@ if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))
 else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string');
 const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string').map((item,index)=>({...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind:item.kind||(item.name.startsWith('成品食物·')?'food':'furniture')}));
 if(!Array.isArray(s.placed)||(!s.placed.length&&migratedPlaced.length))s.placed=migratedPlaced;
-delete s.items;delete s.ownedFurniture;delete s.placedFurniture;
-s.furniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
+// The old furniture list described built-in scene fixtures, not owned inventory.
+const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
+legacySceneFurniture.filter(name=>typeof name==='string'&&name!=='沙发').forEach((name,index)=>{
+ if(s.placed.some(item=>item?.name===name&&item.kind==='scene'))return;
+ const room=['冰箱','灶台','水槽'].includes(name)?'kitchen':'living';
+ s.placed.push({id:'scene-default-'+index,name,room,kind:'scene'});
+});
+delete s.items;delete s.ownedFurniture;delete s.placedFurniture;delete s.furniture;
+
 s.furnitureLayout=s.furnitureLayout&&typeof s.furnitureLayout==='object'?s.furnitureLayout:{};
 s.roomPositions=s.roomPositions&&typeof s.roomPositions==='object'?s.roomPositions:{};
 for(const roomName of ['living','bedroom','kitchen']){
@@ -89,7 +96,7 @@ function dayKey(value){const d=value instanceof Date?value:new Date(value);if(Nu
 function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
-function has(item){return s.inventory.some(x=>x.name===item)||s.furniture.includes(item)||(s.placed||[]).some(x=>x.name===item)}
+function has(item){return s.inventory.some(x=>x.name===item)||(s.placed||[]).some(x=>x.name===item)}
 function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(type==='shared-goal-proposal'||type==='long')return 'proposal';if(type==='player-action')return 'player';if(type.startsWith('life-'))return 'random';return 'daily'}
 function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,category:eventCategory({type}),choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
