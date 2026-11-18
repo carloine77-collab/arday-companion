@@ -1800,6 +1800,28 @@ function initArday3D(){
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
   const canPlaceFurniture=(item,x,z,angle=item.group.rotation.y)=>window.ArdayFurniturePlacement.canPlaceFurniture(item,x,z,angle,furnitureRegistry,roomBounds,canPlaceOnWall);
+  // A support surface and everything resting on it form one placement unit.
+  // Validate attached objects at their prospective transforms before moving
+  // the parent, otherwise a clear tabletop can carry a lamp/computer through
+  // a wall or into another piece of furniture.
+  function canPlaceFurnitureWithSupports(item,x,z,angle=item.group.rotation.y,y=item.group.position.y){
+   if(!canPlaceFurniture(item,x,z,angle))return false;
+   const children=furnitureRegistry.filter(child=>child.supportId===item.id);
+   if(!children.length)return true;
+   const old={x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,angle:item.group.rotation.y};
+   const snapshots=children.map(child=>({child,x:child.group.position.x,y:child.group.position.y,z:child.group.position.z,angle:child.group.rotation.y}));
+   const da=angle-old.angle,co=Math.cos(da),si=Math.sin(da),dy=y-old.y;
+   item.group.position.set(x,y,z);item.group.rotation.y=angle;
+   snapshots.forEach(({child,x:cx,z:cz})=>{
+    const rx=cx-old.x,rz=cz-old.z;
+    child.group.position.set(x+rx*co+rz*si,child.group.position.y+dy,z-rx*si+rz*co);
+    child.group.rotation.y+=da;
+   });
+   const valid=snapshots.every(({child})=>canPlaceFurniture(child,child.group.position.x,child.group.position.z,child.group.rotation.y));
+   item.group.position.set(old.x,old.y,old.z);item.group.rotation.y=old.angle;
+   snapshots.forEach(({child,x:cx,y:cy,z:cz,angle:ca})=>{child.group.position.set(cx,cy,cz);child.group.rotation.y=ca});
+   return valid;
+  }
   function moveSupportedFurniture(parent,oldX,oldY,oldZ,oldAngle){
    const dx=parent.group.position.x-oldX,dz=parent.group.position.z-oldZ,dy=parent.group.position.y-oldY,da=parent.group.rotation.y-oldAngle;
    const co=Math.cos(da),si=Math.sin(da);
@@ -1832,7 +1854,7 @@ function initArday3D(){
   rotateFurnitureButton.onclick=()=>{
    const item=selectedFurniture;if(!item){toast('请先选中一件家具');return}
    const next=item.group.rotation.y+Math.PI/12;
-   if(!canPlaceFurniture(item,item.group.position.x,item.group.position.z,next)){toast('这个方向会超出房间或与其他家具碰撞');return}
+   if(!canPlaceFurnitureWithSupports(item,item.group.position.x,item.group.position.z,next,item.group.position.y)){toast('这个方向会超出房间或与其他家具碰撞');return}
    const ox=item.group.position.x,oy=item.group.position.y,oz=item.group.position.z,oa=item.group.rotation.y;
    item.group.rotation.y=next;moveSupportedFurniture(item,ox,oy,oz,oa);persistFurniture(item);updateFurnitureHotspots();
   };
@@ -1888,22 +1910,24 @@ function initArday3D(){
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
+   const nearestSeat=(origin,room=characterRoom)=>nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),room).filter(it=>Math.hypot(it.group.position.x-origin.x,it.group.position.z-origin.z)<=2.35),origin);
+   const faceToward=(from,to)=>Math.atan2(to.x-from.x,to.z-from.z);
    if(anchor==='desk'){
     const sourceFurniture=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride)[0]:null;
     const computer=sourceFurniture?.name==='电脑'?sourceFurniture:furniture(it=>it.name==='电脑'&&it.supportId)[0];
     const desk=sourceFurniture?.name.startsWith('书桌')?sourceFurniture:(computer&&furniture(it=>it.id===computer.supportId)[0])||furniture(it=>it.name.startsWith('书桌'))[0];
-    if(desk){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),desk.group.position);
-     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=seat.group.rotation.y}
-     else{const offset=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+offset.x,0,desk.group.position.z+offset.z];faceAngle=Math.atan2(desk.group.position.x-p[0],desk.group.position.z-p[2])}}
+    if(desk){const seat=nearestSeat(desk.group.position);
+     if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=faceToward(seat.group.position,desk.group.position)}
+     else{const offset=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+offset.x,0,desk.group.position.z+offset.z];faceAngle=faceToward({x:p[0],z:p[2]},desk.group.position)}}
    }else if(anchor==='shelf'){
-    const shelf=furniture(it=>it.name.startsWith('书架'))[0];if(shelf){const seat=nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·')),shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=seat?seat.group.rotation.y:Math.atan2(shelf.group.position.x-p[0],shelf.group.position.z-p[2])}
+    const shelf=furniture(it=>it.name.startsWith('书架'))[0];if(shelf){const seat=nearestSeat(shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=seat?faceToward(seat.group.position,shelf.group.position):faceToward({x:p[0],z:p[2]},shelf.group.position)}
    }else if(anchor==='sofa'){
     const sofa=furniture(it=>it.name.startsWith('沙发'))[0];if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI}
    }else if(anchor==='table'){
     const table=furniture(it=>it.name.startsWith('餐桌'))[0];if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2])}
    }else if(anchor==='chair'){
     const selectedChair=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride)[0]:null;
-    const chair=selectedChair||furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),roomMode)[0];if(chair){p=[chair.group.position.x,0,chair.group.position.z];faceAngle=chair.group.rotation.y}
+    const chair=selectedChair||nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),characterRoom),person.position);if(chair){p=[chair.group.position.x,0,chair.group.position.z];faceAngle=chair.group.rotation.y}
    }else if(anchor==='bouquet'){
     const bouquet=furniture(it=>it.name==='捧花摆件')[0];if(bouquet){p=[bouquet.group.position.x,0,bouquet.group.position.z+.9];faceAngle=Math.PI}
    }else if(anchor==='bed'){
@@ -1991,7 +2015,7 @@ function initArday3D(){
       }
      }else{
       const nx=dragPoint.x+furnitureDrag.offsetX,nz=dragPoint.z+furnitureDrag.offsetZ;
-      if(item){const previousSupport=item.supportId,previousAngle=g.rotation.y;let support=null,overlapSupport=null;if(item.surfaceType==='tabletop'||['电脑','捧花摆件'].includes(item.name)){const tables=furnitureRegistry.filter(other=>other.room===item.room&&other.surfaceType==='table');support=tables.find(other=>{const dx=nx-other.group.position.x,dz=nz-other.group.position.z,co=Math.cos(other.group.rotation.y),si=Math.sin(other.group.rotation.y),lx=dx*co-dz*si,lz=dx*si+dz*co;return Math.abs(lx)+item.width/2<=other.width/2-.08&&Math.abs(lz)+item.depth/2<=other.depth/2-.08});if(!support&&previousSupport){const old=furnitureRegistry.find(other=>other.id===previousSupport);if(old&&window.ArdayFurniturePlacement.rectsOverlap(window.ArdayFurniturePlacement.corners(item,nx,nz,g.rotation.y),window.ArdayFurniturePlacement.corners(old)))overlapSupport=old;}}item.supportId=(support||overlapSupport)?.id||null;item.allowSupportOverlap=!!overlapSupport;const nextY=item.surfaceType==='ceiling'?4.45:support?support.group.position.y+support.surfaceY+.015:overlapSupport?overlapSupport.group.position.y+overlapSupport.surfaceY+.015:0;if(support)g.rotation.y=support.group.rotation.y;if(canPlaceFurniture(item,nx,nz,g.rotation.y)){const ox=g.position.x,oy=g.position.y,oz=g.position.z,oa=previousAngle;g.position.x=nx;g.position.z=nz;g.position.y=nextY;moveSupportedFurniture(item,ox,oy,oz,oa)}else{item.supportId=previousSupport;item.allowSupportOverlap=false;g.rotation.y=previousAngle;}}
+      if(item){const previousSupport=item.supportId,previousAllowSupportOverlap=item.allowSupportOverlap,previousAngle=g.rotation.y;let support=null,overlapSupport=null;if(item.surfaceType==='tabletop'||['电脑','捧花摆件'].includes(item.name)){const tables=furnitureRegistry.filter(other=>other.room===item.room&&other.surfaceType==='table');support=tables.find(other=>{const dx=nx-other.group.position.x,dz=nz-other.group.position.z,co=Math.cos(other.group.rotation.y),si=Math.sin(other.group.rotation.y),lx=dx*co-dz*si,lz=dx*si+dz*co;return Math.abs(lx)+item.width/2<=other.width/2-.08&&Math.abs(lz)+item.depth/2<=other.depth/2-.08});if(!support&&previousSupport){const old=furnitureRegistry.find(other=>other.id===previousSupport);if(old&&window.ArdayFurniturePlacement.rectsOverlap(window.ArdayFurniturePlacement.corners(item,nx,nz,g.rotation.y),window.ArdayFurniturePlacement.corners(old)))overlapSupport=old;}}item.supportId=(support||overlapSupport)?.id||null;item.allowSupportOverlap=!!overlapSupport;const nextY=item.surfaceType==='ceiling'?4.45:support?support.group.position.y+support.surfaceY+.015:overlapSupport?overlapSupport.group.position.y+overlapSupport.surfaceY+.015:0;if(support)g.rotation.y=support.group.rotation.y;if(canPlaceFurnitureWithSupports(item,nx,nz,g.rotation.y,nextY)){const ox=g.position.x,oy=g.position.y,oz=g.position.z,oa=previousAngle;g.position.x=nx;g.position.z=nz;g.position.y=nextY;moveSupportedFurniture(item,ox,oy,oz,oa)}else{item.supportId=previousSupport;item.allowSupportOverlap=previousAllowSupportOverlap;g.rotation.y=previousAngle;}}
      }
     }e.preventDefault();return;
    }
