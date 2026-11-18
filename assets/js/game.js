@@ -54,11 +54,11 @@ for(const roomName of ['living','bedroom','kitchen']){
  s.roomPositions[roomName]=s.roomPositions[roomName]&&typeof s.roomPositions[roomName]==='object'?s.roomPositions[roomName]:{};
  // Import legacy transforms for static scene objects into canonical placed entities.
  for(const [id,transform] of Object.entries(s.furnitureLayout[roomName])){
-  if(s.placed.some(item=>item.id===id))continue;
+  if(s.placed.some(item=>item?.id===id))continue;
   s.placed.push({id,name:id,room:roomName,kind:'scene',...(transform&&typeof transform==='object'?transform:{})});
  }
  for(const [id,position] of Object.entries(s.roomPositions[roomName])){
-  if(s.placed.some(item=>item.id===id))continue;
+  if(s.placed.some(item=>item?.id===id))continue;
   if(Array.isArray(position))s.placed.push({id,name:id,room:roomName,kind:'scene',x:Number(position[0])||0,y:0,z:Number(position[1])||0,rotation:0});
  }
 }
@@ -186,8 +186,9 @@ function openTab(name,force=false){
    if(id.startsWith('place-owned-')){
     const index=Number(id.slice('place-owned-'.length)),entity=s.inventory[index],item=entity?.name;
     if(!item){toast('这件物品已不在库存中');openTab('物品',true);return}
-    if(!arday3D?.placeOwnedFurniture||!arday3D.placeOwnedFurniture(entity)){toast('当前场景无法放置这件家具');return}
-    s.inventory.splice(index,1);addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
+    s.inventory.splice(index,1);
+    if(!arday3D?.placeOwnedFurniture||!arday3D.placeOwnedFurniture(entity)){s.inventory.splice(index,0,entity);save();toast('当前场景无法放置这件家具');return}
+    addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();say('把'+item+'放进房间吧。');openTab('物品',true);return;
    }
    if(id==='kitchen'){openKitchenPanel(false);return}
    if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
