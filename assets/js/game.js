@@ -333,11 +333,13 @@ function buildDay(key){
  const previous=plans[previousKey]||{duration:8,bedtime:22,wake:6};
  const d=[];
  const add=(start,end,title,kind='routine',activity='idle')=>{if(end>start)d.push({start,end,title,kind,activity})};
- if(previous.duration>0)add(0,previous.wake,'睡眠 · '+previous.duration+'小时','routine','sleep');
+ const previousSleepHours=Math.max(0,Number(previous.duration||0)-(24-Number(previous.bedtime??22)));
+ if(previousSleepHours>0)add(0,previousSleepHours,'睡眠 · '+previous.duration+'小时','routine','sleep');
  add(7,8,'早餐','routine','eat');
  add(12,13,'午餐','routine','eat');
  add(18,19,'晚餐','routine','eat');
- if(p.duration>0)add(p.bedtime,24,'睡眠 · '+p.duration+'小时','routine','sleep');
+ const tonightSleepEnd=Math.min(24,Number(p.bedtime)+Number(p.duration));
+ if(p.duration>0&&tonightSleepEnd>p.bedtime)add(p.bedtime,tonightSleepEnd,'睡眠 · '+p.duration+'小时','routine','sleep');
  const occupied=new Set();
  d.forEach(ev=>{for(let h=Math.max(0,ev.start);h<Math.min(24,ev.end);h++)occupied.add(h)});
  for(let hour=0;hour<24;hour++)if(!occupied.has(hour))d.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});
