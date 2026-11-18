@@ -2183,12 +2183,32 @@ function initArday3D(){
     const hand=box(.04,.055,.11,.012,.13,.008,m.dark);hand.rotation.z=-.35;
    }else if(modelName==='窗帘'){
     width=2.7;depth=.3;height=2.6;wallAxis='x';wallSide='back';anchor=[0,2.8];
-    const rod=cyl(0,1.22,0,.035,.035,2.82,m.gold,16);rod.rotation.z=Math.PI/2;
-    for(const x of [-1.2,1.2]){box(x,1.18,0,.08,2.35,.16,m.wood)}
-    for(let i=0;i<18;i++){const x=-1.25+i*.147,fold=box(x,1.12,.015,.14,2.2,.075,m.fabric);fold.rotation.z=Math.sin(i*.6)*.018}
-    for(const x of [-1.34,1.34])sphere(x,2.36,0,.07,.07,.07,m.gold);
-
-   }else if(modelName==='办公椅'){
+    const cloth=mat(0xc9b9a5,.98),shade=mat(0xb5a18b,.98),rodMat=mat(0x92734f,.52,.62);
+    const rod=cyl(0,1.22,0,.035,.035,2.82,rodMat,16);rod.rotation.z=Math.PI/2;
+    for(const x of [-1.2,1.2]){
+     box(x,1.18,0,.08,2.35,.16,m.wood);
+     sphere(x,2.36,0,.075,.075,.075,m.gold);
+    }
+    for(let i=0;i<18;i++){
+     const x=-1.25+i*.147,depthWave=Math.sin(i*.72);
+     const fold=box(x,1.12,.015+depthWave*.018,.14,2.2,.075,i%3===0?shade:cloth);
+     fold.rotation.z=Math.sin(i*.6)*.018;
+     cyl(x,2.28,.02,.027,.027,.045,m.gold,8);
+    }
+    // Both panels gather toward the sides with visible tiebacks and hanging folds.
+    for(const side of [-1,1]){
+     const gather=side*1.02;
+     const tie=box(gather,1.02,.105,.38,.075,.08,m.gold);tie.rotation.z=side*.08;
+     for(let k=0;k<3;k++){
+      const x=gather+side*(k*.055);
+      const drape=box(x,.82,.055,.11,.72,.07,k%2?cloth:shade);
+      drape.rotation.z=side*(.06+k*.025);
+     }
+     const tassel=new T.Mesh(new T.ConeGeometry(.045,.16,10),m.gold);
+     tassel.position.set(gather, .91,.15);group.add(tassel);
+    }
+    box(0,2.34,-.015,2.5,.035,.045,m.wood);
+   }else if(modelName==='办公椅'){   }else if(modelName==='办公椅'){
     width=.76;depth=.76;height=1.22;
     const mesh=mat(0x30363a,.94),frame=mat(0x555b60,.48,.62),fabric=mat(0x252a2e,.98);
     cyl(0,.39,0,.07,.07,.48,frame,20);cyl(0,.15,0,.11,.11,.08,frame,20);
@@ -2200,8 +2220,25 @@ function initArday3D(){
    }else if(modelName==='坐垫'){
     width=.78;depth=.78;height=.18;surfaceType='floor';box(0,.09,0,.78,.15,.78,m.fabric);const pad=sphere(0,.17,0,.37,.09,.37,m.sofa2);pad.scale.y=.7;for(const x of [-.29,.29])for(const z of [-.29,.29])sphere(x,.16,z,.035,.018,.035,m.cream);
    }else if(modelName==='伞架'){
-    width=.52;depth=.52;height=1.05;const base=cyl(0,.08,0,.25,.27,.14,m.dark,24);cyl(0,.52,0,.19,.22,.78,m.metal,24);cyl(0,.94,0,.21,.21,.07,m.gold,24);for(let i=0;i<3;i++){const a=i*Math.PI*2/3,x=Math.cos(a),z=Math.sin(a);cyl(x*.1,.72,z*.1,.018,.018,.62,m.wood,8);const canopy=sphere(x*.12,1.05,z*.12,.2,.035,.11,m.fabric);canopy.rotation.y=a}
-   }else if(modelName==='展示柜'){
+    width=.62;depth=.62;height=1.12;
+    const vessel=mat(0x555b60,.38,.42),rim=mat(0x9a805f,.48,.58);
+    cyl(0,.09,0,.29,.31,.17,vessel,28);
+    cyl(0,.17,0,.3,.3,.045,rim,28);
+    const body=cyl(0,.56,0,.22,.25,.72,vessel,28);
+    cyl(0,.94,0,.25,.25,.075,rim,28);
+    // Three umbrellas are visible above the stand, with differentiated canopy colours and curved handles.
+    for(let i=0;i<3;i++){
+     const a=i*Math.PI*2/3,x=Math.cos(a)*.11,z=Math.sin(a)*.11;
+     const shaft=cyl(x,.95,z,.018,.018,.88,i===1?m.gold:m.wood,10);
+     const canopy=new T.Mesh(new T.ConeGeometry(.18,.2,18,1,true),i===0?m.fabric:i===1?m.clay:m.leaf);
+     canopy.position.set(x,.99,z);canopy.rotation.x=Math.PI;group.add(canopy);
+     const tip=sphere(x,1.09,z,.035,.035,.035,m.gold);
+     const handleCurve=new T.CatmullRomCurve3([
+      new T.Vector3(x,.5,z),new T.Vector3(x,.38,z),new T.Vector3(x+.055,.34,z),new T.Vector3(x+.09,.4,z)
+     ]);
+     group.add(new T.Mesh(new T.TubeGeometry(handleCurve,12,.018,8,false),m.wood));
+    }
+   }else if(modelName==='展示柜'){   }else if(modelName==='展示柜'){
     width=1.55;depth=.62;height=2.05;surfaceType='table';surfaceY=2.08;
     const wood=mat(0x76543d,.62),glass=mat(0xc9dadd,.12,.12);glass.transparent=true;glass.opacity=.2;
     box(0,1.02,0,1.5,2.0,.56,wood);
@@ -2380,10 +2417,62 @@ function initArday3D(){
     box(.54,1.045,-.08,.48,.025,.34,m.metal);
     box(.54,1.06,-.08,.39,.018,.25,m.dark);
    }else if(modelName==='任务板'){
-    width=1.25;depth=.12;height=1.0;wallAxis='x';wallSide='back';anchor=[0,2.1];box(0,0,0,1.25,1.0,.08,m.wood);box(0,0,.055,1.12,.87,.025,m.cream);for(let i=0;i<4;i++){const y=.28-i*.18;box(-.1,y,.075,.72,.012,.012,m.oak);box(-.48,y,.08,.08,.08,.012,i%2?m.clay:m.leaf);cyl(.42,y,.085,.025,.025,.02,m.gold,8)}
+    width=1.35;depth=.16;height=1.12;wallAxis='x';wallSide='back';anchor=[0,2.1];
+    const frame=mat(0x76543d,.58),cork=mat(0xb98d61,.98),paper=mat(0xf0e8d8,.92);
+    box(0,0,0,1.35,1.12,.1,frame);
+    box(0,0,.058,1.22,1.0,.035,cork);
+    for(const x of [-.62,.62])box(x,0,.085,.035,1.04,.045,m.gold);
+    for(const y of [-.51,.51])box(0,y,.085,1.28,.035,.045,m.gold);
+    // Pinned notes, a small calendar and a weekly list create separate readable zones.
+    box(-.31,.18,.092,.48,.53,.018,paper);
+    for(let row=0;row<4;row++)for(let col=0;col<4;col++){
+     box(-.48+col*.105,.32-row*.105,.105,.075,.065,.008,row===0?m.clay:m.cream);
+    }
+    sphere(-.31,.46,.12,.035,.035,.025,m.gold);
+    box(.34,.23,.095,.42,.34,.018,m.cream);
+    for(let row=0;row<3;row++)box(.34,.32-row*.1,.11,.31,.012,.008,m.oak);
+    for(const x of [.2,.48])sphere(x,.39,.13,.025,.025,.02,m.clay);
+    box(.28,-.26,.095,.62,.34,.018,paper);
+    for(let row=0;row<3;row++){
+     box(.28,-.17-row*.09,.11,.43,.012,.008,m.oak);
+     box(.03,-.17-row*.09,.115,.035,.035,.012,row===1?m.leaf:m.gold);
+    }
+    // A narrow lower ledge holds chalk and a small pencil cup.
+    box(0,-.58,.15,1.12,.075,.18,frame);
+    cyl(.43,-.47,.19,.065,.065,.16,m.clay,14);
+    for(let i=0;i<3;i++){const pencil=cyl(.39+i*.035,-.34,.19,.009,.009,.24,m.gold,8);pencil.rotation.z=(i-1)*.1}
    }else if(modelName==='照片墙'){
-    width=1.8;depth=.14;height=1.3;wallAxis='x';wallSide='back';anchor=[0,2.15];for(const [x,y,w,h] of [[-.58,.28,.48,.52],[0,.1,.56,.68],[.58,.3,.46,.48],[-.35,-.42,.5,.42],[.43,-.4,.58,.44]]){box(x,y,0,w+.06,h+.06,.07,m.wood);box(x,y,.045,w,h,.02,m.cream);const picture=box(x,y,.06,w*.78,h*.7,.012,m.clay);picture.material=mat((x<0?0x7c9a91:0x8b9eb0),.9)}
-   }else if(modelName==='跑步机'){
+    width=1.95;depth=.16;height=1.45;wallAxis='x';wallSide='back';anchor=[0,2.15];
+    const frameA=mat(0x76543d,.62),frameB=mat(0xb69a72,.62),matte=mat(0xf0e8d8,.92);
+    const frames=[
+     [-.62,.31,.48,.58,frameA,0x8ca49b],
+     [0,.12,.62,.78,frameB,0x9aabb6],
+     [.65,.34,.42,.5,frameA,0xc49b79],
+     [-.34,-.47,.56,.44,frameB,0x8e887b],
+     [.47,-.43,.62,.48,frameA,0x82918b]
+    ];
+    for(let i=0;i<frames.length;i++){
+     const [x,y,w,h,frame,colour]=frames[i];
+     box(x,y,0,w+.09,h+.09,.075,frame);
+     box(x,y,.045,w,h,.018,matte);
+     box(x,y,.06,w*.84,h*.84,.012,mat(colour,.92));
+     // Different artwork silhouettes: landscape, portrait, botanical and abstract blocks.
+     if(i===0){
+      box(x,y-.07,.072,w*.72,.012,.008,m.cream);
+      for(let k=0;k<4;k++)box(x-w*.3+k*.08,y+.08,.078,.07,.11,.008,k%2?m.leaf:m.clay);
+     }else if(i===1){
+      const sun=sphere(x+.13,y+.13,.08,.12,.12,.018,m.gold);
+      const hill=box(x,y-.13,.078,w*.72,.14,.008,m.leaf);hill.rotation.z=-.08;
+     }else if(i===2){
+      const vase=sphere(x,y-.04,.08,.09,.16,.018,m.clay);
+      for(let k=0;k<3;k++){const stem=box(x-.1+k*.1,y+.12,.085,.012,.22,.008,m.leaf);stem.rotation.z=(k-1)*.16}
+     }else{
+      for(let k=0;k<4;k++){const stripe=box(x-w*.28+k*.12,y,.08,.045,h*.68,.008,k%2?m.gold:m.cream);stripe.rotation.z=(k-1.5)*.12}
+     }
+    }
+    // Small brass hanging rail unifies the asymmetrical gallery arrangement.
+    box(0,.78,.015,1.45,.025,.035,m.gold);
+   }else if(modelName==='跑步机'){   }else if(modelName==='跑步机'){
     width=.82;depth=1.85;height=1.35;box(0,.14,0,.78,.16,1.78,m.dark);box(0,.235,0,.64,.025,1.58,m.metal);for(const x of [-.28,.28]){const rail=box(x,.72,-.55,.045,1.05,.045,m.metal);rail.rotation.x=-.18;const grip=box(x,.94,-.92,.08,.08,.42,m.dark);grip.rotation.x=.1}box(0,1.08,-.9,.5,.28,.12,m.dark);box(0,1.1,-.835,.38,.16,.015,m.screen);for(const x of [-.33,.33])box(x,.07,.8,.08,.14,.08,m.dark);
    }else if(modelName==='游戏机'){
     width=.62;depth=.42;height=.25;surfaceType='tabletop';surfaceY=.04;box(0,.12,0,.62,.2,.38,m.dark);box(0,.225,0,.52,.018,.3,m.cream);for(let i=0;i<8;i++)box(-.23+i*.065,.24,.08,.018,.012,.18,m.metal);for(const x of [-.28,.28]){const pad=sphere(x,.1,.32,.14,.06,.1,m.dark);pad.scale.y=.6}for(let i=0;i<4;i++)cyl(-.09+i*.06,.23,-.17,.012,.012,.02,m.gold,8);
@@ -2406,8 +2495,34 @@ function initArday3D(){
      const brace=box(side*.34,.95,-.205,.025,1.72,.025,frame);brace.rotation.z=side*.34;
     }
    }else if(modelName==='衣帽架'){
-    width=.68;depth=.68;height=1.95;cyl(0,.06,0,.3,.3,.12,m.dark,20);cyl(0,.96,0,.045,.055,1.72,m.wood,16);for(let i=0;i<6;i++){const a=i*Math.PI/3,x=Math.cos(a),z=Math.sin(a);const arm=box(x*.2,1.72,z*.2,.34,.045,.045,m.gold);arm.rotation.y=a; sphere(x*.34,1.7,z*.34,.06,.06,.06,m.wood)}const coat=box(.15,1.12,.08,.38,.68,.12,m.fabric);coat.rotation.z=-.08;
-   }else if(modelName==='凳子'){
+    width=.82;depth=.82;height=2.05;
+    const wood=mat(0x76543d,.62),brass=mat(0xb69a68,.48,.65);
+    cyl(0,.075,0,.34,.34,.14,m.dark,24);
+    cyl(0,1.0,0,.052,.065,1.82,wood,20);
+    // A stepped crown with six curved hooks, each ending in a protective wooden knob.
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3,x=Math.cos(a),z=Math.sin(a);
+     const curve=new T.CatmullRomCurve3([
+      new T.Vector3(x*.025,1.72,z*.025),
+      new T.Vector3(x*.2,1.82,z*.2),
+      new T.Vector3(x*.31,1.94,z*.31),
+      new T.Vector3(x*.27,2.0,z*.27)
+     ]);
+     group.add(new T.Mesh(new T.TubeGeometry(curve,12,.022,8,false),brass));
+     sphere(x*.27,2.0,z*.27,.055,.055,.055,wood);
+     const collar=cyl(x*.04,1.73,z*.04,.075,.075,.035,m.gold,12);
+     collar.rotation.x=Math.PI/2;
+    }
+    for(let i=0;i<3;i++){
+     const a=i*Math.PI*2/3,x=Math.cos(a),z=Math.sin(a);
+     const peg=box(x*.18,1.36,z*.18,.24,.045,.045,brass);peg.rotation.y=-a;
+     sphere(x*.31,1.36,z*.31,.045,.045,.045,wood);
+    }
+    // A hanging coat and scarf establish scale and show how the hooks are used.
+    const coat=box(.19,1.02,.1,.42,.68,.13,m.fabric);coat.rotation.z=-.08;
+    const lapel=box(.19,1.34,.17,.22,.22,.025,m.cream);lapel.rotation.z=-.1;
+    const scarf=box(-.2,1.26,.12,.1,.78,.035,mat(0x8a9b91,.96));scarf.rotation.z=.12;
+   }else if(modelName==='凳子'){   }else if(modelName==='凳子'){
     width=.62;depth=.62;height=.68;action=()=>openFurnitureActions('chair',id);box(0,.58,0,.62,.12,.62,m.oak);legs(.58,.58,.52,.065);box(0,.31,0,.5,.045,.5,m.wood);
    }else{toast('没有找到这种家具模型：'+name);return null}
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
