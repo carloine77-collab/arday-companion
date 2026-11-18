@@ -1090,3 +1090,6 @@ html body .stage .drawer.profile-expanded.open .choices{
 .furniture-wheel-empty{color:#9a8973;font-size:9px;}
 .furniture-wheel-status{position:absolute;left:50%;top:calc(100% + 37px);transform:translateX(-50%);width:max-content;max-width:220px;padding:6px 9px;border:1px solid #d9c9b4;border-radius:9px;background:rgba(250,246,237,.96);color:#78634d;font-size:10px;line-height:1.4;text-align:center;pointer-events:none;}
 @media(max-width:700px){.furniture-wheel-action{width:56px;height:56px;font-size:10px}.furniture-wheel-center{width:62px;height:62px}}
+
+.furniture-wheel::before{content:"";position:absolute;left:50%;top:50%;width:100%;height:100%;transform:translate(-50%,-50%);border:1px solid rgba(158,132,101,.72);border-radius:50%;background:rgba(245,237,222,.34);box-shadow:0 0 0 5px rgba(255,250,240,.12);pointer-events:none;z-index:0}
+.furniture-wheel-center,.furniture-wheel-action{z-index:1}
