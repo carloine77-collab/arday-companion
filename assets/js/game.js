@@ -501,7 +501,17 @@ function ensureScheduleAt(value){
   Object.keys(s.sleepPlans||{}).forEach(k=>{if(k<currentKey)delete s.sleepPlans[k]});
   addEvent('新的一天','阿尔已经开始安排新一天的生活。','daily');
  }
- const ensureDay=key=>{if(!s.calendar.days[key])s.calendar.days[key]=buildDay(key);const day=s.calendar.days[key];for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});day.sort((a,b)=>a.start-b.start)};
+ const ensureDay=key=>{
+  const existing=s.calendar.days[key],previousPlan=s.sleepPlans?.[key],generated=buildDay(key);
+  if(!existing)s.calendar.days[key]=generated;
+  else if(previousPlan!==s.sleepPlans?.[key]){
+   const preserved=existing.filter(ev=>ev.activity!=='sleep');
+   s.calendar.days[key]=[...preserved,...generated.filter(ev=>ev.activity==='sleep')].sort((a,b)=>a.start-b.start);
+  }
+  const day=s.calendar.days[key];
+  for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});
+  day.sort((a,b)=>a.start-b.start);
+ };
  ensureDay(currentKey);
  for(let i=1;i<=2;i++)ensureDay(dayKey(plusDays(dayAnchor(),i)));
  if(requestedKey>=currentKey)ensureDay(requestedKey);
