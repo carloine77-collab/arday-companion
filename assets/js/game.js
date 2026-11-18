@@ -427,7 +427,6 @@ function ensureScheduleAt(value){
   });
   s.activityLog=(s.activityLog||[]).filter(entry=>!entry.activity||!!activityMeta[entry.activity]);
   if(s.sharedGoal?.id==='meal')s.sharedGoal=null;
-  delete s.pendingCookingSlot;
   s.calendar.version=11;
  }
  if((s.calendar.version||0)<9){
@@ -582,7 +581,7 @@ function processActivityAt(value){
  const resolved=resolveScheduledActivity(key,hour);
  let ev=resolved.event,activity=resolved.activity;
  let placedMealEaten=false;
- if([7,12,18].includes(hour)&&!['sleep','work','computerWork'].includes(activity)){
+ if([7,12,18].includes(hour)){
   const meal=(s.placedFurniture||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
   if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placedFurniture=s.placedFurniture.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？谢谢，我正好饿了。');remember('meal','Arday吃了'+dishName,2);}
  }
