@@ -2208,7 +2208,7 @@ function initArday3D(){
      tassel.position.set(gather, .91,.15);group.add(tassel);
     }
     box(0,2.34,-.015,2.5,.035,.045,m.wood);
-   }else if(modelName==='办公椅'){   }else if(modelName==='办公椅'){
+   }else if(modelName==='办公椅'){
     width=.76;depth=.76;height=1.22;
     const mesh=mat(0x30363a,.94),frame=mat(0x555b60,.48,.62),fabric=mat(0x252a2e,.98);
     cyl(0,.39,0,.07,.07,.48,frame,20);cyl(0,.15,0,.11,.11,.08,frame,20);
@@ -2522,7 +2522,7 @@ function initArday3D(){
     const coat=box(.19,1.02,.1,.42,.68,.13,m.fabric);coat.rotation.z=-.08;
     const lapel=box(.19,1.34,.17,.22,.22,.025,m.cream);lapel.rotation.z=-.1;
     const scarf=box(-.2,1.26,.12,.1,.78,.035,mat(0x8a9b91,.96));scarf.rotation.z=.12;
-   }else if(modelName==='凳子'){   }else if(modelName==='凳子'){
+   }else if(modelName==='凳子'){
     width=.62;depth=.62;height=.68;action=()=>openFurnitureActions('chair',id);box(0,.58,0,.62,.12,.62,m.oak);legs(.58,.58,.52,.065);box(0,.31,0,.5,.045,.5,m.wood);
    }else{toast('没有找到这种家具模型：'+name);return null}
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
