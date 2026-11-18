@@ -325,7 +325,8 @@ function buildDay(key){
   const decay=Math.max(0,Number(energyConfig.hourlyDecay)||0);
   const netRecovery=Math.max(.01,recovery-decay);
   const deficit=Math.max(0,100-currentEnergy);
-  const duration=Math.max(1,Math.ceil(deficit/netRecovery));
+  const minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||1),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||12);
+  const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/netRecovery)));
   const bedtime=22,wake=(bedtime+duration)%24;
   plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,plannedAt:Date.now()};
  }
