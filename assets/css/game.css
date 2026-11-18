@@ -1078,3 +1078,15 @@ html body .stage .drawer.profile-expanded.open .choices{
  .kitchen-bottom-bar{align-items:flex-start}
  .kitchen-bottom-bar p{max-width:60%;font-size:10px}
 }
+
+/* Prototype: compact radial action wheel anchored to the selected furniture hotspot. */
+.furniture-wheel{position:absolute;z-index:180;pointer-events:none;width:0;height:0;transform:translate(-50%,-50%);}
+.furniture-wheel-center{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:66px;height:66px;border:1px solid #cbb99f;border-radius:50%;background:rgba(250,246,237,.97);box-shadow:0 5px 18px rgba(54,42,29,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:auto;}
+.furniture-wheel-title{max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#68533d;font:600 11px/1.3 Georgia,"Noto Serif SC",serif;text-align:center;}
+.furniture-wheel-close{width:22px;height:22px;padding:0;border:0;border-radius:50%;background:#e9dfd0;color:#705b44;font-size:17px;line-height:1;}
+.furniture-wheel-action{position:absolute;transform:translate(-50%,-50%);width:58px;height:58px;padding:5px;border:1px solid #cbb99f;border-radius:50%;background:rgba(250,246,237,.97);color:#5e4b37;font:600 11px/1.25 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;box-shadow:0 4px 13px rgba(54,42,29,.2);pointer-events:auto;touch-action:manipulation;}
+.furniture-wheel-action:active{transform:translate(-50%,-50%) scale(.94);background:#e9ddca;}
+.furniture-wheel-action:disabled{opacity:.48;filter:saturate(.45);}
+.furniture-wheel-empty{color:#9a8973;font-size:9px;}
+.furniture-wheel-status{position:absolute;left:50%;top:calc(100% + 37px);transform:translateX(-50%);width:max-content;max-width:220px;padding:6px 9px;border:1px solid #d9c9b4;border-radius:9px;background:rgba(250,246,237,.96);color:#78634d;font-size:10px;line-height:1.4;text-align:center;pointer-events:none;}
+@media(max-width:700px){.furniture-wheel-action{width:56px;height:56px;font-size:10px}.furniture-wheel-center{width:62px;height:62px}}
