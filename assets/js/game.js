@@ -319,16 +319,18 @@ function respondToChat(text){
 
 function buildDay(key){
  const plans=s.sleepPlans||(s.sleepPlans={});
- if(!plans[key]){
-  const currentEnergy=Math.max(0,Math.min(100,Number(s.energy)||0));
-  const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||13);
-  const decay=Math.max(0,Number(energyConfig.hourlyDecay)||0);
+ const currentEnergy=Math.max(0,Math.min(100,Number(s.energy)||0));
+ const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||1);
+ const decay=Math.max(0,Number(energyConfig.hourlyDecay)||0);
+ const minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||1),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||12);
+ const existingPlan=plans[key];
+ const planNeedsRefresh=!existingPlan||Number(existingPlan.recoveryRate)!==recovery||Number(existingPlan.decayRate)!==decay||Number(existingPlan.minimumSleepHours)!==minSleep||Number(existingPlan.maximumSleepHours)!==maxSleep;
+ if(planNeedsRefresh){
   const netRecovery=Math.max(.01,recovery-decay);
   const deficit=Math.max(0,100-currentEnergy);
-  const minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||1),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||12);
   const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/netRecovery)));
   const bedtime=22,wake=(bedtime+duration)%24;
-  plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,plannedAt:Date.now()};
+  plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now()};
  }
  const p=plans[key],previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate);
  const previous=plans[previousKey]||{duration:8,bedtime:22,wake:6};
