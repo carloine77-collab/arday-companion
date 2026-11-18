@@ -1744,7 +1744,7 @@ function initArday3D(){
      box(0,.92,.31,1.78,.16,.13,walnut);for(const x of [-.82,.82]){const roll=soft(x,.78,.18,.18,.12,.48,fabricShade);roll.rotation.z=x<0?-.08:.08}
      width=2.35;depth=1.12;
     }else if(name==='羊毛沙发'||name==='休闲沙发'){
-     const customStart=0;
+     const genericChildren=group.children.slice();for(const child of genericChildren)group.remove(child);
      if(name==='羊毛沙发'){
       width=2.55;depth=1.28;height=.88;
       box(0,.25,0,2.34,.2,.96,walnut);
@@ -1781,7 +1781,6 @@ function initArday3D(){
        leg.position.set(x,.15,z);group.add(leg);
       }
      }
-     for(const child of group.children.slice(customStart))group.remove(child);
     }
     // Fine upholstery finishing: welted cushion edges, panel seams and recessed feet.
     for(const x of [-.62,0,.62]){
