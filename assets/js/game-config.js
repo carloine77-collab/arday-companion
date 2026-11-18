@@ -4,6 +4,8 @@ window.ArdayGameConfig = {
  furnitureCategories:{
   '起居空间':{
    '沙发':[['沙发·亚麻燕麦','▰','buy-furniture-sofa-linen','1180',''],['沙发·雾蓝绒布','▰','buy-furniture-sofa-blue','1480',''],['沙发·复古高背','▰','buy-furniture-sofa','880','']],
+   '电视':[['电视','▣','buy-furniture-television','1680','可观看电视节目，改善娱乐状态']],
+   '唱片机':[['唱片机','♫','buy-furniture-record-player','980','播放唱片，适合安静地听音乐']],
    '餐桌':[['餐桌','▱','buy-furniture-dining-table','680','用餐与日常摆放'],['餐桌·浅橡木长桌','▱','buy-furniture-dining-table-oak','820','']]
   },
   '卧室':{
@@ -48,7 +50,7 @@ window.ArdayGameConfig = {
     maximumSleepHours: 8,
     activityEffects: {
      rest:10, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
-     computerPlay:-3, music:-1, walk:-5, game:-3, write:-3, work:-4,
+     computerPlay:-3, watchTV:-2, listenRecords:-1, music:-1, walk:-5, game:-3, write:-3, work:-4,
      sitChair:5, food:0, bouquet:0, tea:0, company:0
     }
    },
@@ -64,6 +66,8 @@ window.ArdayGameConfig = {
  chat:{title:'聊天',playerSelectable:true,playerIcon:'💬',autonomous:true,autonomy:{need:'friend',threshold:48,weight:.42,base:1},requires:'seat',menuLabel:'聊天',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:3}},
  computerWork:{title:'使用电脑工作',autonomous:false,menuLabel:'电脑工作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:-1}},
  computerPlay:{title:'用电脑玩游戏',playerSelectable:true,playerIcon:'▣',autonomous:true,autonomy:{need:'fun',threshold:54,weight:1.05},requires:'computer',menuLabel:'电脑游戏',location:'desk',pose:'sit',anchor:'desk',effect:{fun:9}},
+ watchTV:{title:'看电视',playerSelectable:true,playerIcon:'▣',autonomous:true,autonomy:{need:'fun',threshold:66,weight:1.05},requires:'television',menuLabel:'看电视',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:14}},
+ listenRecords:{title:'听唱片',playerSelectable:true,playerIcon:'♫',autonomous:true,autonomy:{need:'fun',threshold:62,weight:.95},requires:'recordPlayer',menuLabel:'听唱片',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:12}},
  bouquet:{title:'欣赏花束',autonomous:false,menuLabel:'欣赏花束',location:'center',pose:'wave',anchor:'bouquet',effect:{fun:3}},
  music:{title:'听音乐',autonomous:true,autonomy:{need:'fun',threshold:64,weight:.9},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10}},
  tea:{title:'一起喝茶',autonomous:false,menuLabel:'一起喝茶',location:'table',pose:'sit',anchor:'table',effect:{fun:4,hunger:2}},
@@ -86,6 +90,8 @@ window.ArdayGameConfig = {
  bookshelf:{title:'书架',activities:{read:{anchor:'shelf'}}},
  desk:{title:'书桌',activities:{read:{anchor:'desk'},computerPlay:{anchor:'desk'}}},
  computer:{title:'电脑',activities:{computerPlay:{anchor:'desk'}}},
+ television:{title:'电视',activities:{watchTV:{anchor:'sofa'}}},
+ recordPlayer:{title:'唱片机',activities:{listenRecords:{anchor:'sofa'}}},
  bouquet:{title:'捧花摆件',activities:{bouquet:{anchor:'bouquet'}}}
  },
    recipes: {eggRice:{name:'蛋炒饭',ingredients:{rice:1,egg:1},hunger:30},tomatoEgg:{name:'番茄炒蛋',ingredients:{tomato:1,egg:2},hunger:28},vegetableSoup:{name:'蔬菜汤',ingredients:{vegetable:2},hunger:22}},
