@@ -853,17 +853,18 @@ function openFurnitureActions(kind,furnitureId=null){
  const stage=$('stage'),drawer=$('drawer');
  closeFurnitureActions();
  drawer.classList.remove('open','furniture-drawer','shop-drawer','profile-expanded');
- const targetItem=null; // The furniture registry is scoped inside the 3D scene; resolve the clicked item through its stage hotspot instead.
+ const targetItem=window.ArdayGetFurnitureHotspot?.(furnitureId)?.__furnitureItem||null;
  const room=targetItem?.room||(s.placed||[]).find(item=>String(item.id)===String(furnitureId))?.room||(stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
  const actions=Object.entries(set.activities||{}).filter(([activity,meta])=>activityMeta[activity]&&furnitureRequirementAvailable(activityMeta[activity].requires,room));
  const blockedReason=furnitureInteractionBlockReason();
  const stageRect=stage.getBoundingClientRect();
- const hotspot=Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
+ const hotspot=window.ArdayGetFurnitureHotspot?.(furnitureId)||Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
+ // Hotspots are already projected into stage-local CSS pixels by the Three.js scene.
+ // Read those exact coordinates instead of mixing viewport and stage coordinate spaces.
+ const hotX=hotspot?Number.parseFloat(hotspot.style.left):NaN,hotY=hotspot?Number.parseFloat(hotspot.style.top):NaN;
  const targetRect=hotspot?.getBoundingClientRect();
- // Keep the menu's origin exactly on the clicked furniture hotspot. Only its radius
- // adapts to available room; never clamp the origin toward a screen corner.
- const cx=targetRect?targetRect.left+targetRect.width/2-stageRect.left:stageRect.width/2;
- const cy=targetRect?targetRect.top+targetRect.height/2-stageRect.top:stageRect.height/2;
+ const cx=Number.isFinite(hotX)?hotX:targetRect?targetRect.left+targetRect.width/2-stageRect.left:stageRect.width/2;
+ const cy=Number.isFinite(hotY)?hotY:targetRect?targetRect.top+targetRect.height/2-stageRect.top:stageRect.height/2;
  const edgeSpace=Math.min(cx,stageRect.width-cx,cy,stageRect.height-cy);
  const radius=Math.max(46,Math.min(88,edgeSpace-30,Math.min(stageRect.width,stageRect.height)*.22));
  const wheel=document.createElement('div');wheel.className='furniture-wheel';wheel.setAttribute('role','group');wheel.setAttribute('aria-label',set.title+'互动');
@@ -1484,6 +1485,8 @@ function initArday3D(){
   }
   function resize(){const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
   const furnitureRegistry=[];
+  // Bridge the scene-local registry to the outer interaction-menu module without leaking the array.
+  window.ArdayGetFurnitureHotspot=(id)=>{const item=furnitureRegistry.find(entry=>String(entry.id)===String(id));if(!item?.button)return null;item.button.__furnitureItem=item;return item.button};
   const roomBounds={minX:-5.0,maxX:5.0,minZ:-3.65,maxZ:3.65};
   function wallTransform(group,side,offset,y=0){
    const maxOffset=group.userData?.wallObject&&String(group.userData.furnitureKey||'').includes('window')?4.25:4.5;
