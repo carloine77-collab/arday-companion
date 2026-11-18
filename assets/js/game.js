@@ -2123,17 +2123,29 @@ function initArday3D(){
    }else if(modelName==='电脑'){
     action=()=>openFurnitureActions('computer',id);
     width=.72;depth=.55;height=.72;surfaceType='tabletop';surfaceY=.04;
-    box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);box(0,.245,-.16,.075,.12,.09,m.metal);box(0,.18,-.16,.34,.035,.22,m.metal);
+    // Desktop monitor with a sculpted bezel, webcam, stand, keyboard keycaps and mouse.
+    box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);
+    box(0,.49,-.113,.68,.395,.006,mat(0x718f9b,.34));
+    box(0,.275,-.16,.075,.12,.09,m.metal);box(0,.205,-.16,.34,.035,.22,m.metal);
+    sphere(0,.716,-.113,.018,.018,.012,m.gold);
     box(0,.07,.15,.68,.045,.23,m.dark);box(0,.096,.15,.6,.012,.17,m.cream);
+    for(let row=0;row<4;row++)for(let col=0;col<13;col++){const key=box(-.265+col*.044,.108,.085+row*.043,.032,.012,.028,row===0?m.metal:m.oak);key.position.y=.108+((row+col)%5)*.001}
+    const mouse=sphere(.43,.105,.16,.055,.025,.085,m.dark);mouse.rotation.y=-.18;
     for(const x of [-.43,.43]){box(x,.2,-.14,.085,.22,.12,m.wood);box(x,.2,-.072,.045,.12,.012,m.dark);cyl(x,.2,-.06,.018,.018,.012,m.gold,10)}
     box(0,.74,-.12,.16,.018,.012,m.gold);
    }else if(modelName==='电视'){
     action=()=>openFurnitureActions('television',id);width=1.62;depth=.58;height=1.42;surfaceType='floor';surfaceY=.04;
     box(0,.32,0,1.55,.58,.52,m.wood);box(0,.64,-.015,1.48,.045,.49,m.oak);box(0,.68,-.015,1.42,.025,.45,m.cream);
     for(const x of [-.57,.57])box(x,.075,.12,.09,.15,.1,m.dark);
-    box(0,1.2,-.12,1.48,.92,.095,m.dark);box(0,1.2,-.174,1.39,.82,.012,m.screen);
-    const tvGlow=box(0,1.2,-.181,1.32,.74,.006,mat(0x66899a,.3));tvGlow.material.emissive=new T.Color(0x1d3542);tvGlow.material.emissiveIntensity=.16;
-    box(0,.75,-.12,.12,.16,.09,m.metal);box(0,.66,-.12,.48,.045,.2,m.metal);
+    // Rounded, layered television housing with a recessed glass panel and a separate soundbar.
+    box(0,1.2,-.12,1.48,.92,.095,m.dark);
+    box(0,1.2,-.174,1.405,.845,.018,m.metal);
+    box(0,1.2,-.186,1.375,.815,.012,m.screen);
+    const tvGlow=box(0,1.2,-.194,1.31,.75,.004,mat(0x66899a,.3));tvGlow.material.emissive=new T.Color(0x1d3542);tvGlow.material.emissiveIntensity=.16;
+    for(const x of [-.68,.68]){box(x,1.2,-.197,.012,.78,.008,m.cream)}
+    box(0,.735,-.12,.12,.18,.09,m.metal);box(0,.66,-.12,.48,.045,.2,m.metal);
+    box(0,.78,.32,.72,.075,.11,m.dark);for(let i=0;i<18;i++)box(-.31+i*.036,.78,.379,.012,.026,.006,m.metal);
+    sphere(.66,.77,-.195,.012,.012,.008,m.gold);
    }else if(modelName==='唱片机'){
     action=()=>openFurnitureActions('recordPlayer',id);width=.92;depth=.78;height=.92;surfaceType='floor';surfaceY=.04;
     box(0,.48,0,.88,.2,.72,m.wood);box(0,.59,-.01,.9,.055,.74,m.oak);
@@ -2318,8 +2330,11 @@ function initArday3D(){
     for(const side of [-1,1]){const brace=box(side*.4,.2,0,.045,.06,.5,timber);brace.rotation.z=side*.08}
    }else if(modelName==='花瓶'){
     width=.5;depth=.5;height=.88;surfaceType='tabletop';surfaceY=.04;
-    const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.12,0),new T.Vector2(.2,.08),new T.Vector2(.22,.32),new T.Vector2(.13,.57),new T.Vector2(.09,.7)],24),m.clay);vase.position.y=.08;group.add(vase);
-    for(let i=0;i<5;i++){const a=i*1.25,curve=new T.CatmullRomCurve3([new T.Vector3(0,.72,0),new T.Vector3(Math.cos(a)*.12,.95,Math.sin(a)*.12),new T.Vector3(Math.cos(a)*.22,1.12+(i%2)*.08,Math.sin(a)*.22)]);group.add(new T.Mesh(new T.TubeGeometry(curve,14,.012,6,false),m.leaf));for(let n=0;n<3;n++){const p=curve.getPoint(.45+n*.15);const leaf=sphere(p.x,.02+p.y,p.z,.09,.025,.035,n%2?m.leaf:m.leaf2);leaf.rotation.y=a}}
+    const ceramic=mat(0xc58d70,.3),lip=mat(0xe2bda0,.28),inside=mat(0x805d4b,.82);
+    const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.12,0),new T.Vector2(.16,.06),new T.Vector2(.23,.2),new T.Vector2(.25,.36),new T.Vector2(.19,.52),new T.Vector2(.105,.66),new T.Vector2(.11,.72)],32),ceramic);vase.position.y=.08;group.add(vase);
+    cyl(0,.805,0,.115,.115,.025,lip,32);
+    for(let rib=0;rib<12;rib++){const a=rib*Math.PI*2/12,curve=new T.CatmullRomCurve3([new T.Vector3(Math.cos(a)*.16,.19,Math.sin(a)*.16),new T.Vector3(Math.cos(a)*.23,.39,Math.sin(a)*.23),new T.Vector3(Math.cos(a)*.15,.61,Math.sin(a)*.15)]);group.add(new T.Mesh(new T.TubeGeometry(curve,12,.006,5,false),lip))}
+    for(let i=0;i<5;i++){const a=i*1.25,curve=new T.CatmullRomCurve3([new T.Vector3(0,.76,0),new T.Vector3(Math.cos(a)*.12,.95,Math.sin(a)*.12),new T.Vector3(Math.cos(a)*.22,1.12+(i%2)*.08,Math.sin(a)*.22)]);group.add(new T.Mesh(new T.TubeGeometry(curve,14,.012,6,false),m.leaf));for(let n=0;n<3;n++){const p=curve.getPoint(.45+n*.15);const leaf=sphere(p.x,p.y,p.z,.09,.025,.035,n%2?m.leaf:m.leaf2);leaf.rotation.y=a}}
    }else if(modelName==='挂钟'){
     width=.58;depth=.16;height=.68;wallAxis='x';wallSide='back';anchor=[0,2.0];
     const clockBody=cyl(0,0,.02,.29,.29,.07,m.wood,40);clockBody.rotation.x=Math.PI/2;const clockFace=cyl(0,0,.07,.245,.245,.018,m.cream,40);clockFace.rotation.x=Math.PI/2;
