@@ -1442,7 +1442,9 @@ function initArday3D(){
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode');
    if(mode==='kitchen')stage.classList.add('kitchen-mode');
    if(mode==='bedroom')stage.classList.add('bedroom-mode');
-   $('drawer').classList.remove('open','profile-expanded');
+   closeFurnitureActions();
+   $('drawer').classList.remove('open','profile-expanded','furniture-drawer');
+   $('drawer').querySelector('.furniture-close')?.remove();
    document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
    updateArday3D();
   }
