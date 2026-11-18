@@ -1113,9 +1113,9 @@ function initArday3D(){
    }
    return true;
   }
-  function registerFurniture({id,name,room,group,width,depth,anchor=[0,0],action,wallAxis=null,wallSide=null,wallRange=4.5}){
+  function registerFurniture({id,name,room,group,width,depth,anchor=[0,0],action,wallAxis=null,wallSide=null,wallRange=4.5,record=null}){
    group.userData.furnitureKey=id;group.userData.roomKey=room;
-   const saved=arguments[0]?.record||s.placedFurniture?.find(item=>item.id===id)||s.furnitureLayout?.[room]?.[id];
+   const saved=record||s.placedFurniture?.find(item=>item.id===id)||s.furnitureLayout?.[room]?.[id];
    if(wallAxis){
     const side=saved?.wallSide||wallSide||(wallAxis==='x'?'back':'right');
     const offset=saved?.offset??saved?.position??(side==='back'||side==='front'?(saved?.x??group.position.x):(saved?.z??group.position.z));
@@ -1372,7 +1372,7 @@ function initArday3D(){
    if(!wallAxis&&surfaceType==='floor'&&modelName!=='地毯'&&modelName!=='卧室地毯'){const shadowCanvas=document.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=128;const cx=shadowCanvas.getContext('2d'),gradient=cx.createRadialGradient(64,64,8,64,64,62);gradient.addColorStop(0,'rgba(34,27,22,0.22)');gradient.addColorStop(.55,'rgba(34,27,22,0.1)');gradient.addColorStop(1,'rgba(34,27,22,0)');cx.fillStyle=gradient;cx.fillRect(0,0,128,128);const shadowTexture=new T.CanvasTexture(shadowCanvas);const contact=new T.Mesh(new T.PlaneGeometry(width*1.16,depth*1.16),new T.MeshBasicMaterial({map:shadowTexture,transparent:true,depthWrite:false,toneMapped:false}));contact.rotation.x=-Math.PI/2;contact.position.y=.012;contact.renderOrder=0;contact.userData.furnitureContactShadow=true;group.add(contact)}
    if(modelName==='台灯'||modelName==='壁灯'||modelName==='吊灯'){const isCeiling=modelName==='吊灯',lampPoint=new T.PointLight(0xffd39a,isCeiling?3.2:1.35,isCeiling?9.5:5.5,1.7);lampPoint.position.set(0,isCeiling?-.56:modelName==='台灯'?.72:-.02,isCeiling?0:modelName==='壁灯'?.24:0);lampPoint.castShadow=false;group.add(lampPoint);practicalLights.push({light:lampPoint,base:lampPoint.intensity});const bulb=new T.Mesh(new T.SphereGeometry(isCeiling?.105:.075,16,12),new T.MeshBasicMaterial({color:0xffe4b5,toneMapped:false}));bulb.position.copy(lampPoint.position);group.add(bulb);group.userData.lampLight=lampPoint}
    group.position.set(x,y,z);group.rotation.y=rotation;
-   const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action,wallAxis,wallSide,wallRange:4.5});
+   const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action,wallAxis,wallSide,wallRange:4.5,record});
    item.owned=true;item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    item.dyeMaterials=[];group.traverse(object=>{if(object.isMesh&&object.material){const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(material=>{if(material?.map===fabricMap&&!item.dyeMaterials.includes(material))item.dyeMaterials.push(material)})}});
    if(record?.dyeColor)item.dyeMaterials.forEach(material=>material.color.setHex(record.dyeColor));item.dyeColor=record?.dyeColor||null;
