@@ -25,6 +25,11 @@
   if(poly.some(([px,pz])=>px<bounds.minX||px>bounds.maxX||pz<bounds.minZ||pz>bounds.maxZ))return false;
   for(const other of registry){
    if(other===item||other.room!==item.room||other.wallAxis)continue;
+   // A tabletop object is elevated above floor furniture. 2D footprint overlap
+   // with chair legs, cabinet bases, or the table apron is not a collision.
+   // Only other objects resting on a tabletop compete for the same surface area.
+   if(item.surfaceType==='tabletop'&&other.surfaceType!=='tabletop')continue;
+   if(other.surfaceType==='tabletop'&&item.surfaceType!=='tabletop')continue;
    // Rugs are decorative floor coverings, not physical obstacles or support platforms.
    if(item.surfaceType==='rug'||other.surfaceType==='rug')continue;
    if(item.supportId===other.id||other.supportId===item.id)continue;
