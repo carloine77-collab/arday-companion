@@ -363,7 +363,7 @@ function renderCalendar(){
 }
 function renderProfile(){
  const esc=x=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- const traits=['洞察人心','从容不羁','疏离矜贵','聪敏自持'];
+ const traits=characterStats.personalityTraits||['洞察人心','从容不羁','疏离矜贵','聪敏自持'];
  $('drawerTitle').textContent='人物档案';
  $('drawer').classList.add('profile-expanded');
  $('choices').innerHTML='<div class="dossier-hero"><div class="dossier-monogram">A</div><div class="dossier-name"><span>CHARACTER FILE</span><h2>Arday <i>·</i> 阿尔</h2></div></div>'+
@@ -625,11 +625,11 @@ function hasAutonomyFurniture(requirement){
 function chooseAutonomousActivity(){
  const recent=(s.activityLog||[]).slice(-5).map(item=>item.activity);
  const temperament=typeof ardayTemperament==='function'?ardayTemperament():{composed:.6,indirect:.4};
- const description=(typeof s.personality==='string'?s.personality:(s.personality?.description||'')).toLowerCase();
+ const description=(typeof s.personality==='string'?s.personality:(s.personality?.description||characterStats.personalityTraits?.join(' ')||'')).toLowerCase();
  const candidates=Object.entries(activityMeta).filter(([id,meta])=>meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires)).map(([id,meta])=>{
   const spec=meta.autonomy,level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
   let personality=0;
-  if(/好奇|求知|敏锐|聪明|善于思考|理性/.test(description)&&['read','write'].includes(id))personality+=5;
+  if(/好奇|求知|敏锐|聪明|洞察|聪敏|善于思考|理性/.test(description)&&['read','write'].includes(id))personality+=5;
   if(/安静|内向|独处|疏离/.test(description)&&['read','music','rest'].includes(id))personality+=4;
   if(/活泼|外向|热情|健谈/.test(description)&&['chat','walk'].includes(id))personality+=4;
   if(/自律|认真|勤奋|专注/.test(description)&&id==='write')personality+=4;
@@ -774,7 +774,7 @@ s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
 s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
 
 function ardayTemperament(){
- const d=(typeof s.personality==='string'?s.personality:(s.personality?.description||'')).toLowerCase();
+ const d=(typeof s.personality==='string'?s.personality:(s.personality?.description||characterStats.personalityTraits?.join(' ')||'')).toLowerCase();
  const hasWord=re=>re.test(d);
  return {
   composed:hasWord(/从容|游刃有余|淡定|镇定|轻松|不慌/)||!d?0.78:0.58,
