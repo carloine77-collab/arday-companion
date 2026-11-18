@@ -853,12 +853,12 @@ function openFurnitureActions(kind,furnitureId=null){
  const stage=$('stage'),drawer=$('drawer');
  closeFurnitureActions();
  drawer.classList.remove('open','furniture-drawer','shop-drawer','profile-expanded');
- const targetItem=arday3D?.getFurnitureById?.(furnitureId)||null;
+ const targetItem=null; // The furniture registry is scoped inside the 3D scene; resolve the clicked item through its stage hotspot instead.
  const room=targetItem?.room||(s.placed||[]).find(item=>String(item.id)===String(furnitureId))?.room||(stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
  const actions=Object.entries(set.activities||{}).filter(([activity,meta])=>activityMeta[activity]&&furnitureRequirementAvailable(activityMeta[activity].requires,room));
  const blockedReason=furnitureInteractionBlockReason();
  const stageRect=stage.getBoundingClientRect();
- const hotspot=targetItem?.button||Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
+ const hotspot=Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
  const targetRect=hotspot?.getBoundingClientRect();
  // Keep the menu's origin exactly on the clicked furniture hotspot. Only its radius
  // adapts to available room; never clamp the origin toward a screen corner.
