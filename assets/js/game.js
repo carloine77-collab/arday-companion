@@ -2917,7 +2917,7 @@ function initArday3D(){
    if(record?.dyeColor)item.dyeMaterials.forEach(material=>material.color.setHex(record.dyeColor));item.dyeColor=record?.dyeColor||null;
    if(restoring){
     if(wallAxis){const side=record.wallSide||wallSide||'back',offset=record.wallOffset??(side==='back'||side==='front'?(record.x??x):(record.z??z));wallTransform(group,side,offset,modelName==='吊柜'?y:(record.y??y));item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z';item.wallAnchorY=(anchor?.[1]??2.55)-group.position.y}
-    else{const legacyRugSupport=record.supportId&&s.placed?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0}
+    else{const legacyRugSupport=record.supportId&&s.placed?.some(it=>it.id===record.supportId&&it.name?.startsWith('地毯'));if(legacyRugSupport)item.supportId=null;group.position.set(record.x??x,legacyRugSupport?0:(record.y??y),record.z??z);group.rotation.y=record.rotation||0;if(Number.isFinite(Number(record.scale))&&Number(record.scale)>0){item.footprintScale=Number(record.scale);group.scale.setScalar(item.footprintScale);width*=item.footprintScale;depth*=item.footprintScale;item.width=width;item.depth=depth}}
    }
    else{
     const supports=surfaceType==='tabletop'||['电脑','捧花摆件'].includes(modelName)?furnitureRegistry.filter(it=>it.room===room&&it.surfaceType==='table').sort((a,b)=>b.width*b.depth-a.width*a.depth):[];
@@ -2954,6 +2954,17 @@ function initArday3D(){
        placed=true;break;
       }
       if(placed)break;
+     }
+     // If every normal slot was rejected because a particular side table or
+     // cabinet has a narrower top than the plate, fit the dish to the largest
+     // available support instead of silently falling through to the floor.
+     if(!placed&&supports.length){
+      const best=supports.slice().sort((a,b)=>b.width*b.depth-a.width*a.depth)[0];
+      const fit=Math.min(1,(best.width-.06)/item.width,(best.depth-.06)/item.depth);
+      if(Number.isFinite(fit)&&fit>0){
+       const scale=Math.max(.5,fit);group.scale.setScalar(scale);item.width*=scale;item.depth*=scale;item.footprintScale=scale;
+       item.supportId=best.id;group.position.set(best.group.position.x,best.group.position.y+best.surfaceY+.015,best.group.position.z);group.rotation.y=best.group.rotation.y;placed=true;
+      }
      }
     }else{
      if(surfaceType==='tabletop'){item.supportId=null;group.position.y=0}
@@ -3043,7 +3054,7 @@ function initArday3D(){
    s.placed=s.placed||[];
    let saved=s.placed.find(x=>x.id===item.id);
    if(!saved){saved={id:item.id,name:item.name,room:item.room,kind:item.kind||(item.owned?'furniture':'scene'),itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():''};s.placed.push(saved)}
-   Object.assign(saved,{name:item.name,room:item.room,itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null});
+   Object.assign(saved,{name:item.name,room:item.room,itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,scale:item.footprintScale||1,supportId:item.supportId||null});
    if(item.dyeColor)saved.dyeColor=item.dyeColor;
    if(typeof item.lightOn==='boolean')saved.lightOn=item.lightOn;
    renderer.shadowMap.needsUpdate=true;
