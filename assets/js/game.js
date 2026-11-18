@@ -421,7 +421,6 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 
 
 
-const playerActivityOptions=Object.entries(activityMeta).filter(([,meta])=>meta.playerSelectable).map(([activity,meta])=>({activity,icon:meta.playerIcon||'•'}));
 function scheduleSlotAvailable(key,start,duration=1){
  const day=s.calendar.days[key]||[];
  for(let h=start;h<start+duration;h++){
