@@ -520,24 +520,20 @@ function ensureScheduleAt(value){
  
  
  
- if(s.calendar.anchor!==currentKey){
+ if(s.calendar.anchor!==currentKey&&requestedKey>=currentKey){
   s.calendar.anchor=currentKey;
   Object.keys(s.calendar.days).forEach(k=>{if(k<currentKey)delete s.calendar.days[k]});
   Object.keys(s.sleepPlans||{}).forEach(k=>{if(k<currentKey)delete s.sleepPlans[k]});
   addEvent('新的一天','阿尔已经开始安排新一天的生活。','daily');
  }
  const ensureDay=key=>{
-  const existing=s.calendar.days[key],previousPlan=s.sleepPlans?.[key];
-  const generated=(!existing||previousPlan!==s.sleepPlans?.[key])?buildDay(key):null;
-  if(!existing)s.calendar.days[key]=generated;
-  else if(generated){
-   const preserved=existing.filter(ev=>ev.activity!=='sleep');
-   s.calendar.days[key]=[...preserved,...generated.filter(ev=>ev.activity==='sleep')].sort((a,b)=>a.start-b.start);
-  }
-  const day=s.calendar.days[key],recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity)];
+  const existing=s.calendar.days[key];
+  if(!existing)s.calendar.days[key]=buildDay(key);
+  const day=s.calendar.days[key];
   for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end)){
+   const preceding=day.filter(ev=>ev.end<=hour).sort((a,b)=>a.start-b.start).slice(-5).map(ev=>ev.activity).filter(Boolean);
+   const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity),...preceding].slice(-5);
    const planned=createAutonomousScheduleEvent(hour,recent);day.push(planned);
-   if(planned.activity!=='idle'){recent.push(planned.activity);if(recent.length>5)recent.shift()}
   }
   day.sort((a,b)=>a.start-b.start);
  };
@@ -714,9 +710,9 @@ function hasAutonomyFurniture(requirement,room=null){
  if(requirement==='recordPlayer')return names.some(name=>name==='唱片机');
  if(requirement==='bouquet')return names.some(name=>name==='捧花摆件');
  if(requirement==='bookshelf')return names.some(name=>name.includes('书架'));
- if(requirement==='readingSpot')return names.some(name=>/书架|书桌/.test(name));
+ if(requirement==='readingSpot')return names.some(name=>/书架|书桌|床/.test(name));
  if(requirement==='sink')return names.some(name=>name.includes('水槽'));
- if(requirement==='seat')return names.some(name=>/沙发|椅子|阅读椅|床/.test(name));
+ if(requirement==='seat')return names.some(name=>/沙发|椅子|餐椅|办公椅|凳子|床/.test(name));
  return true;
 }
 function furnitureKindForPlaced(item){
@@ -727,7 +723,7 @@ function furnitureKindForPlaced(item){
  if(/灶台/.test(name))return 'stove';
  if(/水槽/.test(name))return 'sink';
  if(/^床|上床下桌/.test(name))return 'bed';
- if(/椅子|阅读椅|餐椅|凳子/.test(name))return 'chair';
+ if(/椅子|阅读椅|餐椅|办公椅|凳子/.test(name))return 'chair';
  if(/书架|书柜/.test(name))return 'bookshelf';
  if(/书桌/.test(name))return 'desk';
  if(/^电脑/.test(name))return 'computer';
@@ -780,12 +776,26 @@ function chooseAutonomousActivity(recentOverride=null){
 function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'idle'}
 // Resolve every hour through the calendar. Autonomous choice fills only an unassigned slot;
 // fixed routines and player proposals already exist as calendar events and take precedence.
+function scheduledFurnitureIsValid(ev){
+ if(!ev?.furnitureId)return ev?.activity==='idle';
+ const item=(s.placed||[]).find(entry=>String(entry.id)===String(ev.furnitureId));
+ if(!item)return false;
+ const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],meta=activityMeta[normalizeActivity(ev.activity)];
+ return !!set?.activities?.[normalizeActivity(ev.activity)]&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room);
+}
 function resolveScheduledActivity(key,hour){
  let ev=eventAt(key,hour);
- if(!ev||ev.activity==='autonomous'||normalizeActivity(ev.activity)==='idle'){
-  const choice=chooseAutonomousActivity(),activity=choice.activity,meta=activityMeta[activity]||{title:'自己的时间'};
-  if(ev){ev.title=meta.menuLabel||meta.title;ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'simulation';ev.unresolved=false;ev.resolvedAt=Date.now();ev.room=choice.room;ev.anchor=choice.anchor;ev.furnitureId=choice.furnitureId;ev.furnitureKind=choice.furnitureKind}
-  else{writeBlockForKey(key,hour,hour+1,{title:meta.menuLabel||meta.title,kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind});ev=eventAt(key,hour)}
+ const needsChoice=!ev||ev.activity==='autonomous'||normalizeActivity(ev.activity)==='idle';
+ const stalePlan=ev?.kind==='autonomous'&&!needsChoice&&!scheduledFurnitureIsValid(ev);
+ if(needsChoice||stalePlan){
+  let choice;
+  if(stalePlan){
+   const alternatives=autonomousFurnitureOptions().filter(option=>option.activity===normalizeActivity(ev.activity));
+   choice=alternatives.length?alternatives[Math.floor(Math.random()*alternatives.length)]:chooseAutonomousActivity();
+  }else choice=chooseAutonomousActivity();
+  const activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
+  if(ev){ev.title=activity==='idle'?'自由时间':(meta.menuLabel||meta.title);ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'day-ahead';ev.unresolved=false;ev.resolvedAt=Date.now();ev.room=choice.room;ev.anchor=choice.anchor;ev.furnitureId=choice.furnitureId;ev.furnitureKind=choice.furnitureKind;if(stalePlan)ev.replannedAt=Date.now()}
+  else{writeBlockForKey(key,hour,hour+1,{title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind});ev=eventAt(key,hour)}
   if($('stage').classList.contains('calendar-mode'))renderCalendar();
  }
  return {event:ev,activity:normalizeActivity(ev?.activity||'idle')};
@@ -844,7 +854,7 @@ function activityLabel(activity){
 }
 function furnitureRequirementAvailable(requirement,room){
  if(!requirement)return true;
- const patterns={desk:/书桌/,computer:/电脑/,television:/^电视$/,recordPlayer:/^唱片机$/,bookshelf:/书架/,readingSpot:/书架|书桌/,sink:/水槽/,seat:/沙发|椅子|阅读椅|床/,bouquet:/^捧花摆件$/};
+ const patterns={desk:/书桌/,computer:/电脑/,television:/^电视$/,recordPlayer:/^唱片机$/,bookshelf:/书架/,readingSpot:/书架|书桌|床/,sink:/水槽/,seat:/沙发|椅子|餐椅|办公椅|凳子|床/,bouquet:/^捧花摆件$/};
  const pattern=patterns[requirement];if(!pattern)return true;
  return (s.placed||[]).some(item=>item&&item.room===room&&pattern.test(item.name||''));
 }
