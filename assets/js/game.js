@@ -114,14 +114,14 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 
 
-const tabs={'互动':Object.entries(activityMeta).filter(([,meta])=>meta.playerSelectable).map(([activity,meta])=>[meta.menuLabel||meta.title,meta.playerIcon||'•',activity]),'物品':[],'商店':[]};
+const tabs={'物品':[],'商店':[]};
 
 let shopCategory='食物食材';let shopBookType='菜谱';
 let inventoryCategory='全部';
 let inventoryGrid=null;
 let shopFurnitureGroup='坐卧类';
 let shopFurnitureType='沙发';
-const furnitureNameById={'buy-furniture-television':'电视','buy-furniture-record-player':'唱片机','buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-floor-lamp-paper':'落地灯·纸罩','buy-floor-lamp-arc':'落地灯·黄铜弧形','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽','buy-furniture-sofa-sage':'沙发·鼠尾草绿','buy-furniture-sofa-wool':'沙发·暖灰羊毛','buy-furniture-coffee-table-walnut':'茶几·胡桃木抽屉','buy-furniture-coffee-table-round':'茶几·圆形浅橡木','buy-furniture-coffee-table-stone':'茶几·米白石材','buy-furniture-side-table-brass':'边桌·黄铜圆桌','buy-furniture-side-table-walnut':'边桌·深木方桌','buy-furniture-tv-console-oak':'电视柜·浅橡木','buy-bedroom-bed-cream':'床·奶油软包','buy-bedroom-nightstand-rattan':'床头柜·藤编抽屉','buy-furniture-dresser-walnut':'斗柜·胡桃木四抽','buy-furniture-dresser-cream':'斗柜·奶油三抽','buy-furniture-vanity':'梳妆台·复古木质','buy-furniture-full-mirror':'全身镜·黄铜拱形','buy-furniture-desk-ash':'书桌·白蜡木极简','buy-furniture-desk-walnut':'书桌·深胡桃木复古','buy-furniture-bookshelf-ash':'书架·白蜡木开放格','buy-furniture-bookshelf-walnut':'书架·深胡桃木书柜','buy-furniture-reading-chair':'阅读椅·奶油弧背','buy-furniture-office-chair':'办公椅·黑色网布','buy-furniture-sideboard-oak':'餐边柜·浅橡木','buy-furniture-lamp-amber':'台灯·琥珀玻璃','buy-furniture-floor-lamp-tripod':'落地灯·黑色三脚','buy-furniture-pendant-rattan':'吊灯·藤编圆罩','buy-furniture-vase-terracotta':'花瓶·陶土枝叶','buy-furniture-wall-clock':'挂钟·胡桃木圆钟','buy-furniture-curtain-linen':'窗帘·亚麻白','buy-furniture-rug-ivory':'地毯·羊毛米白'};
+const furnitureNameById={'buy-furniture-television':'电视','buy-furniture-record-player':'唱片机','buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-floor-lamp-paper':'落地灯·纸罩','buy-floor-lamp-arc':'落地灯·黄铜弧形','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽','buy-furniture-sofa-sage':'沙发·鼠尾草绿','buy-furniture-sofa-wool':'沙发·暖灰羊毛','buy-furniture-coffee-table-walnut':'茶几·胡桃木抽屉','buy-furniture-coffee-table-round':'茶几·圆形浅橡木','buy-furniture-coffee-table-stone':'茶几·米白石材','buy-furniture-side-table-brass':'边桌·黄铜圆桌','buy-furniture-side-table-walnut':'边桌·深木方桌','buy-furniture-tv-console-oak':'电视柜·浅橡木','buy-bedroom-bed-cream':'床·奶油软包','buy-bedroom-nightstand-rattan':'床头柜·藤编抽屉','buy-furniture-dresser-walnut':'斗柜·胡桃木四抽','buy-furniture-dresser-cream':'斗柜·奶油三抽','buy-furniture-vanity':'梳妆台·复古木质','buy-furniture-full-mirror':'全身镜·黄铜拱形','buy-furniture-desk-ash':'书桌·白蜡木极简','buy-furniture-desk-walnut':'书桌·深胡桃木复古','buy-furniture-bookshelf-ash':'书架·白蜡木开放格','buy-furniture-bookshelf-walnut':'书架·深胡桃木书柜','buy-furniture-reading-chair':'阅读椅·奶油弧背','buy-furniture-office-chair':'办公椅·黑色网布','buy-furniture-sideboard-oak':'餐边柜·浅橡木','buy-furniture-lamp-amber':'台灯·琥珀玻璃','buy-furniture-floor-lamp-tripod':'落地灯·黑色三脚','buy-furniture-pendant-rattan':'吊灯·藤编圆罩','buy-furniture-vase-terracotta':'花瓶·陶土枝叶','buy-furniture-wall-clock':'挂钟·胡桃木圆钟','buy-furniture-curtain-linen':'窗帘·亚麻白','buy-furniture-rug-ivory':'地毯·羊毛米白','buy-furniture-catalog-045':'默认窗户','buy-furniture-catalog-023':'默认室内木门'};
 Object.entries(shopCatalog.furnitureCategories||{}).forEach(([,types])=>Object.values(types||{}).forEach(items=>(items||[]).forEach(([label,,id])=>{if(id&&id.startsWith('buy-furniture-'))furnitureNameById[id]=label})));
 
 function addInventoryItem(name,kind='food',id=null){const parts=name.split('·'),entity={id:id||('inv-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)),name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''};s.inventory.push(entity);return entity}
@@ -193,7 +193,7 @@ function openTab(name,force=false){
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
  const tabEntries=name==='商店'?(shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(shopCatalog.bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
- if(name==='互动'){$('choices').className='choices interaction-view';const hero=document.createElement('section');hero.className='interaction-masthead';hero.innerHTML='<div class="interaction-overline">A COMPANION JOURNAL <span>VOL. 01 / DAILY LIFE</span></div><div class="interaction-bigtitle">THE LITTLE<br><i>THINGS</i></div><div class="interaction-subtitle"></div><div class="interaction-asterisk"></div>'; $('choices').appendChild(hero);}
+ 
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
@@ -296,14 +296,8 @@ function slotClick(di,h){
   $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
- $('drawerTitle').textContent='提出安排 · '+dayLabel(d)+' '+pad(h)+':00';
- $('choices').innerHTML='<div class="calendar-note">邀请阿尔留出一小时。不同活动会受到他的状态、偏好和关系经历影响。</div><div class="choices">'+playerActivityOptions.map((x,i)=>'<button class="choice" data-p="'+i+'"><span class="emoji">'+x.icon+'</span>'+activityLabel(x.activity)+'</button>').join('')+'</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
- $('choices').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
-  const option=playerActivityOptions[Number(b.dataset.p)];
-  const accepted=proposeActivityNow(option.activity,false,{slot:{key,start:h},dayOffset:di,source:'calendar'});
-  $('drawer').classList.remove('open');
-  toast(accepted?'阿尔接受了邀请':'这次安排没有被接受');
- });
+ $('drawerTitle').textContent='自主安排 · '+dayLabel(d)+' '+pad(h)+':00';
+ $('choices').innerHTML='<div class="calendar-note">这一时段由阿尔根据自己的状态和房间里的家具，自主决定活动。</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
  $('return-empty').onclick=()=>$('drawer').classList.remove('open');
 }
 
@@ -717,8 +711,8 @@ function beginImmediateInteraction(action,options={}){
 function presentActivity(activity,anchor=null,room=null,furnitureId=null){
  const a=normalizeActivity(activity);if(!activityMeta[a])return;updateArday3D(a,anchor,room,furnitureId);
 }
-function hasAutonomyFurniture(requirement){
- const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string').map(item=>item.name);
+function hasAutonomyFurniture(requirement,room=null){
+ const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string'&&(!room||item.room===room)).map(item=>item.name);
  if(requirement==='desk')return names.some(name=>name.includes('书桌'));
  if(requirement==='computer')return names.some(name=>name.includes('电脑'));
  if(requirement==='television')return names.some(name=>name==='电视');
@@ -730,11 +724,42 @@ function hasAutonomyFurniture(requirement){
  if(requirement==='seat')return names.some(name=>/沙发|椅子|床/.test(name));
  return true;
 }
+function furnitureKindForPlaced(item){
+ const name=String(item?.name||'');
+ if(/沙发|躺椅|懒人沙发|沙发床/.test(name))return 'sofa';
+ if(/餐桌/.test(name))return 'dining';
+ if(/^冰箱/.test(name))return 'fridge';
+ if(/灶台/.test(name))return 'stove';
+ if(/水槽/.test(name))return 'sink';
+ if(/^床|上床下桌|榻榻米/.test(name))return 'bed';
+ if(/椅子|餐椅|凳子/.test(name))return 'chair';
+ if(/书架|书柜/.test(name))return 'bookshelf';
+ if(/书桌/.test(name))return 'desk';
+ if(/^电脑/.test(name))return 'computer';
+ if(/^电视/.test(name))return 'television';
+ if(/唱片机/.test(name))return 'recordPlayer';
+ return null;
+}
+function autonomousFurnitureOptions(){
+ const options=[];
+ for(const item of (s.placed||[])){
+  if(!item||!['living','bedroom','kitchen'].includes(item.room))continue;
+  const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind];
+  if(!set?.activities)continue;
+  for(const [activity,context] of Object.entries(set.activities)){
+   const meta=activityMeta[activity];
+   if(!meta?.autonomous||!meta.autonomy||activity==='eat')continue;
+   if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
+   options.push({activity,meta,room:item.room,anchor:context?.anchor||meta.anchor||'default',furnitureId:item.id,furnitureKind:kind});
+  }
+ }
+ return options;
+}
 function chooseAutonomousActivity(){
  const recent=(s.activityLog||[]).slice(-5).map(item=>item.activity);
  const temperament=typeof ardayTemperament==='function'?ardayTemperament():{composed:.6,indirect:.4};
  const description=(typeof s.personality==='string'?s.personality:(s.personality?.description||characterStats.personalityTraits?.join(' ')||'')).toLowerCase();
- const candidates=Object.entries(activityMeta).filter(([id,meta])=>meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires)).map(([id,meta])=>{
+ const candidates=autonomousFurnitureOptions().filter(option=>{const {activity:id,meta}=option;return meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires,option.room)}).map(option=>{const {activity:id,meta}=option;
   const spec=meta.autonomy,level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
   let personality=0;
   if(/好奇|求知|敏锐|聪明|洞察|聪敏|善于思考|理性/.test(description)&&['read','write'].includes(id))personality+=5;
@@ -747,15 +772,15 @@ function chooseAutonomousActivity(){
   const repeatPenalty=recent.filter(x=>x===id).length*3.2;
   const preference=(Number(s.preferences?.[id==='read'?'reading':id==='write'?'writing':id])||0)*1.8;
   const temperamentBias=id==='rest'?(1-temperament.composed)*1.5:0;
-  return {activity:id,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
+  return {...option,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
  }).filter(item=>Number.isFinite(item.score)&&item.score>=0);
- if(!candidates.length)return 'walk';
+ if(!candidates.length)return {activity:'walk',room:'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
  const weighted=candidates.map(item=>({...item,weight:Math.max(.15,item.score-max+5)}));
  const total=weighted.reduce((sum,item)=>sum+item.weight,0);
  let roll=Math.random()*total;
- for(const item of weighted){roll-=item.weight;if(roll<=0)return item.activity}
- return weighted[weighted.length-1].activity;
+ for(const item of weighted){roll-=item.weight;if(roll<=0)return item}
+ return weighted[weighted.length-1];
 }
 function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'idle'}
 // Resolve every hour through the calendar. Autonomous choice fills only an unassigned slot;
@@ -763,9 +788,9 @@ function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'i
 function resolveScheduledActivity(key,hour){
  let ev=eventAt(key,hour);
  if(!ev||ev.activity==='autonomous'||normalizeActivity(ev.activity)==='idle'){
-  const activity=chooseAutonomousActivity(),meta=activityMeta[activity]||{title:'自己的时间'};
-  if(ev){ev.title=meta.menuLabel||meta.title;ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'simulation';ev.unresolved=false;ev.resolvedAt=Date.now()}
-  else{writeBlockForKey(key,hour,hour+1,{title:meta.menuLabel||meta.title,kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now()});ev=eventAt(key,hour)}
+  const choice=chooseAutonomousActivity(),activity=choice.activity,meta=activityMeta[activity]||{title:'自己的时间'};
+  if(ev){ev.title=meta.menuLabel||meta.title;ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'simulation';ev.unresolved=false;ev.resolvedAt=Date.now();ev.room=choice.room;ev.anchor=choice.anchor;ev.furnitureId=choice.furnitureId;ev.furnitureKind=choice.furnitureKind}
+  else{writeBlockForKey(key,hour,hour+1,{title:meta.menuLabel||meta.title,kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind});ev=eventAt(key,hour)}
   if($('stage').classList.contains('calendar-mode'))renderCalendar();
  }
  return {event:ev,activity:normalizeActivity(ev?.activity||'idle')};
@@ -808,7 +833,7 @@ function processActivityAt(value){
  if(workCompleted)updatePersonalGoal('work',d.getTime());
 
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;s.currentActivityAnchor=ev?.anchor||meta?.anchor||null;
- if(!s.activeInteraction)presentActivity(activity);
+ if(!s.activeInteraction)presentActivity(activity,ev?.anchor||meta?.anchor||null,ev?.room||null,ev?.furnitureId||null);
  s.lastProcessedSessionKey=sessionId;
  s.activityLog=s.activityLog||[];
  s.activityLog.push({activity,key,hour,at:d.getTime(),withPlayer:!!ev?.withPlayer});
@@ -1556,7 +1581,7 @@ function initArday3D(){
    registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
    registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')})
   ];
-  const furnitureModelAliases={"开放书架":{"model":"书架","variant":"开放格架"},"坐垫":{"model":"坐垫","variant":""},"雾面墙纸":{"model":"墙纸","variant":"雾面"},"极简书桌":{"model":"书桌","variant":"白蜡木极简"},"屏风":{"model":"隔断","variant":""},"陶瓷灶":{"model":"灶台","variant":"奶油陶瓷"},"锥形吊灯":{"model":"吊灯","variant":"锥形金属"},"复古沙发":{"model":"沙发","variant":"经典款"},"床头柜":{"model":"床头柜","variant":""},"陶土花瓶":{"model":"花瓶","variant":""},"伞架":{"model":"伞架","variant":""},"三抽斗柜":{"model":"斗柜","variant":"奶油三抽"},"木格书架":{"model":"书架","variant":"白蜡木开放格"},"吊柜":{"model":"吊柜","variant":""},"展示柜":{"model":"展示柜","variant":""},"躺椅":{"model":"躺椅","variant":""},"布艺床":{"model":"床","variant":""},"海报":{"model":"海报","variant":""},"深海墙纸":{"model":"墙纸","variant":"深海"},"棕榈树":{"model":"棕榈树绿植","variant":""},"水磨地板":{"model":"地板","variant":"水磨"},"蘑菇台灯":{"model":"台灯","variant":"蘑菇"},"门":{"model":"门","variant":""},"懒人沙发":{"model":"懒人沙发","variant":""},"纸罩灯":{"model":"落地灯","variant":"纸罩"},"鞋柜":{"model":"鞋柜","variant":""},"梳妆台":{"model":"梳妆台","variant":""},"电视柜":{"model":"电视柜","variant":""},"玻璃书柜":{"model":"书架","variant":"玻璃门书柜"},"沙发床":{"model":"沙发床","variant":""},"榻榻米":{"model":"榻榻米","variant":""},"软包床":{"model":"床","variant":"奶油软包"},"复古书桌":{"model":"书桌","variant":"深胡桃木复古"},"哑铃架":{"model":"哑铃架","variant":""},"石材茶几":{"model":"茶几","variant":"米白石材"},"珐琅灶":{"model":"灶台","variant":"复古珐琅"},"壁画":{"model":"壁画","variant":""},"长餐桌":{"model":"餐桌","variant":"浅橡木长桌"},"几何地毯":{"model":"地毯","variant":"海盐蓝"},"水泥地板":{"model":"地板","variant":"水泥"},"抽屉书桌":{"model":"书桌","variant":"抽屉工作台"},"双臂壁灯":{"model":"壁灯","variant":"黄铜双臂"},"方形边桌":{"model":"边桌","variant":"深木方桌"},"木框床":{"model":"床","variant":"浅橡木框架"},"窗":{"model":"窗","variant":""},"圆形茶几":{"model":"茶几","variant":"圆形浅橡木"},"折线台灯":{"model":"台灯","variant":"陶瓷折线"},"卧室地毯":{"model":"地毯","variant":"羊毛米白"},"上床下桌":{"model":"上床下桌","variant":""},"木框挂钟":{"model":"挂钟","variant":""},"波斯地毯":{"model":"地毯","variant":"波斯绛红"},"羊毛沙发":{"model":"沙发","variant":"暖灰羊毛"},"亚麻窗帘":{"model":"窗帘","variant":""},"藤编柜":{"model":"床头柜","variant":"藤编抽屉"},"橱柜":{"model":"橱柜","variant":""},"钢琴":{"model":"钢琴","variant":""},"玻璃台灯":{"model":"台灯","variant":"琥珀玻璃"},"洗衣机":{"model":"洗衣机","variant":""},"亚麻沙发":{"model":"沙发","variant":"亚麻燕麦"},"餐边柜":{"model":"餐边柜","variant":""},"三脚灯":{"model":"落地灯","variant":"黑色三脚"},"冰箱":{"model":"冰箱","variant":""},"不锈钢灶":{"model":"灶台","variant":"不锈钢"},"圆形餐桌":{"model":"餐桌","variant":"圆形餐桌"},"酒柜":{"model":"酒柜","variant":""},"料理台":{"model":"料理台","variant":""},"复古妆台":{"model":"梳妆台","variant":""},"玻璃吊灯":{"model":"吊灯","variant":"乳白玻璃"},"石膏墙纸":{"model":"墙纸","variant":"石膏"},"休闲沙发":{"model":"沙发","variant":""},"任务板":{"model":"任务板","variant":""},"照片墙":{"model":"照片墙","variant":""},"唱片机":{"model":"唱片机","variant":""},"花束":{"model":"捧花摆件","variant":""},"复古书柜":{"model":"书架","variant":"深胡桃木书柜"},"四抽斗柜":{"model":"斗柜","variant":"胡桃木四抽"},"跑步机":{"model":"跑步机","variant":""},"藤编餐椅":{"model":"餐桌椅","variant":"藤编餐椅"},"双人床":{"model":"床","variant":""},"抽屉茶几":{"model":"茶几","variant":"胡桃木抽屉"},"水槽":{"model":"水槽","variant":""},"羊毛地毯":{"model":"地毯","variant":"羊毛米白"},"游戏机":{"model":"游戏机","variant":""},"衣柜":{"model":"衣柜","variant":""},"拱形镜":{"model":"全身镜","variant":"黄铜拱形"},"扶手餐椅":{"model":"餐桌椅","variant":"软包扶手椅"},"绒布沙发":{"model":"沙发","variant":"雾蓝绒布"},"网布椅":{"model":"办公椅","variant":""},"单臂壁灯":{"model":"壁灯","variant":"单臂"},"置物架":{"model":"置物架","variant":""},"衣帽架":{"model":"衣帽架","variant":""},"黄铜桌":{"model":"边桌","variant":"黄铜圆桌"},"格纹地毯":{"model":"地毯","variant":"奶油棋盘"},"电脑":{"model":"电脑","variant":""},"弧背椅":{"model":"椅子","variant":""},"藤编吊灯":{"model":"吊灯","variant":"藤编圆罩"},"电视":{"model":"电视","variant":""},"弧形灯":{"model":"落地灯","variant":"黄铜弧形"},"凳子":{"model":"凳子","variant":""}};
+  const furnitureModelAliases={"开放书架":{"model":"书架","variant":"开放格架"},"坐垫":{"model":"坐垫","variant":""},"雾面墙纸":{"model":"墙纸","variant":"雾面"},"极简书桌":{"model":"书桌","variant":"白蜡木极简"},"屏风":{"model":"隔断","variant":""},"陶瓷灶":{"model":"灶台","variant":"奶油陶瓷"},"锥形吊灯":{"model":"吊灯","variant":"锥形金属"},"复古沙发":{"model":"沙发","variant":"经典款"},"床头柜":{"model":"床头柜","variant":""},"陶土花瓶":{"model":"花瓶","variant":""},"伞架":{"model":"伞架","variant":""},"三抽斗柜":{"model":"斗柜","variant":"奶油三抽"},"木格书架":{"model":"书架","variant":"白蜡木开放格"},"吊柜":{"model":"吊柜","variant":""},"展示柜":{"model":"展示柜","variant":""},"躺椅":{"model":"躺椅","variant":""},"布艺床":{"model":"床","variant":""},"海报":{"model":"海报","variant":""},"深海墙纸":{"model":"墙纸","variant":"深海"},"棕榈树":{"model":"棕榈树绿植","variant":""},"水磨地板":{"model":"地板","variant":"水磨"},"蘑菇台灯":{"model":"台灯","variant":"蘑菇"},"默认室内木门":{"model":"门","variant":""},"门":{"model":"门","variant":""},"懒人沙发":{"model":"懒人沙发","variant":""},"纸罩灯":{"model":"落地灯","variant":"纸罩"},"鞋柜":{"model":"鞋柜","variant":""},"梳妆台":{"model":"梳妆台","variant":""},"电视柜":{"model":"电视柜","variant":""},"玻璃书柜":{"model":"书架","variant":"玻璃门书柜"},"沙发床":{"model":"沙发床","variant":""},"榻榻米":{"model":"榻榻米","variant":""},"软包床":{"model":"床","variant":"奶油软包"},"复古书桌":{"model":"书桌","variant":"深胡桃木复古"},"哑铃架":{"model":"哑铃架","variant":""},"石材茶几":{"model":"茶几","variant":"米白石材"},"珐琅灶":{"model":"灶台","variant":"复古珐琅"},"壁画":{"model":"壁画","variant":""},"长餐桌":{"model":"餐桌","variant":"浅橡木长桌"},"几何地毯":{"model":"地毯","variant":"海盐蓝"},"水泥地板":{"model":"地板","variant":"水泥"},"抽屉书桌":{"model":"书桌","variant":"抽屉工作台"},"双臂壁灯":{"model":"壁灯","variant":"黄铜双臂"},"方形边桌":{"model":"边桌","variant":"深木方桌"},"木框床":{"model":"床","variant":"浅橡木框架"},"默认窗户":{"model":"窗","variant":""},"窗":{"model":"窗","variant":""},"圆形茶几":{"model":"茶几","variant":"圆形浅橡木"},"折线台灯":{"model":"台灯","variant":"陶瓷折线"},"卧室地毯":{"model":"地毯","variant":"羊毛米白"},"上床下桌":{"model":"上床下桌","variant":""},"木框挂钟":{"model":"挂钟","variant":""},"波斯地毯":{"model":"地毯","variant":"波斯绛红"},"羊毛沙发":{"model":"沙发","variant":"暖灰羊毛"},"亚麻窗帘":{"model":"窗帘","variant":""},"藤编柜":{"model":"床头柜","variant":"藤编抽屉"},"橱柜":{"model":"橱柜","variant":""},"钢琴":{"model":"钢琴","variant":""},"玻璃台灯":{"model":"台灯","variant":"琥珀玻璃"},"洗衣机":{"model":"洗衣机","variant":""},"亚麻沙发":{"model":"沙发","variant":"亚麻燕麦"},"餐边柜":{"model":"餐边柜","variant":""},"三脚灯":{"model":"落地灯","variant":"黑色三脚"},"冰箱":{"model":"冰箱","variant":""},"不锈钢灶":{"model":"灶台","variant":"不锈钢"},"圆形餐桌":{"model":"餐桌","variant":"圆形餐桌"},"酒柜":{"model":"酒柜","variant":""},"料理台":{"model":"料理台","variant":""},"复古妆台":{"model":"梳妆台","variant":""},"玻璃吊灯":{"model":"吊灯","variant":"乳白玻璃"},"石膏墙纸":{"model":"墙纸","variant":"石膏"},"休闲沙发":{"model":"沙发","variant":""},"任务板":{"model":"任务板","variant":""},"照片墙":{"model":"照片墙","variant":""},"唱片机":{"model":"唱片机","variant":""},"花束":{"model":"捧花摆件","variant":""},"复古书柜":{"model":"书架","variant":"深胡桃木书柜"},"四抽斗柜":{"model":"斗柜","variant":"胡桃木四抽"},"跑步机":{"model":"跑步机","variant":""},"藤编餐椅":{"model":"餐桌椅","variant":"藤编餐椅"},"双人床":{"model":"床","variant":""},"抽屉茶几":{"model":"茶几","variant":"胡桃木抽屉"},"水槽":{"model":"水槽","variant":""},"羊毛地毯":{"model":"地毯","variant":"羊毛米白"},"游戏机":{"model":"游戏机","variant":""},"衣柜":{"model":"衣柜","variant":""},"拱形镜":{"model":"全身镜","variant":"黄铜拱形"},"扶手餐椅":{"model":"餐桌椅","variant":"软包扶手椅"},"绒布沙发":{"model":"沙发","variant":"雾蓝绒布"},"网布椅":{"model":"办公椅","variant":""},"单臂壁灯":{"model":"壁灯","variant":"单臂"},"置物架":{"model":"置物架","variant":""},"衣帽架":{"model":"衣帽架","variant":""},"黄铜桌":{"model":"边桌","variant":"黄铜圆桌"},"格纹地毯":{"model":"地毯","variant":"奶油棋盘"},"电脑":{"model":"电脑","variant":""},"弧背椅":{"model":"椅子","variant":""},"藤编吊灯":{"model":"吊灯","variant":"藤编圆罩"},"电视":{"model":"电视","variant":""},"弧形灯":{"model":"落地灯","variant":"黄铜弧形"},"凳子":{"model":"凳子","variant":""}};
   function createOwnedFurniture(name,record=null){
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
