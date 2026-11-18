@@ -268,9 +268,7 @@ window.ArdayGameConfig = {
         "buy-furniture-catalog-067",
         "780",
         ""
-      ]
-    ],
-    "undefined": [
+      ],
       [
         "梳妆台",
         "▧",
