@@ -26,7 +26,7 @@ window.ArdayGameConfig = {
   '通用家具':{
    '地毯':[['地毯·波斯绛红','▤','buy-furniture-rug-persian','680','传统纹样'],['地毯·奶油棋盘','▤','buy-furniture-rug-checker','360','棋盘格'],['地毯·海盐蓝','▤','buy-furniture-rug-sea','520','蓝白条纹'],['地毯·卧室款','▧','buy-bedroom-rug','320','浅色卧室款']],
    '椅子':[['椅子·温莎木椅','▰','buy-furniture-chair','180',''],['椅子·软包扶手椅','▰','buy-furniture-dining-chair','220',''],['椅子·藤编餐椅','▰','buy-furniture-chair-rattan','240','']],
-   '灯具':[['台灯·蘑菇','◉','buy-bedroom-lamp','180',''],['台灯·陶瓷折线','◉','buy-bedroom-lamp-ceramic','220',''],['壁灯·黄铜双臂','◉','buy-bedroom-wall-lamp','260',''],['壁灯·单臂','◉','buy-bedroom-wall-lamp-single','190',''],['吊灯·乳白玻璃','◉','buy-bedroom-ceiling-lamp','420',''],['吊灯·锥形金属','◉','buy-bedroom-ceiling-lamp-metal','360','']],
+   '灯具':[['台灯·蘑菇','◉','buy-bedroom-lamp','180',''],['台灯·陶瓷折线','◉','buy-bedroom-lamp-ceramic','220',''],['壁灯·黄铜双臂','◉','buy-bedroom-wall-lamp','260',''],['壁灯·单臂','◉','buy-bedroom-wall-lamp-single','190',''],['吊灯·乳白玻璃','◉','buy-bedroom-ceiling-lamp','420',''],['吊灯·锥形金属','◉','buy-bedroom-ceiling-lamp-metal','360',''],['落地灯·纸罩','◉','buy-floor-lamp-paper','520','柔和漫射光'],['落地灯·黄铜弧形','◉','buy-floor-lamp-arc','680','弧形黄铜灯杆与暖光灯罩']],
    '绿植':[['棕榈树绿植','♧','buy-furniture-palm','150','室内观叶植物']],
    '壁画':[['壁画','▧','buy-furniture-art','180','墙面装饰']],
    '隔断':[['隔断','▥','buy-furniture-divider','360','空间分隔']],
