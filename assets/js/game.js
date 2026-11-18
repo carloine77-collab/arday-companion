@@ -1150,8 +1150,8 @@ function initArday3D(){
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xd9d7d1);
   const camera=new T.PerspectiveCamera(38,1,.1,80);
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
-  const renderer=new T.WebGLRenderer({antialias:!isTouchDevice,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.15:1.35));renderer.outputEncoding=T.sRGBEncoding;
+  const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
   const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
@@ -1271,7 +1271,7 @@ function initArday3D(){
    root.traverse(object=>{
     if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
     if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();
-    if((object.geometry.boundingSphere?.radius||0)<.11)return;
+    if((object.geometry.boundingSphere?.radius||0)<.16)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
     if(!materials.some(material=>material&&material.isMeshStandardMaterial&&!material.transparent&&(material.opacity??1)>.94&&(material.roughness??1)>.28))return;
     const shell=new T.Mesh(object.geometry,inkOutlineMaterial);
@@ -1332,13 +1332,13 @@ function initArday3D(){
    group.userData.backWallSegments=backWallSegments;group.userData.backWallMaterial=wallMaterial;group.userData.wallMeshes=backWallSegments;
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
    const ceilingMaterial=M(0xe9e3d8);ceilingMaterial.transparent=true;ceilingMaterial.opacity=.22;ceilingMaterial.depthWrite=false;ceilingMaterial.side=T.DoubleSide;group.userData.ceilingMesh=box(group,0,4.78,0,10.8,.12,8.4,ceilingMaterial);group.userData.ceilingMesh.visible=false;group.userData.ceilingMesh.castShadow=false;group.userData.ceilingMesh.renderOrder=8;
-   const sideWallMaterial=M(wallColor);sideWallMaterial.transparent=true;sideWallMaterial.opacity=1;sideWallMaterial.depthWrite=false;
+   const sideWallMaterial=M(wallColor);sideWallMaterial.transparent=false;sideWallMaterial.opacity=1;sideWallMaterial.depthWrite=true;
    group.userData.leftWall=leftWallGroup;group.userData.rightWall=rightWallGroup;group.userData.frontWall=frontWallGroup;
    // Side walls terminate exactly at the front/back wall planes; all four
    // exterior faces now share the same room footprint without overhangs.
    const leftWall=box(leftWallGroup,-5.3,2.35,0,.2,4.8,8.16,sideWallMaterial);leftWall.castShadow=false;
-   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,8.16,sideWallMaterial.clone());rightWall.material.transparent=true;rightWall.material.depthWrite=false;rightWall.castShadow=false;
-   const frontWall=box(frontWallGroup,0,2.35,4.08,10.8,4.8,.2,sideWallMaterial.clone());frontWall.material.transparent=true;frontWall.material.depthWrite=false;frontWall.castShadow=false;
+   const rightWall=box(rightWallGroup,5.3,2.35,0,.2,4.8,8.16,sideWallMaterial.clone());rightWall.material.transparent=false;rightWall.material.depthWrite=true;rightWall.castShadow=false;
+   const frontWall=box(frontWallGroup,0,2.35,4.08,10.8,4.8,.2,sideWallMaterial.clone());frontWall.material.transparent=false;frontWall.material.depthWrite=true;frontWall.castShadow=false;
    group.userData.wallMeshes.push(leftWall,rightWall,frontWall);
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
    box(group,0,.24,-3.91,10.65,.12,.12,M(0xd7b990));
