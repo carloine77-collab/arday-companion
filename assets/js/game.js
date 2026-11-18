@@ -1226,11 +1226,11 @@ function initArday3D(){
       inkBand=mix(inkBand,1.035,inkMid);
       outgoingLight*=inkBand;
       float paperGrain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5;
-      outgoingLight*=1.0+paperGrain*0.012;
+      float brushStroke=sin(gl_FragCoord.y*1.7+gl_FragCoord.x*.21)*0.003;\n      outgoingLight*=1.0+paperGrain*0.014+brushStroke;
       #include <tonemapping_fragment>`
     );
    };
-   material.customProgramCacheKey=()=> 'arday-soft-light-v4';
+   material.customProgramCacheKey=()=> 'arday-soft-light-v5';
       return material;
   }
   const M=(color,roughness=.82,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,roughness)),metalness:Math.max(0,Math.min(.9,metalness))}));
@@ -1283,18 +1283,18 @@ function initArday3D(){
   function applyPainterMap(material,texture,bump){if(!material)return material;material.map=texture;material.bumpMap=texture;material.bumpScale=bump;material.needsUpdate=true;return material}
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
   const inkOutlineMaterial=new T.ShaderMaterial({
-   uniforms:{outlineColor:{value:new T.Color(0x302824)},outlineAlpha:{value:.78},outlineThickness:{value:.0052}},
+   uniforms:{outlineColor:{value:new T.Color(0x302824)},outlineAlpha:{value:.82},outlineThickness:{value:.0048}},
    vertexShader:`uniform float outlineThickness;
-    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float fineWobble=sin(position.x*31.0+position.z*23.0)*.35;float width=outlineThickness*(1.0+0.075*wobble+0.018*fineWobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
+    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float fineWobble=sin(position.x*31.0+position.z*23.0)*.35;float width=outlineThickness*(1.0+0.095*wobble+0.026*fineWobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
    fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
-    void main(){gl_FragColor=vec4(outlineColor,outlineAlpha);}`,
+    void main(){float grain=fract(sin(dot(gl_FragCoord.xy,vec2(41.7,289.3)))*43758.5453);float inkBreak=mix(.91,1.0,step(.12,grain));gl_FragColor=vec4(outlineColor,outlineAlpha*inkBreak);}`,
    side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
   });
   function applyInkOutlines(root){
    root.traverse(object=>{
     if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
     if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();
-    if((object.geometry.boundingSphere?.radius||0)<.16)return;
+    if((object.geometry.boundingSphere?.radius||0)<.23)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
     if(!materials.some(material=>material&&material.isMeshStandardMaterial&&!material.transparent&&(material.opacity??1)>.94&&(material.roughness??1)>.28))return;
     const shell=new T.Mesh(object.geometry,inkOutlineMaterial);
@@ -1581,13 +1581,13 @@ function initArday3D(){
    if(modelName==='沙发'&&variant==='亚麻燕麦'){m.fabric.color.setHex(0xc4ad91);m.sofa2.color.setHex(0xe1d3bd);m.wood.color.setHex(0x76543a)}
    // Furniture uses softly bevelled silhouettes instead of razor-sharp box primitives.
    function softBoxGeometry(w,h,d){
-    const radius=Math.max(.012,Math.min(w,h,d)*.085),x=w/2,y=h/2,r=radius;
+    const radius=Math.max(.016,Math.min(w,h,d)*.13),x=w/2,y=h/2,r=radius;
     const shape=new T.Shape();
     shape.moveTo(-x+r,-y);shape.lineTo(x-r,-y);shape.quadraticCurveTo(x,-y,x,-y+r);
     shape.lineTo(x,y-r);shape.quadraticCurveTo(x,y,x-r,y);
     shape.lineTo(-x+r,y);shape.quadraticCurveTo(-x,y,-x,y-r);
     shape.lineTo(-x,-y+r);shape.quadraticCurveTo(-x,-y,-x+r,-y);
-    const bevel=Math.min(r*.42,d*.12);
+    const bevel=Math.min(r*.56,d*.16);
     const geometry=new T.ExtrudeGeometry(shape,{depth:Math.max(.008,d-bevel*2),steps:1,bevelEnabled:true,bevelSegments:2,bevelThickness:bevel,bevelSize:bevel,curveSegments:4});
     geometry.translate(0,0,-d/2+bevel);geometry.computeVertexNormals();return geometry;
    }
