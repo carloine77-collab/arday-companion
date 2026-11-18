@@ -159,7 +159,8 @@ function openTab(name,force=false){
  if(name==='职业'){closeCalendar();showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
  $('drawer').classList.remove('profile-expanded','furniture-drawer');
  $('drawer').querySelector('.furniture-close')?.remove();
- $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
+ const displayName=name==='物品'?'背包':name;
+ $('drawerTitle').textContent=displayName+' · ¥'+s.money;$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
  let shopGrid=null;
  if(name==='商店'){
   $('choices').classList.add('shop-content');
@@ -241,7 +242,7 @@ function openTab(name,force=false){
    else if(id==='collection'){showCollection();return}
    else if(id==='use-food'){let i=s.inventory.findIndex(x=>x.name==='点心');if(i<0){toast('物品栏里没有点心');return}s.inventory.splice(i,1);change({hunger:25,fun:2});say('点心正好派上用场。');}
    else perform(id);
-   save();render();$('drawerTitle').textContent=name+' · ¥ '+s.money;
+   save();render();$('drawerTitle').textContent=displayName+' · ¥ '+s.money;
   };
   const renderTarget=isShop?shopGrid:(name==='物品'?inventoryGrid:$('choices'));renderTarget.appendChild(b);
  });
@@ -283,9 +284,9 @@ function closeCalendar(){if(arday3D?.cancelGesture)arday3D.cancelGesture();$('st
 function slotClick(di,h){
  ensureSchedule();let d=plusDays(dayAnchor(),di),key=dayKey(d),ev=eventAt(key,h);
  $('drawer').classList.add('open');
- if(ev&&ev.kind!=='autonomous'){
+ if(ev&&!(ev.kind==='autonomous'&&ev.unresolved)){
   $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
-  $('choices').innerHTML='<div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">让他自己安排</button><button id="return-existing">返回日程</button></div>';
+  $('choices').innerHTML='<div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">'+(ev.kind==='autonomous'?'重新安排':'让他自己安排')+'</button><button id="return-existing">返回日程</button></div>';
   $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.activity!=='sleep'&&ev.kind!=='work'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;remember('planned','决定一起参与：'+ev.title,1);say('好啊，一起做也不错。')}else if(ev.activity==='sleep'||ev.title.includes('睡眠'))say('现在是我的睡眠时间。我不会为了临时邀请打乱作息。我们可以约在明天醒来以后。');else if(ev.kind==='work')say('我已经答应了这份工作，不能临时把它放下。等结束以后再一起安排吧。');else if(ev.kind==='routine')say('这是我固定的生活安排。我愿意商量，但不想直接取消它。');else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
   $('move').onclick=()=>{
     const target=prompt('想调整到几点？请输入 0–23 之间的整点。'),n=Number(target),duration=ev.end-ev.start,oldStart=ev.start;
@@ -295,7 +296,7 @@ function slotClick(di,h){
     ev.start=n;ev.end=n+duration;
     s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')
    };
-  $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
+  $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}if(ev.kind==='autonomous'){const recent=(s.calendar.days[key]||[]).filter(item=>item!==ev&&item.start<ev.start).sort((a,b)=>a.start-b.start).slice(-5).map(item=>item.activity).filter(Boolean);Object.assign(ev,createAutonomousScheduleEvent(ev.start,recent));save();renderCalendar();$('drawer').classList.remove('open');say('我重新安排了这段时间。');return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='自主安排 · '+dayLabel(d)+' '+pad(h)+':00';
@@ -371,8 +372,17 @@ function buildDay(key){
  if(p.duration>0&&tonightSleepEnd>p.bedtime)add(p.bedtime,tonightSleepEnd,'睡眠 · '+p.duration+'小时','routine','sleep');
  const occupied=new Set();
  d.forEach(ev=>{for(let h=Math.max(0,ev.start);h<Math.min(24,ev.end);h++)occupied.add(h)});
- for(let hour=0;hour<24;hour++)if(!occupied.has(hour))d.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});
+ const priorDay=(s.calendar?.days?.[previousKey]||[]).slice().sort((a,b)=>a.start-b.start);
+ const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity),...priorDay.map(item=>item.activity).filter(activity=>activity&&activity!=='idle')].slice(-5);
+ for(let hour=0;hour<24;hour++)if(!occupied.has(hour)){
+  const planned=createAutonomousScheduleEvent(hour,recent);d.push(planned);
+  if(planned.activity!=='idle'){recent.push(planned.activity);if(recent.length>5)recent.shift()}
+ }
  return d.sort((a,b)=>a.start-b.start);
+}
+function createAutonomousScheduleEvent(hour,recent=[]){
+ const choice=chooseAutonomousActivity(recent),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
+ return {start:hour,end:hour+1,title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'day-ahead',unresolved:false,plannedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind};
 }
 function ensureSchedule(){ensureScheduleAt(Date.now())}
 
@@ -493,6 +503,18 @@ function ensureScheduleAt(value){
   });
   s.calendar.version=15;
  }
+ if((s.calendar.version||0)<16){
+  const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity)];
+  Object.keys(s.calendar.days).sort().forEach(key=>{
+   const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start);
+   day.forEach(ev=>{
+    if(ev.kind==='autonomous'&&(ev.unresolved||ev.activity==='autonomous'))Object.assign(ev,createAutonomousScheduleEvent(ev.start,recent),{end:ev.end||ev.start+1});
+    if(ev.activity&&ev.activity!=='idle'){recent.push(ev.activity);if(recent.length>5)recent.shift()}
+   });
+   s.calendar.days[key]=day;
+  });
+  s.calendar.version=16;
+ }
  
  
  
@@ -511,8 +533,11 @@ function ensureScheduleAt(value){
    const preserved=existing.filter(ev=>ev.activity!=='sleep');
    s.calendar.days[key]=[...preserved,...generated.filter(ev=>ev.activity==='sleep')].sort((a,b)=>a.start-b.start);
   }
-  const day=s.calendar.days[key];
-  for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end))day.push({start:hour,end:hour+1,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true});
+  const day=s.calendar.days[key],recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity)];
+  for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end)){
+   const planned=createAutonomousScheduleEvent(hour,recent);day.push(planned);
+   if(planned.activity!=='idle'){recent.push(planned.activity);if(recent.length>5)recent.shift()}
+  }
   day.sort((a,b)=>a.start-b.start);
  };
  ensureDay(currentKey);
@@ -616,7 +641,7 @@ function openKitchenPanel(){
  }).join('')||'<p class="kitchen-empty-note">还没有收藏其他菜谱，可以去商店的「书籍 · 菜谱」选购。</p>';
  $('drawerTitle').textContent='厨房 · 烹饪';
  $('choices').className='choices cooking-panel';
-   $('choices').innerHTML='<section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section><footer class="kitchen-bottom-bar"><button type="button" id="kitchen-close">离开厨房</button></footer>';
+ $('choices').innerHTML='<button type="button" id="kitchen-close" class="kitchen-close" aria-label="关闭烹饪界面" title="关闭">×</button><header class="kitchen-hero"><div class="kitchen-hero-copy"><span class="kitchen-eyebrow">HOME KITCHEN / DAILY MENU</span><h2>把今天的饭，<em>好好做好。</em></h2></div><div class="kitchen-hero-mark">餐</div></header><section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section>';
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));
  $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
  $('drawer').classList.add('open');
@@ -724,8 +749,8 @@ function autonomousFurnitureOptions(){
  }
  return options;
 }
-function chooseAutonomousActivity(){
- const recent=(s.activityLog||[]).slice(-5).map(item=>item.activity);
+function chooseAutonomousActivity(recentOverride=null){
+ const recent=Array.isArray(recentOverride)?recentOverride:(s.activityLog||[]).slice(-5).map(item=>item.activity);
  const temperament=typeof ardayTemperament==='function'?ardayTemperament():{composed:.6,indirect:.4};
  const description=(typeof s.personality==='string'?s.personality:(s.personality?.description||characterStats.personalityTraits?.join(' ')||'')).toLowerCase();
  const candidates=autonomousFurnitureOptions().filter(option=>{const {activity:id,meta}=option;return meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires,option.room)}).map(option=>{const {activity:id,meta}=option;
