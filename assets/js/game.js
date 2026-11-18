@@ -1293,8 +1293,10 @@ function initArday3D(){
    box(group,0,.12,-3.94,10.7,.16,.12,m.oak);
    box(group,0,.24,-3.91,10.65,.12,.12,M(0xd7b990));
    const trimMat=M(0xe7d4ba);trimMat.transparent=false;trimMat.depthWrite=true;
-   box(leftWallGroup,-5.22,.13,0,.12,.18,8.12,trimMat);
-   box(rightWallGroup,5.22,.13,0,.12,.18,8.12,trimMat.clone());
+   // End trim at the exact inner-face junctions; the previous 8.12
+   // length projected 8 cm beyond both front/back wall junctions.
+   box(leftWallGroup,-5.22,.13,0,.12,.18,7.96,trimMat);
+   box(rightWallGroup,5.22,.13,0,.12,.18,7.96,trimMat.clone());
    // The old raised plank strips caused high-contrast shimmering on iPad
    // displays. Keep the floor's subtle painter texture, not floating seams.
   }
@@ -1464,13 +1466,21 @@ function initArday3D(){
    const segments=roomGroup.userData.backWallSegments;
    if(!segments||segments.length!==4)return;
    const sync=()=>{
+    // Derive the wall aperture from the live window transform. The opening
+    // spans the actual 10.8 m wall, rather than the old asymmetric segment bounds.
     const center=windowGroup.position.x,halfWidth=1.1,left=-5.4,right=5.4;
-    const leftWidth=Math.max(.05,center-halfWidth-left),rightWidth=Math.max(.05,right-(center+halfWidth));
+    const openingLeft=Math.max(left,Math.min(right,center-halfWidth));
+    const openingRight=Math.max(left,Math.min(right,center+halfWidth));
+    const leftWidth=Math.max(.001,openingLeft-left),rightWidth=Math.max(.001,right-openingRight);
     const set=(mesh,x,y,w,h)=>{
-     mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(w,h,.2);mesh.position.set(x,y,-4.08);
+     const width=Math.max(.001,w),height=Math.max(.001,h);
+     if(mesh.geometry.parameters.width!==width||mesh.geometry.parameters.height!==height){
+      mesh.geometry.dispose();mesh.geometry=new T.BoxGeometry(width,height,.2);
+     }
+     mesh.position.set(x,y,-4.08);mesh.geometry.computeBoundingBox();mesh.geometry.computeBoundingSphere();
     };
-    set(segments[0],(left+center-halfWidth)/2,2.35,leftWidth,4.8);
-    set(segments[1],(center+halfWidth+right)/2,2.35,rightWidth,4.8);
+    set(segments[0],(left+openingLeft)/2,2.35,leftWidth,4.8);
+    set(segments[1],(openingRight+right)/2,2.35,rightWidth,4.8);
     set(segments[2],center,.81,2.2,1.72);
     set(segments[3],center,4.14,2.2,1.22);
    };
@@ -2034,7 +2044,7 @@ function initArday3D(){
    if(e.target.closest('button,.day-timeline,.calendar-view,.drawer,input,textarea,select'))return;
    targetRadius+=e.deltaY*.012;applyCamera();e.preventDefault();
   },{passive:false});
-  function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
+  function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;[livingWindow,bedroomWindow,kitchenWindow].forEach(w=>w.userData.syncWallOpening?.());updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
    let delta=target.clone().sub(person.position),distance=delta.length(),moving=distance>.075;
    if(moving){const step=Math.min(distance,(pose==='idleWalk'?1.7:1.55)*dt);person.position.add(delta.normalize().multiplyScalar(step));}
    if(pose==='walk'&&activeActivity==='walk'){if(moving)walkPauseUntil=0;else if(!walkPauseUntil)walkPauseUntil=t+650;else if(t>=walkPauseUntil){walkIndex=(walkIndex+1)%walkRoute.length;target.set(...walkRoute[walkIndex]);walkPauseUntil=0;}}
