@@ -1404,22 +1404,20 @@ function initArday3D(){
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0xc4a783);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
-  const addWindowView=(windowGroup,centerY,width=2.1,height=1.85)=>{const view=new T.Mesh(new T.PlaneGeometry(width,height),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false,side:T.DoubleSide}));view.position.set(0,centerY,.012);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;view.userData.windowScenery=true;windowGroup.add(view);const pane=box(windowGroup,0,centerY,.066,width,height,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
-  addWindowView(livingWindow,2.6);
-  for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
+  const addWindowView=(windowGroup,centerY,width=2.1,height=1.85)=>{const view=new T.Mesh(new T.PlaneGeometry(width,height),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false,side:T.DoubleSide}));view.position.set(0,centerY,.012);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;view.userData.windowScenery=true;windowGroup.add(view);};
+  const addOpenCasementWindow=(windowGroup,frameMaterial)=>{const width=2.2,height=1.95,cy=2.6;box(windowGroup,-1.07,cy,0,.12,height,.12,frameMaterial);box(windowGroup,1.07,cy,0,.12,height,.12,frameMaterial);box(windowGroup,0,cy+height/2,0,width,.12,.12,frameMaterial);box(windowGroup,0,cy-height/2,0,width,.12,.12,frameMaterial);for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(side*1.01,cy,.055);leaf.rotation.y=side*.43;windowGroup.add(leaf);const cx=-side*.49,glass=new T.Mesh(new T.PlaneGeometry(.94,1.76),m.glass);glass.position.set(cx,0,.018);glass.renderOrder=2;glass.castShadow=false;glass.receiveShadow=false;leaf.add(glass);for(const x of [-.49,.49])box(leaf,cx+x,0,.04,.065,1.86,.075,frameMaterial);for(const y of [-.9,.9])box(leaf,cx,y,.04,.98,.065,.075,frameMaterial);box(leaf,cx,0,.045,.045,1.72,.045,frameMaterial);for(const y of [-.55,.55])box(leaf,-side*.91,y,.07,.035,.12,.035,M(0xb18b58,.42));const handle=box(leaf,cx-side*.4,0,.09,.035,.22,.035,M(0xb18b58,.42));handle.castShadow=false;}};
+  addWindowView(livingWindow,2.6);addOpenCasementWindow(livingWindow,m.oak);
   addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4,2.6);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0xb99b83);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
-  addWindowView(bedroomWindow,2.6);
-  for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
+  addWindowView(bedroomWindow,2.6);addOpenCasementWindow(bedroomWindow,M(0x8a6e68));
   addWindowDressing(bedroomWindow,2.1,1.85,0xb9a9a0,2.6);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0xc0a487);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
-  addWindowView(kitchenWindow,2.6);
-  for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(kitchenWindow,x,y,0,w,h,.1,M(0x9a7655));
+  addWindowView(kitchenWindow,2.6);addOpenCasementWindow(kitchenWindow,M(0x9a7655));
   addWindowDressing(kitchenWindow,2.1,1.85,0xd0c4b1,2.6);
   box(kitchen,0,1.12,-3.91,7.7,.55,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=.88;y<=1.35;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
