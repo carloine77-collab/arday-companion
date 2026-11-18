@@ -2086,7 +2086,7 @@ function initArday3D(){
      for(const x of [-.32,.32]){const post=box(x,.78,-.29,.065,.58,.065,wood);post.rotation.z=x*.08}
      for(const x of [-.3,.3]){const arm=box(x,.7,-.01,.075,.07,.58,wood);arm.rotation.z=x*.06}
     }
-   }else if(modelName==='电脑'){else if(modelName==='电脑'){
+   }else if(modelName==='电脑'){
     action=()=>openFurnitureActions('computer',id);
     width=.72;depth=.55;height=.72;surfaceType='tabletop';surfaceY=.04;
     box(0,.48,-.16,.76,.49,.065,m.dark);box(0,.49,-.122,.704,.425,.012,m.screen);box(0,.245,-.16,.075,.12,.09,m.metal);box(0,.18,-.16,.34,.035,.22,m.metal);
@@ -2262,7 +2262,7 @@ function initArday3D(){
     const lumbar=new T.CatmullRomCurve3([new T.Vector3(-.24,.91,-.29),new T.Vector3(-.12,.86,-.31),new T.Vector3(0,.85,-.32),new T.Vector3(.12,.86,-.31),new T.Vector3(.24,.91,-.29)]);
     group.add(new T.Mesh(new T.TubeGeometry(lumbar,20,.025,8,false),trim));
     box(0,1.43,-.27,.34,.16,.1,fabric);box(0,1.43,-.32,.3,.11,.035,mesh);
-   }else if(modelName==='坐垫'){else if(modelName==='坐垫'){
+   }else if(modelName==='坐垫'){
     width=.78;depth=.78;height=.18;surfaceType='floor';box(0,.09,0,.78,.15,.78,m.fabric);const pad=sphere(0,.17,0,.37,.09,.37,m.sofa2);pad.scale.y=.7;for(const x of [-.29,.29])for(const z of [-.29,.29])sphere(x,.16,z,.035,.018,.035,m.cream);
    }else if(modelName==='伞架'){
     width=.62;depth=.62;height=1.12;
@@ -2283,7 +2283,7 @@ function initArday3D(){
      ]);
      group.add(new T.Mesh(new T.TubeGeometry(handleCurve,12,.018,8,false),m.wood));
     }
-   }else if(modelName==='展示柜'){   }else if(modelName==='展示柜'){
+   }else if(modelName==='展示柜'){
     width=1.55;depth=.62;height=2.05;surfaceType='table';surfaceY=2.08;
     const wood=mat(0x76543d,.62),glass=mat(0xc9dadd,.12,.12);glass.transparent=true;glass.opacity=.2;
     box(0,1.02,0,1.5,2.0,.56,wood);
@@ -2517,7 +2517,7 @@ function initArday3D(){
     }
     // Small brass hanging rail unifies the asymmetrical gallery arrangement.
     box(0,.78,.015,1.45,.025,.035,m.gold);
-   }else if(modelName==='跑步机'){   }else if(modelName==='跑步机'){
+   }else if(modelName==='跑步机'){
     width=.82;depth=1.85;height=1.35;box(0,.14,0,.78,.16,1.78,m.dark);box(0,.235,0,.64,.025,1.58,m.metal);for(const x of [-.28,.28]){const rail=box(x,.72,-.55,.045,1.05,.045,m.metal);rail.rotation.x=-.18;const grip=box(x,.94,-.92,.08,.08,.42,m.dark);grip.rotation.x=.1}box(0,1.08,-.9,.5,.28,.12,m.dark);box(0,1.1,-.835,.38,.16,.015,m.screen);for(const x of [-.33,.33])box(x,.07,.8,.08,.14,.08,m.dark);
    }else if(modelName==='游戏机'){
     width=.62;depth=.42;height=.25;surfaceType='tabletop';surfaceY=.04;box(0,.12,0,.62,.2,.38,m.dark);box(0,.225,0,.52,.018,.3,m.cream);for(let i=0;i<8;i++)box(-.23+i*.065,.24,.08,.018,.012,.18,m.metal);for(const x of [-.28,.28]){const pad=sphere(x,.1,.32,.14,.06,.1,m.dark);pad.scale.y=.6}for(let i=0;i<4;i++)cyl(-.09+i*.06,.23,-.17,.012,.012,.02,m.gold,8);
