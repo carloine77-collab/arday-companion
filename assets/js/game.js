@@ -591,7 +591,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','tea','walk','read','game','music','food','company','chat','computerPlay'].includes(action)){
+ if(['listen','tea','walk','read','game','music','food','company','chat','computerPlay','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
   s.friend=clamp(s.friend+1);
   s.attach=clamp(s.attach+.5);
   remember('shared',action);
@@ -628,7 +628,7 @@ function finishImmediateInteraction(at=Date.now()){
   if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   change(effects);
   const preferenceKey=activity==='read'?'reading':activity==='write'?'writing':activity;
-  if(['read','write','chat','computerPlay','watchTV','listenRecords','rest','music','wash'].includes(activity))s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
+  if(['read','write','chat','computerPlay','watchTV','listenRecords','rest','music','wash','tea','bouquet','admireFlowers','smellFlowers'].includes(activity))s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
   if(['read','write'].includes(activity))updatePersonalGoal(activity,at);
   relation(activity);
   s.activityLog=s.activityLog||[];s.activityLog.push({activity,key:keyAt(at),hour:new Date(at).getHours(),at,withPlayer:true,immediate:true});
