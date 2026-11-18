@@ -1564,20 +1564,46 @@ function initArday3D(){
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>say(name+'摆放好了。');
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
    if(modelName==='床'){
-    width=3.1;depth=3.45;height=1.25;action=()=>openFurnitureActions('bed',id);const oakFrame=variant==='浅橡木框架',creamBed=variant==='奶油软包',frameMat=oakFrame?m.oak:creamBed?m.cream:m.wood,headMat=oakFrame||creamBed?m.cream:m.fabric,duvet=mat(oakFrame?0xe4ddd0:creamBed?0xe8ddcc:0xcfc4b6,.98),duvetEdge=mat(oakFrame?0xc8bca9:creamBed?0xd0c2ad:0xb6a797,.94),piping=mat(oakFrame?0xb29b7d:creamBed?0xbba78f:0x9b8878,.86);box(0,.22,0,2.92,.2,3.2,m.dark);box(0,.38,0,3.12,.16,3.42,frameMat);for(const x of [-1.35,1.35])for(const z of [-1.48,1.48])box(x,.17,z,.12,.28,.12,frameMat);box(0,.59,.08,2.92,.28,3.12,m.fabric);box(0,.75,-.04,2.82,.08,2.96,m.sofa2);box(0,1.08,-1.59,3.12,1.48,.22,frameMat);box(0,1.08,-1.45,2.82,1.18,.12,headMat);box(0,.98,-1.365,2.48,.82,.035,m.sofa2);for(const x of [-1.22,1.22]){box(x,1.05,-1.45,.055,1.12,.16,frameMat);box(x,1.62,-1.45,.16,.12,.17,frameMat)}for(const x of [-.82,.82]){const pillow=sphere(x,.91,-.88,.52,.14,.36,m.cream);pillow.rotation.x=-.16;const seam=sphere(x,.91,-.88,.5,.012,.345,piping);seam.position.z-=.008}const cover=sphere(0,.81,.57,1.36,.12,1.13,duvet);cover.position.y=.82;cover.rotation.x=-.025;box(0,.76,1.63,2.72,.12,.38,duvet);for(let i=0;i<5;i++){const x=-1.02+i*.51;const fold=sphere(x,.91,.52,.025,.012,.92,duvetEdge);fold.rotation.y=(i-2)*.035}box(0,.79,1.08,2.74,.035,.035,piping);
-    // Quilted duvet channels and upholstered headboard panel divisions.
+    action=()=>openFurnitureActions('bed',id);
+    const isWood=variant==='浅橡木框架',isSoft=variant==='奶油软包',isDouble=name==='双人床';
+    width=isDouble?3.55:3.1;depth=3.45;height=1.32;
+    const frame=isWood?m.oak:isSoft?m.cream:m.wood;
+    const textile=mat(isSoft?0xe8ddcc:isDouble?0xd8cbbb:0xcfc4b6,.97);
+    const piping=mat(isWood?0xb69a76:isSoft?0xbba78f:0x9b8878,.86);
+    const mattressW=isDouble?3.38:2.92;
+    box(0,.2,0,mattressW+.12,.18,3.28,frame);
+    box(0,.48,.05,mattressW,.3,3.12,m.cream);
+    box(0,.66,.08,mattressW-.08,.12,3.02,textile);
+    if(isWood){
+     box(0,.96,-1.62,mattressW+.16,.94,.16,m.oak);
+     box(0,.58,-1.52,mattressW+.12,.16,.2,m.wood);
+     for(let x=-mattressW/2+.14;x<=mattressW/2-.13;x+=.24)box(x,.98,-1.52,.035,.78,.08,m.wood);
+     for(const x of [-mattressW/2+.12,mattressW/2-.12]){
+      box(x,.18,-1.5,.13,.34,.14,m.oak);box(x,.18,1.48,.13,.34,.14,m.oak);
+     }
+     box(0,.76,.55,mattressW-.22,.07,1.72,m.cream);
+    }else if(isSoft){
+     box(0,1.05,-1.63,mattressW+.18,1.5,.22,m.cream);
+     box(0,1.03,-1.5,mattressW-.12,1.27,.12,textile);
+     for(let x=-mattressW/2+.35;x<=mattressW/2-.3;x+=.42)box(x,1.04,-1.425,.018,1.05,.018,piping);
+     for(const x of [-mattressW*.28,0,mattressW*.28])for(const y of [.68,1.02,1.36])sphere(x,y,-1.35,.035,.035,.018,piping);
+     box(0,.74,.55,mattressW-.2,.1,1.72,m.cream);
+    }else{
+     box(0,.94,-1.62,mattressW+.12,1.22,.2,m.wood);
+     box(0,.97,-1.49,mattressW-.08,.98,.06,m.fabric);
+     box(0,.69,.52,mattressW-.12,.1,1.78,m.cream);
+     for(const x of [-mattressW*.3,mattressW*.3]){
+      const pillow=sphere(x,.91,-.9,.52,.15,.34,m.cream);pillow.rotation.x=-.12;
+     }
+    }
+    const duvet=sphere(0,.79,.62,mattressW*.43,.13,1.05,textile);
+    duvet.rotation.x=-.025;box(0,.73,1.55,mattressW*.86,.14,.36,textile);
     for(let i=0;i<7;i++){
-     const x=-1.08+i*.36;
-     const channel=box(x,.932,.53,.012,.012,1.72,duvetEdge);
-     channel.rotation.x=-.018;
+     const x=-mattressW*.38+i*mattressW*.76/6;
+     box(x,.91,.58,.012,.012,1.65,piping);
     }
-    for(const x of [-.92,-.46,0,.46,.92]){
-     const button=new T.Mesh(new T.SphereGeometry(.028,12,8),piping);
-     button.position.set(x,1.08,-1.285);group.add(button);
-    }
-    for(const x of [-1.18,1.18]){
-     const welt=new T.Mesh(new T.TorusGeometry(.035,.009,6,16),piping);
-     welt.position.set(x,1.05,-1.28);welt.rotation.y=Math.PI/2;group.add(welt);
+    for(const x of [-mattressW*.34,mattressW*.34]){
+     const pillow=sphere(x,.88,-.88,.48,.13,.32,m.cream);pillow.rotation.x=-.14;
     }
    }else if(modelName==='床头柜'){
     const woven=variant==='藤编抽屉';width=.88;depth=.78;height=.92;
@@ -1714,10 +1740,48 @@ function initArday3D(){
      box(.92,.27,.78,.78,.16,1.05,walnut);soft(.92,.49,.78,.37,.15,.48,fabric);const chaiseBack=soft(.92,.77,1.12,.37,.31,.15,fabricShade);chaiseBack.rotation.x=-.12;
      soft(1.28,.59,.76,.16,.28,.5,fabric);box(1.28,.39,.76,.055,.42,.78,walnut);width=3.05;depth=2.15;
     }else if(variant==='经典款'){
-     // Traditional high-back silhouette with rolled arms and button tufting.
-     for(const x of [-.72,-.36,0,.36,.72]){const tuft= new T.Mesh(new T.SphereGeometry(.035,8,6),gold);tuft.position.set(x,.86,.455);group.add(tuft)}
+     for(const x of [-.72,-.36,0,.36,.72]){const tuft=new T.Mesh(new T.SphereGeometry(.035,8,6),gold);tuft.position.set(x,.86,.455);group.add(tuft)}
      box(0,.92,.31,1.78,.16,.13,walnut);for(const x of [-.82,.82]){const roll=soft(x,.78,.18,.18,.12,.48,fabricShade);roll.rotation.z=x<0?-.08:.08}
      width=2.35;depth=1.12;
+    }else if(name==='羊毛沙发'||name==='休闲沙发'){
+     const customStart=group.children.length;
+     if(name==='羊毛沙发'){
+      width=2.55;depth=1.28;height=.88;
+      box(0,.25,0,2.34,.2,.96,walnut);
+      soft(0,.43,-.02,1.13,.17,.47,fabric);
+      for(const x of [-.78,0,.78]){
+       const seat=soft(x,.53,-.02,.39,.16,.43,fabricShade);
+       const seamTube=new T.Mesh(new T.TorusGeometry(.31,.009,8,28),welt);
+       seamTube.position.set(x,.57,-.025);seamTube.rotation.x=Math.PI/2;group.add(seamTube);
+       const back=soft(x,.75,.36,.39,.28,.17,fabric);back.rotation.x=-.1;
+      }
+      for(const x of [-1.02,1.02]){
+       soft(x,.62,-.02,.24,.31,.53,fabric);
+       soft(x,.87,-.02,.24,.09,.43,fabricShade);
+      }
+      for(const x of [-.9,.9])for(const z of [-.38,.38]){
+       const foot=new T.Mesh(new T.CylinderGeometry(.035,.045,.17,12),walnut);
+       foot.position.set(x,.11,z);group.add(foot);
+      }
+     }else{
+      width=2.3;depth=1.08;height=.98;
+      box(0,.29,0,2.05,.12,.78,walnut);
+      for(const x of [-.94,.94]){
+       box(x,.57,-.02,.07,.64,.07,walnut);
+       box(x,.83,.12,.08,.08,.5,walnut);
+       box(x,.36,-.03,.07,.25,.08,walnut);
+      }
+      for(const x of [-.52,.52]){
+       const seat=soft(x,.49,-.04,.48,.13,.36,fabric);
+       const back=soft(x,.77,.27,.47,.25,.12,fabricShade);back.rotation.x=-.1;
+       seam([[x-.35,.53,-.4],[x,.54,-.43],[x+.35,.53,-.4]],.008);
+      }
+      for(const x of [-.82,.82])for(const z of [-.29,.29]){
+       const leg=new T.Mesh(new T.CylinderGeometry(.025,.035,.3,10),walnut);
+       leg.position.set(x,.15,z);group.add(leg);
+      }
+     }
+     for(const child of group.children.slice(customStart))group.remove(child);
     }
     // Fine upholstery finishing: welted cushion edges, panel seams and recessed feet.
     for(const x of [-.62,0,.62]){
@@ -1769,24 +1833,44 @@ function initArday3D(){
     }
     sphere(0,1.77,0,.14,.16,.14,m.leaf);
    }else if(modelName==='书架'){
-    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.55;height=2.1;
-    for(const x of [-.62,.62]){const side=box(x,1.02,0,.09,2.04,.46,m.wood);side.rotation.z=x<0?-.055:.055}
-    for(const [y,w,d] of [[.18,1.3,.5],[.72,1.18,.46],[1.28,1.05,.42],[1.82,.92,.38]])box(0,y,0,w,.075,d,m.oak);
-    // A recessed back panel gives the shelves depth and stops the frame reading as loose planks.
-    box(0,1.02,-.222,1.19,1.94,.035,variant==='深胡桃木书柜'?m.wood:m.sofa2);
-    for(let level=0;level<3;level++){
-     const base=.34+level*.55;
-     for(let j=0;j<4;j++){
-      const ht=.26+(j%2)*.1,x=-.39+j*.26;
-      const bookMat=[m.clay,m.leaf,m.gold,m.dark][(j+level)%4];
-      box(x,base,-.035,.15,ht,.25,bookMat);
-      box(x,base+ht/2+.008,-.035,.125,.012,.255,m.cream);
-      box(x,base,-.164,.018,ht*.72,.012,m.oak);
+    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.58;height=2.12;
+    const open=variant==='开放格架',woodGrid=variant==='白蜡木开放格';
+    const frame=variant==='深胡桃木书柜'?mat(0x503a2d,.62):woodGrid?mat(0xc4a77f,.7):m.wood;
+    const shelf=woodGrid?mat(0xe0cba7,.68):variant==='深胡桃木书柜'?mat(0x74543a,.62):m.oak;
+    if(open){
+     for(const x of [-.65,.65])box(x,1.04,0,.075,2.08,.48,frame);
+     for(const [y,w,d] of [[.16,1.34,.5],[.66,1.18,.46],[1.22,1.34,.46],[1.78,1.12,.42]])box(0,y,0,w,.065,d,shelf);
+     box(0,1.02,-.225,1.26,1.92,.025,m.cream);
+    }else if(woodGrid){
+     box(0,1.05,-.02,1.48,2.1,.52,frame);
+     box(0,1.05,.255,1.34,1.94,.035,m.cream);
+     for(const y of [.16,.68,1.2,1.72,2.0])box(0,y,.015,1.42,.075,.55,shelf);
+     for(const x of [-.46,0,.46])box(x,1.08,.015,.055,1.82,.52,frame);
+     for(const x of [-.68,.68])box(x,1.05,0,.09,2.1,.58,frame);
+    }else{
+     box(0,1.05,0,1.48,2.1,.55,frame);
+     box(0,.28,.29,1.38,.48,.035,shelf);
+     for(const y of [.68,1.2,1.72])box(0,y,0,1.34,.055,.5,shelf);
+     const glass=mat(0xc4d8d9,.14,.12);glass.transparent=true;glass.opacity=.26;
+     for(const x of [-.34,.34]){
+      box(x,1.38,.285,.62,1.18,.025,glass);
+      for(const edge of [-.31,.31])box(x+edge,1.38,.305,.025,1.22,.045,frame);
+      box(x,1.38,.305,.62,.025,.045,frame);
+      cyl(x+(x<0?.24:-.24),1.34,.34,.018,.018,.05,m.gold,10);
      }
-     for(const x of [-.53,.53])box(x,base-.19,-.015,.035,.035,.38,m.gold);
+     box(0,.28,.31,1.38,.46,.035,frame);
+     for(const x of [-.32,.32])cyl(x,.28,.35,.025,.025,.045,m.gold,10);
     }
-    if(variant==='白蜡木开放格'){m.wood.color.setHex(0xc4a77f);m.oak.color.setHex(0xe0cba7)}else if(variant==='深胡桃木书柜'){m.wood.color.setHex(0x503a2d);m.oak.color.setHex(0x74543a)}if(variant==='玻璃门书柜'){const glass=mat(0xc4d8d9,.18,.12);glass.transparent=true;glass.opacity=.3;box(-.3,1.02,.245,.55,1.7,.025,glass);box(.3,1.02,.245,.55,1.7,.025,glass);box(0,1.02,.265,.035,1.78,.04,m.gold);for(const x of [-.06,.06])cyl(x,1.02,.29,.018,.018,.045,m.gold,10)}
-    const braceL=box(-.39,1.02,-.22,.045,1.75,.04,m.gold);braceL.rotation.z=-.28;const braceR=box(.39,1.02,-.22,.045,1.75,.04,m.gold);braceR.rotation.z=.28;
+    for(let level=0;level<3;level++){
+     const y=.38+level*.53;
+     for(let j=0;j<5;j++){
+      const x=-.48+j*.22,bookH=.24+(j%3)*.07;
+      const bookMat=[m.clay,m.leaf,m.gold,m.dark,m.sofa2][(j+level)%5];
+      box(x,y,-.12,.13,bookH,.22,bookMat);
+      box(x,y+bookH/2+.008,-.12,.105,.012,.225,m.cream);
+      box(x,y,-.236,.012,bookH*.72,.012,shelf);
+     }
+    }
    }else if(modelName==='书桌'||modelName==='餐桌'){
     action=()=>modelName==='书桌'?openFurnitureActions('desk',id):openFurnitureActions('dining',id);const dining=modelName==='餐桌';width=dining?1.95:1.55;depth=dining?1.15:.82;height=dining?.82:.78;surfaceType='table';surfaceY=height+.05;
     if(dining&&variant==='浅橡木长桌'){box(0,.83,0,2.05,.13,1.12,m.oak);box(0,.91,0,1.98,.025,1.05,m.cream);for(const x of [-.82,.82])for(const z of [-.39,.39])box(x,.4,z,.12,.76,.12,m.wood);box(0,.38,0,1.5,.08,.08,m.wood)}else if(dining){cyl(0,.4,0,.13,.2,.72,m.wood,12);cyl(0,.12,0,.62,.62,.13,m.oak,12);cyl(0,.82,0,.08,.08,.1,m.gold,12);cyl(0,.88,0,.62,.58,.12,m.wood,12);cyl(0,.95,0,.57,.57,.035,m.cream,12)}
