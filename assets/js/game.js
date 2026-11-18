@@ -612,7 +612,7 @@ function hasAutonomyFurniture(requirement){
 function chooseAutonomousActivity(){
  const recent=(s.activityLog||[]).slice(-5).map(item=>item.activity);
  const temperament=typeof ardayTemperament==='function'?ardayTemperament():{composed:.6,indirect:.4};
- const description=(s.personality?.description||'').toLowerCase();
+ const description=(typeof s.personality==='string'?s.personality:(s.personality?.description||'')).toLowerCase();
  const candidates=Object.entries(activityMeta).filter(([id,meta])=>meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires)).map(([id,meta])=>{
   const spec=meta.autonomy,level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
   let personality=0;
@@ -624,7 +624,7 @@ function chooseAutonomousActivity(){
   if(id==='rest')personality+=Math.max(0,45-(Number(s.energy)||0))*.22;
   if(id==='computerPlay')personality+=Math.max(0,50-(Number(s.fun)||0))*.16;
   const repeatPenalty=recent.filter(x=>x===id).length*3.2;
-  const preference=(Number(s.preferences?.[id])||0)*1.8;
+  const preference=(Number(s.preferences?.[id==='read'?'reading':id])||0)*1.8;
   const temperamentBias=id==='rest'?(1-temperament.composed)*1.5:0;
   return {activity:id,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
  }).filter(item=>Number.isFinite(item.score)&&item.score>=0);
@@ -759,7 +759,7 @@ s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
 s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
 
 function ardayTemperament(){
- const d=(s.personality?.description||'').toLowerCase();
+ const d=(typeof s.personality==='string'?s.personality:(s.personality?.description||'')).toLowerCase();
  const hasWord=re=>re.test(d);
  return {
   composed:hasWord(/从容|游刃有余|淡定|镇定|轻松|不慌/)||!d?0.78:0.58,
