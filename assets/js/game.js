@@ -36,14 +36,15 @@ s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition
 const legacyItems=Array.isArray(s.items)?s.items:[];
 const legacyOwned=Array.isArray(s.ownedFurniture)?s.ownedFurniture:[];
 const legacyPlaced=Array.isArray(s.placedFurniture)?s.placedFurniture:[];
-const legacyEntity=(name,kind,index)=>({id:'inv-'+kind+'-legacy-'+index,name,kind});
+const legacyEntity=(name,kind,index)=>{const parts=name.split('·');return {id:'inv-'+kind+'-legacy-'+index,name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''}};
 const migratedInventory=[
  ...legacyItems.filter(name=>typeof name==='string'&&!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(name)).map((name,index)=>legacyEntity(name,'food',index)),
  ...legacyOwned.filter(name=>typeof name==='string').map((name,index)=>legacyEntity(name,name.startsWith('成品食物·')?'food':'furniture',index))
 ];
 if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))s.inventory=migratedInventory;
 else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string');
-const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string').map((item,index)=>({...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind:item.kind||(item.name.startsWith('成品食物·')?'food':'furniture')}));
+s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():''});
+const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string').map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
 if(!Array.isArray(s.placed)||(!s.placed.length&&migratedPlaced.length))s.placed=migratedPlaced;
 // The old furniture list described built-in scene fixtures, not owned inventory.
 const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
@@ -74,6 +75,7 @@ s.placed.forEach((item,index)=>{
  if(!item||typeof item!=='object')return;
  if(typeof item.name!=='string'||!item.name.trim())return;
  if(!item.id)item.id='legacy-placed-'+(item.room||'unknown')+'-'+index;
+ const parts=item.name.split('·');if(!item.kind)item.kind=item.name.startsWith('成品食物·')?'food':'furniture';if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';
  if(!['living','bedroom','kitchen'].includes(item.room))item.room='living';
  if(!Number.isFinite(Number(item.x)))item.x=0;
  if(!Number.isFinite(Number(item.y)))item.y=0;
@@ -116,7 +118,7 @@ let inventoryGrid=null;
 let shopFurnitureGroup='起居空间';
 let shopFurnitureType='沙发';
 const furnitureNameById={'buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽'};
-function addInventoryItem(name,kind='food',id=null){const entity={id:id||('inv-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)),name,kind};s.inventory.push(entity);return entity}
+function addInventoryItem(name,kind='food',id=null){const parts=name.split('·'),entity={id:id||('inv-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)),name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''};s.inventory.push(entity);return entity}
 function addItem(name){return addInventoryItem(name,'food')}
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
@@ -1467,8 +1469,8 @@ function initArday3D(){
   function persistFurniture(item){
    s.placed=s.placed||[];
    let saved=s.placed.find(x=>x.id===item.id);
-   if(!saved){saved={id:item.id,name:item.name,room:item.room,kind:item.kind||(item.owned?'furniture':'scene')};s.placed.push(saved)}
-   Object.assign(saved,{name:item.name,room:item.room,x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null});
+   if(!saved){saved={id:item.id,name:item.name,room:item.room,kind:item.kind||(item.owned?'furniture':'scene'),itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():''};s.placed.push(saved)}
+   Object.assign(saved,{name:item.name,room:item.room,itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,supportId:item.supportId||null});
    if(item.dyeColor)saved.dyeColor=item.dyeColor;
    if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}
    save();
