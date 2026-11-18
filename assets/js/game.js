@@ -1116,18 +1116,18 @@ function initArday3D(){
   for(let i=0;i<8;i++){const x=i*78-25,h=65+(i*37)%95;outdoorCtx.fillStyle=i%2?'#81958b':'#71877f';outdoorCtx.fillRect(x,260-h,58,h);outdoorCtx.fillStyle='#647c72';for(let y=260-h;y<260;y+=28)outdoorCtx.fillRect(x+8,y,42,3)}
   outdoorCtx.fillStyle='#627c6e';outdoorCtx.beginPath();outdoorCtx.moveTo(0,300);outdoorCtx.quadraticCurveTo(130,250,250,302);outdoorCtx.quadraticCurveTo(390,255,512,294);outdoorCtx.lineTo(512,384);outdoorCtx.lineTo(0,384);outdoorCtx.fill();
   const outdoorTexture=new T.CanvasTexture(outdoorCanvas);outdoorTexture.encoding=T.sRGBEncoding;
-  function addWindowDressing(windowGroup,width,height,color=0xc8b9a8){
+  function addWindowDressing(windowGroup,width,height,color=0xc8b9a8,centerY=2.6){
    const fabric=new T.MeshStandardMaterial({color,roughness:.96,side:T.DoubleSide});
-   const rod=cyl(windowGroup,0,height+.11,.12,.035,width+.24,M(0x9a7655,.42),16);rod.rotation.z=Math.PI/2;
+   const rod=cyl(windowGroup,0,centerY+height/2+.11,.12,.035,width+.24,M(0x9a7655,.42),16);rod.rotation.z=Math.PI/2;
    for(const side of [-1,1]){
     const geometry=new T.PlaneGeometry(.58,height,18,28),positions=geometry.attributes.position;
     for(let i=0;i<positions.count;i++){const x=positions.getX(i),y=positions.getY(i),v=(y+height/2)/height;positions.setX(i,x+Math.sin((x+.29)*42)*.022+Math.sin(v*8)*.012)}
     geometry.computeVertexNormals();
-    const panel=new T.Mesh(geometry,fabric);panel.position.set(side*(width*.5-.3),height*.5,.13);panel.castShadow=true;panel.receiveShadow=true;windowGroup.add(panel);
-    const tie=new T.Mesh(new T.TorusGeometry(.19,.018,8,24),M(0xb18b58,.48));tie.position.set(side*(width*.5-.3),height*.43,.17);tie.scale.set(1,.55,1);windowGroup.add(tie);
-    for(let j=0;j<4;j++){const ring=new T.Mesh(new T.TorusGeometry(.035,.009,6,12),M(0x9a7655,.4));ring.position.set(side*(width*.5-.3)+side*(-.21+j*.14),height+.1,.12);ring.rotation.x=Math.PI/2;windowGroup.add(ring)}
+    const panel=new T.Mesh(geometry,fabric);panel.position.set(side*(width*.5-.3),centerY,.13);panel.castShadow=true;panel.receiveShadow=true;windowGroup.add(panel);
+    const tie=new T.Mesh(new T.TorusGeometry(.19,.018,8,24),M(0xb18b58,.48));tie.position.set(side*(width*.5-.3),centerY-height*.07,.17);tie.scale.set(1,.55,1);windowGroup.add(tie);
+    for(let j=0;j<4;j++){const ring=new T.Mesh(new T.TorusGeometry(.035,.009,6,12),M(0x9a7655,.4));ring.position.set(side*(width*.5-.3)+side*(-.21+j*.14),centerY+height/2+.1,.12);ring.rotation.x=Math.PI/2;windowGroup.add(ring)}
    }
-   for(const side of [-1,1]){const finial=new T.Mesh(new T.SphereGeometry(.055,10,8),M(0xb18b58,.42));finial.position.set(side*(width*.5+.12),height+.11,.12);windowGroup.add(finial)}
+   for(const side of [-1,1]){const finial=new T.Mesh(new T.SphereGeometry(.055,10,8),M(0xb18b58,.42));finial.position.set(side*(width*.5+.12),centerY+height/2+.11,.12);windowGroup.add(finial)}
   }
 
   // Shared procedural textures keep contact shading and lamp bloom consistent without per-object canvases.
@@ -1168,23 +1168,23 @@ function initArday3D(){
   // Three distinct interiors; only one room is visible at a time.
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0x8c7966);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
-  const addWindowView=(windowGroup,width,height)=>{const view=new T.Mesh(new T.PlaneGeometry(width-.08,height-.08),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false}));view.position.set(0,height/2,-.105);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;windowGroup.add(view);const pane=box(windowGroup,0,height/2,-.045,width-.08,height-.08,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
-  addWindowView(livingWindow,2.1,1.85);
+  const addWindowView=(windowGroup,centerY)=>{const view=new T.Mesh(new T.PlaneGeometry(2.1,1.85),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false}));view.position.set(0,centerY,-.105);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;windowGroup.add(view);const pane=box(windowGroup,0,centerY,-.045,2.1,1.85,.035,m.glass);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=2;};
+  addWindowView(livingWindow,2.6);
   for(const [x,y,w,h] of [[-1.07,2.6,.12,1.95],[1.07,2.6,.12,1.95],[0,3.53,2.2,.12],[0,1.67,2.2,.12],[0,2.6,.08,1.85]])box(livingWindow,x,y,0,w,h,.1,m.oak);
-  addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4);
+  addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4,2.6);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0x87786f);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
-  addWindowView(bedroomWindow,2.0,1.7);
+  addWindowView(bedroomWindow,2.65);
   for(const [x,y,w,h] of [[-1.03,2.65,.13,1.85],[1.03,2.65,.13,1.85],[0,3.5,2.15,.13],[0,1.8,2.15,.13]])box(bedroomWindow,x,y,0,w,h,.1,M(0x8a6e68));
-  addWindowDressing(bedroomWindow,2.0,1.7,0xb9a9a0);
+  addWindowDressing(bedroomWindow,2.0,1.7,0xb9a9a0,2.65);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0x8a7867);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
-  addWindowView(kitchenWindow,1.8,1.5);
+  addWindowView(kitchenWindow,2.65);
   for(const x of [-.9,.9])box(kitchenWindow,x,2.65,0,.12,1.65,.1,M(0x9a7655));
-  addWindowDressing(kitchenWindow,1.8,1.5,0xd0c4b1);
+  addWindowDressing(kitchenWindow,1.8,1.5,0xd0c4b1,2.65);
   box(kitchen,0,2.0,-3.91,7.7,1.05,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=1.62;y<=2.38;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
   // Three-dimensional hinged doors are part of each room, not UI overlays.
