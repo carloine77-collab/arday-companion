@@ -145,7 +145,8 @@ function openTab(name,force=false){
  if(name==='目标'){closeCalendar();showGoals();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='目标'));return}
  if(name==='账户'){closeCalendar();showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
  if(name==='职业'){closeCalendar();showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
- $('drawer').classList.remove('profile-expanded');
+ $('drawer').classList.remove('profile-expanded','furniture-drawer');
+ $('drawer').querySelector('.furniture-close')?.remove();
  $('drawerTitle').textContent=name+' · ¥'+s.money;$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
  let shopGrid=null;
  if(name==='商店'){
@@ -226,6 +227,7 @@ function eventChoicesLegacy(e){
  $('drawer').classList.add('open');
 }
 function renderEvents(){
+ $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  const open=s.events.filter(e=>e.status==='open').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='最近发生的事';$('choices').className='choices events-view';$('choices').innerHTML='';
@@ -608,6 +610,7 @@ function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');i
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
 function openKitchenPanel(){
+ $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  kitchenOpen();
  const stock=Object.entries(ingredientNames).map(([key,label])=>'<span class="cooking-stock-item">'+label+' <b>×'+pantryCount(key)+'</b></span>').join('');
  const cards=Object.entries(recipes).map(([id,recipe])=>{const enough=canCook(id),ingredients=Object.entries(recipe.ingredients).map(([key,count])=>ingredientNames[key]+' ×'+count).join('　·　');return '<article class="cooking-card"><div class="cooking-dish-icon">'+(id==='eggRice'?'🍚':id==='tomatoEgg'?'🍳':'🥣')+'</div><div class="cooking-dish-copy"><strong>'+recipe.name+'</strong><small>'+ingredients+'</small></div><button type="button" class="cooking-make" data-recipe="'+id+'" '+(enough?'':'disabled')+'>'+(enough?'制作':'缺少食材')+'</button></article>'}).join('');
@@ -788,17 +791,29 @@ function furnitureRequirementAvailable(requirement,room){
 function openFurnitureActions(kind,furnitureId=null){
  const set=furnitureActivities[kind];if(!set)return;
  if(set.action==='kitchen'){openKitchenPanel();return}
- const sourceFurniture=(s.placed||[]).find(item=>item.id===furnitureId);
- $('drawerTitle').textContent=set.title+' · 互动';
- $('choices').innerHTML='';
+ const drawer=$('drawer'),choices=$('choices'),sourceFurniture=(s.placed||[]).find(item=>item.id===furnitureId);
+ drawer.classList.remove('shop-drawer','profile-expanded');
+ drawer.classList.add('furniture-drawer');
+ $('drawerTitle').textContent=set.title;
+ choices.className='choices furniture-choices';
+ choices.innerHTML='';
  Object.entries(set.activities||{}).forEach(([activity,context])=>{
   const meta=activityMeta[activity];if(!meta)return;
   if(!furnitureRequirementAvailable(meta.requires,sourceFurniture?.room||'living'))return;
   const b=document.createElement('button');b.className='choice';b.type='button';b.textContent=activityLabel(activity);
-  b.onclick=()=>{$('drawer').classList.remove('open');perform(activity,true,{anchor:context?.anchor||null,source:'furniture',furnitureId,furnitureKind:kind})};
-  $('choices').appendChild(b);
+  b.onclick=()=>{drawer.classList.remove('open');perform(activity,true,{anchor:context?.anchor||null,source:'furniture',furnitureId,furnitureKind:kind})};
+  choices.appendChild(b);
  });
- $('drawer').classList.add('open');
+ if(!choices.children.length){
+  const empty=document.createElement('div');empty.className='furniture-empty';empty.textContent='目前没有可用的互动';choices.appendChild(empty);
+ }
+ let close=drawer.querySelector('.furniture-close');
+ if(!close){
+  close=document.createElement('button');close.type='button';close.className='close furniture-close';close.setAttribute('aria-label','关闭家具互动');close.textContent='×';
+  drawer.querySelector('.drawer-head').appendChild(close);
+ }
+ close.onclick=()=>{drawer.classList.remove('open');document.querySelectorAll('.tool').forEach(button=>button.classList.remove('active'))};
+ drawer.classList.add('open');
 }
 function resolveCharacterAvailability(at=new Date()){
  const hour=at.getHours(),key=keyAt(at),ev=eventAt(key,hour);
@@ -829,6 +844,7 @@ buyIngredient=function(id,label,cost){
 };
 
 function eventChoices(e){
+ $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  if(e.type!=='bill')return eventChoicesLegacy(e);
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view';$('drawerTitle').textContent=e.title;
  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">从共同账户支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
