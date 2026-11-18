@@ -421,53 +421,11 @@ document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListene
 
 
 
-function scheduleSlotAvailable(key,start,duration=1){
- const day=s.calendar.days[key]||[];
- for(let h=start;h<start+duration;h++){
-  const ev=day.find(e=>h>=e.start&&h<e.end);
-  if(ev&&!['free','autonomous'].includes(ev.kind))return false;
- }
- return true;
-}
-function findAvailableSlot(now=new Date(),duration=1){
- const today=keyAt(now),hour=now.getHours();
- for(let offset=0;offset<=2;offset++){
-  const d=new Date(now);d.setDate(d.getDate()+offset);
-  const key=ensureScheduleAt(d),from=offset===0?hour+(s.lastUnifiedHourKey===today+'-'+hour?1:0):6;
-  for(let h=from;h+duration<=24;h++)if(scheduleSlotAvailable(key,h,duration))return {key,start:h};
- }
- return null;
-}
-function evaluateActivityProposal(activity,dayOffset=0){
- const score=s.friend*.28+s.attach*.22-s.bored*.5-s.hate*.35+(s.energy-50)*.16+(s.preferences?.[activity]||0)*4+(activity==='computerPlay'&&s.fun<40?10:0);
- const survival=(activity==='rest'&&s.energy<28)||(activity==='eat'&&s.hunger<38);
- // The fresh-save baseline is 11.84; the former threshold of 12 rejected
- // every ordinary invitation before preferences had time to develop.
- return survival||score>8+(Math.max(0,dayOffset)*1.5);
-}
 function rejectActivityProposal(activity){
  const refusals={chat:['我想先自己待一会儿，晚些再聊吧。','今天暂时没有聊天的兴致。'],computerPlay:['现在不太想玩电脑游戏。','这会儿想做点别的。'],walk:['外面我暂时不想去。','今天不想出门，改天吧。'],read:['我现在没心思看书。','读书这件事不急，晚点再说。'],rest:['我还不想休息。','现在坐不住，等会儿再说。']};
  const lines=refusals[activity]||['这会儿不太想做。','我有自己的安排，换个时间吧。'];
  say(lines[Math.floor(Math.random()*lines.length)]);s.rejections=(s.rejections||0)+1;
  if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];
-}
-function proposeActivityNow(action,force=false,options={}){
- // A scheduled invitation targets a future slot. Arday being asleep, at work,
- // eating or outside right now must not block booking a later available hour.
- const a=normalizeActivity(action),now=new Date();
- if(a==='idle'||!activityMeta[a])return false;
- if((a==='walk'||a==='computerPlay')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
- const requiredFurniture=activityMeta[a].requires;
- if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture)){say('家里还没有适合进行这项活动的家具。');return false}
- const slot=options.slot||findAvailableSlot(now,1),dayOffset=Number(options.dayOffset)||0;
- if(!slot){say('最近几天的安排都比较满。等有空档时，我们再约这件事。');return false}
- if(!scheduleSlotAvailable(slot.key,slot.start,1)){say('这个时间已经有其他安排了。我们换个时间吧。');return false}
- const accepted=force||evaluateActivityProposal(a,dayOffset);
- if(!accepted){rejectActivityProposal(a);save();return false}
- const title=activityMeta[a].menuLabel||activityMeta[a].title||a;
- writeBlockForKey(slot.key,slot.start,slot.start+1,{title,kind:'proposal',activity:a,withPlayer:true,byPlayer:true,anchor:options.anchor||null,startedBy:options.source||'player'});
- remember('planned','约定：'+title,1);say(slot.key===keyAt(now)&&slot.start===now.getHours()+1?'好，我把稍后的时间留出来。':'可以，我把这段时间留给我们。');
- save();render();if($('stage').classList.contains('calendar-mode'))renderCalendar();return true;
 }
 function dayAnchorAt(value){
  const d=new Date(value);
@@ -522,6 +480,16 @@ function ensureScheduleAt(value){
    [[7,'早餐'],[12,'午餐'],[18,'晚餐']].forEach(([hour,title])=>writeBlockForKey(key,hour,hour+1,{title,kind:'routine',activity:'eat'}));
   });
   s.calendar.version=14;
+ }
+ if((s.calendar.version||0)<15){
+  Object.keys(s.calendar.days).forEach(key=>{
+   s.calendar.days[key]=(s.calendar.days[key]||[]).map(ev=>{
+    if(ev.kind!=='proposal')return ev;
+    const {withPlayer,byPlayer,startedBy,anchor,furnitureId,furnitureKind,...rest}=ev;
+    return {...rest,title:'自主安排',kind:'autonomous',activity:'autonomous',autonomous:true,source:'simulation',unresolved:true};
+   });
+  });
+  s.calendar.version=15;
  }
  
  
@@ -615,7 +583,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','tea','walk','read','game','music','food','company','chat','computerPlay','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
+ if(['listen','walk','read','game','music','food','company','chat','computerPlay','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
   s.friend=clamp(s.friend+1);
   s.attach=clamp(s.attach+.5);
   remember('shared',action);
