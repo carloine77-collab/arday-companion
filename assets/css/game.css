@@ -1021,3 +1021,60 @@ html body .stage .drawer.profile-expanded.open .choices{
 .drawer.furniture-drawer .furniture-close:focus-visible{
  outline:2px solid #8c765e;outline-offset:2px;
 }
+
+
+/* Rebuilt cooking interface */
+.stage .drawer .choices.cooking-panel{display:flex!important;flex-direction:column!important;gap:22px!important;padding:0 2px 18px!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+.kitchen-hero{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:154px;padding:25px 25px 22px;border:1px solid #d8c5a9;background:linear-gradient(112deg,#eee2cf 0%,#f7f0e5 58%,#e5d7c2 100%);overflow:hidden}
+.kitchen-hero:after{content:"";position:absolute;width:220px;height:220px;right:28px;top:-110px;border:1px solid #a78c6d35;border-radius:50%;box-shadow:0 0 0 18px #a78c6d0b,0 0 0 38px #a78c6d08}
+.kitchen-hero-copy{position:relative;z-index:1;max-width:560px}
+.kitchen-eyebrow,.kitchen-section-heading>div>span{display:block;color:#9b7958;font:700 9px/1.4 Arial,sans-serif;letter-spacing:.2em}
+.kitchen-hero h2{margin:13px 0 8px;color:#493b2d;font:600 clamp(22px,3.2vw,32px)/1.25 Georgia,"Noto Serif SC",serif;letter-spacing:.02em}
+.kitchen-hero h2 em{color:#a66d4c;font-style:normal}
+.kitchen-hero p{margin:0;color:#897761;font-size:12px;line-height:1.7}
+.kitchen-hero-mark{position:relative;z-index:1;display:grid;place-items:center;flex:0 0 66px;width:66px;height:66px;border:1px solid #a98a684d;border-radius:50%;color:#98795a;font:italic 29px Georgia,serif}
+.kitchen-pantry,.kitchen-menu{display:flex;flex-direction:column;gap:13px}
+.kitchen-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 2px}
+.kitchen-section-heading h3{margin:4px 0 0;color:#514130;font:600 19px/1.3 Georgia,"Noto Serif SC",serif}
+.kitchen-section-heading>small{padding-bottom:3px;color:#a18c75;font-size:10px}
+.kitchen-ingredient-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kitchen-ingredient{display:grid;grid-template-columns:38px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;column-gap:9px;min-height:72px;padding:11px 12px;border:1px solid #e1d4c1;background:#faf6ee}
+.kitchen-ingredient-icon{grid-row:1/3;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#eee4d5;font-size:20px}
+.kitchen-ingredient-name{align-self:end;color:#64513d;font-size:12px}
+.kitchen-ingredient strong{align-self:start;color:#a27652;font-size:12px;font-variant-numeric:tabular-nums}
+.kitchen-ingredient.empty{background:#f0ece5;border-color:#e6dfd4}
+.kitchen-ingredient.empty .kitchen-ingredient-icon{filter:grayscale(.8);opacity:.55}
+.kitchen-ingredient.empty strong{color:#b2a99d}
+.kitchen-recipe-list{display:flex;flex-direction:column;gap:10px}
+.kitchen-recipe-card{display:grid;grid-template-columns:66px minmax(0,1fr) auto;align-items:center;gap:15px;padding:15px;border:1px solid #e0d2bf;background:#fbf8f1}
+.kitchen-recipe-art{display:grid;place-items:center;width:62px;height:62px;background:linear-gradient(145deg,#f0e5d4,#e6d7c2);font-size:31px}
+.kitchen-recipe-main{min-width:0;display:flex;flex-direction:column;gap:8px}
+.kitchen-recipe-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
+.kitchen-recipe-heading strong{color:#4e3f30;font:600 16px Georgia,"Noto Serif SC",serif}
+.kitchen-recipe-benefit{color:#a17a58;font-size:10px}
+.kitchen-recipe-ingredients{display:flex;flex-wrap:wrap;gap:6px}
+.kitchen-recipe-ingredient{padding:4px 7px;background:#eee8dc;color:#84715b;font-size:10px}
+.kitchen-recipe-ingredient.ready{background:#e7ebdf;color:#63704f}
+.kitchen-recipe-ingredient.missing{background:#eee8e0;color:#a49a8d}
+.kitchen-recipe-ingredient b{font-weight:700}
+.kitchen-recipe-note{margin:0;color:#87906e;font-size:10px}
+.kitchen-recipe-note.missing-note{color:#a28b75}
+.kitchen-cook-button{min-width:104px;min-height:44px;padding:10px 13px;border:0;background:#725a43;color:#fffaf2;font-size:12px;letter-spacing:.04em}
+.kitchen-cook-button:disabled{background:#e4ddd2;color:#a79b8d;cursor:not-allowed}
+.kitchen-bottom-bar{position:sticky;bottom:-18px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:2px;padding:14px 2px 2px;border-top:1px solid #d7c8b4;background:#eee3d3}
+.kitchen-bottom-bar p{margin:0;color:#8d7b67;font-size:11px;line-height:1.6}
+.kitchen-bottom-bar button{flex:0 0 auto;min-height:44px;padding:10px 18px;border:1px solid #bba78d;background:#e4d6c2;color:#594733;font-size:12px}
+@media(max-width:700px){
+ .stage .drawer .choices.cooking-panel{gap:17px!important}
+ .kitchen-hero{min-height:132px;padding:19px 17px}
+ .kitchen-hero-mark{flex-basis:48px;width:48px;height:48px;font-size:23px}
+ .kitchen-hero p{max-width:270px;font-size:11px}
+ .kitchen-ingredient-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .kitchen-ingredient{min-height:66px;padding:9px}
+ .kitchen-recipe-card{grid-template-columns:46px minmax(0,1fr);gap:10px;padding:12px}
+ .kitchen-recipe-art{width:44px;height:44px;font-size:24px}
+ .kitchen-recipe-heading strong{font-size:15px}
+ .kitchen-cook-button{grid-column:2;justify-self:start;min-width:120px}
+ .kitchen-bottom-bar{align-items:flex-start}
+ .kitchen-bottom-bar p{max-width:60%;font-size:10px}
+}
