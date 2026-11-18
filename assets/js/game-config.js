@@ -94,7 +94,7 @@ window.ArdayGameConfig = {
  computer:{title:'电脑',activities:{computerPlay:{anchor:'desk'},write:{anchor:'desk'}}},
  television:{title:'电视',activities:{watchTV:{anchor:'sofa'}}},
  recordPlayer:{title:'唱片机',activities:{listenRecords:{anchor:'sofa'}}},
- bouquet:{title:'捧花摆件',activities:{bouquet:{anchor:'bouquet'},admireFlowers:{anchor:'bouquet'},smellFlowers:{anchor:'bouquet'}}}
+
  },
    recipes: {eggRice:{name:'蛋炒饭',ingredients:{rice:1,egg:1},hunger:30},tomatoEgg:{name:'番茄炒蛋',ingredients:{tomato:1,egg:2},hunger:28},vegetableSoup:{name:'蔬菜汤',ingredients:{vegetable:2},hunger:22}},
   ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄'}
