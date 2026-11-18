@@ -433,7 +433,8 @@ function rejectActivityProposal(activity){
  if(s.rejections>=2)s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'坚持自己的节奏'])];
 }
 function proposeActivityNow(action,force=false,options={}){
- if(ardayUnavailable()){busyBubble();return false}
+ // A scheduled invitation targets a future slot. Arday being asleep, at work,
+ // eating or outside right now must not block booking a later available hour.
  const a=normalizeActivity(action),now=new Date();
  if(a==='idle'||!activityMeta[a])return false;
  if((a==='walk'||a==='computerPlay')&&s.energy<22){say('我现在精力不太够，做这个恐怕不合适。');s.rejections=(s.rejections||0)+1;save();return false}
