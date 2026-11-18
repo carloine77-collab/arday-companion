@@ -39,26 +39,38 @@ window.ArdayGameConfig = {
  }
 
 },
+  characterStats: {
+   energy: {
+    hourlyDecay: 0.45,
+    sleepRecoveryPerHour: 13,
+    activityEffects: {
+     rest:10, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
+     computerPlay:-3, music:-1, walk:-5, game:-3, write:-3, work:-4,
+     sitChair:5, food:0, bouquet:0, tea:0, company:0
+    }
+   },
+   needs: { hungerHourlyDecay:0.8, cleanHourlyDecay:0.25, funHourlyDecay:0.3 }
+  },
   activityMeta: {
- rest:{title:'休息',playerSelectable:true,playerIcon:'☁',autonomous:true,autonomy:{need:'energy',threshold:58,weight:1.55},menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{energy:10,fun:1}},
- sleep:{title:'睡觉',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{energy:13,hunger:-1}},
- eat:{title:'吃东西',autonomous:true,autonomy:{need:'hunger',threshold:58,weight:1.8},menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:18,energy:1}},
+ rest:{title:'休息',playerSelectable:true,playerIcon:'☁',autonomous:true,autonomy:{need:'energy',threshold:62,weight:1.65},menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
+ sleep:{title:'睡觉',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{hunger:-1}},
+ eat:{title:'吃东西',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:18}},
  food:{title:'一起吃东西',autonomous:false,menuLabel:'一起吃东西',location:'table',pose:'sit',anchor:'table',effect:{hunger:20,fun:3}},
- wash:{title:'洗漱',autonomous:true,autonomy:{need:'clean',threshold:55,weight:1.25},menuLabel:'洗漱',location:'window',pose:'walk',anchor:'default',effect:{clean:17,energy:-1}},
- read:{title:'阅读',playerSelectable:true,playerIcon:'📖',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.8},menuLabel:'阅读',location:'desk',pose:'sit',anchor:'shelf',effect:{fun:8,energy:-2}},
- chat:{title:'聊天',playerSelectable:true,playerIcon:'💬',autonomous:false,menuLabel:'聊天',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:3,energy:0}},
- computerWork:{title:'使用电脑工作',autonomous:false,menuLabel:'电脑工作',location:'desk',pose:'sit',anchor:'desk',effect:{energy:-4,fun:-1}},
- computerPlay:{title:'用电脑玩游戏',playerSelectable:true,playerIcon:'▣',autonomous:false,menuLabel:'电脑游戏',location:'desk',pose:'sit',anchor:'desk',effect:{fun:9,energy:-3}},
+ wash:{title:'洗漱',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},menuLabel:'洗漱',location:'window',pose:'walk',anchor:'default',effect:{clean:17}},
+ read:{title:'阅读',playerSelectable:true,playerIcon:'📖',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.9},menuLabel:'阅读',location:'desk',pose:'sit',anchor:'shelf',effect:{fun:8}},
+ chat:{title:'聊天',playerSelectable:true,playerIcon:'💬',autonomous:true,autonomy:{need:'friend',threshold:48,weight:.42,base:1},menuLabel:'聊天',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:3}},
+ computerWork:{title:'使用电脑工作',autonomous:false,menuLabel:'电脑工作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:-1}},
+ computerPlay:{title:'用电脑玩游戏',playerSelectable:true,playerIcon:'▣',autonomous:true,autonomy:{need:'fun',threshold:54,weight:1.05},requires:'computer',menuLabel:'电脑游戏',location:'desk',pose:'sit',anchor:'desk',effect:{fun:9}},
  bouquet:{title:'欣赏花束',autonomous:false,menuLabel:'欣赏花束',location:'center',pose:'wave',anchor:'bouquet',effect:{fun:3}},
- music:{title:'听音乐',autonomous:true,autonomy:{need:'fun',threshold:65,weight:1.05},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10,energy:-1}},
+ music:{title:'听音乐',autonomous:true,autonomy:{need:'fun',threshold:64,weight:.9},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10}},
  tea:{title:'一起喝茶',autonomous:false,menuLabel:'一起喝茶',location:'table',pose:'sit',anchor:'table',effect:{fun:4,hunger:2}},
- walk:{title:'散步',playerSelectable:true,playerIcon:'🌿',autonomous:true,autonomy:{need:'fun',threshold:60,weight:.15,base:2},menuLabel:'外出',location:'outside',pose:'walk',anchor:'default',effect:{fun:9,energy:-5,clean:-1}},
- game:{title:'玩游戏',autonomous:false,menuLabel:'玩游戏',location:'rug',pose:'wave',anchor:'default',effect:{fun:11,energy:-3}},
+ walk:{title:'散步',playerSelectable:true,playerIcon:'🌿',autonomous:true,autonomy:{need:'fun',threshold:60,weight:.18,base:2},menuLabel:'外出',location:'outside',pose:'walk',anchor:'default',effect:{fun:9,clean:-1}},
+ game:{title:'玩游戏',autonomous:false,menuLabel:'玩游戏',location:'rug',pose:'wave',anchor:'default',effect:{fun:11}},
  company:{title:'自由相处',autonomous:false,menuLabel:'自由相处',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:4}},
- sitChair:{title:'坐在椅子上',autonomous:false,menuLabel:'坐下',location:'chair',pose:'sit',anchor:'chair',effect:{energy:5,fun:1}},
+ sitChair:{title:'坐在椅子上',autonomous:false,menuLabel:'坐下',location:'chair',pose:'sit',anchor:'chair',effect:{fun:1}},
 
- write:{title:'写作 / 整理资料',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.2,base:13},requires:'desk',menuLabel:'写作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:5,energy:-3}},
- work:{title:'工作',autonomous:false,menuLabel:'工作',location:'desk',pose:'sit',anchor:'desk',effect:{energy:-4,fun:-1}}
+ write:{title:'写作 / 整理资料',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.28,base:10},requires:'desk',menuLabel:'写作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:5}},
+ work:{title:'工作',autonomous:false,menuLabel:'工作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:-1}}
 },
   furnitureActivities: {
  sofa:{title:'沙发',activities:{rest:{anchor:'sofa'},chat:{anchor:'sofa'}}},
