@@ -1056,7 +1056,9 @@ function initArday3D(){
    return material;
   }
   const M=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness}));
+  const painterTextureCache=new Map();
   function createPainterTexture(kind){
+   if(painterTextureCache.has(kind))return painterTextureCache.get(kind);
    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;
    const ctx=canvas.getContext('2d'),bases={wood:'#c8aa86',fabric:'#c9c1b8',ceramic:'#e6e0d5',wall:'#d8d0c4',floor:'#9b9185'};
    ctx.fillStyle=bases[kind]||'#d8d0c4';ctx.fillRect(0,0,512,512);
@@ -1079,7 +1081,7 @@ function initArday3D(){
     for(let y=0;y<512;y+=128)for(let x=0;x<512;x+=128){ctx.fillStyle='rgba(70,64,57,.035)';ctx.fillRect(x+2,y+2,124,124);for(let i=0;i<90;i++){ctx.fillStyle=rand()>.5?'rgba(255,255,255,.07)':'rgba(52,48,43,.055)';ctx.fillRect(x+rand()*128,y+rand()*128,1+rand()*3,1+rand()*2)}}
     ctx.strokeStyle='rgba(255,255,255,.11)';ctx.lineWidth=2;for(let n=0;n<=512;n+=128){ctx.beginPath();ctx.moveTo(n,0);ctx.lineTo(n,512);ctx.moveTo(0,n);ctx.lineTo(512,n);ctx.stroke()}
    }
-   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(kind==='wood'?1.5:kind==='wall'?2:3,kind==='wood'?3:kind==='wall'?2:3);texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return texture;
+   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(kind==='wood'?1.5:kind==='wall'?2:3,kind==='wood'?3:kind==='wall'?2:3);texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());painterTextureCache.set(kind,texture);return texture;
   }
   function applyPainterMap(material,texture,bump){if(!material)return material;material.map=texture;material.bumpMap=texture;material.bumpScale=bump;material.needsUpdate=true;return material}
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
@@ -1094,6 +1096,8 @@ function initArday3D(){
   function applyInkOutlines(root){
    root.traverse(object=>{
     if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
+    if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();
+    if((object.geometry.boundingSphere?.radius||0)<.11)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
     if(!materials.some(material=>material&&material.isMeshStandardMaterial&&!material.transparent&&(material.opacity??1)>.94&&(material.roughness??1)>.28))return;
     const shell=new T.Mesh(object.geometry,inkOutlineMaterial);
@@ -1148,7 +1152,7 @@ function initArday3D(){
    const floorMaterial=applyPainterMap(M(floorColor),roomFloorMap,.008),wallMaterial=applyPainterMap(M(wallColor),roomWallMap,.004);
    group.userData.floorMesh=box(group,0,-.14,0,10.8,.28,8.4,floorMaterial);
    const backWallGroup=new T.Group();group.add(backWallGroup);group.userData.backWall=backWallGroup;
-   const backWallParts=[[-4.55,2.35,3.7,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
+   const backWallParts=[[-5.125,2.35,2.55,4.8],[1.875,2.35,7.05,4.8],[-2.75,.81,2.2,1.72],[-2.75,4.14,2.2,1.22]];
    group.userData.wallMeshes=backWallParts.map(([x,y,w,h])=>box(backWallGroup,x,y,-4.08,w,h,.2,wallMaterial));
    const leftWallGroup=new T.Group(),rightWallGroup=new T.Group(),frontWallGroup=new T.Group();group.add(leftWallGroup,rightWallGroup,frontWallGroup);
    const ceilingMaterial=M(0xe9e3d8);ceilingMaterial.transparent=true;ceilingMaterial.opacity=.22;ceilingMaterial.depthWrite=false;ceilingMaterial.side=T.DoubleSide;group.userData.ceilingMesh=box(group,0,4.78,0,10.8,.12,8.4,ceilingMaterial);group.userData.ceilingMesh.visible=false;group.userData.ceilingMesh.castShadow=false;group.userData.ceilingMesh.renderOrder=8;
@@ -1534,6 +1538,12 @@ function initArday3D(){
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
    if(modelName==='床'){for(const x of [-1.36,1.36]){const finial=sphere(x,1.78,-1.57,.075,.075,.075,m.gold);finial.scale.set(.075,.075,.075)}box(0,.73,1.68,2.78,.035,.035,m.cream)}
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
+   if(modelName==='衣柜'){for(const x of [-.45,.45]){for(const y of [.25,2.2])box(x, y,.426,.72,.035,.025,m.oak);for(const side of [-1,1])box(x+side*.36,1.25,.426,.025,1.9,.025,m.oak);box(x+(x<0?.28:-.28),1.25,.474,.025,.42,.025,m.gold)}box(0,2.52,.02,1.96,.07,.84,m.cream)}
+   if(modelName==='橱柜'){for(const x of [-.92,0,.92]){box(x,.49,.442,.72,.72,.018,m.oak);box(x,.49,.454,.66,.66,.012,m.sofa2);cyl(x+(x<0?.25:-.25),.49,.475,.022,.022,.035,m.gold,10)}box(0,1.065,0,2.94,.035,.92,m.oak)}
+   if(modelName==='冰箱'){box(0,2.12,.468,.72,.018,.012,m.cream);for(const y of [1.43,.52])box(0,y,.468,.82,.018,.012,m.cream)}
+   if(modelName==='水槽'){for(const x of [-.48,.48]){cyl(x,1.02,-.25,.045,.045,.06,m.gold,12);const handle=box(x,1.055,-.25,.12,.025,.035,m.metal);handle.rotation.z=x*.18}box(0,.91,.477,.96,.025,.018,m.oak)}
+   if(modelName==='书桌'||modelName==='餐桌'){for(const x of [-.42,.42]){const ferrule=new T.Mesh(new T.CylinderGeometry(.068,.068,.09,12),m.gold);ferrule.position.set(x,.105,.0);group.add(ferrule)}box(0,.16,.0,width*.72,.035,depth*.72,m.oak);for(const x of [-width*.42,width*.42])box(x,height-.07,0,.025,.045,depth*.86,m.gold)}
+   if(modelName==='椅子'||modelName==='餐桌椅'){const seatEdge=mat(0x9c8064,.9);for(const x of [-.29,.29]){box(x,.565,.34,.025,.025,.025,m.gold)}if(variant==='软包扶手椅'){for(const x of [-.3,.3]){const piping= new T.Mesh(new T.TorusGeometry(.27,.008,6,24,Math.PI),seatEdge);piping.position.set(x,.66,-.19);piping.rotation.y=Math.PI/2;group.add(piping)}}}
    if(modelName==='书架'){for(let level=0;level<3;level++)for(let j=0;j<4;j++){const x=-.39+j*.26,y=.34+level*.55;box(x,y+.02,.105,.105,.018,.012,m.gold)}}
    if(modelName==='书桌'||modelName==='餐桌'){for(const x of [-.42,.42]){const ferrule=new T.Mesh(new T.CylinderGeometry(.068,.068,.09,12),m.gold);ferrule.position.set(x,.105,.0);group.add(ferrule)}box(0,.16,.0,width*.72,.035,depth*.72,m.oak)}
    if(modelName==='电脑'){const screenGlow=box(0,.49,-.112,.62,.012,.006,mat(0x6b9eb1,.28));screenGlow.material.emissive=new T.Color(0x23485b);screenGlow.material.emissiveIntensity=.28;for(let row=0;row<3;row++)for(let col=0;col<10;col++)box(-.27+col*.06,.104+row*.002,.105+row*.047,.035,.006,.025,m.metal)}
@@ -1924,21 +1934,14 @@ function updateArday3D(){
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
  }
- const label=$('roomLabel');if(label){label.dataset.room=mode;label.dataset.cameraMode=cameraGestureMode;label.textContent=cameraGestureMode==='orbit'?'旋转':'平移';}
+ const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':'起居室';}
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;render();renderCalendar();generateDailyEvents();save();
-const cameraModeButton=$('roomLabel');
-if(cameraModeButton){
- cameraModeButton.dataset.cameraMode='pan';
- cameraModeButton.addEventListener('click',e=>{
-  e.preventDefault();e.stopPropagation();
-  cameraGestureMode=cameraGestureMode==='pan'?'orbit':'pan';
-  cameraModeButton.dataset.cameraMode=cameraGestureMode;
-  cameraModeButton.textContent=cameraGestureMode==='pan'?'平移':'旋转';
-  cameraModeButton.setAttribute('aria-pressed',cameraGestureMode==='orbit'?'true':'false');
- });
-}
+const cameraPanButton=$('cameraPan'),cameraOrbitButton=$('cameraOrbit');
+function setCameraGestureMode(mode){cameraGestureMode=mode==='orbit'?'orbit':'pan';cameraPanButton?.classList.toggle('active',cameraGestureMode==='pan');cameraOrbitButton?.classList.toggle('active',cameraGestureMode==='orbit');cameraPanButton?.setAttribute('aria-pressed',cameraGestureMode==='pan'?'true':'false');cameraOrbitButton?.setAttribute('aria-pressed',cameraGestureMode==='orbit'?'true':'false');}
+cameraPanButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('pan')});
+cameraOrbitButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('orbit')});
 initArday3D();updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
