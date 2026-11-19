@@ -27,10 +27,10 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:24,attach:12,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
+const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -90,7 +90,7 @@ s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.unlockedRecipes=Array.i
 s.jobApplications=s.jobApplications||{};
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
-const statKeys=['friend','attach','bored','hate','love','energy','hunger','clean','fun'];
+const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
 let dialogueTimer=null;
@@ -603,10 +603,7 @@ function relation(action){
  // or relational conflict, not through repeated music, reading or games.
  if(['listen','walk','read','game','music','food','company','chat','computerPlay','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
   s.friend=clamp(s.friend+1);
-  s.attach=clamp(s.attach+.5);
   remember('shared',action);
- }else if(action==='ignore'){
-  s.attach=clamp(s.attach-1);
  }
 }
 
@@ -758,7 +755,7 @@ function chooseAutonomousActivity(recentOverride=null){
   if(/安静|内向|独处|疏离/.test(description)&&['read','music','rest'].includes(id))personality+=4;
   if(/活泼|外向|热情|健谈/.test(description)&&['chat','walk'].includes(id))personality+=4;
   if(/自律|认真|勤奋|专注/.test(description)&&id==='write')personality+=4;
-  if(id==='chat')personality+=(Number(s.friend)||0)*.045+(Number(s.attach)||0)*.025;
+  if(id==='chat')personality+=(Number(s.friend)||0)*.045;
   if(id==='rest')personality+=Math.max(0,45-(Number(s.energy)||0))*.22;
   if(id==='computerPlay')personality+=Math.max(0,50-(Number(s.fun)||0))*.16;
   const repeatPenalty=recent.filter(x=>x===id).length*3.2;
@@ -1071,7 +1068,7 @@ function advanceSharedGoal(action,at=Date.now()){
   g.status='completed';g.completedAt=at;
   s.sharedGoalHistory.unshift({id:g.id,title:g.title,completedAt:at});
   s.sharedGoalHistory=s.sharedGoalHistory.slice(0,10);
-  change({friend:2,attach:1,fun:3});
+  change({friend:2,fun:3});
   addEvent('你们完成了一件共同计划', '「'+g.title+'」已经完成。那些零碎的时间，最后真的拼成了一件事。','daily');
   remember('shared-goal','共同完成：'+g.title,3);
   say('原来一起做一件事，最后会留下这样的感觉。');
@@ -1143,7 +1140,7 @@ function showCollection(){
  $('drawer').classList.add('open');
  const amount=()=>Math.floor(Number($('transferAmount')?.value||0));
  $('giftMoney').onclick=()=>{const n=amount();if(!Number.isFinite(n)||n<=0){toast('请输入有效金额');return}if(n>s.money){toast('共同账户余额不足');return}s.money-=n;s.personalMoney+=n;moneyRecord('shared','expense',n,'赠与阿尔');moneyRecord('personal','income',n,'收到赠与');save();render();showCollection();toast('已赠与 ¥'+n)};
- $('requestMoney').onclick=()=>{const n=amount();if(!Number.isFinite(n)||n<=0){toast('请输入有效金额');return}if(n>s.personalMoney){say('我个人账户里没有这么多钱。');toast('个人账户余额不足');return}const chance=Math.max(.12,Math.min(.92,.32+s.friend*.004+s.attach*.003-s.hate*.004));if(Math.random()>chance){say('这笔钱我暂时不想转给共同账户。你可以告诉我这笔支出有什么必要。');toast('阿尔暂时拒绝了');return}s.personalMoney-=n;s.money+=n;moneyRecord('personal','expense',n,'转给共同账户');moneyRecord('shared','income',n,'阿尔转入');save();render();showCollection();toast('阿尔转入共同账户 ¥'+n)};
+ $('requestMoney').onclick=()=>{const n=amount();if(!Number.isFinite(n)||n<=0){toast('请输入有效金额');return}if(n>s.personalMoney){say('我个人账户里没有这么多钱。');toast('个人账户余额不足');return}const chance=Math.max(.12,Math.min(.92,.32+s.friend*.004-s.hate*.004));if(Math.random()>chance){say('这笔钱我暂时不想转给共同账户。你可以告诉我这笔支出有什么必要。');toast('阿尔暂时拒绝了');return}s.personalMoney-=n;s.money+=n;moneyRecord('personal','expense',n,'转给共同账户');moneyRecord('shared','income',n,'阿尔转入');save();render();showCollection();toast('阿尔转入共同账户 ¥'+n)};
 }
 window.resignFromJob=function(event){
  if(event){event.preventDefault();event.stopPropagation()}
