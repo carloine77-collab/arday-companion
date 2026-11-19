@@ -862,7 +862,7 @@ window.ArdayGameConfig = {
  read:{title:'阅读',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.9},requires:'readingSpot',menuLabel:'阅读',location:'desk',pose:'sit',anchor:'shelf',effect:{fun:8}},
  chat:{title:'聊天',duration:'long',autonomous:true,autonomy:{need:'friend',threshold:48,weight:.42,base:1},requires:'seat',menuLabel:'聊天',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:3}},
  computerWork:{title:'使用电脑工作',duration:'long',autonomous:false,menuLabel:'电脑工作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:-1}},
- computerPlay:{title:'玩游戏',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:54,weight:1.05},requires:'computer',menuLabel:'电脑游戏',location:'desk',pose:'sit',anchor:'desk',effect:{fun:9}},
+ computerPlay:{title:'玩游戏',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:54,weight:1.05},requires:'computer',menuLabel:'玩游戏',location:'desk',pose:'sit',anchor:'desk',effect:{fun:9}},
  watchTV:{title:'看电视',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:66,weight:1.05},requires:'television',menuLabel:'看电视',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:14}},
  listenRecords:{title:'听唱片',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:62,weight:.95},requires:'recordPlayer',menuLabel:'听唱片',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:12}},
  music:{title:'听音乐',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:64,weight:.9},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10}},
