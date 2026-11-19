@@ -30,22 +30,21 @@ window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;
 const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
-s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();s.memories=s.memories||[];
+s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
 const preferenceCap=10,preferenceGain=.85,preferenceDailyDecay=.4;
 const preferenceActivities=new Set(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','walk','bouquet','admireFlowers','smellFlowers']);
 function decayActivityPreferences(at=Date.now()){
  const last=Number(s.preferenceUpdatedAt)||at,days=Math.max(0,(at-last)/86400000);
- if(days<1)return;
  const loss=preferenceDailyDecay*days;
- for(const key of Object.keys(s.preferences||{}))s.preferences[key]=Math.max(0,Math.min(preferenceCap,(Number(s.preferences[key])||0)-loss));
+ if(loss>0)for(const key of Object.keys(s.preferences||{}))s.preferences[key]=Math.max(0,Math.min(preferenceCap,(Number(s.preferences[key])||0)-loss));
  s.preferenceUpdatedAt=at;
 }
 function recordActivityPreference(activity,at=Date.now()){
  if(!preferenceActivities.has(activity))return;
+ decayActivityPreferences(at);
  const key=activity==='read'?'reading':['write','program'].includes(activity)?'writing':activity;
  s.preferences=s.preferences||{};
  s.preferences[key]=Math.min(preferenceCap,Math.max(0,Number(s.preferences[key])||0)+preferenceGain);
- s.preferenceUpdatedAt=at;
 }
 function activityPreferenceScore(activity){
  const key=activity==='read'?'reading':['write','program'].includes(activity)?'writing':activity;
@@ -428,11 +427,9 @@ function renderCalendar(){
 }
 function renderProfile(){
  const esc=x=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- const traits=characterStats.personalityTraits||['洞察人心','从容不羁','疏离矜贵','聪敏自持'];
  $('drawerTitle').textContent='人物档案';
  $('drawer').classList.add('profile-expanded');
- $('choices').innerHTML='<div class="dossier-hero"><div class="dossier-monogram">A</div><div class="dossier-name"><span>CHARACTER FILE</span><h2>Arday <i>·</i> 阿尔</h2></div></div>'+
- '<section class="profile-section dossier-section"><div class="section-kicker">PERSONALITY</div><h3>性格印象</h3><div class="trait-list">'+traits.map(x=>'<span class="trait-chip">'+x+'</span>').join('')+'</div></section>';
+ $('choices').innerHTML='<div class="dossier-hero"><div class="dossier-monogram">A</div><div class="dossier-name"><span>CHARACTER FILE</span><h2>Arday <i>·</i> 阿尔</h2></div></div>';
  $('drawer').classList.add('open');
 }
 function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open','profile-expanded');$('stage').classList.add('calendar-mode');$('stage').style.touchAction='pan-y';renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
