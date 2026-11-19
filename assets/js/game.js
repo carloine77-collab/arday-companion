@@ -693,7 +693,9 @@ function finishImmediateInteraction(at=Date.now()){
  const restoredMeta=activityMeta[restoredActivity]||{};
  s.currentActivity=restoredActivity;
  s.currentActivityAnchor=scheduled?.anchor||restoredMeta.anchor||null;
- presentActivity(restoredActivity,s.currentActivityAnchor,scheduled?.room||null,scheduled?.furnitureId||null);
+ s.currentActivityRoom=scheduled?.room||(restoredActivity==='sleep'?'bedroom':'living');
+ s.currentActivityFurnitureId=scheduled?.furnitureId||null;
+ presentActivity(restoredActivity,s.currentActivityAnchor,s.currentActivityRoom,s.currentActivityFurnitureId);
  say('还行。下次也要和我一起。');
  save();render();return true;
 }
@@ -890,7 +892,9 @@ function processActivityAt(value){
  if(workCompleted)updatePersonalGoal('work',d.getTime());
 
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;s.currentActivityAnchor=ev?.anchor||meta?.anchor||null;
- if(!s.activeInteraction)presentActivity(activity,ev?.anchor||meta?.anchor||null,ev?.room||null,ev?.furnitureId||null);
+ s.currentActivityRoom=ev?.room||(activity==='sleep'?'bedroom':'living');
+ s.currentActivityFurnitureId=ev?.furnitureId||null;
+ if(!s.activeInteraction)presentActivity(activity,s.currentActivityAnchor,s.currentActivityRoom,s.currentActivityFurnitureId);
  s.lastProcessedSessionKey=sessionId;
  s.activityLog=s.activityLog||[];
  s.activityLog.push({activity,key,hour,at:d.getTime(),withPlayer:!!ev?.withPlayer});
@@ -3597,7 +3601,7 @@ function persistFurniture(item){
   return false;
  }
 }
-function updateArday3D(activity=s.currentActivity||'idle',anchor=s.currentActivityAnchor||null,room=null,furnitureId=null){
+function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity||'idle',anchor=s.activeInteraction?.anchor||s.currentActivityAnchor||null,room=s.activeInteraction?.room||s.currentActivityRoom||null,furnitureId=s.activeInteraction?.furnitureId||s.currentActivityFurnitureId||null){
  const stage=$('stage'),mode=stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
  if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor,room,furnitureId)}
  else{
@@ -3612,7 +3616,7 @@ const cameraPanButton=$('cameraPan'),cameraOrbitButton=$('cameraOrbit');
 function setCameraGestureMode(mode){cameraGestureMode=mode==='orbit'?'orbit':'pan';cameraPanButton?.classList.toggle('active',cameraGestureMode==='pan');cameraOrbitButton?.classList.toggle('active',cameraGestureMode==='orbit');cameraPanButton?.setAttribute('aria-pressed',cameraGestureMode==='pan'?'true':'false');cameraOrbitButton?.setAttribute('aria-pressed',cameraGestureMode==='orbit'?'true':'false');}
 cameraPanButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('pan')});
 cameraOrbitButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('orbit')});
-initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activity,s.activeInteraction.anchor||null,s.activeInteraction.room||null);else updateArday3D();
+initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activity,s.activeInteraction.anchor||null,s.activeInteraction.room||null,s.activeInteraction.furnitureId||null);else updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
 
