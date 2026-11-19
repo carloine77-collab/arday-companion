@@ -684,7 +684,7 @@ function refreshImmediateInteraction(at=Date.now()){
 function beginImmediateInteraction(action,options={}){
  const activity=normalizeActivity(action),meta=activityMeta[activity];
  if(!meta||activity==='idle'||!['short','long'].includes(meta.duration))return false;
- if(meta.duration==='short'&&options.source!=='furniture')return false;
+ if(meta.duration==='short'&&!['furniture','window'].includes(options.source))return false;
  const now=Date.now(),hourKey=keyAt(now)+'-'+new Date(now).getHours();
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now);
  const availability=resolveCharacterAvailability(new Date(now));
