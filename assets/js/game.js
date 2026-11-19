@@ -509,6 +509,15 @@ function ensureScheduleAt(value){
   });
   s.calendar.version=16;
  }
+ if((s.calendar.version||0)<17){
+  // Short interactions are player-triggered only and must never survive as scheduled blocks.
+  Object.keys(s.calendar.days).forEach(key=>{
+   const day=s.calendar.days[key]||[];
+   s.calendar.days[key]=day.filter(ev=>ev.kind!=='autonomous'||activityMeta[normalizeActivity(ev.activity)]?.duration==='long');
+   if(!s.calendar.days[key].length)delete s.calendar.days[key];
+  });
+  s.calendar.version=17;
+ }
  
  
  
@@ -706,6 +715,7 @@ function hasAutonomyFurniture(requirement,room=null){
  if(requirement==='computer')return names.some(name=>name.includes('电脑'));
  if(requirement==='television')return names.some(name=>name==='电视');
  if(requirement==='recordPlayer')return names.some(name=>name==='唱片机');
+ if(requirement==='gameConsole')return names.some(name=>name==='游戏机');
  if(requirement==='bouquet')return names.some(name=>name==='捧花摆件');
  if(requirement==='bookshelf')return names.some(name=>name.includes('书架'));
  if(requirement==='readingSpot')return names.some(name=>/书架|书桌|床/.test(name));
@@ -727,6 +737,7 @@ function furnitureKindForPlaced(item){
  if(/^电脑/.test(name))return 'computer';
  if(/^电视/.test(name))return 'television';
  if(/唱片机/.test(name))return 'recordPlayer';
+ if(/游戏机/.test(name))return 'gameConsole';
  return null;
 }
 function autonomousFurnitureOptions(){
@@ -737,7 +748,7 @@ function autonomousFurnitureOptions(){
   if(!set?.activities)continue;
   for(const [activity,context] of Object.entries(set.activities)){
    const meta=activityMeta[activity];
-   if(!meta?.autonomous||!meta.autonomy||activity==='eat')continue;
+   if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||activity==='eat')continue;
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
    options.push({activity,meta,room:item.room,anchor:context?.anchor||meta.anchor||'default',furnitureId:item.id,furnitureKind:kind});
   }
@@ -779,7 +790,7 @@ function scheduledFurnitureIsValid(ev){
  const item=(s.placed||[]).find(entry=>String(entry.id)===String(ev.furnitureId));
  if(!item)return false;
  const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],activity=normalizeActivity(ev.activity),meta=activityMeta[activity];
- const valid=!!set?.activities?.[activity]&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room);
+ const valid=!!set?.activities?.[activity]&&meta?.duration==='long'&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room);
  if(valid&&ev.room!==item.room)ev.room=item.room;
  return valid;
 }
