@@ -251,25 +251,37 @@ function openTab(name,force=false){
 }
 
 function eventChoicesLegacy(e){
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view';$('drawerTitle').textContent=e.title;
- $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="event-acknowledge">知道了</button></div>';
- $('event-acknowledge').onclick=()=>{completeEvent(e,'已阅');save();renderEvents()};
- $('drawer').classList.add('open');
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view note-detail-view';
+ $('drawerTitle').textContent=e.category==='letter'?'阿尔的留言':'生活记录';
+ const date=new Date(e.created||Date.now()).toLocaleString('zh-CN',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+ const type=e.category==='letter'?'阿尔写给你':'生活记录';
+ const paper=document.createElement('article');paper.className='note-paper '+(e.category==='letter'?'personal-note':'system-note');
+ const meta=document.createElement('div');meta.className='note-paper-meta';meta.textContent=type+'　·　'+date;
+ const heading=document.createElement('h2');heading.className='note-paper-title';heading.textContent=e.title;
+ const body=document.createElement('p');body.className='note-paper-body';body.textContent=e.detail;
+ const signature=document.createElement('div');signature.className='note-paper-signature';signature.textContent=e.category==='letter'?'— 阿尔':'— 日常记录';
+ paper.append(meta,heading,body,signature);
+ const actions=document.createElement('div');actions.className='note-detail-actions';
+ const back=document.createElement('button');back.type='button';back.className='note-back';back.textContent='返回信箱';back.onclick=renderEvents;
+ const ack=document.createElement('button');ack.type='button';ack.className='note-ack';ack.textContent='收好这张纸条';ack.onclick=()=>{completeEvent(e,'已阅');save();renderEvents()};
+ actions.append(back,ack);$('choices').replaceChildren(paper,actions);$('drawer').classList.add('open');
 }
 function renderEvents(){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  const open=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
- $('drawerTitle').textContent='留言纸条';$('choices').className='choices events-view';$('choices').innerHTML='';
- if(!open.length){$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时没有新的纸条</h3><p>阿尔的生活仍在继续。等他有话想说，或有事情值得记下时，纸条就会出现在这里。</p></div>';}
+ $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
+ const intro=document.createElement('div');intro.className='mailbox-intro';intro.innerHTML='<span class="mailbox-mark">✉</span><div><strong>留给你的纸条</strong><p>阿尔的日常、心情，以及想对你说的话。</p></div><span class="mailbox-count">'+open.length+' 张</span>';$('choices').appendChild(intro);
+ if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>信箱暂时空着</h3><p>等阿尔有话想说，或有值得记下的日常，这里就会收到新的纸条。</p>';$('choices').appendChild(empty);}
  open.forEach(e=>{
-  const b=document.createElement('button');b.type='button';b.className='choice event-card '+(e.category==='letter'?'letter-card':'system-card');
-  const copy=document.createElement('span');copy.className='event-copy';
-  const kindNode=document.createElement('em');kindNode.className='event-kind '+(e.category==='letter'?'letter':'system');kindNode.textContent=e.category==='letter'?'阿尔留言':'系统记录';
-  const titleNode=document.createElement('strong');titleNode.textContent=e.title;
-  const detailNode=document.createElement('small');detailNode.textContent=e.detail;
-  const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  copy.append(kindNode,titleNode,detailNode,timeNode);const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='›';b.append(copy,arrow);
+  const isLetter=e.category==='letter';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
+  const top=document.createElement('span');top.className='note-card-top';
+  const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=isLetter?'阿尔的留言':'日常记录';
+  const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});top.append(kindNode,timeNode);
+  const titleNode=document.createElement('strong');titleNode.className='note-card-title';titleNode.textContent=e.title;
+  const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail;
+  const foot=document.createElement('span');foot.className='note-card-foot';foot.textContent=isLetter?'写给你的一点心里话':'Arday · 日常片段';
+  const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='↗';b.append(top,titleNode,detailNode,foot,arrow);
   b.onclick=()=>eventChoices(e);$('choices').appendChild(b);
  });
  $('drawer').classList.add('open');
@@ -405,7 +417,7 @@ function renderProfile(){
 function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open','profile-expanded');$('stage').classList.add('calendar-mode');$('stage').style.touchAction='pan-y';renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
 function refreshTopActions(){let n=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').length;let c=$('eventCount');if(c)c.textContent=n?'· '+n:''}
 $('profileEntry').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='人物档案'){$('drawer').classList.remove('open','profile-expanded');return}renderProfile()});
-$('recentEvents').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='留言纸条'){$('drawer').classList.remove('open');return}renderEvents()});
+$('recentEvents').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='信箱'){$('drawer').classList.remove('open');return}renderEvents()});
 document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListener('click',()=>{
  const obj=b.dataset.decorateObject,opts=obj==='沙发'?['鼠尾草绿','暖杏色','砖红色']:obj==='窗户'?['打开窗帘','合上窗帘','换一幅窗景']:['摆上花瓶','放一本书','点亮台灯'];
  $('drawerTitle').textContent='装修 · '+obj;$('choices').innerHTML='';
