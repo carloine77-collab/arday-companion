@@ -19,7 +19,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./assets/icons/arday-icon.svg">
 <title>Arday · 阿尔</title>
-<link rel="stylesheet" href="assets/css/game.css?v=20261119-buffs1">
+<link rel="stylesheet" href="assets/css/game.css?v=20261119-copyclean1">
 </head>
 <body>
 <div class="app">
@@ -28,7 +28,7 @@
   <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div></div></button>
   <div class="identity-meta"><span id="cash">共同账户 ¥30000</span></div>
  </div>
- <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="和阿尔说点什么……" autocomplete="off"><button class="send">发送</button></form>
+ <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="消息" autocomplete="off"><button class="send">发送</button></form>
 </header>
 <div class="play-area">
 <aside class="stats" aria-label="角色状态"><div class="stat-group"><div class="stat-group-title">情感</div><div class="status-tags" id="emotionStatuses"><span class="status-empty">暂无状态</span></div>
@@ -69,7 +69,7 @@
 <script src="assets/js/chat-copy.js?v=20261119a"></script>
 <script src="assets/js/chat-system.js?v=20261119a"></script>
 <script src="assets/js/character-tap-lines.js?v=20261119a"></script>
-<script src="assets/js/game.js?v=20261119-needs1"></script>
+<script src="assets/js/game.js?v=20261119-copyclean1"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
