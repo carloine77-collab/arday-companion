@@ -2,7 +2,6 @@
 (()=>{
  'use strict';
  const COPY=()=>window.ArdayChatCopy;
- const LIBRARIES=['d1','d2','d3','d4'];
  const CATEGORY_TOPICS={
   '问候':'greeting','疲惫与休息':'tired','情绪与压力':'mood','金钱与工作':'money',
   '音乐':'music','阅读':'reading','饮食':'food','房间与家具':'room','道歉':'apology',
