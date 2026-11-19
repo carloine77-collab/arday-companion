@@ -3409,7 +3409,8 @@ function persistFurniture(item){
    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
    raycaster.setFromCamera(pointerNdc,camera);
    const activeRoom=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living;
-   const hits=raycaster.intersectObjects(activeRoom.children,true);
+   // Arday is attached to the scene root, not to any room group. Include the character explicitly so its meshes can receive tap hits in every room.
+   const hits=raycaster.intersectObjects([...activeRoom.children,person],true);
    if(decorating){
     let furniture=null;
     for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.furnitureKey){furniture=node;break}node=node.parent}if(furniture)break}
