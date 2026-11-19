@@ -1123,7 +1123,7 @@ eventChoices=function(e){
  if(e.type==='life-evening'){
   $('drawerTitle').textContent=e.title;
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="evening-together">今晚一起待着</button><button id="evening-free">维持原定安排</button></div>';
-  $('evening-together').onclick=()=>{change({friend:1,attach:1,fun:2});say('我就知道你会答应。过来吧，今晚不必赶时间。');remember('evening','你们临时改变安排，共度了一个晚上。',2);completeEvent(e,'一起度过晚上');save();renderEvents()};
+  $('evening-together').onclick=()=>{change({friend:1,fun:2});say('我就知道你会答应。过来吧，今晚不必赶时间。');remember('evening','你们临时改变安排，共度了一个晚上。',2);completeEvent(e,'一起度过晚上');save();renderEvents()};
   $('evening-free').onclick=()=>{say('也好。今晚就照原来的安排来。');completeEvent(e,'维持原定安排');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
