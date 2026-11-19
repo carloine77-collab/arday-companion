@@ -513,7 +513,7 @@ function ensureScheduleAt(value){
   // Short interactions are player-triggered only and must never survive as scheduled blocks.
   Object.keys(s.calendar.days).forEach(key=>{
    const day=s.calendar.days[key]||[];
-   s.calendar.days[key]=day.filter(ev=>ev.kind!=='autonomous'||activityMeta[normalizeActivity(ev.activity)]?.duration==='long');
+   s.calendar.days[key]=day.filter(ev=>!ev.activity||activityMeta[normalizeActivity(ev.activity)]?.duration!=='short');
    if(!s.calendar.days[key].length)delete s.calendar.days[key];
   });
   s.calendar.version=17;
@@ -683,7 +683,8 @@ function refreshImmediateInteraction(at=Date.now()){
 }
 function beginImmediateInteraction(action,options={}){
  const activity=normalizeActivity(action),meta=activityMeta[activity];
- if(!meta||activity==='idle')return false;
+ if(!meta||activity==='idle'||!['short','long'].includes(meta.duration))return false;
+ if(meta.duration==='short'&&options.source!=='furniture')return false;
  const now=Date.now(),hourKey=keyAt(now)+'-'+new Date(now).getHours();
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now);
  const availability=resolveCharacterAvailability(new Date(now));
