@@ -1115,3 +1115,6 @@ html body .stage .drawer.profile-expanded.open .choices{
 
 /* Prevent layered shop-title ornament/shadow from reading as duplicate text. */
 .drawer.shop-drawer .drawer-head strong{ text-shadow:none!important; }
+
+/* Persistent character status tags and paper-note ledger */
+.status-tags{display:flex;flex-wrap:wrap;gap:5px;min-height:17px;padding:0 1px 3px}.status-tag{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #e0c7b3;border-radius:999px;background:#f3e5d8;color:#8a5949;font-size:10px;font-weight:700;letter-spacing:.04em}.status-tag.depressed{background:#eee5e8;border-color:#d9c5cc;color:#80616f}.status-tag.sick{background:#e6eadf;border-color:#cbd4c1;color:#66765d}.status-empty{font-size:9px;color:#b2a28f;padding:2px 3px}.event-kind{display:inline-flex;align-self:flex-start;padding:3px 7px;border-radius:5px;font-size:9px;font-style:normal;letter-spacing:.08em}.event-kind.system{background:#e8e9df;color:#6e795e}.event-kind.letter{background:#f2e0d1;color:#9a6b4d}.event-card.letter-card{background:linear-gradient(110deg,#fffaf0,#f4e7d8)!important;border-left:3px solid #bd9270!important}.event-card.system-card{border-left:3px solid #aab29a!important}
