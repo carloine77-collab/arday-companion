@@ -889,6 +889,7 @@ window.ArdayGameConfig = {
  stove:{title:'灶台',action:'kitchen'},
  sink:{title:'水槽',activities:{wash:{anchor:'default'}}},
  bed:{title:'床',activities:{rest:{anchor:'bed'},read:{anchor:'bed'}}},
+ loftBed:{title:'上床下桌',activities:{rest:{anchor:'bed'},read:{anchor:'bed'},write:{anchor:'loftDesk'}}},
  chair:{title:'椅子',activities:{sitChair:{anchor:'chair'},read:{anchor:'chair'},chat:{anchor:'chair'}}},
  cushion:{title:'坐垫',activities:{rest:{anchor:'cushion'},read:{anchor:'cushion'}}},
  bookshelf:{title:'书架',activities:{read:{anchor:'shelf'}}},
