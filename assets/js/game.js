@@ -321,28 +321,22 @@ $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('e
 
 
 function respondToChat(text){
- if(ardayUnavailable()){busyBubble();return}
- const t=text.toLowerCase(),pick=a=>a[Math.floor(Math.random()*a.length)],cur=s.currentActivity||'idle';
- const act={rest:'休息',eat:'吃东西',wash:'洗漱',read:'阅读',music:'听音乐',write:'写东西',walk:'散步',sleep:'睡觉',work:'工作',};
- let topic='general',reply='';
- if(/你好|嗨|早安|早上好|早啊|上午好|中午好|下午好|晚上好|晚安|在吗|在不在|回来|回来了|我回来了|我来了|到家|下班|起床|醒了|睡醒/.test(t)){topic='greeting';reply=pick(['你来了。我刚才在'+(act[cur]||'做自己的事')+'。','嗯，我在。你今天过得怎么样？','回来啦。刚才我正准备'+(cur==='sleep'?'睡觉':'继续手头的事')+'。'])}
- else if(/累|疲惫|困|好困|困了|睡不着|休息|睡觉|熬夜|没精神|打哈欠|犯困|肩膀酸|腰酸|眼睛酸|想睡|失眠|乏力/.test(t)){topic='tired';reply=pick(['你听起来有点累。今天是什么事情最消耗你？','那先坐一会儿吧。我刚才也在休息。','你想聊聊原因，还是暂时换个轻松的话题？'])}
- else if(/难过|伤心|烦|心烦|生气|焦虑|压力|痛苦|委屈|郁闷|失落|崩溃|哭|想哭|不开心|心情不好|烦死了|受气|心累/.test(t)){topic='mood';reply=pick(['我先听你说。是刚发生了什么，还是最近一直积累着？','我不想随便劝你想开点。你最介意的究竟是哪一部分？','你希望我先听着，还是和你一起分析这件事？'])}
- else if(/钱|价格|贵|便宜|工作|赚钱|收入|工资|薪水|存款|花钱|消费|购物|买|账单|房租|预算|银行卡|余额|发工资|辞职|上班|面试|加班|奖金|涨薪/.test(t)){topic='money';reply=pick(['我们现在有 ¥'+s.money+'。我觉得先留出生活开销比较稳妥。','我会看看适合自己的正式职位，也要考虑日程和精力。','最近先留意共同开销，再决定买什么。'])}
- else if(/音乐|唱片|歌|耳机|播放|听歌|专辑|乐队|演唱会|钢琴|吉他|旋律|歌单|音箱|唱歌/.test(t)){topic='music';reply=has('唱片机')?pick(['最近我常在晚上听唱片。你有特别喜欢的音乐吗？','我想找点没听过的音乐。','唱片机已经成了房间里常用的东西。']):'我也想听音乐，不过我们还没有唱片机。'}
- else if(/书|阅读|小说|读|漫画|杂志|书架|书签|纸页|图书馆|诗|散文|章节|作者|文学/.test(t)){topic='reading';reply=pick(['我最近读得比较慢。你在读什么？','你更喜欢故事，还是观点和论证？','有些书读完以后，想法会留很久。'])}
- else if(/吃|饿|饭|食物|早餐|午餐|晚餐|宵夜|外卖|做饭|煮|炒|烤|咖啡|茶|牛奶|面包|鸡蛋|面条|火锅|甜品|冰箱|菜谱|水果|零食|奶茶|蛋糕|饼干|汤/.test(t)){topic='food';reply=pick(['我有点想吃热的东西。你今天吃饭了吗？','如果现在能选，我想吃点简单但有味道的东西。','我们可以看看库存还有什么。'])}
- else if(/房间|家具|装修|书桌|植物|沙发|床|枕头|毯子|台灯|窗帘|窗台|衣柜|地毯|收纳|摆件|灯|厨房|浴室|洗衣机|花瓶|床头柜|镜子|梳妆台|衣架|被子|床单|毛巾|浴袍/.test(t)){topic='room';reply=pick(['我希望房间慢慢有生活痕迹，而不是一下子塞满东西。','如果只能先改一处，我会考虑光线、收纳和使用频率。'])}
- else if(/对不起|抱歉|原谅|错了|我错了|别生气|不是故意|道歉|对不住|我道歉/.test(t)){topic='apology';reply=pick(['我听到了。我会看之后怎么相处，不会只凭一句话判断。','谢谢你愿意说出来。我们可以慢慢把事情讲清楚。'])}
- else if(/喜欢|爱你|爱不爱|关系|朋友|亲亲|亲吻|吻|接吻|抱抱|拥抱|牵手|约会|吃醋|暧昧|调情|撩|想亲|想抱|贴贴|靠近|撒娇|宝贝|亲爱的|睡一起|同床|床单|被窝|睡衣|浴袍|洗澡|湿头发|锁骨|耳边|耳朵|脖子|腰|嘴唇|体温|香水|香味|晚安吻|亲密|性感|想要你|亲一下|抱紧|靠在一起|共枕|心动/.test(t)){topic='relationship';reply=pick(['你靠这么近，是想亲我吗？','刚换了床单。给你留了位置。','浴室还热着。等我吹干头发。','别躲。让我亲一下。','你身上的香味，我刚刚就闻到了。','睡衣扣子好像系错了。帮我看看？','枕头留了你的位置。人也一样。','今晚不想各睡各的。','你再这样看我，我可要当真了。','过来一点。我想亲你。'])}
- else {topic='general';let p=s.memories.filter(m=>m.type==='conversation').slice(-1)[0];reply=p&&Math.random()<.4?'你刚才提到“'+p.text.slice(0,22)+'”。这和你现在说的事情有关系吗？':pick(['你说的这件事里，最让你在意的是哪一部分？','我还没有形成明确看法。你愿意再具体一点吗？','我想知道你为什么会这样想，而不只是听一个结论。','这件事我可能有不同看法。你想听听吗？'])}
- s.chatTopics=s.chatTopics||{};s.chatTopics[topic]=(s.chatTopics[topic]||0)+1;remember('conversation',text.slice(0,55));say(reply);save();render();
+ const chatSystem=window.ArdayChatSystem;
+ if(!chatSystem||typeof chatSystem.respond!=='function'){
+  console.error('Arday chat system failed to load.');
+  busyBubble();
+  return;
+ }
+ return chatSystem.respond(text,{
+  state:s,
+  isUnavailable:ardayUnavailable,
+  busyBubble,
+  remember,
+  say,
+  save,
+  render
+ });
 }
-
-
-
-
-
 
 function buildDay(key){
  const plans=s.sleepPlans||(s.sleepPlans={});
