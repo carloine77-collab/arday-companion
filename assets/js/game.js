@@ -210,7 +210,7 @@ function openTab(name,force=false){
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
-  if(isShop){const desc='';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(description?'<small>'+description+'</small>':'')+'</span><span class="shop-product-price">'+(Number(cost)===0?'免费':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':'购入')+'</span>';}
+  if(isShop){const desc='';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong></span><span class="shop-product-price">'+(Number(cost)===0?'免费':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':'购入')+'</span>';}
   else b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
@@ -271,8 +271,8 @@ function renderEvents(){
  const open=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
- const intro=document.createElement('div');intro.className='mailbox-intro';intro.innerHTML='<span class="mailbox-mark">✉</span><div><strong>留给你的纸条</strong><p>阿尔的日常、心情，以及想对你说的话。</p></div><span class="mailbox-count">'+open.length+' 张</span>';$('choices').appendChild(intro);
- if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>信箱暂时空着</h3><p>等阿尔有话想说，或有值得记下的日常，这里就会收到新的纸条。</p>';$('choices').appendChild(empty);}
+ const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 张';$('choices').appendChild(count);
+ if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无纸条</h3>';$('choices').appendChild(empty);}
  open.forEach(e=>{
   const isLetter=e.category==='letter';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
   const top=document.createElement('span');top.className='note-card-top';
@@ -280,8 +280,7 @@ function renderEvents(){
   const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});top.append(kindNode,timeNode);
   const titleNode=document.createElement('strong');titleNode.className='note-card-title';titleNode.textContent=e.title;
   const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail;
-  const foot=document.createElement('span');foot.className='note-card-foot';foot.textContent=isLetter?'写给你的一点心里话':'Arday · 日常片段';
-  const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='↗';b.append(top,titleNode,detailNode,foot,arrow);
+  const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='↗';b.append(top,titleNode,detailNode,arrow);
   b.onclick=()=>eventChoices(e);$('choices').appendChild(b);
  });
  $('drawer').classList.add('open');
@@ -314,7 +313,7 @@ function slotClick(di,h){
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='自主安排 · '+dayLabel(d)+' '+pad(h)+':00';
- $('choices').innerHTML='<div class="calendar-note">这一时段由阿尔根据自己的状态和房间里的家具，自主决定活动。</div><div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
+ $('choices').innerHTML='<div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
  $('return-empty').onclick=()=>$('drawer').classList.remove('open');
 }
 
@@ -671,11 +670,11 @@ function openKitchenPanel(){
  const cards=Object.entries(recipes).filter(([id])=>(s.unlockedRecipes||[]).includes(id)).map(([id,recipe])=>{
   const enough=canCook(id),parts=Object.entries(recipe.ingredients),ingredients=parts.map(([key,count])=>'<span class="kitchen-recipe-ingredient'+(pantryCount(key)>=count?' ready':' missing')+'">'+ingredientNames[key]+' <b>×'+count+'</b></span>').join('');
   const icon=id==='eggRice'?'🍚':id==='tomatoEgg'?'🍳':'🥣',missing=parts.filter(([key,count])=>pantryCount(key)<count).map(([key,count])=>ingredientNames[key]+' '+(count-pantryCount(key))+'份');
-  return '<article class="kitchen-recipe-card"><div class="kitchen-recipe-art">'+icon+'</div><div class="kitchen-recipe-main"><div class="kitchen-recipe-heading"><strong>'+recipe.name+'</strong><span class="kitchen-recipe-benefit">饱腹 +'+recipe.hunger+'</span></div><div class="kitchen-recipe-ingredients">'+ingredients+'</div>'+(enough?'<p class="kitchen-recipe-note">食材齐全，可以开始烹饪</p>':'<p class="kitchen-recipe-note missing-note">还需要 '+missing.join('、')+'</p>')+'</div><button type="button" class="kitchen-cook-button" data-recipe="'+id+'" '+(enough?'':'disabled')+'>'+(enough?'开始制作':'食材不足')+'</button></article>';
- }).join('')||'<p class="kitchen-empty-note">还没有收藏其他菜谱，可以去商店的「书籍 · 菜谱」选购。</p>';
+  return '<article class="kitchen-recipe-card"><div class="kitchen-recipe-art">'+icon+'</div><div class="kitchen-recipe-main"><div class="kitchen-recipe-heading"><strong>'+recipe.name+'</strong><span class="kitchen-recipe-benefit">饱腹 +'+recipe.hunger+'</span></div><div class="kitchen-recipe-ingredients">'+ingredients+'</div>'+(enough?'<p class="kitchen-recipe-note">可制作</p>':'<p class="kitchen-recipe-note missing-note">还需要 '+missing.join('、')+'</p>')+'</div><button type="button" class="kitchen-cook-button" data-recipe="'+id+'" '+(enough?'':'disabled')+'>'+(enough?'开始制作':'食材不足')+'</button></article>';
+ }).join('')||'<p class="kitchen-empty-note">暂无菜谱</p>';
  $('drawerTitle').textContent='厨房 · 烹饪';
  $('choices').className='choices cooking-panel';
- $('choices').innerHTML='<button type="button" id="kitchen-close" class="kitchen-close" aria-label="关闭烹饪界面" title="关闭">×</button><header class="kitchen-hero"><div class="kitchen-hero-copy"><span class="kitchen-eyebrow">HOME KITCHEN / DAILY MENU</span><h2>把今天的饭，<em>好好做好。</em></h2><p>用冰箱里的食材，准备一顿简单的家常料理。</p></div><div class="kitchen-hero-mark">餐</div></header><section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section>';
+ $('choices').innerHTML='<button type="button" id="kitchen-close" class="kitchen-close" aria-label="关闭烹饪界面" title="关闭">×</button><header class="kitchen-hero"><div class="kitchen-hero-copy"><span class="kitchen-eyebrow">HOME KITCHEN / DAILY MENU</span><h2>厨房</h2></div><div class="kitchen-hero-mark">餐</div></header><section class="kitchen-pantry"><div class="kitchen-section-heading"><div><span>01 / PANTRY</span><h3>冰箱食材</h3></div><small>库存数量</small></div><div class="kitchen-ingredient-grid">'+stock+'</div></section><section class="kitchen-menu"><div class="kitchen-section-heading"><div><span>02 / TODAY’S MENU</span><h3>今日菜单</h3></div></div><div class="kitchen-recipe-list">'+cards+'</div></section>';
  $('choices').querySelectorAll('[data-recipe]').forEach(button=>button.onclick=()=>cookRecipeForPlayer(button.dataset.recipe));
  $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
  $('drawer').classList.add('open');
@@ -1252,16 +1251,16 @@ function showCareer(){
 
  }else{
   const jobs=[
-   {id:'assistant-editor',title:'出版编辑助理',salary:185,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:'协助整理稿件、核对资料与校对文字'},
-   {id:'research-assistant',title:'研究助理',salary:260,start:9,end:12,minFriend:28,minEnergy:42,skill:'reading',skillMin:2,desc:'搜集资料、整理文献并撰写研究摘要'},
-   {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:'参与内容选题、撰写方案与项目协作'}
+   {id:'assistant-editor',title:'出版编辑助理',salary:185,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:''},
+   {id:'research-assistant',title:'研究助理',salary:260,start:9,end:12,minFriend:28,minEnergy:42,skill:'reading',skillMin:2,desc:''},
+   {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:''}
   ];
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
   $('choices').innerHTML=jobs.map((j,i)=>{
    const attempted=!!s.jobApplications[applicationDay][j.id];
    const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
    const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
-   return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>'+j.desc+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted?'disabled':'')+'>'+(attempted?'今日已申请':'申请职位')+'</button></section>';
+   return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted?'disabled':'')+'>'+(attempted?'今日已申请':'申请职位')+'</button></section>';
   }).join('');
   $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{const j=jobs.find(x=>x.id===b.dataset.applyJob);if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};s.jobApplications[applicationDay][j.id]={at:Date.now()};save();const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');showCareer();return}const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}const nextWorkday=plusDays(dayAnchor(),1);nextWorkday.setHours(12,0,0,0);const startDate=dayKey(nextWorkday);s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(nextWorkday);save();addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功')});
  }
