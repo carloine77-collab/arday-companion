@@ -27,10 +27,10 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
+const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.preferences=s.preferences||{};s.memories=s.memories||[];s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair'&&event.type!=='player-action');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -92,7 +92,8 @@ s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='obj
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
+function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});renderStatusTags();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
+function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.length?items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join(''):'<span class="status-empty">暂无状态</span>'};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
 function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
 function saySystem(t){say(t,'system')}
@@ -105,8 +106,8 @@ function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
 function has(item){const matches=name=>name===item||name.startsWith(item+'·');return s.inventory.some(x=>matches(x.name))||(s.placed||[]).some(x=>typeof x.name==='string'&&matches(x.name))}
-function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(type==='shared-goal-proposal'||type==='long')return 'proposal';if(type==='player-action')return 'player';if(type.startsWith('life-'))return 'random';return 'daily'}
-function addEvent(title,detail,type='daily',choices=[]){let e={id:Date.now()+Math.random(),title,detail,type,category:eventCategory({type}),choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
+function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(type==='arday-letter')return 'letter';if(type==='autonomous'||type==='system-note'||type==='daily')return 'system';if(type==='shared-goal-proposal'||type==='long')return 'proposal';if(type==='player-action')return 'player';if(type.startsWith('life-'))return 'random';return 'system'}
+function addEvent(title,detail,type='daily',choices=[]){if(type==='player-action')return null;let e={id:Date.now()+Math.random(),title,detail,type,category:eventCategory({type}),choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 
 
@@ -257,17 +258,18 @@ function eventChoicesLegacy(e){
 }
 function renderEvents(){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
- const open=s.events.filter(e=>e.status==='open').sort((a,b)=>(b.created||0)-(a.created||0));
+ const open=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
- $('drawerTitle').textContent='最近发生的事';$('choices').className='choices events-view';$('choices').innerHTML='';
- if(!open.length){$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时风平浪静</h3><p>阿尔的生活仍在继续。新的事情会在合适的时候发生。</p></div>';}
+ $('drawerTitle').textContent='留言纸条';$('choices').className='choices events-view';$('choices').innerHTML='';
+ if(!open.length){$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时没有新的纸条</h3><p>阿尔的生活仍在继续。等他有话想说，或有事情值得记下时，纸条就会出现在这里。</p></div>';}
  open.forEach(e=>{
   const b=document.createElement('button');b.type='button';b.className='choice event-card';
   const copy=document.createElement('span');copy.className='event-copy';
+  const kindNode=document.createElement('em');kindNode.className='event-kind '+(e.category==='letter'?'letter':'system');kindNode.textContent=e.category==='letter'?'阿尔留言':'系统记录';
   const titleNode=document.createElement('strong');titleNode.textContent=e.title;
   const detailNode=document.createElement('small');detailNode.textContent=e.detail;
   const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  copy.append(titleNode,detailNode,timeNode);const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='›';b.append(copy,arrow);
+  copy.append(kindNode,titleNode,detailNode,timeNode);const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='›';b.append(copy,arrow);
   b.onclick=()=>eventChoices(e);$('choices').appendChild(b);
  });
  $('drawer').classList.add('open');
@@ -401,9 +403,9 @@ function renderProfile(){
  $('drawer').classList.add('open');
 }
 function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open','profile-expanded');$('stage').classList.add('calendar-mode');$('stage').style.touchAction='pan-y';renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
-function refreshTopActions(){let n=s.events.filter(e=>e.status==='open').length;let c=$('eventCount');if(c)c.textContent=n?'· '+n:''}
+function refreshTopActions(){let n=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').length;let c=$('eventCount');if(c)c.textContent=n?'· '+n:''}
 $('profileEntry').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='人物档案'){$('drawer').classList.remove('open','profile-expanded');return}renderProfile()});
-$('recentEvents').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='最近发生的事'){$('drawer').classList.remove('open');return}renderEvents()});
+$('recentEvents').addEventListener('click',()=>{if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='留言纸条'){$('drawer').classList.remove('open');return}renderEvents()});
 document.querySelectorAll('[data-decorate-object]').forEach(b=>b.addEventListener('click',()=>{
  const obj=b.dataset.decorateObject,opts=obj==='沙发'?['鼠尾草绿','暖杏色','砖红色']:obj==='窗户'?['打开窗帘','合上窗帘','换一幅窗景']:['摆上花瓶','放一本书','点亮台灯'];
  $('drawerTitle').textContent='装修 · '+obj;$('choices').innerHTML='';
@@ -853,6 +855,18 @@ function resolveScheduledActivity(key,hour){
  }
  return {event:ev,activity:normalizeActivity(ev?.activity||'idle')};
 }
+function updateStatusBuffs(at=Date.now()){
+ const hourMs=3600000,period=12*hourMs;s.statusBuffs=s.statusBuffs||{};
+ const rules=[
+  {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n);s.love=Math.max(0,(Number(s.love)||0)-n)}},
+  {id:'sick',active:Number(s.clean)<20&&Number(s.energy)<20,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+2*n)}}
+ ];
+ for(const rule of rules){let state=s.statusBuffs[rule.id]||(s.statusBuffs[rule.id]={active:false,since:0,nextEffectAt:0});
+  if(rule.active&&!state.active){state.active=true;state.since=at;state.nextEffectAt=at+period}
+  else if(!rule.active&&state.active){state.active=false;state.since=0;state.nextEffectAt=0}
+  if(rule.active&&state.active){if(!Number(state.nextEffectAt)){state.since=at;state.nextEffectAt=at+period}if(at>=state.nextEffectAt){const periods=Math.floor((at-state.nextEffectAt)/period)+1;rule.apply(periods);state.nextEffectAt+=periods*period}}
+ }
+}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
@@ -866,6 +880,14 @@ function processActivityAt(value){
  if([7,12,18].includes(hour)){
   const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
   if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
+  else{
+   const mealKey=key+'-'+({7:'breakfast',12:'lunch',18:'dinner'}[hour]);
+   if(!s.mealMissedKeys.includes(mealKey)){
+    s.mealPrepMisses=(Number(s.mealPrepMisses)||0)+1;s.mealMissedKeys.push(mealKey);if(s.mealMissedKeys.length>90)s.mealMissedKeys.splice(0,s.mealMissedKeys.length-90);
+    const letters={7:['今天早上没看到准备好的早餐。你是不是忙忘了？','早餐时间到了，桌上却空空的。下次记得给我留一点。','我本来还挺期待早餐的……看来今天得自己想办法了。'],12:['午饭时间到了，今天好像没有我的那一份。','我看了看餐桌，什么也没有。你是不是把午饭忘了？','中午有点饿。下次能不能提前替我留一份？'],18:['晚饭还没有着落。你今天是不是忘记我也要吃饭了？','我刚刚去看了餐桌，还是空的。下次记得我一份。','晚饭时间到了。看来今天又得自己想办法了。']};
+    const options=letters[hour]||letters[12];addEvent('阿尔的留言',options[(s.mealPrepMisses-1)%options.length],'arday-letter');
+   }
+  }
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
@@ -882,6 +904,10 @@ function processActivityAt(value){
  }
  if(sessionStart&&!s.activeInteraction){
   if(activity==='cook')completeAutonomousCooking(d.getTime());
+  else if(ev?.kind==='autonomous'){
+   const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。'};
+   if(notes[activity])addEvent('阿尔的日常记录',notes[activity],'autonomous');
+  }
   if(ev?.withPlayer){
    relation(activity);
    if(activity==='walk')advanceSharedGoal(activity,d.getTime());
@@ -890,6 +916,8 @@ function processActivityAt(value){
  }
  const workCompleted=settleWorkAt(key,hour,d.getTime());
  if(workCompleted)updatePersonalGoal('work',d.getTime());
+ if(Number(s.fun)<=30)s.bored=Math.min(100,(Number(s.bored)||0)+(5/24));
+ updateStatusBuffs(d.getTime());
 
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;s.currentActivityAnchor=ev?.anchor||meta?.anchor||null;
  s.currentActivityRoom=ev?.room||(activity==='sleep'?'bedroom':'living');
