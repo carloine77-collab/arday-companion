@@ -3345,7 +3345,7 @@ function persistFurniture(item){
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,furnitureTap=null,sceneDismissTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
-  let selectedFurniture=null,furnitureDrag=null;
+  let selectedFurniture=null,furnitureDrag=null,characterTap=null;
   const floorPlane=new T.Plane(new T.Vector3(0,1,0),0),dragPoint=new T.Vector3(),dragOffset=new T.Vector3();
   const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2();
   // Camera gestures are handled by the stage, not the canvas. The canvas itself
@@ -3378,8 +3378,23 @@ function persistFurniture(item){
    }
    let targetRoom=null;
    for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.roomTarget){targetRoom=node.userData.roomTarget;break}node=node.parent}if(targetRoom)break}
-   furnitureTap=null;
-   if(!decorating){for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){const key=node.userData?.furnitureKey;if(key){const found=furnitureRegistry.find(x=>x.id===key&&x.room===roomMode);if(found&&found.action){furnitureTap={item:found,pointerId:e.pointerId,x:e.clientX,y:e.clientY};break}}node=node.parent}if(furnitureTap)break}}
+   furnitureTap=null;characterTap=null;
+   if(!decorating){
+    for(const hit of hits){
+     let node=hit.object,foundTarget=null;
+     while(node&&node!==activeRoom){
+      if(node.userData?.furnitureKey){const item=furnitureRegistry.find(x=>x.id===node.userData.furnitureKey&&x.room===roomMode);if(item?.action)foundTarget={type:'furniture',item};break}
+      if(node===person){foundTarget={type:'character'};break}
+      if(node.userData?.roomTarget){foundTarget={type:'room'};break}
+      node=node.parent;
+     }
+     if(foundTarget){
+      if(foundTarget.type==='furniture')furnitureTap={item:foundTarget.item,pointerId:e.pointerId,x:e.clientX,y:e.clientY};
+      else if(foundTarget.type==='character')characterTap={pointerId:e.pointerId,x:e.clientX,y:e.clientY};
+      break;
+     }
+    }
+   }
    gestureSurface.setPointerCapture(e.pointerId);
    if(targetRoom){doorTap={target:targetRoom,pointerId:e.pointerId,x:e.clientX,y:e.clientY};e.preventDefault();return}
    doorTap=null;inertiaTheta=0;inertiaPhi=0;
@@ -3484,8 +3499,16 @@ function persistFurniture(item){
     return;
    }
    if(furnitureTap&&furnitureTap.pointerId===e.pointerId){
-    const tap=furnitureTap;furnitureTap=null;sceneDismissTap=null;
+    const tap=furnitureTap;furnitureTap=null;sceneDismissTap=null;characterTap=null;
     if(e.type==='pointerup'&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<18){invokeFurnitureAction(tap.item);return}
+   }
+   if(characterTap&&characterTap.pointerId===e.pointerId){
+    const tap=characterTap;characterTap=null;sceneDismissTap=null;
+    if(e.type==='pointerup'&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<18){
+     const lines=window.ArdayCharacterTapLines;
+     if(Array.isArray(lines)&&lines.length)say(lines[Math.floor(Math.random()*lines.length)]);
+     return;
+    }
    }
    if(sceneDismissTap&&sceneDismissTap.pointerId===e.pointerId){
     const tap=sceneDismissTap;sceneDismissTap=null;
