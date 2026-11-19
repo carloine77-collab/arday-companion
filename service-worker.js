@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v53";
+const CACHE_NAME = "arday-shell-v54";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const APP_SHELL = [
   "./assets/js/economy.js",
   "./assets/js/chat-copy.js",
   "./assets/js/chat-system.js",
+  "./assets/js/character-tap-lines.js",
   "./assets/js/game.js",
   "./assets/icons/arday-icon.svg"
 ];
