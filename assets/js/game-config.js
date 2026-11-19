@@ -902,6 +902,7 @@ window.ArdayGameConfig = {
  piano:{title:'钢琴',activities:{playPiano:{anchor:'piano'}}},
  washingMachine:{title:'洗衣机',activities:{laundry:{anchor:'washingMachine'}}},
  treadmill:{title:'跑步机',activities:{exercise:{anchor:'treadmill'}}},
+ dumbbellRack:{title:'哑铃架',activities:{exercise:{anchor:'dumbbellRack'}}},
  wallArt:{title:'装饰画',activities:{admireDecor:{anchor:'wallArt'}}},
  window:{title:'窗户',activities:{admireView:{anchor:'window'}}},
 
