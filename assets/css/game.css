@@ -1112,3 +1112,6 @@ html body .stage .drawer.profile-expanded.open .choices{
 .shop-content .shop-categories{margin-bottom:0!important;padding-bottom:2px!important}
 .stage .drawer:has(.cooking-panel) .choices.cooking-panel{position:static!important;padding-top:0!important}
 .stage .drawer:has(.cooking-panel) .kitchen-close{position:absolute!important;top:10px!important;right:10px!important;z-index:60!important}
+
+/* Prevent layered shop-title ornament/shadow from reading as duplicate text. */
+.drawer.shop-drawer .drawer-head strong{ text-shadow:none!important; }
