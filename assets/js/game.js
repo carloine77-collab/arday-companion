@@ -633,6 +633,16 @@ function relation(action){
 
 function pantryCount(k){return Math.max(0,Number(s.pantry?.[k]||0))}
 function canCook(id){const r=recipes[id];return !!r&&Object.entries(r.ingredients).every(([k,n])=>pantryCount(k)>=n)}
+function hasCookableRecipe(){return (s.unlockedRecipes||[]).some(id=>canCook(id))}
+function completeAutonomousCooking(at=Date.now()){
+ const choices=(s.unlockedRecipes||[]).filter(id=>canCook(id));if(!choices.length)return false;
+ const id=choices[Math.floor(Math.random()*choices.length)],recipe=recipes[id];
+ Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);
+ addInventoryItem('成品食物·'+recipe.name,'food');
+ addEvent('阿尔完成了料理',recipe.name+'已放入物品栏。','autonomous');
+ remember('cooking','阿尔亲手制作：'+recipe.name,2);
+ return true;
+}
 function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);saySystem('食材放进冰箱了。');save();render();openTab('商店',true)}
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
@@ -731,7 +741,7 @@ function presentActivity(activity,anchor=null,room=null,furnitureId=null){
 function furnitureSatisfiesRequirement(item,requirement){
  if(!requirement)return true;
  const kind=furnitureKindForPlaced(item);
- const allowed={desk:['desk'],computer:['computer'],television:['television'],recordPlayer:['recordPlayer'],gameConsole:['gameConsole'],bouquet:['bouquet'],bookshelf:['bookshelf'],readingSpot:['bookshelf','desk','bed'],sink:['sink'],seat:['sofa','chair','cushion','bed','loftBed'],desk:['desk','loftBed'],piano:['piano'],washingMachine:['washingMachine'],treadmill:['treadmill']};
+ const allowed={desk:['desk'],computer:['computer'],television:['television'],recordPlayer:['recordPlayer'],gameConsole:['gameConsole'],bouquet:['bouquet'],bookshelf:['bookshelf'],readingSpot:['bookshelf','desk','bed'],sink:['sink'],seat:['sofa','chair','cushion','bed','loftBed'],desk:['desk','loftBed'],stove:['stove'],piano:['piano'],washingMachine:['washingMachine'],treadmill:['treadmill']};
  return !allowed[requirement]||allowed[requirement].includes(kind);
 }
 function hasAutonomyFurniture(requirement,room=null){
@@ -773,6 +783,7 @@ function autonomousFurnitureOptions(){
    if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||activity==='eat')continue;
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
    if(activity==='computerPlay'&&kind==='desk'&&!((s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id))))continue;
+   if(activity==='cook'&&!hasCookableRecipe())continue;
    options.push({activity,meta,room:item.room,anchor:context?.anchor||meta.anchor||'default',furnitureId:item.id,furnitureKind:kind});
   }
  }
@@ -814,7 +825,8 @@ function scheduledFurnitureIsValid(ev){
  if(!item)return false;
  const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],activity=normalizeActivity(ev.activity),meta=activityMeta[activity];
  const linkedComputer=activity!=='computerPlay'||kind!=='desk'||(s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id));
- const valid=!!set?.activities?.[activity]&&meta?.duration==='long'&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room)&&linkedComputer;
+ const ingredientsAvailable=activity!=='cook'||hasCookableRecipe();
+ const valid=!!set?.activities?.[activity]&&meta?.duration==='long'&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room)&&linkedComputer&&ingredientsAvailable;
  if(valid&&ev.room!==item.room)ev.room=item.room;
  return valid;
 }
@@ -863,6 +875,7 @@ function processActivityAt(value){
   // Scene presentation is applied once after the authoritative state is committed.
  }
  if(sessionStart&&!s.activeInteraction){
+  if(activity==='cook')completeAutonomousCooking(d.getTime());
   if(ev?.withPlayer){
    relation(activity);
    if(activity==='walk')advanceSharedGoal(activity,d.getTime());
@@ -3292,7 +3305,7 @@ function persistFurniture(item){
    }else if(anchor==='bed'){
     const bed=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&['bed','loftBed'].includes(furnitureKindForPlaced({name:it.name})),'bedroom')[0]:nearest(furniture(it=>['bed','loftBed'].includes(furnitureKindForPlaced({name:it.name})),'bedroom'),person.position);
     if(bed){const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y}
-   }else if(['sink','piano','washingMachine'].includes(anchor)){
+   }else if(['sink','piano','washingMachine','stove'].includes(anchor)){
     const kind=anchor==='sink'?'sink':anchor;
     const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})===kind)[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})===kind,characterRoom),person.position);
     if(item){if(anchor==='piano'){const stool=nearestSeat(item.group.position);if(stool&&Math.hypot(stool.group.position.x-item.group.position.x,stool.group.position.z-item.group.position.z)<2.5){p=[stool.group.position.x,0,stool.group.position.z];faceAngle=faceToward(stool.group.position,item.group.position)}else{standInFront(item,.62);poseOverride='stand'}}else standInFront(item,.52)}
@@ -3501,13 +3514,14 @@ function persistFurniture(item){
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
     if(activeActivity==='exercise'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.48;l.knee.rotation.x=Math.max(0,stride)*.72})}
-    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='company',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
+    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',cooking=activeActivity==='cook',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='company',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
      let shoulderZ=pose==='sit'?.15:0;
      if(reading){shoulderX=.12+Math.sin(t*.003+i*2.2)*.075;elbowX=-.58+Math.sin(t*.004+i*2.8)*.12;shoulderZ=(i===0?.23:-.18)+Math.sin(t*.002+i)*.025}
      if(typing){shoulderX=.18+Math.sin(t*.012+i*2.5)*.025;elbowX=-.72+Math.sin(t*.01+i)*.035;shoulderZ=i===0?.16:-.16}
+     if(cooking){shoulderX=.38+Math.sin(t*.008+i*1.8)*.08;elbowX=-.82+Math.sin(t*.009+i*2)*.08;shoulderZ=i===0?.28:-.24}
      if(gaming){shoulderX=.34+Math.sin(t*.009+i*2.2)*.055;elbowX=-.7+Math.sin(t*.012+i*2)*.08;shoulderZ=i===0?.2:-.2}
      if(browsing){shoulderX=.14+Math.sin(t*.004+i*2)*.035;elbowX=-.5+Math.sin(t*.006+i)*.045;shoulderZ=i===0?.2:-.14}
      if(pianoPlaying){shoulderX=.3+Math.sin(t*.014+i*Math.PI)*.065;elbowX=-.58+Math.sin(t*.017+i*Math.PI)*.1;shoulderZ=i===0?.2:-.2}
