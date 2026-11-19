@@ -30,7 +30,29 @@ window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;
 const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},personality:null,activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
-s.preferences=s.preferences||{};s.memories=s.memories||[];s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair'&&event.type!=='player-action');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();s.memories=s.memories||[];
+const preferenceCap=10,preferenceGain=.85,preferenceDailyDecay=.4;
+const preferenceActivities=new Set(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','walk','bouquet','admireFlowers','smellFlowers']);
+function decayActivityPreferences(at=Date.now()){
+ const last=Number(s.preferenceUpdatedAt)||at,days=Math.max(0,(at-last)/86400000);
+ if(days<1)return;
+ const loss=preferenceDailyDecay*days;
+ for(const key of Object.keys(s.preferences||{}))s.preferences[key]=Math.max(0,Math.min(preferenceCap,(Number(s.preferences[key])||0)-loss));
+ s.preferenceUpdatedAt=at;
+}
+function recordActivityPreference(activity,at=Date.now()){
+ if(!preferenceActivities.has(activity))return;
+ const key=activity==='read'?'reading':['write','program'].includes(activity)?'writing':activity;
+ s.preferences=s.preferences||{};
+ s.preferences[key]=Math.min(preferenceCap,Math.max(0,Number(s.preferences[key])||0)+preferenceGain);
+ s.preferenceUpdatedAt=at;
+}
+function activityPreferenceScore(activity){
+ const key=activity==='read'?'reading':['write','program'].includes(activity)?'writing':activity;
+ const value=Math.max(0,Math.min(preferenceCap,Number(s.preferences?.[key])||0));
+ return 2.8*(1-Math.exp(-value/4));
+}
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair'&&event.type!=='player-action');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -388,7 +410,7 @@ function buildDay(key){
  return d.sort((a,b)=>a.start-b.start);
 }
 function createAutonomousScheduleEvent(hour,recent=[]){
- const choice=chooseAutonomousActivity(recent),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
+ const choice=chooseAutonomousActivity(recent,hour),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
  return {start:hour,end:hour+1,title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'day-ahead',unresolved:false,plannedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind};
 }
 function ensureSchedule(){ensureScheduleAt(Date.now())}
@@ -693,8 +715,7 @@ function finishImmediateInteraction(at=Date.now()){
   const effects={...(meta.effect||{})};
   if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   change(effects);
-  const preferenceKey=activity==='read'?'reading':activity==='write'?'writing':activity;
-  if(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','bouquet','admireFlowers','smellFlowers'].includes(activity))s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
+  recordActivityPreference(activity,at);
   if(['read','write','program'].includes(activity))updatePersonalGoal(activity==='program'?'write':activity,at);
   relation(activity);
   s.activityLog=s.activityLog||[];s.activityLog.push({activity,key:keyAt(at),hour:new Date(at).getHours(),at,withPlayer:true,immediate:true});
@@ -808,28 +829,33 @@ function autonomousFurnitureOptions(){
  }
  return options;
 }
-function chooseAutonomousActivity(recentOverride=null){
+function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()){
+ decayActivityPreferences();
  const recent=Array.isArray(recentOverride)?recentOverride:(s.activityLog||[]).slice(-5).map(item=>item.activity);
- const temperament=typeof ardayTemperament==='function'?ardayTemperament():{composed:.6,indirect:.4};
- const description=(typeof s.personality==='string'?s.personality:(s.personality?.description||characterStats.personalityTraits?.join(' ')||'')).toLowerCase();
- const candidates=autonomousFurnitureOptions().filter(option=>{const {activity:id,meta}=option;return meta.autonomous&&meta.autonomy&&id!=='eat'&&hasAutonomyFurniture(meta.requires,option.room)}).map(option=>{const {activity:id,meta}=option;
-  const spec=meta.autonomy,level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
-  let personality=0;
-  if(/好奇|求知|敏锐|聪明|洞察|聪敏|善于思考|理性/.test(description)&&['read','write'].includes(id))personality+=5;
-  if(/安静|内向|独处|疏离/.test(description)&&['read','music','rest'].includes(id))personality+=4;
-  if(/活泼|外向|热情|健谈/.test(description)&&['chat','walk'].includes(id))personality+=4;
-  if(/自律|认真|勤奋|专注/.test(description)&&id==='write')personality+=4;
-  if(id==='chat')personality+=(Number(s.friend)||0)*.045;
-  if(id==='rest')personality+=Math.max(0,45-(Number(s.energy)||0))*.22;
-  if(id==='computerPlay')personality+=Math.max(0,50-(Number(s.fun)||0))*.16;
-  const repeatPenalty=recent.filter(x=>x===id).length*3.2;
-  const preference=(Number(s.preferences?.[id==='read'?'reading':id==='write'?'writing':id])||0)*1.8;
-  const temperamentBias=id==='rest'?(1-temperament.composed)*1.5:0;
-  return {...option,score:needScore+(spec.base||0)+personality+preference+temperamentBias-repeatPenalty+Math.random()*3};
- }).filter(item=>Number.isFinite(item.score)&&item.score>=0);
+ const grouped=new Map();
+ for(const option of autonomousFurnitureOptions()){
+  const {activity:id,meta}=option;
+  if(!meta.autonomous||!meta.autonomy||id==='eat'||!hasAutonomyFurniture(meta.requires,option.room))continue;
+  if(!grouped.has(id))grouped.set(id,[]);
+  grouped.get(id).push(option);
+ }
+ const repeatCosts=[3.5,2.2,1.3,.7,.3];
+ const candidates=[...grouped.entries()].map(([id,options])=>{
+  // One activity receives one score regardless of how many pieces of furniture can host it.
+  const option=options[Math.floor(Math.random()*options.length)],{meta}=option,spec=meta.autonomy;
+  const level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
+  const repeatPenalty=recent.slice(-5).reverse().reduce((sum,value,index)=>sum+(normalizeActivity(value)===id?(repeatCosts[index]||0):0),0);
+  const preference=activityPreferenceScore(id);
+  const socialBonus=id==='chat'?(Number(s.friend)||0)*.02:0;
+  let timeBias=0;
+  if(hour>=7&&hour<12&&['wash','cook','laundry'].includes(id))timeBias=1.3;
+  else if(hour>=13&&hour<17&&['read','write','program','playPiano','exercise','walk'].includes(id))timeBias=1.3;
+  else if(hour>=18&&hour<22&&['chat','watchTV','listenRecords','music','computerPlay','game'].includes(id))timeBias=1.3;
+  return {...option,score:needScore+(spec.base||0)+preference+socialBonus+timeBias-repeatPenalty+Math.random()*2};
+ }).filter(item=>Number.isFinite(item.score));
  if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
- const weighted=candidates.map(item=>({...item,weight:Math.max(.15,item.score-max+5)}));
+ const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/10)}));
  const total=weighted.reduce((sum,item)=>sum+item.weight,0);
  let roll=Math.random()*total;
  for(const item of weighted){roll-=item.weight;if(roll<=0)return item}
@@ -907,10 +933,7 @@ function processActivityAt(value){
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('好饿。今天我能得到神明的投喂吗？');delete effects.hunger}
   change(effects);
   
-  if(['read','write','chat','computerPlay','browseWeb','program','playPiano','exercise','laundry','watchTV','listenRecords','walk','rest','music','wash'].includes(activity)){
-   const preferenceKey=activity==='read'?'reading':['write','program'].includes(activity)?'writing':activity;
-   s.preferences[preferenceKey]=(s.preferences[preferenceKey]||0)+1;
-  }
+  recordActivityPreference(activity,d.getTime());
   // Scene presentation is applied once after the authoritative state is committed.
  }
  if(sessionStart&&!s.activeInteraction){
@@ -1085,16 +1108,7 @@ s.sharedGoalHistory=s.sharedGoalHistory||[];
 s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
 s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
 
-function ardayTemperament(){
- const d=(typeof s.personality==='string'?s.personality:(s.personality?.description||characterStats.personalityTraits?.join(' ')||'')).toLowerCase();
- const hasWord=re=>re.test(d);
- return {
-  composed:hasWord(/从容|游刃有余|淡定|镇定|轻松|不慌/)||!d?0.78:0.58,
-  indirect:hasWord(/操纵|引导|心思|试探|迂回|反向/)||!d?0.76:0.4,
- };
-}
 function ardayLine(kind, fallback){
- const p=ardayTemperament();
  const lines={
   proposal:[
    '我倒是有个主意。你先别急着拒绝，听完再说。',
@@ -1119,8 +1133,6 @@ function ardayLine(kind, fallback){
  };
  const pool=lines[kind]||[fallback];
  let line=pool[Math.floor(Math.random()*pool.length)];
- if(kind==='proposal'&&p.indirect>.65&&Math.random()<.45)line='我本来只是随口一提。不过，你若答应，我倒也不会反对。';
- if(kind==='incident'&&p.composed>.65&&Math.random()<.4)line='不是什么大事。总有办法处理，何必现在就皱眉？';
  return line||fallback;
 }
 function sharedGoalCatalog(){
