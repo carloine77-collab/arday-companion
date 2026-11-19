@@ -518,6 +518,19 @@ function ensureScheduleAt(value){
   });
   s.calendar.version=17;
  }
+ if((s.calendar.version||0)<18){
+  const now=new Date(),today=keyAt(now),hour=now.getHours();
+  Object.keys(s.calendar.days).forEach(key=>{
+   if(key<today)return;
+   (s.calendar.days[key]||[]).forEach(ev=>{
+    if(ev.kind==='autonomous'&&(key>today||ev.start>hour)){
+     ev.title='自主安排';ev.activity='autonomous';ev.unresolved=true;
+     delete ev.furnitureId;delete ev.furnitureKind;delete ev.anchor;delete ev.room;
+    }
+   });
+  });
+  s.calendar.version=18;
+ }
  
  
  
@@ -610,7 +623,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','walk','read','game','music','food','company','chat','computerPlay','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
+ if(['listen','walk','read','game','music','food','company','chat','computerPlay','browseWeb','program','playPiano','exercise','laundry','hug','admireDecor','admireView','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
   s.friend=clamp(s.friend+1);
   remember('shared',action);
  }
@@ -665,8 +678,8 @@ function finishImmediateInteraction(at=Date.now()){
   if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
   remember('shared',activityLabel(activity)+' · 即时互动',1);
  }
- const scheduled=eventAt(keyAt(at),new Date(at).getHours());
- const restoredActivity=normalizeActivity(scheduled?.activity||s.currentActivity||'idle');
+ const restored=resolveScheduledActivity(keyAt(at),new Date(at).getHours()),scheduled=restored.event;
+ const restoredActivity=normalizeActivity(restored.activity||s.currentActivity||'idle');
  const restoredMeta=activityMeta[restoredActivity]||{};
  s.currentActivity=restoredActivity;
  s.currentActivityAnchor=scheduled?.anchor||restoredMeta.anchor||null;
@@ -694,50 +707,56 @@ function beginImmediateInteraction(action,options={}){
  }
  if(s.activeInteraction&&now<Number(s.activeInteraction.endsAt||0)){say('这么贪心？三心二意可不好。');return false}
  const requiredFurniture=meta.requires;
- if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture)){saySystem('家里还没有适合进行这项活动的家具。');return false}
- const sourceFurniture=(s.placed||[]).find(item=>item.id===options.furnitureId);
- if(options.source==='furniture'&&sourceFurniture&&!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){saySystem('这件家具附近还没有适合进行这项活动的设备。');return false}
+ const sourceFurniture=(s.placed||[]).find(item=>String(item.id)===String(options.furnitureId));
+ if(options.source==='furniture'){
+  if(!sourceFurniture){saySystem('这件家具暂时无法执行该互动。');return false}
+  const sourceKind=furnitureKindForPlaced(sourceFurniture),sourceSet=sourceKind&&furnitureActivities[sourceKind];
+  if(!sourceSet?.activities?.[activity]){saySystem('这件家具没有配置这项互动。');return false}
+  if(!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){saySystem('这件家具附近还没有适合进行这项活动的设备。');return false}
+ }else if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture,options.room||null)){saySystem('家里还没有适合进行这项活动的家具。');return false}
  const furnitureId=String(options.furnitureId||options.furnitureKind||'unspecified');
  const attemptKey=hourKey,attemptId=furnitureId+'|'+activity,attempts=s.interactionAttempts[attemptKey]||[];
  if(attempts.includes(attemptId)){say('这么想做的话，明天吧。');return false}
  s.interactionAttempts[attemptKey]=[...attempts,attemptId];
  Object.keys(s.interactionAttempts).forEach(key=>{if(key.slice(0,10)<hourKey.slice(0,10))delete s.interactionAttempts[key]});save();
- if(Math.random()<immediateInteractionRefusalRate){rejectActivityProposal(activity);save();return false}
- const startedAt=now;
- s.activeInteraction={activity,anchor:options.anchor||meta.anchor||null,furnitureId,room:sourceFurniture?.room||'living',startedAt,endsAt:startedAt+immediateInteractionDuration,interrupted:{activity:s.currentActivity||availability.activity||'idle',anchor:s.currentActivityAnchor||null},presentationHourKey:hourKey};
+ if(meta.duration==='long'&&Math.random()<immediateInteractionRefusalRate){rejectActivityProposal(activity);save();return false}
+ const startedAt=now,durationMs=meta.duration==='short'?24000:120000;
+ s.activeInteraction={activity,anchor:options.anchor||meta.anchor||null,furnitureId,room:sourceFurniture?.room||options.room||'living',startedAt,endsAt:startedAt+durationMs,interrupted:{activity:s.currentActivity||availability.activity||'idle',anchor:s.currentActivityAnchor||null},presentationHourKey:hourKey};
  presentActivity(activity,s.activeInteraction.anchor,s.activeInteraction.room,furnitureId);say('想让我陪你？那我勉为其难试试吧。');save();return true;
 }
 function presentActivity(activity,anchor=null,room=null,furnitureId=null){
  const a=normalizeActivity(activity);if(!activityMeta[a])return;updateArday3D(a,anchor,room,furnitureId);
 }
+function furnitureSatisfiesRequirement(item,requirement){
+ if(!requirement)return true;
+ const kind=furnitureKindForPlaced(item);
+ const allowed={desk:['desk'],computer:['computer'],television:['television'],recordPlayer:['recordPlayer'],gameConsole:['gameConsole'],bouquet:['bouquet'],bookshelf:['bookshelf'],readingSpot:['bookshelf','desk','bed'],sink:['sink'],seat:['sofa','chair','cushion','bed'],piano:['piano'],washingMachine:['washingMachine'],treadmill:['treadmill']};
+ return !allowed[requirement]||allowed[requirement].includes(kind);
+}
 function hasAutonomyFurniture(requirement,room=null){
- const names=(s.placed||[]).filter(item=>item&&typeof item.name==='string'&&(!room||item.room===room)).map(item=>item.name);
- if(requirement==='desk')return names.some(name=>name.includes('书桌'));
- if(requirement==='computer')return names.some(name=>name.includes('电脑'));
- if(requirement==='television')return names.some(name=>name==='电视');
- if(requirement==='recordPlayer')return names.some(name=>name==='唱片机');
- if(requirement==='gameConsole')return names.some(name=>name==='游戏机');
- if(requirement==='bouquet')return names.some(name=>name==='捧花摆件');
- if(requirement==='bookshelf')return names.some(name=>name.includes('书架'));
- if(requirement==='readingSpot')return names.some(name=>/书架|书桌|床/.test(name));
- if(requirement==='sink')return names.some(name=>name.includes('水槽'));
- if(requirement==='seat')return names.some(name=>/沙发|椅子|餐椅|办公椅|凳子|床/.test(name));
- return true;
+ if(!requirement)return true;
+ return (s.placed||[]).some(item=>item&&(!room||item.room===room)&&furnitureSatisfiesRequirement(item,requirement));
 }
 function furnitureKindForPlaced(item){
  const name=String(item?.name||'');
  if(/沙发|躺椅|懒人沙发|沙发床/.test(name))return 'sofa';
  if(/餐桌/.test(name))return 'dining';
  if(/^冰箱/.test(name))return 'fridge';
- if(/灶台/.test(name))return 'stove';
+ if(/灶/.test(name))return 'stove';
  if(/水槽/.test(name))return 'sink';
- if(/^床|上床下桌/.test(name))return 'bed';
- if(/椅子|阅读椅|餐椅|办公椅|凳子/.test(name))return 'chair';
+ if(/^(?:床(?:$|·)|布艺床|双人床|软包床|木框床|上床下桌|榻榻米)/.test(name))return 'bed';
+ if(/椅/.test(name)||/凳子/.test(name))return 'chair';
  if(/书架|书柜/.test(name))return 'bookshelf';
  if(/书桌/.test(name))return 'desk';
  if(/^电脑/.test(name))return 'computer';
- if(/^电视/.test(name))return 'television';
+ if(/^电视(?:$|·)/.test(name))return 'television';
  if(/唱片机/.test(name))return 'recordPlayer';
+ if(/捧花摆件/.test(name))return 'bouquet';
+ if(/钢琴/.test(name))return 'piano';
+ if(/洗衣机/.test(name))return 'washingMachine';
+ if(/跑步机/.test(name))return 'treadmill';
+ if(/海报|壁画|照片墙/.test(name))return 'wallArt';
+ if(/坐垫/.test(name))return 'cushion';
  if(/游戏机/.test(name))return 'gameConsole';
  return null;
 }
@@ -828,7 +847,7 @@ function processActivityAt(value){
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
- if(meta){
+ if(meta&&!s.activeInteraction){
   const effects={...(meta.effect||{})};if(activity==='sleep')effects.energy=Number(energyConfig.sleepRecoveryPerHour)||1;else if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('好饿。今天我能得到神明的投喂吗？');delete effects.hunger}
   change(effects);
@@ -839,7 +858,7 @@ function processActivityAt(value){
   }
   // Scene presentation is applied once after the authoritative state is committed.
  }
- if(sessionStart){
+ if(sessionStart&&!s.activeInteraction){
   if(ev?.withPlayer){
    relation(activity);
    if(activity==='walk')advanceSharedGoal(activity,d.getTime());
@@ -866,9 +885,7 @@ function activityLabel(activity){
 }
 function furnitureRequirementAvailable(requirement,room){
  if(!requirement)return true;
- const patterns={desk:/书桌/,computer:/电脑/,television:/^电视$/,recordPlayer:/^唱片机$/,bookshelf:/书架/,readingSpot:/书架|书桌|床/,sink:/水槽/,seat:/沙发|椅子|餐椅|办公椅|凳子|床/,bouquet:/^捧花摆件$/};
- const pattern=patterns[requirement];if(!pattern)return true;
- return (s.placed||[]).some(item=>item&&item.room===room&&pattern.test(item.name||''));
+ return (s.placed||[]).some(item=>item&&item.room===room&&furnitureSatisfiesRequirement(item,requirement));
 }
 function closeFurnitureActions(){
  const wheel=document.querySelector('.furniture-wheel');
@@ -1613,9 +1630,9 @@ function initArday3D(){
   // The outdoor view is part of each movable window assembly.
   // The back wall remains solid behind it; no dynamic wall cut-outs are used.
   const wallObjects=[
-   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('read',false,{source:'window',furnitureId:'living-window',anchor:'shelf'})}),
-   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('真的是在好奇窗户吗？看着我。')}),
-   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>say('差点忘了开窗通风，感谢提醒。')}),
+   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'living-window',room:'living',anchor:'window'})}),
+   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'bedroom-window',room:'bedroom',anchor:'window'})}),
+   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'kitchen-window',room:'kitchen',anchor:'window'})}),
    registerWallObject({id:'living-bedroom-door',name:'卧室门',room:'living',group:livingBedroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bedroom')}),
    registerWallObject({id:'living-kitchen-door',name:'厨房门',room:'living',group:livingKitchenDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('kitchen')}),
    registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
@@ -2020,6 +2037,7 @@ function initArday3D(){
      ferrule.position.set(x,.035,z);group.add(ferrule);
     }
    }else if(modelName==='壁画'){
+    action=()=>openFurnitureActions('wallArt',id);
     width=1.5;depth=.14;height=1.18;wallAxis='x';wallSide='back';anchor=[0,1.9];
     box(0,0,0,1.52,1.18,.13,m.wood);box(0,0,.075,1.4,1.06,.035,m.gold);box(0,0,.098,1.32,.98,.018,m.cream);
     const arch=new T.Mesh(new T.CircleGeometry(.36,32,0,Math.PI),m.wall);arch.position.set(0,.17,.112);group.add(arch);box(0,-.19,.115,.72,.72,.012,m.wall);
@@ -2467,6 +2485,7 @@ function initArday3D(){
     group.add(new T.Mesh(new T.TubeGeometry(lumbar,20,.025,8,false),trim));
     box(0,1.43,-.27,.34,.16,.1,fabric);box(0,1.43,-.32,.3,.11,.035,mesh);
    }else if(modelName==='坐垫'){
+    action=()=>openFurnitureActions('cushion',id);
     width=.82;depth=.82;height=.2;surfaceType='floor';
     const textile=mat(0xb9a1a0,.98),shadow=mat(0x97847f,.98),piping=mat(0xeee1cf,.92);
     applyPainterMap(textile,fabricMap,.03);applyPainterMap(shadow,fabricMap,.025);
@@ -2542,6 +2561,7 @@ function initArday3D(){
      const support=box(x,.63,-.28,.06,.3,.06,frame);
     }
    }else if(modelName==='海报'){
+    action=()=>openFurnitureActions('wallArt',id);
     width=1.02;depth=.14;height=1.32;wallAxis='x';wallSide='back';anchor=[0,2.05];
     const frame=mat(0x6c4c35,.62),matte=mat(0xe9dfcf,.92),ink=mat(0x354b50,.9),clay=mat(0xb96f55,.9),gold=mat(0xc59b59,.42,.38);
     box(0,0,0,1.02,1.32,.085,frame);
@@ -2699,6 +2719,7 @@ function initArday3D(){
    }else if(modelName==='上床下桌'){
     width=3.0;depth=2.0;height=2.75;action=()=>openFurnitureActions('bed',id);for(const x of [-1.35,1.35]){box(x,1.35,0,.12,2.65,.12,m.wood);box(x,2.63,0,.18,.12,1.9,m.oak)}box(0,2.18,-.72,2.7,.16,.78,m.wood);box(0,2.3,-.72,2.65,.22,.72,m.fabric);box(0,2.55,-1.58,2.7,.5,.12,m.cream);for(const x of [-1.25,1.25])box(x,.82,.35,.1,1.6,.1,m.wood);box(0,.92,0,2.55,.12,.82,m.oak);box(0,.99,0,2.5,.04,.78,m.cream);for(const x of [-1.1,1.1])box(x,.45,0,.08,.88,.72,m.wood);for(let i=0;i<6;i++)box(-.22+i*.09,.18,.18,.045,.012,.3,m.gold);for(let i=0;i<5;i++){const step=box(-1.5,.22+i*.36,.65-i*.28,.38,.06,.24,m.oak);step.rotation.z=.0}
    }else if(modelName==='钢琴'){
+    action=()=>openFurnitureActions('piano',id);
     width=1.62;depth=.92;height=1.42;
     const caseMat=mat(0x292a2b,.28,.46),wood=mat(0x62452f,.56),ivory=mat(0xf0eadc,.35),ebony=mat(0x18191b,.24);
     // Upright piano cabinet with fallboard, keyboard cheeks, music desk and pedals.
@@ -2719,6 +2740,7 @@ function initArday3D(){
     for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,m.metal);pedal.rotation.x=-.18}
     box(0,.16,.22,.62,.055,.22,caseMat);
    }else if(modelName==='洗衣机'){
+    action=()=>openFurnitureActions('washingMachine',id);
     width=.92;depth=.86;height=1.28;
     const enamel=mat(0xe8e5df,.34,.18),steel=mat(0xaeb7b9,.28,.58),dark=mat(0x34434a,.18,.24),rubber=mat(0x252a2d,.88);
     box(0,.63,0,.88,1.22,.82,enamel);
@@ -2806,6 +2828,7 @@ function initArday3D(){
     cyl(.43,-.47,.19,.065,.065,.16,m.clay,14);
     for(let i=0;i<3;i++){const pencil=cyl(.39+i*.035,-.34,.19,.009,.009,.24,m.gold,8);pencil.rotation.z=(i-1)*.1}
    }else if(modelName==='照片墙'){
+    action=()=>openFurnitureActions('wallArt',id);
     width=1.95;depth=.16;height=1.45;wallAxis='x';wallSide='back';anchor=[0,2.15];
     const frameA=mat(0x76543d,.62),frameB=mat(0xb69a72,.62),matte=mat(0xf0e8d8,.92);
     const frames=[
@@ -2837,6 +2860,7 @@ function initArday3D(){
     // Small brass hanging rail unifies the asymmetrical gallery arrangement.
     box(0,.78,.015,1.45,.025,.035,m.gold);
    }else if(modelName==='跑步机'){
+    action=()=>openFurnitureActions('treadmill',id);
     width=.9;depth=1.92;height=1.48;
     const frame=mat(0x343b40,.42,.72),belt=mat(0x20272b,.94),rail=mat(0x858f92,.42,.65),rubber=mat(0x171c20,.98);
     // Deep running deck with a continuous belt, end rollers and side foot rails.
@@ -2857,6 +2881,7 @@ function initArday3D(){
     for(const x of [-.27,.27]){const safety=box(x,1.08,-.82,.045,.025,.1,m.clay);safety.rotation.z=x*.12}
     for(const x of [-.3,.3])for(const z of [-.72,.72])cyl(x,.075,z,.045,.045,.08,rubber,12);
    }else if(modelName==='游戏机'){
+    action=()=>openFurnitureActions('gameConsole',id);
     width=.72;depth=.48;height=.34;surfaceType='tabletop';surfaceY=.04;
     const shell=mat(0x30363b,.38,.58),edge=mat(0x555e64,.42,.55),vent=mat(0x171d22,.9),light=mat(0x8caeaa,.3,.2);
     // Low console chassis with layered shell, front ports and top ventilation.
@@ -3226,8 +3251,9 @@ function persistFurniture(item){
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
-   const nearestSeat=(origin,room=characterRoom)=>nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),room).filter(it=>Math.hypot(it.group.position.x-origin.x,it.group.position.z-origin.z)<=2.35),origin);
+   const nearestSeat=(origin,room=characterRoom)=>nearest(furniture(it=>['chair','cushion'].includes(furnitureKindForPlaced({name:it.name})),room).filter(it=>Math.hypot(it.group.position.x-origin.x,it.group.position.z-origin.z)<=2.6),origin);
    const faceToward=(from,to)=>Math.atan2(to.x-from.x,to.z-from.z);
+   const standInFront=(item,extra=.52)=>{const front=new T.Vector3(0,0,1).applyAxisAngle(new T.Vector3(0,1,0),item.group.rotation.y),distance=(Number(item.depth)||.8)/2+extra;p=[item.group.position.x+front.x*distance,0,item.group.position.z+front.z*distance];faceAngle=faceToward({x:p[0],z:p[2]},item.group.position)};
    if(anchor==='desk'){
     const sourceFurniture=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride)[0]:null;
     const computer=sourceFurniture?.name==='电脑'?sourceFurniture:furniture(it=>it.name==='电脑'&&it.supportId)[0];
@@ -3236,20 +3262,46 @@ function persistFurniture(item){
      if(seat){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=faceToward(seat.group.position,desk.group.position)}
      else{const offset=new T.Vector3(0,0,Math.max(.82,desk.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),desk.group.rotation.y);p=[desk.group.position.x+offset.x,0,desk.group.position.z+offset.z];faceAngle=faceToward({x:p[0],z:p[2]},desk.group.position)}}
    }else if(anchor==='shelf'){
-    const shelf=furniture(it=>it.name.startsWith('书架'))[0];if(shelf){const seat=nearestSeat(shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=seat?faceToward(seat.group.position,shelf.group.position):faceToward({x:p[0],z:p[2]},shelf.group.position)}
+    const selected=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&/书架|书柜/.test(it.name))[0]:null;
+    const shelf=selected||nearest(furniture(it=>/书架|书柜/.test(it.name),characterRoom),person.position);
+    if(shelf){const seat=nearestSeat(shelf.group.position),offset=new T.Vector3(0,0,-(shelf.depth/2+.52)).applyAxisAngle(new T.Vector3(0,1,0),shelf.group.rotation.y);p=seat?[seat.group.position.x,0,seat.group.position.z]:[shelf.group.position.x+offset.x,0,shelf.group.position.z+offset.z];faceAngle=seat?faceToward(seat.group.position,shelf.group.position):faceToward({x:p[0],z:p[2]},shelf.group.position)}
    }else if(anchor==='sofa'){
-    const sofa=furniture(it=>it.name.startsWith('沙发'))[0];if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI}
+    const selected=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='sofa')[0]:null;
+    const sofa=selected||nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='sofa',characterRoom),person.position);
+    if(sofa){const seat=new T.Vector3(0,.61,-.08).applyAxisAngle(new T.Vector3(0,1,0),sofa.group.rotation.y);p=[sofa.group.position.x+seat.x,sofa.group.position.y+seat.y,sofa.group.position.z+seat.z];faceAngle=sofa.group.rotation.y+Math.PI}
    }else if(anchor==='table'){
-    const table=furniture(it=>it.name.startsWith('餐桌'))[0];if(table){const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=Math.atan2(table.group.position.x-p[0],table.group.position.z-p[2])}
+    const selected=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&it.name.includes('餐桌'))[0]:null;
+    const table=selected||nearest(furniture(it=>it.name.includes('餐桌'),characterRoom),person.position);
+    if(table){const seat=nearestSeat(table.group.position);if(seat&&Math.hypot(seat.group.position.x-table.group.position.x,seat.group.position.z-table.group.position.z)<2.8){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=faceToward(seat.group.position,table.group.position)}else{const offset=new T.Vector3(0,0,-(table.depth/2+.48)).applyAxisAngle(new T.Vector3(0,1,0),table.group.rotation.y);p=[table.group.position.x+offset.x,0,table.group.position.z+offset.z];faceAngle=faceToward({x:p[0],z:p[2]},table.group.position)}}
    }else if(anchor==='chair'){
-    const selectedChair=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride)[0]:null;
-    const chair=selectedChair||nearest(furniture(it=>['椅子','餐桌椅'].includes(it.name)||it.name.startsWith('椅子·'),characterRoom),person.position);if(chair){p=[chair.group.position.x,0,chair.group.position.z];faceAngle=chair.group.rotation.y}
+    const selectedChair=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&['chair','cushion'].includes(furnitureKindForPlaced({name:it.name})),characterRoom)[0]:null;
+    const chair=selectedChair||nearest(furniture(it=>['chair','cushion'].includes(furnitureKindForPlaced({name:it.name})),characterRoom),person.position);
+    if(chair){p=[chair.group.position.x,chair.group.position.y||0,chair.group.position.z];faceAngle=chair.group.rotation.y}
+   }else if(anchor==='cushion'){
+    const cushion=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='cushion',characterRoom)[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='cushion',characterRoom),person.position);
+    if(cushion){p=[cushion.group.position.x,.08,cushion.group.position.z];faceAngle=cushion.group.rotation.y}
    }else if(anchor==='bouquet'){
     const bouquet=furniture(it=>it.name==='捧花摆件')[0];if(bouquet){p=[bouquet.group.position.x,0,bouquet.group.position.z+.9];faceAngle=Math.PI}
    }else if(anchor==='bed'){
-    const bed=furniture(it=>it.name.startsWith('床'),'bedroom')[0];if(bed){const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y}
+    const bed=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='bed','bedroom')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='bed','bedroom'),person.position);
+    if(bed){const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y}
+   }else if(['sink','piano','washingMachine'].includes(anchor)){
+    const kind=anchor==='sink'?'sink':anchor;
+    const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})===kind)[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})===kind,characterRoom),person.position);
+    if(item){if(anchor==='piano'){const stool=nearestSeat(item.group.position);if(stool&&Math.hypot(stool.group.position.x-item.group.position.x,stool.group.position.z-item.group.position.z)<2.5){p=[stool.group.position.x,0,stool.group.position.z];faceAngle=faceToward(stool.group.position,item.group.position)}else standInFront(item,.62)}else standInFront(item,.52)}
+   }else if(anchor==='treadmill'){
+    const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='treadmill')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='treadmill',characterRoom),person.position);
+    if(item){p=[item.group.position.x,0,item.group.position.z];const consolePoint=new T.Vector3(0,0,-(item.depth/2-.12)).applyAxisAngle(new T.Vector3(0,1,0),item.group.rotation.y);faceAngle=faceToward({x:p[0],z:p[2]},{x:item.group.position.x+consolePoint.x,z:item.group.position.z+consolePoint.z})}
+   }else if(anchor==='gameConsole'){
+    const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='gameConsole')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='gameConsole',characterRoom),person.position);
+    if(item){const support=furniture(it=>it.id===item.supportId,characterRoom)[0];if(support){const offset=new T.Vector3(0,0,support.depth/2+1.05).applyAxisAngle(new T.Vector3(0,1,0),support.group.rotation.y);p=[support.group.position.x+offset.x,0,support.group.position.z+offset.z]}else p=positions.rug;faceAngle=faceToward({x:p[0],z:p[2]},item.group.position)}
+   }else if(anchor==='wallArt'){
+    const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='wallArt')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='wallArt',characterRoom),person.position);
+    if(item){const normal=item.wallSide==='back'?new T.Vector3(0,0,1):item.wallSide==='front'?new T.Vector3(0,0,-1):item.wallSide==='left'?new T.Vector3(1,0,0):new T.Vector3(-1,0,0);normal.applyAxisAngle(new T.Vector3(0,1,0),item.group.rotation.y);p=[item.group.position.x+normal.x*(item.depth/2+.72),0,item.group.position.z+normal.z*(item.depth/2+.72)];faceAngle=faceToward({x:p[0],z:p[2]},item.group.position)}
+   }else if(anchor==='window'){
+    p=[...positions.window];faceAngle=Math.PI;
    }
-   target.set(...p);pose=meta.pose||'wave';activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','bouquet','bed'].includes(anchor))person.rotation.y=faceAngle;
+   target.set(...p);pose=meta.pose||'wave';activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','cushion','bouquet','bed','sink','piano','washingMachine','treadmill','gameConsole','wallArt','window'].includes(anchor))person.rotation.y=faceAngle;
    basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
@@ -3441,13 +3493,18 @@ function persistFurniture(item){
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{l.hip.rotation.x+=((pose==='sit'?-1.15:pose==='sleep'?-1.35:0)-l.hip.rotation.x)*.12;l.knee.rotation.x+=((pose==='sit'?1.45:pose==='sleep'?1.5:0)-l.knee.rotation.x)*.12});
-    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','computerPlay'].includes(activeActivity),watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='company',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash',resting=activeActivity==='rest'||activeActivity==='sitChair';
+    if(activeActivity==='exercise'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.48;l.knee.rotation.x=Math.max(0,stride)*.72})}
+    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='company',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
      let shoulderZ=pose==='sit'?.15:0;
      if(reading){shoulderX=.12+Math.sin(t*.003+i*2.2)*.075;elbowX=-.58+Math.sin(t*.004+i*2.8)*.12;shoulderZ=(i===0?.23:-.18)+Math.sin(t*.002+i)*.025}
      if(typing){shoulderX=.18+Math.sin(t*.012+i*2.5)*.025;elbowX=-.72+Math.sin(t*.01+i)*.035;shoulderZ=i===0?.16:-.16}
+     if(gaming){shoulderX=.34+Math.sin(t*.009+i*2.2)*.055;elbowX=-.7+Math.sin(t*.012+i*2)*.08;shoulderZ=i===0?.2:-.2}
+     if(browsing){shoulderX=.14+Math.sin(t*.004+i*2)*.035;elbowX=-.5+Math.sin(t*.006+i)*.045;shoulderZ=i===0?.2:-.14}
+     if(pianoPlaying){shoulderX=.3+Math.sin(t*.014+i*Math.PI)*.065;elbowX=-.58+Math.sin(t*.017+i*Math.PI)*.1;shoulderZ=i===0?.2:-.2}
+     if(hugging){shoulderX=.22+Math.sin(t*.002+i)*.025;elbowX=-.78;shoulderZ=i===0?.48:-.48}
       if(writing){shoulderX=.3+Math.sin(t*.009+i*2.5)*.045;elbowX=-.84+Math.sin(t*.014+i)*.045;shoulderZ=i===0?.24:-.13}
      if(eating){shoulderX=.52+Math.sin(t*.006+i*2.8)*.12;elbowX=-.92+Math.sin(t*.008+i*2.1)*.1;shoulderZ=i===0?.34:-.3}
       if(watching){shoulderX=.04+Math.sin(t*.0018+i)*.025;elbowX=-.22;shoulderZ=i===0?.18:-.18}
@@ -3464,6 +3521,9 @@ function persistFurniture(item){
     });
     if(writing){head.rotation.x+=(-.13+Math.sin(t*.0018)*.025-head.rotation.x)*.035}
      if(reading&&Math.sin(t*.0011)>.985){head.rotation.y+=(.42-head.rotation.y)*.12;head.rotation.x+=(-.08-head.rotation.x)*.12}
+     if(gaming){head.rotation.x+=(-.08+Math.sin(t*.002)*.025-head.rotation.x)*.035}
+     if(browsing){head.rotation.x+=(-.09+Math.sin(t*.0025)*.02-head.rotation.x)*.035}
+     if(pianoPlaying){head.rotation.x+=(-.12+Math.sin(t*.0015)*.025-head.rotation.x)*.035;head.rotation.y+=(Math.sin(t*.0018)*.08-head.rotation.y)*.035}
      if(watching){head.rotation.y+=(Math.sin(t*.0007)*.1-head.rotation.y)*.025;head.rotation.x+=(-.035-head.rotation.x)*.025}
      if(listening){head.rotation.z+=(Math.sin(t*.0011)*.035-head.rotation.z)*.035;head.rotation.x+=(-.055-head.rotation.x)*.025}
      if(conversing){head.rotation.y+=(Math.sin(t*.002)*.18-head.rotation.y)*.045;head.rotation.x+=(Math.sin(t*.0027)*.045-head.rotation.x)*.04}
