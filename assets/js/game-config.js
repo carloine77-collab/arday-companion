@@ -841,7 +841,7 @@ window.ArdayGameConfig = {
   characterStats: {
    personalityTraits: ['洞察人心','从容不羁','疏离矜贵','聪敏自持'],
    energy: {
-    hourlyDecay: 0.45,
+    hourlyDecay: 5,
     sleepRecoveryPerHour: 13,
     minimumSleepHours: 1,
     maximumSleepHours: 8,
@@ -851,7 +851,7 @@ window.ArdayGameConfig = {
      sitChair:5, food:0, tea:0, company:0
     }
    },
-   needs: { hungerHourlyDecay:0.8, cleanHourlyDecay:0.25, funHourlyDecay:0.3 }
+   needs: { hungerHourlyDecay:7.5, cleanHourlyDecay:1.6666666667, funHourlyDecay:2.5 }
   },
   activityMeta: {
  rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:62,weight:1.65},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
