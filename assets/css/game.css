@@ -1102,3 +1102,13 @@ html body .stage .drawer.profile-expanded.open .choices{
 .kitchen-close:hover{background:#e8d9c5}
 .kitchen-close:focus-visible{outline:2px solid #98795a;outline-offset:2px}
 .kitchen-hero{padding-right:54px}
+
+
+/* Final shop/cooking alignment corrections. */
+.drawer.shop-drawer .drawer-head:before,
+.drawer.shop-drawer .drawer-head:after{content:none!important;display:none!important}
+.drawer.shop-drawer #drawerTitle{ text-shadow:none!important; }
+.shop-content .shop-categories:after{content:none!important;display:none!important}
+.shop-content .shop-categories{margin-bottom:0!important;padding-bottom:2px!important}
+.stage .drawer:has(.cooking-panel) .choices.cooking-panel{position:static!important;padding-top:0!important}
+.stage .drawer:has(.cooking-panel) .kitchen-close{position:absolute!important;top:10px!important;right:10px!important;z-index:60!important}
