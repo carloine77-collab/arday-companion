@@ -724,6 +724,7 @@ function beginImmediateInteraction(action,options={}){
   if(!sourceSet?.activities?.[activity]){saySystem('这件家具没有配置这项互动。');return false}
   if(!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){saySystem('这件家具附近还没有适合进行这项活动的设备。');return false}
   if(activity==='computerPlay'&&sourceKind==='desk'&&!((s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(sourceFurniture.id)))){saySystem('这张书桌上还没有放置电脑。');return false}
+  if(['computerPlay','write','browseWeb','program'].includes(activity)&&sourceKind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(sourceFurniture.supportId)&&furnitureKindForPlaced(entry)==='desk'))){saySystem('这台电脑需要放在书桌上才能使用。');return false}
  }else if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture,options.room||null)){saySystem('家里还没有适合进行这项活动的家具。');return false}
  const furnitureId=String(options.furnitureId||options.furnitureKind||'unspecified');
  const attemptKey=hourKey,attemptId=furnitureId+'|'+activity,attempts=s.interactionAttempts[attemptKey]||[];
@@ -782,7 +783,8 @@ function autonomousFurnitureOptions(){
    const meta=activityMeta[activity];
    if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||activity==='eat')continue;
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
-   if(activity==='computerPlay'&&kind==='desk'&&!((s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id))))continue;
+   if(activity==='computerPlay'&&kind==='desk')continue;
+   if(activity==='computerPlay'&&kind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk')))continue;
    if(activity==='cook'&&!hasCookableRecipe())continue;
    options.push({activity,meta,room:item.room,anchor:context?.anchor||meta.anchor||'default',furnitureId:item.id,furnitureKind:kind});
   }
@@ -824,7 +826,7 @@ function scheduledFurnitureIsValid(ev){
  const item=(s.placed||[]).find(entry=>String(entry.id)===String(ev.furnitureId));
  if(!item)return false;
  const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],activity=normalizeActivity(ev.activity),meta=activityMeta[activity];
- const linkedComputer=activity!=='computerPlay'||kind!=='desk'||(s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id));
+ const linkedComputer=activity!=='computerPlay'||(kind==='desk'&&(s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id)))||(kind==='computer'&&(s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk'));
  const ingredientsAvailable=activity!=='cook'||hasCookableRecipe();
  const valid=!!set?.activities?.[activity]&&meta?.duration==='long'&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room)&&linkedComputer&&ingredientsAvailable;
  if(valid&&ev.room!==item.room)ev.room=item.room;
