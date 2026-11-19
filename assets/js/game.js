@@ -263,7 +263,7 @@ function renderEvents(){
  $('drawerTitle').textContent='留言纸条';$('choices').className='choices events-view';$('choices').innerHTML='';
  if(!open.length){$('choices').innerHTML='<div class="event-empty"><span>✧</span><h3>暂时没有新的纸条</h3><p>阿尔的生活仍在继续。等他有话想说，或有事情值得记下时，纸条就会出现在这里。</p></div>';}
  open.forEach(e=>{
-  const b=document.createElement('button');b.type='button';b.className='choice event-card';
+  const b=document.createElement('button');b.type='button';b.className='choice event-card '+(e.category==='letter'?'letter-card':'system-card');
   const copy=document.createElement('span');copy.className='event-copy';
   const kindNode=document.createElement('em');kindNode.className='event-kind '+(e.category==='letter'?'letter':'system');kindNode.textContent=e.category==='letter'?'阿尔留言':'系统记录';
   const titleNode=document.createElement('strong');titleNode.textContent=e.title;
