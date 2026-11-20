@@ -1,0 +1,512 @@
+/* ARDAY — lived-in editorial direction. No divider rules: use ornament, spacing and typography. */
+.drawer .choices.inventory-view,
+.drawer .choices.shop-content,
+.drawer .choices.interaction-view{border:0!important;outline:0!important;box-shadow:none!important}
+.drawer .choices.inventory-view{gap:0!important;padding:0 0 28px!important;background:#e9dfcf!important;background-image:radial-gradient(#6c67591a .65px,transparent .65px),linear-gradient(145deg,#eee5d6,#e4d8c5)!important;background-size:7px 7px,100% 100%!important}
+.inventory-view .inventory-categories{position:relative!important;display:flex!important;justify-content:space-around!important;gap:10px!important;margin:0 0 13px!important;padding:13px 8px 8px!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.inventory-view .inventory-categories:after{content:"     ·     ✧     ·     ";display:block;position:absolute;bottom:-12px;left:0;right:0;text-align:center;color:#a28d6b;font:12px Georgia,serif;letter-spacing:.55em;pointer-events:none}
+.inventory-view .inventory-category{position:relative!important;min-height:45px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#657080!important;font:700 12px Georgia,"Noto Serif SC",serif!important;letter-spacing:.18em!important}
+.inventory-view .inventory-category:before{color:#a18a62!important}
+.inventory-view .inventory-category.active{color:#34475d!important;background:transparent!important;box-shadow:none!important}
+.inventory-view .inventory-category.active:after{content:"✦";position:absolute;left:calc(50% - 4px);bottom:-5px;width:8px;height:8px;color:#b4975e;background:none!important;font:10px Georgia,serif}
+.inventory-items{position:relative!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:13px!important;align-content:start!important;min-height:150px!important;margin-top:15px!important;padding:19px 13px 22px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.inventory-items:before{content:"OBJECTS OF DAILY LIFE";grid-column:1/-1;padding:0 3px 4px;color:#526174;font:700 9px Arial,sans-serif;letter-spacing:.27em}
+.inventory-items:after{content:"✧     ❦     ✧";grid-column:1/-1;grid-row:2;color:#b19b73;text-align:center;font:14px Georgia,serif;letter-spacing:.65em;pointer-events:none}
+.inventory-items:empty:after{content:"✧     ❦     ✧     暂无收藏";grid-row:2;padding:35px 0;color:#95866f;font:italic 16px Georgia,"Noto Serif SC",serif;letter-spacing:.1em}
+.inventory-items>.choice{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:0!important;min-height:118px!important;padding:13px 7px!important;border:0!important;border-radius:3px!important;background:linear-gradient(145deg,#f0e8da,#e4d8c5)!important;color:#3f4b59!important;box-shadow:3px 4px 0 #b8a88e70,0 7px 14px #5e554514!important;text-align:center!important;font:600 11px/1.45 Georgia,"Noto Serif SC",serif!important}
+.inventory-items>.choice:before{content:"✧";position:absolute;top:7px;right:9px;color:#a9956d;font:11px Georgia,serif}
+.inventory-items>.choice .emoji{display:block!important;margin:0!important;color:#526174!important;font:27px Georgia,serif!important;filter:saturate(.45)}
+.inventory-items>.choice small{color:#8b795e!important;font:italic 10px Georgia,serif!important}
+.inventory-items>.choice:after{content:none!important}
+@media(min-width:600px){.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important;padding:22px 20px 26px!important}.inventory-items>.choice{min-height:140px!important;font-size:13px!important}}
+/* Shop: no red accents, no horizontal dividers, editorial catalogue hierarchy. */
+.drawer .choices.shop-content{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:12px 10px calc(28px + env(safe-area-inset-bottom))!important;background:#e8dece!important;background-image:radial-gradient(#77715f18 .65px,transparent .65px),linear-gradient(140deg,#eee5d7,#e3d7c5)!important;background-size:7px 7px,100% 100%!important}
+.shop-content .shop-categories{display:flex!important;gap:30px!important;justify-content:flex-start!important;margin:0 0 12px!important;padding:9px 8px 14px!important;border:0!important;background:transparent!important}
+.shop-content .shop-categories:after{content:"  ✧  ";margin-left:auto;color:#a58e64;font:13px Georgia,serif;letter-spacing:.2em}
+.shop-content .shop-category{position:relative!important;min-height:42px!important;padding:0 2px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#697585!important;font:700 13px Georgia,"Noto Serif SC",serif!important;letter-spacing:.13em!important}
+.shop-content .shop-category.active{color:#34475d!important;background:transparent!important}
+.shop-content .shop-category.active:after{content:"✦";position:absolute;left:calc(50% - 4px);bottom:-5px;width:auto;height:auto;background:none!important;color:#b49b69;font:10px Georgia,serif}
+.shop-content .shop-level-one{display:flex!important;flex-wrap:wrap!important;gap:8px!important;padding:8px 3px 13px!important;border:0!important;background:transparent!important}
+.shop-content .shop-group{min-height:34px!important;padding:7px 12px!important;border:0!important;border-radius:3px!important;background:#d9d0c1!important;color:#536071!important;font:600 10px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.07em}
+.shop-content .shop-group.active{background:#536477!important;color:#f5eddf!important;box-shadow:2px 3px 0 #a99b82!important}
+.shop-content .shop-level-two{display:flex!important;flex-flow:row wrap!important;align-content:flex-start!important;align-items:center!important;justify-content:flex-start!important;gap:7px 9px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:visible!important;white-space:normal!important;padding:11px 3px 13px!important;margin:0 0 11px!important;border:0!important;background:transparent!important}
+.shop-content .shop-level-two:after{content:"✧   ❦   ✧";flex:1 0 100%;padding:3px 0 0;color:#a99570;text-align:center;font:12px Georgia,serif;letter-spacing:.55em}
+.shop-content .shop-furniture-type{display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;min-height:33px!important;padding:7px 12px!important;border:0!important;border-radius:3px!important;background:#dcd3c5!important;color:#586475!important;font:600 10px Arial,"Noto Serif SC",sans-serif!important;white-space:nowrap!important}
+.shop-content .shop-furniture-type.active{background:#6b7885!important;color:#fbf2e4!important;box-shadow:2px 3px 0 #b5a78e!important}
+.shop-content .shop-search{height:40px!important;margin:0 0 14px!important;padding:0 13px!important;border:0!important;border-radius:4px!important;background:#f0e8dc!important;color:#435164!important;box-shadow:inset 0 1px 3px #625b4b18!important;font:italic 12px Georgia,"Noto Serif SC",serif!important}
+.shop-content .shop-product-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:13px!important;padding:6px 1px 18px!important;background:transparent!important}
+.shop-content .shop-product-card{position:relative!important;display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;align-items:center!important;column-gap:10px!important;row-gap:7px!important;min-width:0!important;min-height:128px!important;padding:15px 12px 13px!important;border:0!important;border-radius:4px!important;background:linear-gradient(145deg,#f1e9dc,#e2d7c6)!important;box-shadow:3px 4px 0 #b5a68e75,0 8px 15px #4d4a4012!important;text-align:left!important}
+.shop-content .shop-product-card:before{content:"✧";position:absolute;right:11px;top:8px;width:auto;height:auto;border:0!important;color:#a58e64;font:13px Georgia,serif}
+.shop-content .shop-product-icon{grid-column:1;grid-row:1/4;width:42px!important;height:48px!important;border-radius:0!important;background:transparent!important;color:#657386!important;font:27px Georgia,serif!important;filter:saturate(.42) sepia(.12)}
+.shop-content .shop-product-info{grid-column:2;grid-row:1;min-width:0}
+.shop-content .shop-product-info strong{display:block;color:#3d4b5b!important;font:700 13px/1.4 Georgia,"Noto Serif SC",serif!important;overflow-wrap:anywhere}
+.shop-content .shop-product-price{grid-column:2;grid-row:2;display:block!important;color:#687789!important;font:italic 18px Georgia,serif!important;letter-spacing:.02em;white-space:nowrap}
+.shop-content .shop-product-buy{grid-column:2;grid-row:3;justify-self:start;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:72px!important;min-height:32px!important;padding:6px 15px!important;border:0!important;border-radius:3px!important;background:#536477!important;color:#f6efe3!important;box-shadow:2px 3px 0 #b2a187!important;font:700 10px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.2em!important}
+.shop-content .shop-product-card:active{transform:translateY(1px)!important}
+@media(min-width:600px){.shop-content .shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}.shop-content .shop-product-card{min-height:142px!important;padding:17px!important;grid-template-columns:48px minmax(0,1fr)!important}.shop-content .shop-product-icon{width:48px!important;height:54px!important;font-size:30px!important}.shop-content .shop-product-info strong{font-size:15px!important}.shop-content .shop-product-price{font-size:20px!important}}
+@media(max-width:430px){.shop-content .shop-product-grid{grid-template-columns:1fr!important}.inventory-items{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+/* Interaction page: magazine cover + collectible action tiles. */
+.drawer .choices.interaction-view{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start!important;align-items:stretch!important;gap:13px!important;padding:13px 10px 28px!important;background:#e8dece!important;background-image:radial-gradient(#77715f18 .65px,transparent .65px),linear-gradient(140deg,#eee5d7,#e3d7c5)!important;background-size:7px 7px,100% 100%!important}
+.interaction-view:before{content:"A DAY, WELL LIVED";grid-column:1/-1;padding:4px 3px 8px;color:#536477;font:700 10px Arial,sans-serif;letter-spacing:.28em}
+.interaction-view:after{content:"SMALL RITUALS  ·  SHARED MOMENTS";grid-column:1/-1;grid-row:2;color:#9b8968;text-align:center;font:italic 9px Georgia,serif;letter-spacing:.16em;pointer-events:none}
+.interaction-view>.choice{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-end!important;gap:9px!important;min-height:116px!important;padding:17px 14px 15px!important;border:0!important;border-radius:4px!important;background:linear-gradient(145deg,#f2eadc,#e2d7c6)!important;color:#405064!important;box-shadow:3px 4px 0 #b4a58b75,0 8px 14px #4c493f13!important;text-align:left!important;font:700 14px/1.35 Georgia,"Noto Serif SC",serif!important}
+.interaction-view>.choice:before{content:"✧";position:absolute;right:13px;top:10px;color:#a38d63;font:17px Georgia,serif}
+.interaction-view>.choice .emoji{display:block!important;margin:0!important;color:#617286!important;font:28px Georgia,serif!important;filter:saturate(.4)}
+.interaction-view>.choice small{color:#87909a!important;font:italic 10px Georgia,serif!important}
+.interaction-view>.choice:nth-of-type(1){background:linear-gradient(145deg,#e2e5e1,#cfd8d5)!important}
+.interaction-view>.choice:nth-of-type(2){background:linear-gradient(145deg,#e8e0d2,#d8d0c1)!important}
+.interaction-view>.choice:nth-of-type(3){background:linear-gradient(145deg,#e6e1d3,#d7d4c4)!important}
+.interaction-view>.choice:nth-of-type(4){background:linear-gradient(145deg,#e0e4e8,#cfd8df)!important}
+.interaction-view>.choice:nth-of-type(5){background:linear-gradient(145deg,#e9e0d5,#d9cfc3)!important}
+@media(min-width:600px){.drawer .choices.interaction-view{gap:16px!important;padding:17px 15px 30px!important}.interaction-view>.choice{min-height:145px!important;padding:20px 18px!important;font-size:16px!important}}
+
+/* COMPLETE ART DIRECTION RESET — SHOP / INTERACTION */
+.drawer.shop-drawer{background:#d8d2c6!important;border-radius:25px 25px 0 0!important;overflow:hidden!important}
+.drawer.shop-drawer #drawerTitle{padding:16px 21px 12px!important;background:#202d3b!important;color:#f2ecdf!important;font:500 14px Georgia,"Noto Serif SC",serif!important;letter-spacing:.12em!important}
+.drawer .choices.shop-content{display:flex!important;flex-direction:column!important;gap:0!important;padding:0 17px calc(34px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;background:#dcd5c8!important;background-image:radial-gradient(#343e4a12 .7px,transparent .7px)!important;background-size:6px 6px!important;color:#263343!important}
+.shop-content .shop-masthead{position:relative!important;display:flex!important;flex-direction:column!important;min-height:238px!important;margin:0 -17px 15px!important;padding:19px 23px 21px!important;overflow:hidden!important;background:#253448!important;color:#f3ecdd!important}
+.shop-content .shop-kicker{display:flex;justify-content:space-between;align-items:center;color:#d2c7b1;font:700 9px Arial,sans-serif;letter-spacing:.22em}
+.shop-content .shop-kicker span{font:italic 10px Georgia,serif;letter-spacing:.12em}
+.shop-content .shop-coverline{display:flex;justify-content:space-between;align-items:flex-start;margin-top:21px;color:#d6c6a5}
+.shop-content .shop-cover-number{font:italic 14px Georgia,serif}
+.shop-content .shop-cover-season{text-align:right;font:700 8px/1.5 Arial,sans-serif;letter-spacing:.18em}
+.shop-content .shop-cover-title{position:relative;z-index:1;margin-top:3px;color:#f5eddf;font:500 clamp(43px,9vw,68px)/.83 Georgia,"Times New Roman",serif;letter-spacing:-.065em}
+.shop-content .shop-cover-title i{color:#d9bd8b;font-weight:400}
+.shop-content .shop-cover-note{position:relative;z-index:1;margin-top:16px;color:#e0d6c4;font:12px "Noto Serif SC",serif;letter-spacing:.12em}
+.shop-content .shop-cover-stamp{position:absolute;right:20px;bottom:22px;display:grid;place-content:center;width:72px;height:72px;border:1px solid #c7b58b;border-radius:50%;color:#d9c69f;text-align:center;font:italic 9px/1.4 Georgia,serif;letter-spacing:.1em;transform:rotate(10deg)}
+.shop-content .shop-categories{display:flex!important;gap:25px!important;align-items:center!important;margin:0 0 12px!important;padding:8px 3px 12px!important;border:0!important;background:transparent!important}
+.shop-content .shop-categories:after{content:"SELECTED FOR THE HOME";margin-left:auto;color:#89909a;font:8px Arial,sans-serif;letter-spacing:.16em}
+.shop-content .shop-category{position:relative!important;min-height:42px!important;padding:0 1px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#7c7b75!important;font:italic 19px Georgia,"Noto Serif SC",serif!important;letter-spacing:0!important}
+.shop-content .shop-category.active{color:#26384c!important;font-weight:700!important}
+.shop-content .shop-category.active:after{content:"";position:absolute;left:calc(50% - 5px);bottom:-11px;width:auto;height:auto;background:none!important;color:#b29b70!important;font:10px Georgia,serif}
+.shop-content .shop-level-one{display:flex!important;flex-wrap:wrap!important;gap:7px!important;padding:6px 0 12px!important;border:0!important;background:transparent!important}
+.shop-content .shop-group{min-height:31px!important;padding:6px 11px!important;border:0!important;border-radius:20px!important;background:#c9c4b8!important;color:#4c5967!important;font:600 10px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.06em!important}
+.shop-content .shop-group.active{background:#34475c!important;color:#f5eddf!important;box-shadow:none!important}
+.shop-content .shop-level-two{display:flex!important;flex-flow:row wrap!important;align-items:center!important;gap:7px 8px!important;width:100%!important;margin:0 0 12px!important;padding:10px 0 12px!important;border:0!important;background:transparent!important;overflow:visible!important;white-space:normal!important}
+.shop-content .shop-level-two:after{content:"CURATED OBJECTS  /  ARDAY EDITION";flex:1 0 100%;padding:2px 0 0;color:#8a8e8e;font:8px Arial,sans-serif;letter-spacing:.2em}
+.shop-content .shop-furniture-type{min-height:30px!important;padding:6px 10px!important;border:1px solid #b9b4a8!important;border-radius:20px!important;background:transparent!important;color:#5b6470!important;font:10px Arial,"Noto Serif SC",sans-serif!important}
+.shop-content .shop-furniture-type.active{border-color:#34475c!important;background:#34475c!important;color:#f4eddf!important}
+.shop-content .shop-search{height:42px!important;margin:0 0 13px!important;padding:0 14px!important;border:0!important;border-radius:3px!important;background:#eee8dc!important;color:#344256!important;box-shadow:none!important;font:italic 13px Georgia,"Noto Serif SC",serif!important}
+.shop-content .shop-search::placeholder{color:#8e8d84}
+.shop-content .shop-product-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;padding:0 0 20px!important;background:transparent!important}
+.shop-content .shop-product-card{position:relative!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:104px auto auto auto!important;gap:5px!important;align-content:start!important;min-width:0!important;min-height:190px!important;padding:0 0 13px!important;overflow:hidden!important;border:0!important;border-radius:2px!important;background:#f0eadf!important;box-shadow:0 5px 12px #28334313!important;text-align:left!important}
+.shop-content .shop-product-card:before{content:"ARDAY  /  OBJECT";position:absolute;z-index:1;left:11px;top:9px;width:auto;height:auto;border:0!important;color:#f4eee1!important;font:7px Arial,sans-serif;letter-spacing:.19em}
+.shop-content .shop-product-icon{grid-column:1!important;grid-row:1!important;display:grid!important;place-items:center!important;width:100%!important;height:104px!important;margin:0!important;border-radius:0!important;background:#d6d4ca!important;color:#33485e!important;font:44px Georgia,serif!important;filter:grayscale(.62) saturate(.35)!important}
+.shop-content .shop-product-info{grid-column:1!important;grid-row:2!important;min-width:0!important;padding:7px 12px 0!important}
+.shop-content .shop-product-info strong{display:block;color:#26384b!important;font:600 15px/1.3 Georgia,"Noto Serif SC",serif!important;overflow-wrap:anywhere}
+.shop-content .shop-product-price{grid-column:1!important;grid-row:3!important;padding:0 12px!important;color:#6c7780!important;font:italic 18px Georgia,serif!important}
+.shop-content .shop-product-buy{grid-column:1!important;grid-row:4!important;justify-self:start!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:76px!important;min-height:30px!important;margin:3px 12px 0!important;padding:6px 13px!important;border:0!important;border-radius:1px!important;background:#34475c!important;color:#f3eddf!important;box-shadow:none!important;font:700 9px Arial,"Noto Serif SC",sans-serif!important;letter-spacing:.2em!important}
+.shop-content .shop-product-card:active{transform:scale(.985)!important}
+@media(min-width:600px){.shop-content .shop-masthead{min-height:270px!important;padding:23px 30px 24px!important}.shop-content .shop-cover-title{font-size:76px!important}.shop-content .shop-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:15px!important}.shop-content .shop-product-card{min-height:205px!important;grid-template-rows:118px auto auto auto!important}.shop-content .shop-product-icon{height:118px!important;font-size:48px!important}}
+@media(max-width:430px){.shop-content .shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.shop-content .shop-product-card{grid-template-rows:86px auto auto auto!important;min-height:174px!important}.shop-content .shop-product-icon{height:86px!important;font-size:36px!important}}
+/* Interaction is now an editorial activity poster, not the old button grid. */
+.drawer .choices.interaction-view{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start!important;align-items:stretch!important;gap:13px!important;padding:0 16px 30px!important;background:#e2dbcf!important;background-image:radial-gradient(#303c4b12 .7px,transparent .7px)!important;background-size:6px 6px!important}
+.interaction-view .interaction-masthead{position:relative!important;grid-column:1/-1!important;min-height:220px!important;margin:0 -16px 5px!important;padding:18px 23px 19px!important;overflow:hidden!important;background:#b7c1c1!important;color:#25364a!important}
+.interaction-view .interaction-overline{display:flex;justify-content:space-between;color:#435567;font:700 8px Arial,sans-serif;letter-spacing:.2em}
+.interaction-view .interaction-overline span{font:italic 10px Georgia,serif;letter-spacing:.08em}
+.interaction-view .interaction-bigtitle{position:relative;z-index:1;margin-top:29px;color:#25364a;font:500 clamp(48px,11vw,76px)/.77 Georgia,"Times New Roman",serif;letter-spacing:-.075em}
+.interaction-view .interaction-bigtitle i{color:#f2eddf;font-weight:400}
+.interaction-view .interaction-subtitle{position:relative;z-index:1;margin-top:17px;color:#34485b;font:12px "Noto Serif SC",serif;letter-spacing:.12em}
+.interaction-view .interaction-asterisk{position:absolute;right:22px;bottom:25px;color:#f2eddf;font:70px Georgia,serif;line-height:1}
+.interaction-view:before,.interaction-view:after{display:none!important}
+.interaction-view>.choice{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-end!important;gap:8px!important;min-width:0!important;min-height:145px!important;padding:17px 14px 15px!important;overflow:hidden!important;border:0!important;border-radius:1px!important;background:#f0eadf!important;color:#28394b!important;box-shadow:0 5px 13px #27384a12!important;text-align:left!important;font:600 17px/1.15 Georgia,"Noto Serif SC",serif!important}
+.interaction-view>.choice:before{content:"";position:absolute;right:-22px;top:-25px;width:105px;height:105px;border:1px solid #7e8b8c55;border-radius:50%;box-shadow:0 0 0 9px #7e8b8c12,0 0 0 19px #7e8b8c0b!important}
+.interaction-view>.choice:after{content:"";position:absolute;right:14px;top:13px;width:24px;height:24px;border:1px solid #a5a18f;border-radius:50%}
+.interaction-view>.choice .emoji{display:block!important;margin:0 0 auto!important;color:#526579!important;font:29px Georgia,serif!important;filter:grayscale(.5) saturate(.45)!important}
+.interaction-view>.choice small{margin-top:2px!important;color:#77828a!important;font:italic 10px Georgia,serif!important}
+.interaction-view>.choice:nth-of-type(odd){background:#e5e4dc!important}
+.interaction-view>.choice:nth-of-type(even){background:#eee7da!important}
+.interaction-view>.choice:active{transform:scale(.985)!important}
+@media(min-width:600px){.drawer .choices.interaction-view{gap:16px!important;padding:0 22px 34px!important}.interaction-view .interaction-masthead{min-height:270px!important;margin:0 -22px 7px!important;padding:22px 30px!important}.interaction-view .interaction-bigtitle{font-size:84px!important}.interaction-view>.choice{min-height:175px!important;padding:20px!important;font-size:20px!important}}
+
+/* Remove obstructive solid/circular editorial ornaments from shop and interaction. */
+.shop-content .shop-cover-stamp{display:none!important}
+.interaction-view .interaction-asterisk{display:none!important}
+.interaction-view>.choice:before,
+.interaction-view>.choice:after,
+.shop-content .shop-product-card:before{content:none!important;display:none!important;border:0!important;box-shadow:none!important;background:none!important}
+
+
+/* 2026-11-19i — inventory editorial poster and separated shop taxonomy */
+.drawer .choices.shop-content{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;overflow-y:auto!important}
+.shop-content .shop-level-one{position:relative!important;top:auto!important;z-index:auto!important;display:flex!important;flex-flow:row wrap!important;align-items:center!important;gap:8px 9px!important;width:100%!important;min-height:0!important;box-sizing:border-box!important;margin:0!important;padding:12px 8px 9px 15px!important;border:0!important;background:transparent!important;clear:both!important}
+.shop-content .shop-level-one:before{content:"COLLECTION";display:block;flex:0 0 100%;margin:0 0 3px 1px;color:#8b806e;font:700 8px Arial,sans-serif;letter-spacing:.24em}
+.shop-content .shop-group{position:static!important;display:inline-flex!important;float:none!important;flex:0 0 auto!important;min-height:32px!important;margin:0!important}
+.shop-content .shop-level-two{position:relative!important;top:auto!important;left:auto!important;right:auto!important;z-index:auto!important;display:flex!important;flex-flow:row wrap!important;align-content:flex-start!important;align-items:center!important;justify-content:flex-start!important;gap:7px 8px!important;width:100%!important;min-height:0!important;box-sizing:border-box!important;margin:3px 0 12px!important;padding:12px 8px 12px 23px!important;border:0!important;background:rgba(207,199,183,.34)!important;border-radius:0 9px 9px 0!important;clear:both!important;overflow:visible!important}
+.shop-content .shop-level-two:before{content:"STYLE / VARIATION";display:block;flex:0 0 100%;margin:0 0 3px 1px;color:#8b806e;font:700 8px Arial,sans-serif;letter-spacing:.22em}
+.shop-content .shop-level-two:after{content:none!important;display:none!important}
+.shop-content .shop-furniture-type{position:static!important;display:inline-flex!important;float:none!important;flex:0 0 auto!important;margin:0!important}
+.shop-content .shop-categories{border:0!important}
+.shop-content .shop-category.active:after{height:0!important;content:"✦"!important;bottom:-8px!important;background:none!important;color:#aa9877!important;font-size:9px!important}
+
+/* Inventory: editorial collection poster, with ornamental rather than ruled divisions. */
+.drawer .choices.inventory-view{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:8px 15px 30px!important;overflow-y:auto!important;background:#dcd5c8!important;background-image:radial-gradient(#4d53601a .65px,transparent .65px),linear-gradient(145deg,#e9e1d4,#d9d0c1)!important;background-size:7px 7px,100% 100%!important}
+.inventory-view:before{content:"THE ART OF\A KEEPING THINGS";white-space:pre;display:block;margin:0 -15px 15px;padding:23px 22px 20px;min-height:154px;box-sizing:border-box;background:#34465a;color:#f2eadb;font:500 clamp(37px,8vw,62px)/.82 Georgia,"Noto Serif SC",serif;letter-spacing:-.065em}
+.inventory-view:after{content:"ARDAY JOURNAL     /     PERSONAL COLLECTION     ·     VOL. 03";display:block;order:-1;margin:0 0 9px;color:#8d806b;font:700 8px Arial,sans-serif;letter-spacing:.18em}
+.inventory-view .inventory-categories{position:relative!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;align-items:stretch!important;margin:0 0 17px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.inventory-view .inventory-category{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:5px!important;min-width:0!important;min-height:58px!important;padding:8px 4px!important;border:0!important;border-radius:3px!important;background:#c9c2b5!important;color:#586171!important;font:600 12px "Noto Serif SC",Georgia,serif!important;letter-spacing:.12em!important}
+.inventory-view .inventory-category:before{display:block!important;margin:0!important;color:#8b806e!important;font:italic 10px Georgia,serif!important;letter-spacing:.14em!important}
+.inventory-view .inventory-category.active{background:#34465a!important;color:#f2eadb!important;box-shadow:3px 4px 0 #a99b83!important}
+.inventory-view .inventory-category.active:after{content:"✧"!important;position:absolute!important;left:auto!important;right:7px!important;top:5px!important;bottom:auto!important;width:auto!important;height:auto!important;background:none!important;color:#d9c69f!important;font:11px Georgia,serif!important}
+.inventory-items{position:relative!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;align-content:start!important;min-height:170px!important;margin:0!important;padding:19px 12px 22px!important;border:0!important;border-radius:3px!important;background:rgba(239,231,218,.54)!important;box-shadow:none!important}
+.inventory-items:before{content:"OBJECTS  /  01—∞"!important;grid-column:1/-1!important;padding:0 2px 12px!important;border:0!important;color:#697386!important;font:700 9px Arial,sans-serif!important;letter-spacing:.24em!important}
+.inventory-items:after{content:"✧     ❦     ✧"!important;grid-column:1/-1!important;grid-row:auto!important;padding:10px 0 5px!important;color:#a18e6c!important;text-align:center!important;font:16px Georgia,serif!important;letter-spacing:.5em!important;pointer-events:none}
+.inventory-items:empty:after{content:"✧     ❦     ✧\A 暂无收藏"!important;white-space:pre!important;padding:36px 0!important;color:#8d806e!important;font:italic 17px/2 Georgia,"Noto Serif SC",serif!important}
+.inventory-items>.choice{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:9px!important;min-width:0!important;min-height:116px!important;padding:14px 8px!important;border:0!important;border-radius:2px!important;background:linear-gradient(145deg,#f0e8dc,#ded4c4)!important;color:#3f4b5c!important;box-shadow:3px 4px 0 #b5a78f,0 8px 14px #41434a12!important;text-align:center!important;font:600 12px/1.45 Georgia,"Noto Serif SC",serif!important}
+.inventory-items>.choice:before{content:"";position:absolute!important;inset:5px!important;border:1px solid #a99a8066!important;border-radius:1px!important;pointer-events:none!important}
+.inventory-items>.choice:after{content:"✧"!important;position:absolute!important;right:10px!important;top:7px!important;color:#a18e6c!important;font:11px Georgia,serif!important}
+.inventory-items>.choice .emoji{display:block!important;margin:0!important;color:#586b7e!important;font:30px Georgia,serif!important;filter:grayscale(.25)!important}
+.inventory-items>.choice small{margin:0!important;color:#8b7b67!important;font:italic 10px Georgia,serif!important}
+@media(min-width:600px){.drawer .choices.inventory-view{padding-left:22px!important;padding-right:22px!important}.inventory-view:before{margin-left:-22px!important;margin-right:-22px!important;padding-left:30px!important;min-height:178px!important}.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:15px!important;padding:22px 17px 26px!important}.inventory-items>.choice{min-height:130px!important;font-size:13px!important}.shop-content .shop-level-one{padding-left:18px!important}.shop-content .shop-level-two{padding-left:27px!important}}
+@media(max-width:430px){.inventory-items{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+
+/* 2026-11-19l — iPad mini touch layout: no horizontal drawer scrolling, spacious shop taxonomy */
+.drawer{overflow-x:hidden!important;overscroll-behavior-x:none!important}
+.drawer .choices{min-width:0!important;max-width:100%!important;overflow-x:hidden!important;box-sizing:border-box!important}
+.drawer .choices.interaction-view{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-flow:row!important;align-content:start!important;align-items:stretch!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ gap:clamp(10px,2vw,16px)!important;padding:15px clamp(12px,2.4vw,22px) 28px!important;
+ box-sizing:border-box!important;touch-action:pan-y!important;
+}
+.interaction-view>.interaction-masthead{grid-column:1/-1!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+.interaction-view>.choice{min-width:0!important;width:100%!important;max-width:100%!important;min-height:clamp(104px,15vw,142px)!important;box-sizing:border-box!important;overflow-wrap:anywhere!important}
+.drawer .choices.shop-content{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important;
+}
+.shop-content .shop-categories{
+ position:relative!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;width:100%!important;box-sizing:border-box!important;
+ padding:7px 5px 12px!important;margin:0 0 10px!important;border:0!important;
+}
+.shop-content .shop-category{
+ min-width:0!important;min-height:46px!important;padding:10px 8px!important;
+ white-space:normal!important;text-align:center!important;box-sizing:border-box!important;
+}
+.shop-content .shop-level-one,.shop-content .shop-level-two{
+ position:relative!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;
+ z-index:1!important;display:grid!important;
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,112px),1fr))!important;
+ grid-auto-flow:row!important;align-content:start!important;align-items:stretch!important;
+ justify-content:stretch!important;gap:8px!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ min-height:0!important;height:auto!important;max-height:none!important;
+ margin:0 0 13px!important;padding:10px 8px 12px 17px!important;
+ overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important;
+ white-space:normal!important;box-sizing:border-box!important;
+ border:0!important;background:rgba(205,197,182,.34)!important;border-radius:0 8px 8px 0!important;
+}
+.shop-content .shop-level-one:before,.shop-content .shop-level-two:before{
+ grid-column:1/-1!important;display:block!important;min-width:0!important;
+ margin:0 0 2px!important;color:#817764!important;
+ font:700 8px Arial,sans-serif!important;letter-spacing:.2em!important;
+}
+.shop-content .shop-level-one:before{content:"FURNITURE COLLECTION"!important}
+.shop-content .shop-level-two:before{content:"SELECT A STYLE"!important}
+.shop-content .shop-group,.shop-content .shop-furniture-type{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-width:0!important;min-height:42px!important;height:auto!important;
+ margin:0!important;padding:9px 7px!important;box-sizing:border-box!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;
+ line-height:1.25!important;font-size:11px!important;touch-action:manipulation!important;
+ border:1px solid #b9ad98!important;border-radius:4px!important;
+}
+.shop-content .shop-group.active{background:#34465a!important;border-color:#34465a!important;color:#f4eadb!important}
+.shop-content .shop-furniture-type.active{background:#788697!important;border-color:#788697!important;color:#fff!important}
+.shop-content .shop-search{position:relative!important;top:auto!important;min-width:0!important;width:100%!important;box-sizing:border-box!important}
+@media(min-width:600px) and (max-width:900px){
+ .drawer .choices.interaction-view{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;padding-left:18px!important;padding-right:18px!important}
+ .interaction-view>.choice{min-height:128px!important;padding:18px!important}
+ .shop-content .shop-level-one,.shop-content .shop-level-two{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))!important;gap:9px!important;padding-left:20px!important;padding-right:12px!important}
+ .shop-content .shop-group,.shop-content .shop-furniture-type{min-height:46px!important;font-size:12px!important}
+}
+@media(max-width:599px){
+ .drawer .choices.interaction-view{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;padding:12px 9px 24px!important}
+ .interaction-view>.choice{min-height:104px!important;padding:13px 10px!important}
+ .shop-content .shop-level-one,.shop-content .shop-level-two{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding-left:15px!important}
+ .shop-content .shop-group,.shop-content .shop-furniture-type{min-height:43px!important}
+}
+
+
+/* 2026-11-19m — definitive glyph removal and stable stacked taxonomy for touch */
+.drawer .choices.inventory-view:before,
+.drawer .choices.inventory-view:after,
+.inventory-view .inventory-categories:before,
+.inventory-view .inventory-categories:after,
+.inventory-view .inventory-category:before,
+.inventory-view .inventory-category:after,
+.inventory-items:before,
+.inventory-items:after,
+.inventory-items>.choice:before,
+.inventory-items>.choice:after,
+.inventory-items>.choice .emoji:before,
+.inventory-items>.choice .emoji:after{
+ content:none!important;display:none!important;background:none!important;
+}
+.inventory-view .inventory-category.active{box-shadow:inset 0 -3px 0 #34465a!important}
+.inventory-items>.choice{box-shadow:0 5px 12px rgba(45,48,52,.09)!important}
+.inventory-items>.choice:before,.inventory-items>.choice:after{display:none!important;content:none!important}
+.inventory-items>.choice .emoji{filter:none!important}
+.interaction-view .interaction-asterisk,
+.interaction-view>.choice:before{display:none!important;content:none!important}
+
+/* Shop taxonomy: strict vertical flow; buttons wrap only inside their own rows. */
+.drawer .choices.shop-content{display:block!important;position:relative!important;overflow-x:hidden!important;overflow-y:auto!important;height:auto!important;max-height:100%!important;padding:8px 12px 24px!important;box-sizing:border-box!important}
+.shop-content .shop-categories{position:relative!important;display:flex!important;flex-flow:row wrap!important;gap:8px!important;margin:0 0 12px!important;padding:0 3px 8px!important;box-sizing:border-box!important}
+.shop-content .shop-category{position:relative!important;flex:1 1 120px!important;min-width:0!important;min-height:44px!important;margin:0!important;white-space:normal!important}
+.shop-content .shop-level-one,.shop-content .shop-level-two{
+ position:relative!important;display:flex!important;flex-flow:row wrap!important;
+ align-items:stretch!important;align-content:flex-start!important;justify-content:flex-start!important;
+ float:none!important;clear:both!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;
+ width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;
+ margin:0 0 14px!important;padding:12px 10px 13px 19px!important;
+ gap:8px!important;overflow:visible!important;box-sizing:border-box!important;
+ border:0!important;border-radius:0 8px 8px 0!important;
+ background:rgba(203,195,180,.36)!important;
+}
+.shop-content .shop-level-one:before,.shop-content .shop-level-two:before{
+ position:static!important;display:block!important;flex:0 0 100%!important;
+ width:auto!important;height:auto!important;margin:0 0 4px!important;padding:0!important;
+ color:#7d7569!important;font:700 8px/1.4 Arial,sans-serif!important;letter-spacing:.2em!important;
+}
+.shop-content .shop-level-one:before{content:"FURNITURE / COLLECTION"!important}
+.shop-content .shop-level-two:before{content:"STYLE / VARIATION"!important}
+.shop-content .shop-level-one:after,.shop-content .shop-level-two:after{display:none!important;content:none!important}
+.shop-content .shop-group,.shop-content .shop-furniture-type{
+ position:relative!important;display:flex!important;flex:1 1 116px!important;
+ align-items:center!important;justify-content:center!important;
+ min-width:0!important;width:auto!important;max-width:100%!important;
+ min-height:46px!important;height:auto!important;margin:0!important;padding:10px 8px!important;
+ box-sizing:border-box!important;white-space:normal!important;overflow-wrap:anywhere!important;
+ text-align:center!important;line-height:1.3!important;font-size:12px!important;
+ border:1px solid #b9ad98!important;border-radius:5px!important;
+}
+.shop-content .shop-level-two{margin-top:0!important;margin-bottom:17px!important;padding-left:25px!important;background:rgba(185,190,194,.24)!important}
+.shop-content .shop-group.active{background:#34465a!important;border-color:#34465a!important;color:#f4eadb!important}
+.shop-content .shop-furniture-type.active{background:#788697!important;border-color:#788697!important;color:#fff!important}
+.shop-content .shop-search{display:block!important;position:relative!important;clear:both!important;width:100%!important;max-width:100%!important;margin:0 0 14px!important;box-sizing:border-box!important}
+.shop-content .shop-product-grid{position:relative!important;clear:both!important;width:100%!important;min-width:0!important}
+@media(min-width:600px) and (max-width:900px){
+ .shop-content .shop-group,.shop-content .shop-furniture-type{flex-basis:125px!important;min-height:50px!important;font-size:13px!important}
+ .shop-content .shop-level-one{padding-left:21px!important}
+ .shop-content .shop-level-two{padding-left:29px!important}
+}
+
+
+/* Restore the inventory's editorial poster composition; remove star glyphs only. */
+.drawer .choices.inventory-view:before{
+ content:"THE ART OF\A KEEPING THINGS"!important;white-space:pre!important;
+ display:block!important;position:relative!important;order:0!important;
+ min-height:154px!important;margin:0 -15px 15px!important;padding:23px 22px 20px!important;
+ box-sizing:border-box!important;background:#34465a!important;color:#f2eadb!important;
+ font:500 clamp(37px,8vw,62px)/.82 Georgia,"Noto Serif SC",serif!important;letter-spacing:-.065em!important;
+}
+.drawer .choices.inventory-view:after{
+ content:"ARDAY JOURNAL     /     PERSONAL COLLECTION     ·     VOL. 03"!important;
+ display:block!important;position:relative!important;order:-1!important;
+ margin:0 0 9px!important;color:#8d806e!important;
+ font:700 8px Arial,sans-serif!important;letter-spacing:.18em!important;
+}
+.inventory-view .inventory-categories:before,.inventory-view .inventory-categories:after,
+.inventory-view .inventory-category:before,.inventory-view .inventory-category:after,
+.inventory-items:before,.inventory-items:after,
+.inventory-items>.choice:before,.inventory-items>.choice:after,
+.interaction-view>.choice:before{content:none!important;display:none!important}
+.inventory-view .inventory-categories{margin-top:0!important}
+.inventory-view .inventory-items{padding-top:18px!important}
+@media(min-width:600px){.drawer .choices.inventory-view:before{margin-left:-22px!important;margin-right:-22px!important;padding-left:30px!important;min-height:178px!important}}
+
+/* Rounded editorial treatment for formerly square red action buttons. */
+.drawer .choice,.drawer button.choice,.drawer .shop-product-buy,
+.drawer .shop-category,.drawer .shop-group,.drawer .shop-furniture-type,
+.drawer .calendar-actions button,.drawer .kitchen-actions button,
+.drawer .interaction-view button,.drawer .inventory-view button{
+ border-radius:13px!important;
+}
+.drawer .choice[style*="background"],.drawer button[style*="background"],
+.drawer .choice,.drawer button.choice{
+ transition:border-radius .16s ease,box-shadow .16s ease,transform .16s ease!important;
+}
+.drawer .choice:active,.drawer button.choice:active{
+ border-radius:18px!important;transform:translateY(1px)!important;
+}
+.drawer .choice[style*="rgb(1"],.drawer button[style*="rgb(1"],
+.drawer .choice[style*="#c"],.drawer button[style*="#c"]{
+ border-radius:14px!important;box-shadow:0 3px 0 rgba(94,54,45,.13),inset 0 1px 0 rgba(255,255,255,.25)!important;
+}
+.shop-content .shop-category,.shop-content .shop-group,.shop-content .shop-furniture-type{border-radius:12px!important}
+
+
+/* Profile dossier: center within viewport and prevent horizontal clipping. */
+html body .stage .drawer.profile-expanded.open{
+ position:absolute!important;top:12px!important;bottom:12px!important;
+ left:50%!important;right:auto!important;
+ width:min(620px,calc(100% - 28px))!important;max-width:calc(100% - 28px)!important;
+ height:auto!important;max-height:none!important;margin:0!important;
+ transform:translateX(-50%)!important;overflow-x:hidden!important;overflow-y:auto!important;
+ box-sizing:border-box!important;
+}
+html body .stage .drawer.profile-expanded.open .choices{
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ box-sizing:border-box!important;overflow-x:hidden!important;
+}
+
+/* Camera gesture zones are implicit: left half rotates, right half pans. */
+.stage .three-scene{touch-action:none;}
+/* Compact contextual furniture actions: keep the room visible and the menu close to the scene. */
+.drawer.furniture-drawer{left:auto;right:12px;bottom:12px;width:min( min(92%,360px),calc(100% - 24px));max-height:min(38%,220px);padding:10px 12px;border-radius:15px;transform:translateY(12px);overflow:auto}
+.drawer.furniture-drawer.open{transform:translateY(0)}
+.drawer.furniture-drawer .drawer-head{margin-bottom:7px;gap:10px}
+.drawer.furniture-drawer .drawer-head strong{font:600 14px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;letter-spacing:.02em}
+.drawer.furniture-drawer .furniture-close{width:36px;height:36px;flex:0 0 36px;padding:0;border:0;border-radius:50%;font-size:22px;line-height:1;background:#f1e5d4}
+.drawer.furniture-drawer .furniture-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.drawer.furniture-drawer .furniture-choices .choice{min-height:48px;padding:10px 9px;border-radius:11px;font-size:13px;display:flex;align-items:center;justify-content:center}
+.drawer.furniture-drawer .furniture-empty{grid-column:1/-1;padding:10px 4px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:700px){.drawer.furniture-drawer{right:8px;bottom:8px;width:min( min(92%,340px),calc(100% - 16px));max-height:min(36%,190px);padding:9px 10px}.drawer.furniture-drawer .furniture-choices .choice{min-height:48px;font-size:13px}}
+@media(orientation:landscape) and (max-height:560px){.drawer.furniture-drawer{max-height:46%;width:min( min(82%,380px),calc(100% - 16px));right:8px;bottom:8px}}
+
+
+/* Contextual furniture menu: communicate unavailable actions without hiding the reason. */
+.drawer.furniture-drawer .furniture-choices .choice:disabled{
+ opacity:.42!important;cursor:not-allowed!important;filter:saturate(.45);
+ box-shadow:none!important;transform:none!important;
+}
+.drawer.furniture-drawer .furniture-status{
+ grid-column:1/-1;padding:7px 9px;border-radius:9px;
+ background:rgba(126,105,82,.1);color:#78634d;
+ font-size:11px;line-height:1.45;text-align:left;
+}
+.drawer.furniture-drawer .furniture-choices .choice:focus-visible,
+.drawer.furniture-drawer .furniture-close:focus-visible{
+ outline:2px solid #8c765e;outline-offset:2px;
+}
+
+
+/* Rebuilt cooking interface */
+.stage .drawer .choices.cooking-panel{display:flex!important;flex-direction:column!important;gap:22px!important;padding:0 2px 18px!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+.kitchen-hero{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:154px;padding:25px 25px 22px;border:1px solid #d8c5a9;background:linear-gradient(112deg,#eee2cf 0%,#f7f0e5 58%,#e5d7c2 100%);overflow:hidden}
+.kitchen-hero:after{content:"";position:absolute;width:220px;height:220px;right:28px;top:-110px;border:1px solid #a78c6d35;border-radius:50%;box-shadow:0 0 0 18px #a78c6d0b,0 0 0 38px #a78c6d08}
+.kitchen-hero-copy{position:relative;z-index:1;max-width:560px}
+.kitchen-eyebrow,.kitchen-section-heading>div>span{display:block;color:#9b7958;font:700 9px/1.4 Arial,sans-serif;letter-spacing:.2em}
+.kitchen-hero h2{margin:13px 0 8px;color:#493b2d;font:600 clamp(22px,3.2vw,32px)/1.25 Georgia,"Noto Serif SC",serif;letter-spacing:.02em}
+.kitchen-hero h2 em{color:#a66d4c;font-style:normal}
+.kitchen-hero p{margin:0;color:#897761;font-size:12px;line-height:1.7}
+.kitchen-hero-mark{position:relative;z-index:1;display:grid;place-items:center;flex:0 0 66px;width:66px;height:66px;border:1px solid #a98a684d;border-radius:50%;color:#98795a;font:italic 29px Georgia,serif}
+.kitchen-pantry,.kitchen-menu{display:flex;flex-direction:column;gap:13px}
+.kitchen-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 2px}
+.kitchen-section-heading h3{margin:4px 0 0;color:#514130;font:600 19px/1.3 Georgia,"Noto Serif SC",serif}
+.kitchen-section-heading>small{padding-bottom:3px;color:#a18c75;font-size:10px}
+.kitchen-ingredient-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kitchen-ingredient{display:grid;grid-template-columns:38px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;column-gap:9px;min-height:72px;padding:11px 12px;border:1px solid #e1d4c1;background:#faf6ee}
+.kitchen-ingredient-icon{grid-row:1/3;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#eee4d5;font-size:20px}
+.kitchen-ingredient-name{align-self:end;color:#64513d;font-size:12px}
+.kitchen-ingredient strong{align-self:start;color:#a27652;font-size:12px;font-variant-numeric:tabular-nums}
+.kitchen-ingredient.empty{background:#f0ece5;border-color:#e6dfd4}
+.kitchen-ingredient.empty .kitchen-ingredient-icon{filter:grayscale(.8);opacity:.55}
+.kitchen-ingredient.empty strong{color:#b2a99d}
+.kitchen-recipe-list{display:flex;flex-direction:column;gap:10px}
+.kitchen-recipe-card{display:grid;grid-template-columns:66px minmax(0,1fr) auto;align-items:center;gap:15px;padding:15px;border:1px solid #e0d2bf;background:#fbf8f1}
+.kitchen-recipe-art{display:grid;place-items:center;width:62px;height:62px;background:linear-gradient(145deg,#f0e5d4,#e6d7c2);font-size:31px}
+.kitchen-recipe-main{min-width:0;display:flex;flex-direction:column;gap:8px}
+.kitchen-recipe-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
+.kitchen-recipe-heading strong{color:#4e3f30;font:600 16px Georgia,"Noto Serif SC",serif}
+.kitchen-recipe-benefit{color:#a17a58;font-size:10px}
+.kitchen-recipe-ingredients{display:flex;flex-wrap:wrap;gap:6px}
+.kitchen-recipe-ingredient{padding:4px 7px;background:#eee8dc;color:#84715b;font-size:10px}
+.kitchen-recipe-ingredient.ready{background:#e7ebdf;color:#63704f}
+.kitchen-recipe-ingredient.missing{background:#eee8e0;color:#a49a8d}
+.kitchen-recipe-ingredient b{font-weight:700}
+.kitchen-recipe-note{margin:0;color:#87906e;font-size:10px}
+.kitchen-recipe-note.missing-note{color:#a28b75}
+.kitchen-cook-button{min-width:104px;min-height:44px;padding:10px 13px;border:0;background:#725a43;color:#fffaf2;font-size:12px;letter-spacing:.04em}
+.kitchen-cook-button:disabled{background:#e4ddd2;color:#a79b8d;cursor:not-allowed}
+.kitchen-bottom-bar{position:sticky;bottom:-18px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:2px;padding:14px 2px 2px;border-top:1px solid #d7c8b4;background:#eee3d3}
+.kitchen-bottom-bar p{margin:0;color:#8d7b67;font-size:11px;line-height:1.6}
+.kitchen-bottom-bar button{flex:0 0 auto;min-height:44px;padding:10px 18px;border:1px solid #bba78d;background:#e4d6c2;color:#594733;font-size:12px}
+@media(max-width:700px){
+ .stage .drawer .choices.cooking-panel{gap:17px!important}
+ .kitchen-hero{min-height:132px;padding:19px 17px}
+ .kitchen-hero-mark{flex-basis:48px;width:48px;height:48px;font-size:23px}
+ .kitchen-hero p{max-width:270px;font-size:11px}
+ .kitchen-ingredient-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .kitchen-ingredient{min-height:66px;padding:9px}
+ .kitchen-recipe-card{grid-template-columns:46px minmax(0,1fr);gap:10px;padding:12px}
+ .kitchen-recipe-art{width:44px;height:44px;font-size:24px}
+ .kitchen-recipe-heading strong{font-size:15px}
+ .kitchen-cook-button{grid-column:2;justify-self:start;min-width:120px}
+ .kitchen-bottom-bar{align-items:flex-start}
+ .kitchen-bottom-bar p{max-width:60%;font-size:10px}
+}
+
+
+/* Furniture-anchored radial interaction menu */
+.furniture-wheel{position:absolute;z-index:180;pointer-events:none;transform:translate(-50%,-50%);overflow:visible;isolation:isolate;max-width:calc(100% - 8px);max-height:calc(100% - 8px);}
+.furniture-wheel::before{content:"";position:absolute;left:50%;top:50%;width:100%;height:100%;transform:translate(-50%,-50%);border:1px solid rgba(157,129,94,.7);border-radius:50%;background:radial-gradient(circle,rgba(249,244,234,.28) 0 42%,rgba(240,229,211,.12) 70%,rgba(249,244,234,.02) 100%);box-shadow:0 0 0 5px rgba(255,250,240,.14),0 7px 22px rgba(52,40,27,.12);pointer-events:none;z-index:0;}
+.furniture-wheel-center{cursor:pointer;user-select:none;-webkit-user-select:none;position:absolute;transform:translate(-50%,-50%);width:72px;height:72px;border:1px solid #c4ad8e;border-radius:50%;background:linear-gradient(145deg,#fffdf8,#eee3d2);box-shadow:0 4px 15px rgba(54,42,29,.22),inset 0 1px 2px rgba(255,255,255,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:auto;z-index:2;}
+.furniture-wheel-title{max-width:59px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#574633;font:600 11px/1.3 Georgia,"Noto Serif SC",serif;text-align:center;}
+.furniture-wheel-subtitle{color:#9b866c;font-size:8px;letter-spacing:.12em;}
+.furniture-wheel-action{position:absolute;transform:translate(-50%,-50%);width:62px;height:62px;padding:5px 3px;border:1px solid #c9b496;border-radius:50%;background:linear-gradient(145deg,rgba(255,253,248,.99),rgba(239,229,213,.98));color:#594936;box-shadow:0 4px 12px rgba(54,42,29,.2),inset 0 1px 2px rgba(255,255,255,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:auto;touch-action:manipulation;z-index:1;transition:transform .14s ease,box-shadow .14s ease,background .14s ease;}
+.furniture-wheel-icon{font-family:Georgia,serif;font-size:18px;line-height:1;color:#a18460;}
+.furniture-wheel-label{max-width:54px;font:600 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;text-align:center;overflow-wrap:anywhere;}
+.furniture-wheel-action:hover{transform:translate(-50%,-50%) scale(1.07);box-shadow:0 7px 17px rgba(54,42,29,.25);background:#fffdf8;}
+.furniture-wheel-action:active{transform:translate(-50%,-50%) scale(.94);background:#e8dac6;}
+.furniture-wheel-action:disabled{opacity:.46;filter:saturate(.4);box-shadow:none;}
+.furniture-wheel-empty{color:#9a8973;font-size:9px;}
+.furniture-wheel-status{position:absolute;left:50%;top:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:220px;padding:6px 10px;border:1px solid #d9c9b4;border-radius:10px;background:rgba(250,246,237,.97);color:#78634d;font-size:10px;line-height:1.4;text-align:center;pointer-events:none;z-index:3;}
+@media(max-width:700px){.furniture-wheel-center{width:66px;height:66px}.furniture-wheel-action{width:58px;height:58px}.furniture-wheel-label{font-size:9px}}
+
+/* Cooking panel close affordance */
+.stage .drawer .choices.cooking-panel{position:relative!important;padding-top:4px!important}
+.kitchen-close{position:absolute;top:7px;right:7px;z-index:8;width:34px;height:34px;display:grid;place-items:center;border:1px solid #bba78d;border-radius:50%;background:#f8f1e7;color:#594733;font:400 24px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 2px 8px #493a291c}
+.kitchen-close:hover{background:#e8d9c5}
+.kitchen-close:focus-visible{outline:2px solid #98795a;outline-offset:2px}
+.kitchen-hero{padding-right:54px}
+
+
+/* Final shop/cooking alignment corrections. */
+.drawer.shop-drawer .drawer-head:before,
+.drawer.shop-drawer .drawer-head:after{content:none!important;display:none!important}
+.drawer.shop-drawer #drawerTitle{ text-shadow:none!important; }
+.shop-content .shop-categories:after{content:none!important;display:none!important}
+.shop-content .shop-categories{margin-bottom:0!important;padding-bottom:2px!important}
+.stage .drawer:has(.cooking-panel) .choices.cooking-panel{position:static!important;padding-top:0!important}
+.stage .drawer:has(.cooking-panel) .kitchen-close{position:absolute!important;top:10px!important;right:10px!important;z-index:60!important}
+
+/* Prevent layered shop-title ornament/shadow from reading as duplicate text. */
+.drawer.shop-drawer .drawer-head strong{ text-shadow:none!important; }
+
+/* Persistent character status tags and paper-note ledger */
+.status-tags{display:flex;flex-wrap:wrap;gap:5px;min-height:17px;padding:0 1px 3px}.status-tag{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #e0c7b3;border-radius:999px;background:#f3e5d8;color:#8a5949;font-size:10px;font-weight:700;letter-spacing:.04em}.status-tag.depressed{background:#eee5e8;border-color:#d9c5cc;color:#80616f}.status-tag.sick{background:#e6eadf;border-color:#cbd4c1;color:#66765d}.status-empty{font-size:9px;color:#b2a28f;padding:2px 3px}.event-kind{display:inline-flex;align-self:flex-start;padding:3px 7px;border-radius:5px;font-size:9px;font-style:normal;letter-spacing:.08em}.event-kind.system{background:#e8e9df;color:#6e795e}.event-kind.letter{background:#f2e0d1;color:#9a6b4d}.event-card.letter-card{background:linear-gradient(110deg,#fffaf0,#f4e7d8)!important;border-left:3px solid #bd9270!important}.event-card.system-card{border-left:3px solid #aab29a!important}
+
+/* Mailbox redesign: stationery-like index and readable letter detail. */
+.drawer .choices.events-view{gap:12px!important;padding:10px 11px 18px!important;background:#f4eee5}.mailbox-intro{display:flex;align-items:center;gap:11px;padding:14px 13px 16px;margin:0 0 2px;border-bottom:1px solid #ded2c2}.mailbox-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#e9ddcc;color:#8a6b4f;font-size:20px}.mailbox-intro>div{flex:1;min-width:0}.mailbox-intro strong{display:block;color:#5c4938;font:600 14px Georgia,serif;letter-spacing:.04em}.mailbox-intro p{margin:4px 0 0;color:#968675;font-size:10px;line-height:1.5}.mailbox-count{align-self:flex-start;color:#a08d78;font-size:10px;white-space:nowrap}.event-card{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;min-height:0!important;padding:14px 15px 13px!important;border:1px solid #e7dccd!important;border-radius:3px 12px 12px 3px!important;background:#fffdf8!important;box-shadow:0 3px 10px #5c49380b!important;text-align:left!important;overflow:hidden}.event-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#b5ad98}.event-card.letter-card{background:linear-gradient(110deg,#fffdf8,#fbf2e7)!important;border-color:#e8d7c5!important}.event-card.letter-card:before{background:#b98769}.note-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.note-card-top time{color:#a89a89;font-size:9px;white-space:nowrap}.event-kind{padding:3px 7px;border-radius:2px;font-size:9px;letter-spacing:.06em}.event-kind.system{background:#e9e9df;color:#737a64}.event-kind.letter{background:#f0e1d4;color:#9a6b4d}.note-card-title{padding-right:24px;color:#554535!important;font:600 14px Georgia,serif!important;line-height:1.4}.note-card-preview{display:-webkit-box!important;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#867766!important;font-size:11px!important;line-height:1.65!important}.note-card-foot{padding-top:5px;border-top:1px dashed #e8dfd3;color:#ad9b87;font:italic 9px Georgia,serif}.event-card .event-arrow{position:absolute;right:13px;bottom:12px;color:#b69a7d;font-size:15px}.mailbox-empty{margin:12px 0!important;padding:42px 20px!important;background:#fbf7f0!important;border:1px dashed #d9cabb!important}.mailbox-empty h3{font:600 17px Georgia,serif!important}.note-detail-view{gap:14px!important;padding:14px!important;background:#f1eadf!important}.note-paper{position:relative;min-height:245px;padding:24px 21px 20px;background:#fffdf7;border:1px solid #e8dfd1;box-shadow:0 7px 22px #59452d12;overflow:hidden}.note-paper:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#c4ad91}.note-paper.personal-note{background:repeating-linear-gradient(to bottom,#fffdf7 0,#fffdf7 31px,#eee8dd 32px);}.note-paper.system-note{background:#fbfaf4}.note-paper-meta{color:#a18d77;font-size:9px;letter-spacing:.08em;line-height:1.6}.note-paper-title{margin:23px 0 17px;color:#594635;font:600 20px/1.35 Georgia,'Noto Serif SC',serif;letter-spacing:.03em}.note-paper-body{margin:0;color:#665747;font:14px/2.05 Georgia,'Noto Serif SC',serif;white-space:pre-wrap;overflow-wrap:anywhere}.note-paper-signature{margin-top:30px;text-align:right;color:#a18a72;font:italic 13px Georgia,serif}.note-detail-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px}.note-detail-actions button{min-height:40px;padding:0 15px;border-radius:5px;font-size:11px}.note-back{border:1px solid #d9cbbb;background:#f8f3eb;color:#806f5d}.note-ack{border:1px solid #a77c5b;background:#a77c5b;color:#fffaf3}.mailbox-intro,.event-card,.note-paper{box-sizing:border-box;width:100%}
+
+/* Refined inbox list: override generic drawer rows with individual stationery cards. */
+.drawer .choices.events-view{gap:13px!important;padding:15px 14px 24px!important;background:linear-gradient(180deg,#f1ebe1 0%,#eee7dc 100%)!important;}
+.drawer .choices.events-view>.mailbox-count{position:relative;display:flex!important;align-items:center;justify-content:flex-end;min-height:27px;margin:0 1px 2px;padding:0 2px 9px!important;border:0!important;border-bottom:1px solid #d8cbbb!important;background:transparent!important;color:#9a8771!important;font:500 10px/1.2 Arial,sans-serif!important;letter-spacing:.12em!important;}
+.drawer .choices.events-view>.mailbox-count:before{content:'INBOX';margin-right:auto;color:#a58c70;font:700 9px/1 Arial,sans-serif;letter-spacing:.2em}
+.drawer .choices.events-view>.event-card{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:8px!important;width:100%!important;min-height:106px!important;margin:0!important;padding:14px 16px 14px 18px!important;border:1px solid #e3d8c9!important;border-radius:4px 10px 10px 4px!important;border-left:1px solid #e3d8c9!important;background:linear-gradient(115deg,#fffdf8 0%,#fbf7ef 100%)!important;box-shadow:0 2px 5px #59452d09,0 8px 18px #59452d08!important;text-align:left!important;transform:none!important;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease!important;overflow:hidden!important;}
+.drawer .choices.events-view>.event-card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#b6aa95!important;}
+.drawer .choices.events-view>.event-card.letter-card{border-color:#e6d6c4!important;background:linear-gradient(115deg,#fffdf8 0%,#faf0e4 100%)!important;}
+.drawer .choices.events-view>.event-card.letter-card:before{background:#b98969!important;}
+.drawer .choices.events-view>.event-card.system-card:before{background:#9da58d!important;}
+.drawer .choices.events-view>.event-card:after{content:'';position:absolute;right:0;top:0;width:25px;height:25px;background:linear-gradient(225deg,#e8ddce 0 49%,transparent 51%);opacity:.58;}
+.drawer .choices.events-view>.event-card:active{transform:translateY(1px)!important;box-shadow:0 1px 3px #59452d12!important;}
+.drawer .choices.events-view .note-card-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:18px!important;}
+.drawer .choices.events-view .event-kind{display:inline-flex!important;align-items:center!important;padding:4px 7px!important;border:1px solid transparent!important;border-radius:2px!important;font:700 8px/1 Arial,sans-serif!important;letter-spacing:.13em!important;}
+.drawer .choices.events-view .event-kind.letter{border-color:#ead8c7!important;background:#f4e8dc!important;color:#987052!important;}
+.drawer .choices.events-view .event-kind.system{border-color:#dce0d2!important;background:#edf0e7!important;color:#727b64!important;}
+.drawer .choices.events-view .note-card-top time{color:#a59684!important;font:500 9px/1.2 Arial,sans-serif!important;letter-spacing:.035em!important;}
+.drawer .choices.events-view .note-card-title{display:block!important;margin:1px 20px 0 0!important;padding:0!important;color:#554536!important;font:600 15px/1.45 Georgia,'Noto Serif SC',serif!important;letter-spacing:.025em!important;}
+.drawer .choices.events-view .note-card-preview{display:-webkit-box!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;color:#897967!important;font:400 11px/1.65 'Noto Serif SC',Georgia,serif!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;}
+.drawer .choices.events-view .event-arrow{position:absolute!important;right:13px!important;bottom:12px!important;top:auto!important;color:#b49b7e!important;font:400 14px/1 Georgia,serif!important;opacity:.85;}
+.drawer .choices.events-view>.mailbox-empty{display:flex!important;align-items:center!important;justify-content:center!important;min-height:190px!important;margin:12px 0!important;padding:30px 20px!important;border:1px dashed #d5c8b7!important;border-radius:6px!important;background:#f7f2e9!important;box-shadow:inset 0 0 0 4px #f7f2e9,inset 0 0 0 5px #e9dfd1!important;}
+.drawer .choices.events-view>.mailbox-empty h3{margin:0!important;color:#9a8872!important;font:500 15px/1.4 Georgia,'Noto Serif SC',serif!important;letter-spacing:.08em!important;}
+@media(hover:hover){.drawer .choices.events-view>.event-card:hover{transform:translateY(-2px)!important;border-color:#d5c2ad!important;box-shadow:0 4px 8px #59452d0d,0 12px 22px #59452d0c!important;}}
+@media(max-width:390px){.drawer .choices.events-view{padding:12px 11px 20px!important;gap:10px!important}.drawer .choices.events-view>.event-card{min-height:100px!important;padding:12px 13px 12px 15px!important}.drawer .choices.events-view .note-card-title{font-size:14px!important}}
+
