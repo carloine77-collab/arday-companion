@@ -1634,12 +1634,12 @@ function initArday3D(){
    // Wall-mounted cabinets were previously allowed to overhang room edges.
    const alongBack=side==='back'||side==='front';
    const wallHalf=alongBack?5.0:3.65;
-   const width=item.id?.includes('window')?2.1:item.id?.includes('door')?1.2:(Number(item.width)||.35);
+   const width=item.isDoor?1.24:item.id?.includes('window')?2.1:(Number(item.width)||.35);
    const half=width/2,limit=wallHalf-half;
    if(Math.abs(offset)>limit)return false;
    for(const other of furnitureRegistry){
     if(other===item||other.room!==item.room||!other.wallAxis||other.wallSide!==side)continue;
-    const otherWidth=other.id?.includes('window')?2.1:other.id?.includes('door')?1.2:(Number(other.width)||.35);
+    const otherWidth=other.isDoor?1.24:other.id?.includes('window')?2.1:(Number(other.width)||.35);
     const clearance=(width+otherWidth)/2+.12;
     if(Math.abs(wallOffset(other)-offset)<clearance)return false;
    }
@@ -1656,7 +1656,7 @@ function initArday3D(){
    else{
     /* Position is restored from the canonical placed entity above. */
    }
-   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0};
+   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:modelName==='门',doorDestination:record?.destination||group.userData.roomTarget||null};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;}
    const existing=document.querySelector('.spot-'+id);
    item.button=existing||document.createElement('button');
    if(!existing){
@@ -1665,7 +1665,7 @@ function initArday3D(){
     item.button.textContent=id==='desk'?'✎':'▱';stage.appendChild(item.button);
    }
    /* Rebind on every scene rebuild: existing hotspot DOM nodes otherwise retain stale closures or no action. */
-   item.button.onclick=()=>{if(decorating){selectFurniture(item);return}invokeFurnitureAction(item)};
+   item.button.onclick=()=>{if(decorating){selectFurniture(item);if(item.isDoor)openDoorWheel(item);return}invokeFurnitureAction(item)};
    item.button.dataset.object=name;item.button.dataset.furnitureId=id;item.button.setAttribute('aria-label',name);
    furnitureRegistry.push(item);return item;
   }
@@ -1680,6 +1680,20 @@ function initArday3D(){
    furnitureRegistry.push(item);return item;
   }
   const furnitureHotspots=[];
+  // One matching default door per room: living opens to the public hall; private rooms return to the living room.
+  const defaultDoorRecords=[
+   {id:'default-door-living',name:'默认室内木门',room:'living',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'left',wallOffset:0,x:-5.16,y:0,z:0,destination:'hall'},
+   {id:'default-door-bedroom',name:'默认室内木门',room:'bedroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
+   {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
+   {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
+  ];
+  defaultDoorRecords.forEach(def=>{
+   let record=s.placed.find(entry=>entry.id===def.id);
+   if(!record){record={...def};s.placed.push(record)}
+   record.name='默认室内木门';record.kind='furniture';record.destination=record.destination||def.destination;
+   const existing=furnitureRegistry.find(entry=>entry.id===record.id);
+   if(!existing)createOwnedFurniture(record.name,record);
+  });
   function enterRoomFromDoor(mode){
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode');
    if(mode==='kitchen')stage.classList.add('kitchen-mode');
@@ -1698,7 +1712,7 @@ function initArday3D(){
    registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'bedroom-window',room:'bedroom',anchor:'window'})}),
    registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'kitchen-window',room:'kitchen',anchor:'window'})}),
   ];
-  const furnitureModelAliases={"开放书架":{"model":"书架","variant":"开放格架"},"坐垫":{"model":"坐垫","variant":""},"雾面墙纸":{"model":"墙纸","variant":"雾面"},"极简书桌":{"model":"书桌","variant":"白蜡木极简"},"屏风":{"model":"隔断","variant":""},"陶瓷灶":{"model":"灶台","variant":"奶油陶瓷"},"锥形吊灯":{"model":"吊灯","variant":"锥形金属"},"复古沙发":{"model":"沙发","variant":"经典款"},"床头柜":{"model":"床头柜","variant":""},"陶土花瓶":{"model":"花瓶","variant":""},"伞架":{"model":"伞架","variant":""},"三抽斗柜":{"model":"斗柜","variant":"奶油三抽"},"木格书架":{"model":"书架","variant":"白蜡木开放格"},"吊柜":{"model":"吊柜","variant":""},"展示柜":{"model":"展示柜","variant":""},"躺椅":{"model":"躺椅","variant":""},"布艺床":{"model":"床","variant":""},"海报":{"model":"海报","variant":""},"深海墙纸":{"model":"墙纸","variant":"深海"},"棕榈树":{"model":"棕榈树绿植","variant":""},"水磨地板":{"model":"地板","variant":"水磨"},"蘑菇台灯":{"model":"台灯","variant":"蘑菇"},"默认室内木门":{"model":"门","variant":""},"门":{"model":"门","variant":""},"懒人沙发":{"model":"懒人沙发","variant":""},"纸罩灯":{"model":"落地灯","variant":"纸罩"},"鞋柜":{"model":"鞋柜","variant":""},"梳妆台":{"model":"梳妆台","variant":""},"电视柜":{"model":"电视柜","variant":""},"玻璃书柜":{"model":"书架","variant":"玻璃门书柜"},"沙发床":{"model":"沙发床","variant":""},"榻榻米":{"model":"榻榻米","variant":""},"软包床":{"model":"床","variant":"奶油软包"},"复古书桌":{"model":"书桌","variant":"深胡桃木复古"},"哑铃架":{"model":"哑铃架","variant":""},"石材茶几":{"model":"茶几","variant":"米白石材"},"珐琅灶":{"model":"灶台","variant":"复古珐琅"},"壁画":{"model":"壁画","variant":""},"长餐桌":{"model":"餐桌","variant":"浅橡木长桌"},"几何地毯":{"model":"地毯","variant":"海盐蓝"},"水泥地板":{"model":"地板","variant":"水泥"},"抽屉书桌":{"model":"书桌","variant":"抽屉工作台"},"双臂壁灯":{"model":"壁灯","variant":"黄铜双臂"},"方形边桌":{"model":"边桌","variant":"深木方桌"},"木框床":{"model":"床","variant":"浅橡木框架"},"默认窗户":{"model":"窗","variant":""},"窗":{"model":"窗","variant":""},"圆形茶几":{"model":"茶几","variant":"圆形浅橡木"},"折线台灯":{"model":"台灯","variant":"陶瓷折线"},"卧室地毯":{"model":"地毯","variant":"羊毛米白"},"上床下桌":{"model":"上床下桌","variant":""},"木框挂钟":{"model":"挂钟","variant":""},"波斯地毯":{"model":"地毯","variant":"波斯绛红"},"羊毛沙发":{"model":"沙发","variant":"暖灰羊毛"},"亚麻窗帘":{"model":"窗帘","variant":""},"藤编柜":{"model":"床头柜","variant":"藤编抽屉"},"橱柜":{"model":"橱柜","variant":""},"钢琴":{"model":"钢琴","variant":""},"玻璃台灯":{"model":"台灯","variant":"琥珀玻璃"},"洗衣机":{"model":"洗衣机","variant":""},"亚麻沙发":{"model":"沙发","variant":"亚麻燕麦"},"餐边柜":{"model":"餐边柜","variant":""},"三脚灯":{"model":"落地灯","variant":"黑色三脚"},"冰箱":{"model":"冰箱","variant":""},"不锈钢灶":{"model":"灶台","variant":"不锈钢"},"圆形餐桌":{"model":"餐桌","variant":"圆形餐桌"},"酒柜":{"model":"酒柜","variant":""},"料理台":{"model":"料理台","variant":""},"复古妆台":{"model":"梳妆台","variant":""},"玻璃吊灯":{"model":"吊灯","variant":"乳白玻璃"},"石膏墙纸":{"model":"墙纸","variant":"石膏"},"休闲沙发":{"model":"沙发","variant":""},"任务板":{"model":"任务板","variant":""},"照片墙":{"model":"照片墙","variant":""},"唱片机":{"model":"唱片机","variant":""},"花束":{"model":"捧花摆件","variant":""},"复古书柜":{"model":"书架","variant":"深胡桃木书柜"},"四抽斗柜":{"model":"斗柜","variant":"胡桃木四抽"},"跑步机":{"model":"跑步机","variant":""},"藤编餐椅":{"model":"餐桌椅","variant":"藤编餐椅"},"双人床":{"model":"床","variant":""},"抽屉茶几":{"model":"茶几","variant":"胡桃木抽屉"},"水槽":{"model":"水槽","variant":""},"羊毛地毯":{"model":"地毯","variant":"羊毛米白"},"游戏机":{"model":"游戏机","variant":""},"衣柜":{"model":"衣柜","variant":""},"拱形镜":{"model":"全身镜","variant":"黄铜拱形"},"扶手餐椅":{"model":"餐桌椅","variant":"软包扶手椅"},"绒布沙发":{"model":"沙发","variant":"雾蓝绒布"},"网布椅":{"model":"办公椅","variant":""},"单臂壁灯":{"model":"壁灯","variant":"单臂"},"置物架":{"model":"置物架","variant":""},"衣帽架":{"model":"衣帽架","variant":""},"黄铜桌":{"model":"边桌","variant":"黄铜圆桌"},"格纹地毯":{"model":"地毯","variant":"奶油棋盘"},"电脑":{"model":"电脑","variant":""},"弧背椅":{"model":"椅子","variant":""},"藤编吊灯":{"model":"吊灯","variant":"藤编圆罩"},"电视":{"model":"电视","variant":""},"弧形灯":{"model":"落地灯","variant":"黄铜弧形"},"凳子":{"model":"凳子","variant":""}};
+  const furnitureModelAliases={"开放书架":{"model":"书架","variant":"开放格架"},"坐垫":{"model":"坐垫","variant":""},"雾面墙纸":{"model":"墙纸","variant":"雾面"},"极简书桌":{"model":"书桌","variant":"白蜡木极简"},"屏风":{"model":"隔断","variant":""},"陶瓷灶":{"model":"灶台","variant":"奶油陶瓷"},"锥形吊灯":{"model":"吊灯","variant":"锥形金属"},"复古沙发":{"model":"沙发","variant":"经典款"},"床头柜":{"model":"床头柜","variant":""},"陶土花瓶":{"model":"花瓶","variant":""},"伞架":{"model":"伞架","variant":""},"三抽斗柜":{"model":"斗柜","variant":"奶油三抽"},"木格书架":{"model":"书架","variant":"白蜡木开放格"},"吊柜":{"model":"吊柜","variant":""},"展示柜":{"model":"展示柜","variant":""},"躺椅":{"model":"躺椅","variant":""},"布艺床":{"model":"床","variant":""},"海报":{"model":"海报","variant":""},"深海墙纸":{"model":"墙纸","variant":"深海"},"棕榈树":{"model":"棕榈树绿植","variant":""},"水磨地板":{"model":"地板","variant":"水磨"},"蘑菇台灯":{"model":"台灯","variant":"蘑菇"},"默认室内木门":{"model":"门","variant":"标准胡桃木"},"门":{"model":"门","variant":"标准胡桃木"},"白橡木玻璃门":{"model":"门","variant":"白橡木玻璃门"},"奶油法式双线门":{"model":"门","variant":"奶油法式双线门"},"藤编门":{"model":"门","variant":"藤编门"},"深色格栅推拉门":{"model":"门","variant":"深色格栅推拉门"},"复古拱顶门":{"model":"门","variant":"复古拱顶门"},"懒人沙发":{"model":"懒人沙发","variant":""},"纸罩灯":{"model":"落地灯","variant":"纸罩"},"鞋柜":{"model":"鞋柜","variant":""},"梳妆台":{"model":"梳妆台","variant":""},"电视柜":{"model":"电视柜","variant":""},"玻璃书柜":{"model":"书架","variant":"玻璃门书柜"},"沙发床":{"model":"沙发床","variant":""},"榻榻米":{"model":"榻榻米","variant":""},"软包床":{"model":"床","variant":"奶油软包"},"复古书桌":{"model":"书桌","variant":"深胡桃木复古"},"哑铃架":{"model":"哑铃架","variant":""},"石材茶几":{"model":"茶几","variant":"米白石材"},"珐琅灶":{"model":"灶台","variant":"复古珐琅"},"壁画":{"model":"壁画","variant":""},"长餐桌":{"model":"餐桌","variant":"浅橡木长桌"},"几何地毯":{"model":"地毯","variant":"海盐蓝"},"水泥地板":{"model":"地板","variant":"水泥"},"抽屉书桌":{"model":"书桌","variant":"抽屉工作台"},"双臂壁灯":{"model":"壁灯","variant":"黄铜双臂"},"方形边桌":{"model":"边桌","variant":"深木方桌"},"木框床":{"model":"床","variant":"浅橡木框架"},"默认窗户":{"model":"窗","variant":""},"窗":{"model":"窗","variant":""},"圆形茶几":{"model":"茶几","variant":"圆形浅橡木"},"折线台灯":{"model":"台灯","variant":"陶瓷折线"},"卧室地毯":{"model":"地毯","variant":"羊毛米白"},"上床下桌":{"model":"上床下桌","variant":""},"木框挂钟":{"model":"挂钟","variant":""},"波斯地毯":{"model":"地毯","variant":"波斯绛红"},"羊毛沙发":{"model":"沙发","variant":"暖灰羊毛"},"亚麻窗帘":{"model":"窗帘","variant":""},"藤编柜":{"model":"床头柜","variant":"藤编抽屉"},"橱柜":{"model":"橱柜","variant":""},"钢琴":{"model":"钢琴","variant":""},"玻璃台灯":{"model":"台灯","variant":"琥珀玻璃"},"洗衣机":{"model":"洗衣机","variant":""},"亚麻沙发":{"model":"沙发","variant":"亚麻燕麦"},"餐边柜":{"model":"餐边柜","variant":""},"三脚灯":{"model":"落地灯","variant":"黑色三脚"},"冰箱":{"model":"冰箱","variant":""},"不锈钢灶":{"model":"灶台","variant":"不锈钢"},"圆形餐桌":{"model":"餐桌","variant":"圆形餐桌"},"酒柜":{"model":"酒柜","variant":""},"料理台":{"model":"料理台","variant":""},"复古妆台":{"model":"梳妆台","variant":""},"玻璃吊灯":{"model":"吊灯","variant":"乳白玻璃"},"石膏墙纸":{"model":"墙纸","variant":"石膏"},"休闲沙发":{"model":"沙发","variant":""},"任务板":{"model":"任务板","variant":""},"照片墙":{"model":"照片墙","variant":""},"唱片机":{"model":"唱片机","variant":""},"花束":{"model":"捧花摆件","variant":""},"复古书柜":{"model":"书架","variant":"深胡桃木书柜"},"四抽斗柜":{"model":"斗柜","variant":"胡桃木四抽"},"跑步机":{"model":"跑步机","variant":""},"藤编餐椅":{"model":"餐桌椅","variant":"藤编餐椅"},"双人床":{"model":"床","variant":""},"抽屉茶几":{"model":"茶几","variant":"胡桃木抽屉"},"水槽":{"model":"水槽","variant":""},"羊毛地毯":{"model":"地毯","variant":"羊毛米白"},"游戏机":{"model":"游戏机","variant":""},"衣柜":{"model":"衣柜","variant":""},"拱形镜":{"model":"全身镜","variant":"黄铜拱形"},"扶手餐椅":{"model":"餐桌椅","variant":"软包扶手椅"},"绒布沙发":{"model":"沙发","variant":"雾蓝绒布"},"网布椅":{"model":"办公椅","variant":""},"单臂壁灯":{"model":"壁灯","variant":"单臂"},"置物架":{"model":"置物架","variant":""},"衣帽架":{"model":"衣帽架","variant":""},"黄铜桌":{"model":"边桌","variant":"黄铜圆桌"},"格纹地毯":{"model":"地毯","variant":"奶油棋盘"},"电脑":{"model":"电脑","variant":""},"弧背椅":{"model":"椅子","variant":""},"藤编吊灯":{"model":"吊灯","variant":"藤编圆罩"},"电视":{"model":"电视","variant":""},"弧形灯":{"model":"落地灯","variant":"黄铜弧形"},"凳子":{"model":"凳子","variant":""}};
   function createOwnedFurniture(name,record=null){
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
@@ -2639,23 +2653,42 @@ function initArday3D(){
     for(const x of [-.405,.405])for(const y of [-.56,.56])cyl(x,y,.075,.018,.018,.018,gold,10);
     box(0,.63,.075,.72,.018,.012,frame);
    }else if(modelName==='门'){
-    width=1.24;depth=.2;height=2.38;wallAxis='x';wallSide='back';anchor=[0,2.55];
-    const timber=mat(0x76513a,.58),panel=mat(0xa9845e,.62),shadow=mat(0x4b3426,.78);
-    // Full casing, recessed door leaf, three raised panels and a proper threshold.
-    box(-.62,0,0,.12,2.4,.2,timber);box(.62,0,0,.12,2.4,.2,timber);box(0,1.18,0,1.36,.14,.2,timber);
-    box(0,0,.035,1.08,2.22,.075,shadow);
-    box(0,0,.08,1.02,2.16,.055,panel);
-    for(const y of [-.68,.02,.68]){
-     const h=y===.02?.42:.48;
-     box(0,y,.115,.78,h,.045,timber);
-     box(0,y,.143,.7,h-.08,.018,panel);
+    width=1.24;depth=.2;height=2.42;wallAxis='x';wallSide='back';anchor=[0,2.55];
+    const isGlass=variant==='白橡木玻璃门',isCream=variant==='奶油法式双线门',isRattan=variant==='藤编门',isSliding=variant==='深色格栅推拉门',isArch=variant==='复古拱顶门';
+    const timber=mat(isCream?0xe4d5bd:isGlass?0xb28d60:isRattan?0x9a7047:isSliding?0x554a42:isArch?0x876047:0x76513a,.72);
+    const panel=mat(isCream?0xf0e6d7:isRattan?0xc49a68:isSliding?0x75675b:isArch?0xb28a63:0xa9845e,.82);
+    const shadow=mat(0x4b3426,.86),glass=mat(0x9db9b7,.28,.12),brass=mat(0xc5a15d,.42,.45);
+    // All door variants share the same 1.24 m casing and ground-level origin.
+    // This is also the exact model used by the initial apartment doors.
+    box(-.62,1.2,0,.12,2.4,.2,timber);box(.62,1.2,0,.12,2.4,.2,timber);box(0,2.38,0,1.36,.14,.2,timber);
+    box(0,1.2,.035,1.08,2.22,.075,shadow);
+    box(0,1.2,.08,1.02,2.16,.055,panel);
+    if(isGlass){
+     box(0,1.58,.12,.76,1.08,.04,glass);box(0,2.16,.145,.84,.07,.055,timber);box(0,1.0,.145,.84,.07,.055,timber);
+     for(const x of [-.39,0,.39])box(x,1.57,.16,.025,1.12,.035,timber);
+    }else if(isRattan){
+     box(0,1.2,.12,.82,1.58,.045,shadow);
+     for(let y=.48;y<=1.92;y+=.11)for(let x=-.36;x<=.36;x+=.11){const slat=box(x,y,.15,.025,.025,.025,brass);slat.rotation.z=.58}
+     for(let y=.48;y<=1.92;y+=.11)for(let x=-.36;x<=.36;x+=.11){const slat=box(x,y,.155,.025,.025,.025,timber);slat.rotation.z=-.58}
+    }else if(isSliding){
+     box(-.24,1.2,.14,.48,2.0,.04,timber);box(.24,1.2,.17,.48,2.0,.04,panel);
+     for(let x=-.4;x<=.4;x+=.13)box(x,1.2,.205,.035,1.92,.025,shadow);
+     box(0,2.27,.12,1.12,.08,.07,brass);
+    }else{
+     for(const y of [.53,1.18,1.86]){
+      const ph=y===1.18?.42:.5,ww=isCream?.84:.78;
+      box(0,y,.115,ww,ph,.045,isCream?brass:timber);
+      box(0,y,.143,ww-.08,ph-.08,.018,panel);
+      if(isCream)box(0,y,.158,ww-.17,ph-.17,.012,panel);
+     }
+     if(isArch){
+      const arch=new T.Mesh(new T.TorusGeometry(.43,.045,8,28,Math.PI),timber);arch.position.set(0,2.13,.16);arch.rotation.z=Math.PI;group.add(arch);
+     }
     }
-    box(0,-1.13,.12,1.05,.035,.025,m.oak);
-    for(const x of [-.46,.46])for(const y of [-1.02,1.02])box(x,y,.13,.035,.035,.025,m.gold);
-    // Lever handle, circular rose and separate lock escutcheon.
-    cyl(.39,-.02,.16,.065,.065,.025,m.gold,18);
-    box(.47,-.02,.19,.19,.035,.035,m.gold);
-    cyl(.39,-.25,.16,.035,.035,.025,m.metal,14);
+    // Consistent brass lever, lock escutcheon and destination plaque.
+    cyl(.39,1.18,.16,.065,.065,.025,brass,18);box(.47,1.18,.19,.19,.035,.035,brass);cyl(.39,.94,.16,.035,.035,.025,m.metal,14);
+    const plaque=box(0,2.06,.19,.52,.18,.045,brass);plaque.userData.doorDestinationPlaque=true;
+    group.userData.doorVariant=variant||'标准胡桃木';group.userData.doorPlaque=plaque;
    }else if(modelName==='懒人沙发'){
     width=1.5;depth=1.25;height=.85;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(0xb7a18d,.98),welt=mat(0x8d7866,.9);
@@ -3184,7 +3217,7 @@ function initArday3D(){
     if(!placed){parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
    s.placed=s.placed||[];
-   if(!record)s.placed.push({id,name,room,kind:name.startsWith('成品食物·')?'food':'furniture',x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null});
+   if(!record)s.placed.push({id,name,room,kind:name.startsWith('成品食物·')?'food':'furniture',x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null,...(item.isDoor?{destination:item.doorDestination||'living'}:{})});
    applyInkOutlines(group);renderer.shadowMap.needsUpdate=true;persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
@@ -3274,9 +3307,45 @@ function persistFurniture(item){
    Object.assign(saved,{name:item.name,room:item.room,itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,scale:item.footprintScale||1,supportId:item.supportId||null});
    if(item.dyeColor)saved.dyeColor=item.dyeColor;
    if(typeof item.lightOn==='boolean')saved.lightOn=item.lightOn;
+   if(item.isDoor)saved.destination=item.doorDestination||'living';
    renderer.shadowMap.needsUpdate=true;
    if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}
    save();
+  }
+  function openDoorWheel(item){
+   if(!item?.isDoor)return;
+   closeFurnitureActions();
+   const rect=stage.getBoundingClientRect(),button=item.button;
+   const x=button?Number.parseFloat(button.style.left):rect.width/2,y=button?Number.parseFloat(button.style.top):rect.height/2;
+   const cx=Number.isFinite(x)?x:rect.width/2,cy=Number.isFinite(y)?y:rect.height/2;
+   const radius=Math.max(78,Math.min(102,Math.min(rect.width,rect.height)*.19));
+   const wheel=document.createElement('div');wheel.className='furniture-wheel door-wheel';wheel.style.left=cx+'px';wheel.style.top=cy+'px';wheel.style.width=radius*2+'px';wheel.style.height=radius*2+'px';
+   const center=document.createElement('div');center.className='furniture-wheel-center';center.style.left=radius+'px';center.style.top=radius+'px';
+   const title=document.createElement('span');title.className='furniture-wheel-title';title.textContent='门的去向';
+   const subtitle=document.createElement('span');subtitle.className='furniture-wheel-subtitle';subtitle.textContent='选择目的地';center.append(title,subtitle);center.onclick=closeFurnitureActions;wheel.appendChild(center);
+   const destinations=[['living','起居室','⌂'],['kitchen','厨房','♨'],['bedroom','卧室','☾'],['bathroom','卫生间','◌'],['hall','公共大厅','◇']];
+   destinations.forEach(([value,label,symbol],index)=>{
+    const angle=(-90+index*360/destinations.length)*Math.PI/180,button=document.createElement('button');button.type='button';button.className='furniture-wheel-action';button.style.left=(radius+Math.cos(angle)*radius*.76)+'px';button.style.top=(radius+Math.sin(angle)*radius*.76)+'px';button.setAttribute('aria-label','将门通往'+label);
+    const icon=document.createElement('span');icon.className='furniture-wheel-icon';icon.textContent=symbol;
+    const textNode=document.createElement('span');textNode.className='furniture-wheel-label';textNode.textContent=label;
+    button.append(icon,textNode);button.setAttribute('aria-pressed',item.doorDestination===value?'true':'false');
+    button.onclick=()=>{item.doorDestination=value;item.group.userData.roomTarget=value;const plaque=item.group.userData.doorPlaque;if(plaque?.material?.color)plaque.material.color.setHex(value==='hall'?0xc6ad83:value==='bathroom'?0xa6b9ae:0xc5a15d);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
+    wheel.appendChild(button);
+   });
+   const recycle=document.createElement('button');recycle.type='button';recycle.className='furniture-wheel-action door-wheel-recycle';recycle.style.left=radius+'px';recycle.style.top=(radius*1.91)+'px';
+   const recycleIcon=document.createElement('span');recycleIcon.className='furniture-wheel-icon';recycleIcon.textContent='⌫';
+   const recycleLabel=document.createElement('span');recycleLabel.className='furniture-wheel-label';recycleLabel.textContent='收回背包';recycle.append(recycleIcon,recycleLabel);
+   recycle.onclick=()=>{closeFurnitureActions();recycleDoor(item)};wheel.appendChild(recycle);
+   stage.appendChild(wheel);
+   wheel._outsideHandler=event=>{if(!wheel.contains(event.target)&&event.target!==item.button)closeFurnitureActions()};
+   wheel._escapeHandler=event=>{if(event.key==='Escape')closeFurnitureActions()};
+   document.addEventListener('pointerdown',wheel._outsideHandler,true);document.addEventListener('keydown',wheel._escapeHandler,true);
+  }
+  function recycleDoor(item){
+   if(!item?.isDoor||!item.owned)return;
+   const saved=s.placed.find(entry=>entry.id===item.id);addInventoryItem(item.name,'furniture',item.id);
+   s.placed=s.placed.filter(entry=>entry.id!==item.id);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);
+   selectedFurniture=null;rotateFurnitureButton.disabled=true;removeFurnitureButton.disabled=true;refreshDyePalette();save();updateFurnitureHotspots();toast('门已收回背包');
   }
   function selectFurniture(item){selectedFurniture=item;rotateFurnitureButton.disabled=!!item.wallAxis;removeFurnitureButton.disabled=!item.owned;refreshDyePalette();}
   const rotateFurnitureButton=document.createElement('button');
@@ -3454,7 +3523,7 @@ function persistFurniture(item){
       selectFurniture(item);
       const plane=item.wallAxis?(item.wallSide==='back'||item.wallSide==='front'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):new T.Plane(new T.Vector3(1,0,0),-furniture.position.x)):new T.Plane(new T.Vector3(0,1,0),-furniture.position.y);
       if(raycaster.ray.intersectPlane(plane,dragPoint)){
-       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z,wallOffsetDelta:item.wallAxis?wallOffset(item)-(item.wallSide==='back'||item.wallSide==='front'?dragPoint.x:dragPoint.z):0,wallYOffset:item.wallAxis?furniture.position.y-dragPoint.y:0};
+       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,startX:e.clientX,startY:e.clientY,moved:false,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z,wallOffsetDelta:item.wallAxis?wallOffset(item)-(item.wallSide==='back'||item.wallSide==='front'?dragPoint.x:dragPoint.z):0,wallYOffset:item.wallAxis?furniture.position.y-dragPoint.y:0};
        gestureSurface.setPointerCapture(e.pointerId);e.preventDefault();return;
       }
      }
@@ -3492,11 +3561,12 @@ function persistFurniture(item){
   });
   gestureSurface.addEventListener('pointermove',e=>{
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
+    if(Math.hypot(e.clientX-furnitureDrag.startX,e.clientY-furnitureDrag.startY)>8)furnitureDrag.moved=true;
     const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
     if(raycaster.ray.intersectPlane(furnitureDrag.plane,dragPoint)){
      const g=furnitureDrag.group,item=furnitureDrag.item;
      if(item.wallAxis){
-      const roomGroup=item.room==='bedroom'?bedroom:item.room==='kitchen'?kitchen:living;
+      const roomGroup=item.room==='bedroom'?bedroom:item.room==='kitchen'?kitchen:item.room==='bathroom'?bathroom:living;
       const candidates=[
        {side:'back',plane:new T.Plane(new T.Vector3(0,0,1),3.89),visible:()=>roomGroup.userData.backWall?.visible!==false},
        {side:'front',plane:new T.Plane(new T.Vector3(0,0,1),-3.89),visible:()=>roomGroup.userData.frontWall?.visible!==false},
@@ -3571,8 +3641,8 @@ function persistFurniture(item){
   });
   function endPointer(e){
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
-    const g=furnitureDrag.group,item=furnitureRegistry.find(x=>x.group===g);furnitureDrag=null;
-    if(item){persistFurniture(item);persistSupportedChildren(item);toast(item.name+'位置已保存');}
+    const dragState=furnitureDrag,g=dragState.group,item=furnitureRegistry.find(x=>x.group===g);furnitureDrag=null;
+    if(item){persistFurniture(item);persistSupportedChildren(item);if(item.isDoor&&!dragState.moved)openDoorWheel(item);else toast(item.name+'位置已保存');}
     return;
    }
    if(doorTap&&doorTap.pointerId===e.pointerId){
