@@ -46,6 +46,7 @@ s.activeDungeon=s.activeDungeon&&s.activeDungeon.status==='active'?s.activeDunge
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
 s.dungeonProgress=s.dungeonProgress&&typeof s.dungeonProgress==='object'?s.dungeonProgress:{};
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
+s.dungeonCycleStartedAt=Number(s.dungeonCycleStartedAt)||Number(s.lastDungeonAt)||Date.now();s.nextDungeonDueAt=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||s.dungeonCycleStartedAt)+7*86400000);
 s.dungeonUnlocks=Array.isArray(s.dungeonUnlocks)?s.dungeonUnlocks:['F'];
 const DUNGEON_TIERS=['F','E','D','C','B','A','S','SS','SSS'];
 function highestUnlockedDungeonIndex(){return Math.max(0,...(s.dungeonUnlocks||['F']).map(t=>DUNGEON_TIERS.indexOf(t)).filter(i=>i>=0))}
@@ -165,7 +166,7 @@ function applyBureauDailyGrant(at=Date.now()){
  if(amount>0){s.points=(Number(s.points)||0)+amount;addEvent('管理局每日拨款','根据上一次副本结算，管理局发放 '+amount+' 积分（结算积分的 40%）。','daily')}
  save();return amount;
 }
-function render(){applyBureauDailyGrant();statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(Math.round(Number(s.combat)||0));const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');renderStatusTags();renderCurrentSchedulePeek();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
+function render(){applyDungeonDeadlinePenalty();applyBureauDailyGrant();statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(Math.round(Number(s.combat)||0));const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');renderStatusTags();renderCurrentSchedulePeek();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
 function renderCurrentSchedulePeek(){
  const node=$('currentSchedulePeek');if(!node)return;
  const now=new Date();ensureScheduleAt(now);
@@ -289,11 +290,11 @@ function openTab(name,force=false){
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
   const itemIcons={'点心':'🥐'};
-  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':'食物';const icon=item==='点心'?'🥐':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
+  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):item==='点心'?'🥐':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   
   const nav=document.createElement('div');nav.className='inventory-categories';
-  ['全部','食物','家具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;openTab('物品',true)};nav.appendChild(button)});
+  ['全部','食物','家具','副本道具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;openTab('物品',true)};nav.appendChild(button)});
   $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
@@ -304,6 +305,7 @@ function openTab(name,force=false){
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
    if(id.startsWith('use-inventory-')){
     const index=Number(id.slice('use-inventory-'.length)),entity=s.inventory[index],item=entity?.name;
+    if(entity?.kind==='dungeon-item'){useDungeonItem(entity,index);return}
     if(!item){openTab('物品',true);return}
     if(item.startsWith('成品食物·')){
      if(!arday3D?.placeOwnedFurniture){toast('场景尚未就绪，暂时无法取出料理');return}
@@ -1468,7 +1470,7 @@ function showDungeon(){
  refreshDungeonUnlocks();
  const tierScenes={F:'forest',E:'fog',D:'crypt',C:'ember',B:'wild',A:'moon',S:'storm',SS:'abyss',SSS:'eclipse'};
  const tiers=DUNGEON_TIERS.map((tier,index)=>{
-  const cooldown=dungeonCooldownRemaining()>0,unlocked=dungeonUnlocked(tier),clears=Number(s.dungeonProgress[tier])||0;
+  const cooldown=false,unlocked=dungeonUnlocked(tier),clears=Number(s.dungeonProgress[tier])||0;
   const next=index<DUNGEON_TIERS.length-1?DUNGEON_CLEAR_REQUIREMENTS[DUNGEON_TIERS[index+1]]:null;
   const progress=next?Math.min(1,clears/next):unlocked?1:0;
   return '<button class="guild-gate '+(unlocked?'available':'sealed')+' scene-'+tierScenes[tier]+'" data-instance-tier="'+tier+'" '+(unlocked&&!cooldown?'':'disabled')+'><span class="guild-gate-scene"><i class="gate-orb"></i><i class="gate-spire"></i><i class="gate-ground"></i></span><span class="guild-gate-code">'+tier+'</span><span class="guild-gate-state">'+(cooldown?'冷却中':unlocked?'可进入':'未解锁')+'</span><span class="guild-gate-progress"><i style="width:'+(progress*100)+'%"></i></span></button>';
@@ -1476,70 +1478,100 @@ function showDungeon(){
  const members=s.teamRoster.slice(0,8).map((m,index)=>'<article class="guild-member-card"><button class="guild-member '+(m.selected?'is-selected':'')+'" data-member="'+m.id+'"><span class="guild-member-art tone-'+(index%4)+'"><i class="member-hair"></i><i class="member-face"></i><i class="member-neck"></i><i class="member-shoulders"></i><i class="member-cloak"></i><i class="member-light"></i></span><span class="guild-member-info"><strong>'+m.name+'</strong><small>最高副本 '+(m.maxTier||'F')+'</small><span class="guild-member-stats"><b>战力 '+m.combat+'</b></span><span class="guild-member-meter"><i style="width:'+Math.max(0,Math.min(100,m.combat))+'%"></i></span></span><span class="guild-member-check">'+(m.selected?'✓':'＋')+'</span></button><button class="guild-member-remove" data-remove-member="'+m.id+'" aria-label="移除队友">×</button></article>').join('');
  const selected=s.teamRoster.slice(0,8).filter(m=>m.selected),teamPower=selected.length?selected.reduce((n,m)=>n+m.combat,0)/selected.length:0;
  const combined=Math.round((s.combat+teamPower)/2);
- $('choices').innerHTML='<section class="guild-cover"><div class="guild-cover-sky"></div><div class="guild-cover-mountains"></div><div class="guild-cover-arch"><i></i><b></b></div><div class="guild-cover-copy"><small>THE FRONTIER · GUILD HALL</small><h2>组队</h2><span>选择目的地，召集队友</span></div><div class="guild-wallet"><small>持有积分</small><b>'+s.points.toLocaleString('zh-CN')+'</b></div></section><section class="guild-destinations"><div class="guild-gate-grid">'+tiers+'</div></section><section class="guild-party"><div class="guild-section-head"><span>队友</span><small>'+selected.length+' / '+s.teamRoster.length+' · 最多 8 人</small></div><div class="guild-roster">'+members+'</div></section><section class="guild-strength"><div class="guild-strength-emblem">⚔</div><div class="guild-strength-copy"><small>EXPEDITION POWER</small><b>'+combined+'</b><span>队伍综合战力</span></div><div class="guild-strength-meter"><i style="width:'+Math.max(0,Math.min(100,combined))+'%"></i></div></section>';
+ $('choices').innerHTML='<section class="guild-cover"><div class="guild-cover-sky"></div><div class="guild-cover-mountains"></div><div class="guild-cover-arch"><i></i><b></b></div><div class="guild-cover-copy"><small>THE FRONTIER · GUILD HALL</small><h2>组队</h2><span>选择目的地，召集队友</span></div><div class="guild-wallet"><small>持有积分</small><b>'+s.points.toLocaleString('zh-CN')+'</b></div><div class="guild-dungeon-deadline">'+dungeonDeadlineText()+'</div></section><section class="guild-destinations"><div class="guild-gate-grid">'+tiers+'</div></section><section class="guild-party"><div class="guild-section-head"><span>队友</span><small>'+selected.length+' / '+s.teamRoster.length+' · 最多 8 人</small></div><div class="guild-roster">'+members+'</div></section><section class="guild-strength"><div class="guild-strength-emblem">⚔</div><div class="guild-strength-copy"><small>EXPEDITION POWER</small><b>'+combined+'</b><span>队伍综合战力</span></div><div class="guild-strength-meter"><i style="width:'+Math.max(0,Math.min(100,combined))+'%"></i></div></section>';
  $('drawer').classList.add('open');
  $('choices').querySelectorAll('[data-instance-tier]').forEach(button=>button.onclick=()=>startDungeon(button.dataset.instanceTier));
  $('choices').querySelectorAll('[data-member]').forEach(button=>button.onclick=()=>{const m=s.teamRoster.find(x=>x.id===button.dataset.member);if(!m)return;if(!m.selected&&s.teamRoster.filter(x=>x.selected).length>=3){toast('最多携带 3 名自己的队友');return}m.selected=!m.selected;save();showDungeon()});
  $('choices').querySelectorAll('[data-remove-member]').forEach(button=>button.onclick=event=>{event.stopPropagation();const index=s.teamRoster.findIndex(x=>x.id===button.dataset.removeMember);if(index<0)return;const removed=s.teamRoster.splice(index,1)[0];save();toast('已移除队友：'+removed.name);showDungeon()});
 }
-function showDungeonPending(){
- const mission=s.activeDungeon;if(!mission)return;
- $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view';
- $('choices').innerHTML='<section class="mission-waiting"><div class="mission-portal"><svg viewBox="0 0 240 220" role="img" aria-label="封闭的副本入口"><path d="M25 198V87Q25 20 120 12Q215 20 215 87V198" fill="none" stroke="#6e7770" stroke-width="4"/><path d="M48 198V90Q48 38 120 30Q192 38 192 90V198" fill="none" stroke="#a18d70" stroke-width="2"/><path d="M83 198V99Q83 65 120 60Q157 65 157 99V198" fill="#5b6870" stroke="#d2c4aa" stroke-width="2"/><circle cx="120" cy="111" r="13" fill="none" stroke="#e4d5b8" stroke-width="2"/><path d="M120 93V129M102 111H138" stroke="#e4d5b8" stroke-width="1.5"/><path d="M12 198H228M40 211H200" stroke="#7d796e" stroke-width="2"/></svg></div><div class="mission-seal">'+mission.tier+'</div><div class="mission-status">副本进行中</div><div class="mission-clock" id="missionClock">日程结束时结算</div><div class="mission-finish">预计结束 '+new Date(mission.endsAt).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+'</div></section>';
- const matched=mission.snapshot?.matchedStrangers||[];$('choices').innerHTML+='<section class="mission-matchmaking"><div class="mission-matchmaking-head"><b>临时匹配</b><small>BLACK-BOX MATCHMAKING</small></div><div class="mission-matchmaking-slots">'+matched.map((m,i)=>'<div class="mission-match-slot"><span>?</span><b>陌生队友 '+(i+1)+'</b><small>数据未知</small></div>').join('')+'</div></section>';updateDungeonCountdown();
+const DUNGEON_BOARD_TILES=[
+['explore','场景探索','⌂'],['apparition','灵异遭遇','◌'],['investigate','调查线索','⌕'],['rules','规则禁忌','≋'],['supply','物资补给','＋'],['route','路线选择','↗'],['npc','人物遭遇','♙'],['cognition','精神认知','◉'],['environment','时间环境','☾'],['trap','陷阱危机','△'],['reward','特殊机会','✦'],['climax','阶段剧情','◇']];
+const DUNGEON_ITEM_CATALOG={stimulant:{name:'肾上腺素注射剂',type:'buff',icon:'✚',effects:{energy:16,agility:5,willpower:4}},standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},hex:{name:'恶意诅咒钉',type:'harm',icon:'†',tradeOnly:true},fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',tradeOnly:true},reprieve:{name:'七日豁免令',type:'extension',icon:'⌛',extendDays:7}};
+const DUNGEON_EVENT_LIBRARY={
+explore:{title:'封闭的实验楼',desc:'走廊的灯一盏盏亮起，尽头的门牌却写着不存在的楼层。',options:[{label:'检查门牌和墙体',effects:{perception:3,intelligence:2,energy:-2},chance:2},{label:'沿安全通道离开',effects:{willpower:2,clean:-1} }]},
+apparition:{title:'走廊尽头的人影',desc:'一个穿着旧校服的人影背对着你。它的脚没有落在地面上。',options:[{label:'保持距离，观察它',effects:{perception:3,willpower:-2},chance:2},{label:'迅速撤离',effects:{energy:-3,agility:2},chance:-3,risk:true}]},
+investigate:{title:'被涂改的值班记录',desc:'记录本上有一页被反复撕贴，残留字迹似乎在描述今晚的校园。',options:[{label:'整理残留信息',effects:{intelligence:3,perception:2,fun:-1},chance:3,flag:'optional-clue'},{label:'不再停留',effects:{willpower:1,energy:1}}]},
+rules:{title:'广播中的校规',desc:'广播要求午夜后不得回应自己的名字。播音员随后念出了你的名字。',options:[{label:'不回应，关闭广播',effects:{willpower:4,energy:-2},chance:2},{label:'回应并询问身份',effects:{intelligence:2,willpower:-5,fun:-3},chance:-5,risk:true}]},
+supply:{title:'器材室',desc:'器材室门没有锁，里面有旧手电、急救包和一排空荡荡的储物柜。',options:[{label:'搜寻可用物资',effects:{perception:2,energy:-1},item:'stimulant'},{label:'快速离开',effects:{agility:2,clean:1}}]},
+route:{title:'两条楼梯',desc:'左侧楼梯通向明亮的大厅，右侧楼梯传来规律的敲击声。',options:[{label:'走向明亮处',effects:{willpower:2,energy:-1}},{label:'进入右侧楼梯',effects:{perception:3,agility:-2},chance:3,flag:'optional-route'}]},
+npc:{title:'没有脸的值日生',desc:'值日生递来一张纸条，声称可以告诉你离开校园的方法。',options:[{label:'接受纸条并询问细节',effects:{intelligence:2,willpower:-1},flag:'npc-note'},{label:'拒绝接触，保持警惕',effects:{perception:2,willpower:2}}]},
+cognition:{title:'重复的教室',desc:'教室里坐着许多和你一模一样的人。他们同时抬起头。',options:[{label:'确认自己的记忆',effects:{intelligence:2,willpower:3,fun:-3}},{label:'闭眼沿墙移动',effects:{agility:2,energy:-2},risk:true}]},
+environment:{title:'全校停电',desc:'广播停止，钟表停在 23:17。窗外的操场却出现了清晨的日光。',options:[{label:'利用光线寻找出口',effects:{perception:2,agility:2,energy:-1}},{label:'留在原地等待',effects:{willpower:2,fun:-2,hunger:-1}}]},
+trap:{title:'地板下的空洞',desc:'脚下的地砖突然塌陷，下面传来许多人的低声交谈。',options:[{label:'抓住栏杆翻越',effects:{strength:3,agility:-3,energy:-3},risk:true},{label:'退后寻找绕行路线',effects:{perception:2,energy:-2}}]},
+reward:{title:'无人认领的储物柜',desc:'柜门上贴着你的名字，里面放着一件从未见过的物品。',options:[{label:'取走柜中物品',effects:{willpower:-1},item:'fate'},{label:'检查柜体后离开',effects:{intelligence:2,perception:1}}]},
+climax:{title:'第三次钟声',desc:'钟声响起。校园布局正在向最初的样子收缩。',options:[{label:'记住变化并继续前进',effects:{intelligence:3,willpower:2},chance:4},{label:'趁空间收缩时冲刺',effects:{agility:3,energy:-4},risk:true}]}
+};
+function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;return item}
+function useDungeonItem(entity,index){
+ const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
+ if(data.tradeOnly){toast('该道具目前仅作为交易物资保留，对人使用机制尚未开放');return}
+ if(data.lifeSave){s.dungeonProtection=(Number(s.dungeonProtection)||0)+1;s.inventory.splice(index,1);toast('替身纸人已启用：下一次高危副本失败时自动生效')}
+ else if(data.type==='probability'){s.nextDungeonChanceModifier=Math.min(.25,(Number(s.nextDungeonChanceModifier)||0)+data.chance/100);s.inventory.splice(index,1);toast('下次副本通关概率 +'+data.chance+'%')}
+ else if(data.type==='extension'){s.nextDungeonDueAt=(Number(s.nextDungeonDueAt)||Date.now()+7*86400000)+data.extendDays*86400000;s.inventory.splice(index,1);toast('副本期限已延长七天')}
+ else if(data.type==='buff'){Object.entries(data.effects).forEach(([key,value])=>{if(key in s.attributes)s.attributes[key]=clamp((Number(s.attributes[key])||0)+value);else if(key in s)s[key]=clamp((Number(s[key])||0)+value)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);s.inventory.splice(index,1);toast(data.name+'已使用')}
+ save();render();openTab('物品',true);
 }
-function updateDungeonCountdown(){
- const m=s.activeDungeon;if(!m)return;
- const clock=$('missionClock');
- if(clock)clock.textContent='日程结束时结算 · '+new Date(Number(m.scheduleEndAt||m.endsAt)).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+function dungeonDeadlineText(at=Date.now()){const due=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||Number(s.dungeonCycleStartedAt)||at)+7*86400000),left=due-at;return left<=0?'已逾期 '+Math.ceil(-left/86400000)+' 天 · 需要立即进入副本':'距离下次强制副本 '+Math.floor(left/86400000)+' 天 '+Math.floor(left%86400000/3600000)+' 小时'}
+function applyDungeonDeadlinePenalty(at=Date.now()){
+ const due=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||Number(s.dungeonCycleStartedAt)||at)+7*86400000);if(at<due)return;const today=keyAt(at);if(s.dungeonOverduePenaltyDay===today)return;
+ s.dungeonOverduePenaltyDay=today;s.energy=clamp((Number(s.energy)||0)-6);s.hunger=clamp((Number(s.hunger)||0)-5);s.clean=clamp((Number(s.clean)||0)-3);s.fun=clamp((Number(s.fun)||0)-5);s.attributes.willpower=clamp((Number(s.attributes.willpower)||0)-2);s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);addEvent('副本期限逾期','连续七天未进入副本，异常侵蚀影响了生存状态与意志。','daily');save();
 }
-function dungeonCooldownRemaining(at=Date.now()){return Math.max(0,86400000-(at-(Number(s.lastDungeonAt)||0)))}
+function renderDungeonBoard(){
+ const mission=s.activeDungeon;if(!mission)return;const board=mission.board||(mission.board={steps:0,position:0,chanceModifier:0,fatalRisk:false,flags:{},history:[]});$('drawerTitle').textContent='校园灵异 · 副本';$('choices').className='choices infinite-view dungeon-board-view';
+ const current=board.position||0,lap=Math.min(3,Math.floor((board.steps||0)/12)+1),progress=Math.min(100,(board.steps||0)/36*100);
+ const cells=DUNGEON_BOARD_TILES.map((tile,i)=>'<div class="dungeon-board-cell tone-'+tile[0]+' '+(i===current?'is-here':'')+'"><span>'+tile[2]+'</span><b>'+tile[1]+'</b><small>'+String(i+1).padStart(2,'0')+'</small></div>').join('');
+ const history=(board.history||[]).slice(-4).reverse().map(h=>'<div class="dungeon-log-row"><b>'+h.title+'</b><span>'+h.outcome+'</span></div>').join('');
+ $('choices').innerHTML='<section class="dungeon-board-cover"><div class="dungeon-board-kicker">CAMPUS ANOMALY / INFINITE INSTANCE</div><div class="dungeon-board-title">夜间校园</div><p>教学楼 · 实验楼 · 宿舍区 · 地下通道</p><div class="dungeon-board-meta"><span>副本等级 <b>'+mission.tier+'</b></span><span>第 <b>'+Math.min(3,lap)+'</b> / 3 圈</span><span>通关修正 <b>'+((board.chanceModifier||0)>=0?'+':'')+board.chanceModifier+'%</b></span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-map-head"><b>校园路线</b><small>掷骰前进 · 共三圈</small></div><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><span>ROUND</span><strong>'+Math.min(3,lap)+'</strong><small>'+Math.min(36,board.steps||0)+' / 36 STEPS</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display"><span>LAST ROLL</span><b>'+(board.lastRoll||'—')+'</b><small>'+(board.lastMove?'前进 '+board.lastMove+' 格':'等待掷骰')+'</small></div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=36?'disabled':'')+'>掷骰前进 <span>⚄</span></button></section><section class="dungeon-board-notes"><div class="dungeon-board-map-head"><b>事件记录</b><small>线索不是通关门槛</small></div>'+(history||'<p>尚无事件记录。校园的第一声钟响还没有出现。</p>')+'</section><div class="dungeon-deadline-note">'+dungeonDeadlineText()+'</div>';
+ const roll=$('dungeonRoll');if(roll)roll.onclick=rollDungeonBoard;
+}
+function rollDungeonBoard(){
+ const mission=s.activeDungeon;if(!mission||mission.board?.pending)return;const board=mission.board,roll=1+Math.floor(Math.random()*6),move=Math.min(roll,36-board.steps);board.lastRoll=roll;board.lastMove=move;board.steps+=move;board.position=board.steps%12;
+ const tile=DUNGEON_BOARD_TILES[board.position],event={...DUNGEON_EVENT_LIBRARY[tile[0]]};
+ if(board.steps===12||board.steps===24){event.title=board.steps===12?'第一圈结束 · 广播室':'第二圈结束 · 地下档案室';event.desc=board.steps===12?'你已经确认校园的异常并非单一现象。广播里出现新的路线提示。':'校园的时间结构开始崩坏，远处的出口与入口逐渐重合。';event.options=[{label:'整理现有信息，继续调查',effects:{intelligence:3,perception:2,willpower:1},chance:3},{label:'不再停留，尽快前进',effects:{agility:2,energy:-2}}]}
+ board.pending={event,tile:tile[0]};save();renderDungeonEvent();
+}
+function renderDungeonEvent(){
+ const mission=s.activeDungeon;if(!mission?.board?.pending)return;const {event,tile}=mission.board.pending,cell=DUNGEON_BOARD_TILES.find(t=>t[0]===tile),lap=Math.min(3,Math.ceil(mission.board.steps/12));$('drawerTitle').textContent='事件 · '+event.title;$('choices').className='choices infinite-view dungeon-event-view';
+ $('choices').innerHTML='<section class="dungeon-event-scene tone-'+tile+'"><small>ROUND 0'+lap+' / '+cell[1]+'</small><div class="dungeon-event-symbol">'+cell[2]+'</div><h2>'+event.title+'</h2><p>'+event.desc+'</p></section><section class="dungeon-event-choices"><div class="dungeon-event-label">选择行动</div>'+event.options.map((option,i)=>'<button class="dungeon-event-choice" data-dungeon-choice="'+i+'"><span>0'+(i+1)+'</span><b>'+option.label+'</b><i>›</i></button>').join('')+'</section><p class="dungeon-event-footnote">事件影响生存与战斗九项数值；少数事件改变通关概率或提供道具。线索与钥匙均非强制条件。</p>';
+ $('choices').querySelectorAll('[data-dungeon-choice]').forEach(button=>button.onclick=()=>resolveDungeonEvent(Number(button.dataset.dungeonChoice)));
+}
+function resolveDungeonEvent(index){
+ const mission=s.activeDungeon;if(!mission?.board?.pending)return;const board=mission.board,event=board.pending.event,option=event.options[index];if(!option)return;
+ Object.entries(option.effects||{}).forEach(([key,value])=>{if(key in s.attributes)s.attributes[key]=clamp((Number(s.attributes[key])||0)+value);else if(['energy','hunger','clean','fun'].includes(key))s[key]=clamp((Number(s[key])||0)+value)});
+ s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);if(option.chance)board.chanceModifier=Math.max(-25,Math.min(25,(Number(board.chanceModifier)||0)+option.chance));if(option.flag)board.flags[option.flag]=true;if(option.risk)board.fatalRisk=true;
+ let reward='无额外收获';if(option.item&&Math.random()<.68){let id=option.item;const rare=Math.random();if(rare<.07)id='standin';else if(rare<.12)id='reprieve';else if(rare<.17)id='hex';else if(rare<.21)id='misfortune';const item=addDungeonItem(id);if(item)reward='获得道具：'+item.name}
+ board.history=Array.isArray(board.history)?board.history:[];board.history.push({title:event.title,outcome:option.label+' · '+reward});board.history=board.history.slice(-12);board.pending=null;
+ if(board.steps>=36){mission.scheduleEndAt=Date.now();save();settleDungeonIfDue(Date.now());return}save();render();renderDungeonBoard();
+}
+function showDungeonPending(){if(s.activeDungeon?.board?.pending)renderDungeonEvent();else renderDungeonBoard()}
+function updateDungeonCountdown(){const m=s.activeDungeon;if(!m)return;const roll=$('dungeonRoll');if(roll)roll.disabled=!!m.board?.pending||(m.board?.steps||0)>=36}
+function dungeonCooldownRemaining(){return 0}
 function startDungeon(tier){
- if(s.activeDungeon){showDungeonPending();return}
+ if(s.activeDungeon){showDungeonPending();$('drawer').classList.add('open');return}
  const incompatible=s.teamRoster.filter(m=>m.selected&&dungeonTierIndex(m.maxTier)<dungeonTierIndex(tier));if(incompatible.length){toast('队友最高副本等级不足：'+incompatible.map(m=>m.name+'（'+(m.maxTier||'F')+'）').join('、'));return}
- if(dungeonCooldownRemaining()>0){toast('副本每 24 小时只能进行一次');return}
- if(!dungeonUnlocked(tier)){toast('尚未解锁');return}
- if(dungeonCooldownRemaining()>0){toast('副本每 24 小时只能进行一次');return}
- const energyCost=Number(({F:5,E:7,D:9,C:12,B:15,A:18,S:22,SS:26,SSS:30})[tier]||5);
- if(s.energy<energyCost){toast('精力不足');return}
- dispatchDungeon(tier,energyCost,DUNGEON_BASE_REWARD[tier]||25);
+ if(!dungeonUnlocked(tier)){toast('尚未解锁');return}const energyCost=Number(({F:5,E:7,D:9,C:12,B:15,A:18,S:22,SS:26,SSS:30})[tier]||5);if(s.energy<energyCost){toast('精力不足');return}dispatchDungeon(tier,energyCost,DUNGEON_BASE_REWARD[tier]||25);
 }
 function dispatchDungeon(tier,energyCost,base){
- if(dungeonCooldownRemaining()>0){toast('副本每 24 小时只能进行一次');return}
- if(s.teamRoster.some(m=>m.selected&&dungeonTierIndex(m.maxTier)<dungeonTierIndex(tier))){toast('队友副本等级不足，无法进入');return}
- const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),duration=1,scheduleStart=new Date(now);scheduleStart.setMinutes(0,0,0);const scheduleEnd=new Date(scheduleStart.getTime()+3600000);
- const selected=s.teamRoster.filter(m=>m.selected);
- const matchedStrangers=Array.from({length:2},(_,index)=>({id:'stranger-'+Date.now()+'-'+index,name:'陌生匹配者 '+(index+1),role:'临时队员',combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82),anonymous:true}));
- const fullTeam=[...selected,...matchedStrangers],teamPower=fullTeam.reduce((n,m)=>n+m.combat,0)/fullTeam.length,teamMalice=fullTeam.reduce((n,m)=>n+m.malice,0)/fullTeam.length;
- const difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)],end=scheduleEnd.getTime();
- s.energy=Math.max(0,s.energy-energyCost);s.lastDungeonAt=now;
- s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,energyCost,baseReward:base,difficulty,startAt:scheduleStart.getTime(),endsAt:end,scheduleKey:key,scheduleStartHour:hour,scheduleEndAt:end,duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers}};
- // 副本占用当前整点时段，结束时刻与日程边界严格一致。
- writeBlockForKey(key,hour,hour+1,{title:'副本',kind:'dungeon',activity:'dungeon',dungeonId:s.activeDungeon.id,priority:'forced'});
- s.activeInteraction=null;s.currentActivity='dungeon';s.currentActivityAnchor=null;s.currentActivityRoom='dungeon';s.currentActivityFurnitureId=null;s.lastUnifiedHourKey=key+'-'+hour;s.lastProcessedSessionKey=key+'-'+hour+'-dungeon';
- save();render();renderCalendar();showDungeonPending();$('drawer').classList.add('open');
+ const now=Date.now(),selected=s.teamRoster.filter(m=>m.selected);if(selected.some(m=>dungeonTierIndex(m.maxTier)<dungeonTierIndex(tier))){toast('队友副本等级不足，无法进入');return}
+ const strangers=Array.from({length:2},(_,i)=>({id:'stranger-'+now+'-'+i,name:'陌生匹配者 '+(i+1),combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82)})),team=[...selected,...strangers],teamPower=team.reduce((n,m)=>n+m.combat,0)/team.length,teamMalice=team.reduce((n,m)=>n+m.malice,0)/team.length,difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)];
+ s.energy=Math.max(0,s.energy-energyCost);s.lastDungeonAt=now;s.nextDungeonDueAt=now+7*86400000;const nextModifier=Number(s.nextDungeonChanceModifier)||0;s.nextDungeonChanceModifier=0;
+ s.activeDungeon={id:'dungeon-'+now,status:'active',tier,energyCost,baseReward:base,difficulty,startAt:now,endsAt:0,scheduleEndAt:0,successChanceModifier:nextModifier,snapshot:{playerPower:s.combat,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers:strangers},board:{steps:0,position:0,chanceModifier:0,fatalRisk:false,flags:{},history:[],pending:null}};
+ s.activeInteraction=null;s.currentActivity='idle';s.currentActivityAnchor=null;s.currentActivityRoom=null;s.currentActivityFurnitureId=null;save();render();renderDungeonBoard();$('drawer').classList.add('open');
 }
 function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active')return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;
- const snap=mission.snapshot||{},powerScore=(Number(snap.playerPower)||0)*.48+(Number(snap.teamPower)||0)*.52;
- const powerAdvantage=(powerScore-mission.difficulty)*.006,malicePenalty=(Number(snap.teamMalice)||0)*.0038;
- const survivalPenalty=(100-(Number(snap.energy)||0))*.0011+(100-(Number(snap.hunger)||0))*.00035+(100-(Number(snap.clean)||0))*.00025;
- const successChance=Math.max(.035,Math.min(.97,.50+powerAdvantage-malicePenalty-survivalPenalty));
- const roll=Math.random(),success=roll<successChance;
- const raw=Math.round(Math.max(0,Math.min(100,50+powerScore*.22-mission.difficulty*.25+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.12)));
- const rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):(raw>=55?'C':'D');
- const earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.12));
- s.points+=earned;if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;if(s.guildCommission?.status==='active'&&success&&dungeonTierIndex(mission.tier)>=dungeonTierIndex(s.guildCommission.minTier)){s.guildCommission.status='completed';s.points+=Number(s.guildCommission.reward)||0;addEvent('公会特殊委托完成',s.guildCommission.title+'已完成，额外获得 '+s.guildCommission.reward+' 积分。','long')}
- const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x));
- const result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at:at,unlocked:newly};
- recordDungeonStat(result);const eliteEncounter=maybeMeetElite(mission.tier,at);if(eliteEncounter)result.eliteEncounter={name:eliteEncounter.name,relation:eliteEncounter.relation};
- s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
- addEvent('副本结算报告 · '+result.tier,'副本任务已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(newly.length?' 新解锁：'+newly.join('、')+'。':'')+(eliteEncounter?' 遭遇排行榜人物 '+eliteEncounter.name+'，双方关系：'+(eliteEncounter.relation==='ally'?'友善':'交恶')+'。':''),'daily');
- save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本')showDungeonResult(result);return true;
+ const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.48+(Number(snap.teamPower)||0)*.52,penalty=(100-(Number(snap.energy)||0))*.0011+(100-(Number(snap.hunger)||0))*.00035+(100-(Number(snap.clean)||0))*.00025,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.035,Math.min(.97,.50+(power-mission.difficulty)*.006-(Number(snap.teamMalice)||0)*.0038-penalty+modifier)),success=Math.random()<successChance;
+ let fatal=false,survived=true;
+ if(!success&&board.fatalRisk){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=false;s.energy=0;s.hunger=0;s.attributes.willpower=clamp(s.attributes.willpower-18);s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
+ const raw=Math.round(Math.max(0,Math.min(100,50+power*.22-mission.difficulty*.25+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.12+(Number(board.chanceModifier)||0)*.25))),rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):(raw>=55?'C':'D'),earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.12));
+ s.points+=earned;if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
+ const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x)),result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at,unlocked:newly,survived,fatal,boardSteps:board.steps||36};
+ recordDungeonStat(result);const elite=maybeMeetElite(mission.tier,at);if(elite)result.eliteEncounter={name:elite.name,relation:elite.relation};s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
+ addEvent('副本结算报告 · '+result.tier,'校园灵异副本已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(fatal?'未使用保命道具，角色遭受濒死重创。':''),'daily');save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent.includes('副本'))showDungeonResult(result);return true;
 }
 function showDungeonResult(result){
  $('drawerTitle').textContent='副本结算';$('choices').className='choices infinite-view';
- $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级</div></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>累计 '+s.points.toLocaleString('zh-CN')+'</small></div>'+(result.unlocked?.length?'<div class="instance-unlock">解锁 '+result.unlocked.join(' / ')+'</div>':'')+(result.eliteEncounter?'<section class="elite-encounter-result '+(result.eliteEncounter.relation==='ally'?'is-ally':'is-hostile')+'"><small>ELITE ENCOUNTER</small><b>'+result.eliteEncounter.name+'</b><span>'+(result.eliteEncounter.relation==='ally'?'建立友善关系 · 已加入可选队友':'发生冲突 · 关系恶化')+'</span></section>':'')+'<button class="instance-primary" id="instanceAgain">返回组队</button>';
+ $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级 · 校园灵异</div><p>通关概率 '+result.successChance+'% · 完成 '+result.boardSteps+' 格</p></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>累计 '+s.points.toLocaleString('zh-CN')+'</small></div><div class="instance-result-detail"><span>生还状态</span><b>'+(result.survived?'已生还':'濒死重创')+'</b><span>本次圈数</span><b>3 圈</b></div><button class="instance-primary" id="instanceAgain">返回组队</button>';
  $('instanceAgain').onclick=showDungeon;
 }
 function showEntertainment(){ $('drawerTitle').textContent='娱乐';$('choices').className='choices infinite-view';$('choices').innerHTML='<div class="illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 300 100"><path d="M15 82 Q60 10 108 72 T205 38 T285 65" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="90" cy="38" r="20" fill="none" stroke="currentColor"/><path d="M80 38h20M90 28v20" stroke="currentColor"/></svg></div><h2>娱乐</h2></div><div class="illustrated-choice-grid"><button class="instance-strategy" onclick="toast(\'即将开放\')">🎴<strong>牌局</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">🎮<strong>街机</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">♟<strong>棋室</strong></button></div>';$('drawer').classList.add('open');}
