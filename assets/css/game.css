@@ -1170,3 +1170,63 @@ html body .stage .drawer.profile-expanded.open .choices{
 .recruitment-current .recruitment-kicker{color:#8b947f}
 .recruitment-footnote{padding:9px 2px 0;color:#9a8e7c;font:10px/1.8 "Noto Serif SC",serif}
 @media(min-width:600px){.drawer .choices.recruitment-view{padding-left:22px!important;padding-right:22px!important}.recruitment-masthead{margin-left:-22px;margin-right:-22px;padding:29px 30px 22px}.recruitment-card{padding:18px 18px 15px}}
+
+
+/* Infinite progression, ranking and points exchange */
+.drawer .choices.infinite-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;padding:0 14px 26px!important;overflow-y:auto!important;background:#e9e3d8!important;color:#303a42!important}
+.infinite-masthead{margin:0 -14px 8px;padding:23px 20px 19px;background:linear-gradient(145deg,#273644,#394957 70%,#4a514e);color:#eee7d9}
+.infinite-kicker{font:700 8px Arial,sans-serif;letter-spacing:.2em;color:#c4b89f}
+.infinite-masthead h2,.instance-brief h2{margin:9px 0 6px;font:600 26px Georgia,"Noto Serif SC",serif;letter-spacing:.08em}
+.infinite-masthead p,.instance-brief p{margin:0;color:#d0c9bd;font:11px/1.7 "Noto Serif SC",serif}
+.infinite-balance{display:flex;align-items:baseline;justify-content:space-between;margin-top:17px;padding-top:12px;border-top:1px solid #e5dcc544}
+.infinite-balance span{font:10px "Noto Serif SC",serif;color:#c9c0b1}
+.infinite-balance b{font:italic 26px Georgia,serif;color:#f0e6d2}
+.infinite-section-title{display:flex;justify-content:space-between;align-items:baseline;margin:8px 1px 2px;padding-bottom:8px;border-bottom:1px solid #c6bdad;color:#4b514e;font:600 15px Georgia,"Noto Serif SC",serif}
+.infinite-section-title small{font:700 8px Arial,sans-serif;letter-spacing:.15em;color:#a19683}
+.instance-tier{display:flex;align-items:center;gap:13px;width:100%;min-height:66px;padding:10px 12px;border:1px solid #d0c6b5;background:#f4efe5;text-align:left;color:#34404a}
+.instance-tier.unlocked{border-left:3px solid #73877d}
+.instance-tier.locked{opacity:.56;background:#e3ded4}
+.instance-tier-code{display:grid;place-items:center;width:39px;height:39px;border:1px solid #9f9a8d;color:#53636b;font:italic 20px Georgia,serif}
+.instance-tier-copy{display:flex;flex:1;flex-direction:column;gap:5px}
+.instance-tier-copy strong{font:600 14px Georgia,"Noto Serif SC",serif}
+.instance-tier-copy small{font:10px "Noto Serif SC",serif;color:#8d8578}
+.instance-tier-mark{font:700 8px Arial,sans-serif;letter-spacing:.08em;color:#8a806e}
+.infinite-note{margin:4px 1px 0;color:#918878;font:10px/1.8 "Noto Serif SC",serif}
+.instance-brief{margin:0 -14px 8px;padding:22px 20px;background:#344451;color:#eee7d9}
+.instance-cost{margin-top:15px;padding-top:10px;border-top:1px solid #ffffff30;color:#cfc6b5;font:10px "Noto Serif SC",serif}
+.instance-cost b{margin-left:8px;color:#f2e6ce;font:italic 19px Georgia,serif}
+.instance-strategy{display:flex;flex-direction:column;gap:6px;padding:14px 13px;border:1px solid #d3c8b6;background:#f5f0e6;text-align:left;color:#3d484d}
+.instance-strategy strong{font:600 15px Georgia,"Noto Serif SC",serif}
+.instance-strategy small{color:#8c8375;font:10px/1.6 "Noto Serif SC",serif}
+.instance-back,.instance-primary{min-height:40px;border:1px solid #687780;background:#3c4d58;color:#f1eadc;font:11px "Noto Serif SC",serif;letter-spacing:.1em}
+.instance-result{margin:0 -14px;padding:25px 20px;text-align:center;background:#344451;color:#eee7d9}
+.instance-result.failed{background:#51413f}
+.instance-result-status{margin-top:15px;font:700 10px Arial,sans-serif;letter-spacing:.22em}
+.instance-rating{margin:6px 0;font:italic 58px Georgia,serif;color:#e4d4b5}
+.instance-result p{margin:0;color:#d0c7b8;font:10px "Noto Serif SC",serif}
+.instance-reward{display:flex;flex-direction:column;align-items:center;gap:5px;padding:18px;border:1px solid #d1c5b2;background:#f5f0e6}
+.instance-reward span{font:10px "Noto Serif SC",serif;color:#938673}
+.instance-reward strong{font:italic 32px Georgia,serif;color:#8c7658}
+.instance-reward small{font:10px "Noto Serif SC",serif;color:#8b8377}
+.instance-result-detail{display:grid;grid-template-columns:1fr auto;gap:9px;padding:12px;color:#77766e;font:10px "Noto Serif SC",serif}
+.instance-result-detail b{color:#47535a}
+.instance-unlock{padding:11px;border:1px solid #a9b5a3;background:#e0e7db;color:#4e6653;font:11px "Noto Serif SC",serif;text-align:center}
+.ranking-self{display:flex;align-items:center;gap:14px;padding:15px;border:1px solid #d1c7b8;background:#f5f0e6}
+.ranking-rank{min-width:52px;text-align:center;color:#95866d;font:700 8px Arial,sans-serif;letter-spacing:.1em}
+.ranking-rank strong{font:italic 25px Georgia,serif}
+.ranking-self h3{margin:4px 0;color:#38434a;font:600 16px Georgia,serif}
+.ranking-self p{margin:0;color:#8b8274;font:10px "Noto Serif SC",serif}
+.ranking-self small{color:#a0927e;font:9px Arial,sans-serif;letter-spacing:.12em}
+.ranking-row{display:grid;grid-template-columns:28px 1fr auto auto;gap:8px;align-items:center;padding:12px 8px;border-bottom:1px solid #d6ccbd;color:#596169;font:10px "Noto Serif SC",serif}
+.ranking-row-index{color:#a0917b;font:italic 13px Georgia,serif}
+.ranking-row strong{color:#927b5d;font:italic 15px Georgia,serif}
+.exchange-rate{display:block;margin-top:9px;color:#c6bdaE;font:9px "Noto Serif SC",serif}
+.exchange-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid #d1c7b8;background:#f5f0e6}
+.exchange-item h3{margin:5px 0;color:#3d474d;font:600 15px Georgia,"Noto Serif SC",serif}
+.exchange-item p{margin:0;color:#8b8275;font:10px/1.6 "Noto Serif SC",serif}
+.exchange-item-kicker{font:700 7px Arial,sans-serif;letter-spacing:.16em;color:#a0927e}
+.exchange-item button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:78px;min-height:48px;border:1px solid #718078;background:#43554e;color:#f0e9db}
+.exchange-item button b{font:italic 18px Georgia,serif}
+.exchange-item button small{font:9px "Noto Serif SC",serif}
+.exchange-item button:disabled{opacity:.4}
+@media(min-width:600px){.drawer .choices.infinite-view{padding-left:22px!important;padding-right:22px!important}.infinite-masthead,.instance-brief,.instance-result{margin-left:-22px;margin-right:-22px;padding-left:28px;padding-right:28px}}
