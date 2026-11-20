@@ -1391,84 +1391,19 @@ html body .stage .drawer.profile-expanded.open .choices{
 .dossier-attributes{margin:14px 0;padding:14px;background:#e9e1d3;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}.dossier-attributes header{display:flex;justify-content:space-between;margin-bottom:13px;color:#8b7e68}.dossier-attributes header span{font:7px Georgia,serif;letter-spacing:.15em}.dossier-attributes header b{font:11px "Noto Serif SC",serif;color:#48594e}
 .dossier-attribute{display:grid;grid-template-columns:42px 1fr 26px;gap:9px;align-items:center;margin:9px 0;color:#596257;font:10px "Noto Serif SC",serif}.dossier-attribute>i{height:5px;background:#d2c8b6;overflow:hidden}.dossier-attribute>i>b{display:block;height:100%;background:linear-gradient(90deg,#6b8272,#b69b6f)}.dossier-attribute strong{text-align:right;font:10px Georgia,serif;color:#8c7757}
 
-/* Guild ranking, recruitment power emphasis, and lifetime dungeon dossier */
-.guild-rank-mark{display:flex;align-items:center;justify-content:space-between;width:100%;padding:5px 8px;margin:0 0 4px;background:linear-gradient(100deg,#e1d4b8,#f1e8d7 65%,#d2c2a4);border-left:3px solid #94794f;color:#64553d}.guild-rank-mark small{font:7px Georgia,serif;letter-spacing:.16em}.guild-rank-mark b{font:italic 20px Georgia,serif;color:#715a37}
-.candidate-copy>small:first-child{display:block;width:100%;margin:2px 0 5px;padding:4px 0 7px;border-bottom:1px solid #c9b99e;color:#9a7950;font:8px Georgia,serif;letter-spacing:.16em}.candidate-copy>small:first-child:after{content:"";display:block}
-.candidate-copy>small:first-child{font-size:0}.candidate-copy>small:first-child::first-line{font-size:8px}
-.candidate-copy>small:first-child{position:relative;min-height:44px;padding-top:2px;font-size:0}
-.candidate-copy>small:first-child{color:transparent}
-.candidate-copy>small:first-child:before{content:"COMBAT POWER";display:block;color:#8e7958;font:8px Georgia,serif;letter-spacing:.16em}
-.candidate-copy>small:first-child{line-height:1}
-.candidate-copy>small:first-child:after{content:attr(data-power);display:block}
-.candidate-card .candidate-copy>small:first-child{font-size:0}
-.candidate-card .candidate-copy>small:first-child{height:48px}
-.candidate-card .candidate-copy>small:first-child{background:linear-gradient(90deg,#e6dece,#d8cbb6);border-radius:3px;padding:5px 7px}
-.candidate-card .candidate-copy>small:first-child{color:#9a7950}
-.candidate-card .candidate-copy>small:first-child::after{content:"";display:none}
-.candidate-card .candidate-copy>small:first-child{font-size:0}
-.candidate-card .candidate-copy>small:first-child:before{content:"战斗力";display:block;color:#8e7958;font:9px "Noto Serif SC",serif}
-.candidate-card .candidate-copy>small:first-child{min-height:54px}
-.candidate-card .candidate-copy>small:first-child{position:relative}
-.candidate-card .candidate-copy>small:first-child{padding-right:7px}
-.candidate-card .candidate-copy>small:first-child{white-space:nowrap}
-.candidate-card .candidate-copy>small:first-child:after{content:"";display:none}
-.candidate-card .candidate-copy>small:first-child{font-size:0}
-.candidate-card .candidate-copy>small:first-child:before{content:"战斗力";font-size:9px}
-.candidate-card .candidate-copy>small:first-child{border-bottom:1px solid #bda987}
-.candidate-card .candidate-copy>small:first-child{display:flex;align-items:flex-start}
-.candidate-card .candidate-copy>small:first-child{overflow:visible}
-.candidate-card .candidate-copy>small:first-child{line-height:1.2}
-.candidate-card .candidate-copy>small:first-child{color:#8e7958}
-.candidate-card .candidate-copy>small:first-child{font-family:"Noto Serif SC",serif}
-.candidate-card .candidate-copy>small:first-child{letter-spacing:0}
-.candidate-card .candidate-copy>small:first-child{font-weight:500}
-.candidate-card .candidate-copy>small:first-child{margin-bottom:7px}
-.candidate-card .candidate-copy>small:first-child{padding-bottom:5px}
-.candidate-card .candidate-copy>small:first-child{background:transparent}
-.candidate-card .candidate-copy>small:first-child{height:auto}
-.candidate-card .candidate-copy>small:first-child{min-height:0}
-.candidate-card .candidate-copy>small:first-child{width:auto}
-.candidate-card .candidate-copy>small:first-child{border-radius:0}
-.candidate-card .candidate-copy>small:first-child{border-left:0}
-.candidate-card .candidate-copy>small:first-child{box-shadow:none}
-.candidate-card .candidate-copy>small:first-child{display:block}
-.candidate-card .candidate-copy>small:first-child:before{content:"战斗力";display:inline-block;margin-right:5px}
-.candidate-card .candidate-copy>small:first-child{font-size:0}
-.candidate-card .candidate-copy>small:first-child:after{content:"";display:none}
-.candidate-card .candidate-copy>small:first-child{color:#8e7958}
-.candidate-card .candidate-copy>small:first-child{font-size:0}
-.candidate-card .candidate-copy>small:first-child{min-height:0}
-.candidate-card .candidate-copy>small:first-child{padding:0 0 6px}
-.candidate-card .candidate-copy>small:first-child{border-bottom:1px solid #c9b99e}
-.candidate-card .candidate-copy>small:first-child{background:none}
-.candidate-card .candidate-copy>small:first-child{letter-spacing:0}
-.candidate-card .candidate-copy>small:first-child{font-weight:400}
-.candidate-card .candidate-copy>small:first-child{margin:0 0 7px}
-.candidate-card .candidate-copy>small:first-child{position:static}
-.candidate-card .candidate-copy>small:first-child:before{content:"战斗力";font-size:9px}
-.candidate-card .candidate-copy>small:first-child{display:block}
-.candidate-card .candidate-copy>small:first-child{line-height:1.3}
-.candidate-card .candidate-copy>small:first-child{white-space:normal}
-.candidate-card .candidate-copy>small:first-child{height:auto}
-.candidate-card .candidate-copy>small:first-child{width:100%}
-.candidate-card .candidate-copy>small:first-child{min-height:0}
-.candidate-card .candidate-copy>small:first-child{padding:0 0 7px}
-.candidate-card .candidate-copy>small:first-child{border:0}
-.candidate-card .candidate-copy>small:first-child{font-size:9px}
-.candidate-card .candidate-copy>small:first-child{color:#8e7958}
-.candidate-card .candidate-copy>small:first-child{font:9px "Noto Serif SC",serif}
-.candidate-card .candidate-copy>small:first-child{display:flex;align-items:center;gap:7px}
-.candidate-card .candidate-copy>small:first-child{border-bottom:1px solid #c9b99e}
-.candidate-card .candidate-copy>small:first-child{padding-bottom:5px}
-.candidate-card .candidate-copy>small:first-child{margin-bottom:7px}
-.candidate-card .candidate-copy>small:first-child{white-space:nowrap}
-.candidate-card .candidate-copy>small:first-child{overflow:hidden}
-.candidate-card .candidate-copy>small:first-child{font-size:0}
-.candidate-card .candidate-copy>small:first-child:before{content:"战斗力";font:9px "Noto Serif SC",serif}
-.candidate-card .candidate-copy>small:first-child:after{content:attr(data-value);font:700 25px Georgia,serif;color:#45594d;letter-spacing:-.04em}
-.dossier-dungeon-records{margin:14px 0 24px;padding:14px;background:#e9e1d3;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}.dossier-dungeon-records>header{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:12px;color:#8b7e68}.dossier-dungeon-records>header span{font:7px Georgia,serif;letter-spacing:.15em}.dossier-dungeon-records>header b{font:11px "Noto Serif SC",serif;color:#48594e}.dossier-dungeon-records>header small{margin-left:auto;font:9px Georgia,serif}
-.dossier-tier-list{display:flex;flex-direction:column;gap:6px}.dossier-tier-record{display:grid;grid-template-columns:35px minmax(0,1fr) auto;align-items:center;gap:9px;padding:8px 5px;border-bottom:1px solid #d4c8b5}.dossier-tier-code{font:italic 19px Georgia,serif;color:#6d806e}.dossier-tier-main{min-width:0}.dossier-tier-numbers{display:flex;align-items:baseline;gap:5px;color:#5d675c}.dossier-tier-numbers>b{font:19px Georgia,serif;color:#45594d}.dossier-tier-numbers small,.dossier-tier-numbers span{font:8px "Noto Serif SC",serif}.dossier-tier-ratings{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.dungeon-rating-chip{padding:2px 5px;border:1px solid #c4b69e;border-radius:2px;color:#766447;font:8px Georgia,serif}.dungeon-rating-chip b{font-weight:600}.dungeon-result-mark{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;margin-left:3px;border:1px solid #a48c65;border-radius:50%;font:italic 10px Georgia,serif;color:#766447}.dungeon-result-mark.is-fail{border-color:#a66e64;color:#a66e64}.no-rating{font:8px "Noto Serif SC",serif;color:#a99c88}.dossier-tier-recent{white-space:nowrap}
-.leader-list-caption{padding:7px 2px;color:#88785d;font:8px Georgia,serif;letter-spacing:.16em}.leader-row.elite-ranker{background:linear-gradient(90deg,#e8dfce,#e0d4bd);border-left:2px solid #a28a61}.leader-row.elite-ranker .leader-row-number{color:#98794d}
-.elite-encounter-result{display:flex;flex-direction:column;gap:5px;margin:12px 0;padding:13px 16px;border:1px solid #b69a70;background:linear-gradient(120deg,#e9dfcc,#d7d0bd);color:#46564d}.elite-encounter-result small{font:8px Georgia,serif;letter-spacing:.15em}.elite-encounter-result b{font:20px "Noto Serif SC",serif}.elite-encounter-result span{font:10px "Noto Serif SC",serif}.elite-encounter-result.is-hostile{border-color:#a66c62;background:linear-gradient(120deg,#e7d8d0,#d8c8c2)}
 
-.candidate-power{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin:1px 0 7px;padding:4px 0 7px;border-bottom:1px solid #c9b99e;color:#8e7958}.candidate-power small{font:8px Georgia,serif;letter-spacing:.14em}.candidate-power b{font:700 34px/.95 Georgia,serif;letter-spacing:-.055em;color:#40584b;text-shadow:0 1px 0 #fff7e8}
+/* Guild ranking, recruitment power emphasis, and lifetime dungeon dossier */
+.guild-rank-mark{display:flex;align-items:center;justify-content:space-between;width:100%;padding:5px 8px;margin:0 0 4px;background:linear-gradient(100deg,#e1d4b8,#f1e8d7 65%,#d2c2a4);border-left:3px solid #94794f;color:#64553d}
+.guild-rank-mark small{font:7px Georgia,serif;letter-spacing:.16em}.guild-rank-mark b{font:italic 20px Georgia,serif;color:#715a37}
+.candidate-power{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin:1px 0 7px;padding:4px 0 7px;border-bottom:1px solid #c9b99e;color:#8e7958}
+.candidate-power small{font:8px Georgia,serif;letter-spacing:.14em}.candidate-power b{font:700 34px/.95 Georgia,serif;letter-spacing:-.055em;color:#40584b;text-shadow:0 1px 0 #fff7e8}
+.dossier-dungeon-records{margin:14px 0 24px;padding:14px;background:#e9e1d3;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}
+.dossier-dungeon-records>header{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:12px;color:#8b7e68}.dossier-dungeon-records>header span{font:7px Georgia,serif;letter-spacing:.15em}.dossier-dungeon-records>header b{font:11px "Noto Serif SC",serif;color:#48594e}.dossier-dungeon-records>header small{margin-left:auto;font:9px Georgia,serif}
+.dossier-tier-list{display:flex;flex-direction:column;gap:6px}.dossier-tier-record{display:grid;grid-template-columns:35px minmax(0,1fr) auto;align-items:center;gap:9px;padding:8px 5px;border-bottom:1px solid #d4c8b5}
+.dossier-tier-code{font:italic 19px Georgia,serif;color:#6d806e}.dossier-tier-main{min-width:0}.dossier-tier-numbers{display:flex;align-items:baseline;gap:5px;color:#5d675c}.dossier-tier-numbers>b{font:19px Georgia,serif;color:#45594d}.dossier-tier-numbers small,.dossier-tier-numbers span{font:8px "Noto Serif SC",serif}
+.dossier-tier-ratings{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.dungeon-rating-chip{padding:2px 5px;border:1px solid #c4b69e;border-radius:2px;color:#766447;font:8px Georgia,serif}.dungeon-rating-chip b{font-weight:600}
+.dungeon-result-mark{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;margin-left:3px;border:1px solid #a48c65;border-radius:50%;font:italic 10px Georgia,serif;color:#766447}.dungeon-result-mark.is-fail{border-color:#a66e64;color:#a66e64}.no-rating{font:8px "Noto Serif SC",serif;color:#a99c88}.dossier-tier-recent{white-space:nowrap}
+.leader-list-caption{padding:7px 2px;color:#88785d;font:8px Georgia,serif;letter-spacing:.16em}.leader-row.elite-ranker{background:linear-gradient(90deg,#e8dfce,#e0d4bd);border-left:2px solid #a28a61}.leader-row.elite-ranker .leader-row-number{color:#98794d}
+.elite-encounter-result{display:flex;flex-direction:column;gap:5px;margin:12px 0;padding:13px 16px;border:1px solid #b69a70;background:linear-gradient(120deg,#e9dfcc,#d7d0bd);color:#46564d}
+.elite-encounter-result small{font:8px Georgia,serif;letter-spacing:.15em}.elite-encounter-result b{font:20px "Noto Serif SC",serif}.elite-encounter-result span{font:10px "Noto Serif SC",serif}
+.elite-encounter-result.is-hostile{border-color:#a66c62;background:linear-gradient(120deg,#e7d8d0,#d8c8c2)}
