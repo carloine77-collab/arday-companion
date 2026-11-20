@@ -17,6 +17,7 @@ function dungeonDiceFinalTransform(value){return {1:'rotateX(0deg) rotateY(0deg)
 function dungeonBoardPosition(i){if(i<10)return {r:1,c:i+1};if(i<18)return {r:i-8,c:10};if(i<28)return {r:10,c:28-i};return {r:37-i,c:1}}
 function dungeonPlayerTokenMarkup(){return '<i class="dungeon-player-token" aria-label="玩家位置"><i class="token-head"></i><i class="token-body"></i><i class="token-leg token-leg-a"></i><i class="token-leg token-leg-b"></i></i>'}
 function renderDungeonBoard(){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission)return;const board=mission.board||(mission.board={steps:0,position:0,chanceModifier:0});
  if(board.version!==2){const oldSteps=Math.max(0,Number(board.steps)||0);board.steps=Math.min(108,oldSteps*3);board.version=2;board.position=board.steps?((board.steps-1)%36):0;board.isRolling=false}
  $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view dungeon-board-view';
@@ -28,11 +29,13 @@ function renderDungeonBoard(){
  const button=$('dungeonRoll');if(button)button.onclick=rollDungeonBoard;
 }
 function dungeonMoveTokenTo(position){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const root=$('choices');if(!root||!root.classList.contains('dungeon-board-view'))return;
  root.querySelectorAll('.dungeon-player-token').forEach(token=>token.remove());root.querySelectorAll('.dungeon-board-cell.is-here').forEach(cell=>cell.classList.remove('is-here'));
  const cell=root.querySelector('[data-board-cell="'+position+'"]');if(cell){cell.classList.add('is-here');cell.insertAdjacentHTML('beforeend',dungeonPlayerTokenMarkup())}
 }
 function animateDungeonBoardMove(mission,remaining){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const b=mission.board;if(!b||s.activeDungeon!==mission||!b.isMoving)return;
  if(remaining<=0){
   b.isMoving=false;b.moveTarget=null;const tile=DUNGEON_BOARD_TILES[b.position],base=DUNGEON_EVENT_LIBRARY[tile[0]],event={...base,options:base.options.map(o=>({...o,effects:{...o.effects}}))};
@@ -45,6 +48,7 @@ function animateDungeonBoardMove(mission,remaining){
  setTimeout(()=>animateDungeonBoardMove(mission,remaining-1),125);
 }
 function rollDungeonBoard(){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission||mission.mode!=='board'||mission.board?.pending||mission.board?.result||mission.board?.isRolling||mission.board?.isMoving)return;
  const b=mission.board,roll=1+Math.floor(Math.random()*6);b.isRolling=true;b.lastRoll=roll;
  const button=$('dungeonRoll'),cube=$('choices').querySelector('.dungeon-dice-cube');if(button)button.disabled=true;if(cube){cube.classList.remove('is-rolling');void cube.offsetWidth;cube.classList.add('is-rolling')}
@@ -54,6 +58,7 @@ function rollDungeonBoard(){
 }
 function dungeonEffectLabel(key){return ({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志',energy:'精力',hunger:'饥饿',clean:'整洁',fun:'愉悦'})[key]||key}
 function renderDungeonResult(){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission?.board?.result)return;const r=mission.board.result;$('drawerTitle').textContent='行动结果';$('choices').className='choices infinite-view dungeon-event-view';
  const rows=(r.changes||[]).map(x=>'<div class="dungeon-result-change '+(x.delta>0?'is-up':x.delta<0?'is-down':'')+'"><span>'+dungeonEffectLabel(x.key)+'</span><b>'+(x.delta>0?'+':'')+x.delta+'</b></div>').join('');
  const chance=r.chanceDelta?'<div class="dungeon-result-change '+(r.chanceDelta>0?'is-up':'is-down')+'"><span>通关概率修正</span><b>'+(r.chanceDelta>0?'+':'')+r.chanceDelta+'%</b></div>':'';
@@ -62,13 +67,16 @@ function renderDungeonResult(){
  $('choices').innerHTML='<section class="dungeon-event-modal dungeon-result-modal"><div class="dungeon-result-mark">✓</div><small>行动结果</small><h2>'+r.title+'</h2><p class="dungeon-result-choice">'+r.choice+'</p><div class="dungeon-result-changes">'+rows+chance+item+none+'</div><button class="dungeon-result-continue" id="continueDungeonBoard">返回棋盘</button></section>';
  const button=$('continueDungeonBoard');if(button)button.onclick=continueDungeonBoard;
 }
-function continueDungeonBoard(){const mission=s.activeDungeon;if(!mission?.board?.result)return;const b=mission.board;b.result=null;if(b.steps>=108){mission.scheduleEndAt=Date.now();save();settleDungeonIfDue(Date.now());return}save();renderDungeonBoard()}
+function continueDungeonBoard(){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};const mission=s.activeDungeon;if(!mission?.board?.result)return;const b=mission.board;b.result=null;if(b.steps>=108){mission.scheduleEndAt=Date.now();save();settleDungeonIfDue(Date.now());return}save();renderDungeonBoard()}
 function renderDungeonEvent(){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission?.board?.pending)return;const {event,tile}=mission.board.pending,cell=DUNGEON_BOARD_TILES.find(t=>t[0]===tile);$('drawerTitle').textContent='';$('choices').className='choices infinite-view dungeon-event-view';
  $('choices').innerHTML='<section class="dungeon-event-modal tone-'+tile+'"><div class="dungeon-event-symbol">'+cell[2]+'</div><h2>'+event.title+'</h2><p>'+event.desc+'</p><div class="dungeon-event-choices">'+event.options.map((o,i)=>'<button class="dungeon-event-choice" data-dungeon-choice="'+i+'"><span>'+(i+1)+'</span><b>'+o.label+'</b><i>›</i></button>').join('')+'</div></section>';
  $('choices').querySelectorAll('[data-dungeon-choice]').forEach(button=>button.onclick=()=>resolveDungeonEvent(Number(button.dataset.dungeonChoice)));
 }
 function resolveDungeonEvent(index){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission?.board?.pending)return;const b=mission.board,event=b.pending.event,option=event.options[index];if(!option)return;
  const changes=[];b.statGains=b.statGains||{};Object.entries(option.effects||{}).forEach(([key,value])=>{const target=key in s.attributes?s.attributes:['energy','hunger','clean','fun'].includes(key)?s:null;if(!target)return;const before=Number(target[key])||0;let delta=Number(value)||0;if(delta>0){const used=Number(b.statGains[key])||0;delta=Math.min(delta,Math.max(0,2-used));b.statGains[key]=used+delta}target[key]=clamp(before+delta);const actual=Number(target[key])-before;if(actual)changes.push({key,delta:actual})});
  s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);mission.snapshot.playerPower=s.combat;mission.snapshot.energy=s.energy;mission.snapshot.hunger=s.hunger;mission.snapshot.clean=s.clean;
@@ -76,4 +84,5 @@ function resolveDungeonEvent(index){
  let itemName='';if(option.item&&!b.itemFound&&Math.random()<.18){const item=addDungeonItem(option.item);if(item){itemName=item.name||'特殊道具';b.itemFound=true}}
  b.pending=null;b.result={title:event.title,choice:option.label,changes,chanceDelta,itemName};save();renderDungeonResult();
 }
-function chooseDungeonBoard(){const mission=s.activeDungeon;if(!mission)return;mission.mode='board';mission.boardChoiceMade=true;mission.scheduleEndAt=0;mission.endsAt=0;save();if(mission.board?.pending)renderDungeonEvent();else if(mission.board?.result)renderDungeonResult();else renderDungeonBoard()}
+function chooseDungeonBoard(){
+ const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};const mission=s.activeDungeon;if(!mission)return;mission.mode='board';mission.boardChoiceMade=true;mission.scheduleEndAt=0;mission.endsAt=0;save();if(mission.board?.pending)renderDungeonEvent();else if(mission.board?.result)renderDungeonResult();else renderDungeonBoard()}
