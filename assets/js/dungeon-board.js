@@ -1,4 +1,19 @@
-const DUNGEON_BOARD_TILES=Array.from({length:36},(_,i)=>{const t=[['scene','场景','⌂'],['anomaly','异象','◌'],['clue','调查','⌕'],['crisis','危机','△'],['supply','补给','＋'],['turning','节点','◇']][i%6];return [...t]});
+const DUNGEON_BOARD_TYPES=[
+ ['scene','场景',['⌂','▤','▥','▦','⌂','▤']],
+ ['anomaly','异象',['◌','◉','◍','◌','◉','◍']],
+ ['clue','调查',['⌕','▧','▤','⌕','▧','▤']],
+ ['crisis','危机',['△','╳','⚠','△','╳','⚠']],
+ ['supply','补给',['＋','✚','▣','＋','✚','▣']],
+ ['turning','节点',['◇','✧','◈','◇','✧','◈']]
+];
+const DUNGEON_BOARD_TILES=Array.from({length:36},(_,i)=>{const t=DUNGEON_BOARD_TYPES[i%6],variant=Math.floor(i/6);return [t[0],t[1],t[2][variant],variant]});
+const DUNGEON_STAT_LABELS={energy:'精力',hunger:'食欲',clean:'卫生',fun:'娱乐',agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'};
+const DUNGEON_STAT_KEYS=new Set(Object.keys(DUNGEON_STAT_LABELS));
+const DUNGEON_ROUND_STAGES=[
+ {title:'第一圈 · 规则确认',goal:'目标：确认校园规则，找到安全路线。不要贸然接近异常。',center:'规则'},
+ {title:'第二圈 · 深入调查',goal:'目标：穿过异常区域，寻找线索并判断危险来源。',center:'调查'},
+ {title:'第三圈 · 高危逃生',goal:'目标：异常全面扩散，优先寻找出口并活着离开。',center:'逃生'}
+];
 
 const DUNGEON_EVENT_LIBRARY={
 scene:{title:'封闭的实验楼',desc:'走廊灯光依次亮起，尽头那扇写着旧校区编号的门后传来拖行声。',options:[{label:'推门进入',effects:{perception:1,energy:-1},chance:1},{label:'贴近门缝观察',effects:{intelligence:1,fun:-1},chance:2},{label:'沿墙绕开',effects:{agility:1,clean:-1}}]},
@@ -21,10 +36,10 @@ function renderDungeonBoard(){
  const mission=s.activeDungeon;if(!mission)return;const board=mission.board||(mission.board={steps:0,position:0,chanceModifier:0});
  if(board.version!==2){const oldSteps=Math.max(0,Number(board.steps)||0);board.steps=Math.min(108,oldSteps*3);board.version=2;board.position=board.steps?((board.steps-1)%36):0;board.isRolling=false}
  $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view dungeon-board-view';
- const lap=Math.min(3,Math.floor((board.steps||0)/36)+1),progress=Math.min(100,(board.steps||0)/108*100),current=board.position||0;
- const cells=DUNGEON_BOARD_TILES.map((tile,i)=>{const p=dungeonBoardPosition(i),here=i===current;return '<div class="dungeon-board-cell tone-'+tile[0]+' '+(here?'is-here':'')+'" data-board-cell="'+i+'" style="grid-row:'+p.r+';grid-column:'+p.c+'"><span>'+tile[2]+'</span><b>'+String(i+1).padStart(2,'0')+'</b>'+(here?dungeonPlayerTokenMarkup():'')+'</div>'}).join('');
+ const lap=Math.min(3,Math.floor((board.steps||0)/36)+1),progress=Math.min(100,(board.steps||0)/108*100),current=board.position||0,stage=DUNGEON_ROUND_STAGES[lap-1];
+ const cells=DUNGEON_BOARD_TILES.map((tile,i)=>{const p=dungeonBoardPosition(i),here=i===current,round=Math.floor(i/12)+1;return '<div class="dungeon-board-cell tone-'+tile[0]+' tile-variant-'+tile[3]+' lap-'+round+' '+(here?'is-here':'')+'" data-board-cell="'+i+'" aria-label="'+(i+1)+' '+tile[1]+'" style="grid-row:'+p.r+';grid-column:'+p.c+'"><span>'+tile[2]+'</span><b>'+String(i+1).padStart(2,'0')+'</b>'+(here?dungeonPlayerTokenMarkup():'')+'</div>'}).join('');
  const roll=Number(board.lastRoll)||0;
- $('choices').innerHTML='<section class="dungeon-board-cover"><div class="dungeon-board-title">校园</div><div class="dungeon-board-meta"><span>'+mission.tier+'</span><span>'+lap+' / 3</span><span>'+((board.chanceModifier||0)>=0?'+':'')+(board.chanceModifier||0)+'%</span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><strong>'+lap+'</strong><small> / 3</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display">'+dungeonDiceMarkup(roll||1)+'</div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=108||board.isRolling||board.isMoving?'disabled':'')+'><span>投掷</span></button></section>';
+ $('choices').innerHTML='<section class="dungeon-board-cover"><div class="dungeon-board-title">校园</div><div class="dungeon-round-heading"><strong>'+stage.title+'</strong><p>'+stage.goal+'</p></div><div class="dungeon-board-meta"><span>'+mission.tier+'</span><span>'+lap+' / 3</span><span>通关修正 '+((board.chanceModifier||0)>=0?'+':'')+(board.chanceModifier||0)+'%</span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><small>'+stage.center+'</small><strong>'+lap+'</strong><small> / 3</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display">'+dungeonDiceMarkup(roll||1)+'</div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=108||board.isRolling||board.isMoving?'disabled':'')+'><span>投掷</span></button></section>';
  const cube=$('choices').querySelector('.dungeon-dice-cube');if(cube)cube.style.transform=dungeonDiceFinalTransform(roll||1);
  const button=$('dungeonRoll');if(button)button.onclick=rollDungeonBoard;
 }
@@ -56,7 +71,7 @@ function rollDungeonBoard(){
   const move=Math.min(roll,108-b.steps);if(move<=0){mission.scheduleEndAt=Date.now();save();settleDungeonIfDue(Date.now());return}b.isMoving=true;b.moveTarget=b.steps+move;animateDungeonBoardMove(mission,move);
  },1050);
 }
-function dungeonEffectLabel(key){return ({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志',energy:'精力',hunger:'饥饿',clean:'整洁',fun:'愉悦'})[key]||key}
+function dungeonEffectLabel(key){return DUNGEON_STAT_LABELS[key]||''}
 function renderDungeonResult(){
  const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission?.board?.result)return;const r=mission.board.result;$('drawerTitle').textContent='行动结果';$('choices').className='choices infinite-view dungeon-event-view';
@@ -78,7 +93,7 @@ function renderDungeonEvent(){
 function resolveDungeonEvent(index){
  const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  const mission=s.activeDungeon;if(!mission?.board?.pending)return;const b=mission.board,event=b.pending.event,option=event.options[index];if(!option)return;
- const changes=[];b.statGains=b.statGains||{};Object.entries(option.effects||{}).forEach(([key,value])=>{const target=key in s.attributes?s.attributes:['energy','hunger','clean','fun'].includes(key)?s:null;if(!target)return;const before=Number(target[key])||0;let delta=Number(value)||0;if(delta>0){const used=Number(b.statGains[key])||0;delta=Math.min(delta,Math.max(0,2-used));b.statGains[key]=used+delta}target[key]=clamp(before+delta);const actual=Number(target[key])-before;if(actual)changes.push({key,delta:actual})});
+ const changes=[];b.statGains=b.statGains||{};Object.entries(option.effects||{}).forEach(([key,value])=>{if(!DUNGEON_STAT_KEYS.has(key))return;const target=key in s.attributes?s.attributes:s;const before=Number(target[key])||0;let delta=Number(value)||0;if(delta>0){const used=Number(b.statGains[key])||0;delta=Math.min(delta,Math.max(0,2-used));b.statGains[key]=used+delta}target[key]=clamp(before+delta);const actual=Number(target[key])-before;if(actual)changes.push({key,delta:actual})});
  s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);mission.snapshot.playerPower=s.combat;mission.snapshot.energy=s.energy;mission.snapshot.hunger=s.hunger;mission.snapshot.clean=s.clean;
  let chanceDelta=0;if(option.chance){const before=Number(b.chanceModifier)||0;b.chanceModifier=Math.max(-10,Math.min(10,before+option.chance));chanceDelta=b.chanceModifier-before}
  let itemName='';if(option.item&&!b.itemFound&&Math.random()<.18){const item=addDungeonItem(option.item);if(item){itemName=item.name||'特殊道具';b.itemFound=true}}
