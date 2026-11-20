@@ -231,6 +231,51 @@
     bevel=Math.min(bevel,d*.22,h*.22,w*.22);const g=new T.ExtrudeGeometry(s,{depth:Math.max(.04,d-2*bevel),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:bevel,bevelThickness:bevel,curveSegments:8});
     g.computeVertexNormals();const o=new T.Mesh(g,material);o.position.set(x,y,z-d/2+bevel);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
    };
+   const addSculptedFacade=(x,y,z,w,h,depth,material,bulge=1.2)=>{
+    // A continuous, subtly bowed architectural skin with real surface curvature.
+    const verts=[],uv=[],indices=[],nx=36,ny=10;
+    for(let iy=0;iy<=ny;iy++)for(let ix=0;ix<=nx;ix++){
+     const u=ix/nx,v=iy/ny,xx=(u-.5)*w,yy=(v-.5)*h;
+     const zz=-bulge*(1-4*(u-.5)*(u-.5));
+     verts.push(x+xx,y+yy,z-depth/2+zz);uv.push(u,v);
+    }
+    for(let iy=0;iy<ny;iy++)for(let ix=0;ix<nx;ix++){
+     const a=iy*(nx+1)+ix,b=a+1,d=a+nx+1,e=d+1;
+     indices.push(a,d,b,b,d,e);
+    }
+    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();
+    const m=material.clone();m.side=T.DoubleSide;const skin=new T.Mesh(g,m);skin.castShadow=true;skin.receiveShadow=true;area.add(skin);
+    // Curved perimeter rails and shallow vertical ribs articulate the facade without a box-grid appearance.
+    const curveAt=(u)=>new T.Vector3(x+(u-.5)*w,y,z-depth/2-bulge*(1-4*(u-.5)*(u-.5))-.08);
+    for(const u of [0,.25,.5,.75,1]){
+     const p0=curveAt(u),p1=p0.clone();p0.y=y-h/2;p1.y=y+h/2;
+     const path=new T.CatmullRomCurve3([p0,p1]);
+     const rib=new T.Mesh(new T.TubeGeometry(path,12,.055,6,false),u===.5?warmMetal:silver);area.add(rib);
+    }
+    for(const yy of [-h/2,h/2]){
+     const pts=[];for(let k=0;k<=24;k++){const u=k/24,p=curveAt(u);p.y=y+yy;pts.push(p)}
+     const rail=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),48,.09,7,false),warmMetal);area.add(rail);
+    }
+    return skin;
+   };
+   const addBotanicalTree=(x,z,height=8,foliage=jade,form=0)=>{
+    // Tapered trunk, branching limbs and layered leaf clusters; avoids primitive cone-tree silhouettes.
+    const trunkProfile=[[.08,0],[.22,.18],[.19,.55],[.14,height*.58],[.1,height*.86],[.05,height],[0,height]];
+    addLathedProfile(x,0,z,trunkProfile,warmMetal,12);
+    for(let b=0;b<5;b++){
+     const angle=b*Math.PI*2/5+form*.37,reach=1.25+(b%3)*.34,base=height*(.38+(b%2)*.12);
+     const start=new T.Vector3(x,base,z);
+     const end=new T.Vector3(x+Math.cos(angle)*reach,base+1.5+(b%2)*.5,z+Math.sin(angle)*reach);
+     const mid=start.clone().lerp(end,.58);mid.y+=.42;
+     const branch=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([start,mid,end]),10,.075,6,false),warmMetal);area.add(branch);
+     for(let l=0;l<3;l++){
+      const t=.45+l*.23,p=start.clone().lerp(end,t);
+      const leaf=new T.Mesh(new T.SphereGeometry(1,10,7),l%2?foliage:jade);
+      leaf.position.copy(p);leaf.scale.set(.62+(l%2)*.16,.34,.88);leaf.rotation.y=angle+l*.6;leaf.rotation.z=.32+(l%2)*-.64;area.add(leaf);
+     }
+    }
+    const crown=new T.Mesh(new T.SphereGeometry(1,12,9),foliage);crown.position.set(x,height*.91,z);crown.scale.set(1.55,1.0,1.45);area.add(crown);
+   };
    const addLathedProfile=(x,y,z,profile,material,segments=24)=>{
     const pts=profile.map(p=>new T.Vector2(p[0],p[1]));
     const g=new T.LatheGeometry(pts,segments);g.computeVertexNormals();
@@ -324,7 +369,7 @@
    // The front stays open so the district remains visible and connected to the public concourse.
    if(z.id==='exchange'){
     // Exchange hall: a deep banking concourse with a vaulted service frontage and seven teller bays.
-    addBox(0,13,-43,100,26,2.4,graphite);
+    addSculptedFacade(0,13,-43,100,26,2.4,graphite,1.8);
     addBox(0,25.2,-41.55,94,1.0,.22,warmMetal);
     for(let i=-3;i<=3;i++){
      const x=i*13.1;
@@ -348,7 +393,7 @@
     for(let i=-3;i<=3;i++){addBox(i*13,7,-31,1.4,5,1.2,silver);addBox(i*13,9.8,-31,5,.18,1.5,amber)}
    }else if(z.id==='ranking'){
     // Ranking forum: a monumental stepped display wall, flanked by deep buttresses and public tiers.
-    addBox(0,18,-45,102,36,3.2,graphite);
+    addSculptedFacade(0,18,-45,102,36,3.2,graphite,2.2);
     addBox(0,35,-43.18,94,1.0,.45,silver);
     for(let i=-5;i<=5;i++){
      const x=i*8.4,h=20+(Math.abs(i)%3)*3;
@@ -369,7 +414,7 @@
     for(let i=-4;i<=4;i++)addBox(i*9,3.5,35,1.1,6,1.2,i%2?coral:silver);
    }else if(z.id==='recruitment'){
     // Recruitment pavilion: three private interview suites with glazed partitions and shared circulation.
-    addBox(0,14,-43,100,28,2.2,graphite);
+    addSculptedFacade(0,14,-43,100,28,2.2,graphite,1.8);
     addBox(0,28,-40.9,103,1.5,6,silver);
     for(let bay=-1;bay<=1;bay++){
      const x=bay*32;
@@ -395,7 +440,7 @@
     for(let i=-3;i<=3;i++){const x=i*11;addBox(x,3.2,24,7,.16,7,jade);addBox(x,4.1,21,1.1,2.2,.8,silver)}
    }else if(z.id==='commissions'){
     // Dispatch center: a two-level mission control wall with cantilevered terminal gantries.
-    addBox(0,17,-45,104,34,3.2,graphite);
+    addSculptedFacade(0,17,-45,104,34,3.2,graphite,2.0);
     addBox(0,35,-43.1,108,1.6,4.2,silver);
     for(let i=0;i<5;i++){
      const x=-40+i*20;
@@ -444,7 +489,7 @@
     for(let i=-3;i<=3;i++){const x=i*11;addBox(x,.85,43,9,1.5,4,plum);addBox(x,1.75,43,8,.16,3.8,violet)}
    }else if(z.id==='entertainment'){
     // Simulation pavilion: three large hangar bays with deep portal frames and enclosed equipment shells.
-    addBox(0,14,-44,104,28,2.8,graphite);
+    addSculptedFacade(0,14,-44,104,28,2.8,graphite,2.0);
     for(let bay=-1;bay<=1;bay++){
      const x=bay*34;
      addTrussBay(x,-20,28,bay===0?33:29,violet);
@@ -466,7 +511,7 @@
     for(let i=-2;i<=2;i++){const x=i*16;addBox(x,6,38,8,8,1.2,graphite);addScreen(x,7,38.68,6,5,violet)}
    }else if(z.id==='food'){
     // Food hall: a covered market street with three service fronts and a shared dining room.
-    addBox(0,9,-44,104,18,2.8,graphite);
+    addSculptedFacade(0,9,-44,104,18,2.8,graphite,1.6);
     addBox(0,18.5,-41.8,108,1.3,5.2,warmMetal);
     for(let bay=0;bay<3;bay++){
      const x=(bay-1)*34,stallAccent=bay===0?coral:bay===1?amber:jade;
@@ -531,8 +576,7 @@
     addBox(x,.42,z,w,.84,3.6,graphite);addBox(x,.91,z,w-.35,.16,3.22,ivory);
     const n=Math.max(4,Math.floor(w/2.2));
     for(let k=0;k<n;k++){const px=x+(k-(n-1)/2)*(w-2)/(n-1),pz=z+(k%2?-.55:.55);
-     const stem=new T.Mesh(new T.CylinderGeometry(.06,.1,1.1,6),warmMetal);stem.position.set(px,1.55,pz);area.add(stem);
-     const leaf=new T.Mesh(k%3===0?new T.SphereGeometry(.7,7,5):new T.ConeGeometry(.58,1.6,6),k%2?m:jade);leaf.position.set(px,2.15,pz);leaf.scale.set(1.15,1.2,1);area.add(leaf);
+     addBotanicalTree(px,pz,3.4,k%2?m:jade,k);
     }
    };
    // Layered edge gardens: architectural planter beds with trees, shrubs and low ground cover.
@@ -547,19 +591,7 @@
     for(let n=0;n<count;n++){
      const pz=z+(n-(count-1)/2)*(length-3)/Math.max(1,count-1);
      const px=x+(n%2?-.72:.72);
-     const trunk=new T.Mesh(new T.CylinderGeometry(.16,.26,3.4+(n%2)*.65,7),warmMetal);
-     trunk.position.set(px,2.9,pz);area.add(trunk);
-     if(variant%3===0){
-      const crown=new T.Mesh(new T.SphereGeometry(1.65,9,7),n%2?m:jade);
-      crown.position.set(px,5.0+(n%2)*.4,pz);crown.scale.set(1.0,1.18,1.0);area.add(crown);
-      const crown2=new T.Mesh(new T.SphereGeometry(1.05,8,6),n%2?jade:m);
-      crown2.position.set(px+.85,5.45,pz+.45);area.add(crown2);
-     }else{
-      const crown=new T.Mesh(new T.ConeGeometry(1.55,3.7,7),n%2?m:jade);
-      crown.position.set(px,5.1,pz);crown.scale.z=1.12;area.add(crown);
-      const crown2=new T.Mesh(new T.ConeGeometry(1.05,2.5,7),n%2?jade:m);
-      crown2.position.set(px,6.35,pz);area.add(crown2);
-     }
+     addBotanicalTree(px,pz,6.8+(n%2)*.8,n%2?m:jade,variant+n);
     }
     for(let n=0;n<Math.floor(length/2.4);n++){
      const pz=z-length*.42+n*2.4;
