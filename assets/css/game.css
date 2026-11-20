@@ -1148,4 +1148,4 @@ html body .stage .drawer.profile-expanded.open .choices{
 
 /* Public hall is a continuous 3D exploration scene; the room label belongs only to interiors. */
 .stage.hall-mode .room-label{display:none!important}
-.stage.hall-mode .three-scene{cursor:crosshair}
+.stage.hall-mode{background:#091522;border-color:#263c4d}.stage.hall-mode .three-scene{cursor:crosshair;background:#091522}.stage.hall-mode .camera-controls button{background:#172b3b;color:#d7edf3;border-color:#476171}.stage.hall-mode .camera-controls button.active{background:#b8dbe2;color:#142734}
