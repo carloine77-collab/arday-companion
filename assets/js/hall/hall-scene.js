@@ -181,7 +181,7 @@
    area.position.set(z.x,0,z.z);area.scale.set(1.2,1,1.2);
    // Each district turns its main frontage toward the central arrival concourse.
    // Local -Z is the frontage axis; the rotation therefore differs by district location.
-   const hallCenter={x:-25.18,z:0};
+   const hallCenter={x:-20,z:0};
    area.rotation.y=Math.atan2(-(hallCenter.x-z.x),-(hallCenter.z-z.z));
    area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
    polygon(area,z.shape,.012,index%2?floorMat:floorDark);
@@ -426,15 +426,12 @@
    }
    zoneObjects.push(area);
   });
-  // Large, irregular avenues connect neighborhoods; the routes cross and branch rather than radiate from a central circle.
-  [[-118,-48,-55,-125],[-55,-125,65,-126],[65,-126,145,-32],[145,-32,130,92],[130,92,5,137],[5,137,-112,105],[-112,105,-118,-48],[-55,-125,5,137],[65,-126,130,92],[-118,-48,130,92]].forEach((p,i)=>strip(p[0],p[1],p[2],p[3],i%3===0?27:20,floorDark));
-  [[-118,-48,-55,-125],[-55,-125,65,-126],[65,-126,145,-32],[145,-32,130,92],[130,92,5,137],[5,137,-112,105],[-112,105,-118,-48]].forEach(p=>strip(p[0],p[1],p[2],p[3],.55,cyan));
   // Arrival portal is placed inside the immense hall, facing into the open central concourse.
-  const portal=new T.Group();portal.position.set(-20,0,0);portal.rotation.y=-Math.PI/2;portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
+  const portal=new T.Group();portal.position.set(-20,0,0);portal.rotation.y=Math.PI/2;portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
   box(portal,0,3.1,0,5.4,6.2,.8,graphite);box(portal,0,3.1,.45,4.4,5.3,.08,glass);
   for(const x of [-2.45,2.45])box(portal,x,3.1,.53,.1,5.8,.08,cyan);
   const gateText=new T.Mesh(new T.PlaneGeometry(3.7,.62),new T.MeshBasicMaterial({map:labelTexture('返回居所','RESIDENTIAL GATE'),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));gateText.position.set(0,6.65,.55);portal.add(gateText);
-  return {group:root,zones,zoneObjects,ground:floor,center:{x:-25.18,z:0},spawn:{x:-9.8,z:0},radius:310};
+  return {group:root,zones,zoneObjects,ground:floor,center:{x:-25.18,z:0},spawn:{x:-9.8,z:0},radius:285};
  }
  global.ArdayHallScene={create};
 })(window);
