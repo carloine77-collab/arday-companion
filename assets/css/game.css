@@ -1684,3 +1684,31 @@ html body .stage .drawer.profile-expanded.open .choices{
 .stat-group-title{display:flex;align-items:center;gap:7px}
 .stat-group-title .status-tags{display:inline-flex;flex:0 1 auto;align-items:center;min-height:0;gap:4px;padding:0;vertical-align:middle}
 .stat-group-title .status-tag{padding:2px 6px;font-size:9px;line-height:1.2;white-space:nowrap}
+
+.dungeon-event-view{display:flex!important;align-items:center;justify-content:center;min-height:100%;padding:18px 12px!important;box-sizing:border-box}
+.dungeon-event-modal{width:min(520px,100%);max-height:82vh;overflow:auto;margin:auto;padding:24px 22px 18px;border:1px solid #bdb39f;border-radius:13px;background:linear-gradient(155deg,#f3f0e7,#e4e0d4);box-shadow:0 18px 55px #17221d45;color:#46544d}
+.dungeon-event-modal.tone-scene,.dungeon-event-modal.tone-anomaly,.dungeon-event-modal.tone-clue,.dungeon-event-modal.tone-crisis,.dungeon-event-modal.tone-supply,.dungeon-event-modal.tone-turning{background:linear-gradient(150deg,#263b3e,#53645c);color:#eee7d8}
+.dungeon-event-modal .dungeon-event-symbol{margin:0 0 12px;font-size:36px;color:#e0cda6}
+.dungeon-event-modal h2{margin:0 0 10px;font:600 21px "Noto Serif SC",serif;letter-spacing:.06em;color:inherit}
+.dungeon-event-modal>p{margin:0 0 17px;font:13px/1.8 "Noto Serif SC",serif;color:inherit;opacity:.88}
+.dungeon-event-modal .dungeon-event-choices{padding:0;border:0;background:transparent;display:flex;flex-direction:column;gap:4px}
+.dungeon-event-modal .dungeon-event-choice{min-height:46px;border-top:1px solid #d7d0c2;color:inherit}
+.dungeon-event-modal .dungeon-event-choice b{font-size:13px}
+.dungeon-player-token{position:absolute;z-index:4;left:50%;top:50%;width:17px;height:25px;display:block;transform:translate(-50%,-35%);filter:drop-shadow(0 2px 2px #15211e66);pointer-events:none;animation:dungeon-token-arrive .22s ease-out}
+.dungeon-player-token .token-head{position:absolute;left:6px;top:0;width:7px;height:7px;border:1px solid #f8e6bd;border-radius:50%;background:#344d46}
+.dungeon-player-token .token-body{position:absolute;left:4px;top:8px;width:11px;height:10px;border:1px solid #f8e6bd;border-radius:5px 5px 3px 3px;background:linear-gradient(90deg,#405e55,#263f3a)}
+.dungeon-player-token .token-leg{position:absolute;top:17px;width:4px;height:7px;border-radius:2px;background:#263d38}
+.dungeon-player-token .token-leg-a{left:4px;transform:rotate(8deg)}.dungeon-player-token .token-leg-b{right:3px;transform:rotate(-8deg)}
+@keyframes dungeon-token-arrive{from{opacity:.4;transform:translate(-50%,-75%) scale(.8)}to{opacity:1;transform:translate(-50%,-35%) scale(1)}}
+.dungeon-result-modal{background:linear-gradient(155deg,#f3f0e7,#e4e0d4);color:#46544d}
+.dungeon-result-modal>small{display:block;color:#8e806a;font:700 9px Arial,sans-serif;letter-spacing:.18em}
+.dungeon-result-mark{width:34px;height:34px;margin:0 auto 10px;border:1px solid #8a9a84;border-radius:50%;display:grid;place-items:center;color:#58745e;font-size:20px}
+.dungeon-result-modal h2{margin:9px 0 6px;text-align:center;color:#46544d}
+.dungeon-result-choice{text-align:center;color:#8a7656!important}
+.dungeon-result-changes{display:flex;flex-direction:column;gap:6px;margin:15px 0}
+.dungeon-result-change{display:flex;justify-content:space-between;padding:8px 11px;border-radius:6px;background:#fff9ed;color:#56635a;font-size:12px}
+.dungeon-result-change b{font-size:13px}.dungeon-result-change.is-up b{color:#39734d}.dungeon-result-change.is-down b{color:#a34d45}
+.dungeon-result-item{padding:9px 11px;border:1px solid #b5a174;border-radius:6px;color:#80643c;font-size:12px}
+.dungeon-result-note{font-size:12px;color:#857d6e;text-align:center}
+.dungeon-result-continue{width:100%;min-height:43px;border:0;border-radius:6px;background:#435c51;color:#f3ead8;font:600 13px "Noto Serif SC",serif}
+@media(max-width:480px){.dungeon-event-view{padding:12px!important}.dungeon-event-modal{width:100%;max-height:78vh;padding:20px 17px 15px}.dungeon-event-modal h2{font-size:19px}.dungeon-event-modal>p{font-size:12px}}
