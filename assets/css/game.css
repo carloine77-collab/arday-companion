@@ -983,17 +983,8 @@ html body .stage .drawer.profile-expanded.open .choices{
  box-sizing:border-box!important;overflow-x:hidden!important;
 }
 
-/* Always-visible camera navigation controls, separated from the room label and furniture editor. */
-.camera-controls{position:absolute;left:12px;bottom:12px;z-index:92;display:flex;gap:5px;padding:4px;border:1px solid #d8c4a7;border-radius:13px;background:#fff9efed;box-shadow:0 3px 12px #49351f20;pointer-events:auto;}
-.camera-controls button{min-width:62px;min-height:42px;padding:0 12px;border:1px solid transparent;border-radius:9px;background:transparent;color:#675640;font-size:12px;font-weight:700;touch-action:manipulation;}
-.camera-controls button.active{background:#6f5945;color:#fff8ed;box-shadow:0 2px 5px #49351f25;}
-.stage.calendar-mode .camera-controls,.stage:has(.drawer.open) .camera-controls{display:none!important}
-@media(max-width:700px){.camera-controls{left:7px;bottom:7px;gap:4px;padding:3px}.camera-controls button{min-width:66px;min-height:44px;font-size:12px}}
-
-/* Keep the room label clear of the bottom-left camera controls. */
-.stage #roomLabel{left:12px!important;top:12px!important;bottom:auto!important;}
-@media(max-width:700px){.stage #roomLabel{left:7px!important;top:7px!important;}}
-
+/* Camera gesture zones are implicit: left half rotates, right half pans. */
+.stage .three-scene{touch-action:none;}
 /* Compact contextual furniture actions: keep the room visible and the menu close to the scene. */
 .drawer.furniture-drawer{left:auto;right:12px;bottom:12px;width:min( min(92%,360px),calc(100% - 24px));max-height:min(38%,220px);padding:10px 12px;border-radius:15px;transform:translateY(12px);overflow:auto}
 .drawer.furniture-drawer.open{transform:translateY(0)}
