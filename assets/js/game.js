@@ -3865,7 +3865,7 @@ function persistFurniture(item){
   let selectedFurniture=null,furnitureDrag=null,characterTap=null,hallTap=null;
   const floorPlane=new T.Plane(new T.Vector3(0,1,0),0),dragPoint=new T.Vector3(),dragOffset=new T.Vector3();
   const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2(),gestureRight=new T.Vector3(),gestureForward=new T.Vector3();
-  const hallInteractionTargets=hall.children.filter(object=>object.userData?.hallFloor||object.userData?.hallAction);
+  const hallInteractionTargets=hall.children.filter(object=>object.userData?.hallFloor||object.userData?.hallAction||object.userData?.roomTarget),hallRaycastTargets=[...hallInteractionTargets,person];
   // Camera gestures are handled by the stage, not the canvas. The canvas itself
   // is click-through so it can never steal taps from the footer or room controls.
   const canvas=renderer.domElement,gestureSurface=stage;
@@ -3879,7 +3879,7 @@ function persistFurniture(item){
    raycaster.setFromCamera(pointerNdc,camera);
    const activeRoom=roomMode==='hall'?hall:roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living;
    // Arday is attached to the scene root, not to any room group. Include the character explicitly so its meshes can receive tap hits in every room.
-   const hits=raycaster.intersectObjects(roomMode==='hall'?[...hallInteractionTargets,person]:[...activeRoom.children,person],true);
+   const hits=raycaster.intersectObjects(roomMode==='hall'?hallRaycastTargets:[...activeRoom.children,person],true);
    if(decorating){
     let furniture=null;
     for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.furnitureKey){furniture=node;break}node=node.parent}if(furniture)break}
@@ -4058,7 +4058,7 @@ function persistFurniture(item){
    if(e.target.closest('button,.day-timeline,.calendar-view,.drawer,input,textarea,select'))return;
    targetRadius+=e.deltaY*.012;applyCamera();e.preventDefault();
   },{passive:false});
-  function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
+  function frame(t){const frameInterval=isTouchDevice?(roomMode==='hall'?1000/30:1000/40):1000/60;if(t-lastDraw<frameInterval){arday3D.raf=requestAnimationFrame(frame);return}const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
    if(roomMode==='hall'){
     const dx=target.x-hallScene.center.x,dz=target.z-hallScene.center.z,len=Math.hypot(dx,dz);if(len>hallScene.radius){const k=hallScene.radius/len;target.x=hallScene.center.x+dx*k;target.z=hallScene.center.z+dz*k;}
     const follow=1-Math.exp(-dt*3);cameraTarget.x+=(person.position.x+hallCameraOffset.x-cameraTarget.x)*follow;cameraTarget.z+=(person.position.z+hallCameraOffset.z-cameraTarget.z)*follow;
@@ -4140,7 +4140,7 @@ function persistFurniture(item){
    body.position.y+=(Math.sin(t*.0015)*.026-body.position.y)*.08;
    if(t>lastBlink&&activeActivity!=='sleep'){eyeGroups.forEach(g=>{g.scale.y=.12});setTimeout(()=>{if(activeActivity!=='sleep')eyeGroups.forEach(g=>{g.scale.y=1})},90);lastBlink=t+2400+Math.random()*2600;}
    updateFurnitureHotspots();
-   const renderInterval=isTouchDevice?1000/40:1000/60;if(t-lastDraw>=renderInterval){renderer.render(scene,camera);lastDraw=t}
+   renderer.render(scene,camera);lastDraw=t
    arday3D.raf=requestAnimationFrame(frame)}
   scene.traverse(o=>{if(o.isMesh&&!o.userData.hallIllustration){const mats=Array.isArray(o.material)?o.material:[o.material],opaque=mats.every(m=>m&&!m.transparent&&(m.opacity??1)>=.98);o.castShadow=opaque&&!o.userData.furnitureContactShadow;o.receiveShadow=opaque&&!o.userData.furnitureContactShadow}});
   updateDaylight(true);applyInkOutlines(scene);
