@@ -1145,3 +1145,7 @@ html body .stage .drawer.profile-expanded.open .choices{
 .drawer .choices.events-view>.mailbox-empty h3{margin:0!important;color:#9a8872!important;font:500 15px/1.4 Georgia,'Noto Serif SC',serif!important;letter-spacing:.08em!important;}
 @media(hover:hover){.drawer .choices.events-view>.event-card:hover{transform:translateY(-2px)!important;border-color:#d5c2ad!important;box-shadow:0 4px 8px #59452d0d,0 12px 22px #59452d0c!important;}}
 @media(max-width:390px){.drawer .choices.events-view{padding:12px 11px 20px!important;gap:10px!important}.drawer .choices.events-view>.event-card{min-height:100px!important;padding:12px 13px 12px 15px!important}.drawer .choices.events-view .note-card-title{font-size:14px!important}}
+
+/* Public hall is a continuous 3D exploration scene; the room label belongs only to interiors. */
+.stage.hall-mode .room-label{display:none!important}
+.stage.hall-mode .three-scene{cursor:crosshair}
