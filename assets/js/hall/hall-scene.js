@@ -23,7 +23,7 @@
    new T.MeshPhysicalMaterial({color:0x2e6848,map:leafMap,roughness:.82,metalness:0,sheen:.3,sheenColor:new T.Color(0x4c9362),side:T.DoubleSide})
   ];
   // Static procedural shader breakup adds subtle natural tonal variation without time-based flicker.
-  leafPalette.forEach((m,i)=>{m.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\\n diffuseColor.rgb *= 0.972 + 0.028 * sin(vViewPosition.x * '+(3.1+i*.37).toFixed(2)+' + vViewPosition.y * 2.3);');};m.customProgramCacheKey=()=> 'arday-leaf-natural-'+i;});
+  leafPalette.forEach((m,i)=>{m.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n diffuseColor.rgb *= 0.986 + 0.014 * sin(vUv.x * '+(7.1+i*.37).toFixed(2)+' + vUv.y * 9.3);');};m.customProgramCacheKey=()=> 'arday-leaf-natural-'+i;});
   const soilMat=new T.MeshStandardMaterial({map:soilMap,bumpMap:soilMap,bumpScale:.12,color:0xffffff,roughness:1,metalness:0});
   const leafGeometry=(()=>{const sh=new T.Shape();sh.moveTo(0,0);sh.quadraticCurveTo(.2,.24,.02,.9);sh.quadraticCurveTo(-.2,.24,0,0);const g=new T.ExtrudeGeometry(sh,{depth:.035,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.018,bevelThickness:.012,curveSegments:10});g.computeVertexNormals();return g;})();
 
