@@ -1310,7 +1310,7 @@ function initArday3D(){
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
-  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.66;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.76;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   // A restrained studio equirectangular environment gives metal, glass and polished wood something to reflect.
   const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;
   const environmentContext=environmentCanvas.getContext('2d');
@@ -1332,9 +1332,9 @@ function initArday3D(){
   environmentTexture.generateMipmaps=true;environmentTexture.minFilter=T.LinearMipmapLinearFilter;
   scene.environment=environmentTexture;
   host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
-  const hemi=new T.HemisphereLight(0xe8e3da,0x514b43,.48);scene.add(hemi);
-  const sun=new T.DirectionalLight(0xe8d9c2,.68);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
-  const fill=new T.DirectionalLight(0xb8c2cb,.16);fill.position.set(5,4,-5);scene.add(fill);
+  const hemi=new T.HemisphereLight(0xe8e3da,0x514b43,.58);scene.add(hemi);
+  const sun=new T.DirectionalLight(0xe8d9c2,.92);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
+  const fill=new T.DirectionalLight(0xb8c2cb,.30);fill.position.set(5,4,-5);scene.add(fill);
   const daylightWindows=[],practicalLights=[];let lastDaylightUpdate=0;
   const lampShadow=new T.SpotLight(0xffd8a6,0,5.5,Math.PI/3,.82,1.8);lampShadow.castShadow=false;lampShadow.shadow.mapSize.set(256,256);lampShadow.shadow.camera.near=.12;lampShadow.shadow.camera.far=6;lampShadow.shadow.bias=-.00016;lampShadow.shadow.normalBias=.035;lampShadow.shadow.radius=5;scene.add(lampShadow,lampShadow.target);
   function addWindowSun(root,windowGroup,centerY=2.65){
@@ -1355,12 +1355,12 @@ function initArday3D(){
   function updateDaylight(force=false){
    const now=Date.now();if(!force&&now-lastDaylightUpdate<1000)return;lastDaylightUpdate=now;
    const d=new Date(),h=d.getHours()+d.getMinutes()/60+d.getSeconds()/3600;
-   const keys=[{h:0,c:0x26334c,a:.10,s:0,e:.12},{h:5,c:0x596b8a,a:.14,s:.02,e:.18},{h:7,c:0xe8b58a,a:.32,s:.16,e:.30},{h:10,c:0xffedcf,a:.52,s:.58,e:.48},{h:14,c:0xfff0d9,a:.55,s:.62,e:.52},{h:17,c:0xf2a16f,a:.38,s:.32,e:.38},{h:19,c:0x5b6689,a:.18,s:.05,e:.18},{h:21,c:0x29364f,a:.11,s:0,e:.12},{h:24,c:0x26334c,a:.10,s:0,e:.12}];
+   const keys=[{h:0,c:0x26334c,a:.14,s:0,e:.16},{h:5,c:0x596b8a,a:.20,s:.03,e:.24},{h:7,c:0xe8b58a,a:.42,s:.25,e:.38},{h:10,c:0xffedcf,a:.68,s:.78,e:.58},{h:14,c:0xfff0d9,a:.72,s:.82,e:.62},{h:17,c:0xf2a16f,a:.52,s:.48,e:.48},{h:19,c:0x5b6689,a:.24,s:.07,e:.25},{h:21,c:0x29364f,a:.14,s:0,e:.16},{h:24,c:0x26334c,a:.14,s:0,e:.16}];
    let i=0;while(i<keys.length-1&&h>keys[i+1].h)i++;
    const a=keys[i],b=keys[Math.min(i+1,keys.length-1)],t=Math.max(0,Math.min(1,(h-a.h)/(b.h-a.h))),mix=(x,y)=>x+(y-x)*t,col=new T.Color(a.c).lerp(new T.Color(b.c),t);
    hemi.color.copy(col);hemi.intensity=mix(a.a,b.a);sun.color.copy(col).lerp(new T.Color(0xfff1dc),.42);sun.intensity=mix(a.s,b.s);sun.castShadow=sun.intensity>.08;
    sun.position.set(-Math.cos((h-6)/12*Math.PI)*7,8,Math.sin((h-6)/12*Math.PI)*5+1);sun.target.position.set(0,0,0);sun.target.updateMatrixWorld();
-   fill.color.copy(col).lerp(new T.Color(0xa8c4e2),.48);fill.intensity=mix(a.e,b.e);renderer.toneMappingExposure=mix(.56,.68,Math.min(1,hemi.intensity));scene.background.copy(col).lerp(new T.Color(0xd9d7d1),.58);
+   fill.color.copy(col).lerp(new T.Color(0xa8c4e2),.48);fill.intensity=mix(a.e,b.e);renderer.toneMappingExposure=mix(.70,.78,Math.min(1,hemi.intensity));scene.background.copy(col).lerp(new T.Color(0xd9d7d1),.58);
    const daylight=Math.max(0,Math.min(1,(h-5.8)/1.7,(20-h)/2.2)),night=h>=20||h<5?1:h>=18?(h-18)/2:h<7?(7-h)/2:0;
    daylightWindows.forEach(w=>{const active=w.root===(roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living)&&w.windowGroup.visible!==false,strength=mix(a.s,b.s)*.92*daylight*(active?1:.12),sunDrift=Math.sin((h-8)/12*Math.PI)*1.05;w.spot.intensity=strength;w.spot.target.position.set(sunDrift,.32,3.75);w.spot.target.updateMatrixWorld();w.spot.castShadow=active&&strength>.08;w.beam.position.x=sunDrift*.46;w.beam.material.uniforms.sunStrength.value=daylight*(active?1:.12)*Math.max(.12,mix(a.s,b.s));w.beam.material.uniforms.sunColor.value.copy(col).lerp(new T.Color(0xffdca5),.62)});
    practicalLights.forEach(item=>{item.light.intensity=item.enabled?item.base*(item.light.distance>9?.48+.52*night:.5+.5*night):0;if(item.bulb){item.bulb.material.color.setHex(item.enabled?0xffe4b5:0x786f63);item.bulb.material.emissive?.setHex(item.enabled?0x8d5422:0x000000);item.bulb.material.emissiveIntensity=item.enabled?.55:0}if(item.glow)item.glow.visible=item.enabled});
@@ -1380,15 +1380,15 @@ function initArday3D(){
      `float inkLuminance=dot(outgoingLight,vec3(0.2126,0.7152,0.0722));
       float inkShadow=smoothstep(0.12,0.25,inkLuminance);
       float inkMid=smoothstep(0.38,0.58,inkLuminance);
-      float inkBand=mix(0.66,0.82,inkShadow);
-      inkBand=mix(inkBand,0.89,inkMid);
+      float inkBand=mix(0.88,0.94,inkShadow);
+      inkBand=mix(inkBand,1.0,inkMid);
       outgoingLight*=inkBand;
       float paperGrain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5;
-      float brushStroke=sin(gl_FragCoord.y*1.7+gl_FragCoord.x*.21)*0.003;\n      outgoingLight*=0.985+paperGrain*0.009+brushStroke*.72;
+      float brushStroke=sin(gl_FragCoord.y*1.7+gl_FragCoord.x*.21)*0.003;\n      outgoingLight*=0.995+paperGrain*0.012+brushStroke;
       #include <tonemapping_fragment>`
     );
    };
-   material.customProgramCacheKey=()=> 'arday-soft-light-v6';
+   material.customProgramCacheKey=()=> 'arday-soft-light-v7';
       return material;
   }
   const M=(color,roughness=.82,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,roughness)),metalness:Math.max(0,Math.min(.9,metalness))}));
@@ -1441,13 +1441,14 @@ function initArday3D(){
   function applyPainterMap(material,texture,bump){if(!material)return material;material.map=texture;material.bumpMap=texture;material.bumpScale=bump;material.needsUpdate=true;return material}
   // Warm ink outline pass: inverted-hull shells follow animated meshes and newly placed furniture.
   const inkOutlineMaterial=new T.ShaderMaterial({
-   uniforms:{outlineColor:{value:new T.Color(0x302824)},outlineAlpha:{value:.82},outlineThickness:{value:.0048}},
+   uniforms:{outlineColor:{value:new T.Color(0x49362e)},outlineAlpha:{value:.9},outlineThickness:{value:.0058}},
    vertexShader:`uniform float outlineThickness;
-    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float fineWobble=sin(position.x*31.0+position.z*23.0)*.35;float width=outlineThickness*(1.0+0.095*wobble+0.026*fineWobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
+    void main(){float wobble=sin(position.x*13.0+position.y*7.0)*sin(position.z*11.0-position.y*5.0);float secondWobble=sin(position.x*23.0-position.y*17.0+position.z*9.0);float fineWobble=sin(position.x*31.0+position.z*23.0)*.35;float width=outlineThickness*(1.0+0.16*wobble+0.055*secondWobble+0.035*fineWobble);vec3 expanded=position+normalize(normal)*width;gl_Position=projectionMatrix*modelViewMatrix*vec4(expanded,1.0);}`,
    fragmentShader:`uniform vec3 outlineColor;uniform float outlineAlpha;
-    void main(){float grain=fract(sin(dot(gl_FragCoord.xy,vec2(41.7,289.3)))*43758.5453);float inkBreak=mix(.91,1.0,step(.12,grain));gl_FragColor=vec4(outlineColor,outlineAlpha*inkBreak);}`,
+    void main(){float grain=fract(sin(dot(gl_FragCoord.xy,vec2(41.7,289.3)))*43758.5453);float fiber=fract(sin(dot(gl_FragCoord.xy,vec2(17.3,91.7)))*15731.743);float inkBreak=mix(.72,1.0,step(.08,grain));float inkDensity=mix(.84,1.0,smoothstep(.08,.92,fiber));gl_FragColor=vec4(outlineColor,outlineAlpha*inkBreak*inkDensity);}`,
    side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
   });
+  const inkDetailMaterial=new T.LineBasicMaterial({color:0x59463d,transparent:true,opacity:.2,depthTest:true,depthWrite:false,toneMapped:false});
   function applyInkOutlines(root){
    root.traverse(object=>{
     if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
@@ -1459,6 +1460,8 @@ function initArday3D(){
     shell.name='hand-drawn-ink-outline';shell.userData.inkOutline=true;shell.frustumCulled=false;
     shell.castShadow=false;shell.receiveShadow=false;shell.renderOrder=1;
     object.userData.hasInkOutline=true;object.add(shell);
+    // Fine pen strokes on hard-surface seams; rounded forms keep their clean silhouette.
+    if(object.geometry.type==='BoxGeometry'&&!object.userData.inkDetail){const detail=new T.LineSegments(new T.EdgesGeometry(object.geometry,28),inkDetailMaterial);detail.name='hand-drawn-edge-detail';detail.userData.inkDetail=true;detail.renderOrder=2;detail.frustumCulled=false;object.add(detail);object.userData.inkDetail=true;}
    });
   }
   const m={wall:M(0xd8d5ce),floor:M(0x8b7764),wood:M(0x513a2b),oak:M(0x806044),sofa:M(0xd9cdbb),sofa2:M(0xc4b49e),skin:M(0xd9a17c),hair:M(0x302629),shirt:M(0x526575),pants:M(0x454c5c),glass:new T.MeshPhysicalMaterial({color:0xd7e5e7,roughness:.12,metalness:.04,transparent:true,opacity:.24,reflectivity:.72,clearcoat:.85,clearcoatRoughness:.08,depthWrite:false,side:T.DoubleSide}),rug:M(0xb2a18c),leaf:M(0x64775d),dark:M(0x423a36),cream:M(0xf1eee7)};
