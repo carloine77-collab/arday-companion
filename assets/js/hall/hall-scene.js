@@ -201,11 +201,11 @@
     for(let n=0;n<count;n++){const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);localCylinder(px,2.25,pz,.12,.2,2.1,warmMetal,7);const leaf=new T.Mesh(new T.ConeGeometry(.62,2.4,7),n%3===0?foliage:n%3===1?jade:ivory);leaf.position.set(px,3.15,pz);leaf.rotation.z=n%2?.22:-.22;area.add(leaf);const bloom=new T.Mesh(new T.SphereGeometry(.34,8,6),variant%2?amber:coral);bloom.position.set(px,4.35,pz);area.add(bloom)}
     for(const side of [-1,1])addBox(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal);
    };
-   const addBench=(x,zz,accentMat=accentMat,rotation=0)=>{const g=new T.Group();g.position.set(x,0,zz);g.rotation.y=rotation;area.add(g);box(g,0,1.1,0,7.4,.42,1.25,ivory);box(g,0,2.15,-.48,7.4,1.7,.38,plum);for(const sx of [-3,3])box(g,sx,.48,0,.28,.96,.9,warmMetal);box(g,0,1.34,.66,6.8,.12,.14,accentMat)};
-   const addBeacon=(x,zz,accentMat=accentMat,h=5)=>{localCylinder(x,h/2,zz,.48,.72,h,graphite,10);localCylinder(x,h*.72,zz,.58,.58,.26,warmMetal,10);const lens=new T.Mesh(new T.CylinderGeometry(.34,.34,.34,12),accentMat);lens.position.set(x,h*.82,zz);area.add(lens);const cap=new T.Mesh(new T.SphereGeometry(.42,10,8),whiteGlow);cap.position.set(x,h+.08,zz);area.add(cap)};
-   const addKiosk=(x,zz,accentMat=accentMat,scale=1)=>{const g=new T.Group();g.position.set(x,0,zz);g.scale.setScalar(scale);area.add(g);box(g,0,2.5,0,3.2,5,.9,graphite);box(g,0,3.05,.52,2.55,2.35,.12,accentMat);box(g,0,4.35,.04,3.65,.32,ivory);box(g,0,4.58,.04,2.8,.12,warmMetal);box(g,0,.45,.08,3.7,.48,graphite);for(const sx of [-1,1])box(g,sx*1.25,1.35,.5,.12,1.35,.12,silver);return g};
-   const addStorageRack=(x,zz,w=8,h=6,accentMat=accentMat)=>{for(const sx of [-1,1])addBox(x+sx*w/2,h/2,zz,.28,h,.42,graphite);for(let level=0;level<3;level++){const y=1+level*2.1;addBox(x,y,zz,w,.22,1.1,silver);for(let n=-2;n<=2;n++){const px=x+n*w*.17;addBox(px,y+.72,zz,.95,1.25,.9,n%2?plum:graphite);addBox(px,y+1.39,zz,.62,.1,.94,level%2?accentMat:warmMetal)}}addBox(x,h+.2,zz,w+.8,.28,1.4,accentMat)};
-   const addOverheadLamp=(x,zz,accentMat=accentMat)=>{addBox(x,12,zz,.24,5,.24,warmMetal);addBox(x,9.35,zz,3.8,.3,1.6,graphite);addBox(x,9.12,zz,2.8,.12,1.1,accentMat)};
+   const addBench=(x,zz,accentMat=warmMetal,rotation=0)=>{const g=new T.Group();g.position.set(x,0,zz);g.rotation.y=rotation;area.add(g);box(g,0,1.1,0,7.4,.42,1.25,ivory);box(g,0,2.15,-.48,7.4,1.7,.38,plum);for(const sx of [-3,3])box(g,sx,.48,0,.28,.96,.9,warmMetal);box(g,0,1.34,.66,6.8,.12,.14,accentMat)};
+   const addBeacon=(x,zz,accentMat=cyan,h=5)=>{localCylinder(x,h/2,zz,.48,.72,h,graphite,10);localCylinder(x,h*.72,zz,.58,.58,.26,warmMetal,10);const lens=new T.Mesh(new T.CylinderGeometry(.34,.34,.34,12),accentMat);lens.position.set(x,h*.82,zz);area.add(lens);const cap=new T.Mesh(new T.SphereGeometry(.42,10,8),whiteGlow);cap.position.set(x,h+.08,zz);area.add(cap)};
+   const addKiosk=(x,zz,accentMat=cyan,scale=1)=>{const g=new T.Group();g.position.set(x,0,zz);g.scale.setScalar(scale);area.add(g);box(g,0,2.5,0,3.2,5,.9,graphite);box(g,0,3.05,.52,2.55,2.35,.12,accentMat);box(g,0,4.35,.04,3.65,.32,ivory);box(g,0,4.58,.04,2.8,.12,warmMetal);box(g,0,.45,.08,3.7,.48,graphite);for(const sx of [-1,1])box(g,sx*1.25,1.35,.5,.12,1.35,.12,silver);return g};
+   const addStorageRack=(x,zz,w=8,h=6,accentMat=warmMetal)=>{for(const sx of [-1,1])addBox(x+sx*w/2,h/2,zz,.28,h,.42,graphite);for(let level=0;level<3;level++){const y=1+level*2.1;addBox(x,y,zz,w,.22,1.1,silver);for(let n=-2;n<=2;n++){const px=x+n*w*.17;addBox(px,y+.72,zz,.95,1.25,.9,n%2?plum:graphite);addBox(px,y+1.39,zz,.62,.1,.94,level%2?accentMat:warmMetal)}}addBox(x,h+.2,zz,w+.8,.28,1.4,accentMat)};
+   const addOverheadLamp=(x,zz,accentMat=cyan)=>{addBox(x,12,zz,.24,5,.24,warmMetal);addBox(x,9.35,zz,3.8,.3,1.6,graphite);addBox(x,9.12,zz,2.8,.12,1.1,accentMat)};
    const addPanel=(x,y,zz,w,h,m)=>{const o=new T.Mesh(new T.PlaneGeometry(w,h),m);o.position.set(x,y,zz);area.add(o);return o};
    const addColumn=(x,zz,h=18,width=2.2,m=graphite)=>addBox(x,h/2,zz,width,h,width,m);
    const addBeam=(x,y,zz,w,h,d,m=graphite,rz=0)=>{const o=addBox(x,y,zz,w,h,d,m);o.rotation.z=rz;return o};
@@ -443,6 +443,74 @@
     for(let i=-2;i<=2;i++){const x=i*18;addBox(x,1.1,43,10,2.2,5,plum);addBox(x,2.3,43,9.2,.16,4.4,ivory);addBox(x,3.4,43,1.1,2.1,.8,i%2?coral:amber);for(const side of [-1,1]){addBox(x+side*6,.8,43,1.5,1.6,1.5,graphite);addBox(x+side*6,1.65,43,1.3,.16,1.3,warmMetal)}}
     addKiosk(-47,28,coral,.82);addKiosk(47,28,jade,.82);addPlanter(-49,39,10,6,jade,1);addPlanter(49,39,10,6,jade,2);addStorageRack(-36,25,8,5,coral);addStorageRack(36,25,8,5,jade);
     for(const x of [-42,-21,21,42])addBeacon(x,6,x<0?coral:jade,5);for(let i=-3;i<=3;i++)addOverheadLamp(i*13,4,i%2?coral:amber);for(const x of [-29,29]){addBench(x,34,coral);addPlanter(x,43,7,4,jade,0)}
+   }
+   // Public-life layer: planted edges, sheltered seating, service fixtures and wayfinding.
+   // These are arranged around the perimeter of each forecourt; the central approach stays open.
+   const addLinearGarden=(x,z,w,m=jade)=>{
+    addBox(x,.42,z,w,.84,3.6,graphite);addBox(x,.91,z,w-.35,.16,3.22,ivory);
+    const n=Math.max(4,Math.floor(w/2.2));
+    for(let k=0;k<n;k++){const px=x+(k-(n-1)/2)*(w-2)/(n-1),pz=z+(k%2?-.55:.55);
+     const stem=new T.Mesh(new T.CylinderGeometry(.06,.1,1.1,6),warmMetal);stem.position.set(px,1.55,pz);area.add(stem);
+     const leaf=new T.Mesh(k%3===0?new T.SphereGeometry(.7,7,5):new T.ConeGeometry(.58,1.6,6),k%2?m:jade);leaf.position.set(px,2.15,pz);leaf.scale.set(1.15,1.2,1);area.add(leaf);
+    }
+   };
+   const addPublicBench=(x,z,m=warmMetal,rot=0)=>{
+    const g=new T.Group();g.position.set(x,0,z);g.rotation.y=rot;area.add(g);
+    addBox(0,.58,0,5.8,.22,1.35,graphite);
+    for(let k=0;k<4;k++)addBox(0,.78+k*.22,-.38,5.65,.16,.24,k%2?ivory:m);
+    addBox(0,1.65,-.53,5.8,1.35,.28,plum);
+    for(const sx of [-2.35,2.35]){addBox(sx,.34,0,.22,.68,1,silver);addBox(sx,1.05,.08,.42,.16,1.15,warmMetal)}
+    addBox(0,.96,.62,5.1,.12,.12,m);
+   };
+   const addInfoTotem=(x,z,m=cyan)=>{
+    addBox(x,.38,z,2.8,.76,2.1,graphite);addBox(x,2.65,z,1.45,4.6,1.15,titanium);
+    addBox(x,3.05,z+.62,1.12,2.5,.12,plum);addBox(x,3.05,z+.71,.82,1.85,.08,m);
+    addBox(x,5.1,z,2.2,.18,1.7,warmMetal);addBox(x,5.32,z,1.35,.12,1,ivory);
+   };
+   const addWasteStation=(x,z,m=jade)=>{
+    addBox(x,.78,z,2.7,1.56,1.8,graphite);addBox(x,1.62,z,2.85,.16,1.95,silver);
+    for(let k=-1;k<=1;k++){addBox(x+k*.82,.92,z+.94,.56,.78,.08,k===0?m:ivory);addBox(x+k*.82,1.38,z+.99,.26,.12,.06,graphite)}
+   };
+   const addQueueRail=(x1,x2,z,m=warmMetal)=>{
+    const mid=(x1+x2)/2;
+    for(const x of [x1,mid,x2]){addCylinder(area,x,.72,z,.19,.25,1.44,graphite,8);addCylinder(area,x,1.48,z,.25,.25,.18,m,8)}
+    addBox(mid,1.22,z,Math.abs(x2-x1),.12,.12,m);
+   };
+   const addLightPost=(x,z,m=cyan)=>{
+    addBox(x,3.2,z,.24,6.4,.24,warmMetal);addBox(x,5.95,z,1.35,.24,.9,graphite);addBox(x,5.78,z,1.05,.1,.62,m);addBox(x,.34,z,1.4,.68,1.15,graphite);
+   };
+   const addShelterSeat=(x,z,m=cyan)=>{
+    addPublicBench(x,z,m);
+    addBox(x,5.2,z-1.35,7.4,.32,3.4,graphite);
+    for(const sx of [-3.2,3.2])addBox(x+sx,2.75,z-1.35,.22,5.2,.22,silver);
+    addBox(x,5.42,z-1.35,6.7,.1,2.8,m);
+   };
+   addLinearGarden(-43,51,17,accentMat);addLinearGarden(43,51,17,index%2?jade:accentMat);
+   addShelterSeat(-25,52,accentMat);addShelterSeat(25,52,index%2?accentMat:warmMetal);
+   addInfoTotem(0,57,accentMat);addWasteStation(-56,18,accentMat);addWasteStation(56,18,jade);
+   addLightPost(-56,39,accentMat);addLightPost(56,39,index%2?amber:cyan);
+   if(z.id==='exchange'){
+    addQueueRail(-29,-8,-16,amber);addQueueRail(8,29,-16,amber);
+    addPublicBench(-34,4,ivory,Math.PI/2);addPublicBench(34,4,ivory,-Math.PI/2);
+    addInfoTotem(-51,-31,amber);addInfoTotem(51,-31,amber);
+   }else if(z.id==='ranking'){
+    addPublicBench(-47,13,coral,Math.PI/2);addPublicBench(47,13,coral,-Math.PI/2);
+    for(let k=0;k<3;k++){addBox(-48+k*4,1.4,45,1.2,2.8,1.2,graphite);addBox(-48+k*4,2.9,45,.9,.16,.9,amber)}
+   }else if(z.id==='recruitment'){
+    addShelterSeat(-48,13,jade);addShelterSeat(48,13,jade);
+    addQueueRail(-28,-8,18,jade);addQueueRail(8,28,18,jade);addWasteStation(0,39,jade);
+   }else if(z.id==='commissions'){
+    addQueueRail(-35,-12,-19,amber);addQueueRail(12,35,-19,cyan);
+    addPublicBench(-48,9,amber,Math.PI/2);addPublicBench(48,9,cyan,-Math.PI/2);addInfoTotem(0,47,amber);
+   }else if(z.id==='teams'){
+    for(const x of [-48,48]){addShelterSeat(x,8,violet);addInfoTotem(x,-43,violet)}
+    addQueueRail(-20,20,48,violet);addWasteStation(0,49,violet);
+   }else if(z.id==='entertainment'){
+    for(const x of [-48,48]){addPublicBench(x,8,violet,Math.PI/2);addInfoTotem(x,-40,violet)}
+    addQueueRail(-25,25,47,violet);addWasteStation(0,48,violet);
+   }else if(z.id==='food'){
+    addShelterSeat(-49,8,coral);addShelterSeat(49,8,jade);
+    addQueueRail(-39,-12,-18,coral);addQueueRail(12,39,-18,jade);addWasteStation(0,49,coral);
    }
 // Fine facade articulation: shallow trim and service reveals, without duplicate walls or roofs.
    for(const side of [-1,1]){
