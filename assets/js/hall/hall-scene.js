@@ -104,7 +104,7 @@
   let seed=90317;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
   for(let i=0;i<2600;i++){ctx.fillStyle='rgba(180,225,245,'+(.08+rand()*.32)+')';ctx.beginPath();ctx.arc(rand()*2048,rand()*1024,.3+rand()*1.2,0,Math.PI*2);ctx.fill()}
   for(let i=0;i<90;i++){const x=i*24,w=8+rand()*36,h=120+rand()*420;ctx.fillStyle='rgba(75,125,155,.24)';ctx.fillRect(x,930-h,w,h)}
-  const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(920,64,36),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-8;root.add(sky);
+  const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(780,96,64),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-100;sky.frustumCulled=false;root.add(sky);
   // Central civic landmark: a navigational astrolabe, not another service district.
   // Its layered orbital frame is visible above the surrounding architecture and readable from the home portal.
   const core=new T.Group();core.name='hall-central-kinetic-core';core.position.set(18,0,0);root.add(core);
@@ -184,9 +184,7 @@
    const hallCenter={x:-20,z:0};
    area.rotation.y=Math.atan2(-(hallCenter.x-z.x),-(hallCenter.z-z.z));
    area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
-   polygon(area,z.shape,.012,index%2?floorMat:floorDark);
-   // Subtle embedded boundary seams, not raised circular platforms or fenced lots.
-   const pts=z.shape.map(p=>new T.Vector3(p[0],.025,p[1]));area.add(new T.LineLoop(new T.BufferGeometry().setFromPoints(pts),new T.LineBasicMaterial({color:0x78c9d8,transparent:true,opacity:.16})));
+   // Districts share the continuous plaza floor: no overlapping polygon pads or boundary rings.
    // Low architectural inlays define the district's internal circulation.
    for(let i=-2;i<=2;i++){const seam=new T.Mesh(new T.PlaneGeometry(.06,z.d*.66),cyan);seam.rotation.x=-Math.PI/2;seam.position.set(i*z.w*.13,.035,0);area.add(seam)}
    // Varied landmarks replace the repetitive notice-board wall: each district has a different spatial identity.
@@ -335,21 +333,22 @@
    // with distinct entrances, structural depth and recognizable interior spatial rhythms.
    const front=-z.d*.53,gateAccent=accent;
    const gateRadius=z.id==='ranking'?13:z.id==='entertainment'?14:z.id==='teams'?12:z.id==='food'?10:11;
-   const gateRing=new T.Mesh(new T.TorusGeometry(gateRadius,.72,14,88),z.id==='teams'?silver:gateAccent);
-   gateRing.position.set(0,gateRadius,front);gateRing.scale.set(z.id==='food'?1.35:1.0,1,1);area.add(gateRing);
-   const gateInner=new T.Mesh(new T.TorusGeometry(gateRadius-1.45,.16,8,88),z.id==='teams'?violet:ivory);
-   gateInner.position.set(0,gateRadius,front-.18);gateInner.scale.copy(gateRing.scale);area.add(gateInner);
+   const gateWidth=gateRadius*1.72,gateHeight=gateRadius*1.82;
+   // Rectilinear portal architecture replaces the repeated circular gateway motif.
    for(const side of [-1,1]){
-    const pier=addCylinder(side*(gateRadius+.4),gateRadius*.48,front,.95,1.65,gateRadius*.96,graphite,10);
-    const collar=addCylinder(side*(gateRadius+.4),gateRadius*.86,front,1.45,1.45,.62,warmMetal,10);
-    const inlay=addCylinder(side*(gateRadius+.4),gateRadius*.5,front-.98,.16,.16,gateRadius*.72,gateAccent,8);
+    addBox(side*gateWidth*.5,gateHeight*.5,front,1.8,gateHeight,2.1,graphite);
+    addBox(side*gateWidth*.5,gateHeight*.5,front+1.08,.24,gateHeight*.82,.12,gateAccent);
+    addBox(side*gateWidth*.5,gateHeight*.88,front,2.5,1.15,2.6,warmMetal);
+    addBox(side*gateWidth*.5,1.2,front+1.15,2.5,.42,3.0,silver);
    }
-   const lintel=new T.Mesh(new T.BoxGeometry(gateRadius*1.55,.55,1.1),z.id==='food'?ivory:silver);lintel.position.set(0,gateRadius*1.92,front);area.add(lintel);
-   const crest=new T.Mesh(new T.OctahedronGeometry(1.7,1),gateAccent);crest.position.set(0,gateRadius*2.18,front);area.add(crest);
-   // A shallow forecourt apron visually joins each building entrance to the district avenue.
-   const apron=new T.Mesh(new T.CylinderGeometry(gateRadius*1.18,gateRadius*1.28,.24,12),z.id==='food'?paleStone:floorDark);
-   apron.position.set(0,.08,front+4.8);area.add(apron);
-   const apronRim=new T.Mesh(new T.TorusGeometry(gateRadius*1.16,.18,8,72),gateAccent);apronRim.rotation.x=Math.PI/2;apronRim.position.set(0,.22,front+4.8);area.add(apronRim);
+   addBox(0,gateHeight,front,gateWidth+2.2,2.0,2.6,z.id==='food'?ivory:silver);
+   addBox(0,gateHeight+1.15,front,gateWidth*.62,.28,2.72,gateAccent);
+   addBox(0,gateHeight*.55,front-.12,.22,gateHeight*.88,.18,ivory);
+   const crest=new T.Mesh(new T.OctahedronGeometry(1.7,1),gateAccent);crest.position.set(0,gateHeight+3,front);area.add(crest);
+   // Broad rectangular forecourt apron is flush with the plaza and connects to the avenue.
+   const apron=new T.Mesh(new T.BoxGeometry(gateWidth*1.42,.22,17),z.id==='food'?paleStone:floorDark);
+   apron.position.set(0,.015,front+8);apron.receiveShadow=true;area.add(apron);
+   addBox(0,.15,front+16,gateWidth*1.18,.12,.32,gateAccent);
    if(z.id==='exchange'){
     // Three transaction bays with suspended coin-like medallions and recessed waiting benches.
     for(let i=-1;i<=1;i++){
