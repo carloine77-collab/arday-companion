@@ -1140,3 +1140,33 @@ html body .stage .drawer.profile-expanded.open .choices{
 /* Public hall is a continuous 3D exploration scene; the room label belongs only to interiors. */
 .stage.hall-mode .room-label{display:none!important}
 .stage.hall-mode{background:#091522;border-color:#263c4d}.stage.hall-mode .three-scene{cursor:default;background:#091522}.stage.hall-mode .camera-controls button{background:#172b3b;color:#d7edf3;border-color:#476171}.stage.hall-mode .camera-controls button.active{background:#b8dbe2;color:#142734}
+
+
+/* Recruitment office: deliberately independent from the bottom-menu career page. */
+.drawer .choices.recruitment-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:0 14px 28px!important;overflow-y:auto!important;background:#e8e0d2!important;background-image:radial-gradient(#4d536014 .7px,transparent .7px),linear-gradient(150deg,#eee8dc,#ded7c9)!important;color:#29313a!important}
+.recruitment-masthead{position:relative;margin:0 -14px 18px;padding:25px 22px 20px;background:linear-gradient(135deg,#263544,#394655 62%,#4b4d4b);color:#eee7d9;overflow:hidden}
+.recruitment-masthead:after{content:"";position:absolute;right:-45px;top:-70px;width:210px;height:210px;border:1px solid #e4d8c044;border-radius:50%;box-shadow:0 0 0 18px #e4d8c010,0 0 0 38px #e4d8c009}
+.recruitment-seal{display:grid;place-items:center;width:34px;height:34px;margin-bottom:18px;border:1px solid #d4c6a5aa;border-radius:50%;font:italic 20px Georgia,serif;color:#e4d8bd}
+.recruitment-kicker,.recruitment-section-label small,.recruitment-card-top,.recruitment-current .recruitment-kicker{font:700 8px Arial,sans-serif;letter-spacing:.19em;color:#bdb29d}
+.recruitment-masthead h2{margin:8px 0 7px;font:600 27px/1.2 Georgia,"Noto Serif SC",serif;letter-spacing:.08em}
+.recruitment-masthead p{margin:0;color:#d0c9bc;font:11px/1.7 "Noto Serif SC",serif}
+.recruitment-rule{display:flex;align-items:center;gap:9px;margin-top:20px;padding-top:11px;border-top:1px solid #d8d0bd44;color:#c4b99f;font:700 8px Arial,sans-serif;letter-spacing:.16em}
+.recruitment-rule b{font:italic 22px Georgia,serif;color:#f0e6d2}
+.recruitment-section-label{display:flex;align-items:baseline;justify-content:space-between;margin:0 1px 10px;padding-bottom:9px;border-bottom:1px solid #bcb19f;color:#4b4a43;font:600 15px Georgia,"Noto Serif SC",serif}
+.recruitment-section-label small{color:#a0927e;font-size:7px}
+.recruitment-card{position:relative;margin:0 0 12px;padding:15px 14px 13px;border:1px solid #d6cbbb;border-left:3px solid #9b886b;background:#f5f0e6;box-shadow:0 3px 9px #4a40300b}
+.recruitment-card-top{display:flex;justify-content:space-between;align-items:center;color:#9b8e7a;font-size:7px}
+.recruitment-salary{color:#9a7652;font:italic 18px Georgia,serif;letter-spacing:0}
+.recruitment-salary small{font:700 7px Arial,sans-serif;letter-spacing:.1em}
+.recruitment-card h3{margin:12px 0 6px;color:#353c40;font:600 18px Georgia,"Noto Serif SC",serif}
+.recruitment-description{margin:0 0 12px;color:#817766;font:11px/1.7 "Noto Serif SC",serif}
+.recruitment-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;padding:8px 0;border-top:1px dashed #d4c9b8;border-bottom:1px dashed #d4c9b8;color:#7c7569;font:10px "Noto Serif SC",serif}
+.recruitment-requirements{margin:10px 0;color:#928675;font:10px/1.7 "Noto Serif SC",serif}
+.recruitment-apply{width:100%;min-height:39px;border:1px solid #66717a;background:#394653;color:#f2ecdf;font:11px "Noto Serif SC",serif;letter-spacing:.12em}
+.recruitment-apply:disabled{border-color:#c9c1b4;background:#ded8cc;color:#a59a88}
+.recruitment-current{display:flex;flex-direction:column;gap:7px;margin:0 0 16px;padding:13px 14px;border:1px solid #c9c2b3;background:#e0e3dc}
+.recruitment-current strong{color:#3e514d;font:600 17px Georgia,"Noto Serif SC",serif}
+.recruitment-current p,.recruitment-current small{margin:0;color:#777e73;font:10px/1.7 "Noto Serif SC",serif}
+.recruitment-current .recruitment-kicker{color:#8b947f}
+.recruitment-footnote{padding:9px 2px 0;color:#9a8e7c;font:10px/1.8 "Noto Serif SC",serif}
+@media(min-width:600px){.drawer .choices.recruitment-view{padding-left:22px!important;padding-right:22px!important}.recruitment-masthead{margin-left:-22px;margin-right:-22px;padding:29px 30px 22px}.recruitment-card{padding:18px 18px 15px}}
