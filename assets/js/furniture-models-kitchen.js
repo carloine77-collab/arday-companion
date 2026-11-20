@@ -1,7 +1,10 @@
 /* Furniture model builders: furniture-models-kitchen */
 window.ArdayFurnitureModelCategories = window.ArdayFurnitureModelCategories || Object.create(null);
 Object.assign(window.ArdayFurnitureModelCategories, {
- "成品食物": function(ctx) { with(ctx) {
+ "成品食物": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=.74;depth=.74;height=.24;surfaceType='tabletop';
     const plate=mat(0xf4eee2,.28),plateEdge=mat(0xc9b99e,.32),rice=mat(0xf1e5c9,.92),egg=mat(0xe8bd58,.78),tomato=mat(0xc85e42,.82),green=mat(0x6f8c50,.9),meat=mat(0x8c5237,.86),noodle=mat(0xe6c77f,.84),broth=mat(0xb88a4f,.3),tofu=mat(0xe8d8b8,.9);
@@ -42,8 +45,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      for(let n=0;n<7;n++){const a=n*2.4,r=.07+(n%3)*.05;const o=box(Math.cos(a)*r,.27,Math.sin(a)*r,.065,.05,.065,n%2?tofu:meat);o.rotation.y=a}
     }
    
- } return true; },
- "橱柜": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "橱柜": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=2.8;depth=.82;height=1.05;surfaceType='table';surfaceY=1.1;
     const carcass=mat(0xb99b78,.72),front=mat(0xe4d8c7,.82),counter=mat(0xd9d2c5,.42);
@@ -59,8 +68,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     box(0,.98,-.04,2.72,.025,.74,m.cream);
     for(const x of [-1.2,1.2])box(x,.46,-.395,.08,.78,.08,m.oak);
    
- } return true; },
- "吊柜": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "吊柜": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=2.2;depth=.48;height=1.05;wallAxis='x';wallSide='back';anchor=[0,2.9];
     const carcass=mat(0x76543d,.68),door=mat(0xe6dac9,.78);
@@ -73,8 +88,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     }
     for(const x of [-1.03,1.03])box(x,0,-.18,.07,.9,.08,m.wood);
    
- } return true; },
- "冰箱": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "冰箱": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openKitchenPanel();width=1.02;depth=.86;height=2.2;
     const shell=mat(0xe8e4dc,.38),edge=mat(0xb9b7b0,.46),glass=mat(0x9eb6bc,.22,.12);
@@ -90,8 +111,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     box(0,.05,0,.98,.08,.82,m.dark);
     for(const x of [-.39,.39])box(x,.12,.32,.09,.08,.08,edge);
    
- } return true; },
- "灶台": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "灶台": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openKitchenPanel();width=variant==='复古珐琅'?1.5:1.35;depth=.82;height=variant==='不锈钢'?1.02:.94;
     if(variant==='复古珐琅'){
@@ -109,8 +136,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      box(0,.22,.425,.95,.38,.035,m.metal);box(0,.22,.45,.76,.25,.018,m.dark);
     }
    
- } return true; },
- "水槽": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "水槽": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('sink',id);width=1.35;depth=.88;height=.98;
     const cabinet=mat(0xb18a61,.72),steel=mat(0xbfc5c5,.24,.48),basin=mat(0x687b80,.26,.28);
@@ -130,8 +163,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     }
     box(0,.12,0,1.22,.16,.72,m.dark);
    
- } return true; },
- "餐边柜": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "餐边柜": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=1.92;depth=.64;height=1.22;surfaceType='table';surfaceY=1.26;
     const carcass=mat(0x76543d,.66),front=mat(0xc5a47e,.72),dark=mat(0x47372d,.78),brass=mat(0xb58d56,.34,.68),stone=mat(0xe5ded1,.42);
@@ -155,8 +194,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     box(0,1.22,.34,.48,.035,.025,brass);
     for(const x of [-.88,.88])for(const z of [-.22,.22]){const foot=new T.CylinderGeometry(.04,.055,.17,10);const f=new T.Mesh(foot,carcass);f.position.set(x,.085,z);group.add(f)}
    
- } return true; },
- "酒柜": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "酒柜": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=1.25;depth=.58;height=1.72;surfaceType='table';surfaceY=1.75;
     const wood=mat(0x503626,.62),back=mat(0x34251e,.82),glass=mat(0xc9dadd,.14,.12);glass.transparent=true;glass.opacity=.2;
@@ -181,8 +226,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      const bowl=sphere(x,1.47,.12,.055,.075,.055,glass);
     }
    
- } return true; },
- "料理台": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "料理台": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=1.9;depth=.92;height=1.02;surfaceType='table';surfaceY=1.05;
     const island=mat(0x9c8064,.7),stone=mat(0xe5dfd4,.34),wood=mat(0xb18a61,.7);
@@ -206,5 +257,8 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     box(.54,1.045,-.08,.48,.025,.34,m.metal);
     box(.54,1.06,-.08,.39,.018,.25,m.dark);
    
- } return true; }
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ }
 });
