@@ -165,14 +165,14 @@
    const dx=z.x-hub.x,dz=z.z-hub.z,len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len;
    const sx=hub.x+ux*34,sz=hub.z+uz*34,ex=z.x-ux*70,ez=z.z-uz*70;
    const accent=routeAccent[z.id];
-   const routeY=-.105+i*.045;
+   const routeY=-.1625+i*.004;
    strip(sx,sz,ex,ez,15,floorDark,routeY);
    strip(sx,sz,ex,ez,1.25,accent,routeY+.028);
    const px=-uz*5.2,pz=ux*5.2;
    strip(sx+px,sz+pz,ex+px,ez+pz,.22,silver,routeY+.034);
    strip(sx-px,sz-pz,ex-px,ez-pz,.22,silver,routeY+.034);
    // Continuous flush inlay marks the route end without circular pads, rings or repeated chevrons.
-   const terminal=new T.Mesh(new T.BoxGeometry(10,.035,.8),accent);terminal.rotation.y=Math.atan2(ux,uz);terminal.position.set(ex,-.045+i*.045,ez);terminal.castShadow=false;terminal.receiveShadow=false;root.add(terminal);
+   const terminal=new T.Mesh(new T.BoxGeometry(10,.035,.8),accent);terminal.rotation.y=Math.atan2(ux,uz);terminal.position.set(ex,routeY,ez);terminal.castShadow=false;terminal.receiveShadow=false;root.add(terminal);
   });
   const zoneObjects=[];
   zones.forEach((z,index)=>{
