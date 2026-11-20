@@ -10,7 +10,7 @@ window.ArdayFurnitureModels = (() => {
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
    const modelName=alias?.model??name.split('·')[0].trim();
-   const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:room==='bathroom'?bathroom:living;
+   const room=record?.room||getRoomMode()||'living',parent=rooms[room]||rooms.living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
    const mat=(color,rough=.78,metalness=0)=>{const material=stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,rough)),metalness:Math.max(0,Math.min(.9,metalness))}));material.userData.dyeable=metalness<.58&&rough>=.28;return material};
