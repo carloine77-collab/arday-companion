@@ -1656,7 +1656,7 @@ function initArday3D(){
    else{
     /* Position is restored from the canonical placed entity above. */
    }
-   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:!!group.userData.isDoor,doorDestination:record?.destination||group.userData.roomTarget||null};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;}
+   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:!!group.userData.isDoor,doorDestination:record?.destination||group.userData.roomTarget||(group.userData.isDoor?'living':null)};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;}
    const existing=document.querySelector('.spot-'+id);
    item.button=existing||document.createElement('button');
    if(!existing){
@@ -3242,6 +3242,7 @@ function initArday3D(){
    {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
   ];
+  if(!s.defaultDoorSetupVersion){
   defaultDoorRecords.forEach(def=>{
    let record=s.placed.find(entry=>entry.id===def.id);
    if(!record){record={...def};s.placed.push(record)}
@@ -3249,6 +3250,8 @@ function initArday3D(){
    const existing=furnitureRegistry.find(entry=>entry.id===record.id);
    if(!existing)createOwnedFurniture(record.name,record);
   });
+   s.defaultDoorSetupVersion=1;save();
+  }
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
   const canPlaceFurniture=(item,x,z,angle=item.group.rotation.y)=>window.ArdayFurniturePlacement.canPlaceFurniture(item,x,z,angle,furnitureRegistry,roomBounds,canPlaceOnWall);
