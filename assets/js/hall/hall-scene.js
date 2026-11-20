@@ -184,244 +184,231 @@
    const hallCenter={x:-20,z:0};
    area.rotation.y=Math.atan2(-(hallCenter.x-z.x),-(hallCenter.z-z.z));
    area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
-   // Districts share the continuous plaza floor: no overlapping polygon pads or boundary rings.
-   // Low architectural inlays define the district's internal circulation.
-   for(let i=-2;i<=2;i++){const seam=new T.Mesh(new T.PlaneGeometry(.06,z.d*.66),cyan);seam.rotation.x=-Math.PI/2;seam.position.set(i*z.w*.13,.035,0);area.add(seam)}
-   // Varied landmarks replace the repetitive notice-board wall: each district has a different spatial identity.
+   // The seven districts are built as inhabited architectural spaces, not collections of floating props.
+   // Each frontage faces the central concourse; structural frames, wall depth and equipment share one scale.
    const title=new T.Mesh(new T.PlaneGeometry(24,6),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));
-   title.position.set(0,15,-z.d*.34);
-   // Keep the plaque upright while continuously turning its face toward the active camera.
-   // The callback uses world coordinates so the district group's own rotation cannot skew it.
+   title.position.set(0,17,-z.d*.34);
    const plaqueWorld=new T.Vector3(),cameraWorld=new T.Vector3();
    title.onBeforeRender=(renderer,activeScene,camera)=>{
-    title.getWorldPosition(plaqueWorld);
-    camera.getWorldPosition(cameraWorld);
-    // PlaneGeometry's front normal is local +Z, matching Object3D.lookAt() for meshes.
+    title.getWorldPosition(plaqueWorld);camera.getWorldPosition(cameraWorld);
     title.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
    };
    area.add(title);
    const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
-   if(z.id==='exchange'){
-    // A broad banking counter, suspended currency halo and several recessed service kiosks.
-    addBox(0,2,-17,48,4,8,graphite);addBox(0,4.2,-17,46,.35,7,silver);
-    for(let i=-3;i<=3;i++){addBox(i*5,2.2,-11,2.4,4.4,1.2,titanium);addBox(i*5,2.6,-10.3,2.0,2.1,.08,cyan)}
-    const halo=new T.Mesh(new T.TorusGeometry(15,.42,12,96),silver);halo.position.set(0,13,-25);halo.rotation.x=Math.PI/2;area.add(halo);
-    const inner=new T.Mesh(new T.TorusGeometry(12,.12,8,96),cyan);inner.position.copy(halo.position);inner.rotation.copy(halo.rotation);area.add(inner);
-   }else if(z.id==='ranking'){
-    // A tall stepped holographic leaderboard wall and three monumental rank plinths.
-    addBox(0,10,-25,54,20,2,graphite);addBox(0,10,-23.8,48,16,.12,cyan);
-    for(let i=0;i<3;i++){const x=(i-1)*12,h=[3.5,6.5,4.5][i];addBox(x,h/2,5,7,h,7,i===1?silver:titanium);addBox(x,h+.2,5,5,.12,5,cyan)}
-   }else if(z.id==='recruitment'){
-    // Open recruitment lounge with clusters of seats and floating identity panels.
-    for(let i=0;i<4;i++){const x=(i%2?1:-1)*18,zz=(i<2?-2:17);addBox(x,1.3,zz,12,1.4,7,graphite);addBox(x,2.1,zz,10,.16,5,silver)}
-    for(let i=-1;i<=1;i++){const p=addBox(i*13,7,-25,7,10,.55,glass);addBox(i*13,7,-24.6,6,8,.06,cyan)}
-   }else if(z.id==='commissions'){
-    // Contract dispatch: a wide mission table surrounded by vertical data monoliths.
-    addBox(0,1.5,4,40,2.6,22,graphite);addBox(0,3,4,37,.16,19,cyan);
-    for(let i=0;i<5;i++){const x=-32+i*16;addBox(x,7,-22,2.2,14,2.2,titanium);addBox(x,7,-20.8,.12,10,.08,cyan)}
-    addBox(0,9,-32,56,.45,1.2,silver);
-   }else if(z.id==='teams'){
-    // A large open assembly plaza with a central holographic tactical table and seating arcs.
-    addBox(0,1.2,0,28,2.2,20,graphite);addBox(0,2.5,0,25,.12,17,cyan);
-    for(let i=0;i<8;i++){const a=i*Math.PI/4,x=Math.cos(a)*25,zz=Math.sin(a)*25;const seat=addBox(x,.9,zz,8,1.4,4,titanium);seat.rotation.y=-a}
-    const ring=new T.Mesh(new T.TorusGeometry(10,.22,8,64),cyan);ring.position.set(0,5,0);area.add(ring);
-   }else if(z.id==='entertainment'){
-    // Simulation deck: scattered pods, interactive stages and a wide open play floor.
-    for(let i=0;i<4;i++){const x=(i%2?1:-1)*22,zz=(i<2?-18:18);addBox(x,2.2,zz,12,4.4,10,graphite);addBox(x,3,zz-5.1,9,2.4,.12,cyan)}
-    addBox(0,.55,0,35,1.1,24,silver);addBox(0,1.15,0,31,.08,20,cyan);
-    for(let i=-2;i<=2;i++){const p=addBox(i*8,6,-34,5,12,.8,glass);addBox(i*8,6,-33.5,4,10,.05,cyan)}
-   }else if(z.id==='food'){
-    // A food court with separate counters, seating islands and overhead light frames.
-    for(let i=0;i<3;i++){const x=(i-1)*23;addBox(x,2,-20,17,3.6,9,silver);addBox(x,4,-20,18,.3,10,graphite);addBox(x,2.7,-15,14,.12,.08,cyan)}
-    for(let i=0;i<4;i++){const x=(i%2?1:-1)*18,zz=i<2?7:24;addBox(x,.9,zz,9,1.2,7,graphite);addBox(x,1.55,zz,8,.12,6,silver)}
-    for(let i=0;i<3;i++){const frame=addBox((i-1)*22,8,-20,1,8,12,graphite);addBox((i-1)*22,12,-20,.12,.12,12,cyan)}
-   }
-   // District-specific furnishing pass: warmer materials, layered silhouettes and usable public-space details.
+   const addPanel=(x,y,zz,w,h,m)=>{const o=new T.Mesh(new T.PlaneGeometry(w,h),m);o.position.set(x,y,zz);area.add(o);return o};
+   const addColumn=(x,zz,h=18,width=2.2,m=graphite)=>addBox(x,h/2,zz,width,h,width,m);
+   const addBeam=(x,y,zz,w,h,d,m=graphite,rz=0)=>{const o=addBox(x,y,zz,w,h,d,m);o.rotation.z=rz;return o};
+   const addFacadeBay=(x,zz,w,h,accentMat=accent)=>{
+    addColumn(x-w/2,zz,h,1.8,graphite);addColumn(x+w/2,zz,h,1.8,graphite);
+    addBeam(x,h,zz,w+1.8,1.5,2.2,silver);
+    addBeam(x,h+.92,zz,w*.72,.18,2.35,accentMat);
+    addBeam(x,1.0,zz,w,.5,2.0,warmMetal);
+   };
+   const addScreen=(x,y,zz,w,h,accentMat=cyan)=>{
+    addBox(x,y,zz,w+.9,h+.9,.72,graphite);
+    addBox(x,y,zz+.39,w,h,.08,plum);
+    addPanel(x,y,zz+.46,w*.91,h*.88,new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,emissive:accentMat.color||0x70ddeb,emissiveIntensity:.32,toneMapped:false}));
+    for(const sx of [-1,1])addBox(x+sx*(w/2+.28),y,zz+.43,.16,h+.25,.16,silver);
+   };
+   const addCounter=(x,y,zz,w,d,top=ivory,front=graphite)=>{
+    addBox(x,y,zz,w,1.8,d,front);addBox(x,y+1.02,zz-.08,w+.5,.34,d+.32,top);
+    addBox(x,y+1.94,zz+d*.34,w*.82,.16,.12,warmMetal);
+   };
+   const addStair=(x,zz,w,steps,depth,material=graphite)=>{
+    for(let n=0;n<steps;n++){const h=.55+n*.48;addBox(x,h/2,zz+n*depth,w,h,depth+.08,material);addBox(x,h+.06,zz+n*depth,w,.12,depth+.08,n%2?silver:warmMetal)}
+   };
+   const addTrussBay=(x,zz,w,h,accentMat=accent)=>{
+    for(const side of [-1,1]){
+     addColumn(x+side*w/2,zz,h,2.2,graphite);
+     addBeam(x+side*w/2,h*.58,zz+1.18,.42,h*.78,.3,accentMat,side*.13);
+    }
+    addBeam(x,h,zz,w+2.2,2.1,3.2,silver);
+    addBeam(x,h+1.18,zz,w*.82,.2,3.3,accentMat);
+    for(let n=-2;n<=2;n++)addBeam(x+n*w*.15,h*.78,zz-.95,.34,3.2,.3,n%2?warmMetal:graphite,n*.045);
+   };
    const accentSet={exchange:amber,ranking:coral,recruitment:jade,commissions:amber,teams:violet,entertainment:violet,food:coral};
-   const accent=accentSet[z.id],warmSeat=z.id==='recruitment'?jade:z.id==='teams'?plum:z.id==='food'?copper:graphite;
-   const addCylinder=(x,y,zz,rt,rb,h,m,seg=16)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,seg),m);o.position.set(x,y,zz);o.castShadow=true;o.receiveShadow=true;area.add(o);return o};
-   const addTorus=(x,y,zz,r,t,m)=>{const o=new T.Mesh(new T.TorusGeometry(r,t,10,48),m);o.position.set(x,y,zz);area.add(o);return o};
-   const addSphere=(x,y,zz,r,m)=>{const o=new T.Mesh(new T.SphereGeometry(r,16,12),m);o.position.set(x,y,zz);area.add(o);return o};
-   // Low benches, planters and lighting islands give the districts scale between the large machines.
-   for(let i=0;i<4;i++){
-    const a=i*Math.PI/2+.35,px=Math.cos(a)*z.w*.31,pz=Math.sin(a)*z.d*.3;
-    addBox(px,.7,pz,8,1.05,2.2,warmSeat);addBox(px,1.28,pz,7.6,.16,2,ivory);
-    const planterX=px+Math.cos(a+1.1)*7,planterZ=pz+Math.sin(a+1.1)*7;
-    addCylinder(planterX,.48,planterZ,1.7,2.1,.9,plum,8);
-    addCylinder(planterX,1.0,planterZ,1.55,1.55,.16,jade,12);
-    for(let k=0;k<3;k++)addSphere(planterX+(k-1)*.65,1.65+(k%2)*.35,planterZ+(k%2)*.4,.62,k%2?jade:ivory);
-    addCylinder(px,2.1,pz, .18,.3,1.7,accent,10);
-   }
+   const accentMat=accentSet[z.id];
+   // A continuous rear service wall and two structural returns establish a real room volume.
+   // The front stays open so the district remains visible and connected to the public concourse.
    if(z.id==='exchange'){
-    for(let i=0;i<5;i++){const x=-25+i*12;addBox(x,6,18,8,9,1.3,i%2?warmMetal:ivory);addBox(x,6.2,18.75,6,6,.08,amber);addBox(x,2,18.9,5,.2,.1,graphite)}
-    addTorus(0,17,0,19,.32,warmMetal);addTorus(0,17,0,16,.12,amber);
-    for(let i=0;i<7;i++){const coin=addCylinder(-27+i*9,1.1,31,.95,.95,.24,i%2?warmMetal:ivory,24);coin.rotation.x=Math.PI/2}
+    // Exchange hall: a deep banking concourse with a vaulted service frontage and seven teller bays.
+    addBox(0,10,-43,100,20,2.4,graphite);
+    addBox(0,19.2,-41.55,94,1.0,.22,warmMetal);
+    for(let i=-3;i<=3;i++){
+     const x=i*13.1;
+     addFacadeBay(x,-40,11.2,17,amber);
+     addScreen(x,11,-41.12,8.8,6.2,amber);
+     addCounter(x,2.0,-24,10.4,5,ivory,graphite);
+     addBox(x,4.4,-23.7,8.4,.22,4.1,warmMetal);
+     addBox(x,5.3,-22.1,7.4,.16,.12,cyan);
+    }
+    for(const side of [-1,1]){
+     addBox(side*49,9,-13,2.4,18,60,graphite);
+     addBox(side*47.65,9,-13,.16,13,52,amber);
+     addBox(side*47.4,18,-13,3.4,1.2,60,silver);
+     addTrussBay(side*34,-12,24,20,amber);
+    }
+    addBox(0,21,-13,101,1.6,58,silver);
+    for(let i=-4;i<=4;i++)addBeam(i*11,20.05,-13,.34,1.1,56,i%2?warmMetal:graphite);
+    addBox(0,22,-13,82,.22,1.2,amber);
+    // A waiting gallery sits behind the teller line, with real seating and service dividers.
+    for(let i=0;i<4;i++){const x=-30+i*20;addBox(x,1.3,12,14,1.2,4,plum);addBox(x,2.15,12,13,.18,3.7,ivory);addBox(x,4.5,10,1.1,5,.8,silver)}
+    for(let i=-3;i<=3;i++){addBox(i*13,7,-31,1.4,5,1.2,silver);addBox(i*13,9.8,-31,5,.18,1.5,amber)}
    }else if(z.id==='ranking'){
-    for(let i=0;i<5;i++){const x=-27+i*13,h=2.5+(i%3)*1.3;addBox(x,h/2,23,7,h,7,i===2?warmMetal:plum);addBox(x,h+.18,23,5,.12,5,i===2?amber:coral)}
-    for(let i=0;i<3;i++){addCylinder(-22+i*22,10, -35,1.3,1.3,20,i===1?amber:coral,10);addSphere(-22+i*22,21,-35,1.8,i===1?amber:ivory)}
-    addBox(0,1.3,38,42,2.2,5,ivory);addBox(0,2.5,38,39,.12,4,coral);
+    // Ranking forum: a monumental stepped display wall, flanked by deep buttresses and public tiers.
+    addBox(0,15,-45,102,30,3.2,graphite);
+    addBox(0,29,-43.18,94,1.0,.45,silver);
+    for(let i=-5;i<=5;i++){
+     const x=i*8.4,h=20+(Math.abs(i)%3)*3;
+     addBox(x,h/2,-42.9,1.25,h,1.0,i%2?plum:graphite);
+     addBox(x,h/2,-42.25,.18,h*.78,.12,i%2?coral:amber);
+    }
+    for(let i=-1;i<=1;i++){
+     const x=i*29;addBox(x,15,-42.9,25,15,.32,plum);addScreen(x,16,-42.55,20,11,i===0?amber:coral);
+     addBox(x,5.5,-38,23,1.2,5,warmMetal);
+    }
+    for(const side of [-1,1]){
+     addBox(side*51,14,-15,3,28,62,graphite);
+     addBox(side*48.9,14,-15,.18,22,54,coral);
+     addBeam(side*39,29,-14,26,1.6,58,silver);
+    }
+    addStair(0,2,82,5,7,plum);
+    addBox(0,1.4,-8,18,2.8,12,warmMetal);addBox(0,2.95,-8,15,.24,9,ivory);
+    for(let i=-4;i<=4;i++)addBox(i*9,3.5,35,1.1,6,1.2,i%2?coral:silver);
    }else if(z.id==='recruitment'){
-    for(let i=0;i<6;i++){const x=-30+(i%3)*30,zz=i<3?30:43;addBox(x,.95,zz,11,1.5,6,i%2?plum:jade);addBox(x,1.8,zz,10,.18,5,ivory);addBox(x,2.9,zz-2.5,10,2.2,.35,warmMetal)}
-    for(let i=0;i<4;i++){const x=-30+i*20;addBox(x,8,-38,1,15,.8,ivory);addBox(x,8,-37.5,.16,12,.08,i%2?jade:amber)}
-    addTorus(0,4,-5,13,.25,jade);
+    // Recruitment pavilion: three private interview suites with glazed partitions and shared circulation.
+    addBox(0,10,-43,100,20,2.2,graphite);
+    addBox(0,20,-40.9,103,1.5,6,silver);
+    for(let bay=-1;bay<=1;bay++){
+     const x=bay*32;
+     addFacadeBay(x,-40,25,17,jade);
+     addBox(x,8,-30,23,16,1.2,graphite);
+     addBox(x,8,-29.32,19,12,.08,glass);
+     addBox(x,8,-28.95,18,11,.08,jade);
+     addBox(x,1.5,-19,19,2.1,6,plum);
+     addCounter(x,2.0,-37,12,3,ivory,graphite);
+     addBox(x,5.3,-35.1,10,.18,.12,jade);
+     for(const side of [-1,1]){
+      addColumn(x+side*11,-13,14,1.25,graphite);
+      addBeam(x+side*11,14,-13,1.4,1.0,54,silver);
+      addBox(x+side*11,8,-13,.12,11,48,jade);
+     }
+     addBeam(x,17,-13,23,1.1,50,warmMetal);
+     addBox(x,18,-13,17,.16,50,jade);
+     // Privacy fins and acoustic ceiling baffles define each interview room without closing it off.
+     for(let j=-2;j<=2;j++)addBox(x+j*3.2,14,-12,.18,5,31,j%2?plum:graphite);
+     for(let j=-2;j<=2;j++)addBox(x+j*3.2,16,-5,2.4,.22,18,ivory);
+    }
+    addBox(0,2,24,78,1.4,8,graphite);
+    for(let i=-3;i<=3;i++){const x=i*11;addBox(x,3.2,24,7,.16,7,jade);addBox(x,4.1,21,1.1,2.2,.8,silver)}
    }else if(z.id==='commissions'){
-    for(let i=0;i<4;i++){const x=-36+i*24;addBox(x,8,31,13,15,2,plum);addBox(x,8,32.1,10,10,.08,i%2?amber:coral);addBox(x,1.1,31,14,1.8,5,ivory)}
-    for(let i=0;i<6;i++){const x=-32+i*12;addCylinder(x,2, -39,1.3,1.3,3,i%2?copper:warmMetal,8);addCylinder(x,4,-39,.5,.5,1.2,accent,8)}
-    addBox(0,1.1,42,54,1.8,8,graphite);addBox(0,2.1,42,50,.12,7,amber);
-   }else if(z.id==='teams'){
-    for(let i=0;i<8;i++){const a=i*Math.PI/4,x=Math.cos(a)*34,zz=Math.sin(a)*34;const seat=addBox(x,1.05,zz,10,1.6,5,i%2?plum:ivory);seat.rotation.y=-a;addBox(x,2,zz,9,.16,4,i%2?violet:warmMetal)}
-    addCylinder(0,3,0,5,6,5,graphite,12);addCylinder(0,5.8,0,4.1,4.1,.22,ivory,24);addTorus(0,6.1,0,8,.3,violet);
-    for(let i=0;i<4;i++){const a=i*Math.PI/2;addCylinder(Math.cos(a)*18,6,Math.sin(a)*18,.45,.45,9,amber,8)}
-   }else if(z.id==='entertainment'){
-    for(let i=0;i<5;i++){const x=-32+i*16;addCylinder(x,2,-38,3.4,4.4,4,plum,12);addTorus(x,4.3,-38,3.6,.22,i%2?violet:coral);addSphere(x,7,-38,1.3,i%2?violet:amber)}
-    for(let i=0;i<3;i++){const x=-28+i*28;addBox(x,5,34,18,10,1.4,plum);addBox(x,5,34.8,15,7,.08,i%2?violet:coral)}
-    addCylinder(0,.8,0,18,18,1.3,plum,48);addTorus(0,1.6,0,16,.28,violet);addTorus(0,1.65,0,11,.16,coral);
-   }else if(z.id==='food'){
-    const stallColors=[coral,amber,jade];
-    for(let i=0;i<3;i++){const x=-25+i*25;addBox(x,6,-35,19,.7,13,stallColors[i]);addBox(x,3.2,-35,16,5.5,9,ivory);addBox(x,6.4,-35,17,.22,10,warmMetal);addBox(x,4.6,-29.9,14,.25,.12,graphite);addCylinder(x,8,-35,1.4,1.4,1.2,stallColors[i],12)}
-    for(let i=0;i<5;i++){const x=-34+i*17;addCylinder(x,1.4,31,3.3,3.3,2.4,i%2?ivory:coral,20);addCylinder(x,2.7,31,1.1,1.1,.22,warmMetal,20);for(let j=0;j<3;j++){const a=j*Math.PI*2/3;const seat=addBox(x+Math.cos(a)*5,.85,31+Math.sin(a)*5,3.8,1.4,3.8,j%2?jade:copper);seat.rotation.y=-a}}
-    for(let i=0;i<4;i++){const x=-34+i*22;addBox(x,10,-18,1,12,1,warmMetal);addBox(x,16,-18,13,.45,1.2,stallColors[i%3]);addSphere(x,17,-18,.9,amber)}
-   }
-   // District architecture pass: each area receives a distinct structural silhouette,
-   // while its central floor remains open for navigation and the existing service furniture.
-   if(z.id==='exchange'){
-    for(const x of [-48,48]){addBox(x,11,-5,3.2,22,3.2,graphite);addBox(x,11,-3.15,.22,17,.12,amber);addBox(x,22,-5,5,1.5,5,warmMetal)}
-    addBox(0,22,-5,101,2.2,4.2,silver);addBox(0,23.25,-5,84,.18,4.35,amber);
-    for(let i=-3;i<=3;i++){const fin=addBox(i*13,15,-5,.48,12,.65,i%2?ivory:warmMetal);fin.rotation.z=(i%2?1:-1)*.08}
-   }else if(z.id==='ranking'){
-    // Tiered monumental fins create a recognizable ranking facade rather than a flat screen wall.
-    for(let i=0;i<9;i++){const x=-48+i*12,h=17+(i%3)*5;addBox(x,h/2,43,2.4,h,2.4,i%2?graphite:plum);addBox(x,h/2,41.65,.16,h*.78,.12,i%2?coral:amber)}
-    addBox(0,26,43,104,1.8,3.2,silver);addBox(0,27.1,43,94,.16,3.3,coral);
-   }else if(z.id==='recruitment'){
-    // Three open recruitment portals with layered jambs and illuminated lintels.
-    for(let i=-1;i<=1;i++){
-     const x=i*37;
-     for(const side of [-1,1]){addBox(x+side*12,9,-42,2.6,18,2.8,graphite);addBox(x+side*12,9,-40.45,.18,14,.12,jade)}
-     addBox(x,18,-42,26,2,3.4,warmMetal);addBox(x,19.2,-42,21,.16,3.5,ivory);
-     addBox(x,5,-42,17,.22,2.2,jade);
-    }
-   }else if(z.id==='commissions'){
-    // A cantilevered dispatch gantry frames the task terminals and makes the area legible at distance.
-    for(const x of [-48,48]){addBox(x,12,-34,2.8,24,3.2,graphite);addBox(x,12,-32.3,.18,19,.12,amber)}
-    addBox(0,24,-34,101,2.2,4.2,silver);addBox(0,25.35,-34,88,.18,4.35,amber);
-    for(let i=-3;i<=3;i++){const rib=addBox(i*13,19,-34,.45,8,.65,i%2?copper:ivory);rib.rotation.z=(i%2?1:-1)*.12}
-   }else if(z.id==='teams'){
-    // An open overhead assembly ring, held by four sculptural supports; no roof closes the space.
-    for(let i=0;i<4;i++){const a=i*Math.PI/2,x=Math.cos(a)*43,zz=Math.sin(a)*39;addBox(x,10,zz,2.8,20,2.8,graphite);addBox(x,10,zz+1.55,.18,16,.12,violet)}
-    const canopy=new T.Mesh(new T.TorusGeometry(43,.8,10,96),silver);canopy.position.y=21;canopy.scale.set(1,1,.9);area.add(canopy);
-    const innerCanopy=new T.Mesh(new T.TorusGeometry(36,.2,8,96),violet);innerCanopy.position.y=20.4;innerCanopy.scale.set(1,1,.9);area.add(innerCanopy);
-    for(let i=0;i<8;i++){const a=i*Math.PI/4;const rib=addBox(Math.cos(a)*40,20,Math.sin(a)*36,1,.45,8,i%2?violet:warmMetal);rib.rotation.y=-a}
-   }else if(z.id==='entertainment'){
-    // Asymmetric truss frames suggest a simulation pavilion while preserving the open-air character.
-    for(let i=-1;i<=1;i++){
-     const x=i*39,h=i===0?23:18;
-     addBox(x-15,h/2,43,2.2,h,2.2,plum);addBox(x+15,h/2,43,2.2,h,2.2,graphite);
-     addBox(x,h,43,33,1.6,2.8,i===0?violet:warmMetal);
-     for(let k=-1;k<=1;k++){const brace=addBox(x+k*9,h*.72,41.4,.42,7,.35,coral);brace.rotation.z=k*.22}
-    }
-   }else if(z.id==='food'){
-    // A sequence of smaller stall canopies establishes a food-market street rhythm.
-    for(let i=-1;i<=1;i++){
-     const x=i*34;
-     addBox(x,12,-37,25,1.2,15,i===0?warmMetal:ivory);
-     addBox(x,12.8,-37,22,.16,13,i===0?amber:jade);
-     for(const side of [-1,1]){addBox(x+side*11,6,-37,1.5,12,1.5,graphite);addBox(x+side*11,6,-36.1,.14,9,.12,i===0?amber:coral)}
-     addBox(x,8,-29.3,20,.35,.45,i===0?coral:jade);
-    }
-   }
-   // Secondary sculptural pass: make the service buildings read as inhabited architecture,
-   // with distinct entrances, structural depth and recognizable interior spatial rhythms.
-   const front=-z.d*.53,gateAccent=accent;
-   const gateRadius=z.id==='ranking'?13:z.id==='entertainment'?14:z.id==='teams'?12:z.id==='food'?10:11;
-   const gateWidth=gateRadius*1.72,gateHeight=gateRadius*1.82;
-   // Rectilinear portal architecture replaces the repeated circular gateway motif.
-   for(const side of [-1,1]){
-    addBox(side*gateWidth*.5,gateHeight*.5,front,1.8,gateHeight,2.1,graphite);
-    addBox(side*gateWidth*.5,gateHeight*.5,front+1.08,.24,gateHeight*.82,.12,gateAccent);
-    addBox(side*gateWidth*.5,gateHeight*.88,front,2.5,1.15,2.6,warmMetal);
-    addBox(side*gateWidth*.5,1.2,front+1.15,2.5,.42,3.0,silver);
-   }
-   addBox(0,gateHeight,front,gateWidth+2.2,2.0,2.6,z.id==='food'?ivory:silver);
-   addBox(0,gateHeight+1.15,front,gateWidth*.62,.28,2.72,gateAccent);
-   addBox(0,gateHeight*.55,front-.12,.22,gateHeight*.88,.18,ivory);
-   const crest=new T.Mesh(new T.OctahedronGeometry(1.7,1),gateAccent);crest.position.set(0,gateHeight+3,front);area.add(crest);
-   // Broad rectangular forecourt apron is flush with the plaza and connects to the avenue.
-   const apron=new T.Mesh(new T.BoxGeometry(gateWidth*1.42,.22,17),z.id==='food'?paleStone:floorDark);
-   apron.position.set(0,.13,front+8);apron.receiveShadow=true;area.add(apron);
-   addBox(0,.15,front+16,gateWidth*1.18,.12,.32,gateAccent);
-   if(z.id==='exchange'){
-    // Three transaction bays with suspended coin-like medallions and recessed waiting benches.
-    for(let i=-1;i<=1;i++){
-     const x=i*29;
-     addCylinder(x,.32,-20,7.2,7.2,.55,warmMetal,32);
-     const canopy=new T.Mesh(new T.TorusGeometry(7,.34,10,64),amber);canopy.position.set(x,14,-20);area.add(canopy);
-     addBox(x,9,-20,11,1.1,7,graphite);addBox(x,10,-16.2,8,.16,.12,ivory);
-     const coin=new T.Mesh(new T.CylinderGeometry(2.8,2.8,.48,32),warmMetal);coin.rotation.z=Math.PI/2;coin.position.set(x,19,-20);area.add(coin);
-     const coinFace=new T.Mesh(new T.TorusGeometry(1.7,.14,8,48),amber);coinFace.position.set(x,19.28,-20);area.add(coinFace);
-    }
-    for(let i=0;i<4;i++){const x=(i-1.5)*15;addBox(x,.8,42,11,1.2,4,ivory);addBox(x,1.48,42,10,.16,3.7,warmMetal)}
-    addTorus(0,25,-20,28,.28,amber);
-   }else if(z.id==='ranking'){
-    // A stepped public amphitheatre faces the ranking wall, with a central ceremonial podium.
-    for(let row=0;row<4;row++){
-     const depth=5.5+row*4.2,y=.65+row*.72,zp=20+row*5.1;
-     addBox(0,y,zp,88-row*9,1.15,4.8, row%2?plum:graphite);
-     addBox(0,y+.62,zp,84-row*9,.12,4.4,row%2?coral:warmMetal);
-    }
-    const podium=new T.Mesh(new T.CylinderGeometry(7,9,2.2,10),warmMetal);podium.position.set(0,1.1,-2);area.add(podium);
-    const podiumTop=new T.Mesh(new T.CylinderGeometry(6.2,6.2,.22,10),ivory);podiumTop.position.set(0,2.3,-2);area.add(podiumTop);
-    for(let i=-3;i<=3;i++){const fin=addBox(i*7,14,-45,.65,28,.8,i%2?coral:graphite);fin.rotation.z=(i%2?1:-1)*.055}
-   }else if(z.id==='recruitment'){
-    // Six semi-private interview pods, each framed by a circular identity halo.
-    for(let i=0;i<6;i++){
-     const x=(i%3-1)*31,zp=i<3?17:42;
-     const pod=new T.Mesh(new T.CylinderGeometry(7.5,8.2,1.2,12),plum);pod.position.set(x,.65,zp);area.add(pod);
-     const halo=new T.Mesh(new T.TorusGeometry(6.2,.3,10,64),i%2?jade:amber);halo.position.set(x,7,zp-3);area.add(halo);
-     for(const side of [-1,1]){addBox(x+side*6.5,4,zp-3,1,8,1,graphite);addBox(x+side*6.5,4,zp-2.35,.12,6,.08,i%2?jade:amber)}
-     const identity=new T.Mesh(new T.OctahedronGeometry(1.6,1),i%2?jade:ivory);identity.position.set(x,10,zp-3);area.add(identity);
-    }
-   }else if(z.id==='commissions'){
-    // Tiered dispatch consoles and a high-level command dais distinguish contract classes.
-    for(let tier=0;tier<3;tier++){
-     const x=-36+tier*36,zp=15+tier*7;
-     const plinth=new T.Mesh(new T.CylinderGeometry(8,9,1.4,8),tier===1?warmMetal:graphite);plinth.position.set(x,.7,zp);area.add(plinth);
-     const terminal=new T.Mesh(new T.BoxGeometry(10,7,2),tier===1?ivory:plum);terminal.position.set(x,5,zp);area.add(terminal);
-     const screen=new T.Mesh(new T.PlaneGeometry(8,4.8),new T.MeshBasicMaterial({color:tier===1?0xffc77e:0x80d8e5,transparent:true,opacity:.78,side:T.DoubleSide}));screen.position.set(x,5.2,zp-1.08);area.add(screen);
-     for(let j=0;j<3;j++){const node=new T.Mesh(new T.OctahedronGeometry(.72,0),tier===1?amber:cyan);node.position.set(x+(j-1)*2.3,9.3,zp);area.add(node)}
-    }
-    const commandRing=new T.Mesh(new T.TorusGeometry(24,.48,10,80),warmMetal);commandRing.rotation.x=Math.PI/2;commandRing.position.set(0,17,3);area.add(commandRing);
-   }else if(z.id==='teams'){
-    // Four team cells branch from the central gathering table; each has its own seat arc and beacon.
-    for(let cell=0;cell<4;cell++){
-     const a=cell*Math.PI/2,x=Math.cos(a)*27,zp=Math.sin(a)*27;
-     const pad=new T.Mesh(new T.CylinderGeometry(10,11,1,12),cell%2?plum:graphite);pad.position.set(x,.5,zp);area.add(pad);
-     const ring=new T.Mesh(new T.TorusGeometry(9,.22,8,56),violet);ring.rotation.x=Math.PI/2;ring.position.set(x,1.1,zp);area.add(ring);
-     for(let j=0;j<3;j++){const sa=a+(j-1)*.48,sx=x+Math.cos(sa)*7,sz=zp+Math.sin(sa)*7;const seat=addBox(sx,1.2,sz,4.8,1.5,3.2,j%2?ivory:plum);seat.rotation.y=-sa}
-     const beacon=new T.Mesh(new T.OctahedronGeometry(2.1,1),cell%2?violet:amber);beacon.position.set(x,9,zp);area.add(beacon);
-    }
-    const centralMap=new T.Mesh(new T.IcosahedronGeometry(4.2,1),new T.MeshPhysicalMaterial({color:0x9fe5ed,metalness:.5,roughness:.16,transparent:true,opacity:.82,emissive:0x1b6573,emissiveIntensity:.55}));centralMap.position.set(0,9,0);area.add(centralMap);
-   }else if(z.id==='entertainment'){
-    // Five distinct simulation bays: circular launch pads, overhead rings and angled entry fins.
+    // Dispatch center: a two-level mission control wall with cantilevered terminal gantries.
+    addBox(0,13,-45,104,26,3.2,graphite);
+    addBox(0,27,-43.1,108,1.6,4.2,silver);
     for(let i=0;i<5;i++){
-     const x=-40+i*20,zp=18+(i%2)*14;
-     const pad=new T.Mesh(new T.CylinderGeometry(7.2,8.5,.9,12),plum);pad.position.set(x,.5,zp);area.add(pad);
-     const ring=new T.Mesh(new T.TorusGeometry(6.6,.34,10,64),i%2?violet:coral);ring.rotation.x=Math.PI/2;ring.position.set(x,1,zp);area.add(ring);
-     const arch=new T.Mesh(new T.TorusGeometry(5.2,.38,10,64),i%2?violet:amber);arch.position.set(x,6,zp-3);area.add(arch);
-     for(const side of [-1,1]){const fin=addBox(x+side*5,4,zp-3,.65,8,.85,graphite);fin.rotation.z=side*.12}
-     const orb=new T.Mesh(new T.IcosahedronGeometry(1.6,1),i%2?violet:amber);orb.position.set(x,10,zp-3);area.add(orb);
+     const x=-40+i*20;
+     addBox(x,11,-42.95,17,18,.3,plum);
+     addScreen(x,15,-42.7,13,9,i%2?cyan:amber);
+     addBox(x,3,-39,16,1.2,5,graphite);
+     addBox(x,4,-37,14,.18,3,ivory);
+     for(let j=-1;j<=1;j++)addBox(x+j*4,6,-37,.55,4,.6,i%2?amber:jade);
     }
-    const canopyRing=new T.Mesh(new T.TorusGeometry(47,.52,10,96),violet);canopyRing.position.set(0,24,22);area.add(canopyRing);
+    for(const side of [-1,1]){
+     addBox(side*52,13,-12,3,26,66,graphite);
+     addBox(side*49.8,13,-12,.18,21,58,amber);
+     addTrussBay(side*37,-12,27,23,amber);
+    }
+    addBox(0,24,-13,105,1.8,62,silver);
+    for(let i=-4;i<=4;i++)addBeam(i*12,22.9,-13,.4,1.3,60,i%2?amber:graphite);
+    // Separate task-class consoles have different housings and approach clearances.
+    for(let tier=0;tier<3;tier++){
+     const x=(tier-1)*31,zp=10+tier*7;
+     addBox(x,1.2,zp,24,2.4,13,tier===1?warmMetal:graphite);
+     addBox(x,2.55,zp-1,21,.18,10,ivory);
+     for(let j=-1;j<=1;j++){addBox(x+j*6,5,zp-4,4,5,1.2,plum);addScreen(x+j*6,6,zp-3.3,3,2.8,tier===1?amber:cyan)}
+    }
+    addBox(0,1.1,39,78,2.0,8,graphite);addBox(0,2.2,39,74,.16,7,amber);
+   }else if(z.id==='teams'){
+    // Team assembly hall: four rectangular meeting cells around a shared tactical operations table.
+    addBox(0,1.1,-5,30,2.2,20,graphite);addBox(0,2.35,-5,27,.18,17,ivory);
+    addScreen(0,9,-44,28,13,violet);
+    for(let cell=0;cell<4;cell++){
+     const sx=(cell%2?1:-1)*31,sz=cell<2?-28:27;
+     addBox(sx,7,sz,30,14,1.2,graphite);
+     addBox(sx,7,sz+.68,26,10,.08,glass);
+     addBox(sx,1.2,sz+7,26,2.4,12,plum);
+     addBox(sx,2.55,sz+7,23,.18,10,ivory);
+     for(let j=-1;j<=1;j++){addBox(sx+j*8,4,sz+13,1.2,4,1.4,violet);addBox(sx+j*8,6.3,sz+13,4,.18,1.6,warmMetal)}
+     addBeam(sx,16,sz,30,1.3,4,silver);
+     for(let j=-1;j<=1;j++)addBeam(sx+j*8,13,sz-2,.22,5,.25,violet,j*.12);
+    }
+    for(const side of [-1,1]){
+     addColumn(side*49,-7,23,2.4,graphite);
+     addBeam(side*49,23,-7,2.6,1.4,90,silver);
+    }
+    addBeam(0,24,-7,100,1.8,3.5,warmMetal);
+    for(let i=-4;i<=4;i++)addBeam(i*12,22.8,-7,.36,2,86,i%2?violet:graphite);
+    for(let i=-2;i<=2;i++){addBox(i*8,1.1,7,7,2.2,6,graphite);addBox(i*8,2.35,7,6.4,.18,5.4,cyan)}
+    for(let i=-3;i<=3;i++){const x=i*11;addBox(x,.85,43,9,1.5,4,plum);addBox(x,1.75,43,8,.16,3.8,violet)}
+   }else if(z.id==='entertainment'){
+    // Simulation pavilion: three large hangar bays with deep portal frames and enclosed equipment shells.
+    addBox(0,10,-44,104,20,2.8,graphite);
+    for(let bay=-1;bay<=1;bay++){
+     const x=bay*34;
+     addTrussBay(x,-20,28,bay===0?25:21,violet);
+     addBox(x,8,-18,24,16,1.5,plum);
+     addBox(x,8,-17.1,20,12,.12,glass);
+     addBox(x,8,-16.85,18,10,.1,violet);
+     addBox(x,2,-5,20,2.2,8,graphite);
+     addBox(x,3.25,-5,17,.18,7,ivory);
+     for(let side=-1;side<=1;side+=2){
+      const fin=addBox(x+side*13,10,-5,1.1,18,28,graphite);fin.rotation.z=side*.1;
+      addBox(x+side*11.9,10,-4,.18,14,24,violet);
+     }
+     // Service hatch, ventilation louvres and reinforced lower casing.
+     addBox(x,3,-14,15,5,1.2,silver);
+     for(let j=-3;j<=3;j++)addBox(x+j*2,3,-13.25,.22,3.8,.12,graphite);
+     addBox(x,17,-7,21,1.2,18,warmMetal);
+    }
+    addBox(0,1.2,27,82,2.4,14,plum);addBox(0,2.55,27,78,.18,12,violet);
+    for(let i=-2;i<=2;i++){const x=i*16;addBox(x,6,38,8,8,1.2,graphite);addScreen(x,7,38.68,6,5,violet)}
    }else if(z.id==='food'){
-    // Three individually framed food stalls and a shared circular dining commons.
-    for(let i=0;i<3;i++){
-     const x=(i-1)*34,zp=-15;
-     const roof=new T.Mesh(new T.CylinderGeometry(10,10,.75,6),i===1?warmMetal:ivory);roof.position.set(x,11,zp);roof.rotation.y=Math.PI/6;area.add(roof);
-     const roofRim=new T.Mesh(new T.TorusGeometry(9,.22,8,64),i===1?amber:jade);roofRim.position.set(x,11.45,zp);area.add(roofRim);
-     for(let j=0;j<3;j++){const a=j*Math.PI*2/3;const sx=x+Math.cos(a)*7.5,sz=zp+Math.sin(a)*7.5;addCylinder(sx,5.4,sz,.34,.72,10,graphite,8);addCylinder(sx,10.4,sz,.7,.7,.38,i===1?amber:jade,10)}
+    // Food hall: a covered market street with three service fronts and a shared dining room.
+    addBox(0,9,-44,104,18,2.8,graphite);
+    addBox(0,18.5,-41.8,108,1.3,5.2,warmMetal);
+    for(let bay=0;bay<3;bay++){
+     const x=(bay-1)*34,stallAccent=bay===0?coral:bay===1?amber:jade;
+     addFacadeBay(x,-40,28,15,stallAccent);
+     addBox(x,5,-36,25,10,1.0,ivory);
+     addBox(x,6,-35.35,21,6,.08,stallAccent);
+     addCounter(x,2.1,-28,23,5,ivory,graphite);
+     addBox(x,8,-27.4,19,.35,.22,warmMetal);
+     addBox(x,10,-27.2,1.1,3.4,.8,stallAccent);
+     for(let j=-2;j<=2;j++){addBox(x+j*4.1,3.3,-27.3,.22,2.6,.22,copper);addBox(x+j*4.1,4.8,-27.3,3.2,.16,.3,ivory)}
+     // Each stall gets a service hatch and a recessed prep counter behind the public counter.
+     addCounter(x,1.8,-41,20,3,plum,graphite);
+     for(let j=-1;j<=1;j++){addBox(x+j*6,4,-43,.35,5,.35,silver);addBox(x+j*6,6.6,-43,4,.22,.5,stallAccent)}
     }
-    const dining=new T.Mesh(new T.CylinderGeometry(17,18,1.1,12),paleStone);dining.position.set(0,.55,26);area.add(dining);
-    const diningRim=new T.Mesh(new T.TorusGeometry(17,.28,8,88),coral);diningRim.rotation.x=Math.PI/2;diningRim.position.set(0,1.15,26);area.add(diningRim);
-    for(let i=0;i<8;i++){const a=i*Math.PI/4,x=Math.cos(a)*22,zp=26+Math.sin(a)*22;const table=new T.Mesh(new T.CylinderGeometry(2.5,2.8,1.1,10),copper);table.position.set(x,1.2,zp);area.add(table);for(let j=0;j<3;j++){const sa=a+j*Math.PI*2/3,sx=x+Math.cos(sa)*4.2,sz=zp+Math.sin(sa)*4.2;addBox(sx,.85,sz,2.8,1.3,2.8,j%2?jade:ivory)}}
+    for(const side of [-1,1]){
+     addColumn(side*51,-12,18,2.4,graphite);
+     addBeam(side*51,18,-12,2.5,1.2,62,silver);
+     addBox(side*49.3,9,-12,.16,14,58,stallAccent);
+    }
+    addBeam(0,19,-12,104,1.6,62,ivory);
+    for(let i=-4;i<=4;i++)addBeam(i*12,18,-12,.34,1.2,58,i%2?jade:coral);
+    // Shared dining room: rectangular tables, benches, lighting rails and a clear central aisle.
+    for(let row=0;row<3;row++)for(let col=-2;col<=2;col++){
+     const x=col*15,zz=13+row*13;
+     addBox(x,1.6,zz,9,1.2,5,ivory);
+     addBox(x,2.28,zz,8.7,.16,4.7,copper);
+     for(const side of [-1,1]){addBox(x+side*6,1,zz,3.2,1.5,4,plum);addBox(x+side*6,.3,zz,2.8,.18,3.7,warmMetal)}
+    }
+    for(let i=-3;i<=3;i++){const x=i*14;addColumn(x,-2,9,1.0,warmMetal);addBox(x,13,-2,9,.45,1.4,ivory)}
+   }
+   // Interior reveals, door jambs and recessed lighting complete each building envelope.
+   for(let side=-1;side<=1;side+=2){
+    addBox(side*49,8,-13,1.2,16,60,graphite);
+    addBox(side*48.25,8,-13,.12,11,52,accentMat);
    }
    zoneObjects.push(area);
   });
