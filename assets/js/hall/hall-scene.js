@@ -29,7 +29,7 @@
 
   const addCylinder=(parent,x,y,z,rt,rb,h,material,segments=16)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
   const addTorus=(parent,x,y,z,r,t,material)=>{const o=new T.Mesh(new T.TorusGeometry(r,t,10,56),material);o.position.set(x,y,z);parent.add(o);return o};
-  const titanium=mat(0x77838d,.62,.48),silver=mat(0x9aa5ab,.66,.42),graphite=mat(0x1d2934,.48,.62),dark=mat(0x0d1721,.38,.68),floorMat=mat(0x414c58,.18,.82),floorDark=mat(0x26333f,.34,.72),cyan=new T.MeshStandardMaterial({color:0x789da6,emissive:0x183b45,emissiveIntensity:.16,metalness:.22,roughness:.52,envMapIntensity:.76}),whiteGlow=new T.MeshBasicMaterial({color:0xa9c1c4,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x8faeb5,metalness:.08,roughness:.34,transparent:false,opacity:1,depthWrite:true,transmission:.1,thickness:.16,clearcoat:.24,clearcoatRoughness:.34,envMapIntensity:.82,side:T.DoubleSide});
+  const titanium=mat(0x77838d,.62,.48),silver=mat(0x9aa5ab,.66,.42),graphite=mat(0x1d2934,.48,.62),dark=mat(0x0d1721,.38,.68),floorMat=mat(0x414c58,.18,.82),floorDark=mat(0x26333f,.34,.72),cyan=new T.MeshStandardMaterial({color:0x789da6,emissive:0x183b45,emissiveIntensity:.16,metalness:.22,roughness:.52,envMapIntensity:.76}),whiteGlow=new T.MeshBasicMaterial({color:0xa9c1c4,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x8faeb5,metalness:.08,roughness:.34,transparent:false,opacity:1,depthWrite:true,transmission:.1,clearcoat:.24,clearcoatRoughness:.34,envMapIntensity:.82,side:T.DoubleSide});
   // Layered cool-neutral lighting: broad ambient fill, a directional key, a soft blue bounce and a restrained warm rim.
   root.add(new T.HemisphereLight(0x9baeb8,0x111a24,.48));
   const key=new T.DirectionalLight(0xb9c8d0,.68);key.position.set(-42,92,54);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-360;key.shadow.camera.right=360;key.shadow.camera.top=310;key.shadow.camera.bottom=-310;key.shadow.camera.near=1;key.shadow.camera.far=520;key.shadow.bias=-.00022;key.shadow.normalBias=.045;key.shadow.radius=5;key.shadow.camera.updateProjectionMatrix();root.add(key);
@@ -48,6 +48,7 @@
   const violet=new T.MeshStandardMaterial({color:0x656577,emissive:0x29283e,emissiveIntensity:.09,metalness:.18,roughness:.66,envMapIntensity:.72});
   const coral=new T.MeshStandardMaterial({color:0x936b68,emissive:0x3e2425,emissiveIntensity:.06,metalness:.1,roughness:.72,envMapIntensity:.7});
   const jade=new T.MeshStandardMaterial({color:0x65786f,emissive:0x24352f,emissiveIntensity:.055,metalness:.08,roughness:.76,envMapIntensity:.68});
+   const plum=mat(0x514b59,.22,.78); // muted ink-plum for signs and upholstered details
   const framePoints=[new T.Vector3(-312,57,-248),new T.Vector3(-20,57,-248),new T.Vector3(273,57,-248),new T.Vector3(273,57,-120),new T.Vector3(273,57,0),new T.Vector3(273,57,120),new T.Vector3(273,57,248),new T.Vector3(-20,57,248),new T.Vector3(-312,57,248),new T.Vector3(-312,57,0)];
   const upperFrame=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(framePoints,true,'centripetal'),240,1.65,10,true),graphite);upperFrame.castShadow=true;perimeter.add(upperFrame);
   const lowerPoints=framePoints.map(p=>new T.Vector3(p.x,7.5,p.z));
