@@ -10,9 +10,9 @@ const DUNGEON_BOARD_TILES=Array.from({length:36},(_,i)=>{const t=DUNGEON_BOARD_T
 const DUNGEON_STAT_LABELS={energy:'精力',hunger:'食欲',clean:'卫生',fun:'娱乐',agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'};
 const DUNGEON_STAT_KEYS=new Set(Object.keys(DUNGEON_STAT_LABELS));
 const DUNGEON_ROUND_STAGES=[
- {title:'第一圈 · 规则确认',goal:'目标：确认校园规则，找到安全路线。不要贸然接近异常。',center:'规则'},
- {title:'第二圈 · 深入调查',goal:'目标：穿过异常区域，寻找线索并判断危险来源。',center:'调查'},
- {title:'第三圈 · 高危逃生',goal:'目标：异常全面扩散，优先寻找出口并活着离开。',center:'逃生'}
+ {title:'01 / 规则',center:'规则',mark:'I'},
+ {title:'02 / 调查',center:'调查',mark:'II'},
+ {title:'03 / 逃生',center:'逃生',mark:'III'}
 ];
 
 const DUNGEON_EVENT_LIBRARY={
@@ -39,7 +39,7 @@ function renderDungeonBoard(){
  const lap=Math.min(3,Math.floor((board.steps||0)/36)+1),progress=Math.min(100,(board.steps||0)/108*100),current=board.position||0,stage=DUNGEON_ROUND_STAGES[lap-1];
  const cells=DUNGEON_BOARD_TILES.map((tile,i)=>{const p=dungeonBoardPosition(i),here=i===current,round=Math.floor(i/12)+1;return '<div class="dungeon-board-cell tone-'+tile[0]+' tile-variant-'+tile[3]+' lap-'+round+' '+(here?'is-here':'')+'" data-board-cell="'+i+'" aria-label="'+(i+1)+' '+tile[1]+'" style="grid-row:'+p.r+';grid-column:'+p.c+'"><span>'+tile[2]+'</span><b>'+String(i+1).padStart(2,'0')+'</b>'+(here?dungeonPlayerTokenMarkup():'')+'</div>'}).join('');
  const roll=Number(board.lastRoll)||0;
- $('choices').innerHTML='<section class="dungeon-board-cover"><div class="dungeon-board-title">校园</div><div class="dungeon-round-heading"><strong>'+stage.title+'</strong><p>'+stage.goal+'</p></div><div class="dungeon-board-meta"><span>'+mission.tier+'</span><span>'+lap+' / 3</span><span>通关修正 '+((board.chanceModifier||0)>=0?'+':'')+(board.chanceModifier||0)+'%</span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><small>'+stage.center+'</small><strong>'+lap+'</strong><small> / 3</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display">'+dungeonDiceMarkup(roll||1)+'</div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=108||board.isRolling||board.isMoving?'disabled':'')+'><span>投掷</span></button></section>';
+ $('choices').innerHTML='<section class="dungeon-board-cover stage-'+lap+'"><div class="dungeon-campus-art" aria-hidden="true"><i class="campus-moon"></i><i class="campus-tower"></i><i class="campus-building campus-building-a"></i><i class="campus-building campus-building-b"></i><i class="campus-fog"></i></div><div class="dungeon-cover-top"><span class="dungeon-board-title">校园</span><span class="dungeon-stage-mark">'+stage.mark+'</span></div><div class="dungeon-round-heading"><strong>'+stage.title+'</strong><span>'+mission.tier+'</span></div><div class="dungeon-board-meta"><span>'+lap+' / 3</span><span>通关 '+((board.chanceModifier||0)>=0?'+':'')+(board.chanceModifier||0)+'%</span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><small>'+stage.center+'</small><strong>'+lap+'</strong><small> / 3</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display">'+dungeonDiceMarkup(roll||1)+'</div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=108||board.isRolling||board.isMoving?'disabled':'')+'><span>投掷</span></button></section>';
  const cube=$('choices').querySelector('.dungeon-dice-cube');if(cube)cube.style.transform=dungeonDiceFinalTransform(roll||1);
  const button=$('dungeonRoll');if(button)button.onclick=rollDungeonBoard;
 }
@@ -55,12 +55,12 @@ function animateDungeonBoardMove(mission,remaining){
  if(remaining<=0){
   b.isMoving=false;b.moveTarget=null;const tile=DUNGEON_BOARD_TILES[b.position],base=DUNGEON_EVENT_LIBRARY[tile[0]],event={...base,options:base.options.map(o=>({...o,effects:{...o.effects}}))};
   if(b.steps===36||b.steps===72){event.title=b.steps===36?'广播室':'地下档案室';event.desc=b.steps===36?'广播传出你的声音，控制台的监控画面却停留在十分钟前。':'地下档案柜里每份档案都贴着同一张照片，照片拍摄日期是明天。';event.options=[{label:'检查广播或档案',effects:{intelligence:1,perception:1},chance:1},{label:'破坏异常设备',effects:{strength:1,energy:-1},chance:1},{label:'立即离开现场',effects:{agility:1,willpower:1},chance:-1}]}
-  b.pending={event,tile:tile[0]};save();if($('choices')?.classList.contains('dungeon-board-view'))renderDungeonEvent();return;
+  b.pending={event,tile:tile[0]};save();setTimeout(()=>{if(s.activeDungeon===mission&&mission.board?.pending&&$('choices')?.classList.contains('dungeon-board-view'))renderDungeonEvent()},420);return;
  }
  b.steps=Math.min(108,b.steps+1);b.position=(b.steps-1)%36;dungeonMoveTokenTo(b.position);
  const root=$('choices'),progress=root?.querySelector('.dungeon-board-progress i');if(progress)progress.style.width=(b.steps/108*100)+'%';
  const center=root?.querySelector('.dungeon-board-center strong');if(center)center.textContent=String(Math.min(3,Math.floor(b.steps/36)+1));
- setTimeout(()=>animateDungeonBoardMove(mission,remaining-1),125);
+ setTimeout(()=>animateDungeonBoardMove(mission,remaining-1),330);
 }
 function rollDungeonBoard(){
  const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
@@ -78,7 +78,7 @@ function renderDungeonResult(){
  const rows=(r.changes||[]).map(x=>'<div class="dungeon-result-change '+(x.delta>0?'is-up':x.delta<0?'is-down':'')+'"><span>'+dungeonEffectLabel(x.key)+'</span><b>'+(x.delta>0?'+':'')+x.delta+'</b></div>').join('');
  const chance=r.chanceDelta?'<div class="dungeon-result-change '+(r.chanceDelta>0?'is-up':'is-down')+'"><span>通关概率修正</span><b>'+(r.chanceDelta>0?'+':'')+r.chanceDelta+'%</b></div>':'';
  const item=r.itemName?'<div class="dungeon-result-item">＋ '+r.itemName+'</div>':'';
- const none=!rows&&!chance&&!item?'<p class="dungeon-result-note">没有获得额外收益，行动消耗了时间。</p>':'';
+ const none='';
  $('choices').innerHTML='<section class="dungeon-event-modal dungeon-result-modal"><div class="dungeon-result-mark">✓</div><small>行动结果</small><h2>'+r.title+'</h2><p class="dungeon-result-choice">'+r.choice+'</p><div class="dungeon-result-changes">'+rows+chance+item+none+'</div><button class="dungeon-result-continue" id="continueDungeonBoard">返回棋盘</button></section>';
  const button=$('continueDungeonBoard');if(button)button.onclick=continueDungeonBoard;
 }
