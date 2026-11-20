@@ -1933,8 +1933,8 @@ function initArday3D(){
   function createOwnedFurniture(name,record=null){
    const model=furnitureModelBuilder.build(name,record);
    if(!model)return null;
-   const {variant,modelName,room,parent,id,group,restoring,width:initialWidth,depth:initialDepth,height,surfaceType:initialSurfaceType,surfaceY:initialSurfaceY,supportId:initialSupportId,wallAxis,wallSide,anchor,action}=model;
-   let width=initialWidth,depth=initialDepth,surfaceType=initialSurfaceType,surfaceY=initialSurfaceY,supportId=initialSupportId;
+   const {variant,modelName,room,parent,id,group,restoring,width:initialWidth,depth:initialDepth,height,surfaceType:initialSurfaceType,surfaceY:initialSurfaceY,supportId:initialSupportId,wallAxis,wallSide,anchor}=model;
+   let width=initialWidth,depth=initialDepth,surfaceType=initialSurfaceType,surfaceY=initialSurfaceY,supportId=initialSupportId,action=model.action;
    let modelMeshCount=0;
    group.traverse(object=>{if(object.isMesh){modelMeshCount++;object.visible=true;object.frustumCulled=false;object.castShadow=true;object.receiveShadow=true;if(object.material){object.material.visible=true;object.material.side=T.DoubleSide}}});
    if(modelMeshCount<2){parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
