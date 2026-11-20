@@ -165,7 +165,7 @@
    const dx=z.x-hub.x,dz=z.z-hub.z,len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len;
    const sx=hub.x+ux*34,sz=hub.z+uz*34,ex=z.x-ux*70,ez=z.z-uz*70;
    const accent=routeAccent[z.id];
-   const routeY=-.1625+i*.004;
+   const routeY=-.105+i*.003; // Keep route inlays clearly above the continuous floor to prevent depth-buffer fighting.
    strip(sx,sz,ex,ez,15,floorDark,routeY);
    strip(sx,sz,ex,ez,1.25,accent,routeY+.028);
    const px=-uz*5.2,pz=ux*5.2;
@@ -260,7 +260,7 @@
      edge(r1,r0,backBase+r1,backBase+r0);
     }
     const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();
-    const mesh=new T.Mesh(g,material);mesh.castShadow=true;mesh.receiveShadow=true;area.add(mesh);return mesh;
+    const volumeMaterial=material.clone();volumeMaterial.side=T.DoubleSide;const mesh=new T.Mesh(g,volumeMaterial);mesh.castShadow=true;mesh.receiveShadow=true;area.add(mesh);return mesh;
    };
    const addCurvedGlazing=(x,y,z,w,h,d,material,bulge=.8)=>{
     const pane=addCurvedVolume(x,y,z,w,h,d,material,bulge);
@@ -273,29 +273,17 @@
     return pane;
    };
    const addSculptedFacade=(x,y,z,w,h,depth,material,bulge=1.2)=>{
-    // A continuous, subtly bowed architectural skin with real surface curvature.
-    const verts=[],uv=[],indices=[],nx=36,ny=10;
-    for(let iy=0;iy<=ny;iy++)for(let ix=0;ix<=nx;ix++){
-     const u=ix/nx,v=iy/ny,xx=(u-.5)*w,yy=(v-.5)*h;
-     const zz=-bulge*(1-4*(u-.5)*(u-.5));
-     verts.push(x+xx,y+yy,z-depth/2+zz);uv.push(u,v);
-    }
-    for(let iy=0;iy<ny;iy++)for(let ix=0;ix<nx;ix++){
-     const a=iy*(nx+1)+ix,b=a+1,d=a+nx+1,e=d+1;
-     indices.push(a,d,b,b,d,e);
-    }
-    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();
-    const m=material.clone();m.side=T.DoubleSide;const skin=new T.Mesh(g,m);skin.castShadow=true;skin.receiveShadow=true;area.add(skin);
-    // Curved perimeter rails and shallow vertical ribs articulate the facade without a box-grid appearance.
-    const curveAt=(u)=>new T.Vector3(x+(u-.5)*w,y,z-depth/2-bulge*(1-4*(u-.5)*(u-.5))-.08);
-    for(const u of [0,.25,.5,.75,1]){
-     const p0=curveAt(u),p1=p0.clone();p0.y=y-h/2;p1.y=y+h/2;
-     const path=new T.CatmullRomCurve3([p0,p1]);
-     const rib=new T.Mesh(new T.TubeGeometry(path,12,.055,6,false),u===.5?warmMetal:silver);area.add(rib);
+    // Use a closed curved volume, not a single two-sided sheet: the facade has real thickness.
+    const skin=addCurvedVolume(x,y,z,w,h,depth,material,bulge);
+    const profileCurve=(u)=>z-depth/2-bulge*(1-4*u*u)-.12;
+    for(const u of [-.48,-.24,0,.24,.48]){
+     const xx=x+u*w,zz=profileCurve(u);
+     const path=new T.CatmullRomCurve3([new T.Vector3(xx,y-h/2,zz),new T.Vector3(xx,y,zz-.04),new T.Vector3(xx,y+h/2,zz)]);
+     area.add(new T.Mesh(new T.TubeGeometry(path,16,.065,7,false),u===0?warmMetal:silver));
     }
     for(const yy of [-h/2,h/2]){
-     const pts=[];for(let k=0;k<=24;k++){const u=k/24,p=curveAt(u);p.y=y+yy;pts.push(p)}
-     const rail=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),48,.09,7,false),warmMetal);area.add(rail);
+     const pts=[];for(let k=0;k<=32;k++){const u=k/32-.5;pts.push(new T.Vector3(x+u*w,y+yy,z-depth/2-bulge*(1-4*u*u)-.1))}
+     area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),48,.11,8,false),warmMetal));
     }
     return skin;
    };
