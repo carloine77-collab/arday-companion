@@ -1656,7 +1656,7 @@ function initArday3D(){
    else{
     /* Position is restored from the canonical placed entity above. */
    }
-   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:modelName==='门',doorDestination:record?.destination||group.userData.roomTarget||null};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;}
+   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:!!group.userData.isDoor,doorDestination:record?.destination||group.userData.roomTarget||null};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;}
    const existing=document.querySelector('.spot-'+id);
    item.button=existing||document.createElement('button');
    if(!existing){
@@ -1680,20 +1680,6 @@ function initArday3D(){
    furnitureRegistry.push(item);return item;
   }
   const furnitureHotspots=[];
-  // One matching default door per room: living opens to the public hall; private rooms return to the living room.
-  const defaultDoorRecords=[
-   {id:'default-door-living',name:'默认室内木门',room:'living',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'left',wallOffset:0,x:-5.16,y:0,z:0,destination:'hall'},
-   {id:'default-door-bedroom',name:'默认室内木门',room:'bedroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
-   {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
-   {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
-  ];
-  defaultDoorRecords.forEach(def=>{
-   let record=s.placed.find(entry=>entry.id===def.id);
-   if(!record){record={...def};s.placed.push(record)}
-   record.name='默认室内木门';record.kind='furniture';record.destination=record.destination||def.destination;
-   const existing=furnitureRegistry.find(entry=>entry.id===record.id);
-   if(!existing)createOwnedFurniture(record.name,record);
-  });
   function enterRoomFromDoor(mode){
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode');
    if(mode==='kitchen')stage.classList.add('kitchen-mode');
@@ -2653,7 +2639,7 @@ function initArday3D(){
     for(const x of [-.405,.405])for(const y of [-.56,.56])cyl(x,y,.075,.018,.018,.018,gold,10);
     box(0,.63,.075,.72,.018,.012,frame);
    }else if(modelName==='门'){
-    width=1.24;depth=.2;height=2.42;wallAxis='x';wallSide='back';anchor=[0,2.55];
+    width=1.24;depth=.2;height=2.42;wallAxis='x';wallSide='back';anchor=[0,2.55];group.userData.isDoor=true;
     const isGlass=variant==='白橡木玻璃门',isCream=variant==='奶油法式双线门',isRattan=variant==='藤编门',isSliding=variant==='深色格栅推拉门',isArch=variant==='复古拱顶门';
     const timber=mat(isCream?0xe4d5bd:isGlass?0xb28d60:isRattan?0x9a7047:isSliding?0x554a42:isArch?0x876047:0x76513a,.72);
     const panel=mat(isCream?0xf0e6d7:isRattan?0xc49a68:isSliding?0x75675b:isArch?0xb28a63:0xa9845e,.82);
@@ -3243,6 +3229,20 @@ function initArday3D(){
    }
   });
 
+  // One matching default door per room: living opens to the public hall; private rooms return to the living room.
+  const defaultDoorRecords=[
+   {id:'default-door-living',name:'默认室内木门',room:'living',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'left',wallOffset:0,x:-5.16,y:0,z:0,destination:'hall'},
+   {id:'default-door-bedroom',name:'默认室内木门',room:'bedroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
+   {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
+   {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
+  ];
+  defaultDoorRecords.forEach(def=>{
+   let record=s.placed.find(entry=>entry.id===def.id);
+   if(!record){record={...def};s.placed.push(record)}
+   record.name='默认室内木门';record.kind='furniture';record.destination=record.destination||def.destination;
+   const existing=furnitureRegistry.find(entry=>entry.id===record.id);
+   if(!existing)createOwnedFurniture(record.name,record);
+  });
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
   const canPlaceFurniture=(item,x,z,angle=item.group.rotation.y)=>window.ArdayFurniturePlacement.canPlaceFurniture(item,x,z,angle,furnitureRegistry,roomBounds,canPlaceOnWall);
