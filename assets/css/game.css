@@ -1569,3 +1569,6 @@ html body .stage .drawer.profile-expanded.open .choices{
 .current-schedule-item>strong{min-width:0;font:500 10px/1.4 "Noto Serif SC",serif;color:#4c5148;overflow-wrap:anywhere}
 .guild-official-caption{font:10px "Noto Serif SC",serif;color:#c9b995;letter-spacing:.08em}
 .guild-bureau-grant-note{margin:8px 0 2px;color:#8c806c;font:10px/1.6 "Noto Serif SC",serif}
+
+/* The schedule heading is not a fourth status section divider. */
+.current-schedule-group .stat-group-title{border-bottom:0!important}
