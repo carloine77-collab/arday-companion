@@ -1292,7 +1292,7 @@ function showGoals(){
 
 
 /* Three.js room system. Simulation state remains authoritative. */
-let let activeCameraGesture='pan';
+let activeCameraGesture='pan';
 let arday3D=null,arday3DLoading=false,arday3DFallbackTried=false;
 function initArday3D(){
  let host=null;
