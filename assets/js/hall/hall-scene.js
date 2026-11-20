@@ -471,10 +471,6 @@
     addKiosk(-47,28,coral,.82);addKiosk(47,28,jade,.82);addPlanter(-49,39,10,6,jade,1);addPlanter(49,39,10,6,jade,2);addStorageRack(-36,25,8,5,coral);addStorageRack(36,25,8,5,jade);
     for(const x of [-42,-21,21,42])addBeacon(x,6,x<0?coral:jade,5);for(let i=-3;i<=3;i++)addOverheadLamp(i*13,4,i%2?coral:amber);for(const x of [-29,29]){addBench(x,34,coral);addPlanter(x,43,7,4,jade,0)}
    }
-   // Paired perimeter gardens create a planted edge and a sense of depth in every district.
-   const gardenAccent={exchange:jade,ranking:jade,recruitment:jade,commissions:jade,teams:jade,entertainment:jade,food:jade}[z.id];
-   addLandscapeBed(-58.5,19,25,gardenAccent,index);
-   addLandscapeBed(58.5,19,25,gardenAccent,index+1);
    // Public-life layer: planted edges, sheltered seating, service fixtures and wayfinding.
    // These are arranged around the perimeter of each forecourt; the central approach stays open.
    const addLinearGarden=(x,z,w,m=jade)=>{
@@ -518,6 +514,10 @@
      if(n%3===0){const flower=new T.Mesh(new T.SphereGeometry(.2,7,5),n%2?coral:amber);flower.position.set(x+(n%2?1.65:-1.65),2.18,pz);area.add(flower)}
     }
    };
+   // Paired perimeter gardens create a planted edge and a sense of depth in every district.
+   const gardenAccent={exchange:jade,ranking:jade,recruitment:jade,commissions:jade,teams:jade,entertainment:jade,food:jade}[z.id];
+   addLandscapeBed(-58.5,19,25,gardenAccent,index);
+   addLandscapeBed(58.5,19,25,gardenAccent,index+1);
    const addPublicBench=(x,z,m=warmMetal,rot=0)=>{
     const g=new T.Group();g.position.set(x,0,z);g.rotation.y=rot;area.add(g);
     addBox(0,.58,0,5.8,.22,1.35,graphite);
