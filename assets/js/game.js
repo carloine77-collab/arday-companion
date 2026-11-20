@@ -469,7 +469,8 @@ function buildDay(key){
  d.forEach(ev=>{for(let h=Math.max(0,ev.start);h<Math.min(24,ev.end);h++)occupied.add(h)});
  const priorDay=(s.calendar?.days?.[previousKey]||[]).slice().sort((a,b)=>a.start-b.start);
  const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity),...priorDay.map(item=>item.activity).filter(activity=>activity&&activity!=='idle')].slice(-5);
- for(let hour=0;hour<24;hour++)if(!occupied.has(hour)){
+ for(let hour=0;hour<24;hour++){
+  if(occupied.has(hour)){const prior=d.find(ev=>hour-1>=ev.start&&hour-1<ev.end);if(prior?.activity&&prior.activity!=='idle'){recent.push(prior.activity);if(recent.length>5)recent.shift()}continue}
   const planned=createAutonomousScheduleEvent(hour,recent);d.push(planned);
   if(planned.activity!=='idle'){recent.push(planned.activity);if(recent.length>5)recent.shift()}
  }
@@ -656,6 +657,22 @@ function ensureScheduleAt(value){
   }));
   s.calendar.version=19;
  }
+ if((s.calendar.version||0)<20){
+  // Replan consecutive identical autonomous activities; sleep is the sole exception.
+  Object.keys(s.calendar.days||{}).forEach(key=>{
+   const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start);
+   let previous=null;
+   for(const ev of day){
+    const activity=normalizeActivity(ev.activity);
+    if(activity&&activity!=='idle'&&activity!=='sleep'&&activity===previous&&ev.kind==='autonomous'){
+     Object.assign(ev,{title:'自主安排',activity:'autonomous',kind:'autonomous',autonomous:true,source:'simulation',unresolved:true,room:null,anchor:null,furnitureId:null,furnitureKind:null});
+    }else if(activity&&activity!=='idle'&&activity!=='sleep'){previous=activity}
+    else if(activity==='sleep')previous='sleep';
+   }
+   s.calendar.days[key]=day;
+  });
+  s.calendar.version=20;
+ }
  
  
  
@@ -674,6 +691,7 @@ function ensureScheduleAt(value){
   for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end)){
    const preceding=day.filter(ev=>ev.end<=hour).sort((a,b)=>a.start-b.start).slice(-5).map(ev=>ev.activity).filter(Boolean);
    const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity),...preceding].slice(-5);
+   const previous=eventAt(key,hour-1);if(previous?.activity&&previous.activity!=='idle')recent.push(previous.activity);
    const planned=createAutonomousScheduleEvent(hour,recent);day.push(planned);
   }
   day.sort((a,b)=>a.start-b.start);
@@ -958,7 +976,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   else if(hour>=13&&hour<17&&['read','write','program','playPiano','exercise','walk'].includes(id))timeBias=1.3;
   else if(hour>=18&&hour<22&&['chat','watchTV','listenRecords','music','computerPlay','game'].includes(id))timeBias=1.3;
   return {...option,score:needScore+(spec.base||0)+preference+socialBonus+timeBias-repeatPenalty+Math.random()*2};
- }).filter(item=>Number.isFinite(item.score));
+ }).filter(item=>Number.isFinite(item.score)&&!(normalizeActivity(recent[recent.length-1])===item.activity&&item.activity!=='sleep'));
  if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bathroom-mode')?'bathroom':$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
  const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/13)}));
