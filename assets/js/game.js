@@ -3621,7 +3621,7 @@ function persistFurniture(item){
    if(hallTap&&hallTap.pointerId===e.pointerId){
     const tap=hallTap;hallTap=null;const dist=Math.hypot(e.clientX-tap.x,e.clientY-tap.y);
     if(e.type==='pointerup'&&dist<18){
-     if(tap.point){const dx=tap.point.x-hallScene.center.x,dz=tap.point.z-hallScene.center.z,len=Math.hypot(dx,dz),scale=len>hallScene.radius?hallScene.radius/len:1;target.set(hallScene.center.x+dx*scale,0,hallScene.center.z+dz*scale);pose='walk';basePose='idle';}
+     if(tap.point){const dx=tap.point.x-hallScene.center.x,dz=tap.point.z-hallScene.center.z,len=Math.hypot(dx,dz),scale=len>hallScene.radius?hallScene.radius/len:1;target.set(hallScene.center.x+dx*scale,0,hallScene.center.z+dz*scale);pose='idleWalk';basePose='idle';idleWalkStartedAt=performance.now();}
      else if(tap.action)activateHallZone(tap.action);
      pointers.delete(e.pointerId);drag=null;pinchCenter=null;inertiaTheta=0;inertiaPhi=0;return;
     }
