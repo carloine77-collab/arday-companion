@@ -1475,3 +1475,68 @@ html body .stage .drawer.profile-expanded.open .choices{
 .guild-empty-emblem{display:grid;place-items:center;width:92px;height:92px;margin:0 auto 15px;border:1px solid #a89a78;border-radius:50%;background:repeating-conic-gradient(#b4a47e22 0 10deg,transparent 10deg 20deg)}
 .guild-empty-emblem i{font:42px Georgia,serif;color:#68745e;font-style:normal}.guild-empty-emblem b{font:8px Georgia,serif;letter-spacing:.2em;color:#8c8069}
 .guild-career-empty h2{font:600 17px "Noto Serif SC",serif;color:#4c594d}
+
+
+/* Guild career: collapsible illustrated dossiers */
+.drawer .choices.career-view>.guild-career-section{
+  display:block;position:relative;margin:0;padding:0;overflow:hidden;
+  border:1px solid #a99b7e;border-radius:11px;
+  background:linear-gradient(145deg,#f1eadb,#e2d8c5);
+  box-shadow:0 5px 15px #2d302817;
+}
+.guild-career-section>summary{
+  display:grid;grid-template-columns:96px minmax(0,1fr) 22px;
+  align-items:center;gap:13px;min-height:104px;padding:10px 13px;
+  list-style:none;cursor:pointer;position:relative;
+}
+.guild-career-section>summary::-webkit-details-marker{display:none}
+.guild-career-section>summary:after{content:none!important}
+.guild-section-art{
+  position:relative;display:block;width:96px;height:80px;overflow:hidden;
+  border:1px solid #ffffff55;box-shadow:inset 0 0 0 4px #ffffff20,0 3px 8px #25251e22;
+}
+.guild-section-art:before,.guild-section-art:after{content:"";position:absolute;display:block}
+.guild-section-art i,.guild-section-art b,.guild-section-art em{position:absolute;display:block;font-style:normal}
+.guild-section-heading{display:flex;flex-direction:column;gap:6px;min-width:0}
+.guild-section-heading small{font:9px Georgia,serif;letter-spacing:.17em;color:#92846a}
+.guild-section-heading strong{font:600 15px "Noto Serif SC",serif;letter-spacing:.08em;color:#34443a}
+.guild-section-toggle{width:19px;height:19px;position:relative;border:1px solid #a99b7e;background:#e5dcc9}
+.guild-section-toggle:before,.guild-section-toggle:after{content:"";position:absolute;left:5px;right:5px;top:8px;height:1px;background:#596b58}
+.guild-section-toggle:after{transform:rotate(90deg);transition:transform .2s}
+.guild-career-section[open] .guild-section-toggle:after{transform:rotate(0)}
+.guild-section-body{padding:0 15px 16px 122px;border-top:1px solid #c6b99f88}
+.guild-section-body:before{content:"";display:block;width:100%;height:1px;margin:0 0 12px;background:linear-gradient(90deg,#a9976d,#a9976d00)}
+.guild-section-body .guild-due{font-size:39px}
+.guild-section-body .guild-applicant-list{gap:8px}
+.guild-section-body .guild-material-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.guild-section-body .guild-contract-meta{margin-top:12px}
+.guild-section-body>h3{margin:12px 0 0;font:600 15px "Noto Serif SC",serif;color:#465647}
+/* 01: contribution ledger, stamped columns and ink lines */
+.art-contribution{background:linear-gradient(135deg,#687b69,#344a40 65%,#283a34)}
+.art-contribution:before{left:13px;top:10px;width:43px;height:57px;background:linear-gradient(#e7d8b7 0 0) 0 0/100% 4px no-repeat, repeating-linear-gradient(to bottom,transparent 0 10px,#e7d8b755 10px 11px);border-left:1px solid #e5d5b2;border-right:1px solid #e5d5b2;transform:skewY(-5deg)}
+.art-contribution:after{right:8px;bottom:9px;width:25px;height:25px;border:2px solid #d4bd87;border-radius:50%;box-shadow:inset 0 0 0 4px #344a40,inset 0 0 0 5px #d4bd87}
+.art-contribution i{left:19px;top:18px;width:27px;height:3px;background:#e8d9b8;box-shadow:0 10px #e8d9b877,0 20px #e8d9b877}
+.art-contribution b{right:13px;top:12px;width:12px;height:26px;background:#b9a16d;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+/* 02: personnel silhouettes against a field dossier */
+.art-applicants{background:linear-gradient(130deg,#b4a17d,#7c8068 52%,#46594c)}
+.art-applicants:before{left:9px;right:9px;bottom:9px;height:24px;background:linear-gradient(150deg,transparent 0 20%,#34483d 21% 42%,transparent 43%),linear-gradient(30deg,transparent 0 25%,#34483d 26% 55%,transparent 56%)}
+.art-applicants:after{left:8px;top:8px;width:78px;height:1px;background:#f0e6ce;box-shadow:0 5px #f0e6ce77}
+.art-applicants i,.art-applicants b,.art-applicants em{bottom:19px;width:17px;height:29px;background:#d7c8a7;clip-path:polygon(50% 0,75% 12%,82% 35%,100% 100%,0 100%,18% 35%,25% 12%);z-index:1}
+.art-applicants i{left:13px}.art-applicants b{left:39px;height:36px;background:#34483d}.art-applicants em{left:65px;background:#c3ae82}
+/* 03: stacked supply crates and a field map */
+.art-materials{background:linear-gradient(145deg,#b7a17b,#82765b 60%,#4d594b)}
+.art-materials:before{left:10px;bottom:10px;width:34px;height:28px;background:repeating-linear-gradient(90deg,#6e795f 0 5px,#899071 5px 7px);border:2px solid #dfc99a;transform:skewY(-8deg);box-shadow:35px -16px 0 -2px #a78f61,35px -16px 0 0 #e0c99b}
+.art-materials:after{right:8px;top:9px;width:23px;height:23px;border:1px solid #f0dfb7;border-radius:50%;box-shadow:0 0 0 5px #f0dfb722}
+.art-materials i{left:13px;bottom:23px;width:28px;height:2px;background:#e6d3aa;z-index:1}
+.art-materials b{right:13px;top:14px;width:13px;height:13px;border:1px solid #f0dfb7;transform:rotate(45deg)}
+/* 04: topographic field-operation map and signal marker */
+.art-commission{background:linear-gradient(145deg,#657a78,#344b50 62%,#27383d)}
+.art-commission:before{left:-8px;right:-8px;bottom:8px;height:45px;background:linear-gradient(145deg,transparent 0 22%,#a7aa8d 23% 31%,transparent 32%),linear-gradient(35deg,transparent 0 34%,#c3b58e 35% 42%,transparent 43%),linear-gradient(155deg,transparent 0 55%,#7d927e 56% 68%,transparent 69%)}
+.art-commission:after{left:46px;top:9px;width:28px;height:28px;border:1px solid #e2d3aa;transform:rotate(45deg);box-shadow:0 0 0 5px #e2d3aa22}
+.art-commission i{left:57px;top:17px;width:7px;height:7px;border-radius:50%;background:#e8d8a9;z-index:2;box-shadow:0 0 0 4px #e8d8a933}
+.art-commission b{left:13px;top:12px;width:24px;height:1px;background:#e2d3aa;box-shadow:0 6px #e2d3aa88,0 12px #e2d3aa55}
+@media(max-width:420px){
+ .guild-career-section>summary{grid-template-columns:82px minmax(0,1fr) 20px;gap:10px;padding:9px}
+ .guild-section-art{width:82px;height:72px}
+ .guild-section-body{padding:0 11px 14px}
+}
