@@ -88,7 +88,13 @@
   ];
   const zoneObjects=[];
   zones.forEach((z,index)=>{
-   const area=new T.Group();area.position.set(z.x,0,z.z);area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
+   const area=new T.Group();
+   area.position.set(z.x,0,z.z);
+   // Each district turns its main frontage toward the central arrival concourse.
+   // Local -Z is the frontage axis; the rotation therefore differs by district location.
+   const hallCenter={x:-25.18,z:0};
+   area.rotation.y=Math.atan2(-(hallCenter.x-z.x),-(hallCenter.z-z.z));
+   area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
    polygon(area,z.shape,.012,index%2?floorMat:floorDark);
    // Subtle embedded boundary seams, not raised circular platforms or fenced lots.
    const pts=z.shape.map(p=>new T.Vector3(p[0],.025,p[1]));area.add(new T.LineLoop(new T.BufferGeometry().setFromPoints(pts),new T.LineBasicMaterial({color:0x78c9d8,transparent:true,opacity:.16})));
