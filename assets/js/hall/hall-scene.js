@@ -2,7 +2,7 @@
  'use strict';
  function create(T,scene,M,box){
   const root=new T.Group();root.name='ArdayPublicHall';root.position.set(-5.18,0,0);scene.add(root);
-  const mat=(c,m=.58,r=.42)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r,envMapIntensity:1.12});
+  const mat=(c,m=.42,r=.58)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r,envMapIntensity:.72});
   // Organic surface library: procedural bark, leaf and soil maps keep plants out of the metallic material family.
   const makeOrganicMap=(base,low,high,kind)=>{
    const c=document.createElement('canvas');c.width=256;c.height=256;const q=c.getContext('2d');
@@ -13,29 +13,29 @@
    else{for(let i=0;i<2400;i++){q.fillStyle=i%2?low:high;q.globalAlpha=.08+rnd()*.12;q.fillRect(rnd()*256,rnd()*256,1+rnd()*3,1+rnd()*3)}}
    q.globalAlpha=1;const t=new T.CanvasTexture(c);if(T.sRGBEncoding!==undefined)t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=4;return t;
   };
-  const barkMap=makeOrganicMap('#625d54','#3e4140','#8d8170','bark'),leafMap=makeOrganicMap('#69776f','#45574f','#a1a99a','leaf'),soilMap=makeOrganicMap('#55534c','#343b3b','#77746a','soil');
+  const barkMap=makeOrganicMap('#514d49','#34383a','#797267','bark'),leafMap=makeOrganicMap('#5b665f','#3e4a47','#8c9184','leaf'),soilMap=makeOrganicMap('#464641','#292f31','#68665e','soil');
   const barkMat=new T.MeshStandardMaterial({map:barkMap,bumpMap:barkMap,bumpScale:.16,color:0xffffff,roughness:.94,metalness:0});
   // Three.js r128 does not implement the later MeshPhysicalMaterial sheen pipeline.
   // Keep foliage on the stable Standard shader path; variation comes from texture and per-leaf palette.
   const leafPalette=[
-   new T.MeshStandardMaterial({color:0x586c65,map:leafMap,roughness:.9,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x718078,map:leafMap,roughness:.87,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x8a9182,map:leafMap,roughness:.92,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x66736b,map:leafMap,roughness:.92,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x5b7470,map:leafMap,roughness:.89,metalness:0,side:T.DoubleSide})
+   new T.MeshStandardMaterial({color:0x4c5b58,map:leafMap,roughness:.96,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x65716b,map:leafMap,roughness:.94,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x77796d,map:leafMap,roughness:.97,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x515e5b,map:leafMap,roughness:.96,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x596b6b,map:leafMap,roughness:.95,metalness:0,side:T.DoubleSide})
   ];
   const soilMat=new T.MeshStandardMaterial({map:soilMap,bumpMap:soilMap,bumpScale:.12,color:0xffffff,roughness:1,metalness:0});
-  const leafGeometry=(()=>{const sh=new T.Shape();sh.moveTo(0,0);sh.quadraticCurveTo(.2,.24,.02,.9);sh.quadraticCurveTo(-.2,.24,0,0);const g=new T.ExtrudeGeometry(sh,{depth:.035,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.018,bevelThickness:.012,curveSegments:10});g.computeVertexNormals();return g;})();
+  const makeLeafGeometry=kind=>{const sh=new T.Shape();if(kind===0){sh.moveTo(0,0);sh.quadraticCurveTo(.16,.28,.015,1.05);sh.quadraticCurveTo(-.16,.28,0,0)}else if(kind===1){sh.moveTo(0,0);sh.bezierCurveTo(.34,.22,.27,.78,0,.92);sh.bezierCurveTo(-.27,.78,-.34,.22,0,0)}else{sh.moveTo(0,0);sh.quadraticCurveTo(.12,.18,.04,.34);sh.quadraticCurveTo(.24,.42,.12,.58);sh.quadraticCurveTo(.19,.8,0,1.02);sh.quadraticCurveTo(-.19,.8,-.12,.58);sh.quadraticCurveTo(-.24,.42,-.04,.34);sh.quadraticCurveTo(-.12,.18,0,0)}const g=new T.ExtrudeGeometry(sh,{depth:.022,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.012,bevelThickness:.009,curveSegments:12});g.computeVertexNormals();return g};const leafGeometries=[makeLeafGeometry(0),makeLeafGeometry(1),makeLeafGeometry(2)];
 
   const addCylinder=(parent,x,y,z,rt,rb,h,material,segments=16)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
   const addTorus=(parent,x,y,z,r,t,material)=>{const o=new T.Mesh(new T.TorusGeometry(r,t,10,56),material);o.position.set(x,y,z);parent.add(o);return o};
-  const titanium=mat(0x9eabb4,.72,.36),silver=mat(0xd1dce1,.78,.3),graphite=mat(0x263440,.62,.48),dark=mat(0x111e2a,.5,.56),floorMat=mat(0x667783,.32,.66),floorDark=mat(0x344550,.5,.56),cyan=new T.MeshStandardMaterial({color:0x9bcbd2,emissive:0x285b66,emissiveIntensity:.28,metalness:.32,roughness:.38,envMapIntensity:1.2}),whiteGlow=new T.MeshBasicMaterial({color:0xd9faff,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0xa8cbd0,metalness:.12,roughness:.24,transparent:false,opacity:1,depthWrite:true,transmission:.16,thickness:.16,clearcoat:.42,clearcoatRoughness:.26,envMapIntensity:1.3,side:T.DoubleSide});
+  const titanium=mat(0x77838d,.62,.48),silver=mat(0x9aa5ab,.66,.42),graphite=mat(0x1d2934,.48,.62),dark=mat(0x0d1721,.38,.68),floorMat=mat(0x414c58,.18,.82),floorDark=mat(0x26333f,.34,.72),cyan=new T.MeshStandardMaterial({color:0x789da6,emissive:0x183b45,emissiveIntensity:.16,metalness:.22,roughness:.52,envMapIntensity:.76}),whiteGlow=new T.MeshBasicMaterial({color:0xa9c1c4,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x8faeb5,metalness:.08,roughness:.34,transparent:false,opacity:1,depthWrite:true,transmission:.1,thickness:.16,clearcoat:.24,clearcoatRoughness:.34,envMapIntensity:.82,side:T.DoubleSide});
   // Layered cool-neutral lighting: broad ambient fill, a directional key, a soft blue bounce and a restrained warm rim.
-  root.add(new T.HemisphereLight(0xcbd9df,0x202b34,.96));
-  const key=new T.DirectionalLight(0xe4edf2,1.18);key.position.set(-42,92,54);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-360;key.shadow.camera.right=360;key.shadow.camera.top=310;key.shadow.camera.bottom=-310;key.shadow.camera.near=1;key.shadow.camera.far=520;key.shadow.bias=-.00018;key.shadow.normalBias=.035;key.shadow.radius=4;key.shadow.camera.updateProjectionMatrix();root.add(key);
-  const fillLight=new T.DirectionalLight(0x9ab9c8,.42);fillLight.position.set(58,52,-72);root.add(fillLight);
-  const rimLight=new T.DirectionalLight(0xf0d9bd,.16);rimLight.position.set(12,34,76);root.add(rimLight);
-  const fill=new T.PointLight(0x78b9c7,18,260,1.65);fill.position.set(-54,38,-26);root.add(fill);
+  root.add(new T.HemisphereLight(0x9baeb8,0x111a24,.48));
+  const key=new T.DirectionalLight(0xb9c8d0,.68);key.position.set(-42,92,54);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-360;key.shadow.camera.right=360;key.shadow.camera.top=310;key.shadow.camera.bottom=-310;key.shadow.camera.near=1;key.shadow.camera.far=520;key.shadow.bias=-.00022;key.shadow.normalBias=.045;key.shadow.radius=5;key.shadow.camera.updateProjectionMatrix();root.add(key);
+  const fillLight=new T.DirectionalLight(0x718a9a,.19);fillLight.position.set(58,52,-72);root.add(fillLight);
+  const rimLight=new T.DirectionalLight(0xb6a18a,.075);rimLight.position.set(12,34,76);root.add(rimLight);
+  const fill=new T.PointLight(0x5e8994,7,260,1.8);fill.position.set(-54,38,-26);root.add(fill);
   // A vast continuous floor; districts are embedded in its geography rather than isolated platforms.
   const floor=new T.Mesh(new T.PlaneGeometry(780,680),floorMat);floor.rotation.x=-Math.PI/2;floor.position.set(-20,-.18,0);floor.receiveShadow=false;floor.castShadow=false;floor.name='hall-walkable-ground';floor.userData.hallFloor=true;root.add(floor);
   // Continuous floor without intersecting coplanar grid planes.
@@ -44,12 +44,12 @@
   // Open-air public forum: a monumental perimeter colonnade encloses the plaza.
   // There is deliberately no indoor ceiling or interior column grid; the sky remains visible.
   const perimeter=new T.Group();perimeter.name='hall-outdoor-perimeter-colonnade';perimeter.scale.set(1.25,1,1.25);root.add(perimeter);
-  const columnMat=[silver,titanium,graphite],warmMetal=mat(0x9d876b,.7,.4),paleStone=mat(0xbfc4c0,.18,.82);
-  const amber=new T.MeshStandardMaterial({color:0xd7ad78,emissive:0x76502b,emissiveIntensity:.24,metalness:.3,roughness:.42,envMapIntensity:1.05});
-  const violet=new T.MeshStandardMaterial({color:0x85869b,emissive:0x393c59,emissiveIntensity:.2,metalness:.28,roughness:.46,envMapIntensity:1.05});
-  const coral=new T.MeshStandardMaterial({color:0xb77d76,emissive:0x5b3535,emissiveIntensity:.13,metalness:.18,roughness:.52,envMapIntensity:.95});
-  const jade=new T.MeshStandardMaterial({color:0x819b91,emissive:0x30483f,emissiveIntensity:.12,metalness:.16,roughness:.56,envMapIntensity:.95});
-  const ivory=mat(0xc9c9bf,.12,.78),copper=mat(0x876f5c,.68,.42),plum=mat(0x514f5c,.38,.56);
+  const columnMat=[silver,titanium,graphite],warmMetal=mat(0x756858,.56,.54),paleStone=mat(0x929894,.08,.94);
+  const amber=new T.MeshStandardMaterial({color:0x9b8060,emissive:0x49311e,emissiveIntensity:.1,metalness:.2,roughness:.62,envMapIntensity:.76});
+  const violet=new T.MeshStandardMaterial({color:0x656577,emissive:0x29283e,emissiveIntensity:.09,metalness:.18,roughness:.66,envMapIntensity:.72});
+  const coral=new T.MeshStandardMaterial({color:0x936b68,emissive:0x3e2425,emissiveIntensity:.06,metalness:.1,roughness:.72,envMapIntensity:.7});
+  const jade=new T.MeshStandardMaterial({color:0x65786f,emissive:0x24352f,emissiveIntensity:.055,metalness:.08,roughness:.76,envMapIntensity:.68});
+  const ivory=mat(0x96958c,.06,.94),copper=mat(0x69584c,.48,.58),plum=mat(0x393d48,.28,.72);
   const addColumn=(x,z,index)=>{
    const g=new T.Group();g.position.set(x,0,z);perimeter.add(g);
    const h=54+(index%4)*3.5,base=5.8,shaftR=index%3===0?2.45:2.05;
@@ -125,7 +125,7 @@
    const glow=new T.Mesh(new T.SphereGeometry(.42,10,8),i%3===0?amber:i%3===1?violet:cyan);glow.position.set(x,2.35,z);perimeter.add(glow);
   }
   // Distant architectural backdrop, deliberately beyond the playable boundary.
-  const bg=document.createElement('canvas');bg.width=2048;bg.height=1024;const ctx=bg.getContext('2d'),grad=ctx.createLinearGradient(0,0,0,1024);grad.addColorStop(0,'#07111f');grad.addColorStop(.52,'#172c40');grad.addColorStop(1,'#263c4e');ctx.fillStyle=grad;ctx.fillRect(0,0,2048,1024);
+  const bg=document.createElement('canvas');bg.width=2048;bg.height=1024;const ctx=bg.getContext('2d'),grad=ctx.createLinearGradient(0,0,0,1024);grad.addColorStop(0,'#050a12');grad.addColorStop(.52,'#101d2a');grad.addColorStop(1,'#1a2935');ctx.fillStyle=grad;ctx.fillRect(0,0,2048,1024);
   let seed=90317;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
   for(let i=0;i<2600;i++){ctx.fillStyle='rgba(180,225,245,'+(.08+rand()*.32)+')';ctx.beginPath();ctx.arc(rand()*2048,rand()*1024,.3+rand()*1.2,0,Math.PI*2);ctx.fill()}
   for(let i=0;i<90;i++){const x=i*24,w=8+rand()*36,h=120+rand()*420;ctx.fillStyle='rgba(75,125,155,.24)';ctx.fillRect(x,930-h,w,h)}
@@ -146,7 +146,7 @@
   }
   const coreSpire=new T.Mesh(new T.CylinderGeometry(1.8,4.8,30,12),silver);coreSpire.position.y=17;coreSpire.castShadow=true;core.add(coreSpire);
   const coreDark=new T.Mesh(new T.CylinderGeometry(2.05,2.05,17,12),graphite);coreDark.position.y=17;core.add(coreDark);
-  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.4,2),new T.MeshPhysicalMaterial({color:0xc3d9dc,metalness:.42,roughness:.2,emissive:0x244d56,emissiveIntensity:.38,transparent:true,opacity:.94,envMapIntensity:1.35}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
+  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.4,2),new T.MeshPhysicalMaterial({color:0x83999d,metalness:.28,roughness:.36,emissive:0x1a3338,emissiveIntensity:.18,transparent:true,opacity:.94,envMapIntensity:.82}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
   // Three differently inclined orbital bands make the landmark legible in silhouette from every approach.
   for(let i=0;i<3;i++){
    const ring=new T.Mesh(new T.TorusGeometry(12+i*5,.34-i*.045,12,112),i===1?warmMetal:i===2?violet:cyan);
@@ -169,7 +169,7 @@
    const a=-Math.PI/2+i*Math.PI*2/7;
    const ray=new T.Mesh(new T.BoxGeometry(.22,13,.22),i%2?cyan:amber);ray.position.set(Math.cos(a)*9,23,Math.sin(a)*9);ray.rotation.z=.22*Math.cos(a);ray.rotation.x=.22*Math.sin(a);core.add(ray);
   }
-  const coreLight=new T.PointLight(0x91c9d2,14,120,1.8);coreLight.position.set(18,29,0);root.add(coreLight);
+  const coreLight=new T.PointLight(0x789da6,6,120,1.9);coreLight.position.set(18,29,0);root.add(coreLight);
   function labelTexture(title,sub){const c=document.createElement('canvas');c.width=768;c.height=224;const g=c.getContext('2d');g.fillStyle='rgba(8,23,37,.88)';g.fillRect(8,8,752,208);g.strokeStyle='#78d9e8';g.lineWidth=4;g.strokeRect(12,12,744,200);g.fillStyle='#effaff';g.textAlign='center';g.textBaseline='middle';g.font='bold 66px sans-serif';g.fillText(title,384,88);g.fillStyle='#82c9d9';g.font='25px sans-serif';g.fillText(sub,384,163);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t}
   const zones=[
 
@@ -247,7 +247,7 @@
     signRoot.getWorldPosition(plaqueWorld);camera.getWorldPosition(cameraWorld);
     signRoot.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
    };
-   const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
+   const addBox=(x,y,zz,w,h,d,m)=>addRoundedShell(x,y,zz,w,h,d,m,Math.min(.34,w*.16,h*.2,d*.2),Math.min(.085,w*.1,h*.12,d*.12));
    // Higher-fidelity architectural primitives: bevelled extrusions, lathed metal profiles and curved display skins.
    const addRoundedShell=(x,y,z,w,h,d,material,radius=0.7,bevel=0.12)=>{
     const s=new T.Shape(),r=Math.min(radius,w*.22,h*.22);
@@ -315,29 +315,20 @@
     return skin;
    };
    const addBotanicalTree=(x,z,height=8,foliage=leafPalette[1],form=0)=>{
-     // Broadleaf tree with a textured trunk, tapered limbs and individually shaped leaves.
-     const trunkProfile=[[.06,0],[.2,.16],[.17,.48],[.145,height*.42],[.115,height*.68],[.075,height*.88],[.035,height],[0,height]];
+     const species=((form%4)+4)%4,trunkProfile=[[.06,0],[.2,.16],[.17,.48],[.145,height*.42],[.115,height*.68],[.075,height*.88],[.035,height],[0,height]];
      addLathedProfile(x,0,z,trunkProfile,barkMat,18);
-     const addLeaf=(px,py,pz,angle,tilt,scale,mi)=>{
-      const leaf=new T.Mesh(leafGeometry,leafPalette[mi%leafPalette.length]);leaf.position.set(px,py,pz);
-      leaf.rotation.set(tilt,angle,Math.sin(angle+form)*.24);leaf.scale.set(scale,scale*(.78+(mi%3)*.1),scale);leaf.castShadow=true;area.add(leaf);
-     };
-     for(let branchIndex=0;branchIndex<7;branchIndex++){
-      const angle=branchIndex*Math.PI*2/7+form*.29,reach=height*(.19+(branchIndex%3)*.025),base=height*(.38+(branchIndex%3)*.075);
-      const start=new T.Vector3(x,base,z),end=new T.Vector3(x+Math.cos(angle)*reach,Math.min(height*.91,base+height*(.23+(branchIndex%2)*.04)),z+Math.sin(angle)*reach);
-      const mid=start.clone().lerp(end,.58);mid.y+=height*.035;
-      area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([start,mid,end]),16,.085-(branchIndex%3)*.012,7,false),barkMat));
-      for(let l=0;l<5;l++){const t=.28+l*.15,p=start.clone().lerp(end,t),side=(l%2?1:-1)*.32;
-       addLeaf(p.x+Math.cos(angle+Math.PI/2)*side,p.y+.12+(l%3)*.08,p.z+Math.sin(angle+Math.PI/2)*side,angle+(l%2?-.55:.55),-.28+(l%3)*.18,.72+(l%2)*.16,branchIndex+l);
-       if(l%2===0)addLeaf(p.x,p.y+.18,p.z,angle+.8,-.42,.58,branchIndex+l+2);
-      }
+     const addLeaf=(px,py,pz,angle,tilt,scale,mi)=>{const leaf=new T.Mesh(leafGeometries[(mi+species)%3],leafPalette[(mi+species)%leafPalette.length]);leaf.position.set(px,py,pz);leaf.rotation.set(tilt,angle,Math.sin(angle+form)*.24);leaf.scale.set(scale,scale*(.78+(mi%3)*.1),scale);leaf.castShadow=true;area.add(leaf)};
+     const branches=species===1?9:species===2?6:7;
+     for(let b=0;b<branches;b++){const a=b*Math.PI*2/branches+form*.29,reach=height*(species===1?.14:species===2?.28:.19+(b%3)*.025),base=height*(species===2?.28:.38+(b%3)*.075),start=new T.Vector3(x,base,z),end=new T.Vector3(x+Math.cos(a)*reach,Math.min(height*.91,base+height*(.23+(b%2)*.04)),z+Math.sin(a)*reach),mid=start.clone().lerp(end,.58);mid.y+=height*.035;area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([start,mid,end]),16,.085-(b%3)*.012,7,false),barkMat));
+      for(let l=0;l<(species===1?6:5);l++){const t=.22+l*.14,p=start.clone().lerp(end,t),side=(l%2?1:-1)*(.24+(species===2?.18:0));addLeaf(p.x+Math.cos(a+Math.PI/2)*side,p.y+.12+(l%3)*.08,p.z+Math.sin(a+Math.PI/2)*side,a+(l%2?-.55:.55),-.28+(l%3)*.18,.72+(l%2)*.16,b+l);if(l%2===0)addLeaf(p.x,p.y+.18,p.z,a+.8,-.42,.58,b+l+2)}
      }
-     // Irregular crown sprays replace the old pale spherical canopy.
-     for(let c=0;c<11;c++){const angle=c*Math.PI*2/11+form*.21,rad=height*(.12+(c%3)*.025),cy=height*(.72+(c%4)*.045),cx=x+Math.cos(angle)*rad,cz=z+Math.sin(angle)*rad;
-      for(let j=0;j<4;j++){const aa=angle+(j-1.5)*.36,rr=height*(.045+(j%2)*.012);addLeaf(cx+Math.cos(aa)*rr,cy+(j%3)*.22,cz+Math.sin(aa)*rr,aa,-.38+(j%2)*.24,.82+(j%2)*.13,c+j)}
-     }
+     const crowns=species===1?13:species===2?9:species===3?15:11;
+     for(let c=0;c<crowns;c++){const a=c*Math.PI*2/crowns+form*.21,r=height*(species===1?.075:species===2?.19:species===3?.2:.12+(c%3)*.025),cy=height*(species===1?.82:species===2?.62:species===3?.73:.72+(c%4)*.045),cx=x+Math.cos(a)*r,cz=z+Math.sin(a)*r;for(let j=0;j<4;j++){const aa=a+(j-1.5)*.36,rr=height*(.04+(j%2)*.014);addLeaf(cx+Math.cos(aa)*rr,cy+(j%3)*.2,cz+Math.sin(aa)*rr,aa,species===3?-.12:-.38+(j%2)*.24,.72+(j%2)*.16,c+j)}}
     };
-   const addLathedProfile=(x,y,z,profile,material,segments=24)=>{
+    const addShrubMass=(x,z,width=2.4,height=1.35,variant=0)=>{const clumps=variant%2?7:5;for(let i=0;i<clumps;i++){const a=i/clumps*Math.PI*2+variant*.31,r=width*(.12+(i%3)*.12),px=x+Math.cos(a)*r,pz=z+Math.sin(a)*r,py=height*(.48+(i%3)*.1);for(let j=0;j<7;j++){const aa=a+j*2.399,rr=.16+(j%3)*.09,leaf=new T.Mesh(leafGeometries[(i+j+variant)%3],leafPalette[(i+j+variant)%leafPalette.length]);leaf.position.set(px+Math.cos(aa)*rr,py+(j%3)*.12,pz+Math.sin(aa)*rr);leaf.rotation.set(-.25+(j%3)*.18,aa,Math.sin(aa)*.22);leaf.scale.set(.34+(j%2)*.1,.42+(j%3)*.08,.34);area.add(leaf)}}};
+    const addGrassTuft=(x,z,scale=1,variant=0)=>{const count=7+variant%4;for(let i=0;i<count;i++){const a=i/count*Math.PI*2+variant*.37,len=scale*(.65+(i%3)*.18),bend=scale*(.16+(i%2)*.1),pts=[new T.Vector3(x,1.28,z),new T.Vector3(x+Math.cos(a)*bend*.45,1.28+len*.58,z+Math.sin(a)*bend*.45),new T.Vector3(x+Math.cos(a)*bend,1.28+len,z+Math.sin(a)*bend)];area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),8,.035*scale,5,false),leafPalette[(i+variant)%leafPalette.length]))}};
+    const addFlowerSpray=(x,z,scale=1,variant=0)=>{const stemH=scale*(.8+(variant%3)*.16),stem=new T.Vector3(x,1.28,z),top=new T.Vector3(x+Math.sin(variant*1.7)*.18*scale,1.28+stemH,z+Math.cos(variant*1.3)*.14*scale);area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([stem,stem.clone().lerp(top,.55),top]),12,.035*scale,6,false),barkMat));for(let k=0;k<3;k++){const a=k*Math.PI*2/3+variant*.8,petal=new T.Mesh(leafGeometries[1],k%2?coral:amber);petal.position.set(top.x+Math.cos(a)*.18*scale,top.y,top.z+Math.sin(a)*.18*scale);petal.rotation.set(-.2,a,Math.PI/2);petal.scale.set(.22*scale,.25*scale,.22*scale);area.add(petal)}const center=new T.Mesh(new T.SphereGeometry(.09*scale,8,6),warmMetal);center.position.copy(top);area.add(center)};
+    const addLathedProfile=(x,y,z,profile,material,segments=24)=>{
     const pts=profile.map(p=>new T.Vector2(p[0],p[1]));
     const g=new T.LatheGeometry(pts,segments);g.computeVertexNormals();
     const o=new T.Mesh(g,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
@@ -369,12 +360,13 @@
     addRoundedShell(x,1.2,zz,w-1,.1,d-1,paleStone,.3,.04);
     const planterSoil=new T.Mesh(new T.PlaneGeometry(w-1.35,d-1.35),soilMat);planterSoil.rotation.x=-Math.PI/2;planterSoil.position.set(x,1.27,zz);area.add(planterSoil);
     const count=Math.max(3,Math.floor(w/2.2));
-    for(let n=0;n<count;n++){
-     const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);
-     addBotanicalTree(px,pz,3.1,n%3===0?leafPalette[1]:n%3===1?leafPalette[0]:leafPalette[2],variant+n);
-     const bloom=new T.Mesh(new T.SphereGeometry(.34,9,7),variant%2?amber:coral);bloom.position.set(px,3.75,pz);area.add(bloom);
-    }
-    for(const side of [-1,1])addRoundedShell(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal,.07,.04);
+     for(let n=0;n<count;n++){const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65),species=(variant+n)%4;
+      if(species===0)addBotanicalTree(px,pz,3.1,leafPalette[1],variant+n);
+      else if(species===1)addShrubMass(px,pz,1.05,1.2,variant+n);
+      else if(species===2){addGrassTuft(px,pz,.95,variant+n);addFlowerSpray(px+.22,pz-.16,.82,variant+n)}
+      else{addBotanicalTree(px,pz,2.7,leafPalette[2],variant+n);addGrassTuft(px-.34,pz+.28,.65,variant+n)}
+     }
+     for(const side of [-1,1])addRoundedShell(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal,.07,.04);
    };
    const addBench=(x,zz,accentMat=warmMetal,rotation=0)=>{
     const g=new T.Group();g.position.set(x,0,zz);g.rotation.y=rotation;area.add(g);
@@ -678,9 +670,7 @@
     }
     for(let n=0;n<Math.floor(length/2.4);n++){
      const pz=z-length*.42+n*2.4;
-     const shrub=new T.Mesh(new T.SphereGeometry(.62,7,5),n%2?jade:m);
-     shrub.position.set(x+(n%2?1.65:-1.65),1.72,pz);shrub.scale.set(1.25,.7,1.1);area.add(shrub);
-     if(n%3===0){const flower=new T.Mesh(new T.SphereGeometry(.2,7,5),n%2?coral:amber);flower.position.set(x+(n%2?1.65:-1.65),2.18,pz);area.add(flower)}
+     const sx=x+(n%2?1.65:-1.65);addShrubMass(sx,pz,1.55,1.05,variant+n);if(n%2===0)addFlowerSpray(sx+.25,pz-.12,.82,variant+n);if(n%3===1)addGrassTuft(sx-.42,pz+.25,.72,variant+n);
     }
    };
    // Paired perimeter gardens create a planted edge and a sense of depth in every district.
@@ -814,7 +804,10 @@
    zoneObjects.push(area);
   });
   // City-scale hall meshes do not cast or receive the small room's shadow map.
-   root.traverse(object=>{if(object.isMesh){object.castShadow=false;object.receiveShadow=false}});
+   // Restrict shadows to architectural masses; keep small trim inexpensive.
+    root.traverse(object=>{if(object.isMesh){if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();const radius=object.geometry.boundingSphere?.radius||0;object.castShadow=radius>3.2;object.receiveShadow=radius>4.8;
+     const mats=Array.isArray(object.material)?object.material:[object.material];mats.forEach(material=>{if(!material||!material.isMeshStandardMaterial||material.userData.hallPainterInk)return;material.userData.hallPainterInk=true;material.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',`float pigmentNoise=fract(sin(dot(gl_FragCoord.xy,vec2(17.17,91.73)))*43758.5453)-.5;float paperFiber=sin(gl_FragCoord.y*.73+gl_FragCoord.x*.19)*.5;outgoingLight*=.982+pigmentNoise*.018+paperFiber*.004;vec3 paperTint=vec3(.985,.978,.958);outgoingLight=mix(outgoingLight,outgoingLight*paperTint,.18);\n#include <tonemapping_fragment>`)};material.customProgramCacheKey=()=>'arday-hall-watercolor-paper-ink-v1';material.needsUpdate=true});
+    }});
    // Arrival portal is placed inside the immense hall, facing into the open central concourse.
   const portal=new T.Group();portal.position.set(-20,0,0);portal.rotation.y=Math.PI/2;portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
   box(portal,0,3.1,0,5.4,6.2,.8,graphite);box(portal,0,3.1,.45,4.4,5.3,.08,glass);
