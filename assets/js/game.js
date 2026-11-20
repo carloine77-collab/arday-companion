@@ -27,12 +27,15 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
+const base={friend:24,bored:4,hate:0,love:3,energy:78,hunger:62,clean:86,fun:70,combat:35,money:100000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.money=100000;s.testFundsV3=true;}}}catch(e){} delete s.coins;
 s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
 
 // Infinite-instance progression: one currency (points) powers both ranking and exchange.
+s.combat=clamp(Number(s.combat??35));
+s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[{id:'lin',name:'林澈',role:'前锋',combat:72,malice:12,selected:true,portrait:'⚔'},{id:'mori',name:'森',role:'侦察',combat:58,malice:8,selected:true,portrait:'⌕'},{id:'qiao',name:'乔',role:'支援',combat:46,malice:38,selected:false,portrait:'✦'}];
+s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});
 s.points=Math.max(0,Math.floor(Number(s.points)||0));
 s.dungeonProgress=s.dungeonProgress&&typeof s.dungeonProgress==='object'?s.dungeonProgress:{};
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
@@ -125,7 +128,7 @@ s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.unlockedRecipes=Array.i
 s.jobApplications=s.jobApplications||{};
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
-const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun'];
+const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun','combat'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
 function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});renderStatusTags();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
 function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.length?items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join(''):'<span class="status-empty">暂无状态</span>'};draw(emotion,'emotion');draw(survival,'survival');}
@@ -1307,7 +1310,7 @@ function showRecruitment(){
   const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
   return '<article class="recruitment-card"><div class="recruitment-card-top"><span>OPEN POSITION / 0'+(i+1)+'</span><span class="recruitment-salary">¥'+j.salary+' <small>/ DAY</small></span></div><h3>'+j.title+'</h3><p class="recruitment-description">'+j.desc+'</p><div class="recruitment-meta"><span>工作时间 '+pad(j.start)+':00–'+pad(j.end)+':00</span><span>录用概率 '+Math.round(chance*100)+'%</span></div><div class="recruitment-requirements">申请条件：精力 ≥ '+j.minEnergy+' · 友谊 ≥ '+j.minFriend+(j.skillMin?' · 阅读经验 ≥ '+j.skillMin:'')+'</div><button class="recruitment-apply" data-recruit-job="'+j.id+'" '+(attempted||s.job?.active?'disabled':'')+'>'+(s.job?.active?'已有在职岗位':attempted?'今日已申请':'提交申请')+'</button></article>';
  }).join('');
- $('choices').innerHTML='<header class="recruitment-masthead"><div class="recruitment-seal">A</div><div class="recruitment-kicker">ARDAY PUBLIC HALL · CAREER OFFICE</div><h2>人才招募处</h2><p>在这里查看公开职位、申请条件与薪酬信息。</p><div class="recruitment-rule"><span>POSITIONS AVAILABLE</span><b>'+jobs.length+'</b></div></header>'+status+'<div class="recruitment-section-label"><span>公开职位</span><small>OPEN CALLS · '+day+'</small></div>'+cards+'<footer class="recruitment-footnote">申请结果将根据当前状态与能力经验综合判定。每个职位每日仅可申请一次。</footer>';
+ $('choices').innerHTML='<header class="recruitment-masthead"><div class="recruitment-seal">A</div><div class="recruitment-kicker">ARDAY PUBLIC HALL · CAREER OFFICE</div><h2>人才招募处</h2><p></p><div class="recruitment-rule"><span>POSITIONS AVAILABLE</span><b>'+jobs.length+'</b></div></header>'+status+'<div class="recruitment-section-label"><span>公开职位</span><small>OPEN CALLS · '+day+'</small></div>'+cards+'<footer class="recruitment-footnote"></footer>';
  $('drawer').classList.add('open');
  $('choices').querySelectorAll('[data-recruit-job]').forEach(button=>button.onclick=()=>{
   const j=jobs.find(item=>item.id===button.dataset.recruitJob);if(!j)return;
@@ -1328,58 +1331,41 @@ function showRecruitment(){
 
 
 function showDungeon(){
- refreshDungeonUnlocks();
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
- $('drawerTitle').textContent='副本组队 · INSTANCE GATE';
- $('choices').className='choices infinite-view';
- const cards=DUNGEON_TIERS.map((tier,index)=>{
-  const unlocked=dungeonUnlocked(tier),clears=Number(s.dungeonProgress[tier])||0,next=DUNGEON_TIERS[index+1],needed=next?DUNGEON_CLEAR_REQUIREMENTS[next]:null;
-  const progress=needed===null?'最高阶副本':clears+' / '+needed+' 次通关';
-  return '<button class="instance-tier '+(unlocked?'unlocked':'locked')+'" data-instance-tier="'+tier+'" '+(unlocked?'':'disabled')+'><span class="instance-tier-code">'+tier+'</span><span class="instance-tier-copy"><strong>'+tier+'级副本</strong><small>'+(unlocked?'已开放 · '+progress:'需先通关 '+(DUNGEON_CLEAR_REQUIREMENTS[tier]||0)+' 次 '+DUNGEON_TIERS[index-1]+' 级副本')+'</small></span><span class="instance-tier-mark">'+(unlocked?'进入 →':'LOCKED')+'</span></button>';
- }).join('');
- $('choices').innerHTML='<header class="infinite-masthead"><div class="infinite-kicker">ARDAY INSTANCE NETWORK</div><h2>副本入口</h2><p>从 F 级开始，在连续通关中逐步解锁更高危险等级。</p><div class="infinite-balance"><span>当前积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div></header><div class="infinite-section-title">选择挑战等级 <small>F — SSS</small></div>'+cards+'<p class="infinite-note">通关次数按副本等级分别累计。单次结算会生成评级与积分，积分计入排行榜。</p>';
- $('drawer').classList.add('open');
- $('choices').querySelectorAll('[data-instance-tier]').forEach(button=>button.onclick=()=>startDungeon(button.dataset.instanceTier));
+ refreshDungeonUnlocks();$('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='副本组队';$('choices').className='choices infinite-view';
+ const cards=DUNGEON_TIERS.map((tier,index)=>{const unlocked=dungeonUnlocked(tier),clears=Number(s.dungeonProgress[tier])||0,needed=index<DUNGEON_TIERS.length-1?DUNGEON_CLEAR_REQUIREMENTS[DUNGEON_TIERS[index+1]]:null;return '<button class="instance-tier '+(unlocked?'unlocked':'locked')+'" data-instance-tier="'+tier+'" '+(unlocked?'':'disabled')+'><span class="instance-tier-code">'+tier+'</span><span class="instance-tier-copy"><strong>'+tier+'</strong><small>'+(unlocked?(needed===null?'MAX':clears+'/'+needed):'🔒 '+DUNGEON_CLEAR_REQUIREMENTS[tier]+' '+DUNGEON_TIERS[index-1]+' clears')+'</small></span><span class="instance-tier-mark">'+(unlocked?'↗':'·')+'</span></button>'}).join('');
+ const members=s.teamRoster.map(m=>'<button class="team-member '+(m.selected?'selected':'')+'" data-member="'+m.id+'"><span class="team-portrait">'+m.portrait+'</span><strong>'+m.name+'</strong><small>'+m.role+'</small><span class="team-meter"><i style="width:'+m.combat+'%"></i></span><em>战力 '+m.combat+' · 恶意 '+m.malice+'</em></button>').join('');
+ $('choices').innerHTML='<header class="infinite-masthead illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 320 110"><path d="M18 94 Q52 10 91 75 T163 40 T235 70 T302 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 96 L20 54 48 34 76 54 76 96 M108 96 L108 22 150 22 150 96 M188 96 L188 48 220 30 252 48 252 96 M270 96 L270 62 296 45 316 62" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="150" cy="17" r="6" fill="none" stroke="currentColor"/></svg></div><div class="infinite-kicker">INSTANCE GATE</div><h2>副本入口</h2><div class="infinite-balance"><span>积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div></header><div class="infinite-section-title">等级</div><div class="instance-grid">'+cards+'</div><div class="infinite-section-title">队伍 <small>选择成员</small></div><div class="team-roster">'+members+'</div><div class="team-strength"><span>队伍综合战力</span><b>'+Math.round((s.combat+s.teamRoster.filter(m=>m.selected).reduce((n,m)=>n+m.combat,0))/(1+s.teamRoster.filter(m=>m.selected).length))+'</b></div>';
+ $('drawer').classList.add('open');$('choices').querySelectorAll('[data-instance-tier]').forEach(button=>button.onclick=()=>startDungeon(button.dataset.instanceTier));$('choices').querySelectorAll('[data-member]').forEach(button=>button.onclick=()=>{const m=s.teamRoster.find(x=>x.id===button.dataset.member);if(m)m.selected=!m.selected;save();showDungeon()});
 }
 function startDungeon(tier){
- if(!dungeonUnlocked(tier)){toast('该等级副本尚未解锁');return}
- const energyCost=Number(({F:5,E:7,D:9,C:12,B:15,A:18,S:22,SS:26,SSS:30})[tier]||5);
- if(s.energy<energyCost){toast('精力不足，无法进入副本');return}
- $('drawerTitle').textContent=tier+'级副本 · 行动方案';
- $('choices').className='choices infinite-view';
- const base=DUNGEON_BASE_REWARD[tier]||25;
- $('choices').innerHTML='<header class="instance-brief"><div class="infinite-kicker">MISSION BRIEFING / '+tier+'</div><h2>'+tier+'级未知区域</h2><p>进入副本后选择行动策略。策略将影响本次表现评级与积分结算。</p><div class="instance-cost">入场消耗 <b>'+energyCost+'</b> 精力</div></header><div class="infinite-section-title">选择行动策略</div><button class="instance-strategy" data-strategy="steady"><strong>谨慎探索</strong><small>降低风险，稳定完成目标，评级更可靠。</small></button><button class="instance-strategy" data-strategy="rush"><strong>快速突进</strong><small>追求效率与高额积分，但失败风险更高。</small></button><button class="instance-strategy" data-strategy="investigate"><strong>搜集情报</strong><small>优先寻找线索，可能获得额外评价与奖励。</small></button><button class="instance-back" id="instanceBack">返回副本列表</button>';
- $('drawer').classList.add('open');
- $('instanceBack').onclick=showDungeon;
- $('choices').querySelectorAll('[data-strategy]').forEach(b=>b.onclick=()=>resolveDungeon(tier,b.dataset.strategy,energyCost,base));
+ if(!dungeonUnlocked(tier)){toast('尚未解锁');return}const energyCost=Number(({F:5,E:7,D:9,C:12,B:15,A:18,S:22,SS:26,SSS:30})[tier]||5);if(s.energy<energyCost){toast('精力不足');return}
+ $('drawerTitle').textContent=tier+'级副本';$('choices').className='choices infinite-view';const base=DUNGEON_BASE_REWARD[tier]||25;
+ $('choices').innerHTML='<header class="instance-brief"><div class="ink-illustration compact-illustration"><svg viewBox="0 0 300 90"><path d="M10 80 Q60 5 112 62 T210 35 T290 10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M60 80 L60 38 90 18 120 38 120 80 M190 80 L190 48 220 26 250 48 250 80" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div><div class="infinite-kicker">MISSION / '+tier+'</div><h2>'+tier+'级副本</h2><div class="instance-cost">入场 <b>'+energyCost+'</b> 精力</div></header><div class="strategy-grid"><button class="instance-strategy" data-strategy="steady"><span>🛡</span><strong>谨慎探索</strong></button><button class="instance-strategy" data-strategy="rush"><span>⚡</span><strong>快速突进</strong></button><button class="instance-strategy" data-strategy="investigate"><span>⌕</span><strong>搜集情报</strong></button></div><button class="instance-back" id="instanceBack">← 返回</button>';
+ $('drawer').classList.add('open');$('instanceBack').onclick=showDungeon;$('choices').querySelectorAll('[data-strategy]').forEach(b=>b.onclick=()=>resolveDungeon(tier,b.dataset.strategy,energyCost,base));
 }
 function resolveDungeon(tier,strategy,energyCost,base){
- const strategyData={steady:{risk:.12,bonus:8,grade:8,label:'谨慎探索'},rush:{risk:.3,bonus:30,grade:-3,label:'快速突进'},investigate:{risk:.2,bonus:18,grade:16,label:'搜集情报'}}[strategy];
- const tierIndex=DUNGEON_TIERS.indexOf(tier),energyFactor=Math.min(1,Math.max(.35,(s.energy-energyCost+25)/75));
- const success=Math.random()>(strategyData.risk+(1-energyFactor)*.24+tierIndex*.012);
- s.energy=Math.max(0,s.energy-energyCost);
- const raw=Math.round(55+energyFactor*24+strategyData.grade+(Math.random()*22-7)-(success?0:24));
- const rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):(raw>=55?'C':'D');
- const earned=success?Math.max(5,Math.round(base*(.65+raw/150)+strategyData.bonus)):Math.max(2,Math.round(base*.12));
- s.points+=earned;
- if(success)s.dungeonProgress[tier]=(Number(s.dungeonProgress[tier])||0)+1;
- s.dungeonHistory.unshift({tier,strategy:strategyData.label,success,rating,score:raw,points:earned,at:Date.now()});s.dungeonHistory=s.dungeonHistory.slice(0,80);
- const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();save();render();
- const newly=s.dungeonUnlocks.filter(x=>!before.includes(x));
- $('drawerTitle').textContent='副本结算 · RESULT';
- $('choices').className='choices infinite-view';
- $('choices').innerHTML='<header class="instance-result '+(success?'cleared':'failed')+'"><div class="infinite-kicker">MISSION RESULT / '+tier+'</div><div class="instance-result-status">'+(success?'MISSION CLEARED':'MISSION FAILED')+'</div><div class="instance-rating">'+rating+'</div><p>'+strategyData.label+' · 本次表现 '+raw+' 分</p></header><div class="instance-reward"><span>获得积分</span><strong>+'+earned.toLocaleString('zh-CN')+'</strong><small>当前总积分 '+s.points.toLocaleString('zh-CN')+' · 1 积分 = ¥1（价值对应）</small></div><div class="instance-result-detail"><span>本次精力消耗</span><b>'+energyCost+'</b><span>本等级累计通关</span><b>'+(Number(s.dungeonProgress[tier])||0)+'</b></div>'+(newly.length?'<div class="instance-unlock">新副本已解锁：'+newly.join('、')+'</div>':'')+'<button class="instance-primary" id="instanceAgain">返回副本入口</button>';
- $('instanceAgain').onclick=showDungeon;
- addEvent(success?'副本通关':'副本挑战失败',tier+'级副本：'+(success?'通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。','daily');
- save();
+ const strategyData={steady:{risk:.08,bonus:8,grade:8,label:'谨慎探索'},rush:{risk:.19,bonus:30,grade:-3,label:'快速突进'},investigate:{risk:.13,bonus:18,grade:16,label:'搜集情报'}}[strategy];
+ const tierIndex=DUNGEON_TIERS.indexOf(tier),selected=s.teamRoster.filter(m=>m.selected),teamPower=selected.length?selected.reduce((n,m)=>n+m.combat,0)/selected.length:0,teamMalice=selected.length?selected.reduce((n,m)=>n+m.malice,0)/selected.length:0;
+ const difficulty=[8,14,21,29,38,48,59,71,84][tierIndex],playerPower=Number(s.combat)||0,powerScore=playerPower*.48+teamPower*.52;
+ const powerAdvantage=(powerScore-difficulty)*.006,malicePenalty=teamMalice*.0038,survivalPenalty=(100-s.energy)*.0011+(100-s.hunger)*.00035+(100-s.clean)*.00025,strategyModifier=strategy==='steady'?.07:strategy==='rush'?-.025:.035;
+ const successChance=Math.max(.035,Math.min(.97,.50+powerAdvantage-malicePenalty-survivalPenalty-strategyData.risk+strategyModifier));
+ const roll=Math.random(),success=roll<successChance;s.energy=Math.max(0,s.energy-energyCost);
+ const raw=Math.round(Math.max(0,Math.min(100,50+powerScore*.22-difficulty*.25+(Math.random()*20-10)+strategyData.grade-teamMalice*.12)));
+ const rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):(raw>=55?'C':'D'),earned=success?Math.max(5,Math.round(base*(.65+raw/150)+strategyData.bonus)):Math.max(2,Math.round(base*.12));
+ s.points+=earned;if(success)s.dungeonProgress[tier]=(Number(s.dungeonProgress[tier])||0)+1;s.dungeonHistory.unshift({tier,strategy:strategyData.label,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(teamPower),teamMalice:Math.round(teamMalice),at:Date.now()});s.dungeonHistory=s.dungeonHistory.slice(0,80);
+ const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();save();render();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x));
+ $('drawerTitle').textContent='副本结算';$('choices').className='choices infinite-view';
+ $('choices').innerHTML='<header class="instance-result '+(success?'cleared':'failed')+'"><div class="infinite-kicker">'+tier+' / RESULT</div><div class="instance-result-status">'+(success?'通关':'失败')+'</div><div class="instance-rating">'+rating+'</div><p>成功率 '+Math.round(successChance*100)+'% · 随机判定 '+Math.round(roll*100)+'%</p></header><div class="instance-reward"><span>获得积分</span><strong>+'+earned+'</strong><small>累计 '+s.points.toLocaleString('zh-CN')+'</small></div><div class="instance-result-detail"><span>玩家战力</span><b>'+playerPower+'</b><span>队伍战力</span><b>'+Math.round(teamPower)+'</b><span>队伍恶意</span><b>'+Math.round(teamMalice)+'</b><span>副本难度</span><b>'+difficulty+'</b></div>'+(newly.length?'<div class="instance-unlock">解锁 '+newly.join(' / ')+'</div>':'')+'<button class="instance-primary" id="instanceAgain">返回</button>';
+ $('instanceAgain').onclick=showDungeon;addEvent(success?'副本通关':'副本挑战失败',tier+'级副本：'+(success?'通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。','daily');save();
 }
+function showEntertainment(){ $('drawerTitle').textContent='娱乐';$('choices').className='choices infinite-view';$('choices').innerHTML='<div class="illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 300 100"><path d="M15 82 Q60 10 108 72 T205 38 T285 65" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="90" cy="38" r="20" fill="none" stroke="currentColor"/><path d="M80 38h20M90 28v20" stroke="currentColor"/></svg></div><h2>娱乐</h2></div><div class="illustrated-choice-grid"><button class="instance-strategy" onclick="toast(\'即将开放\')">🎴<strong>牌局</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">🎮<strong>街机</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">♟<strong>棋室</strong></button></div>';$('drawer').classList.add('open');}
 function showRanking(){
  $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
  $('drawerTitle').textContent='积分排行榜 · RANKING';
  $('choices').className='choices infinite-view';
  const total=DUNGEON_TIERS.reduce((n,t)=>n+(Number(s.dungeonProgress[t])||0),0);
  const latest=s.dungeonHistory[0];
- $('choices').innerHTML='<header class="infinite-masthead ranking-masthead"><div class="infinite-kicker">ARDAY POINTS LEADERBOARD</div><h2>积分榜</h2><p>所有副本结算积分累计进入同一排行榜。</p><div class="infinite-balance"><span>我的累计积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div></header><section class="ranking-self"><div class="ranking-rank">LOCAL<br><strong>—</strong></div><div><small>当前玩家</small><h3>你</h3><p>累计通关 '+total+' 次 · 已开放 '+s.dungeonUnlocks.length+' / 9 个等级</p></div></section><div class="infinite-section-title">最近结算 <small>RECENT RESULTS</small></div>'+(s.dungeonHistory.length?s.dungeonHistory.slice(0,8).map((x,i)=>'<div class="ranking-row"><span class="ranking-row-index">'+String(i+1).padStart(2,'0')+'</span><b>'+x.tier+'级副本</b><span>'+x.rating+' · '+(x.success?'通关':'失败')+'</span><strong>+'+x.points+'</strong></div>').join(''):'<p class="infinite-note">尚无副本结算记录。完成副本后，积分将显示在这里。</p>')+'<p class="infinite-note">当前版本保存本地玩家积分与结算记录。跨玩家实时排名需要联机账户和排行榜服务接入；不会用虚构玩家数据冒充真实排名。</p>';
+ $('choices').innerHTML='<header class="infinite-masthead ranking-masthead"><div class="infinite-kicker">ARDAY POINTS LEADERBOARD</div><h2>积分榜</h2><p></p><div class="infinite-balance"><span>我的累计积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div></header><section class="ranking-self"><div class="ranking-rank">LOCAL<br><strong>—</strong></div><div><small>当前玩家</small><h3>你</h3><p>累计通关 '+total+' 次 · 已开放 '+s.dungeonUnlocks.length+' / 9 个等级</p></div></section><div class="infinite-section-title">最近结算 <small>RECENT RESULTS</small></div>'+(s.dungeonHistory.length?s.dungeonHistory.slice(0,8).map((x,i)=>'<div class="ranking-row"><span class="ranking-row-index">'+String(i+1).padStart(2,'0')+'</span><b>'+x.tier+'级副本</b><span>'+x.rating+' · '+(x.success?'通关':'失败')+'</span><strong>+'+x.points+'</strong></div>').join(''):'<p class="infinite-note">尚无副本结算记录。完成副本后，积分将显示在这里。</p>')+'<p class="infinite-note"></p>';
  $('drawer').classList.add('open');
 }
 function showExchange(){
@@ -1387,7 +1373,7 @@ function showExchange(){
  $('drawerTitle').textContent='积分兑换 · EXCHANGE';
  $('choices').className='choices infinite-view';
  const goods=[{id:'energy',name:'应急能量补给',desc:'立即恢复 35 点精力。',price:45},{id:'recovery',name:'状态修复包',desc:'恢复饥饿与清洁状态各 25 点。',price:35},{id:'memory',name:'记忆档案扩展',desc:'获得一份特殊档案收藏。',price:120}];
- $('choices').innerHTML='<header class="infinite-masthead exchange-masthead"><div class="infinite-kicker">ARDAY POINT EXCHANGE</div><h2>兑换中心</h2><p>副本积分是本空间唯一的流通货币，可用于兑换区消费。</p><div class="infinite-balance"><span>可用积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div><small class="exchange-rate">参考兑换比例：1 积分 = ¥1</small></header><div class="infinite-section-title">可兑换物资 <small>SUPPLY CATALOG</small></div>'+goods.map(x=>'<article class="exchange-item"><div><span class="exchange-item-kicker">SUPPLY / '+x.id.toUpperCase()+'</span><h3>'+x.name+'</h3><p>'+x.desc+'</p></div><button data-exchange="'+x.id+'" '+(s.points<x.price?'disabled':'')+'><b>'+x.price+'</b><small>积分兑换</small></button></article>').join('')+'<p class="infinite-note">此处的 1:1 是游戏内积分与人民币的价值标尺；真实充值、提现或人民币支付功能尚未接入。</p>';
+ $('choices').innerHTML='<header class="infinite-masthead exchange-masthead"><div class="infinite-kicker">ARDAY POINT EXCHANGE</div><h2>兑换中心</h2><p></p><div class="infinite-balance"><span>可用积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div><small class="exchange-rate">参考兑换比例：1 积分 = ¥1</small></header><div class="infinite-section-title">可兑换物资 <small>SUPPLY CATALOG</small></div>'+goods.map(x=>'<article class="exchange-item"><div><span class="exchange-item-kicker">SUPPLY / '+x.id.toUpperCase()+'</span><h3>'+x.name+'</h3><p>'+x.desc+'</p></div><button data-exchange="'+x.id+'" '+(s.points<x.price?'disabled':'')+'><b>'+x.price+'</b><small>积分兑换</small></button></article>').join('')+'<p class="infinite-note"></p>';
  $('drawer').classList.add('open');
  $('choices').querySelectorAll('[data-exchange]').forEach(b=>b.onclick=()=>{
   const item=goods.find(x=>x.id===b.dataset.exchange);if(!item||s.points<item.price)return;
@@ -3638,12 +3624,12 @@ function persistFurniture(item){
   }
   function activateHallZone(id){
    const zone=hallScene.zones.find(item=>item.id===id);if(!zone)return;
-   const lines={entertainment:'模拟娱乐区。街机与休闲玩法将逐项接入。'};
+   const lines={};
    if(id==='exchange'){showExchange();return}
    if(id==='recruitment'){closeCalendar();showRecruitment();document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
    if(id==='commissions'){openTab('目标');return}
    if(id==='food'){shopCategory='食物食材';openTab('商店',true);return}
-   if(id==='ranking'){showRanking();return}if(id==='teams'){showDungeon();return}say(lines[id]||zone.name);
+   if(id==='ranking'){showRanking();return}if(id==='teams'){showDungeon();return}if(id==='entertainment'){showEntertainment();return}say(lines[id]||zone.name);
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,furnitureTap=null,sceneDismissTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
