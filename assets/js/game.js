@@ -584,6 +584,30 @@ function ensureScheduleAt(value){
   });
   s.calendar.version=18;
  }
+ if((s.calendar.version||0)<19){
+  // Migrate active dungeon sessions onto the calendar block; the schedule owns the end time.
+  const mission=s.activeDungeon;
+  if(mission&&mission.status==='active'){
+   let located=null,locatedKey=null;
+   Object.keys(s.calendar.days||{}).some(key=>(s.calendar.days[key]||[]).some(ev=>{
+    if(ev.dungeonId===mission.id){located=ev;locatedKey=key;return true}return false
+   }));
+   if(!located){
+    const now=new Date(),key=keyAt(now),hour=now.getHours();
+    writeBlockForKey(key,hour,hour+1,{title:'副本',kind:'dungeon',activity:'dungeon',dungeonId:mission.id,priority:'forced'});
+    located=eventAt(key,hour);locatedKey=key;
+   }
+   located.title='副本';located.kind='dungeon';located.activity='dungeon';
+   const start=new Date(locatedKey+'T00:00:00');start.setHours(Number(located.start)||0,0,0,0);
+   const finish=new Date(locatedKey+'T00:00:00');finish.setHours(Number(located.end)||24,0,0,0);
+   mission.scheduleKey=locatedKey;mission.scheduleStartHour=located.start;mission.startAt=start.getTime();mission.endsAt=finish.getTime();mission.scheduleEndAt=finish.getTime();
+   s.activeInteraction=null;
+  }
+  Object.keys(s.calendar.days||{}).forEach(key=>(s.calendar.days[key]||[]).forEach(ev=>{
+   if(ev.kind==='dungeon'){ev.title='副本';ev.activity='dungeon'}
+  }));
+  s.calendar.version=19;
+ }
  
  
  
@@ -725,7 +749,7 @@ function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe||(s.unlocke
 const immediateInteractionDuration=120000;
 const immediateInteractionRefusalRate=.3;
 function finishImmediateInteraction(at=Date.now()){
- const interaction=s.activeInteraction;if(!interaction||at<Number(interaction.endsAt||0))return false;
+ const interaction=s.activeInteraction;if(!interaction)return false;if(s.activeDungeon){s.activeInteraction=null;return false}if(at<Number(interaction.endsAt||0))return false;
  const currentKey=keyAt(at),currentHour=new Date(at).getHours();
  if(s.lastUnifiedHourKey!==currentKey+'-'+currentHour)processActivityAt(at);
  s.activeInteraction=null;
@@ -753,13 +777,14 @@ function finishImmediateInteraction(at=Date.now()){
  save();render();return true;
 }
 function refreshImmediateInteraction(at=Date.now()){
- const interaction=s.activeInteraction;if(!interaction)return false;
+ const interaction=s.activeInteraction;if(!interaction)return false;if(s.activeDungeon){s.activeInteraction=null;return false}
  if(at>=Number(interaction.endsAt||0))return finishImmediateInteraction(at);
  const hourKey=keyAt(at)+'-'+new Date(at).getHours();
  if(interaction.presentationHourKey!==hourKey){interaction.presentationHourKey=hourKey;presentActivity(interaction.activity,interaction.anchor||null,interaction.room||null,interaction.furnitureId||null)}
  return true;
 }
 function beginImmediateInteraction(action,options={}){
+ if(s.activeDungeon){toast('副本进行中，暂时无法进行即时互动');return false}
  const activity=normalizeActivity(action),meta=activityMeta[activity];
  if(!meta||activity==='idle'||!['short','long'].includes(meta.duration))return false;
  if(meta.duration==='short'&&!['furniture','window'].includes(options.source))return false;
@@ -896,7 +921,7 @@ function scheduledFurnitureIsValid(ev){
 }
 function resolveScheduledActivity(key,hour){
  let ev=eventAt(key,hour);
- const needsChoice=!ev||ev.activity==='autonomous'||normalizeActivity(ev.activity)==='idle';
+ const needsChoice=!ev||ev.activity==='autonomous'||(normalizeActivity(ev.activity)==='idle'&&ev.kind!=='dungeon');
  const stalePlan=ev?.kind==='autonomous'&&!needsChoice&&!scheduledFurnitureIsValid(ev);
  if(needsChoice||stalePlan){
   let choice;
@@ -1086,7 +1111,7 @@ function resolveCharacterAvailability(at=new Date()){
  if(['work','computerWork'].includes(activity)||ev?.kind==='work')return {status:'working',activity,event:ev,key,hour};
  if(['eat','food'].includes(activity))return {status:'eating',activity,event:ev,key,hour};
  if(activity==='walk')return {status:'outside',activity,event:ev,key,hour};
- if(ev&&['busy','unavailable'].includes(ev.kind))return {status:'busy',activity,event:ev,key,hour};
+ if(ev&&['busy','unavailable','dungeon'].includes(ev.kind))return {status:'busy',activity,event:ev,key,hour};
  return {status:'available',activity,event:ev,key,hour};
 }
 function ardayUnavailable(){return resolveCharacterAvailability().status!=='available'}
@@ -1344,7 +1369,7 @@ function showDungeon(){
 }
 function showDungeonPending(){
  const mission=s.activeDungeon;if(!mission)return;
- $('drawerTitle').textContent='副本派遣';$('choices').className='choices infinite-view';
+ $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view';
  $('choices').innerHTML='<section class="mission-waiting"><div class="mission-portal"><svg viewBox="0 0 240 220" role="img" aria-label="封闭的副本入口"><path d="M25 198V87Q25 20 120 12Q215 20 215 87V198" fill="none" stroke="#6e7770" stroke-width="4"/><path d="M48 198V90Q48 38 120 30Q192 38 192 90V198" fill="none" stroke="#a18d70" stroke-width="2"/><path d="M83 198V99Q83 65 120 60Q157 65 157 99V198" fill="#5b6870" stroke="#d2c4aa" stroke-width="2"/><circle cx="120" cy="111" r="13" fill="none" stroke="#e4d5b8" stroke-width="2"/><path d="M120 93V129M102 111H138" stroke="#e4d5b8" stroke-width="1.5"/><path d="M12 198H228M40 211H200" stroke="#7d796e" stroke-width="2"/></svg></div><div class="mission-seal">'+mission.tier+'</div><div class="mission-status">派遣中</div><div class="mission-clock" id="missionClock"></div><div class="mission-track"><i id="missionProgress"></i></div><div class="mission-finish">预计结束 '+new Date(mission.endsAt).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+'</div></section>';
  const matched=mission.snapshot?.matchedStrangers||[];$('choices').innerHTML+='<section class="mission-matchmaking"><div class="mission-matchmaking-head"><b>临时匹配</b><small>BLACK-BOX MATCHMAKING</small></div><div class="mission-matchmaking-slots">'+matched.map((m,i)=>'<div class="mission-match-slot"><span>?</span><b>陌生队友 '+(i+1)+'</b><small>数据未知</small></div>').join('')+'</div></section>';updateDungeonCountdown();
 }
@@ -1363,19 +1388,20 @@ function startDungeon(tier){
  dispatchDungeon(tier,energyCost,DUNGEON_BASE_REWARD[tier]||25);
 }
 function dispatchDungeon(tier,energyCost,base){
- const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),duration=1;
+ const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),duration=1,scheduleStart=new Date(now);scheduleStart.setMinutes(0,0,0);const scheduleEnd=new Date(scheduleStart.getTime()+3600000);
  const selected=s.teamRoster.filter(m=>m.selected);
  const matchedStrangers=Array.from({length:2},(_,index)=>({id:'stranger-'+Date.now()+'-'+index,name:'陌生匹配者 '+(index+1),role:'临时队员',combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82),anonymous:true}));
  const fullTeam=[...selected,...matchedStrangers],teamPower=fullTeam.reduce((n,m)=>n+m.combat,0)/fullTeam.length,teamMalice=fullTeam.reduce((n,m)=>n+m.malice,0)/fullTeam.length;
- const difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)],end=now+3600000;
+ const difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)],end=scheduleEnd.getTime();
  s.energy=Math.max(0,s.energy-energyCost);
- s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,energyCost,baseReward:base,difficulty,startAt:now,endsAt:end,duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers}};
- // Dungeon dispatch overrides every scheduled activity for this one-hour block.
- writeBlockForKey(key,hour,hour+1,{title:'副本派遣',kind:'dungeon',activity:'idle',dungeonId:s.activeDungeon.id,priority:'forced'});
+ s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,energyCost,baseReward:base,difficulty,startAt:scheduleStart.getTime(),endsAt:end,scheduleKey:key,scheduleStartHour:hour,scheduleEndAt:end,duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers}};
+ // 副本占用当前整点时段，结束时刻与日程边界严格一致。
+ writeBlockForKey(key,hour,hour+1,{title:'副本',kind:'dungeon',activity:'dungeon',dungeonId:s.activeDungeon.id,priority:'forced'});
+ s.activeInteraction=null;s.currentActivity='dungeon';s.currentActivityAnchor=null;s.currentActivityRoom='dungeon';s.currentActivityFurnitureId=null;s.lastUnifiedHourKey=key+'-'+hour;s.lastProcessedSessionKey=key+'-'+hour+'-dungeon';
  save();render();renderCalendar();showDungeonPending();$('drawer').classList.add('open');
 }
 function settleDungeonIfDue(at=Date.now()){
- const mission=s.activeDungeon;if(!mission||mission.status!=='active'||at<Number(mission.endsAt||0))return false;
+ const mission=s.activeDungeon;if(!mission||mission.status!=='active')return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;
  const snap=mission.snapshot||{},powerScore=(Number(snap.playerPower)||0)*.48+(Number(snap.teamPower)||0)*.52;
  const powerAdvantage=(powerScore-mission.difficulty)*.006,malicePenalty=(Number(snap.teamMalice)||0)*.0038;
  const survivalPenalty=(100-(Number(snap.energy)||0))*.0011+(100-(Number(snap.hunger)||0))*.00035+(100-(Number(snap.clean)||0))*.00025;
@@ -1389,7 +1415,7 @@ function settleDungeonIfDue(at=Date.now()){
  const result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at:at,unlocked:newly};
  s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
  addEvent('副本结算报告 · '+result.tier,'副本任务已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(newly.length?' 新解锁：'+newly.join('、')+'。':''),'daily');
- save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本派遣')showDungeonResult(result);return true;
+ save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本')showDungeonResult(result);return true;
 }
 function showDungeonResult(result){
  $('drawerTitle').textContent='副本结算';$('choices').className='choices infinite-view';
