@@ -671,6 +671,7 @@ function ensureScheduleAt(value){
      const start=ev.start,end=ev.end,withPlayer=ev.withPlayer;
      const planned=createAutonomousScheduleEvent(start,recent);
      Object.assign(ev,planned,{start,end,...(withPlayer?{withPlayer}: {})});
+     if(ev.activity&&ev.activity!=='idle'){recent.push(ev.activity);if(recent.length>5)recent.shift()}
     }
     if(ev.activity&&ev.activity!=='idle'&&ev.activity!=='autonomous'){recent.push(ev.activity);if(recent.length>5)recent.shift()}
    });
