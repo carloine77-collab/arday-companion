@@ -17,7 +17,33 @@
   const ceiling=new T.Group();ceiling.position.set(-20,0,0);root.add(ceiling);
   for(let i=0;i<13;i++){const x=-300+i*46;box(ceiling,x,79,0,1.5,1.1,500,i%2?silver:graphite);box(ceiling,x,78.35,0,.16,.1,470,whiteGlow)}
   for(let i=0;i<15;i++){const z=-250+i*36;box(ceiling,0,82,z,610,.9,1.1,graphite);box(ceiling,0,82.55,z,580,.1,.12,cyan)}
-  for(const x of [-300,300])for(const z of [-250,250]){box(ceiling,x,38,z,3,76,3,graphite);box(ceiling,x,38,z+1.65,.16,74,.12,cyan)}
+  // Repeating staggered metallic pylons restore the interlaced megastructure rhythm.
+  // Wide bays preserve sightlines while cross-braces make the ceiling feel engineered and monumental.
+  for(let row=0;row<5;row++){
+   const z=-190+row*95;
+   for(let col=0;col<7;col++){
+    const x=-240+col*80+(row%2?38:0);
+    if(Math.abs(x)<42&&Math.abs(z)<48)continue;
+    const h=64+(col%3)*5;
+    box(ceiling,x,h/2,z,2.8,h,2.8,col%2?silver:graphite);
+    box(ceiling,x+1.65,h/2,z,.16,h-2,.16,cyan);
+    box(ceiling,x,h-5,z,7,.9,1.1,titanium);
+    box(ceiling,x,h-9,z,1.0,1.0,7,graphite);
+    const braceA=box(ceiling,x+13,h-13,z,26,1.05,1.05,silver);braceA.rotation.z=.24;
+    const braceB=box(ceiling,x-13,h-13,z,26,1.05,1.05,graphite);braceB.rotation.z=-.24;
+   }
+  }
+  // Longitudinal and transverse structural ribs form a visible criss-cross ceiling lattice.
+  for(let i=0;i<10;i++){
+   const z=-225+i*50;
+   box(ceiling,0,69,z,560,1.4,1.8,i%2?silver:graphite);
+   box(ceiling,0,69.9,z,540,.12,.14,cyan);
+  }
+  for(let i=0;i<11;i++){
+   const x=-250+i*50;
+   box(ceiling,x,73,0,1.6,1.1,480,i%2?graphite:silver);
+   box(ceiling,x+.9,73.7,0,.12,.12,460,whiteGlow);
+  }
   // Distant architectural backdrop, deliberately beyond the playable boundary.
   const bg=document.createElement('canvas');bg.width=2048;bg.height=1024;const ctx=bg.getContext('2d'),grad=ctx.createLinearGradient(0,0,0,1024);grad.addColorStop(0,'#07111f');grad.addColorStop(.52,'#172c40');grad.addColorStop(1,'#263c4e');ctx.fillStyle=grad;ctx.fillRect(0,0,2048,1024);
   let seed=90317;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
@@ -26,13 +52,13 @@
   const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(720,64,36),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-8;root.add(sky);
   function labelTexture(title,sub){const c=document.createElement('canvas');c.width=768;c.height=224;const g=c.getContext('2d');g.fillStyle='rgba(8,23,37,.88)';g.fillRect(8,8,752,208);g.strokeStyle='#78d9e8';g.lineWidth=4;g.strokeRect(12,12,744,200);g.fillStyle='#effaff';g.textAlign='center';g.textBaseline='middle';g.font='bold 66px sans-serif';g.fillText(title,384,88);g.fillStyle='#82c9d9';g.font='25px sans-serif';g.fillText(sub,384,163);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t}
   const zones=[
-   {id:'exchange',name:'兑换区',sub:'RMB EXCHANGE',x:-205,z:-105,w:94,d:78,shape:[[-48,-31],[22,-42],[55,-15],[49,28],[8,43],[-42,29],[-58,-2]]},
-   {id:'ranking',name:'排行区',sub:'RANKING MATRIX',x:-75,z:-190,w:86,d:76,shape:[[-40,-30],[26,-43],[50,-12],[42,34],[-8,43],[-49,15]]},
-   {id:'recruitment',name:'招募区',sub:'RECRUITMENT',x:95,z:-190,w:98,d:82,shape:[[-48,-34],[30,-42],[57,-5],[45,37],[-18,45],[-57,9]]},
-   {id:'commissions',name:'委托区',sub:'CONTRACT TERMINAL',x:225,z:-65,w:100,d:84,shape:[[-52,-33],[31,-45],[59,-7],[45,39],[-22,45],[-61,8]]},
-   {id:'teams',name:'组队区',sub:'SQUAD ASSEMBLY',x:205,z:125,w:104,d:88,shape:[[-55,-36],[29,-46],[62,-4],[43,42],[-26,47],[-65,5]]},
-   {id:'entertainment',name:'娱乐区',sub:'SIMULATION DECK',x:25,z:195,w:112,d:92,shape:[[-58,-38],[32,-49],[66,-7],[47,45],[-24,49],[-68,8]]},
-   {id:'food',name:'美食区',sub:'FOOD & SUPPLY',x:-165,z:145,w:100,d:84,shape:[[-52,-34],[27,-43],[60,-4],[44,39],[-19,45],[-62,6]]}
+   {id:'exchange',name:'兑换区',sub:'RMB EXCHANGE',x:-118,z:-48,w:118,d:100,shape:[[-60,-40],[28,-54],[69,-18],[62,34],[8,55],[-53,38],[-73,-3]]},
+   {id:'ranking',name:'排行区',sub:'RANKING MATRIX',x:-55,z:-125,w:108,d:96,shape:[[-52,-38],[31,-50],[63,-14],[53,42],[-10,52],[-62,20]]},
+   {id:'recruitment',name:'招募区',sub:'RECRUITMENT',x:65,z:-126,w:122,d:102,shape:[[-60,-42],[36,-54],[72,-6],[56,46],[-20,56],[-72,12]]},
+   {id:'commissions',name:'委托区',sub:'CONTRACT TERMINAL',x:145,z:-32,w:126,d:106,shape:[[-64,-42],[37,-56],[75,-8],[58,48],[-26,57],[-76,10]]},
+   {id:'teams',name:'组队区',sub:'SQUAD ASSEMBLY',x:130,z:92,w:132,d:110,shape:[[-68,-44],[35,-58],[78,-5],[55,53],[-30,59],[-80,7]]},
+   {id:'entertainment',name:'娱乐区',sub:'SIMULATION DECK',x:5,z:137,w:138,d:114,shape:[[-70,-46],[38,-60],[82,-8],[59,56],[-28,62],[-84,9]]},
+   {id:'food',name:'美食区',sub:'FOOD & SUPPLY',x:-112,z:105,w:124,d:104,shape:[[-63,-42],[34,-54],[73,-5],[54,48],[-24,56],[-76,8]]}
   ];
   const zoneObjects=[];
   zones.forEach((z,index)=>{
@@ -83,8 +109,8 @@
    zoneObjects.push(area);
   });
   // Large, irregular avenues connect neighborhoods; the routes cross and branch rather than radiate from a central circle.
-  [[-205,-105,-75,-190],[-75,-190,95,-190],[95,-190,225,-65],[225,-65,205,125],[205,125,25,195],[25,195,-165,145],[-165,145,-205,-105],[-75,-190,25,195],[95,-190,205,125],[-205,-105,25,195]].forEach((p,i)=>strip(p[0],p[1],p[2],p[3],i%3===0?24:17,floorDark));
-  [[-205,-105,-75,-190],[-75,-190,95,-190],[95,-190,225,-65],[225,-65,205,125],[205,125,25,195],[25,195,-165,145],[-165,145,-205,-105]].forEach(p=>strip(p[0],p[1],p[2],p[3],.45,cyan));
+  [[-118,-48,-55,-125],[-55,-125,65,-126],[65,-126,145,-32],[145,-32,130,92],[130,92,5,137],[5,137,-112,105],[-112,105,-118,-48],[-55,-125,5,137],[65,-126,130,92],[-118,-48,130,92]].forEach((p,i)=>strip(p[0],p[1],p[2],p[3],i%3===0?27:20,floorDark));
+  [[-118,-48,-55,-125],[-55,-125,65,-126],[65,-126,145,-32],[145,-32,130,92],[130,92,5,137],[5,137,-112,105],[-112,105,-118,-48]].forEach(p=>strip(p[0],p[1],p[2],p[3],.55,cyan));
   // Arrival portal is placed inside the immense hall, facing into the open central concourse.
   const portal=new T.Group();portal.position.set(-20,0,0);portal.rotation.y=-Math.PI/2;portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
   box(portal,0,3.1,0,5.4,6.2,.8,graphite);box(portal,0,3.1,.45,4.4,5.3,.08,glass);
