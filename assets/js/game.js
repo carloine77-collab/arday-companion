@@ -1569,8 +1569,8 @@ function initArday3D(){
    signFace.position.set(0,2.72,.076);g.add(signFace);
    return g;
   }
-  const livingBedroomDoor=roomDoor(living,-1.45,'卧室','bedroom',0x77513b);
-  const livingKitchenDoor=roomDoor(living,1.45,'厨房','kitchen',0x718778);
+  const livingBedroomDoor=roomDoor(living,-2.25,'卧室','bedroom',0x77513b);
+  const livingKitchenDoor=roomDoor(living,2.25,'厨房','kitchen',0x718778);
   // Tiled bathroom shell; no sanitary fixtures are pre-installed.
   const bathroom=new T.Group();scene.add(bathroom);roomShell(bathroom,0xd7d8d4,0xb8b6aa);
   const bathroomTile=M(0xd9d7cf,.96);
