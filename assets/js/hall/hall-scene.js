@@ -3,6 +3,30 @@
  function create(T,scene,M,box){
   const root=new T.Group();root.name='ArdayPublicHall';root.position.set(-5.18,0,0);scene.add(root);
   const mat=(c,m=.68,r=.32)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r});
+  // Organic surface library: procedural bark, leaf and soil maps keep plants out of the metallic material family.
+  const makeOrganicMap=(base,low,high,kind)=>{
+   const c=document.createElement('canvas');c.width=256;c.height=256;const q=c.getContext('2d');
+   q.fillStyle=base;q.fillRect(0,0,256,256);let seed=kind==='bark'?3817:kind==='leaf'?9281:6113;
+   const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+   if(kind==='bark'){for(let i=0;i<95;i++){const x=rnd()*256,w=1+rnd()*5;q.strokeStyle=i%2?low:high;q.globalAlpha=.12+rnd()*.24;q.lineWidth=w;q.beginPath();q.moveTo(x,0);q.bezierCurveTo(x+(rnd()-.5)*18,85,x+(rnd()-.5)*18,170,x+(rnd()-.5)*12,256);q.stroke()}for(let i=0;i<420;i++){q.fillStyle=i%2?low:high;q.globalAlpha=.12;q.fillRect(rnd()*256,rnd()*256,1+rnd()*3,2+rnd()*8)}}
+   else if(kind==='leaf'){for(let i=0;i<125;i++){const x=rnd()*256,y=rnd()*256;q.strokeStyle=i%3?low:high;q.globalAlpha=.12+rnd()*.2;q.lineWidth=.7+rnd()*1.2;q.beginPath();q.moveTo(x,y);q.quadraticCurveTo(x+(rnd()-.5)*18,y+5+rnd()*12,x+(rnd()-.5)*26,y+12+rnd()*26);q.stroke()}}
+   else{for(let i=0;i<2400;i++){q.fillStyle=i%2?low:high;q.globalAlpha=.08+rnd()*.12;q.fillRect(rnd()*256,rnd()*256,1+rnd()*3,1+rnd()*3)}}
+   q.globalAlpha=1;const t=new T.CanvasTexture(c);if(T.sRGBEncoding!==undefined)t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=4;return t;
+  };
+  const barkMap=makeOrganicMap('#65452f','#38281f','#a77b4d','bark'),leafMap=makeOrganicMap('#4d7836','#234b27','#9bbd54','leaf'),soilMap=makeOrganicMap('#4b3d2b','#2b261c','#786043','soil');
+  const barkMat=new T.MeshStandardMaterial({map:barkMap,bumpMap:barkMap,bumpScale:.16,color:0xffffff,roughness:.94,metalness:0});
+  const leafPalette=[
+   new T.MeshPhysicalMaterial({color:0x315d32,map:leafMap,roughness:.84,metalness:0,sheen:.28,sheenColor:new T.Color(0x527b39),side:T.DoubleSide}),
+   new T.MeshPhysicalMaterial({color:0x477a36,map:leafMap,roughness:.8,metalness:0,sheen:.32,sheenColor:new T.Color(0x7e9c43),side:T.DoubleSide}),
+   new T.MeshPhysicalMaterial({color:0x6b8d3c,map:leafMap,roughness:.86,metalness:0,sheen:.22,sheenColor:new T.Color(0x9eaf54),side:T.DoubleSide}),
+   new T.MeshPhysicalMaterial({color:0x526b2e,map:leafMap,roughness:.88,metalness:0,sheen:.24,sheenColor:new T.Color(0x788d3d),side:T.DoubleSide}),
+   new T.MeshPhysicalMaterial({color:0x2e6848,map:leafMap,roughness:.82,metalness:0,sheen:.3,sheenColor:new T.Color(0x4c9362),side:T.DoubleSide})
+  ];
+  // Static procedural shader breakup adds subtle natural tonal variation without time-based flicker.
+  leafPalette.forEach((m,i)=>{m.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\\n diffuseColor.rgb *= 0.972 + 0.028 * sin(vViewPosition.x * '+(3.1+i*.37).toFixed(2)+' + vViewPosition.y * 2.3);');};m.customProgramCacheKey=()=> 'arday-leaf-natural-'+i;});
+  const soilMat=new T.MeshStandardMaterial({map:soilMap,bumpMap:soilMap,bumpScale:.12,color:0xffffff,roughness:1,metalness:0});
+  const leafGeometry=(()=>{const sh=new T.Shape();sh.moveTo(0,0);sh.quadraticCurveTo(.2,.24,.02,.9);sh.quadraticCurveTo(-.2,.24,0,0);const g=new T.ExtrudeGeometry(sh,{depth:.035,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.018,bevelThickness:.012,curveSegments:10});g.computeVertexNormals();return g;})();
+
   const addCylinder=(parent,x,y,z,rt,rb,h,material,segments=16)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
   const addTorus=(parent,x,y,z,r,t,material)=>{const o=new T.Mesh(new T.TorusGeometry(r,t,10,56),material);o.position.set(x,y,z);parent.add(o);return o};
   const titanium=mat(0x9eabb4,.82,.25),silver=mat(0xd1dce1,.76,.22),graphite=mat(0x263440,.72,.34),dark=mat(0x111e2a,.6,.42),floorMat=mat(0x667783,.72,.3),floorDark=mat(0x344550,.72,.34),cyan=new T.MeshStandardMaterial({color:0x70ddeb,emissive:0x137d96,emissiveIntensity:.55,metalness:.4,roughness:.25}),whiteGlow=new T.MeshBasicMaterial({color:0xd9faff,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x9de6f0,metalness:.12,roughness:.2,transparent:false,opacity:1,depthWrite:true,transmission:.22,thickness:.12,clearcoat:.55,clearcoatRoughness:.18,side:T.DoubleSide});
@@ -287,24 +311,29 @@
     }
     return skin;
    };
-   const addBotanicalTree=(x,z,height=8,foliage=jade,form=0)=>{
-    // Tapered trunk, branching limbs and layered leaf clusters; avoids primitive cone-tree silhouettes.
-    const trunkProfile=[[.08,0],[.22,.18],[.19,.55],[.14,height*.58],[.1,height*.86],[.05,height],[0,height]];
-    addLathedProfile(x,0,z,trunkProfile,warmMetal,12);
-    for(let b=0;b<5;b++){
-     const angle=b*Math.PI*2/5+form*.37,reach=1.25+(b%3)*.34,base=height*(.38+(b%2)*.12);
-     const start=new T.Vector3(x,base,z);
-     const end=new T.Vector3(x+Math.cos(angle)*reach,base+1.5+(b%2)*.5,z+Math.sin(angle)*reach);
-     const mid=start.clone().lerp(end,.58);mid.y+=.42;
-     const branch=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([start,mid,end]),10,.075,6,false),warmMetal);area.add(branch);
-     for(let l=0;l<3;l++){
-      const t=.45+l*.23,p=start.clone().lerp(end,t);
-      const leaf=new T.Mesh(new T.SphereGeometry(1,10,7),l%2?foliage:jade);
-      leaf.position.copy(p);leaf.scale.set(.62+(l%2)*.16,.34,.88);leaf.rotation.y=angle+l*.6;leaf.rotation.z=.32+(l%2)*-.64;area.add(leaf);
+   const addBotanicalTree=(x,z,height=8,foliage=leafPalette[1],form=0)=>{
+     // Broadleaf tree with a textured trunk, tapered limbs and individually shaped leaves.
+     const trunkProfile=[[.06,0],[.2,.16],[.17,.48],[.145,height*.42],[.115,height*.68],[.075,height*.88],[.035,height],[0,height]];
+     addLathedProfile(x,0,z,trunkProfile,barkMat,18);
+     const addLeaf=(px,py,pz,angle,tilt,scale,mi)=>{
+      const leaf=new T.Mesh(leafGeometry,leafPalette[mi%leafPalette.length]);leaf.position.set(px,py,pz);
+      leaf.rotation.set(tilt,angle,Math.sin(angle+form)*.24);leaf.scale.set(scale,scale*(.78+(mi%3)*.1),scale);leaf.castShadow=true;area.add(leaf);
+     };
+     for(let branchIndex=0;branchIndex<7;branchIndex++){
+      const angle=branchIndex*Math.PI*2/7+form*.29,reach=height*(.19+(branchIndex%3)*.025),base=height*(.38+(branchIndex%3)*.075);
+      const start=new T.Vector3(x,base,z),end=new T.Vector3(x+Math.cos(angle)*reach,Math.min(height*.91,base+height*(.23+(branchIndex%2)*.04)),z+Math.sin(angle)*reach);
+      const mid=start.clone().lerp(end,.58);mid.y+=height*.035;
+      area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([start,mid,end]),16,.085-(branchIndex%3)*.012,7,false),barkMat));
+      for(let l=0;l<5;l++){const t=.28+l*.15,p=start.clone().lerp(end,t),side=(l%2?1:-1)*.32;
+       addLeaf(p.x+Math.cos(angle+Math.PI/2)*side,p.y+.12+(l%3)*.08,p.z+Math.sin(angle+Math.PI/2)*side,angle+(l%2?-.55:.55),-.28+(l%3)*.18,.72+(l%2)*.16,branchIndex+l);
+       if(l%2===0)addLeaf(p.x,p.y+.18,p.z,angle+.8,-.42,.58,branchIndex+l+2);
+      }
      }
-    }
-    const crown=new T.Mesh(new T.SphereGeometry(1,12,9),foliage);crown.position.set(x,height*.91,z);crown.scale.set(1.55,1.0,1.45);area.add(crown);
-   };
+     // Irregular crown sprays replace the old pale spherical canopy.
+     for(let c=0;c<11;c++){const angle=c*Math.PI*2/11+form*.21,rad=height*(.12+(c%3)*.025),cy=height*(.72+(c%4)*.045),cx=x+Math.cos(angle)*rad,cz=z+Math.sin(angle)*rad;
+      for(let j=0;j<4;j++){const aa=angle+(j-1.5)*.36,rr=height*(.045+(j%2)*.012);addLeaf(cx+Math.cos(aa)*rr,cy+(j%3)*.22,cz+Math.sin(aa)*rr,aa,-.38+(j%2)*.24,.82+(j%2)*.13,c+j)}
+     }
+    };
    const addLathedProfile=(x,y,z,profile,material,segments=24)=>{
     const pts=profile.map(p=>new T.Vector2(p[0],p[1]));
     const g=new T.LatheGeometry(pts,segments);g.computeVertexNormals();
@@ -338,7 +367,7 @@
     const count=Math.max(3,Math.floor(w/2.2));
     for(let n=0;n<count;n++){
      const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);
-     addBotanicalTree(px,pz,3.1,n%3===0?foliage:n%3===1?jade:ivory,variant+n);
+     addBotanicalTree(px,pz,3.1,n%3===0?leafPalette[1]:n%3===1?leafPalette[0]:leafPalette[2],variant+n);
      const bloom=new T.Mesh(new T.SphereGeometry(.34,9,7),variant%2?amber:coral);bloom.position.set(px,3.75,pz);area.add(bloom);
     }
     for(const side of [-1,1])addRoundedShell(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal,.07,.04);
@@ -625,7 +654,7 @@
     addBox(x,.42,z,w,.84,3.6,graphite);addBox(x,.91,z,w-.35,.16,3.22,ivory);
     const n=Math.max(4,Math.floor(w/2.2));
     for(let k=0;k<n;k++){const px=x+(k-(n-1)/2)*(w-2)/(n-1),pz=z+(k%2?-.55:.55);
-     addBotanicalTree(px,pz,3.4,k%2?m:jade,k);
+     addBotanicalTree(px,pz,3.4,k%2?leafPalette[1]:leafPalette[0],k);
     }
    };
    // Layered edge gardens: architectural planter beds with trees, shrubs and low ground cover.
@@ -640,7 +669,7 @@
     for(let n=0;n<count;n++){
      const pz=z+(n-(count-1)/2)*(length-3)/Math.max(1,count-1);
      const px=x+(n%2?-.72:.72);
-     addBotanicalTree(px,pz,6.8+(n%2)*.8,n%2?m:jade,variant+n);
+     addBotanicalTree(px,pz,6.8+(n%2)*.8,n%2?leafPalette[1]:leafPalette[0],variant+n);
     }
     for(let n=0;n<Math.floor(length/2.4);n++){
      const pz=z-length*.42+n*2.4;
