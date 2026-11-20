@@ -1574,6 +1574,9 @@ function initArday3D(){
   }
   const livingBedroomDoor=roomDoor(living,-2.25,'卧室','bedroom',0x77513b);
   const livingKitchenDoor=roomDoor(living,2.25,'厨房','kitchen',0x718778);
+  const livingHallDoor=roomDoor(living,0,'公共大厅','hall',0x8b9b8c);livingHallDoor.position.set(-5.18,0,0);livingHallDoor.rotation.y=-Math.PI/2;
+  const hallScene=window.ArdayHallScene?.create(T,scene,M,box);if(!hallScene)throw new Error('Public hall scene failed to initialize');
+  const hall=hallScene.group;hall.visible=false;
   // Tiled bathroom shell; no sanitary fixtures are pre-installed.
   const bathroom=new T.Group();scene.add(bathroom);roomShell(bathroom,0xd7d8d4,0xb8b6aa);
   const bathroomTile=M(0xd9d7cf,.96);
@@ -3357,8 +3360,11 @@ function persistFurniture(item){
    });
   }
   function setRoom(mode){
-   roomMode=['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
-   living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';
+   roomMode=mode==='hall'?'hall':['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
+   living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';hall.visible=roomMode==='hall';
+   if(roomMode==='hall'){
+    scene.background.set(0xaab9b6);cameraTarget.set(person.position.x,1,person.position.z);targetTheta=.72;targetPhi=1.12;targetRadius=17;applyCamera();updateDaylight(true);return;
+   }
    const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
    applyWallpaperToRoom(root,wallpaper);
    if(finish?.floor){root.userData.floorMesh.material=M(finish.floor==='buy-floor-concrete'?0x69727b:0x424d5b)}
@@ -3368,7 +3374,9 @@ function persistFurniture(item){
   }
   function updateActivity(a,anchorOverride,roomOverride,furnitureIdOverride){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave',anchor:'default'};
-   activeActivity=act;const characterRoom=['bedroom','kitchen','bathroom'].includes(roomOverride)?roomOverride:(act==='sleep'?'bedroom':'living');person.visible=characterRoom===roomMode;
+   activeActivity=act;
+   if(roomMode==='hall'){person.visible=true;pose='idle';basePose='idle';walkRoute=[];walkIndex=0;walkPauseUntil=0;rig.rotation.set(0,0,0);rig.position.set(0,0,0);eyeGroups.forEach(g=>g.scale.y=1);return;}
+   const characterRoom=['bedroom','kitchen','bathroom'].includes(roomOverride)?roomOverride:(act==='sleep'?'bedroom':'living');person.visible=characterRoom===roomMode;
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y,poseOverride=null;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
@@ -3438,9 +3446,19 @@ function persistFurniture(item){
    body.position.y=pose==='sit'?-.32:0;legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
+  function activateHallZone(id){
+   const zone=hallScene.zones.find(item=>item.id===id);if(!zone)return;
+   const lines={exchange:'这里使用人民币结算，不设置代币或兑换积分。可以查看现有账户余额与收支记录。',ranking:'这里展示大厅玩家排行与赛季记录。跨玩家实时排行需要联机数据服务。',recruitment:'这里是招募公告区，可以查看现有职业与工作信息。',commissions:'这里集中发布委托。当前先连接已有目标与委托进度系统。',teams:'这里用于寻找队友、创建队伍和共同活动。队伍匹配需要联机服务。',entertainment:'这里是街机与休闲娱乐区，后续可以逐个加入可玩的实体设施。',food:'欢迎来到美食街。',events:'这里发布大厅公告、限时活动和版本消息。',showcase:'这里展示角色名片、收藏和成就。'};
+   if(id==='exchange'){showCollection();return}
+   if(id==='recruitment'){openTab('职业');return}
+   if(id==='commissions'){openTab('目标');return}
+   if(id==='food'){shopCategory='食物食材';openTab('商店',true);return}
+   if(id==='events'){$('recentEvents')?.click();return}
+   say(lines[id]||zone.name);
+  }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,furnitureTap=null,sceneDismissTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
-  let selectedFurniture=null,furnitureDrag=null,characterTap=null;
+  let selectedFurniture=null,furnitureDrag=null,characterTap=null,hallTap=null;
   const floorPlane=new T.Plane(new T.Vector3(0,1,0),0),dragPoint=new T.Vector3(),dragOffset=new T.Vector3();
   const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2();
   // Camera gestures are handled by the stage, not the canvas. The canvas itself
@@ -3454,7 +3472,7 @@ function persistFurniture(item){
    sceneDismissTap=$('drawer').classList.contains('furniture-drawer')&&$('drawer').classList.contains('open')?{pointerId:e.pointerId,x:e.clientX,y:e.clientY}:null;
    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
    raycaster.setFromCamera(pointerNdc,camera);
-   const activeRoom=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living;
+   const activeRoom=roomMode==='hall'?hall:roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living;
    // Arday is attached to the scene root, not to any room group. Include the character explicitly so its meshes can receive tap hits in every room.
    const hits=raycaster.intersectObjects([...activeRoom.children,person],true);
    if(decorating){
@@ -3472,8 +3490,8 @@ function persistFurniture(item){
      }
     }
    }
-   let targetRoom=null;
-   for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.roomTarget){targetRoom=node.userData.roomTarget;break}node=node.parent}if(targetRoom)break}
+   let targetRoom=null,hallAction=null,hallFloorHit=null;
+   for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.roomTarget){targetRoom=node.userData.roomTarget;break}if(node.userData?.hallAction){hallAction=node.userData.hallAction;break}if(node.userData?.hallFloor){hallFloorHit=hit;break}node=node.parent}if(targetRoom||hallAction||hallFloorHit)break}
    furnitureTap=null;characterTap=null;
    if(!decorating){
     for(const hit of hits){
@@ -3493,6 +3511,9 @@ function persistFurniture(item){
    }
    gestureSurface.setPointerCapture(e.pointerId);
    if(targetRoom){doorTap={target:targetRoom,pointerId:e.pointerId,x:e.clientX,y:e.clientY};e.preventDefault();return}
+   if(roomMode==='hall'&&(hallAction||hallFloorHit)){
+    const point=new T.Vector3();if(hallAction)hallTap={action:hallAction,pointerId:e.pointerId,x:e.clientX,y:e.clientY};else if(raycaster.ray.intersectPlane(floorPlane,point))hallTap={point,pointerId:e.pointerId,x:e.clientX,y:e.clientY};
+   }
    doorTap=null;inertiaTheta=0;inertiaPhi=0;
    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
    if(pointers.size===1)drag={x:e.clientX,y:e.clientY};
@@ -3587,13 +3608,23 @@ function persistFurniture(item){
    if(doorTap&&doorTap.pointerId===e.pointerId){
     const tap=doorTap,dist=Math.hypot(e.clientX-tap.x,e.clientY-tap.y);doorTap=null;sceneDismissTap=null;
     if(e.type==='pointerup'&&dist<18){
-     stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode');
+     stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode','hall-mode');
      if(tap.target==='kitchen')stage.classList.add('kitchen-mode');
      if(tap.target==='bedroom')stage.classList.add('bedroom-mode');
      if(tap.target==='bathroom')stage.classList.add('bathroom-mode');
+     if(tap.target==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);activeActivity='idle';}
+     if(tap.target==='living'&&roomMode==='hall'){person.position.set(-4.25,0,0);target.copy(person.position);}
      $('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));updateArday3D();
     }
     return;
+   }
+   if(hallTap&&hallTap.pointerId===e.pointerId){
+    const tap=hallTap;hallTap=null;const dist=Math.hypot(e.clientX-tap.x,e.clientY-tap.y);
+    if(e.type==='pointerup'&&dist<18){
+     if(tap.point){const dx=tap.point.x-hallScene.center.x,dz=tap.point.z-hallScene.center.z,len=Math.hypot(dx,dz),scale=len>hallScene.radius?hallScene.radius/len:1;target.set(hallScene.center.x+dx*scale,0,hallScene.center.z+dz*scale);pose='walk';basePose='idle';}
+     else if(tap.action)activateHallZone(tap.action);
+     pointers.delete(e.pointerId);drag=null;pinchCenter=null;inertiaTheta=0;inertiaPhi=0;return;
+    }
    }
    if(furnitureTap&&furnitureTap.pointerId===e.pointerId){
     const tap=furnitureTap;furnitureTap=null;sceneDismissTap=null;characterTap=null;
@@ -3623,10 +3654,16 @@ function persistFurniture(item){
    targetRadius+=e.deltaY*.012;applyCamera();e.preventDefault();
   },{passive:false});
   function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
+   if(roomMode==='hall'){
+    const dx=target.x-hallScene.center.x,dz=target.z-hallScene.center.z,len=Math.hypot(dx,dz);if(len>hallScene.radius){const k=hallScene.radius/len;target.x=hallScene.center.x+dx*k;target.z=hallScene.center.z+dz*k;}
+    cameraTarget.x+=(person.position.x-cameraTarget.x)*(1-Math.exp(-dt*3));cameraTarget.z+=(person.position.z-cameraTarget.z)*(1-Math.exp(-dt*3));
+   }
    let delta=target.clone().sub(person.position),distance=delta.length(),moving=distance>.075;
-   if(moving){const step=Math.min(distance,(pose==='idleWalk'?1.7:1.55)*dt);person.position.add(delta.normalize().multiplyScalar(step));}
+   if(moving){const step=Math.min(distance,(roomMode==='hall'?2.35:pose==='idleWalk'?1.7:1.55)*dt);person.position.add(delta.normalize().multiplyScalar(step));
+    if(roomMode==='hall'){const dx=person.position.x-hallScene.center.x,dz=person.position.z-hallScene.center.z,len=Math.hypot(dx,dz);if(len>hallScene.radius){person.position.x=hallScene.center.x+dx/len*hallScene.radius;person.position.z=hallScene.center.z+dz/len*hallScene.radius;target.copy(person.position);}}
+   }
    if(pose==='walk'&&activeActivity==='walk'){if(moving)walkPauseUntil=0;else if(!walkPauseUntil)walkPauseUntil=t+650;else if(t>=walkPauseUntil){walkIndex=(walkIndex+1)%walkRoute.length;target.set(...walkRoute[walkIndex]);walkPauseUntil=0;}}
-   const roamAllowed=activeActivity==='idle';
+   const roamAllowed=roomMode!=='hall'&&activeActivity==='idle';
    if(roamAllowed&&pose!=='idleWalk'&&pose!=='wave'&&!moving&&t>idleNextMove){
     const choices=['sofa','table','window','rug','shelf','center','outside','desk'];
     let pick=positions[choices[Math.floor(Math.random()*choices.length)]];
@@ -3723,13 +3760,13 @@ function persistFurniture(item){
  }
 }
 function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity||'idle',anchor=s.activeInteraction?.anchor||s.currentActivityAnchor||null,room=s.activeInteraction?.room||s.currentActivityRoom||null,furnitureId=s.activeInteraction?.furnitureId||s.currentActivityFurnitureId||null){
- const stage=$('stage'),mode=stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
+ const stage=$('stage'),mode=stage.classList.contains('hall-mode')?'hall':stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
  if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor,room,furnitureId)}
  else{
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
  }
- const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':mode==='bathroom'?'卫生间':'起居室';}
+ const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='hall'?'公共大厅':mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':mode==='bathroom'?'卫生间':'起居室';}
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;render();renderCalendar();generateDailyEvents();save();
