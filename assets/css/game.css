@@ -1268,8 +1268,6 @@ html body .stage .drawer.profile-expanded.open .choices{
 .career-poster small{position:absolute;left:12px;bottom:9px;font:6px Georgia,serif!important;letter-spacing:.12em;color:#e0d2bb!important}
 .drawer-head{display:flex!important;align-items:center;justify-content:space-between}
 .drawer-close-button{width:34px;height:34px;flex:0 0 34px;border:0!important;background:#ded5c5!important;color:#46554f!important;border-radius:50%!important;font:25px/1 Georgia,serif!important;cursor:pointer}
-.hall-exit-button{display:none;position:absolute;z-index:40;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;min-height:38px;padding:0 14px;border:1px solid #9d927f!important;border-radius:22px!important;background:#e9e1d2ed!important;color:#46554f!important;box-shadow:0 2px 7px #1d2a2a22;font:12px "Noto Serif SC",serif;cursor:pointer}
-.stage.hall-mode .hall-exit-button{display:block}
 #app button,#app section,#app article,#app header,#app footer,#app nav,#app .drawer,#app .choices,#app .calendar-content,#app .profile-section,#app .account-balance,#app .recruitment-card,#app .instance-tier,#app .exchange-item,#app .ranking-self,#app .day-card,#app .day-slot,#app .stat-group,#app .stat,#app .career-poster{border-top:0!important;border-bottom:0!important}
 #app hr,#app .recruitment-rule,#app .infinite-section-title:after,#app .calendar-title-mark{display:none!important}
 #app .drawer-head{border:0!important}
