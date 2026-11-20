@@ -1,7 +1,10 @@
 /* Furniture model builders: furniture-models-office */
 window.ArdayFurnitureModelCategories = window.ArdayFurnitureModelCategories || Object.create(null);
 Object.assign(window.ArdayFurnitureModelCategories, {
- "电脑": function(ctx) { with(ctx) {
+ "电脑": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('computer',id);
     width=.72;depth=.55;height=.72;surfaceType='tabletop';surfaceY=.04;
@@ -16,8 +19,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     for(const x of [-.43,.43]){box(x,.2,-.14,.085,.22,.12,m.wood);box(x,.2,-.072,.045,.12,.012,m.dark);cyl(x,.2,-.06,.018,.018,.012,m.gold,10)}
     box(0,.74,-.12,.16,.018,.012,m.gold);
    
- } return true; },
- "哑铃架": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "哑铃架": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('dumbbellRack',id);
     width=1.35;depth=.68;height=1.02;
@@ -40,8 +49,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     }
     for(let i=0;i<3;i++){const plate=cyl(-.55+i*.09,.1,-.34,.09,.09,.035,rubber,18);plate.rotation.x=Math.PI/2}
    
- } return true; },
- "钢琴": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "钢琴": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('piano',id);
     width=1.62;depth=.92;height=1.42;
@@ -64,8 +79,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,m.metal);pedal.rotation.x=-.18}
     box(0,.16,.22,.62,.055,.22,caseMat);
    
- } return true; },
- "跑步机": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "跑步机": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('treadmill',id);
     width=.9;depth=1.92;height=1.48;
@@ -88,8 +109,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     for(const x of [-.27,.27]){const safety=box(x,1.08,-.82,.045,.025,.1,m.clay);safety.rotation.z=x*.12}
     for(const x of [-.3,.3])for(const z of [-.72,.72])cyl(x,.075,z,.045,.045,.08,rubber,12);
    
- } return true; },
- "游戏机": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "游戏机": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('gameConsole',id);
     width=.72;depth=.48;height=.34;surfaceType='tabletop';surfaceY=.04;
@@ -110,5 +137,8 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      for(let k=0;k<4;k++)sphere(x+.035+(k%2)*.035,.17,.405+Math.floor(k/2)*.035,.012,.012,.012,k%2?m.clay:m.cream);
     }
    
- } return true; }
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ }
 });
