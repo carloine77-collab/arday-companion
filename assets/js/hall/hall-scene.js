@@ -192,13 +192,14 @@
    // Each frontage faces the central concourse; structural frames, wall depth and equipment share one scale.
    // District identity sign: a framed, supported architectural gateway plaque.
    // Its elevation is matched to each hall's roofline instead of using one low, shared height.
+   const signAccent={exchange:amber,ranking:coral,recruitment:jade,commissions:amber,teams:violet,entertainment:violet,food:coral};
    const signHeights={exchange:35,ranking:42,recruitment:35,commissions:42,teams:39,entertainment:40,food:33};
    const roofHeights={exchange:29,ranking:35,recruitment:28,commissions:35,teams:32,entertainment:33,food:27};
    const signY=signHeights[z.id],signZ=z.d*.34,signMountY=roofHeights[z.id]+1.5;
    for(const sx of [-17,17]){
     const support=new T.Mesh(new T.BoxGeometry(1.05,Math.max(2,signY-signMountY-3),1.2),graphite);
     support.position.set(sx,(signY+signMountY)/2-1.5,signZ);area.add(support);
-    const reveal=new T.Mesh(new T.BoxGeometry(.12,Math.max(1,signY-signMountY-3.5),1.28),accentSet[z.id]||cyan);
+    const reveal=new T.Mesh(new T.BoxGeometry(.12,Math.max(1,signY-signMountY-3.5),1.28),signAccent[z.id]||cyan);
     reveal.position.set(sx-.59,(signY+signMountY)/2-1.5,signZ);area.add(reveal);
     const foot=new T.Mesh(new T.BoxGeometry(2.2,.65,2.4),warmMetal);foot.position.set(sx,signMountY,signZ);area.add(foot);
    }
@@ -210,7 +211,7 @@
     const trim=new T.Mesh(new T.BoxGeometry(34.4,.22,1.35),warmMetal);trim.position.y=sy;signRoot.add(trim);
    }
    for(const sx of [-16.8,16.8]){
-    const trim=new T.Mesh(new T.BoxGeometry(.22,8.5,1.35),accentSet[z.id]||cyan);trim.position.x=sx;signRoot.add(trim);
+    const trim=new T.Mesh(new T.BoxGeometry(.22,8.5,1.35),signAccent[z.id]||cyan);trim.position.x=sx;signRoot.add(trim);
    }
    const title=new T.Mesh(new T.PlaneGeometry(29,6.4),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.FrontSide,depthWrite:false,toneMapped:false}));
    title.position.set(0,0,.82);signRoot.add(title);
@@ -472,8 +473,8 @@
    }
    // Paired perimeter gardens create a planted edge and a sense of depth in every district.
    const gardenAccent={exchange:jade,ranking:jade,recruitment:jade,commissions:jade,teams:jade,entertainment:jade,food:jade}[z.id];
-   addLandscapeBed(-55,19,25,gardenAccent,index);
-   addLandscapeBed(55,19,25,gardenAccent,index+1);
+   addLandscapeBed(-58.5,19,25,gardenAccent,index);
+   addLandscapeBed(58.5,19,25,gardenAccent,index+1);
    // Public-life layer: planted edges, sheltered seating, service fixtures and wayfinding.
    // These are arranged around the perimeter of each forecourt; the central approach stays open.
    const addLinearGarden=(x,z,w,m=jade)=>{
