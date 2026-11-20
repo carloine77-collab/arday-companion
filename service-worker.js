@@ -1,10 +1,16 @@
-const CACHE_NAME = "arday-shell-v147";
+const CACHE_NAME = "arday-shell-v148";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./assets/css/game.css?v=20261121-campus-poster-title1",
+  "./assets/css/game.css?v=20261121-modular-css1",
+  "./assets/css/game-panels.css?v=20261121-modular-css1",
+  "./assets/css/game-interactions.css?v=20261121-modular-css1",
+  "./assets/css/game-world.css?v=20261121-modular-css1",
+  "./assets/css/game-career.css?v=20261121-modular-css1",
+  "./assets/css/dungeon-board.css?v=20261121-modular-css1",
   "./assets/js/game-config.js",
+  "./assets/js/furniture-catalog.js?v=20261121-modular-js1",
   "./assets/js/furniture-placement.js",
   "./assets/js/economy.js",
   "./assets/js/chat-copy.js",
