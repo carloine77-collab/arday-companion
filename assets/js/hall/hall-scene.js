@@ -805,7 +805,7 @@
   });
   // City-scale hall meshes do not cast or receive the small room's shadow map.
    // Restrict shadows to architectural masses; keep small trim inexpensive.
-    root.traverse(object=>{if(object.isMesh){if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();const radius=object.geometry.boundingSphere?.radius||0;object.castShadow=radius>3.2;object.receiveShadow=radius>4.8;
+    root.traverse(object=>{if(object.isMesh){object.userData.hallIllustration=true;if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();const radius=object.geometry.boundingSphere?.radius||0;object.castShadow=!object.userData.hallFloor&&radius>3.2;object.receiveShadow=!object.userData.hallFloor&&radius>4.8;
      const mats=Array.isArray(object.material)?object.material:[object.material];mats.forEach(material=>{if(!material||!material.isMeshStandardMaterial||material.userData.hallPainterInk)return;material.userData.hallPainterInk=true;material.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',`float pigmentNoise=fract(sin(dot(gl_FragCoord.xy,vec2(17.17,91.73)))*43758.5453)-.5;float paperFiber=sin(gl_FragCoord.y*.73+gl_FragCoord.x*.19)*.5;outgoingLight*=.982+pigmentNoise*.018+paperFiber*.004;vec3 paperTint=vec3(.985,.978,.958);outgoingLight=mix(outgoingLight,outgoingLight*paperTint,.18);\n#include <tonemapping_fragment>`)};material.customProgramCacheKey=()=>'arday-hall-watercolor-paper-ink-v1';material.needsUpdate=true});
     }});
    // Arrival portal is placed inside the immense hall, facing into the open central concourse.
