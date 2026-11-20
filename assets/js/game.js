@@ -145,7 +145,7 @@ let inventoryCategory='全部';
 let inventoryGrid=null;
 let shopFurnitureGroup='坐卧类';
 let shopFurnitureType='沙发';
-const furnitureNameById={'buy-furniture-television':'电视','buy-furniture-record-player':'唱片机','buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-floor-lamp-paper':'落地灯·纸罩','buy-floor-lamp-arc':'落地灯·黄铜弧形','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽','buy-furniture-sofa-sage':'沙发·鼠尾草绿','buy-furniture-sofa-wool':'沙发·暖灰羊毛','buy-furniture-coffee-table-walnut':'茶几·胡桃木抽屉','buy-furniture-coffee-table-round':'茶几·圆形浅橡木','buy-furniture-coffee-table-stone':'茶几·米白石材','buy-furniture-side-table-brass':'边桌·黄铜圆桌','buy-furniture-side-table-walnut':'边桌·深木方桌','buy-furniture-tv-console-oak':'电视柜·浅橡木','buy-bedroom-bed-cream':'床·奶油软包','buy-bedroom-nightstand-rattan':'床头柜·藤编抽屉','buy-furniture-dresser-walnut':'斗柜·胡桃木四抽','buy-furniture-dresser-cream':'斗柜·奶油三抽','buy-furniture-vanity':'梳妆台·复古木质','buy-furniture-full-mirror':'全身镜·黄铜拱形','buy-furniture-desk-ash':'书桌·白蜡木极简','buy-furniture-desk-walnut':'书桌·深胡桃木复古','buy-furniture-bookshelf-ash':'书架·白蜡木开放格','buy-furniture-bookshelf-walnut':'书架·深胡桃木书柜','buy-furniture-reading-chair':'阅读椅·奶油弧背','buy-furniture-office-chair':'办公椅·黑色网布','buy-furniture-sideboard-oak':'餐边柜·浅橡木','buy-furniture-lamp-amber':'台灯·琥珀玻璃','buy-furniture-floor-lamp-tripod':'落地灯·黑色三脚','buy-furniture-pendant-rattan':'吊灯·藤编圆罩','buy-furniture-vase-terracotta':'花瓶·陶土枝叶','buy-furniture-wall-clock':'挂钟·胡桃木圆钟','buy-furniture-curtain-linen':'窗帘·亚麻白','buy-furniture-rug-ivory':'地毯·羊毛米白','buy-furniture-catalog-045':'默认窗户','buy-furniture-catalog-023':'默认室内木门'};
+const furnitureNameById={'buy-furniture-television':'电视','buy-furniture-record-player':'唱片机','buy-furniture-rug-persian':'地毯·波斯绛红','buy-furniture-rug-checker':'地毯·奶油棋盘','buy-furniture-rug-sea':'地毯·海盐蓝','buy-kitchen-stove-enamel':'灶台·复古珐琅','buy-kitchen-stove-steel':'灶台·不锈钢','buy-kitchen-stove-cream':'灶台·奶油陶瓷','buy-furniture-sofa-linen':'沙发·亚麻燕麦','buy-furniture-sofa-blue':'沙发·雾蓝绒布','buy-furniture-rug':'地毯','buy-furniture-sofa':'沙发·复古高背','buy-furniture-art':'壁画','buy-furniture-divider':'隔断','buy-furniture-palm':'棕榈树绿植','buy-furniture-bookshelf':'书架·开放格架','buy-furniture-bookshelf-glass':'书架·玻璃门书柜','buy-furniture-desk':'书桌·经典书桌','buy-furniture-desk-drawer':'书桌·抽屉工作台','buy-furniture-chair':'椅子·温莎木椅','buy-furniture-chair-rattan':'椅子·藤编餐椅','buy-furniture-computer':'电脑','buy-furniture-dining-table':'餐桌','buy-furniture-dining-table-oak':'餐桌·浅橡木长桌','buy-furniture-dining-chair':'椅子·软包扶手椅','buy-furniture-bouquet':'捧花摆件','buy-bedroom-bed':'床·胡桃木软包','buy-bedroom-bed-oak':'床·浅橡木框架','buy-bedroom-nightstand':'床头柜','buy-bedroom-lamp':'台灯·蘑菇','buy-bedroom-lamp-ceramic':'台灯·陶瓷折线','buy-bedroom-wall-lamp':'壁灯·黄铜双臂','buy-bedroom-wall-lamp-single':'壁灯·单臂','buy-bedroom-ceiling-lamp':'吊灯·乳白玻璃','buy-bedroom-ceiling-lamp-metal':'吊灯·锥形金属','buy-floor-lamp-paper':'落地灯·纸罩','buy-floor-lamp-arc':'落地灯·黄铜弧形','buy-bedroom-wardrobe':'衣柜','buy-bedroom-rug':'地毯·卧室款','buy-kitchen-cabinets':'橱柜','buy-kitchen-wall-cabinet':'吊柜','buy-kitchen-fridge':'冰箱','buy-kitchen-stove':'灶台','buy-kitchen-sink':'水槽','buy-furniture-sofa-sage':'沙发·鼠尾草绿','buy-furniture-sofa-wool':'沙发·暖灰羊毛','buy-furniture-coffee-table-walnut':'茶几·胡桃木抽屉','buy-furniture-coffee-table-round':'茶几·圆形浅橡木','buy-furniture-coffee-table-stone':'茶几·米白石材','buy-furniture-side-table-brass':'边桌·黄铜圆桌','buy-furniture-side-table-walnut':'边桌·深木方桌','buy-furniture-tv-console-oak':'电视柜·浅橡木','buy-bedroom-bed-cream':'床·奶油软包','buy-bedroom-nightstand-rattan':'床头柜·藤编抽屉','buy-furniture-dresser-walnut':'斗柜·胡桃木四抽','buy-furniture-dresser-cream':'斗柜·奶油三抽','buy-furniture-vanity':'梳妆台·复古木质','buy-furniture-full-mirror':'全身镜·黄铜拱形','buy-furniture-desk-ash':'书桌·白蜡木极简','buy-furniture-desk-walnut':'书桌·深胡桃木复古','buy-furniture-bookshelf-ash':'书架·白蜡木开放格','buy-furniture-bookshelf-walnut':'书架·深胡桃木书柜','buy-furniture-reading-chair':'阅读椅·奶油弧背','buy-furniture-office-chair':'办公椅·黑色网布','buy-furniture-sideboard-oak':'餐边柜·浅橡木','buy-furniture-lamp-amber':'台灯·琥珀玻璃','buy-furniture-floor-lamp-tripod':'落地灯·黑色三脚','buy-furniture-pendant-rattan':'吊灯·藤编圆罩','buy-furniture-vase-terracotta':'花瓶·陶土枝叶','buy-furniture-wall-clock':'挂钟·胡桃木圆钟','buy-furniture-curtain-linen':'窗帘·亚麻白','buy-furniture-rug-ivory':'地毯·羊毛米白','buy-furniture-catalog-045':'默认窗户','buy-furniture-catalog-023':'默认室内木门','buy-furniture-door-glass':'白橡木玻璃门','buy-furniture-door-cream':'奶油法式双线门','buy-furniture-door-rattan':'藤编门','buy-furniture-door-sliding':'深色格栅推拉门','buy-furniture-door-arch':'复古拱顶门'};
 Object.entries(shopCatalog.furnitureCategories||{}).forEach(([,types])=>Object.values(types||{}).forEach(items=>(items||[]).forEach(([label,,id])=>{if(id&&id.startsWith('buy-furniture-'))furnitureNameById[id]=label})));
 
 function addInventoryItem(name,kind='food',id=null){const parts=name.split('·'),entity={id:id||('inv-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)),name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''};s.inventory.push(entity);return entity}
@@ -1665,7 +1665,7 @@ function initArday3D(){
     item.button.textContent=id==='desk'?'✎':'▱';stage.appendChild(item.button);
    }
    /* Rebind on every scene rebuild: existing hotspot DOM nodes otherwise retain stale closures or no action. */
-   item.button.onclick=()=>{if(decorating){selectFurniture(item);if(item.isDoor)openDoorWheel(item);return}invokeFurnitureAction(item)};
+   item.button.onclick=()=>{if(decorating){selectFurniture(item);if(item.isDoor)openDoorWheel(item);return}if(item.isDoor){enterRoomFromDoor(item.doorDestination||'living');return}invokeFurnitureAction(item)};
    item.button.dataset.object=name;item.button.dataset.furnitureId=id;item.button.setAttribute('aria-label',name);
    furnitureRegistry.push(item);return item;
   }
@@ -1681,10 +1681,14 @@ function initArday3D(){
   }
   const furnitureHotspots=[];
   function enterRoomFromDoor(mode){
-   stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode');
-   if(mode==='kitchen')stage.classList.add('kitchen-mode');
-   if(mode==='bedroom')stage.classList.add('bedroom-mode');
-   if(mode==='bathroom')stage.classList.add('bathroom-mode');
+   stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode','hall-mode');
+   if(mode==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);activeActivity='idle';}
+   else{
+    if(mode==='kitchen')stage.classList.add('kitchen-mode');
+    if(mode==='bedroom')stage.classList.add('bedroom-mode');
+    if(mode==='bathroom')stage.classList.add('bathroom-mode');
+    if(roomMode==='hall'){person.position.set(-4.25,0,0);target.copy(person.position);}
+   }
    closeFurnitureActions();
    $('drawer').classList.remove('open','profile-expanded','furniture-drawer');
    $('drawer').querySelector('.furniture-close')?.remove();
@@ -3343,7 +3347,7 @@ function persistFurniture(item){
   }
   function recycleDoor(item){
    if(!item?.isDoor||!item.owned)return;
-   const saved=s.placed.find(entry=>entry.id===item.id);addInventoryItem(item.name,'furniture',item.id);
+   const saved=s.placed.find(entry=>entry.id===item.id);const stored=addInventoryItem(item.name,'furniture',item.id);stored.destination=item.doorDestination||'living';
    s.placed=s.placed.filter(entry=>entry.id!==item.id);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);
    selectedFurniture=null;rotateFurnitureButton.disabled=true;removeFurnitureButton.disabled=true;refreshDyePalette();save();updateFurnitureHotspots();toast('门已收回背包');
   }
