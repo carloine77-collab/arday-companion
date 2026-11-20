@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v159";
+const CACHE_NAME = "arday-shell-v160";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -14,12 +14,12 @@ const APP_SHELL = [
   "./assets/js/game-data/dungeon-data.js?v=20261121-modular-js1",
   "./assets/js/game-data/career-data.js?v=20261121-modular-js1",
   "./assets/js/schedule-engine.js?v=20261121-modular-js3",
-  "./assets/js/furniture-models-bedroom.js?v=20261121-furniture-categories1",
-  "./assets/js/furniture-models-living.js?v=20261121-furniture-categories1",
-  "./assets/js/furniture-models-kitchen.js?v=20261121-furniture-categories1",
-  "./assets/js/furniture-models-lighting.js?v=20261121-furniture-categories1",
-  "./assets/js/furniture-models-office.js?v=20261121-furniture-categories1",
-  "./assets/js/furniture-models-bathroom.js?v=20261121-furniture-categories1",
+  "./assets/js/furniture-models-bedroom.js?v=20261121-furniture-categories2",
+  "./assets/js/furniture-models-living.js?v=20261121-furniture-categories2",
+  "./assets/js/furniture-models-kitchen.js?v=20261121-furniture-categories2",
+  "./assets/js/furniture-models-lighting.js?v=20261121-furniture-categories2",
+  "./assets/js/furniture-models-office.js?v=20261121-furniture-categories2",
+  "./assets/js/furniture-models-bathroom.js?v=20261121-furniture-categories2",
   "./assets/js/furniture-models.js?v=20261121-furniture-categories7",
   "./assets/js/furniture-placement.js",
   "./assets/js/economy.js",
