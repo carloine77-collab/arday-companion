@@ -228,7 +228,7 @@
     s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);
     s.lineTo(-w/2+r,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);
     s.lineTo(-w/2,-h/2+r);s.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);
-    const g=new T.ExtrudeGeometry(s,{depth:Math.max(.08,d-2*bevel),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:bevel,bevelThickness:bevel,curveSegments:8});
+    bevel=Math.min(bevel,d*.22,h*.22,w*.22);const g=new T.ExtrudeGeometry(s,{depth:Math.max(.04,d-2*bevel),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:bevel,bevelThickness:bevel,curveSegments:8});
     g.computeVertexNormals();const o=new T.Mesh(g,material);o.position.set(x,y,z-d/2+bevel);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
    };
    const addLathedProfile=(x,y,z,profile,material,segments=24)=>{
@@ -269,8 +269,15 @@
    const addStorageRack=(x,zz,w=8,h=6,accentMat=warmMetal)=>{for(const sx of [-1,1])addBox(x+sx*w/2,h/2,zz,.28,h,.42,graphite);for(let level=0;level<3;level++){const y=1+level*2.1;addBox(x,y,zz,w,.22,1.1,silver);for(let n=-2;n<=2;n++){const px=x+n*w*.17;addBox(px,y+.72,zz,.95,1.25,.9,n%2?plum:graphite);addBox(px,y+1.39,zz,.62,.1,.94,level%2?accentMat:warmMetal)}}addBox(x,h+.2,zz,w+.8,.28,1.4,accentMat)};
    const addOverheadLamp=(x,zz,accentMat=cyan)=>{addBox(x,12,zz,.24,5,.24,warmMetal);addBox(x,9.35,zz,3.8,.3,1.6,graphite);addBox(x,9.12,zz,2.8,.12,1.1,accentMat)};
    const addPanel=(x,y,zz,w,h,m)=>{const o=new T.Mesh(new T.PlaneGeometry(w,h),m);o.position.set(x,y,zz);area.add(o);return o};
-   const addColumn=(x,zz,h=18,width=2.2,m=graphite)=>addBox(x,h/2,zz,width,h,width,m);
-   const addBeam=(x,y,zz,w,h,d,m=graphite,rz=0)=>{const o=addBox(x,y,zz,w,h,d,m);o.rotation.z=rz;return o};
+   const addColumn=(x,zz,h=18,width=2.2,m=graphite)=>{
+    // Tapered, moulded structural pier with a flared base and capital; no square-post silhouette.
+    const profile=[[0,0],[width*.38,0],[width*.5,.18],[width*.43,.52],[width*.39,h-.72],[width*.5,h-.28],[width*.42,h],[0,h]];
+    return addLathedProfile(x,0,zz,profile,m,24);
+   };
+   const addBeam=(x,y,zz,w,h,d,m=graphite,rz=0)=>{
+    const o=addRoundedShell(x,y,zz,w,h,d,m,Math.min(.45,h*.28,d*.22),Math.min(.12,h*.16,d*.16));
+    o.rotation.z=rz;return o;
+   };
    const addFacadeBay=(x,zz,w,h,accentMat=accent)=>{
     // Deep portal surround with softened shoulders, a curved crown and sculpted metal piers.
     const pierProfile=[[0,0],[.72,0],[.86,.22],[.68,.52],[.58,1.15],[.72,1.45],[.58,h*.72],[.88,h*.9],[.82,h],[0,h]];
