@@ -1642,3 +1642,10 @@ html body .stage .drawer.profile-expanded.open .choices{
 .dungeon-event-scene h2{font-size:21px}.dungeon-event-scene p{font-size:11px}
 .dungeon-event-choices{padding:7px 12px}.dungeon-event-choice{min-height:44px}
 .dungeon-event-footnote,.dungeon-board-kicker,.dungeon-board-cover>p,.dungeon-board-map-head{display:none!important}
+
+.mission-status-view{display:flex;flex-direction:column;justify-content:center;min-height:100%;padding:20px 14px}
+.mission-status-compact{padding:26px 18px 22px;text-align:center;border:0;background:transparent;box-shadow:none}
+.mission-status-compact .mission-status{font-size:18px;font-weight:700;letter-spacing:.08em}
+.mission-status-compact .mission-clock{margin-top:12px;font-size:13px;letter-spacing:.04em}
+.mission-status-compact .mission-finish{margin-top:7px;font-size:11px;opacity:.68}
+.mission-status-view .mission-board-choice{margin:14px 12px 4px}
