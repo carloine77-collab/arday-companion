@@ -10,14 +10,15 @@
   const key=new T.DirectionalLight(0xe1f6ff,.92);key.position.set(-30,75,35);key.castShadow=true;root.add(key);
   const fill=new T.PointLight(0x57d5e8,32,220,1.7);fill.position.set(-50,35,-20);root.add(fill);
   // A vast continuous floor; districts are embedded in its geography rather than isolated platforms.
-  const floor=new T.Mesh(new T.PlaneGeometry(620,540),floorMat);floor.rotation.x=-Math.PI/2;floor.position.set(-20,-.18,0);floor.receiveShadow=true;floor.name='hall-walkable-ground';floor.userData.hallFloor=true;root.add(floor);
-  for(let x=-320;x<=280;x+=20){const line=new T.Mesh(new T.PlaneGeometry(.045,520),floorDark);line.rotation.x=-Math.PI/2;line.position.set(x,-.165,0);root.add(line)}
-  for(let z=-260;z<=260;z+=20){const line=new T.Mesh(new T.PlaneGeometry(600,.045),floorDark);line.rotation.x=-Math.PI/2;line.position.set(-20,-.164,z);root.add(line)}
+  const floor=new T.Mesh(new T.PlaneGeometry(780,680),floorMat);floor.rotation.x=-Math.PI/2;floor.position.set(-20,-.18,0);floor.receiveShadow=true;floor.name='hall-walkable-ground';floor.userData.hallFloor=true;root.add(floor);
+  // Sparse, low-contrast construction seams preserve scale without turning the plaza into a dense grid.
+  for(let x=-380;x<=340;x+=30){const line=new T.Mesh(new T.PlaneGeometry(.035,660),floorDark);line.rotation.x=-Math.PI/2;line.position.set(x,-.165,0);root.add(line)}
+  for(let z=-330;z<=330;z+=30){const line=new T.Mesh(new T.PlaneGeometry(760,.035),floorDark);line.rotation.x=-Math.PI/2;line.position.set(-20,-.164,z);root.add(line)}
   function polygon(parent,points,y,material){const s=new T.Shape();s.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)s.lineTo(points[i][0],points[i][1]);s.closePath();const o=new T.Mesh(new T.ShapeGeometry(s),material);o.rotation.x=-Math.PI/2;o.position.y=y;o.receiveShadow=true;parent.add(o);return o}
   function strip(x1,z1,x2,z2,width,material){const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),angle=Math.atan2(dx,dz),o=new T.Mesh(new T.PlaneGeometry(width,len),material);o.rotation.set(-Math.PI/2,0,-angle);o.position.set((x1+x2)/2,-.105,(z1+z2)/2);root.add(o);return o}
   // Open-air public forum: a monumental perimeter colonnade encloses the plaza.
   // There is deliberately no indoor ceiling or interior column grid; the sky remains visible.
-  const perimeter=new T.Group();perimeter.name='hall-outdoor-perimeter-colonnade';root.add(perimeter);
+  const perimeter=new T.Group();perimeter.name='hall-outdoor-perimeter-colonnade';perimeter.scale.set(1.25,1,1.25);root.add(perimeter);
   const columnMat=[silver,titanium,graphite],warmMetal=mat(0xb68a55,.78,.24),paleStone=mat(0xd9d0bd,.42,.42);
   const amber=new T.MeshStandardMaterial({color:0xffbd68,emissive:0x9b4d12,emissiveIntensity:.48,metalness:.36,roughness:.28});
   const violet=new T.MeshStandardMaterial({color:0x9b83d8,emissive:0x49318b,emissiveIntensity:.42,metalness:.42,roughness:.25});
@@ -103,13 +104,13 @@
   let seed=90317;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
   for(let i=0;i<2600;i++){ctx.fillStyle='rgba(180,225,245,'+(.08+rand()*.32)+')';ctx.beginPath();ctx.arc(rand()*2048,rand()*1024,.3+rand()*1.2,0,Math.PI*2);ctx.fill()}
   for(let i=0;i<90;i++){const x=i*24,w=8+rand()*36,h=120+rand()*420;ctx.fillStyle='rgba(75,125,155,.24)';ctx.fillRect(x,930-h,w,h)}
-  const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(720,64,36),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-8;root.add(sky);
+  const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(920,64,36),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-8;root.add(sky);
   // Central civic landmark: a navigational astrolabe, not another service district.
   // Its layered orbital frame is visible above the surrounding architecture and readable from the home portal.
   const core=new T.Group();core.name='hall-central-kinetic-core';core.position.set(18,0,0);root.add(core);
   const coreBase=new T.Mesh(new T.CylinderGeometry(25,28,1.5,16),graphite);coreBase.position.y=.45;coreBase.receiveShadow=true;core.add(coreBase);
   const baseRim=new T.Mesh(new T.TorusGeometry(25,.55,12,112),warmMetal);baseRim.rotation.x=Math.PI/2;baseRim.position.y=1.25;core.add(baseRim);
-  const baseInner=new T.Mesh(new T.TorusGeometry(20,.2,10,112),cyan);baseInner.rotation.x=Math.PI/2;baseInner.position.y=1.28;core.add(baseInner);
+  // Removed the nested inner ring: the landmark reads as one broad civic plinth, not a stack of circles.
   const coreInset=new T.Mesh(new T.CylinderGeometry(18,18,.28,16),silver);coreInset.position.y=1.25;core.add(coreInset);
   // Eight separated pylons support a floating orbital instrument; the open gaps keep the plaza visually permeable.
   for(let i=0;i<8;i++){
@@ -126,8 +127,7 @@
    const ring=new T.Mesh(new T.TorusGeometry(12+i*5,.34-i*.045,12,112),i===1?warmMetal:i===2?violet:cyan);
    ring.position.y=31+i*4.2;ring.rotation.set(Math.PI/2+(i-1)*.42,0,(i-1)*.58);core.add(ring);
   }
-  const meridian=new T.Mesh(new T.TorusGeometry(8,.24,10,96),silver);meridian.rotation.y=Math.PI/2;meridian.position.y=32;core.add(meridian);
-  const crown=new T.Mesh(new T.TorusGeometry(7,.28,10,96),amber);crown.rotation.x=Math.PI/2;crown.position.y=42;core.add(crown);
+  // The orbital silhouette is kept to the three principal inclined bands; redundant rings removed.
   // Seven luminous constellation nodes form a floating wayfinding halo above the core.
   const constellation=[];
   for(let i=0;i<7;i++){
@@ -147,6 +147,7 @@
   const coreLight=new T.PointLight(0x7bd9e8,25,110,1.8);coreLight.position.set(18,29,0);root.add(coreLight);
   function labelTexture(title,sub){const c=document.createElement('canvas');c.width=768;c.height=224;const g=c.getContext('2d');g.fillStyle='rgba(8,23,37,.88)';g.fillRect(8,8,752,208);g.strokeStyle='#78d9e8';g.lineWidth=4;g.strokeRect(12,12,744,200);g.fillStyle='#effaff';g.textAlign='center';g.textBaseline='middle';g.font='bold 66px sans-serif';g.fillText(title,384,88);g.fillStyle='#82c9d9';g.font='25px sans-serif';g.fillText(sub,384,163);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t}
   const zones=[
+   const zones=[
    {id:'exchange',name:'兑换区',sub:'RMB EXCHANGE',x:-118,z:-48,w:118,d:100,shape:[[-60,-40],[28,-54],[69,-18],[62,34],[8,55],[-53,38],[-73,-3]]},
    {id:'ranking',name:'排行区',sub:'RANKING MATRIX',x:-55,z:-125,w:108,d:96,shape:[[-52,-38],[31,-50],[63,-14],[53,42],[-10,52],[-62,20]]},
    {id:'recruitment',name:'招募区',sub:'RECRUITMENT',x:65,z:-126,w:122,d:102,shape:[[-60,-42],[36,-54],[72,-6],[56,46],[-20,56],[-72,12]]},
@@ -155,6 +156,8 @@
    {id:'entertainment',name:'娱乐区',sub:'SIMULATION DECK',x:5,z:137,w:138,d:114,shape:[[-70,-46],[38,-60],[82,-8],[59,56],[-28,62],[-84,9]]},
    {id:'food',name:'美食区',sub:'FOOD & SUPPLY',x:-112,z:105,w:124,d:104,shape:[[-63,-42],[34,-54],[73,-5],[54,48],[-24,56],[-76,8]]}
   ];
+  // Expand each district's geography around the central landmark while preserving the relative layout.
+  zones.forEach(z=>{z.x=18+(z.x-18)*1.22;z.z*=1.22});
   // Clear pedestrian spokes connect the home arrival, central astrolabe and each district forecourt.
   const routeAccent={exchange:amber,ranking:coral,recruitment:jade,commissions:amber,teams:violet,entertainment:violet,food:coral};
   const hub={x:18,z:0};
@@ -162,26 +165,20 @@
   strip(-20,0,-10,0,13,floorDark);strip(-20,0,-10,0,1.1,cyan);
   zones.forEach((z,i)=>{
    const dx=z.x-hub.x,dz=z.z-hub.z,len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len;
-   const sx=hub.x+ux*29,sz=hub.z+uz*29,ex=z.x-ux*54,ez=z.z-uz*54;
+   const sx=hub.x+ux*34,sz=hub.z+uz*34,ex=z.x-ux*70,ez=z.z-uz*70;
    const accent=routeAccent[z.id];
-   strip(sx,sz,ex,ez,10,floorDark);
-   strip(sx,sz,ex,ez,2.1,accent);
-   const px=-uz*3.1,pz=ux*3.1;
+   strip(sx,sz,ex,ez,15,floorDark);
+   strip(sx,sz,ex,ez,1.25,accent);
+   const px=-uz*5.2,pz=ux*5.2;
    strip(sx+px,sz+pz,ex+px,ez+pz,.22,silver);
    strip(sx-px,sz-pz,ex-px,ez-pz,.22,silver);
-   // Repeated floor chevrons communicate travel direction without adding another UI panel.
-   for(let k=1;k<=4;k++){
-    const t=k/5,x=sx+(ex-sx)*t,zp=sz+(ez-sz)*t;
-    const marker=new T.Mesh(new T.ConeGeometry(1.45,2.8,3),accent);
-    marker.rotation.x=-Math.PI/2;marker.rotation.z=Math.atan2(ux,uz);marker.position.set(x,.035,zp);root.add(marker);
-   }
-   const node=new T.Mesh(new T.CylinderGeometry(5.5,6.5,.42,12),graphite);node.position.set(ex,.12,ez);root.add(node);
-   const nodeRing=new T.Mesh(new T.TorusGeometry(5.2,.22,8,48),accent);nodeRing.rotation.x=Math.PI/2;nodeRing.position.set(ex,.42,ez);root.add(nodeRing);
+   // Continuous flush inlay marks the route end without circular pads, rings or repeated chevrons.
+   const terminal=new T.Mesh(new T.PlaneGeometry(10,.8),accent);terminal.rotation.x=-Math.PI/2;terminal.rotation.z=-Math.atan2(ux,uz);terminal.position.set(ex,.028,ez);root.add(terminal);
   });
   const zoneObjects=[];
   zones.forEach((z,index)=>{
    const area=new T.Group();
-   area.position.set(z.x,0,z.z);
+   area.position.set(z.x,0,z.z);area.scale.set(1.2,1,1.2);
    // Each district turns its main frontage toward the central arrival concourse.
    // Local -Z is the frontage axis; the rotation therefore differs by district location.
    const hallCenter={x:-25.18,z:0};
@@ -437,7 +434,7 @@
   box(portal,0,3.1,0,5.4,6.2,.8,graphite);box(portal,0,3.1,.45,4.4,5.3,.08,glass);
   for(const x of [-2.45,2.45])box(portal,x,3.1,.53,.1,5.8,.08,cyan);
   const gateText=new T.Mesh(new T.PlaneGeometry(3.7,.62),new T.MeshBasicMaterial({map:labelTexture('返回居所','RESIDENTIAL GATE'),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));gateText.position.set(0,6.65,.55);portal.add(gateText);
-  return {group:root,zones,zoneObjects,ground:floor,center:{x:-25.18,z:0},spawn:{x:-9.8,z:0},radius:250};
+  return {group:root,zones,zoneObjects,ground:floor,center:{x:-25.18,z:0},spawn:{x:-9.8,z:0},radius:310};
  }
  global.ArdayHallScene={create};
 })(window);
