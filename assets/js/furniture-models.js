@@ -5,7 +5,7 @@
  */
 window.ArdayFurnitureModels = (() => {
  function create(context) {
-  const {T,getRoomMode,rooms,furnitureModelAliases,stylizeMaterial,recolorFurniture,createPainterTexture,applyPainterMap,roomWallMap,openFurnitureActions,openKitchenPanel,document,addWindowSun,toast}=context;
+  const {T,getRoomMode,rooms,furnitureModelAliases,stylizeMaterial,recolorFurniture,createPainterTexture,applyPainterMap,roomWallMap,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,toast}=context;
   function build(name,record=null) {
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
