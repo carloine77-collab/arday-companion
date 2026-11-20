@@ -1540,3 +1540,19 @@ html body .stage .drawer.profile-expanded.open .choices{
  .guild-section-art{width:82px;height:72px}
  .guild-section-body{padding:0 11px 14px}
 }
+
+
+/* Combat attributes use the exact same stat row and meter language as survival/emotion. */
+.combat-attributes{display:flex;flex-direction:column;gap:5px;margin-top:7px}
+.combat-group .combat-attribute{
+ display:grid;grid-template-columns:34px 24px minmax(0,1fr);gap:4px;align-items:center;
+ min-width:0;text-align:left;border:0;border-bottom:1px solid #eee5d8;
+ padding:5px 1px;background:transparent;border-radius:0;color:inherit;
+}
+.combat-group .combat-attribute label{display:block;margin:0;font-size:10px;color:var(--muted);white-space:nowrap}
+.combat-group .combat-attribute b{display:block;margin:0;font-size:11px;text-align:right;color:inherit}
+.combat-group .combat-attribute .meter{height:5px;border-radius:9px;background:#eee4d6;overflow:hidden}
+.combat-group .combat-attribute .meter i{display:block;height:100%;border-radius:9px;background:var(--green)}
+.combat-group .combat-attribute:last-child{border-bottom:0}
+.guild-section-heading{flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:9px;row-gap:2px}
+.faction-card-copy>small,.candidate-copy>strong{display:none}
