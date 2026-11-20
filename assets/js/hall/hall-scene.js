@@ -194,6 +194,18 @@
    };
    area.add(title);
    const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
+   const localCylinder=(x,y,zz,rt,rb,h,m,segments=12)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),m);o.position.set(x,y,zz);area.add(o);return o};
+   const addPlanter=(x,zz,w=8,d=5,foliage=jade,variant=0)=>{
+    addBox(x,.52,zz,w,1.04,d,graphite);addBox(x,1.08,zz,w-.55,.18,d-.55,ivory);addBox(x,1.19,zz,w-1,.08,d-1,paleStone);
+    const count=Math.max(3,Math.floor(w/2.2));
+    for(let n=0;n<count;n++){const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);localCylinder(px,2.25,pz,.12,.2,2.1,warmMetal,7);const leaf=new T.Mesh(new T.ConeGeometry(.62,2.4,7),n%3===0?foliage:n%3===1?jade:ivory);leaf.position.set(px,3.15,pz);leaf.rotation.z=n%2?.22:-.22;area.add(leaf);const bloom=new T.Mesh(new T.SphereGeometry(.34,8,6),variant%2?amber:coral);bloom.position.set(px,4.35,pz);area.add(bloom)}
+    for(const side of [-1,1])addBox(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal);
+   };
+   const addBench=(x,zz,accentMat=accentMat,rotation=0)=>{const g=new T.Group();g.position.set(x,0,zz);g.rotation.y=rotation;area.add(g);box(g,0,1.1,0,7.4,.42,1.25,ivory);box(g,0,2.15,-.48,7.4,1.7,.38,plum);for(const sx of [-3,3])box(g,sx,.48,0,.28,.96,.9,warmMetal);box(g,0,1.34,.66,6.8,.12,.14,accentMat)};
+   const addBeacon=(x,zz,accentMat=accentMat,h=5)=>{localCylinder(x,h/2,zz,.48,.72,h,graphite,10);localCylinder(x,h*.72,zz,.58,.58,.26,warmMetal,10);const lens=new T.Mesh(new T.CylinderGeometry(.34,.34,.34,12),accentMat);lens.position.set(x,h*.82,zz);area.add(lens);const cap=new T.Mesh(new T.SphereGeometry(.42,10,8),whiteGlow);cap.position.set(x,h+.08,zz);area.add(cap)};
+   const addKiosk=(x,zz,accentMat=accentMat,scale=1)=>{const g=new T.Group();g.position.set(x,0,zz);g.scale.setScalar(scale);area.add(g);box(g,0,2.5,0,3.2,5,.9,graphite);box(g,0,3.05,.52,2.55,2.35,.12,accentMat);box(g,0,4.35,.04,3.65,.32,ivory);box(g,0,4.58,.04,2.8,.12,warmMetal);box(g,0,.45,.08,3.7,.48,graphite);for(const sx of [-1,1])box(g,sx*1.25,1.35,.5,.12,1.35,.12,silver);return g};
+   const addStorageRack=(x,zz,w=8,h=6,accentMat=accentMat)=>{for(const sx of [-1,1])addBox(x+sx*w/2,h/2,zz,.28,h,.42,graphite);for(let level=0;level<3;level++){const y=1+level*2.1;addBox(x,y,zz,w,.22,1.1,silver);for(let n=-2;n<=2;n++){const px=x+n*w*.17;addBox(px,y+.72,zz,.95,1.25,.9,n%2?plum:graphite);addBox(px,y+1.39,zz,.62,.1,.94,level%2?accentMat:warmMetal)}}addBox(x,h+.2,zz,w+.8,.28,1.4,accentMat)};
+   const addOverheadLamp=(x,zz,accentMat=accentMat)=>{addBox(x,12,zz,.24,5,.24,warmMetal);addBox(x,9.35,zz,3.8,.3,1.6,graphite);addBox(x,9.12,zz,2.8,.12,1.1,accentMat)};
    const addPanel=(x,y,zz,w,h,m)=>{const o=new T.Mesh(new T.PlaneGeometry(w,h),m);o.position.set(x,y,zz);area.add(o);return o};
    const addColumn=(x,zz,h=18,width=2.2,m=graphite)=>addBox(x,h/2,zz,width,h,width,m);
    const addBeam=(x,y,zz,w,h,d,m=graphite,rz=0)=>{const o=addBox(x,y,zz,w,h,d,m);o.rotation.z=rz;return o};
@@ -403,6 +415,34 @@
      for(const side of [-1,1]){addBox(x+side*6,1,zz,3.2,1.5,4,plum);addBox(x+side*6,.3,zz,2.8,.18,3.7,warmMetal)}
     }
     for(let i=-3;i<=3;i++){const x=i*14;addColumn(x,-2,9,1.0,warmMetal);addBox(x,13,-2,9,.45,1.4,ivory)}
+   }
+   // Occupied public-space layer: circulation furniture, service objects, planting and wayfinding.
+   // Props sit in secondary bays and along the edges, keeping the central approach clear.
+   if(z.id==='exchange'){
+    for(let i=0;i<6;i++){const x=-39+i*15.6;localCylinder(x,.68,8,.18,.25,1.36,warmMetal,10);localCylinder(x,1.45,8,.42,.42,.2,amber,10)}
+    addKiosk(-43,26,amber,.92);addKiosk(43,26,amber,.92);addPlanter(-43,39,10,5,jade,0);addPlanter(43,39,10,5,jade,1);
+    addBench(-22,29,amber);addBench(22,29,amber);for(const x of [-47,0,47])addBeacon(x,-4,amber,6);addStorageRack(0,38,12,6,amber);for(const x of [-34,34])addOverheadLamp(x,4,amber);
+   }else if(z.id==='ranking'){
+    for(let i=0;i<5;i++){const x=-38+i*19;addBox(x,2.2,24,7,4.4,5,graphite);addBox(x,4.55,24,6.2,.22,4.2,i===2?amber:coral);const trophy=new T.Mesh(new T.TorusGeometry(1.1,.22,8,20),i===2?amber:warmMetal);trophy.position.set(x,6.1,24);area.add(trophy);localCylinder(x,5.7,24,.16,.16,1.1,silver,8)}
+    addBench(-37,39,coral);addBench(37,39,coral);addPlanter(-48,31,8,5,jade,2);addPlanter(48,31,8,5,jade,3);for(const x of [-42,-21,21,42])addBeacon(x,9,coral,7);addKiosk(-43,-2,coral,.85);addKiosk(43,-2,coral,.85);for(let i=-2;i<=2;i++)addOverheadLamp(i*18,33,i%2?coral:amber);
+   }else if(z.id==='recruitment'){
+    addKiosk(-44,26,jade,.92);addKiosk(44,26,jade,.92);addPlanter(-47,38,10,6,jade,0);addPlanter(47,38,10,6,jade,1);addBench(-22,30,jade);addBench(22,30,jade);
+    for(const x of [-43,-14,14,43]){addBeacon(x,7,jade,5);addBox(x,3.2,7,2.4,.24,2.4,ivory)}
+    for(let i=-2;i<=2;i++){const x=i*17;addBox(x,1.1,40,10,2.2,4,plum);addBox(x,2.32,40,9.2,.16,3.5,jade)}addStorageRack(0,33,13,5,jade);for(const x of [-34,34])addOverheadLamp(x,3,jade);
+   }else if(z.id==='commissions'){
+    addKiosk(-48,27,amber,.9);addKiosk(48,27,cyan,.9);addPlanter(-51,40,9,5,jade,1);addPlanter(51,40,9,5,jade,2);addStorageRack(-33,27,10,7,amber);addStorageRack(33,27,10,7,cyan);
+    for(let i=-2;i<=2;i++){const x=i*18;addBox(x,1.15,43,11,2.3,5,graphite);addBox(x,2.42,43,10.2,.16,4.4,i%2?cyan:amber)}for(const x of [-42,-14,14,42])addBeacon(x,8,x<0?amber:cyan,6);addBench(-18,31,amber);addBench(18,31,cyan);for(let i=-2;i<=2;i++)addOverheadLamp(i*18,4,i%2?cyan:amber);
+   }else if(z.id==='teams'){
+    for(const x of [-43,43]){addPlanter(x,37,10,6,jade,x>0?1:2);addBench(x,25,violet)}
+    for(let cell=0;cell<4;cell++){const x=(cell%2?1:-1)*39,zz=cell<2?-5:39;addKiosk(x,zz,violet,.78);addStorageRack(x,zz+9,8,5,violet);for(const side of [-1,1])addBeacon(x+side*8,zz+1,violet,5)}
+    addBox(0,1.2,35,16,2.4,8,graphite);addBox(0,2.55,35,14,.18,7,violet);for(let i=-3;i<=3;i++){const x=i*12;addBox(x,4.4,35,1.1,4.5,1.2,silver);addBox(x,6.8,35,2.2,.18,1.5,amber)}for(const x of [-25,25])addOverheadLamp(x,-1,violet);
+   }else if(z.id==='entertainment'){
+    for(let bay=-1;bay<=1;bay++){const x=bay*36;addKiosk(x,28,violet,.88);addBench(x,39,violet);addBox(x,2.2,15,9,4.4,5,graphite);addBox(x,4.55,15,8.2,.22,4.2,amber);const prize=new T.Mesh(new T.IcosahedronGeometry(1.35,1),bay===0?amber:violet);prize.position.set(x,6.1,15);area.add(prize);addPlanter(x-12,37,6,5,jade,bay+2)}
+    for(let i=-3;i<=3;i++){const x=i*13;addBeacon(x,5,i%2?violet:coral,5);addOverheadLamp(x,43,i%2?violet:cyan)}addStorageRack(-48,26,9,6,violet);addStorageRack(48,26,9,6,coral);
+   }else if(z.id==='food'){
+    for(let i=-2;i<=2;i++){const x=i*18;addBox(x,1.1,43,10,2.2,5,plum);addBox(x,2.3,43,9.2,.16,4.4,ivory);addBox(x,3.4,43,1.1,2.1,.8,i%2?coral:amber);for(const side of [-1,1]){addBox(x+side*6,.8,43,1.5,1.6,1.5,graphite);addBox(x+side*6,1.65,43,1.3,.16,1.3,warmMetal)}}
+    addKiosk(-47,28,coral,.82);addKiosk(47,28,jade,.82);addPlanter(-49,39,10,6,jade,1);addPlanter(49,39,10,6,jade,2);addStorageRack(-36,25,8,5,coral);addStorageRack(36,25,8,5,jade);
+    for(const x of [-42,-21,21,42])addBeacon(x,6,x<0?coral:jade,5);for(let i=-3;i<=3;i++)addOverheadLamp(i*13,4,i%2?coral:amber);for(const x of [-29,29]){addBench(x,34,coral);addPlanter(x,43,7,4,jade,0)}
    }
 // Fine facade articulation: shallow trim and service reveals, without duplicate walls or roofs.
    for(const side of [-1,1]){
