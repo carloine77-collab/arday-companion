@@ -243,8 +243,8 @@
    // The front stays open so the district remains visible and connected to the public concourse.
    if(z.id==='exchange'){
     // Exchange hall: a deep banking concourse with a vaulted service frontage and seven teller bays.
-    addBox(0,10,-43,100,20,2.4,graphite);
-    addBox(0,19.2,-41.55,94,1.0,.22,warmMetal);
+    addBox(0,13,-43,100,26,2.4,graphite);
+    addBox(0,25.2,-41.55,94,1.0,.22,warmMetal);
     for(let i=-3;i<=3;i++){
      const x=i*13.1;
      addFacadeBay(x,-40,11.2,17,amber);
@@ -257,18 +257,18 @@
      addBox(side*49,9,-13,2.4,18,60,graphite);
      addBox(side*47.65,9,-13,.16,13,52,amber);
      addBox(side*47.4,18,-13,3.4,1.2,60,silver);
-     addTrussBay(side*34,-12,24,20,amber);
+     addTrussBay(side*34,-12,24,27,amber);
     }
-    addBox(0,21,-13,101,1.6,58,silver);
-    for(let i=-4;i<=4;i++)addBeam(i*11,20.05,-13,.34,1.1,56,i%2?warmMetal:graphite);
-    addBox(0,22,-13,82,.22,1.2,amber);
+    addBox(0,28,-13,101,1.6,58,silver);
+    for(let i=-4;i<=4;i++)addBeam(i*11,27.05,-13,.34,1.1,56,i%2?warmMetal:graphite);
+    addBox(0,29,-13,82,.22,1.2,amber);
     // A waiting gallery sits behind the teller line, with real seating and service dividers.
     for(let i=0;i<4;i++){const x=-30+i*20;addBox(x,1.3,12,14,1.2,4,plum);addBox(x,2.15,12,13,.18,3.7,ivory);addBox(x,4.5,10,1.1,5,.8,silver)}
     for(let i=-3;i<=3;i++){addBox(i*13,7,-31,1.4,5,1.2,silver);addBox(i*13,9.8,-31,5,.18,1.5,amber)}
    }else if(z.id==='ranking'){
     // Ranking forum: a monumental stepped display wall, flanked by deep buttresses and public tiers.
-    addBox(0,15,-45,102,30,3.2,graphite);
-    addBox(0,29,-43.18,94,1.0,.45,silver);
+    addBox(0,18,-45,102,36,3.2,graphite);
+    addBox(0,35,-43.18,94,1.0,.45,silver);
     for(let i=-5;i<=5;i++){
      const x=i*8.4,h=20+(Math.abs(i)%3)*3;
      addBox(x,h/2,-42.9,1.25,h,1.0,i%2?plum:graphite);
@@ -279,20 +279,20 @@
      addBox(x,5.5,-38,23,1.2,5,warmMetal);
     }
     for(const side of [-1,1]){
-     addBox(side*51,14,-15,3,28,62,graphite);
+     addBox(side*51,17,-15,3,34,62,graphite);
      addBox(side*48.9,14,-15,.18,22,54,coral);
-     addBeam(side*39,29,-14,26,1.6,58,silver);
+     addBeam(side*39,35,-14,26,1.6,58,silver);
     }
     addStair(0,2,82,5,7,plum);
     addBox(0,1.4,-8,18,2.8,12,warmMetal);addBox(0,2.95,-8,15,.24,9,ivory);
     for(let i=-4;i<=4;i++)addBox(i*9,3.5,35,1.1,6,1.2,i%2?coral:silver);
    }else if(z.id==='recruitment'){
     // Recruitment pavilion: three private interview suites with glazed partitions and shared circulation.
-    addBox(0,10,-43,100,20,2.2,graphite);
-    addBox(0,20,-40.9,103,1.5,6,silver);
+    addBox(0,14,-43,100,28,2.2,graphite);
+    addBox(0,28,-40.9,103,1.5,6,silver);
     for(let bay=-1;bay<=1;bay++){
      const x=bay*32;
-     addFacadeBay(x,-40,25,17,jade);
+     addFacadeBay(x,-40,25,25,jade);
      addBox(x,8,-30,23,16,1.2,graphite);
      addBox(x,8,-29.32,19,12,.08,glass);
      addBox(x,8,-28.95,18,11,.08,jade);
@@ -300,22 +300,22 @@
      addCounter(x,2.0,-37,12,3,ivory,graphite);
      addBox(x,5.3,-35.1,10,.18,.12,jade);
      for(const side of [-1,1]){
-      addColumn(x+side*11,-13,14,1.25,graphite);
-      addBeam(x+side*11,14,-13,1.4,1.0,54,silver);
-      addBox(x+side*11,8,-13,.12,11,48,jade);
+      addColumn(x+side*11,-13,23,1.25,graphite);
+      addBeam(x+side*11,23,-13,1.4,1.0,54,silver);
+      addBox(x+side*11,12,-13,.12,19,48,jade);
      }
-     addBeam(x,17,-13,23,1.1,50,warmMetal);
-     addBox(x,18,-13,17,.16,50,jade);
+     addBeam(x,25,-13,23,1.1,50,warmMetal);
+     addBox(x,26,-13,17,.16,50,jade);
      // Privacy fins and acoustic ceiling baffles define each interview room without closing it off.
-     for(let j=-2;j<=2;j++)addBox(x+j*3.2,14,-12,.18,5,31,j%2?plum:graphite);
-     for(let j=-2;j<=2;j++)addBox(x+j*3.2,16,-5,2.4,.22,18,ivory);
+     for(let j=-2;j<=2;j++)addBox(x+j*3.2,21,-12,.18,5,31,j%2?plum:graphite);
+     for(let j=-2;j<=2;j++)addBox(x+j*3.2,23, -5,2.4,.22,18,ivory);
     }
     addBox(0,2,24,78,1.4,8,graphite);
     for(let i=-3;i<=3;i++){const x=i*11;addBox(x,3.2,24,7,.16,7,jade);addBox(x,4.1,21,1.1,2.2,.8,silver)}
    }else if(z.id==='commissions'){
     // Dispatch center: a two-level mission control wall with cantilevered terminal gantries.
-    addBox(0,13,-45,104,26,3.2,graphite);
-    addBox(0,27,-43.1,108,1.6,4.2,silver);
+    addBox(0,17,-45,104,34,3.2,graphite);
+    addBox(0,35,-43.1,108,1.6,4.2,silver);
     for(let i=0;i<5;i++){
      const x=-40+i*20;
      addBox(x,11,-42.95,17,18,.3,plum);
@@ -327,10 +327,10 @@
     for(const side of [-1,1]){
      addBox(side*52,13,-12,3,26,66,graphite);
      addBox(side*49.8,13,-12,.18,21,58,amber);
-     addTrussBay(side*37,-12,27,23,amber);
+     addTrussBay(side*37,-12,27,31,amber);
     }
-    addBox(0,24,-13,105,1.8,62,silver);
-    for(let i=-4;i<=4;i++)addBeam(i*12,22.9,-13,.4,1.3,60,i%2?amber:graphite);
+    addBox(0,32,-13,105,1.8,62,silver);
+    for(let i=-4;i<=4;i++)addBeam(i*12,30.9,-13,.4,1.3,60,i%2?amber:graphite);
     // Separate task-class consoles have different housings and approach clearances.
     for(let tier=0;tier<3;tier++){
      const x=(tier-1)*31,zp=10+tier*7;
@@ -355,18 +355,18 @@
     }
     for(const side of [-1,1]){
      addColumn(side*49,-7,23,2.4,graphite);
-     addBeam(side*49,23,-7,2.6,1.4,90,silver);
+     addBeam(side*49,31,-7,2.6,1.4,90,silver);
     }
-    addBeam(0,24,-7,100,1.8,3.5,warmMetal);
-    for(let i=-4;i<=4;i++)addBeam(i*12,22.8,-7,.36,2,86,i%2?violet:graphite);
+    addBeam(0,32,-7,100,1.8,3.5,warmMetal);
+    for(let i=-4;i<=4;i++)addBeam(i*12,30.8,-7,.36,2,86,i%2?violet:graphite);
     for(let i=-2;i<=2;i++){addBox(i*8,1.1,7,7,2.2,6,graphite);addBox(i*8,2.35,7,6.4,.18,5.4,cyan)}
     for(let i=-3;i<=3;i++){const x=i*11;addBox(x,.85,43,9,1.5,4,plum);addBox(x,1.75,43,8,.16,3.8,violet)}
    }else if(z.id==='entertainment'){
     // Simulation pavilion: three large hangar bays with deep portal frames and enclosed equipment shells.
-    addBox(0,10,-44,104,20,2.8,graphite);
+    addBox(0,14,-44,104,28,2.8,graphite);
     for(let bay=-1;bay<=1;bay++){
      const x=bay*34;
-     addTrussBay(x,-20,28,bay===0?25:21,violet);
+     addTrussBay(x,-20,28,bay===0?33:29,violet);
      addBox(x,8,-18,24,16,1.5,plum);
      addBox(x,8,-17.1,20,12,.12,glass);
      addBox(x,8,-16.85,18,10,.1,violet);
@@ -379,7 +379,7 @@
      // Service hatch, ventilation louvres and reinforced lower casing.
      addBox(x,3,-14,15,5,1.2,silver);
      for(let j=-3;j<=3;j++)addBox(x+j*2,3,-13.25,.22,3.8,.12,graphite);
-     addBox(x,17,-7,21,1.2,18,warmMetal);
+     addBox(x,25,-7,21,1.2,18,warmMetal);
     }
     addBox(0,1.2,27,82,2.4,14,plum);addBox(0,2.55,27,78,.18,12,violet);
     for(let i=-2;i<=2;i++){const x=i*16;addBox(x,6,38,8,8,1.2,graphite);addScreen(x,7,38.68,6,5,violet)}
@@ -405,8 +405,8 @@
      addBeam(side*51,18,-12,2.5,1.2,62,silver);
      addBox(side*49.3,9,-12,.16,14,58,accentMat);
     }
-    addBeam(0,19,-12,104,1.6,62,ivory);
-    for(let i=-4;i<=4;i++)addBeam(i*12,18,-12,.34,1.2,58,i%2?jade:coral);
+    addBeam(0,27,-12,104,1.6,62,ivory);
+    for(let i=-4;i<=4;i++)addBeam(i*12,26,-12,.34,1.2,58,i%2?jade:coral);
     // Shared dining room: rectangular tables, benches, lighting rails and a clear central aisle.
     for(let row=0;row<3;row++)for(let col=-2;col<=2;col++){
      const x=col*15,zz=13+row*13;
