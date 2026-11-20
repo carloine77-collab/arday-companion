@@ -1,3 +1,4 @@
+(()=>{const bind=()=>{const close=document.getElementById('drawerClose');if(close&&!close.dataset.bound){close.dataset.bound='1';close.addEventListener('click',()=>{document.getElementById('drawer')?.classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'))})}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind()})();
 
 
 
@@ -1307,14 +1308,14 @@ function showRecruitment(){
   {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:'负责内容构思、文字撰写与专题策划。'}
  ];
  const day=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[day]=s.jobApplications[day]||{};
- const status=s.job?.active?'<section class="recruitment-current"><span class="recruitment-kicker">CURRENT APPOINTMENT</span><strong>'+s.job.title+'</strong><p>当前在职 · 日薪 ¥'+s.job.salary+' · '+pad(s.job.start)+':00–'+pad(s.job.end)+':00</p><small>如需结束当前任职，请前往底部「职业」页面管理。</small></section>':'';
+ const status=s.job?.active?'<section class="recruitment-current">'+careerPoster(s.job.title,0)+'<strong>'+s.job.title+'</strong><p>¥'+s.job.salary+' / DAY</p></section>':'';
  const cards=jobs.map((j,i)=>{
   const attempted=!!s.jobApplications[day][j.id],skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0);
   const eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
   const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
-  return '<article class="recruitment-card"><div class="recruitment-art recruitment-art-'+i+'">'+(['✒','⌕','✧'][i])+'</div><div class="recruitment-card-top"><span>OPEN POSITION / 0'+(i+1)+'</span><span class="recruitment-salary">¥'+j.salary+' <small>/ DAY</small></span></div><h3>'+j.title+'</h3><p class="recruitment-description">'+j.desc+'</p><div class="recruitment-meta"><span>工作时间 '+pad(j.start)+':00–'+pad(j.end)+':00</span><span>录用概率 '+Math.round(chance*100)+'%</span></div><div class="recruitment-requirements">申请条件：精力 ≥ '+j.minEnergy+' · 友谊 ≥ '+j.minFriend+(j.skillMin?' · 阅读经验 ≥ '+j.skillMin:'')+'</div><button class="recruitment-apply" data-recruit-job="'+j.id+'" '+(attempted||s.job?.active?'disabled':'')+'>'+(s.job?.active?'已有在职岗位':attempted?'今日已申请':'提交申请')+'</button></article>';
+  return '<article class="recruitment-card illustrated-recruitment-card">'+careerPoster(j.title,i)+'<div class="recruitment-card-top"><span>OPEN POSITION / 0'+(i+1)+'</span><span class="recruitment-salary">¥'+j.salary+' <small>/ DAY</small></span></div><h3>'+j.title+'</h3><p class="recruitment-description">'+j.desc+'</p><div class="recruitment-meta"><span>工作时间 '+pad(j.start)+':00–'+pad(j.end)+':00</span><span>录用概率 '+Math.round(chance*100)+'%</span></div><div class="recruitment-requirements">申请条件：精力 ≥ '+j.minEnergy+' · 友谊 ≥ '+j.minFriend+(j.skillMin?' · 阅读经验 ≥ '+j.skillMin:'')+'</div><button class="recruitment-apply" data-recruit-job="'+j.id+'" '+(attempted||s.job?.active?'disabled':'')+'>'+(s.job?.active?'已有在职岗位':attempted?'今日已申请':'提交申请')+'</button></article>';
  }).join('');
- $('choices').innerHTML='<header class="recruitment-masthead"><div class="recruitment-seal">A</div><div class="recruitment-kicker">ARDAY PUBLIC HALL · CAREER OFFICE</div><h2>人才招募处</h2><p></p><div class="recruitment-rule"><span>POSITIONS AVAILABLE</span><b>'+jobs.length+'</b></div></header>'+status+'<div class="recruitment-section-label"><span>公开职位</span><small>OPEN CALLS · '+day+'</small></div>'+cards+'<footer class="recruitment-footnote"></footer>';
+ $('choices').innerHTML='<header class="recruitment-masthead">'+careerPoster('人才招募',0)+'<div class="recruitment-kicker">ARDAY PUBLIC HALL</div><h2>人才招募处</h2></header>'+status+'<div class="recruitment-section-label"><span>公开职位</span><small>OPEN CALLS · '+day+'</small></div>'+cards+'<footer class="recruitment-footnote"></footer>';
  $('drawer').classList.add('open');
  $('choices').querySelectorAll('[data-recruit-job]').forEach(button=>button.onclick=()=>{
   const j=jobs.find(item=>item.id===button.dataset.recruitJob);if(!j)return;
@@ -1371,57 +1372,34 @@ function startDungeon(tier){
  if(!dungeonUnlocked(tier)){toast('尚未解锁');return}
  const energyCost=Number(({F:5,E:7,D:9,C:12,B:15,A:18,S:22,SS:26,SSS:30})[tier]||5);
  if(s.energy<energyCost){toast('精力不足');return}
- const base=DUNGEON_BASE_REWARD[tier]||25;
- $('drawerTitle').textContent=tier+'级副本';$('choices').className='choices infinite-view';
- $('choices').innerHTML='<header class="instance-brief"><div class="gate-art compact-gate-art"><svg viewBox="0 0 280 110"><path d="M25 100V49Q140 -30 255 49V100 M52 100V58Q140 -4 228 58V100 M90 100V67Q140 31 190 67V100" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M12 101H268" stroke="currentColor" stroke-width="2"/></svg></div><div class="mission-seal">'+tier+'</div></header><div class="strategy-grid"><button class="instance-strategy" data-strategy="steady"><span class="strategy-art">♜</span><strong>稳健</strong></button><button class="instance-strategy" data-strategy="rush"><span class="strategy-art">⚡</span><strong>突进</strong></button><button class="instance-strategy" data-strategy="investigate"><span class="strategy-art">⌕</span><strong>侦察</strong></button></div><button class="instance-back" id="instanceBack">返回</button>';
- $('drawer').classList.add('open');$('instanceBack').onclick=showDungeon;
- $('choices').querySelectorAll('[data-strategy]').forEach(button=>button.onclick=()=>dispatchDungeon(tier,button.dataset.strategy,energyCost,base));
+ dispatchDungeon(tier,energyCost,DUNGEON_BASE_REWARD[tier]||25);
 }
-function findDungeonSchedule(duration){
- const today=dayAnchorAt(Date.now()),now=new Date();
- for(let offset=0;offset<3;offset++){
-  const date=plusDays(today,offset),key=dayKey(date);ensureScheduleAt(date);
-  const first=offset===0?Math.max(7,now.getHours()+1):7;
-  for(let hour=first;hour+duration<=23;hour++){
-   const slots=Array.from({length:duration},(_,i)=>eventAt(key,hour+i));
-   if(slots.every(ev=>ev&&ev.kind==='autonomous'&&!ev.jobShift&&ev.activity!=='sleep'))return {key,hour,date,duration};
-  }
- }
- return null;
-}
-function dispatchDungeon(tier,strategy,energyCost,base){
- const strategyData={steady:{risk:.08,bonus:8,grade:8,label:'稳健'},rush:{risk:.19,bonus:30,grade:-3,label:'突进'},investigate:{risk:.13,bonus:18,grade:16,label:'侦察'}}[strategy];
- if(!strategyData)return;
- const duration=({F:1,E:1,D:1,C:2,B:2,A:2,S:3,SS:3,SSS:3})[tier]||1;
- const slot=findDungeonSchedule(duration);if(!slot){toast('近期没有可用的连续日程');return}
+function dispatchDungeon(tier,energyCost,base){
+ const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),duration=1;
  const selected=s.teamRoster.filter(m=>m.selected),teamPower=selected.length?selected.reduce((n,m)=>n+m.combat,0)/selected.length:0,teamMalice=selected.length?selected.reduce((n,m)=>n+m.malice,0)/selected.length:0;
- const difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)];
- const start=new Date(slot.date);start.setHours(slot.hour,0,0,0);const end=new Date(start.getTime()+duration*3600000);
+ const difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)],end=now+3600000;
  s.energy=Math.max(0,s.energy-energyCost);
- s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,strategy,strategyLabel:strategyData.label,energyCost,baseReward:base,difficulty,startAt:start.getTime(),endsAt:end.getTime(),duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected: selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice}))}};
- writeBlockForKey(slot.key,slot.hour,slot.hour+duration,{title:'副本派遣',kind:'dungeon',activity:'idle',dungeonId:s.activeDungeon.id});
+ s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,energyCost,baseReward:base,difficulty,startAt:now,endsAt:end,duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice}))}};
+ // Dungeon dispatch overrides every scheduled activity for this one-hour block.
+ writeBlockForKey(key,hour,hour+1,{title:'副本派遣',kind:'dungeon',activity:'idle',dungeonId:s.activeDungeon.id,priority:'forced'});
  save();render();renderCalendar();showDungeonPending();$('drawer').classList.add('open');
 }
 function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active'||at<Number(mission.endsAt||0))return false;
- const strategyData={steady:{risk:.08,bonus:8,grade:8,label:'稳健'},rush:{risk:.19,bonus:30,grade:-3,label:'突进'},investigate:{risk:.13,bonus:18,grade:16,label:'侦察'}}[mission.strategy]||{risk:.08,bonus:8,grade:8,label:'稳健'};
  const snap=mission.snapshot||{},powerScore=(Number(snap.playerPower)||0)*.48+(Number(snap.teamPower)||0)*.52;
  const powerAdvantage=(powerScore-mission.difficulty)*.006,malicePenalty=(Number(snap.teamMalice)||0)*.0038;
  const survivalPenalty=(100-(Number(snap.energy)||0))*.0011+(100-(Number(snap.hunger)||0))*.00035+(100-(Number(snap.clean)||0))*.00025;
- const strategyModifier=mission.strategy==='steady'?.07:mission.strategy==='rush'?-.025:.035;
- const successChance=Math.max(.035,Math.min(.97,.50+powerAdvantage-malicePenalty-survivalPenalty-strategyData.risk+strategyModifier));
+ const successChance=Math.max(.035,Math.min(.97,.50+powerAdvantage-malicePenalty-survivalPenalty));
  const roll=Math.random(),success=roll<successChance;
- const raw=Math.round(Math.max(0,Math.min(100,50+powerScore*.22-mission.difficulty*.25+(Math.random()*20-10)+strategyData.grade-(Number(snap.teamMalice)||0)*.12)));
+ const raw=Math.round(Math.max(0,Math.min(100,50+powerScore*.22-mission.difficulty*.25+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.12)));
  const rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):(raw>=55?'C':'D');
- const earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150)+strategyData.bonus)):Math.max(2,Math.round(mission.baseReward*.12));
+ const earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.12));
  s.points+=earned;if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
  const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x));
- const result={tier:mission.tier,strategy:strategyData.label,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),at:at,unlocked:newly};
+ const result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),at:at,unlocked:newly};
  s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
  addEvent('副本结算报告 · '+result.tier,'副本任务已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(newly.length?' 新解锁：'+newly.join('、')+'。':''),'daily');
- save();render();
- if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本派遣')showDungeonResult(result);
- return true;
+ save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本派遣')showDungeonResult(result);return true;
 }
 function showDungeonResult(result){
  $('drawerTitle').textContent='副本结算';$('choices').className='choices infinite-view';
@@ -3692,6 +3670,9 @@ function persistFurniture(item){
    body.position.y=pose==='sit'?-.32:0;legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
+  const hallExitButton=document.createElement('button');
+  hallExitButton.type='button';hallExitButton.className='hall-exit-button';hallExitButton.textContent='← 返回居所';hallExitButton.setAttribute('aria-label','退出公共大厅，返回居所');stage.appendChild(hallExitButton);
+  hallExitButton.addEventListener('click',()=>{if(roomMode!=='hall')return;enterRoomFromDoor('living');hallExitButton.blur()});
   function activateHallZone(id){
    const zone=hallScene.zones.find(item=>item.id===id);if(!zone)return;
    const lines={};
