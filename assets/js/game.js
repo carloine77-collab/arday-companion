@@ -47,6 +47,20 @@ s.dungeonProgress=s.dungeonProgress&&typeof s.dungeonProgress==='object'?s.dunge
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
 s.dungeonUnlocks=Array.isArray(s.dungeonUnlocks)?s.dungeonUnlocks:['F'];
 const DUNGEON_TIERS=['F','E','D','C','B','A','S','SS','SSS'];
+s.dungeonStats=s.dungeonStats&&typeof s.dungeonStats==='object'?s.dungeonStats:{};
+if(!s.dungeonStats.migrated){
+ s.dungeonStats.byTier={};
+ DUNGEON_TIERS.forEach(t=>s.dungeonStats.byTier[t]={attempts:0,clears:0,ratings:{},recent:[]});
+ (s.dungeonHistory||[]).forEach(r=>{const x=s.dungeonStats.byTier[r.tier];if(!x)return;x.attempts++;if(r.success)x.clears++;x.ratings[r.rating]=(x.ratings[r.rating]||0)+1;x.recent.push({rating:r.rating,success:!!r.success,at:r.at||Date.now()})});
+ DUNGEON_TIERS.forEach(t=>s.dungeonStats.byTier[t].recent=s.dungeonStats.byTier[t].recent.slice(-8));
+ s.dungeonStats.migrated=true;
+}
+function recordDungeonStat(result){
+ const all=s.dungeonStats.byTier||(s.dungeonStats.byTier={});
+ const x=all[result.tier]||(all[result.tier]={attempts:0,clears:0,ratings:{},recent:[]});
+ x.attempts++;if(result.success)x.clears++;x.ratings[result.rating]=(x.ratings[result.rating]||0)+1;
+ x.recent=Array.isArray(x.recent)?x.recent:[];x.recent.unshift({rating:result.rating,success:!!result.success,at:result.at});x.recent=x.recent.slice(0,8);
+}
 const DUNGEON_CLEAR_REQUIREMENTS={F:0,E:3,D:4,C:5,B:6,A:8,S:10,SS:12,SSS:15};
 const DUNGEON_BASE_REWARD={F:25,E:40,D:60,C:85,B:115,A:150,S:195,SS:250,SSS:330};
 function dungeonUnlocked(tier){return tier==='F'||DUNGEON_TIERS.indexOf(tier)<=DUNGEON_TIERS.findIndex(x=>x==='F')||s.dungeonUnlocks.includes(tier)}
@@ -454,6 +468,8 @@ function renderProfile(){
  $('drawer').classList.add('profile-expanded');
  const attrs=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']],power=Math.round(attrs.reduce((n,[k])=>n+s.attributes[k],0)/5);
  $('choices').innerHTML='<div class="dossier-hero"><div class="dossier-monogram">A</div><div class="dossier-name"><span>CHARACTER FILE</span><h2>Arday <i>·</i> 阿尔</h2><div class="dossier-power"><small>综合战斗力</small><b>'+power+'</b></div></div></div><section class="dossier-attributes"><header><span>ATTRIBUTE PROFILE</span><b>五维参数</b></header>'+attrs.map(([k,label])=>'<div class="dossier-attribute"><span>'+label+'</span><i><b style="width:'+s.attributes[k]+'%"></b></i><strong>'+s.attributes[k]+'</strong></div>').join('')+'</section>';
+ const stats=s.dungeonStats?.byTier||{},tierRecords=DUNGEON_TIERS.map(t=>{const x=stats[t]||{attempts:0,clears:0,ratings:{},recent:[]},ratings=['SS','S','A','B','C','D'].filter(r=>x.ratings?.[r]).map(r=>'<span class="dungeon-rating-chip rating-'+r+'">'+r+' <b>'+x.ratings[r]+'</b></span>').join(''),recent=(x.recent||[]).slice(0,4).map(r=>'<i class="dungeon-result-mark '+(r.success?'is-clear':'is-fail')+'">'+r.rating+'</i>').join('');return '<article class="dossier-tier-record"><div class="dossier-tier-code">'+t+'</div><div class="dossier-tier-main"><div class="dossier-tier-numbers"><b>'+x.attempts+'</b><small>次挑战</small><span>通关 '+x.clears+'</span></div><div class="dossier-tier-ratings">'+(ratings||'<small class="no-rating">暂无评级</small>')+'</div></div><div class="dossier-tier-recent">'+(recent||'<small>—</small>')+'</div></article>'}).join('');
+ $('choices').innerHTML+='<section class="dossier-dungeon-records"><header><span>DUNGEON RECORD</span><b>副本挑战记录</b><small>累计 '+DUNGEON_TIERS.reduce((n,t)=>n+(stats[t]?.attempts||0),0)+' 次</small></header><div class="dossier-tier-list">'+tierRecords+'</div></section>';
  $('drawer').classList.add('open');
 }
 function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').classList.remove('open','profile-expanded');$('stage').classList.add('calendar-mode');$('stage').style.touchAction='pan-y';renderCalendar();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='日程'))}
@@ -1332,7 +1348,7 @@ function showCareer(){
 }
 
 const ARDAY_FACTIONS=[
-{id:'iron-gate',name:'铁门公会',type:'工会',mark:'鐵',field:'边境探索',desc:'承接高危区域勘探与前线委托。'},{id:'night-heron',name:'夜鹭公会',type:'工会',mark:'鷺',field:'侦察情报',desc:'负责情报搜集、路线测绘与目标追踪。'},{id:'cinder-forge',name:'余烬公会',type:'工会',mark:'爐',field:'装备工造',desc:'研究异常材料、维护装备与改造器械。'},{id:'blue-transit',name:'蓝线公会',type:'工会',mark:'線',field:'运输后勤',desc:'经营补给网络、跨区运输与安全撤离。'},{id:'stillwater',name:'静水教团',type:'教团',mark:'水',field:'意识与梦境',desc:'招募能够辨识梦境污染与精神回响的人。'},{id:'convergence',name:'归一教团',type:'教团',mark:'一',field:'异常理论',desc:'以统一理论解释不同异常现象。'},{id:'last-candle',name:'余烛教团',type:'教团',mark:'燭',field:'遗物与仪式',desc:'保存旧时代遗物，研究仪式性异常。'},{id:'anomaly-bureau',name:'异常事务管理局',type:'管理局',mark:'局',field:'官方机构',desc:'负责异常事件登记、管制与公共安全。'}];
+{id:'iron-gate',name:'铁门公会',type:'工会',guildRank:1,mark:'鐵',field:'边境探索',desc:'承接高危区域勘探与前线委托。'},{id:'night-heron',name:'夜鹭公会',type:'工会',guildRank:2,mark:'鷺',field:'侦察情报',desc:'负责情报搜集、路线测绘与目标追踪。'},{id:'cinder-forge',name:'余烬公会',type:'工会',guildRank:3,mark:'爐',field:'装备工造',desc:'研究异常材料、维护装备与改造器械。'},{id:'blue-transit',name:'蓝线公会',type:'工会',guildRank:4,mark:'線',field:'运输后勤',desc:'经营补给网络、跨区运输与安全撤离。'},{id:'stillwater',name:'静水教团',type:'教团',mark:'水',field:'意识与梦境',desc:'招募能够辨识梦境污染与精神回响的人。'},{id:'convergence',name:'归一教团',type:'教团',mark:'一',field:'异常理论',desc:'以统一理论解释不同异常现象。'},{id:'last-candle',name:'余烛教团',type:'教团',mark:'燭',field:'遗物与仪式',desc:'保存旧时代遗物，研究仪式性异常。'},{id:'anomaly-bureau',name:'异常事务管理局',type:'管理局',mark:'局',field:'官方机构',desc:'负责异常事件登记、管制与公共安全。'}];
 const ARDAY_CANDIDATE_POOL=[
 {name:'闻野',role:'近战突入',combat:78,malice:18,portrait:'野',acceptance:.76},{name:'苏弥',role:'环境侦察',combat:64,malice:9,portrait:'弥',acceptance:.82},{name:'周既白',role:'战术支援',combat:71,malice:27,portrait:'白',acceptance:.68},{name:'罗缇',role:'异常研究',combat:52,malice:6,portrait:'缇',acceptance:.88},{name:'严朔',role:'重装防御',combat:86,malice:42,portrait:'朔',acceptance:.55},{name:'祁雾',role:'远程压制',combat:74,malice:61,portrait:'雾',acceptance:.48},{name:'程照',role:'火力压制',combat:82,malice:33,portrait:'照',acceptance:.63},{name:'白榆',role:'医疗支援',combat:59,malice:11,portrait:'榆',acceptance:.84},{name:'沈砚',role:'近距格斗',combat:69,malice:24,portrait:'砚',acceptance:.72},{name:'唐梨',role:'异常感知',combat:67,malice:15,portrait:'梨',acceptance:.79},{name:'顾临',role:'机动侦察',combat:75,malice:49,portrait:'临',acceptance:.52},{name:'叶澄',role:'远程狙击',combat:88,malice:37,portrait:'澄',acceptance:.57}];
 let recruitmentCandidates=[],recruitmentInvites={};
@@ -1341,8 +1357,8 @@ function showRecruitment(tab){
  $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');$('drawerTitle').textContent='招募';$('choices').className='choices recruitment-view';
  const active=tab||s.recruitmentTab||'organization';s.recruitmentTab=active;
  if(active==='personal'&&!recruitmentCandidates.length)refreshRecruitmentMarket();
- const orgs=ARDAY_FACTIONS.map((f,i)=>{const member=s.factionMembership===f.id,clue=({0:'signal',3:'dispatch',6:'seal'})[i],found=clue&&s.factionClues.includes(clue);return '<article class="faction-card faction-tone-'+(i%4)+' faction-'+f.id+'"><div class="faction-poster"><span>'+f.type+'</span><b>'+f.mark+'</b><small>'+String(i+1).padStart(2,'0')+' / PUBLIC FACTION</small></div><div class="faction-card-copy"><small>'+f.field+'</small><h3>'+f.name+'</h3><p>'+f.desc+'</p><button class="recruit-action" data-faction="'+f.id+'" '+(s.factionMembership&&!member?'disabled':'')+'>'+(member?'已加入':s.factionMembership?'已加入其他组织':s.factionApplications[f.id]?'再次申请':'申请加入')+'</button>'+(clue?'<button class="faction-clue '+(found?'found':'')+'" data-clue="'+clue+'">'+(found?'线索已记录':'拾取异常档案')+'</button>':'')+'</div></article>'}).join('');
- const candidates=recruitmentCandidates.map((c,i)=>{const inv=recruitmentInvites[c.id]||{},joined=s.teamRoster.some(m=>m.id===c.id),action=joined?'已确认队友':inv.status==='pending'?'查看回复':'邀请入队',attr=joined?'disabled':inv.status==='pending'?'data-check-invite="'+c.id+'"':'data-invite-candidate="'+c.id+'"';return '<article class="candidate-card candidate-tone-'+(i%4)+'"><div class="candidate-portrait"><i>'+c.portrait+'</i><b></b></div><div class="candidate-copy"><small>战力 '+c.combat+'</small><h3>'+c.name+'</h3><strong>'+c.role+'</strong><div class="candidate-meter"><i style="width:'+c.combat+'%"></i></div><button class="recruit-action" '+attr+' '+(joined?'disabled':'')+'>'+action+'</button></div></article>'}).join('');
+ const orgs=ARDAY_FACTIONS.map((f,i)=>{const member=s.factionMembership===f.id,clue=({0:'signal',3:'dispatch',6:'seal'})[i],found=clue&&s.factionClues.includes(clue);return '<article class="faction-card faction-tone-'+(i%4)+' faction-'+f.id+'"><div class="faction-poster"><span>'+f.type+'</span><b>'+f.mark+'</b><small>'+String(i+1).padStart(2,'0')+' / PUBLIC FACTION</small></div><div class="faction-card-copy">'+(f.type==='工会'?'<div class="guild-rank-mark"><small>GUILD RANK</small><b>#'+f.guildRank+'</b></div>':'')+'<small>'+f.field+'</small><h3>'+f.name+'</h3><p>'+f.desc+'</p><button class="recruit-action" data-faction="'+f.id+'" '+(s.factionMembership&&!member?'disabled':'')+'>'+(member?'已加入':s.factionMembership?'已加入其他组织':s.factionApplications[f.id]?'再次申请':'申请加入')+'</button>'+(clue?'<button class="faction-clue '+(found?'found':'')+'" data-clue="'+clue+'">'+(found?'线索已记录':'拾取异常档案')+'</button>':'')+'</div></article>'}).join('');
+ const candidates=recruitmentCandidates.map((c,i)=>{const inv=recruitmentInvites[c.id]||{},joined=s.teamRoster.some(m=>m.id===c.id),action=joined?'已确认队友':inv.status==='pending'?'查看回复':'邀请入队',attr=joined?'disabled':inv.status==='pending'?'data-check-invite="'+c.id+'"':'data-invite-candidate="'+c.id+'"';return '<article class="candidate-card candidate-tone-'+(i%4)+'"><div class="candidate-portrait"><i>'+c.portrait+'</i><b></b></div><div class="candidate-copy"><div class="candidate-power"><small>COMBAT POWER</small><b>'+c.combat+'</b></div><h3>'+c.name+'</h3><strong>'+c.role+'</strong><div class="candidate-meter"><i style="width:'+c.combat+'%"></i></div><button class="recruit-action" '+attr+' '+(joined?'disabled':'')+'>'+action+'</button></div></article>'}).join('');
  const n=s.factionClues.length,hidden=n>=3?'<article class="faction-card hidden-rebel-card"><div class="faction-poster"><span>UNLISTED · 09</span><b>零</b><small>NO PUBLIC RECORD</small></div><div class="faction-card-copy"><small>未登记组织</small><h3>零号反抗组织</h3><p>加密联络入口</p><button class="recruit-action" data-rebel-contact="true" '+(s.factionMembership?'disabled':'')+'>'+(s.factionMembership==='zero-resistance'?'已建立联系':s.factionMembership?'已加入其他组织':'建立秘密联系')+'</button></div></article>':'<div class="hidden-faction-note is-locked"><small>ARCHIVE FRAGMENTS</small><b>缺失档案 '+n+' / 3</b></div>';
  const orgPanel='<section class="recruitment-masthead"><div class="recruitment-kicker">ARDAY PUBLIC HALL · FACTION OFFICE</div><h2>组织招募</h2></section><div class="faction-grid">'+orgs+'</div>'+hidden;
  const personalPanel='<section class="recruitment-masthead personal-masthead"><div class="recruitment-kicker">ARDAY · OPEN PARTY CALL</div><h2>个人招募</h2></section><button class="market-refresh" data-refresh-market="true">↻　刷新人才市场</button><div class="candidate-grid">'+candidates+'</div>';
@@ -1419,32 +1435,57 @@ function settleDungeonIfDue(at=Date.now()){
  s.points+=earned;if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
  const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x));
  const result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at:at,unlocked:newly};
+ recordDungeonStat(result);const eliteEncounter=maybeMeetElite(mission.tier,at);if(eliteEncounter)result.eliteEncounter={name:eliteEncounter.name,relation:eliteEncounter.relation};
  s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
- addEvent('副本结算报告 · '+result.tier,'副本任务已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(newly.length?' 新解锁：'+newly.join('、')+'。':''),'daily');
+ addEvent('副本结算报告 · '+result.tier,'副本任务已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(newly.length?' 新解锁：'+newly.join('、')+'。':'')+(eliteEncounter?' 遭遇排行榜人物 '+eliteEncounter.name+'，双方关系：'+(eliteEncounter.relation==='ally'?'友善':'交恶')+'。':''),'daily');
  save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本')showDungeonResult(result);return true;
 }
 function showDungeonResult(result){
  $('drawerTitle').textContent='副本结算';$('choices').className='choices infinite-view';
- $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级</div></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>累计 '+s.points.toLocaleString('zh-CN')+'</small></div>'+(result.unlocked?.length?'<div class="instance-unlock">解锁 '+result.unlocked.join(' / ')+'</div>':'')+'<button class="instance-primary" id="instanceAgain">返回组队</button>';
+ $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级</div></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>累计 '+s.points.toLocaleString('zh-CN')+'</small></div>'+(result.unlocked?.length?'<div class="instance-unlock">解锁 '+result.unlocked.join(' / ')+'</div>':'')+(result.eliteEncounter?'<section class="elite-encounter-result '+(result.eliteEncounter.relation==='ally'?'is-ally':'is-hostile')+'"><small>ELITE ENCOUNTER</small><b>'+result.eliteEncounter.name+'</b><span>'+(result.eliteEncounter.relation==='ally'?'建立友善关系 · 已加入可选队友':'发生冲突 · 关系恶化')+'</span></section>':'')+'<button class="instance-primary" id="instanceAgain">返回组队</button>';
  $('instanceAgain').onclick=showDungeon;
 }
 function showEntertainment(){ $('drawerTitle').textContent='娱乐';$('choices').className='choices infinite-view';$('choices').innerHTML='<div class="illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 300 100"><path d="M15 82 Q60 10 108 72 T205 38 T285 65" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="90" cy="38" r="20" fill="none" stroke="currentColor"/><path d="M80 38h20M90 28v20" stroke="currentColor"/></svg></div><h2>娱乐</h2></div><div class="illustrated-choice-grid"><button class="instance-strategy" onclick="toast(\'即将开放\')">🎴<strong>牌局</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">🎮<strong>街机</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">♟<strong>棋室</strong></button></div>';$('drawer').classList.add('open');}
+const ARDAY_ELITE_RANKERS=[
+{id:'elite-01',name:'霜原',role:'独行者',combat:98,malice:12,points:28640},
+{id:'elite-02',name:'顾长夜',role:'战术指挥',combat:96,malice:19,points:25120},
+{id:'elite-03',name:'沈星回',role:'异常猎手',combat:94,malice:8,points:22900},
+{id:'elite-04',name:'裴照',role:'重装先锋',combat:93,malice:31,points:20500},
+{id:'elite-05',name:'祁连',role:'远程狙击',combat:91,malice:14,points:18800},
+{id:'elite-06',name:'温黛',role:'精神干涉',combat:90,malice:22,points:17400},
+{id:'elite-07',name:'陆沉',role:'近战突击',combat:89,malice:27,points:15900},
+{id:'elite-08',name:'谢临川',role:'情报分析',combat:88,malice:9,points:14600},
+{id:'elite-09',name:'岑鸢',role:'环境适应',combat:86,malice:17,points:13300},
+{id:'elite-10',name:'江砚',role:'医疗支援',combat:85,malice:11,points:12100}
+];
+function leaderboardNPCs(){
+ const surnames='沈顾裴陆温谢岑江许周林秦苏程叶白唐祁陈宋';const given='星河照临川月深远知秋砚宁';const roles=['探索者','战斗员','侦察员','支援者','研究员'];
+ const generic=Array.from({length:990},(_,i)=>{let n=i+1;let seed=(n*9301+49297)%233280;let rnd=seed/233280;let seed2=(n*233+719)%7919;return{id:'ranked-'+String(n).padStart(3,'0'),name:surnames[n%surnames.length]+given[(n*7)%given.length]+(n>given.length?'·'+String(n).padStart(3,'0'):''),role:roles[n%roles.length],combat:35+Math.floor(rnd*55),malice:Math.floor((seed2%100)),points:Math.max(120,Math.round(11900-i*11.8+rnd*9)),isElite:false}});
+ return [...ARDAY_ELITE_RANKERS.map(x=>({...x,isElite:true})),...generic];
+}
+function getLeaderboard(){
+ const all=[...leaderboardNPCs(),{id:'player',name:'Arday',points:s.points,isPlayer:true}].sort((a,b)=>b.points-a.points||a.id.localeCompare(b.id));
+ const playerIndex=all.findIndex(x=>x.isPlayer);
+ return {all,rank:playerIndex+1,topTen:all.slice(0,10),neighbors:[all[playerIndex-1],all[playerIndex+1]].filter(Boolean)};
+}
+function maybeMeetElite(tier,at){
+ const chance=({A:.12,S:.24,SS:.38,SSS:.55})[tier]||0;if(Math.random()>=chance)return null;
+ s.leaderboardContacts=Array.isArray(s.leaderboardContacts)?s.leaderboardContacts:[];
+ const available=ARDAY_ELITE_RANKERS.filter(n=>!s.leaderboardContacts.some(c=>c.id===n.id));
+ if(!available.length)return null;
+ const npc=available[Math.floor(Math.random()*available.length)],friendly=Math.random()<.5;
+ const contact={id:npc.id,name:npc.name,role:npc.role,combat:npc.combat,malice:npc.malice,relation:friendly?'ally':'hostile',at};
+ s.leaderboardContacts.push(contact);
+ if(friendly&&!s.teamRoster.some(m=>m.id===npc.id)){s.teamRoster.push({id:npc.id,name:npc.name,role:npc.role,combat:npc.combat,malice:npc.malice,selected:false,recruited:true,elite:true,portrait:npc.name.slice(0,1)})}
+ return contact;
+}
 function showRanking(){
  $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
- $('drawerTitle').textContent='积分排行榜';
- $('choices').className='choices infinite-view ranking-view';
- const npcDefaults={lin:1360,mori:1080,qiao:860};
- s.rankingNPCs=Array.isArray(s.rankingNPCs)?s.rankingNPCs:[];
- s.teamRoster.forEach((member,index)=>{
-  let npc=s.rankingNPCs.find(item=>item.id===member.id);
-  if(!npc){npc={id:member.id,name:member.name,points:npcDefaults[member.id]??Math.max(300,760-index*110)};s.rankingNPCs.push(npc)}
-  npc.name=member.name;npc.points=Math.max(0,Math.floor(Number(npc.points)||0));
- });
- const entries=[{id:'player',name:'Arday',points:s.points,isPlayer:true},...s.rankingNPCs.map(npc=>({id:npc.id,name:npc.name,points:npc.points,isPlayer:false}))].sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name,'zh-CN'));
- const podium=entries.slice(0,3).map((entry,index)=>'<article class="leader-podium leader-place-'+(index+1)+(entry.isPlayer?' is-player':'')+'"><div class="leader-podium-crown">'+(index===0?'✦':index===1?'✧':'◇')+'</div><div class="leader-podium-avatar '+(entry.isPlayer?'leader-avatar-arday':'')+'">'+(entry.isPlayer?'<strong>A</strong>':'<i></i><b></b>')+'</div><strong>'+entry.name+(entry.isPlayer?'<small>ARDAY</small>':'')+'</strong><span class="leader-podium-score">'+entry.points.toLocaleString('zh-CN')+'</span><em>积分</em><div class="leader-podium-step"><b>'+(index+1)+'</b></div></article>').join('');
- const rest=entries.slice(3).map((entry,index)=>'<article class="leader-row '+(entry.isPlayer?'is-player':'')+'"><b class="leader-row-number">'+(index+4).toString().padStart(2,'0')+'</b><span class="leader-row-avatar">'+(entry.isPlayer?'A':entry.name.slice(0,1))+'</span><strong>'+entry.name+(entry.isPlayer?'<small>YOU</small>':'')+'</strong><b class="leader-row-score">'+entry.points.toLocaleString('zh-CN')+'</b></article>').join('');
- const playerRank=entries.findIndex(entry=>entry.isPlayer)+1;
- $('choices').innerHTML='<section class="leader-cover"><div class="leader-cover-glow"></div><div class="leader-cover-copy"><small>ARDAY GUILD · LEADERBOARD</small><h2>积分排行榜</h2><span>RANKED BY POINTS</span></div><div class="leader-cover-insignia">榜</div></section><section class="leader-self"><div><small>MY POSITION</small><b>#'+playerRank+'</b></div><div class="leader-self-score"><small>我的积分</small><strong>'+s.points.toLocaleString('zh-CN')+'</strong></div></section><section class="leader-podium-wrap"><div class="leader-podium-grid">'+podium+'</div></section>'+(rest?'<section class="leader-list">'+rest+'</section>':'');
+ $('drawerTitle').textContent='积分排行榜';$('choices').className='choices infinite-view ranking-view';
+ const board=getLeaderboard(),entries=[...new Map([...board.topTen,...board.neighbors].map(x=>[x.id,x])).values()].sort((a,b)=>board.all.indexOf(a)-board.all.indexOf(b));
+ const podium=entries.slice(0,3).map(entry=>{const index=board.all.indexOf(entry);return '<article class="leader-podium leader-place-'+(index+1)+(entry.isPlayer?' is-player':'')+'"><div class="leader-podium-crown">'+(index===0?'✦':index===1?'✧':'◇')+'</div><div class="leader-podium-avatar '+(entry.isPlayer?'leader-avatar-arday':'')+'">'+(entry.isPlayer?'<strong>A</strong>':'<i></i><b></b>')+'</div><strong>'+entry.name+(entry.isPlayer?'<small>ARDAY</small>':'')+'</strong><span class="leader-podium-score">'+entry.points.toLocaleString('zh-CN')+'</span><em>积分</em><div class="leader-podium-step"><b>'+(index+1)+'</b></div></article>'}).join('');
+ const rest=entries.slice(3).map(entry=>{const rank=board.all.indexOf(entry)+1;return '<article class="leader-row '+(entry.isPlayer?'is-player':'')+(entry.isElite?' elite-ranker':'')+'"><b class="leader-row-number">'+String(rank).padStart(02,'0')+'</b><span class="leader-row-avatar">'+(entry.isPlayer?'A':entry.name.slice(0,1))+'</span><strong>'+entry.name+(entry.isPlayer?'<small>YOU</small>':entry.isElite?'<small>ELITE</small>':'')+'</strong><b class="leader-row-score">'+entry.points.toLocaleString('zh-CN')+'</b></article>'}).join('');
+ $('choices').innerHTML='<section class="leader-cover"><div class="leader-cover-glow"></div><div class="leader-cover-copy"><small>ARDAY GUILD · 1,000 REGISTERED</small><h2>积分排行榜</h2><span>RANKED BY POINTS</span></div><div class="leader-cover-insignia">榜</div></section><section class="leader-self"><div><small>MY POSITION</small><b>#'+board.rank.toLocaleString('zh-CN')+'</b></div><div class="leader-self-score"><small>我的积分</small><strong>'+s.points.toLocaleString('zh-CN')+'</strong></div></section><section class="leader-podium-wrap"><div class="leader-podium-grid">'+podium+'</div></section><section class="leader-list"><div class="leader-list-caption">TOP 10 · PERSONAL SCORE</div>'+rest+'</section>';
  $('drawer').classList.add('open');
 }
 function showExchange(){
