@@ -76,44 +76,22 @@
   for(let i=0;i<2600;i++){ctx.fillStyle='rgba(180,225,245,'+(.08+rand()*.32)+')';ctx.beginPath();ctx.arc(rand()*2048,rand()*1024,.3+rand()*1.2,0,Math.PI*2);ctx.fill()}
   for(let i=0;i<90;i++){const x=i*24,w=8+rand()*36,h=120+rand()*420;ctx.fillStyle='rgba(75,125,155,.24)';ctx.fillRect(x,930-h,w,h)}
   const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(780,96,64),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-100;sky.frustumCulled=false;root.add(sky);
-  // Central civic landmark: a navigational astrolabe, not another service district.
-  // Its layered orbital frame is visible above the surrounding architecture and readable from the home portal.
+  // Central landmark: one calm sculptural plinth, a tapered mast and two orbital arcs.
+  // Repeated pylons, collars, constellation stems and radial bars are removed.
   const core=new T.Group();core.name='hall-central-kinetic-core';core.position.set(18,0,0);root.add(core);
-  const coreBase=new T.Mesh(new T.CylinderGeometry(25,28,1.5,16),graphite);coreBase.position.y=.45;coreBase.receiveShadow=true;core.add(coreBase);
-  const baseRim=new T.Mesh(new T.TorusGeometry(25,.55,12,112),warmMetal);baseRim.rotation.x=Math.PI/2;baseRim.position.y=1.25;core.add(baseRim);
-  // Removed the nested inner ring: the landmark reads as one broad civic plinth, not a stack of circles.
-  const coreInset=new T.Mesh(new T.CylinderGeometry(18,18,.28,16),silver);coreInset.position.y=1.25;core.add(coreInset);
-  // Eight separated pylons support a floating orbital instrument; the open gaps keep the plaza visually permeable.
-  for(let i=0;i<8;i++){
-   const a=i*Math.PI/4,x=Math.cos(a)*15,z=Math.sin(a)*15;
-   const foot=new T.Mesh(new T.CylinderGeometry(1.7,2.6,1.1,8),graphite);foot.position.set(x,2,z);core.add(foot);
-   const p=new T.Mesh(new T.CylinderGeometry(.62,1.25,13,8),i%2?copper:titanium);p.position.set(x,8.5,z);p.rotation.z=Math.cos(a)*-.12;p.rotation.x=Math.sin(a)*.12;core.add(p);
-   const collar=new T.Mesh(new T.TorusGeometry(1.25,.16,8,32),i%2?amber:cyan);collar.position.set(x,14.5,z);core.add(collar);
+  const coreBase=new T.Mesh(new T.CylinderGeometry(24,27,1.35,48),graphite);coreBase.position.y=.45;coreBase.receiveShadow=true;core.add(coreBase);
+  const coreInset=new T.Mesh(new T.CylinderGeometry(20,20,.18,48),silver);coreInset.position.y=1.2;core.add(coreInset);
+  const coreSpire=new T.Mesh(new T.CylinderGeometry(1.9,4.2,27,24),titanium);coreSpire.position.y=15.1;coreSpire.castShadow=true;core.add(coreSpire);
+  const coreCollar=new T.Mesh(new T.TorusGeometry(3.1,.18,10,48),warmMetal);coreCollar.rotation.x=Math.PI/2;coreCollar.position.y=27.8;core.add(coreCollar);
+  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.1,2),new T.MeshPhysicalMaterial({color:0x83999d,metalness:.28,roughness:.36,emissive:0x1a3338,emissiveIntensity:.18,transparent:true,opacity:.94,envMapIntensity:.82}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
+  for(let i=0;i<2;i++){
+   const ring=new T.Mesh(new T.TorusGeometry(14+i*7,.3,10,96),i===0?cyan:warmMetal);
+   ring.position.y=31+i*3.8;ring.rotation.set(Math.PI/2+(i===0?-.34:.38),0,i===0?-.48:.55);core.add(ring);
   }
-  const coreSpire=new T.Mesh(new T.CylinderGeometry(1.8,4.8,30,12),silver);coreSpire.position.y=17;coreSpire.castShadow=true;core.add(coreSpire);
-  const coreDark=new T.Mesh(new T.CylinderGeometry(2.05,2.05,17,12),graphite);coreDark.position.y=17;core.add(coreDark);
-  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.4,2),new T.MeshPhysicalMaterial({color:0x83999d,metalness:.28,roughness:.36,emissive:0x1a3338,emissiveIntensity:.18,transparent:true,opacity:.94,envMapIntensity:.82}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
-  // Three differently inclined orbital bands make the landmark legible in silhouette from every approach.
-  for(let i=0;i<3;i++){
-   const ring=new T.Mesh(new T.TorusGeometry(12+i*5,.34-i*.045,12,112),i===1?warmMetal:i===2?violet:cyan);
-   ring.position.y=31+i*4.2;ring.rotation.set(Math.PI/2+(i-1)*.42,0,(i-1)*.58);core.add(ring);
-  }
-  // The orbital silhouette is kept to the three principal inclined bands; redundant rings removed.
-  // Seven luminous constellation nodes form a floating wayfinding halo above the core.
-  const constellation=[];
-  for(let i=0;i<7;i++){
-   const a=-Math.PI/2+i*Math.PI*2/7,x=Math.cos(a)*34,z=Math.sin(a)*34,y=39+(i%2)*4;
-   const node=new T.Mesh(new T.OctahedronGeometry(1.8,1),[amber,coral,jade,violet,cyan,warmMetal,silver][i]);node.position.set(x,y,z);core.add(node);const stem=new T.Mesh(new T.CylinderGeometry(.08,.08,9,6),whiteGlow);stem.position.set(x,y-5,z);core.add(stem);
-   constellation.push(new T.Vector3(x,y,z));
-  }
-  for(let i=0;i<7;i++){
-   const pts=[constellation[i],constellation[(i+1)%7],new T.Vector3(0,30,0),constellation[(i+3)%7]];
-   const geo=new T.BufferGeometry().setFromPoints(pts);
-   core.add(new T.Line(geo,new T.LineBasicMaterial({color:i%2?0x8bcbd8:0xd8b78b,transparent:true,opacity:.62})));
-  }
-  for(let i=0;i<7;i++){
-   const a=-Math.PI/2+i*Math.PI*2/7;
-   const ray=new T.Mesh(new T.BoxGeometry(.22,13,.22),i%2?cyan:amber);ray.position.set(Math.cos(a)*9,23,Math.sin(a)*9);ray.rotation.z=.22*Math.cos(a);ray.rotation.x=.22*Math.sin(a);core.add(ray);
+  const markerMat=[amber,coral,jade,violet];
+  for(let i=0;i<4;i++){
+   const angle=-Math.PI/2+i*Math.PI/2,node=new T.Mesh(new T.OctahedronGeometry(1.25,0),markerMat[i]);
+   node.position.set(Math.cos(angle)*31,38,Math.sin(angle)*31);core.add(node);
   }
   const coreLight=new T.PointLight(0x789da6,6,120,1.9);coreLight.position.set(18,29,0);root.add(coreLight);
   function labelTexture(title,sub){const c=document.createElement('canvas');c.width=768;c.height=224;const g=c.getContext('2d');g.fillStyle='rgba(8,23,37,.88)';g.fillRect(8,8,752,208);g.strokeStyle='#78d9e8';g.lineWidth=4;g.strokeRect(12,12,744,200);g.fillStyle='#effaff';g.textAlign='center';g.textBaseline='middle';g.font='bold 66px sans-serif';g.fillText(title,384,88);g.fillStyle='#82c9d9';g.font='25px sans-serif';g.fillText(sub,384,163);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t}
