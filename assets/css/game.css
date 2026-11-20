@@ -1439,3 +1439,39 @@ html body .stage .drawer.profile-expanded.open .choices{
 .combat-attribute-head b{font:10px Georgia,serif;color:#536858}
 .combat-attribute-meter{display:block;width:100%;height:4px;overflow:hidden;background:#d9d0c1;border-radius:5px}
 .combat-attribute-meter>b{display:block;height:100%;background:linear-gradient(90deg,#718b78,#b9a078);border-radius:5px}
+
+/* Career boards: editorial tabs and graphic-first guild workspace */
+.career-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:7px;margin:0 0 14px;border:0;border-radius:14px;background:linear-gradient(135deg,#242e2c,#3a4038);box-shadow:inset 0 1px 0 #ffffff20,0 5px 16px #171b1920}
+.career-tabs button{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border:1px solid #c6bda433;border-radius:9px;background:transparent;color:#c8c0ad;font:600 12px "Noto Serif SC",serif;letter-spacing:.12em}
+.career-tabs button.active{background:linear-gradient(145deg,#e4d8bd,#c7b58e);color:#303a34;border-color:#f1e6ce;box-shadow:0 3px 10px #10161355}
+.career-tab-glyph{font:20px Georgia,serif;opacity:.9}
+.guild-career-banner{position:relative;display:flex;align-items:center;gap:15px;min-height:124px;padding:18px;overflow:hidden;border:1px solid #c4b38b66;border-radius:13px;background:radial-gradient(ellipse at 12% 50%,#a9a17b45,transparent 48%),linear-gradient(120deg,#263632,#435047 58%,#252f2c);color:#eee4cf}
+.guild-career-banner:after{content:"";position:absolute;inset:8px;border:1px solid #d7c79b44;border-radius:8px;pointer-events:none}
+.guild-banner-sigil{display:grid;place-items:center;flex:0 0 78px;width:78px;height:78px;border:1px solid #c9b889;border-radius:50%;background:radial-gradient(circle,#b8aa7c55 0 35%,transparent 36%),repeating-conic-gradient(from 0deg,#d6c69b22 0 8deg,transparent 8deg 16deg);box-shadow:0 0 0 5px #d7c99b12,inset 0 0 18px #d7c99b22}
+.guild-banner-sigil i{font:38px "Noto Serif SC",serif;color:#e0d2a8;font-style:normal}
+.guild-banner-identity{position:relative;z-index:1;min-width:0;flex:1}
+.guild-banner-identity>small{font:9px Georgia,serif;letter-spacing:.2em;color:#c5b78e}
+.guild-banner-identity h2{margin:5px 0 10px;font:600 19px "Noto Serif SC",serif;letter-spacing:.1em}
+.guild-rank-track{height:3px;max-width:150px;background:#d8d0bd35}.guild-rank-track i{display:block;height:100%;background:#d8c493}
+.guild-banner-rank{position:relative;z-index:1;font:italic 30px Georgia,serif;color:#e4d5ad}
+.guild-career-section{position:relative;margin-top:12px;padding:14px;border:1px solid #a89c8050;border-radius:12px;background:linear-gradient(145deg,#f0e9d9,#e2dac8);box-shadow:0 5px 13px #29271d0c}
+.guild-career-section>header{display:flex;align-items:center;gap:9px;margin-bottom:12px;border:0}
+.guild-career-section>header>b{font:600 13px "Noto Serif SC",serif;letter-spacing:.1em;color:#34433a}
+.guild-career-section>header>small{margin-left:auto;font:10px Georgia,serif;letter-spacing:.14em;color:#9a8c70}
+.guild-section-icon{display:grid;place-items:center;width:29px;height:29px;border:1px solid #a99a7466;border-radius:8px;background:#d8cdb5;color:#536653;font:18px Georgia,serif;font-style:normal}
+.guild-due{display:block;font:42px Georgia,serif;line-height:1;color:#455e4d}.guild-due small{font:11px "Noto Serif SC",serif;color:#8c8069}
+.guild-contribution-total{display:flex;align-items:center;gap:6px;margin-top:10px;color:#82785f}.guild-contribution-total i{font-style:normal;color:#a78d55}.guild-contribution-total b{font:17px Georgia,serif;color:#536653}.guild-contribution-total small{font-size:10px}
+.guild-applicant-list{display:grid;gap:7px}.guild-applicant{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;padding:7px;border-radius:9px;background:#d8d0bd80}
+.guild-applicant-mark{display:grid;place-items:center;width:40px;height:40px;border:1px solid #a99a75;border-radius:50%;background:radial-gradient(circle,#aeb79d,#56675a);color:#f1e8d2;font:20px "Noto Serif SC",serif}
+.guild-applicant>div:nth-child(2){display:flex;flex-direction:column;gap:4px;min-width:0}.guild-applicant>div:nth-child(2)>b{font:600 12px "Noto Serif SC",serif;color:#39453c}.guild-applicant>div:nth-child(2)>small{font-size:9px;color:#887e6c}
+.guild-applicant>button,.guild-career-section .recruit-action{border:1px solid #8d987d;border-radius:7px;background:#536858;color:#f4eddd;padding:7px 12px;font-size:11px}
+.guild-material-count{display:inline-block;margin-bottom:10px;padding:5px 9px;border-radius:20px;background:#d5cbb4;color:#68745e;font-size:10px}
+.guild-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.guild-material-grid button{position:relative;min-height:82px;padding:34px 8px 8px;border:1px solid #b8aa8b;border-radius:9px;background:linear-gradient(145deg,#e8dfca,#d5c9ae);color:#4c594d;font:600 11px "Noto Serif SC",serif}
+.guild-material-grid button:before{content:"✧";position:absolute;top:7px;left:50%;transform:translateX(-50%);font:25px Georgia,serif;color:#9b8b5e}
+.guild-material-grid button small{display:block;margin-top:4px;font-size:9px;color:#92866d}
+.guild-contract-meta{display:flex;align-items:baseline;gap:5px;margin:4px 0 12px;color:#9a8b70}.guild-contract-meta b{font:22px Georgia,serif;color:#536858}.guild-contract-meta strong{margin-left:12px;font:22px Georgia,serif;color:#536858}
+.guild-career-empty{text-align:center;padding:28px 16px;border:1px solid #b7aa8c;border-radius:14px;background:linear-gradient(145deg,#e9e0cd,#d8cfbb)}
+.guild-empty-emblem{display:grid;place-items:center;width:92px;height:92px;margin:0 auto 15px;border:1px solid #a89a78;border-radius:50%;background:repeating-conic-gradient(#b4a47e22 0 10deg,transparent 10deg 20deg)}
+.guild-empty-emblem i{font:42px Georgia,serif;color:#68745e;font-style:normal}.guild-empty-emblem b{font:8px Georgia,serif;letter-spacing:.2em;color:#8c8069}
+.guild-career-empty h2{font:600 17px "Noto Serif SC",serif;color:#4c594d}
