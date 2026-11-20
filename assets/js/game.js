@@ -1275,6 +1275,43 @@ function showCareer(){
  }
  $('drawer').classList.add('open');
 }
+
+function showRecruitment(){
+ $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');
+ $('drawerTitle').textContent='人才招募 · RECRUITMENT';
+ $('choices').className='choices recruitment-view';
+ const jobs=[
+  {id:'assistant-editor',title:'出版编辑助理',salary:185,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:'协助整理稿件、核对资料与日常出版事务。'},
+  {id:'research-assistant',title:'研究助理',salary:260,start:9,end:12,minFriend:28,minEnergy:42,skill:'reading',skillMin:2,desc:'参与资料检索、文献整理与专题研究。'},
+  {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:'负责内容构思、文字撰写与专题策划。'}
+ ];
+ const day=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[day]=s.jobApplications[day]||{};
+ const status=s.job?.active?'<section class="recruitment-current"><span class="recruitment-kicker">CURRENT APPOINTMENT</span><strong>'+s.job.title+'</strong><p>当前在职 · 日薪 ¥'+s.job.salary+' · '+pad(s.job.start)+':00–'+pad(s.job.end)+':00</p><small>如需结束当前任职，请前往底部「职业」页面管理。</small></section>':'';
+ const cards=jobs.map((j,i)=>{
+  const attempted=!!s.jobApplications[day][j.id],skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0);
+  const eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
+  const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
+  return '<article class="recruitment-card"><div class="recruitment-card-top"><span>OPEN POSITION / 0'+(i+1)+'</span><span class="recruitment-salary">¥'+j.salary+' <small>/ DAY</small></span></div><h3>'+j.title+'</h3><p class="recruitment-description">'+j.desc+'</p><div class="recruitment-meta"><span>工作时间 '+pad(j.start)+':00–'+pad(j.end)+':00</span><span>录用概率 '+Math.round(chance*100)+'%</span></div><div class="recruitment-requirements">申请条件：精力 ≥ '+j.minEnergy+' · 友谊 ≥ '+j.minFriend+(j.skillMin?' · 阅读经验 ≥ '+j.skillMin:'')+'</div><button class="recruitment-apply" data-recruit-job="'+j.id+'" '+(attempted||s.job?.active?'disabled':'')+'>'+(s.job?.active?'已有在职岗位':attempted?'今日已申请':'提交申请')+'</button></article>';
+ }).join('');
+ $('choices').innerHTML='<header class="recruitment-masthead"><div class="recruitment-seal">A</div><div class="recruitment-kicker">ARDAY PUBLIC HALL · CAREER OFFICE</div><h2>人才招募处</h2><p>在这里查看公开职位、申请条件与薪酬信息。</p><div class="recruitment-rule"><span>POSITIONS AVAILABLE</span><b>'+jobs.length+'</b></div></header>'+status+'<div class="recruitment-section-label"><span>公开职位</span><small>OPEN CALLS · '+day+'</small></div>'+cards+'<footer class="recruitment-footnote">申请结果将根据当前状态与能力经验综合判定。每个职位每日仅可申请一次。</footer>';
+ $('drawer').classList.add('open');
+ $('choices').querySelectorAll('[data-recruit-job]').forEach(button=>button.onclick=()=>{
+  const j=jobs.find(item=>item.id===button.dataset.recruitJob);if(!j)return;
+  if(s.job?.active){toast('当前已有在职岗位');return}
+  s.jobApplications=s.jobApplications||{};s.jobApplications[day]=s.jobApplications[day]||{};
+  if(s.jobApplications[day][j.id]){toast('这个职位今天已经申请过了');return}
+  s.jobApplications[day][j.id]={at:Date.now()};save();
+  const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
+  if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');showRecruitment();return}
+  const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));
+  if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showRecruitment();return}
+  const nextWorkday=plusDays(dayAnchor(),1);nextWorkday.setHours(12,0,0,0);const startDate=dayKey(nextWorkday);
+  s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(nextWorkday);save();
+  addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');
+  say('我找到工作了。明天开始上班，薪资按天结算。');showRecruitment();renderCalendar();toast('录用成功');
+ });
+}
+
 function showGoals(){
  ensurePersonalGoal();
  const g=s.personalGoal,sg=s.sharedGoal;
@@ -3516,7 +3553,7 @@ function persistFurniture(item){
    const zone=hallScene.zones.find(item=>item.id===id);if(!zone)return;
    const lines={ranking:'玩家排行与赛季记录展示终端。跨玩家实时排行需要联机数据服务。',teams:'组队终端。创建队伍、邀请成员与共同任务需要联机服务。',entertainment:'模拟娱乐区。街机与休闲玩法将逐项接入。'};
    if(id==='exchange'){showCollection();return}
-   if(id==='recruitment'){openTab('职业');return}
+   if(id==='recruitment'){closeCalendar();showRecruitment();document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
    if(id==='commissions'){openTab('目标');return}
    if(id==='food'){shopCategory='食物食材';openTab('商店',true);return}
    say(lines[id]||zone.name);
