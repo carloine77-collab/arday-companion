@@ -19,7 +19,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./assets/icons/arday-icon.svg">
 <title>Arday · 阿尔</title>
-<link rel="stylesheet" href="assets/css/game.css?v=20261124-illustrated-missions1">
+<link rel="stylesheet" href="assets/css/game.css?v=20261124-hall-polish2">
 </head>
 <body>
 <div class="app">
@@ -47,7 +47,7 @@
  <div class="dialogue-pill" id="dialogue" style="display:none"></div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2></div></div><div class="calendar-content" id="calendarContent"></div></section>
 
  <button class="room-label" id="roomLabel" type="button" aria-label="当前房间">起居室</button>
- <section class="drawer" id="drawer"><div class="drawer-head"><strong id="drawerTitle">互动</strong></div><div class="choices" id="choices"></div></section>
+ <section class="drawer" id="drawer"><div class="drawer-head"><strong id="drawerTitle">互动</strong><button class="drawer-close-button" id="drawerClose" type="button" aria-label="关闭界面">×</button></div><div class="choices" id="choices"></div></section>
 </main>
 </div>
 <footer class="bottom">
@@ -70,7 +70,7 @@
 <script src="assets/js/chat-system.js?v=20261119a"></script>
 <script src="assets/js/character-tap-lines.js?v=20261119a"></script>
 <script src="assets/js/hall/hall-scene.js?v=20261124-combat-ink1"></script>
-<script src="assets/js/game.js?v=20261124-illustrated-missions1"></script>
+<script src="assets/js/game.js?v=20261124-hall-polish2"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
