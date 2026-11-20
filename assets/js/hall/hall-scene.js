@@ -228,6 +228,37 @@
    };
    const accentSet={exchange:amber,ranking:coral,recruitment:jade,commissions:amber,teams:violet,entertainment:violet,food:coral};
    const accentMat=accentSet[z.id];
+   // Architectural detailing kit: recessed cladding, fasteners, equipment housings and partial canopies.
+   // These pieces add readable construction depth without closing the plaza-facing elevation.
+   const addFastener=(x,y,zz,m=warmMetal)=>{
+    const o=new T.Mesh(new T.SphereGeometry(.19,8,6),m);o.position.set(x,y,zz);area.add(o);return o;
+   };
+   const addCladding=(x,y,zz,w,h,depth=.34,trim=silver,inset=graphite,lightMat=accentMat)=>{
+    addBox(x,y,zz,w,h,depth,trim);addBox(x,y,zz+depth*.56,w-.8,h-.8,.08,inset);
+    addBox(x-w*.34,y,zz+depth*.66,.12,h-.95,.1,lightMat);addBox(x+w*.34,y,zz+depth*.66,.12,h-.95,.1,lightMat);
+    for(const sx of [-1,1])for(const sy of [-1,1])addFastener(x+sx*(w/2-.42),y+sy*(h/2-.42),zz+depth*.68,trim);
+   };
+   const addEquipment=(x,y,zz,w,h,d,accent=accentMat)=>{
+    addBox(x,y,zz,w,h,d,graphite);addBox(x,y+h*.12,zz+d*.53,w*.88,h*.72,.18,silver);
+    addBox(x,y+h*.12,zz+d*.64,w*.78,h*.61,.08,plum);addBox(x,y+h*.12,zz+d*.70,w*.7,h*.48,.06,accent);
+    for(let j=-2;j<=2;j++){addBox(x+j*w*.13,y-h*.31,zz+d*.55,.16,.12,.16,warmMetal);addBox(x+j*w*.13,y-h*.36,zz+d*.54,.12,.08,.1,j%2?cyan:amber)}
+    for(let j=-2;j<=2;j++)addBox(x+j*.48,y-h*.05,zz+d*.58,.12,h*.24,.1,graphite);
+   };
+   const addCanopy=(x,zz,w,d,y,accent=accentMat)=>{
+    // Shallow canopy over the rear work zone; the public-facing edge remains completely open.
+    addBox(x,y,zz,w,d*.1,d,graphite);addBox(x,y+.62,zz,w-1,.22,d-.8,silver);addBox(x,y+.78,zz,w*.86,.12,.22,accent);
+    for(let n=-4;n<=4;n++)addBox(x+n*w*.105,y-.58,zz,.22,.95,d-.7,n%2?warmMetal:graphite);
+    for(const side of [-1,1]){addBox(x+side*(w/2-.8),y-1.35,zz,.42,2.7,.55,silver);addBox(x+side*(w/2-.8),y-2.72,zz,.9,.18,.9,warmMetal)}
+   };
+   const addPortalFrame=(x,zz,w,h,depth,accent=accentMat)=>{
+    for(const side of [-1,1]){addBox(x+side*(w/2),h/2,zz,.82,h,depth,graphite);addBox(x+side*(w/2),h*.54,zz+depth*.55,.16,h*.72,.12,accent);addBox(x+side*(w/2),.65,zz,1.4,.34,depth+1,warmMetal)}
+    addBox(x,h,zz,w+1.2,.9,depth+1,silver);addBox(x,h+.52,zz,w*.76,.14,depth+1.1,accent);
+   };
+   const addSeat=(x,zz,accent=accentMat)=>{
+    addBox(x,1.15,zz,3.8,.48,1.25,ivory);addBox(x,2.15,zz-.48,3.8,1.8,.42,plum);
+    for(const side of [-1,1])addBox(x+side*1.55,.55,zz,.22,1.1,.28,warmMetal);
+    addBox(x,1.45,zz+.68,3.3,.18,.16,accent);
+   };
    // A continuous rear service wall and two structural returns establish a real room volume.
    // The front stays open so the district remains visible and connected to the public concourse.
    if(z.id==='exchange'){
@@ -404,6 +435,36 @@
      for(const side of [-1,1]){addBox(x+side*6,1,zz,3.2,1.5,4,plum);addBox(x+side*6,.3,zz,2.8,.18,3.7,warmMetal)}
     }
     for(let i=-3;i<=3;i++){const x=i*14;addColumn(x,-2,9,1.0,warmMetal);addBox(x,13,-2,9,.45,1.4,ivory)}
+   }
+   // District-specific finish work: each venue receives its own construction vocabulary.
+   if(z.id==='exchange'){
+    addCanopy(0,-14,94,24,24,amber);
+    for(let i=-3;i<=3;i++){const x=i*13.1;addCladding(x,15.2,-39.55,10.6,2.8,.5,silver,graphite,amber);addBox(x,19.2,-38.7,8.8,.28,.5,amber);addFastener(x-4.6,8.2,-40.4,warmMetal);addFastener(x+4.6,8.2,-40.4,warmMetal);addEquipment(x,4.2,-18,5.4,5.8,2.6,amber)}
+    for(let i=0;i<5;i++)addSeat(-34+i*17,18,amber);
+    for(const x of [-51,51])addPortalFrame(x,-12,8,15,2.4,amber);
+   }else if(z.id==='ranking'){
+    addCanopy(0,-17,96,28,32,coral);
+    for(let i=-5;i<=5;i++){const x=i*8.4;addCladding(x,25,-41.25,6.5,5.2,.42,silver,plum,coral);addFastener(x-2.8,22.8,-40.95,warmMetal);addFastener(x+2.8,22.8,-40.95,warmMetal)}
+    for(let i=0;i<5;i++){const z=9+i*7;addBox(-42,1.1,z,1.2,2.2,4.8,coral);addBox(42,1.1,z,1.2,2.2,4.8,coral);addBox(0,2.35,z,78,.16,4.5,ivory)}
+    addPortalFrame(0,-35,30,18,2.4,coral);
+   }else if(z.id==='recruitment'){
+    addCanopy(0,-12,96,27,23,jade);
+    for(let bay=-1;bay<=1;bay++){const x=bay*32;addPortalFrame(x,-15,21,15,2.1,jade);for(let j=-2;j<=2;j++){addBox(x+j*3.6,13,-27,.16,8,.24,j%2?silver:jade);addBox(x+j*3.6,18,-27,2.7,.14,.5,ivory)}addEquipment(x,4.8,-20,8,6,3,jade);addSeat(x-7,3,jade);addSeat(x+7,3,jade);addCladding(x,16,-41.1,19,2.5,.38,silver,graphite,jade)}
+   }else if(z.id==='commissions'){
+    addCanopy(0,-13,100,28,29,amber);
+    for(let i=-2;i<=2;i++){const x=i*20;addCladding(x,22,-42.45,15.8,4.6,.52,silver,plum,i%2?cyan:amber);addEquipment(x,4.8,-31,9.2,7.2,4.2,i%2?cyan:amber);for(let j=-2;j<=2;j++)addBox(x+j*2.5,9,-37,.18,2.8,.22,j%2?amber:cyan)}
+    addPortalFrame(0,-10,36,20,2.8,amber);for(const x of [-45,45])addEquipment(x,4,12,10,5,5,jade);
+   }else if(z.id==='teams'){
+    addCanopy(0,-8,96,26,26,violet);
+    for(let cell=0;cell<4;cell++){const sx=(cell%2?1:-1)*31,sz=cell<2?-28:27;addPortalFrame(sx,sz-2,22,13,2.2,violet);for(let j=-2;j<=2;j++)addBox(sx+j*4,11,sz+.72,.14,8,.12,j%2?glass:violet);addEquipment(sx,5,sz+3,8,5,3,violet);addSeat(sx-7,sz+10,violet);addSeat(sx+7,sz+10,violet)}
+    addCladding(0,18,-5,38,3.8,.6,silver,graphite,violet);
+   }else if(z.id==='entertainment'){
+    addCanopy(0,-9,102,26,28,violet);
+    for(let bay=-1;bay<=1;bay++){const x=bay*34;addPortalFrame(x,-18,27,23,3.4,violet);addCladding(x,16,-16.05,17,3.2,.55,silver,plum,violet);addEquipment(x,5,-2,12,7,5,violet);for(let j=-3;j<=3;j++){addBox(x+j*2.6,19,-18,.18,3.8,.22,j%2?violet:silver);addBox(x+j*2.6,2.7,-12,.22,2.8,.2,graphite)}addFastener(x-11,3.2,-13,warmMetal);addFastener(x+11,3.2,-13,warmMetal)}
+   }else if(z.id==='food'){
+    addCanopy(0,-13,100,27,22,coral);
+    for(let bay=0;bay<3;bay++){const x=(bay-1)*34,stallAccent=bay===0?coral:bay===1?amber:jade;addPortalFrame(x,-27,25,14,2.1,stallAccent);addCladding(x,14,-39.35,23,3.6,.48,silver,plum,stallAccent);addEquipment(x,5,-19,8,5.5,3.4,stallAccent);for(let j=-2;j<=2;j++)addBox(x+j*4.2,17,-39,.16,4.8,.24,j%2?warmMetal:stallAccent)}
+    for(let row=0;row<3;row++)for(let col=-2;col<=2;col++){const x=col*15,zz=13+row*13;for(const side of [-1,1])addSeat(x+side*6,zz+2,coral)}
    }
    // Interior reveals, door jambs and recessed lighting complete each building envelope.
    for(let side=-1;side<=1;side+=2){
