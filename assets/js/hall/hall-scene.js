@@ -512,7 +512,62 @@
     addShelterSeat(-49,8,coral);addShelterSeat(49,8,jade);
     addQueueRail(-39,-12,-18,coral);addQueueRail(12,39,-18,jade);addWasteStation(0,49,coral);
    }
-// Fine facade articulation: shallow trim and service reveals, without duplicate walls or roofs.
+// Connected architectural frontage: replace the visual effect of scattered posts with a continuous, legible structure.
+   // The open portal frames the district entrance; it does not close the view into the interior.
+   const portalZ=-7.5,portalY=17.5,portalWidth=100,portalDepth=13;
+   // Continuous fascia and roof spine tie the structural supports together.
+   addBox(0,portalY,portalZ,portalWidth,1.35,1.65,graphite);
+   addBox(0,portalY+.78,portalZ,portalWidth-2,.16,1.82,accentMat);
+   addBox(0,portalY-.82,portalZ,portalWidth-1,.18,1.78,silver);
+   addBox(0,portalY-1.35,portalZ,portalWidth-4,.12,.22,warmMetal);
+   for(const x of [-46,0,46]){
+    // Broad composite piers with plinths, capitals and recessed luminous reveals.
+    addBox(x,8.5,portalZ,2.8,17,2.8,graphite);
+    addBox(x,1.05,portalZ,4.2,2.1,4.1,silver);
+    addBox(x,17.1,portalZ,4.1,1.15,3.8,titanium);
+    addBox(x,8.8,portalZ+1.46,.16,12.8,.08,accentMat);
+    addBox(x,8.8,portalZ-1.46,.16,12.8,.08,ivory);
+   }
+   // Repeated cross-ribs and shallow roof cassettes form a canopy rather than isolated uprights.
+   for(let k=-5;k<=5;k++){
+    const x=k*9.1;
+    addBox(x,portalY+.35,portalZ, .42,.32,portalDepth, k%2?warmMetal:silver);
+    addBox(x,portalY-.5,portalZ-portalDepth/2,.32,1.0,.32,graphite);
+    addBox(x,portalY-.5,portalZ+portalDepth/2,.32,1.0,.32,graphite);
+   }
+   for(let k=0;k<5;k++){
+    const z=portalZ-portalDepth/2+1.3+k*2.55;
+    addBox(0,portalY+.12,z,portalWidth-5,.18,1.85,k%2?graphite:titanium);
+    addBox(0,portalY+.24,z,portalWidth-8,.06,.12,accentMat);
+   }
+   // Integrated side galleries: continuous low walls, display niches and planter ledges.
+   for(const side of [-1,1]){
+    addBox(side*52,2.0,13,1.15,4,39,graphite);
+    addBox(side*51.35,4.1,13,.12,.18,37,accentMat);
+    addBox(side*51.2,4.55,13,1.65,.22,39,silver);
+    for(let bay=0;bay<4;bay++){
+     const z=-1+bay*9.2;
+     addBox(side*50.55,3.0,z,.12,2.3,5.4,plum);
+     addBox(side*50.45,3.1,z,.08,1.65,4.2,side<0?accentMat:jade);
+    }
+    addBox(side*47.4,.72,20,7.2,1.44,23,graphite);
+    addBox(side*47.4,1.48,20,6.8,.18,22,ivory);
+    for(let n=0;n<4;n++){
+     const z=11+n*6;
+     const plant=new T.Mesh(new T.SphereGeometry(1.05,8,6),n%2?jade:accentMat);
+     plant.position.set(side*47.4,2.35,z);plant.scale.set(1.1,.75,1.35);area.add(plant);
+    }
+   }
+   // The arrival threshold is a broad rectangular material transition, not another circular pad.
+   addBox(0,.055,-1,78,.11,7,floorDark);
+   addBox(0,.12,-1,72,.08,.18,accentMat);
+   addBox(-37,.18,-1,.22,.22,6,silver);addBox(37,.18,-1,.22,.22,6,silver);
+   // Ceiling-mounted continuous light troughs visually connect the canopy and interior.
+   for(const side of [-1,1]){
+    addBox(0,15.9,side*4,82,.18,.48,graphite);
+    addBox(0,15.78,side*4,76,.08,.22,accentMat);
+   }
+   // Fine facade articulation: shallow trim and service reveals, without duplicate walls or roofs.
    for(const side of [-1,1]){
     for(let level=0;level<3;level++)addBox(side*50.28,4.2+level*5.6,-13,.12,.16,48,level===1?accentMat:warmMetal);
     for(let bay=-2;bay<=2;bay++){const zz=-33+bay*10.2;addBox(side*50.32,9.6,zz,.14,10,.18,bay%2===0?titanium:silver);addBox(side*50.42,9.6,zz,.08,7.6,.08,accentMat)}
