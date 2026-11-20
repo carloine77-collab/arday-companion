@@ -41,89 +41,35 @@
   // Continuous floor without intersecting coplanar grid planes.
   function polygon(parent,points,y,material){const s=new T.Shape();s.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)s.lineTo(points[i][0],points[i][1]);s.closePath();const o=new T.Mesh(new T.ShapeGeometry(s),material);o.rotation.x=-Math.PI/2;o.position.y=y;o.receiveShadow=true;parent.add(o);return o}
   function strip(x1,z1,x2,z2,width,material,y=-.105){const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),angle=Math.atan2(dx,dz),o=new T.Mesh(new T.BoxGeometry(width,.035,len),material);o.rotation.y=angle;o.position.set((x1+x2)/2,y,(z1+z2)/2);o.castShadow=false;o.receiveShadow=false;root.add(o);return o}
-  // Open-air public forum: a monumental perimeter colonnade encloses the plaza.
-  // There is deliberately no indoor ceiling or interior column grid; the sky remains visible.
+  // A continuous perimeter frame replaces the old forest of repeated columns and trim.
   const perimeter=new T.Group();perimeter.name='hall-outdoor-perimeter-colonnade';perimeter.scale.set(1.25,1,1.25);root.add(perimeter);
   const columnMat=[silver,titanium,graphite],warmMetal=mat(0x756858,.56,.54),paleStone=mat(0x929894,.08,.94);
   const amber=new T.MeshStandardMaterial({color:0x9b8060,emissive:0x49311e,emissiveIntensity:.1,metalness:.2,roughness:.62,envMapIntensity:.76});
   const violet=new T.MeshStandardMaterial({color:0x656577,emissive:0x29283e,emissiveIntensity:.09,metalness:.18,roughness:.66,envMapIntensity:.72});
   const coral=new T.MeshStandardMaterial({color:0x936b68,emissive:0x3e2425,emissiveIntensity:.06,metalness:.1,roughness:.72,envMapIntensity:.7});
   const jade=new T.MeshStandardMaterial({color:0x65786f,emissive:0x24352f,emissiveIntensity:.055,metalness:.08,roughness:.76,envMapIntensity:.68});
-  const ivory=mat(0x96958c,.06,.94),copper=mat(0x69584c,.48,.58),plum=mat(0x393d48,.28,.72);
+  const framePoints=[new T.Vector3(-312,57,-248),new T.Vector3(-20,57,-248),new T.Vector3(273,57,-248),new T.Vector3(273,57,-120),new T.Vector3(273,57,0),new T.Vector3(273,57,120),new T.Vector3(273,57,248),new T.Vector3(-20,57,248),new T.Vector3(-312,57,248),new T.Vector3(-312,57,0)];
+  const upperFrame=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(framePoints,true,'centripetal'),240,1.65,10,true),graphite);upperFrame.castShadow=true;perimeter.add(upperFrame);
+  const lowerPoints=framePoints.map(p=>new T.Vector3(p.x,7.5,p.z));
+  const lowerFrame=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(lowerPoints,true,'centripetal'),240,.72,8,true),titanium);perimeter.add(lowerFrame);
   const addColumn=(x,z,index)=>{
-   const g=new T.Group();g.position.set(x,0,z);perimeter.add(g);
-   const h=54+(index%4)*3.5,base=5.8,shaftR=index%3===0?2.45:2.05;
-   const cyl=(rTop,rBottom,height,y,material,segments=12)=>{const o=new T.Mesh(new T.CylinderGeometry(rTop,rBottom,height,segments),material);o.position.y=y;o.castShadow=true;o.receiveShadow=true;g.add(o);return o};
-   cyl(3.8,4.6,2.1,1.05,graphite,8);cyl(3.1,3.8,1.2,2.7,warmMetal,8);
-   cyl(shaftR,shaftR*1.3,h-7,base+(h-7)/2,index%4===0?paleStone:columnMat[index%3],10);
-   cyl(shaftR+1.05,shaftR+1.05,1.4,h-5.5,titanium,8);
-   cyl(3.0,3.0,2.0,h-2.8,graphite,8);
-   // Four fluted ribs and a warm inset light make each support legible at a distance.
-   for(let k=0;k<4;k++){const a=k*Math.PI/2,fin=new T.Mesh(new T.BoxGeometry(.34,h-10,.48),k%2?silver:warmMetal);fin.position.set(Math.cos(a)*(shaftR+.12),h/2,Math.sin(a)*(shaftR+.12));fin.rotation.y=-a;g.add(fin)}
-   const light=new T.Mesh(new T.BoxGeometry(.18,h-13,.2),index%3===0?amber:index%3===1?cyan:violet);light.position.set(shaftR+.34,h/2,0);g.add(light);
-   const cap=new T.Mesh(new T.TorusGeometry(3.2,.16,8,32),index%2?amber:cyan);cap.rotation.x=Math.PI/2;cap.position.y=h-1.4;g.add(cap);
-   return h;
+   const h=50+(index%3)*2.5,r=1.65+(index%2)*.22;
+   const profile=[[0,0],[r*1.8,0],[r*2,.45],[r*1.3,1.15],[r,h*.72],[r*1.12,h-.9],[r*1.55,h],[0,h]];
+   const pier=new T.Mesh(new T.LatheGeometry(profile.map(p=>new T.Vector2(p[0],p[1])),16),index%4===0?paleStone:columnMat[index%3]);
+   pier.position.set(x,0,z);pier.castShadow=true;pier.receiveShadow=true;perimeter.add(pier);
   };
   let pillarIndex=0;
-  // Four long sides; corner spacing is tightened to create a continuous civic enclosure.
-  for(let i=0;i<=15;i++){const x=-312+i*39;addColumn(x,-248,pillarIndex++);addColumn(x,248,pillarIndex++)}
-  for(let i=1;i<13;i++){const z=-248+i*38.15;addColumn(-312,z,pillarIndex++);addColumn(273,z,pillarIndex++)}
-  // The perimeter has a broken, elevated crown beam, not a roof: large openings remain to the sky.
-  const beam=(x,y,z,w,h,d,material)=>box(perimeter,x,y,z,w,h,d,material);
-  for(let i=0;i<15;i++){
-   const x=-292+i*39;
-   beam(x,59,-248,34,.9,1.8,i%2?graphite:titanium);
-   beam(x,59,248,34,.9,1.8,i%2?titanium:graphite);
-   beam(x,60,-248,29,.12,.16,i%2?amber:cyan);
-   beam(x,60,248,29,.12,.16,i%2?cyan:amber);
-  }
-  for(let i=0;i<12;i++){
-   const z=-229+i*38.15;
-   beam(-312,59,z,1.8,.9,32,graphite);beam(273,59,z,1.8,.9,32,titanium);
-  }
-  // A second, intermittent structural tier gives the colonnade depth without roofing over the plaza.
-  for(let i=0;i<15;i+=2){
-   const x=-292+i*39;
-   beam(x,36,-246,30,.72,1.25,i%4===0?warmMetal:graphite);
-   beam(x,36,246,30,.72,1.25,i%4===0?graphite:titanium);
-   // Suspended luminaires hang below the crown beams at selected bays.
-   for(const z of [-246,246]){
-    const stem=box(perimeter,x,53,z, .28,5.2,.28,warmMetal);
-    const housing=box(perimeter,x,49.8,z,3.8,.72,2.8,graphite);
-    const lens=box(perimeter,x,49.35,z,2.7,.12,1.8,i%4===0?amber:cyan);
-   }
-  }
-  for(let i=0;i<12;i+=2){
-   const z=-229+i*38.15;
-   beam(-310,36,z,1.25,.72,27,i%4===0?warmMetal:graphite);
-   beam(271,36,z,1.25,.72,27,i%4===0?graphite:titanium);
-   for(const x of [-310,271]){
-    box(perimeter,x,53,z,.28,5.2,.28,warmMetal);
-    box(perimeter,x,49.8,z,2.8,.72,3.8,graphite);
-    box(perimeter,x,49.35,z,1.8,.12,2.7,i%4===0?amber:cyan);
-   }
-  }
-  // Short diagonal braces articulate selected bays; they remain outside the open central volume.
-  for(let i=0;i<15;i+=3){
-   const x=-292+i*39;
-   const brace=box(perimeter,x+15,43,-248,18,.62,.9,silver);brace.rotation.z=-.34;
-   const brace2=box(perimeter,x+15,43,248,18,.62,.9,warmMetal);brace2.rotation.z=.34;
-  }
-  // Four monumental gateways punctuate the colonnade and orient visitors toward the plaza.
+  for(let i=0;i<=7;i++){const x=-312+i*83.5;addColumn(x,-248,pillarIndex++);addColumn(x,248,pillarIndex++)}
+  for(let i=1;i<5;i++){const z=-248+i*99.2;addColumn(-312,z,pillarIndex++);addColumn(273,z,pillarIndex++)}
   const gateway=(x,z,rot,accent)=>{
    const g=new T.Group();g.position.set(x,0,z);g.rotation.y=rot;perimeter.add(g);
-   box(g,-8,25,0,2.8,50,3.2,graphite);box(g,8,25,0,2.8,50,3.2,titanium);
-   box(g,0,51,0,21,3.2,4.2,warmMetal);box(g,0,52.9,0,17,.22,4.35,accent);
-   for(let i=-2;i<=2;i++){const fin=box(g,i*3.4,27,1.9,.42,43,.28,i%2?silver:accent);fin.rotation.z=(i%2)*.025}
-   const disc=new T.Mesh(new T.TorusGeometry(5,.28,10,48),accent);disc.position.set(0,43,2.2);g.add(disc);
+   const profile=[[0,0],[2.5,0],[3.1,.6],[2.1,2],[1.65,8],[1.8,40],[2.6,48],[2.2,51],[0,51]];
+   for(const side of [-1,1]){const p=new T.Mesh(new T.LatheGeometry(profile.map(v=>new T.Vector2(v[0],v[1])),16),side<0?graphite:titanium);p.position.x=side*10;p.castShadow=true;g.add(p)}
+   const lintel=new T.Mesh(new T.BoxGeometry(25,3.4,5),warmMetal);lintel.position.set(0,50,0);g.add(lintel);
+   const inset=new T.Mesh(new T.BoxGeometry(19,.16,5.12),accent);inset.position.set(0,52,0);g.add(inset);
   };
   gateway(-20,-248,0,amber);gateway(-20,248,Math.PI,coral);gateway(-312,0,Math.PI/2,violet);gateway(273,0,-Math.PI/2,jade);
-  // Low edge lights and occasional public benches soften the monumental perimeter.
-  for(let i=0;i<28;i++){
-   const a=i/28*Math.PI*2,x=-20+292*Math.cos(a),z=248*Math.sin(a);
-   const lamp=new T.Mesh(new T.CylinderGeometry(.22,.42,2.2,8),warmMetal);lamp.position.set(x,1.1,z);perimeter.add(lamp);
-   const glow=new T.Mesh(new T.SphereGeometry(.42,10,8),i%3===0?amber:i%3===1?violet:cyan);glow.position.set(x,2.35,z);perimeter.add(glow);
-  }
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2,x=-20+292*Math.cos(a),z=248*Math.sin(a);const lamp=new T.Mesh(new T.CylinderGeometry(.18,.32,1.4,8),warmMetal);lamp.position.set(x,.7,z);perimeter.add(lamp);const glow=new T.Mesh(new T.SphereGeometry(.26,8,6),i%3===0?amber:i%3===1?violet:cyan);glow.position.set(x,1.5,z);perimeter.add(glow)}
   // Distant architectural backdrop, deliberately beyond the playable boundary.
   const bg=document.createElement('canvas');bg.width=2048;bg.height=1024;const ctx=bg.getContext('2d'),grad=ctx.createLinearGradient(0,0,0,1024);grad.addColorStop(0,'#050a12');grad.addColorStop(.52,'#101d2a');grad.addColorStop(1,'#1a2935');ctx.fillStyle=grad;ctx.fillRect(0,0,2048,1024);
   let seed=90317;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
@@ -300,19 +246,8 @@
     return pane;
    };
    const addSculptedFacade=(x,y,z,w,h,depth,material,bulge=1.2)=>{
-    // Use a closed curved volume, not a single two-sided sheet: the facade has real thickness.
-    const skin=addCurvedVolume(x,y,z,w,h,depth,material,bulge);
-    const profileCurve=(u)=>z-depth/2-bulge*(1-4*u*u)-.12;
-    for(const u of [-.48,-.24,0,.24,.48]){
-     const xx=x+u*w,zz=profileCurve(u);
-     const path=new T.CatmullRomCurve3([new T.Vector3(xx,y-h/2,zz),new T.Vector3(xx,y,zz-.04),new T.Vector3(xx,y+h/2,zz)]);
-     area.add(new T.Mesh(new T.TubeGeometry(path,16,.065,7,false),u===0?warmMetal:silver));
-    }
-    for(const yy of [-h/2,h/2]){
-     const pts=[];for(let k=0;k<=32;k++){const u=k/32-.5;pts.push(new T.Vector3(x+u*w,y+yy,z-depth/2-bulge*(1-4*u*u)-.1))}
-     area.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),48,.11,8,false),warmMetal));
-    }
-    return skin;
+    // One continuous, closed curved facade is the primary architectural mass.
+    return addCurvedVolume(x,y,z,w,h,depth,material,bulge);
    };
    const addBotanicalTree=(x,z,height=8,foliage=leafPalette[1],form=0)=>{
      const species=((form%4)+4)%4,trunkProfile=[[.06,0],[.2,.16],[.17,.48],[.145,height*.42],[.115,height*.68],[.075,height*.88],[.035,height],[0,height]];
@@ -410,20 +345,15 @@
     addRoundedShell(x,.95,zz,w,.48,2.5,warmMetal,.18,.08);
    };
    const addScreen=(x,y,zz,w,h,accentMat=cyan)=>{
-    addRoundedShell(x,y,zz,w+1.15,h+1.0,.9,graphite,Math.min(1.1,h*.12),.16);
-    addRoundedShell(x,y,zz+.43,w+.18,h+.12,.14,plum,Math.min(.9,h*.1),.045);
-    const display=new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,emissive:accentMat.color||0x70ddeb,emissiveIntensity:.32,toneMapped:false,side:T.DoubleSide});
-    addCurvedScreen(x,y,zz+.53,w*.92,h*.88,display);
-    for(const sx of [-1,1]){
-     addLathedProfile(x+sx*(w/2+.39),y-h*.5,zz+.36,[[.12,0],[.16,.12],[.11,.32],[.11,h-.32],[.17,h-.12],[.12,h]],silver,12);
-    }
+    // One recessed housing and a single curved glass surface.
+    addRoundedShell(x,y,zz,w+1.0,h+.8,.72,graphite,Math.min(.8,h*.12),.12);
+    const display=new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,emissive:accentMat.color||0x70ddeb,emissiveIntensity:.22,toneMapped:false,side:T.DoubleSide});
+    addCurvedScreen(x,y,zz+.39,w*.94,h*.9,display);
    };
    const addCounter=(x,y,zz,w,d,top=ivory,front=graphite)=>{
-    // Furniture-grade counter: radiused carcass, layered stone worktop and recessed service fascia.
-    addRoundedShell(x,y,zz,w,1.85,d,front,Math.min(.72,d*.16),.14);
-    addRoundedShell(x,y+1.0,zz-.08,w+.48,.34,d+.3,top,.32,.09);
-    addRoundedShell(x,y+.28,zz+d*.5+.035,w*.78,.72,.12,plum,.18,.04);
-    addRoundedShell(x,y+1.94,zz+d*.34,w*.82,.16,.16,warmMetal,.07,.035);
+    // Monolithic carcass with one integrated worktop.
+    addRoundedShell(x,y,zz,w,1.8,d,front,Math.min(.72,d*.16),.14);
+    addRoundedShell(x,y+.96,zz-.04,w+.22,.24,d+.16,top,.24,.07);
    };
    const addStair=(x,zz,w,steps,depth,material=graphite)=>{
     for(let n=0;n<steps;n++){const h=.55+n*.48;addBox(x,h/2,zz+n*depth,w,h,depth+.08,material);addBox(x,h+.06,zz+n*depth,w,.12,depth+.08,n%2?silver:warmMetal)}
@@ -735,76 +665,19 @@
     addShelterSeat(-49,8,coral);addShelterSeat(49,8,jade);
     addQueueRail(-39,-12,-18,coral);addQueueRail(12,39,-18,jade);addWasteStation(0,49,coral);
    }
-// Connected architectural frontage: replace the visual effect of scattered posts with a continuous, legible structure.
-   // The open portal frames the district entrance; it does not close the view into the interior.
-   const portalZ=-7.5,portalY=17.5,portalWidth=100,portalDepth=13;
-   // Continuous fascia and roof spine tie the structural supports together.
-   addBox(0,portalY,portalZ,portalWidth,1.35,1.65,graphite);
-   addBox(0,portalY+.78,portalZ,portalWidth-2,.16,1.82,accentMat);
-   addBox(0,portalY-.82,portalZ,portalWidth-1,.18,1.78,silver);
-   addBox(0,portalY-1.35,portalZ,portalWidth-4,.12,.22,warmMetal);
-   for(const x of [-46,0,46]){
-    // Broad composite piers with plinths, capitals and recessed luminous reveals.
-    addBox(x,8.5,portalZ,2.8,17,2.8,graphite);
-    addBox(x,1.05,portalZ,4.2,2.1,4.1,silver);
-    addBox(x,17.1,portalZ,4.1,1.15,3.8,titanium);
-    addBox(x,8.8,portalZ+1.46,.16,12.8,.08,accentMat);
-    addBox(x,8.8,portalZ-1.46,.16,12.8,.08,ivory);
-   }
-   // Repeated cross-ribs and shallow roof cassettes form a canopy rather than isolated uprights.
-   for(let k=-5;k<=5;k++){
-    const x=k*9.1;
-    addBox(x,portalY+.35,portalZ, .42,.32,portalDepth, k%2?warmMetal:silver);
-    addBox(x,portalY-.5,portalZ-portalDepth/2,.32,1.0,.32,graphite);
-    addBox(x,portalY-.5,portalZ+portalDepth/2,.32,1.0,.32,graphite);
-   }
-   for(let k=0;k<5;k++){
-    const z=portalZ-portalDepth/2+1.3+k*2.55;
-    addBox(0,portalY+.12,z,portalWidth-5,.18,1.85,k%2?graphite:titanium);
-    addBox(0,portalY+.24,z,portalWidth-8,.06,.12,accentMat);
-   }
-   // Integrated side galleries: continuous low walls, display niches and planter ledges.
+// One continuous entrance canopy, two load-bearing shoulders and two integrated side returns.
+   // District-specific halls remain the primary interior architecture.
+   const portalZ=-7.5,portalY=18.2;
+   addCurvedVolume(0,portalY,portalZ,100,3.2,14,graphite,1.9);
+   addRoundedShell(0,portalY+1.72,portalZ-.08,94,.18,13,accentMat,.08,.04);
    for(const side of [-1,1]){
-    addBox(side*52,2.0,13,1.15,4,39,graphite);
-    addBox(side*51.35,4.1,13,.12,.18,37,accentMat);
-    addBox(side*51.2,4.55,13,1.65,.22,39,silver);
-    for(let bay=0;bay<4;bay++){
-     const z=-1+bay*9.2;
-     addBox(side*50.55,3.0,z,.12,2.3,5.4,plum);
-     addBox(side*50.45,3.1,z,.08,1.65,4.2,side<0?accentMat:jade);
-    }
-    addBox(side*47.4,.72,20,7.2,1.44,23,graphite);
-    addBox(side*47.4,1.48,20,6.8,.18,22,ivory);
-    for(let n=0;n<4;n++){
-     const z=11+n*6;
-     const plant=new T.Mesh(new T.SphereGeometry(1.05,8,6),n%2?jade:accentMat);
-     plant.position.set(side*47.4,2.35,z);plant.scale.set(1.1,.75,1.35);area.add(plant);
-    }
+    addLathedProfile(side*47,0,portalZ,[[0,0],[2.1,0],[2.8,.55],[1.75,1.8],[1.55,14],[2.15,17.4],[1.8,18.2],[0,18.2]],graphite,20);
+    addRoundedShell(side*47,18.1,portalZ,4.4,.48,14,accentMat,.2,.08);
+    addRoundedShell(side*50,5.2,16,1.1,10,40,graphite,.42,.12);
    }
-   // The arrival threshold is a broad rectangular material transition, not another circular pad.
-   addBox(0,.055,-1,78,.11,7,floorDark);
-   addBox(0,.12,-1,72,.08,.18,accentMat);
-   addBox(-37,.18,-1,.22,.22,6,silver);addBox(37,.18,-1,.22,.22,6,silver);
-   // Ceiling-mounted continuous light troughs visually connect the canopy and interior.
-   for(const side of [-1,1]){
-    addBox(0,15.9,side*4,82,.18,.48,graphite);
-    addBox(0,15.78,side*4,76,.08,.22,accentMat);
-   }
-   // Fine facade articulation: shallow trim and service reveals, without duplicate walls or roofs.
-   for(const side of [-1,1]){
-    for(let level=0;level<3;level++)addBox(side*50.28,4.2+level*5.6,-13,.12,.16,48,level===1?accentMat:warmMetal);
-    for(let bay=-2;bay<=2;bay++){const zz=-33+bay*10.2;addBox(side*50.32,9.6,zz,.14,10,.18,bay%2===0?titanium:silver);addBox(side*50.42,9.6,zz,.08,7.6,.08,accentMat)}
-   }
-   for(let bay=-4;bay<=4;bay++){const x=bay*10.6;addBox(x,19.3,-41.58,7.2,.12,.12,accentMat);addBox(x,2.2,-41.58,7.2,.1,.12,warmMetal)}
-      // Interior reveals, door jambs and recessed lighting complete each building envelope.
-   for(let side=-1;side<=1;side+=2){
-    addBox(side*49,8,-13,1.2,16,60,graphite);
-    addBox(side*48.25,8,-13,.12,11,52,accentMat);
-   }
-   zoneObjects.push(area);
-  });
-  // City-scale hall meshes do not cast or receive the small room's shadow map.
-   // Restrict shadows to architectural masses; keep small trim inexpensive.
+   addRoundedShell(0,.08,-1,76,.12,6,floorDark,.12,.035);
+   addRoundedShell(0,.15,-1,68,.055,.12,accentMat,.04,.02);
+   Restrict shadows to architectural masses; keep small trim inexpensive.
     root.traverse(object=>{if(object.isMesh){object.userData.hallIllustration=true;if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();const radius=object.geometry.boundingSphere?.radius||0;object.castShadow=!object.userData.hallFloor&&radius>3.2;object.receiveShadow=!object.userData.hallFloor&&radius>4.8;
      const mats=Array.isArray(object.material)?object.material:[object.material];mats.forEach(material=>{if(!material||!material.isMeshStandardMaterial||material.userData.hallPainterInk)return;material.userData.hallPainterInk=true;material.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',`float pigmentNoise=fract(sin(dot(gl_FragCoord.xy,vec2(17.17,91.73)))*43758.5453)-.5;float paperFiber=sin(gl_FragCoord.y*.73+gl_FragCoord.x*.19)*.5;outgoingLight*=.982+pigmentNoise*.018+paperFiber*.004;vec3 paperTint=vec3(.985,.978,.958);outgoingLight=mix(outgoingLight,outgoingLight*paperTint,.18);\n#include <tonemapping_fragment>`)};material.customProgramCacheKey=()=>'arday-hall-watercolor-paper-ink-v1';material.needsUpdate=true});
     }});
