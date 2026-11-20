@@ -303,14 +303,34 @@
 
    const localCylinder=(x,y,zz,rt,rb,h,m,segments=12)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),m);o.position.set(x,y,zz);area.add(o);return o};
    const addPlanter=(x,zz,w=8,d=5,foliage=jade,variant=0)=>{
-    addBox(x,.52,zz,w,1.04,d,graphite);addBox(x,1.08,zz,w-.55,.18,d-.55,ivory);addBox(x,1.19,zz,w-1,.08,d-1,paleStone);
+    addRoundedShell(x,.52,zz,w,1.04,d,graphite,.42,.12);
+    addRoundedShell(x,1.08,zz,w-.48,.2,d-.48,ivory,.36,.06);
+    addRoundedShell(x,1.2,zz,w-1,.1,d-1,paleStone,.3,.04);
     const count=Math.max(3,Math.floor(w/2.2));
-    for(let n=0;n<count;n++){const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);localCylinder(px,2.25,pz,.12,.2,2.1,warmMetal,7);const leaf=new T.Mesh(new T.ConeGeometry(.62,2.4,7),n%3===0?foliage:n%3===1?jade:ivory);leaf.position.set(px,3.15,pz);leaf.rotation.z=n%2?.22:-.22;area.add(leaf);const bloom=new T.Mesh(new T.SphereGeometry(.34,8,6),variant%2?amber:coral);bloom.position.set(px,4.35,pz);area.add(bloom)}
-    for(const side of [-1,1])addBox(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal);
+    for(let n=0;n<count;n++){
+     const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);
+     addBotanicalTree(px,pz,3.1,n%3===0?foliage:n%3===1?jade:ivory,variant+n);
+     const bloom=new T.Mesh(new T.SphereGeometry(.34,9,7),variant%2?amber:coral);bloom.position.set(px,3.75,pz);area.add(bloom);
+    }
+    for(const side of [-1,1])addRoundedShell(x+side*(w/2-.45),.82,zz,.18,.16,d-.6,warmMetal,.07,.04);
    };
-   const addBench=(x,zz,accentMat=warmMetal,rotation=0)=>{const g=new T.Group();g.position.set(x,0,zz);g.rotation.y=rotation;area.add(g);box(g,0,1.1,0,7.4,.42,1.25,ivory);box(g,0,2.15,-.48,7.4,1.7,.38,plum);for(const sx of [-3,3])box(g,sx,.48,0,.28,.96,.9,warmMetal);box(g,0,1.34,.66,6.8,.12,.14,accentMat)};
+   const addBench=(x,zz,accentMat=warmMetal,rotation=0)=>{
+    const g=new T.Group();g.position.set(x,0,zz);g.rotation.y=rotation;area.add(g);
+    const seat=addRoundedShell(0,1.1,0,7.4,.42,1.25,ivory,.2,.08);g.add(seat);area.remove(seat);
+    const back=addRoundedShell(0,2.15,-.48,7.4,1.7,.38,plum,.18,.08);g.add(back);area.remove(back);
+    for(const sx of [-3,3]){const leg=addLathedProfile(sx,0,0,[[.18,0],[.28,.16],[.2,.38],[.16,.96],[.12,1.05]],warmMetal,12);g.add(leg);area.remove(leg)}
+    const rail=addRoundedShell(0,1.34,.66,6.8,.12,.14,accentMat,.05,.03);g.add(rail);area.remove(rail);
+   };
    const addBeacon=(x,zz,accentMat=cyan,h=5)=>{localCylinder(x,h/2,zz,.48,.72,h,graphite,10);localCylinder(x,h*.72,zz,.58,.58,.26,warmMetal,10);const lens=new T.Mesh(new T.CylinderGeometry(.34,.34,.34,12),accentMat);lens.position.set(x,h*.82,zz);area.add(lens);const cap=new T.Mesh(new T.SphereGeometry(.42,10,8),whiteGlow);cap.position.set(x,h+.08,zz);area.add(cap)};
-   const addKiosk=(x,zz,accentMat=cyan,scale=1)=>{const g=new T.Group();g.position.set(x,0,zz);g.scale.setScalar(scale);area.add(g);box(g,0,2.5,0,3.2,5,.9,graphite);box(g,0,3.05,.52,2.55,2.35,.12,accentMat);box(g,0,4.35,.04,3.65,.32,ivory);box(g,0,4.58,.04,2.8,.12,warmMetal);box(g,0,.45,.08,3.7,.48,graphite);for(const sx of [-1,1])box(g,sx*1.25,1.35,.5,.12,1.35,.12,silver);return g};
+   const addKiosk=(x,zz,accentMat=cyan,scale=1)=>{
+    const g=new T.Group();g.position.set(x,0,zz);g.scale.setScalar(scale);area.add(g);
+    const shell=addRoundedShell(0,2.5,0,3.2,5,.9,graphite,.42,.14);g.add(shell);area.remove(shell);
+    const fascia=addRoundedShell(0,3.05,.52,2.55,2.35,.12,accentMat,.24,.035);g.add(fascia);area.remove(fascia);
+    const hood=addVaultCanopy(0,4.35,.04,3.65,1.25,ivory);g.add(hood);area.remove(hood);
+    const base=addRoundedShell(0,.45,.08,3.7,.48,1.05,graphite,.18,.08);g.add(base);area.remove(base);
+    for(const sx of [-1,1]){const fin=addLathedProfile(sx*1.25,.68,.5,[[.07,0],[.09,.12],[.06,1.25],[.1,1.35],[.04,1.35]],silver,12);g.add(fin);area.remove(fin)}
+    return g;
+   };
    const addStorageRack=(x,zz,w=8,h=6,accentMat=warmMetal)=>{for(const sx of [-1,1])addBox(x+sx*w/2,h/2,zz,.28,h,.42,graphite);for(let level=0;level<3;level++){const y=1+level*2.1;addBox(x,y,zz,w,.22,1.1,silver);for(let n=-2;n<=2;n++){const px=x+n*w*.17;addBox(px,y+.72,zz,.95,1.25,.9,n%2?plum:graphite);addBox(px,y+1.39,zz,.62,.1,.94,level%2?accentMat:warmMetal)}}addBox(x,h+.2,zz,w+.8,.28,1.4,accentMat)};
    const addOverheadLamp=(x,zz,accentMat=cyan)=>{addBox(x,12,zz,.24,5,.24,warmMetal);addBox(x,9.35,zz,3.8,.3,1.6,graphite);addBox(x,9.12,zz,2.8,.12,1.1,accentMat)};
    const addPanel=(x,y,zz,w,h,m)=>{const o=new T.Mesh(new T.PlaneGeometry(w,h),m);o.position.set(x,y,zz);area.add(o);return o};
