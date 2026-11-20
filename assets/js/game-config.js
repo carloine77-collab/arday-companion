@@ -652,6 +652,12 @@ window.ArdayGameConfig = {
       ]
     ]
   },
+  "卫浴类": {
+    "马桶": [["马桶","▧","buy-furniture-catalog-100","780",""]],
+    "洗手台": [["洗手台","▧","buy-furniture-catalog-101","920",""]],
+    "淋浴间": [["淋浴间","▧","buy-furniture-catalog-102","1180",""]],
+    "浴缸": [["浴缸","▧","buy-furniture-catalog-103","1380",""]]
+  },
   "功能类": {
     "冰箱": [
       [
