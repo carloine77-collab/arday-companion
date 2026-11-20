@@ -3510,12 +3510,11 @@ function persistFurniture(item){
   }
   function activateHallZone(id){
    const zone=hallScene.zones.find(item=>item.id===id);if(!zone)return;
-   const lines={exchange:'这里使用人民币结算，不设置代币或兑换积分。可以查看现有账户余额与收支记录。',ranking:'这里展示大厅玩家排行与赛季记录。跨玩家实时排行需要联机数据服务。',recruitment:'这里是招募公告区，可以查看现有职业与工作信息。',commissions:'这里集中发布委托。当前先连接已有目标与委托进度系统。',teams:'这里用于寻找队友、创建队伍和共同活动。队伍匹配需要联机服务。',entertainment:'这里是街机与休闲娱乐区，后续可以逐个加入可玩的实体设施。',food:'欢迎来到美食街。',events:'这里发布大厅公告、限时活动和版本消息。',showcase:'这里展示角色名片、收藏和成就。'};
+   const lines={ranking:'玩家排行与赛季记录展示终端。跨玩家实时排行需要联机数据服务。',teams:'组队终端。创建队伍、邀请成员与共同任务需要联机服务。',entertainment:'模拟娱乐区。街机与休闲玩法将逐项接入。'};
    if(id==='exchange'){showCollection();return}
    if(id==='recruitment'){openTab('职业');return}
    if(id==='commissions'){openTab('目标');return}
    if(id==='food'){shopCategory='食物食材';openTab('商店',true);return}
-   if(id==='events'){$('recentEvents')?.click();return}
    say(lines[id]||zone.name);
   }
   // One-finger orbit and two-finger pinch work on iPad; mouse drag and wheel work too.
