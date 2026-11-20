@@ -43,6 +43,7 @@ s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object
 s.points=Math.max(0,Math.floor(Number(s.points)||0));
 if(!s.leaderboardPopulationV2){if(s.points===0)s.points=100;s.leaderboardPopulationV2=true;}
 s.activeDungeon=s.activeDungeon&&s.activeDungeon.status==='active'?s.activeDungeon:null;
+if(s.activeDungeon){s.activeDungeon.endsAt=0;s.activeDungeon.scheduleEndAt=0;s.activeDungeon.board=s.activeDungeon.board||{steps:0,position:0,lap:0,chanceModifier:0,fatalRisk:false,flags:{},history:[],pending:null};}
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
 s.dungeonProgress=s.dungeonProgress&&typeof s.dungeonProgress==='object'?s.dungeonProgress:{};
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
@@ -1538,7 +1539,7 @@ function renderDungeonEvent(){
 function resolveDungeonEvent(index){
  const mission=s.activeDungeon;if(!mission?.board?.pending)return;const board=mission.board,event=board.pending.event,option=event.options[index];if(!option)return;
  Object.entries(option.effects||{}).forEach(([key,value])=>{if(key in s.attributes)s.attributes[key]=clamp((Number(s.attributes[key])||0)+value);else if(['energy','hunger','clean','fun'].includes(key))s[key]=clamp((Number(s[key])||0)+value)});
- s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);if(option.chance)board.chanceModifier=Math.max(-25,Math.min(25,(Number(board.chanceModifier)||0)+option.chance));if(option.flag)board.flags[option.flag]=true;if(option.risk)board.fatalRisk=true;
+ s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);mission.snapshot.playerPower=s.combat;mission.snapshot.energy=s.energy;mission.snapshot.hunger=s.hunger;mission.snapshot.clean=s.clean;if(option.chance)board.chanceModifier=Math.max(-25,Math.min(25,(Number(board.chanceModifier)||0)+option.chance));if(option.flag)board.flags[option.flag]=true;if(option.risk)board.fatalRisk=true;
  let reward='无额外收获';if(option.item&&Math.random()<.68){let id=option.item;const rare=Math.random();if(rare<.07)id='standin';else if(rare<.12)id='reprieve';else if(rare<.17)id='hex';else if(rare<.21)id='misfortune';const item=addDungeonItem(id);if(item)reward='获得道具：'+item.name}
  board.history=Array.isArray(board.history)?board.history:[];board.history.push({title:event.title,outcome:option.label+' · '+reward});board.history=board.history.slice(-12);board.pending=null;
  if(board.steps>=36){mission.scheduleEndAt=Date.now();save();settleDungeonIfDue(Date.now());return}save();render();renderDungeonBoard();
