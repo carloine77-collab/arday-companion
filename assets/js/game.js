@@ -850,7 +850,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   else if(hour>=18&&hour<22&&['chat','watchTV','listenRecords','music','computerPlay','game'].includes(id))timeBias=1.3;
   return {...option,score:needScore+(spec.base||0)+preference+socialBonus+timeBias-repeatPenalty+Math.random()*2};
  }).filter(item=>Number.isFinite(item.score));
- if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
+ if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bathroom-mode')?'bathroom':$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
  const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/10)}));
  const total=weighted.reduce((sum,item)=>sum+item.weight,0);
@@ -3584,9 +3584,10 @@ function persistFurniture(item){
    if(doorTap&&doorTap.pointerId===e.pointerId){
     const tap=doorTap,dist=Math.hypot(e.clientX-tap.x,e.clientY-tap.y);doorTap=null;sceneDismissTap=null;
     if(e.type==='pointerup'&&dist<18){
-     stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode');
+     stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode');
      if(tap.target==='kitchen')stage.classList.add('kitchen-mode');
      if(tap.target==='bedroom')stage.classList.add('bedroom-mode');
+     if(tap.target==='bathroom')stage.classList.add('bathroom-mode');
      $('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));updateArday3D();
     }
     return;
