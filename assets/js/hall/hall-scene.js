@@ -392,7 +392,7 @@
     for(const side of [-1,1]){
      addColumn(side*51,-12,18,2.4,graphite);
      addBeam(side*51,18,-12,2.5,1.2,62,silver);
-     addBox(side*49.3,9,-12,.16,14,58,stallAccent);
+     addBox(side*49.3,9,-12,.16,14,58,accentMat);
     }
     addBeam(0,19,-12,104,1.6,62,ivory);
     for(let i=-4;i<=4;i++)addBeam(i*12,18,-12,.34,1.2,58,i%2?jade:coral);
