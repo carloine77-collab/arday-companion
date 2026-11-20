@@ -1292,7 +1292,7 @@ function showGoals(){
 
 
 /* Three.js room system. Simulation state remains authoritative. */
-let cameraGestureMode='pan';
+let let activeCameraGesture='pan';
 let arday3D=null,arday3DLoading=false,arday3DFallbackTried=false;
 function initArday3D(){
  let host=null;
@@ -3577,7 +3577,7 @@ function persistFurniture(item){
    }
    doorTap=null;inertiaTheta=0;inertiaPhi=0;
    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-   if(pointers.size===1)drag={x:e.clientX,y:e.clientY};
+   if(pointers.size===1){drag={x:e.clientX,y:e.clientY};activeCameraGesture=e.clientX<rect.left+rect.width/2?'orbit':'pan';}
    if(pointers.size===2){const p=[...pointers.values()];pinchStart=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);pinchRadius=targetRadius;pinchCenter={x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2};pinchAngle=Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x)}
    lastPointerTime=e.timeStamp;e.preventDefault();
   });
@@ -3636,7 +3636,7 @@ function persistFurniture(item){
    if(!pointers.has(e.pointerId))return;
    const old=pointers.get(e.pointerId),dx=e.clientX-old.x,dy=e.clientY-old.y,elapsed=Math.max(8,e.timeStamp-lastPointerTime||16);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
    if(pointers.size===1&&drag){
-    if(cameraGestureMode==='orbit'){targetTheta-=dx*.0065;targetPhi+=dy*.0045;applyCamera();}
+    if(activeCameraGesture==='orbit'){targetTheta-=dx*.0065;targetPhi+=dy*.0045;applyCamera();}
     else{
      camera.updateMatrixWorld(true);
      const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.y=0;right.normalize();
@@ -3832,10 +3832,6 @@ function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;render();renderCalendar();generateDailyEvents();save();
-const cameraPanButton=$('cameraPan'),cameraOrbitButton=$('cameraOrbit');
-function setCameraGestureMode(mode){cameraGestureMode=mode==='orbit'?'orbit':'pan';cameraPanButton?.classList.toggle('active',cameraGestureMode==='pan');cameraOrbitButton?.classList.toggle('active',cameraGestureMode==='orbit');cameraPanButton?.setAttribute('aria-pressed',cameraGestureMode==='pan'?'true':'false');cameraOrbitButton?.setAttribute('aria-pressed',cameraGestureMode==='orbit'?'true':'false');}
-cameraPanButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('pan')});
-cameraOrbitButton?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setCameraGestureMode('orbit')});
 initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activity,s.activeInteraction.anchor||null,s.activeInteraction.room||null,s.activeInteraction.furnitureId||null);else updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
