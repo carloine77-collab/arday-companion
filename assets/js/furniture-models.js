@@ -5,7 +5,7 @@
  */
 window.ArdayFurnitureModels = (() => {
  function create(context) {
-  const {T,getRoomMode,rooms,furnitureModelAliases,stylizeMaterial,recolorFurniture,createPainterTexture,applyPainterMap,roomWallMap,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,toast}=context;
+  const {T,getRoomMode,rooms,furnitureModelAliases,stylizeMaterial,recolorFurniture,createPainterTexture,applyPainterMap,roomWallMap,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,toast}=context;
   function build(name,record=null) {
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
@@ -49,7 +49,7 @@ window.ArdayFurnitureModels = (() => {
    const restoring=!!record&&['x','y','z','rotation','wallSide','wallOffset'].some(key=>Object.prototype.hasOwnProperty.call(record,key));
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>{};
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
-   const modelContext={T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,box,cyl,sphere,legs,restoring,width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action,toast};
+   const modelContext={T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action,toast};
    const modelBuilder=window.ArdayFurnitureModelCategories?.[modelName];
    if(!modelBuilder){toast('没有找到这种家具模型：'+name);return null}
    modelBuilder(modelContext);
