@@ -83,7 +83,7 @@
    zoneObjects.push(b);
   });
   // Physical return portal: the only route back to the private apartment.
-  const portal=new T.Group();portal.position.set(0,0,0);portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
+  const portal=new T.Group();portal.position.set(0,0,0);portal.rotation.y=-Math.PI/2;portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
   box(portal,-1.35,1.55,0,.22,3.1,.28,wood);box(portal,1.35,1.55,0,.22,3.1,.28,wood);box(portal,0,3.05,0,2.92,.24,.3,wood);
   box(portal,0,1.42,-.08,2.38,2.72,.12,cream);
   const portalSign=new T.Mesh(new T.PlaneGeometry(2.15,.52),new T.MeshBasicMaterial({map:signTexture('回到房间','HOME',0),toneMapped:false,side:T.DoubleSide}));portalSign.position.set(0,3.48,.02);portal.add(portalSign);
