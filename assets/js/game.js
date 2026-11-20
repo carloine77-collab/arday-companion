@@ -1554,27 +1554,7 @@ function initArday3D(){
   addWindowDressing(kitchenWindow,2.1,1.85,0xd0c4b1,2.6);
   box(kitchen,0,1.12,-3.91,7.7,.55,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=.88;y<=1.35;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
-  // Three-dimensional hinged doors are part of each room, not UI overlays.
-  function roomDoor(parent,z,label,target,color){
-   const g=new T.Group();g.position.set(5.18,0,z);g.rotation.y=Math.PI/2;g.userData.roomTarget=target;g.userData.wallObject=true;parent.add(g);
-   const frameMat=M(0x65452f),leafMat=M(color),insetMat=M(0x9a704b),metalMat=M(0xd6b77d,.42);
-   box(g,-.72,1.22,0,.16,2.44,.22,frameMat);box(g,.72,1.22,0,.16,2.44,.22,frameMat);box(g,0,2.44,0,1.6,.16,.22,frameMat);
-   const leaf=box(g,0,1.16,-.035,1.26,2.28,.13,leafMat);leaf.userData.roomTarget=target;
-   box(g,0,1.18,.045,.94,1.84,.035,insetMat);
-   box(g,0,1.18,.068,.78,1.65,.025,leafMat);
-   const knob=new T.Mesh(new T.SphereGeometry(.055,12,10),metalMat);knob.position.set(.43,1.12,.105);g.add(knob);
-   const plaque=box(g,0,2.72,.035,.92,.32,.07,M(0xf1e5d1));plaque.material=plaque.material.clone();
-   const sign=document.createElement('canvas');sign.width=256;sign.height=88;const ctx=sign.getContext('2d');
-   ctx.fillStyle='#f1e5d1';ctx.fillRect(0,0,256,88);ctx.strokeStyle='#967657';ctx.lineWidth=5;ctx.strokeRect(3,3,250,82);
-   ctx.fillStyle='#5c4938';ctx.font='bold 46px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,128,45);
-   const tex=new T.CanvasTexture(sign);tex.encoding=T.sRGBEncoding;
-   const signFace=new T.Mesh(new T.PlaneGeometry(.86,.27),new T.MeshBasicMaterial({map:tex,transparent:true,side:T.DoubleSide}));
-   signFace.position.set(0,2.72,.076);g.add(signFace);
-   return g;
-  }
-  const livingBedroomDoor=roomDoor(living,-2.25,'卧室','bedroom',0x77513b);
-  const livingKitchenDoor=roomDoor(living,2.25,'厨房','kitchen',0x718778);
-  const livingHallDoor=roomDoor(living,0,'公共大厅','hall',0x8b9b8c);livingHallDoor.position.set(-5.18,0,0);livingHallDoor.rotation.y=-Math.PI/2;
+  // All room doors are now instances of the same owned, movable furniture model.
   const hallScene=window.ArdayHallScene?.create(T,scene,M,box);if(!hallScene)throw new Error('Public hall scene failed to initialize');
   const hall=hallScene.group;hall.visible=false;
   // Tiled bathroom shell; no sanitary fixtures are pre-installed.
@@ -1583,10 +1563,6 @@ function initArday3D(){
   for(let x=-5.12;x<=5.12;x+=.34){box(bathroom,x,.66,-3.965,.31,1.18,.025,bathroomTile);box(bathroom,x,.66,3.965,.31,1.18,.025,bathroomTile)}
   for(let z=-3.8;z<=3.81;z+=.34){box(bathroom,-5.165,.66,z,.025,1.18,.31,bathroomTile);box(bathroom,5.165,.66,z,.025,1.18,.31,bathroomTile)}
   const bathroomAccent=M(0xb4b9b1,.9);box(bathroom,0,1.28,-3.94,10.3,.035,.035,bathroomAccent);box(bathroom,0,1.28,3.94,10.3,.035,.035,bathroomAccent);
-  const bathroomDoor=roomDoor(living,0,'卫生间','bathroom',0x82928a);
-  const bathroomLivingDoor=roomDoor(bathroom,.45,'起居室','living',0x82928a);
-  const bedroomLivingDoor=roomDoor(bedroom,.45,'起居室','living',0x77513b);
-  const kitchenLivingDoor=roomDoor(kitchen,.45,'起居室','living',0x718778);
   kitchen.visible=false;bedroom.visible=false;bathroom.visible=false;
   // Detailed stylized character with articulated shoulders, elbows, hips and knees.
   const person=new T.Group();scene.add(person);const rig=new T.Group();person.add(rig);const body=new T.Group();rig.add(body);
@@ -1721,12 +1697,6 @@ function initArday3D(){
    registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'living-window',room:'living',anchor:'window'})}),
    registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'bedroom-window',room:'bedroom',anchor:'window'})}),
    registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'kitchen-window',room:'kitchen',anchor:'window'})}),
-   registerWallObject({id:'living-bedroom-door',name:'卧室门',room:'living',group:livingBedroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bedroom')}),
-   registerWallObject({id:'living-kitchen-door',name:'厨房门',room:'living',group:livingKitchenDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('kitchen')}),
-   registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
-   registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
-   registerWallObject({id:'living-bathroom-door',name:'卫生间门',room:'living',group:bathroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bathroom')}),
-   registerWallObject({id:'bathroom-living-door',name:'起居室门',room:'bathroom',group:bathroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')})
   ];
   const furnitureModelAliases={"开放书架":{"model":"书架","variant":"开放格架"},"坐垫":{"model":"坐垫","variant":""},"雾面墙纸":{"model":"墙纸","variant":"雾面"},"极简书桌":{"model":"书桌","variant":"白蜡木极简"},"屏风":{"model":"隔断","variant":""},"陶瓷灶":{"model":"灶台","variant":"奶油陶瓷"},"锥形吊灯":{"model":"吊灯","variant":"锥形金属"},"复古沙发":{"model":"沙发","variant":"经典款"},"床头柜":{"model":"床头柜","variant":""},"陶土花瓶":{"model":"花瓶","variant":""},"伞架":{"model":"伞架","variant":""},"三抽斗柜":{"model":"斗柜","variant":"奶油三抽"},"木格书架":{"model":"书架","variant":"白蜡木开放格"},"吊柜":{"model":"吊柜","variant":""},"展示柜":{"model":"展示柜","variant":""},"躺椅":{"model":"躺椅","variant":""},"布艺床":{"model":"床","variant":""},"海报":{"model":"海报","variant":""},"深海墙纸":{"model":"墙纸","variant":"深海"},"棕榈树":{"model":"棕榈树绿植","variant":""},"水磨地板":{"model":"地板","variant":"水磨"},"蘑菇台灯":{"model":"台灯","variant":"蘑菇"},"默认室内木门":{"model":"门","variant":""},"门":{"model":"门","variant":""},"懒人沙发":{"model":"懒人沙发","variant":""},"纸罩灯":{"model":"落地灯","variant":"纸罩"},"鞋柜":{"model":"鞋柜","variant":""},"梳妆台":{"model":"梳妆台","variant":""},"电视柜":{"model":"电视柜","variant":""},"玻璃书柜":{"model":"书架","variant":"玻璃门书柜"},"沙发床":{"model":"沙发床","variant":""},"榻榻米":{"model":"榻榻米","variant":""},"软包床":{"model":"床","variant":"奶油软包"},"复古书桌":{"model":"书桌","variant":"深胡桃木复古"},"哑铃架":{"model":"哑铃架","variant":""},"石材茶几":{"model":"茶几","variant":"米白石材"},"珐琅灶":{"model":"灶台","variant":"复古珐琅"},"壁画":{"model":"壁画","variant":""},"长餐桌":{"model":"餐桌","variant":"浅橡木长桌"},"几何地毯":{"model":"地毯","variant":"海盐蓝"},"水泥地板":{"model":"地板","variant":"水泥"},"抽屉书桌":{"model":"书桌","variant":"抽屉工作台"},"双臂壁灯":{"model":"壁灯","variant":"黄铜双臂"},"方形边桌":{"model":"边桌","variant":"深木方桌"},"木框床":{"model":"床","variant":"浅橡木框架"},"默认窗户":{"model":"窗","variant":""},"窗":{"model":"窗","variant":""},"圆形茶几":{"model":"茶几","variant":"圆形浅橡木"},"折线台灯":{"model":"台灯","variant":"陶瓷折线"},"卧室地毯":{"model":"地毯","variant":"羊毛米白"},"上床下桌":{"model":"上床下桌","variant":""},"木框挂钟":{"model":"挂钟","variant":""},"波斯地毯":{"model":"地毯","variant":"波斯绛红"},"羊毛沙发":{"model":"沙发","variant":"暖灰羊毛"},"亚麻窗帘":{"model":"窗帘","variant":""},"藤编柜":{"model":"床头柜","variant":"藤编抽屉"},"橱柜":{"model":"橱柜","variant":""},"钢琴":{"model":"钢琴","variant":""},"玻璃台灯":{"model":"台灯","variant":"琥珀玻璃"},"洗衣机":{"model":"洗衣机","variant":""},"亚麻沙发":{"model":"沙发","variant":"亚麻燕麦"},"餐边柜":{"model":"餐边柜","variant":""},"三脚灯":{"model":"落地灯","variant":"黑色三脚"},"冰箱":{"model":"冰箱","variant":""},"不锈钢灶":{"model":"灶台","variant":"不锈钢"},"圆形餐桌":{"model":"餐桌","variant":"圆形餐桌"},"酒柜":{"model":"酒柜","variant":""},"料理台":{"model":"料理台","variant":""},"复古妆台":{"model":"梳妆台","variant":""},"玻璃吊灯":{"model":"吊灯","variant":"乳白玻璃"},"石膏墙纸":{"model":"墙纸","variant":"石膏"},"休闲沙发":{"model":"沙发","variant":""},"任务板":{"model":"任务板","variant":""},"照片墙":{"model":"照片墙","variant":""},"唱片机":{"model":"唱片机","variant":""},"花束":{"model":"捧花摆件","variant":""},"复古书柜":{"model":"书架","variant":"深胡桃木书柜"},"四抽斗柜":{"model":"斗柜","variant":"胡桃木四抽"},"跑步机":{"model":"跑步机","variant":""},"藤编餐椅":{"model":"餐桌椅","variant":"藤编餐椅"},"双人床":{"model":"床","variant":""},"抽屉茶几":{"model":"茶几","variant":"胡桃木抽屉"},"水槽":{"model":"水槽","variant":""},"羊毛地毯":{"model":"地毯","variant":"羊毛米白"},"游戏机":{"model":"游戏机","variant":""},"衣柜":{"model":"衣柜","variant":""},"拱形镜":{"model":"全身镜","variant":"黄铜拱形"},"扶手餐椅":{"model":"餐桌椅","variant":"软包扶手椅"},"绒布沙发":{"model":"沙发","variant":"雾蓝绒布"},"网布椅":{"model":"办公椅","variant":""},"单臂壁灯":{"model":"壁灯","variant":"单臂"},"置物架":{"model":"置物架","variant":""},"衣帽架":{"model":"衣帽架","variant":""},"黄铜桌":{"model":"边桌","variant":"黄铜圆桌"},"格纹地毯":{"model":"地毯","variant":"奶油棋盘"},"电脑":{"model":"电脑","variant":""},"弧背椅":{"model":"椅子","variant":""},"藤编吊灯":{"model":"吊灯","variant":"藤编圆罩"},"电视":{"model":"电视","variant":""},"弧形灯":{"model":"落地灯","variant":"黄铜弧形"},"凳子":{"model":"凳子","variant":""}};
   function createOwnedFurniture(name,record=null){
