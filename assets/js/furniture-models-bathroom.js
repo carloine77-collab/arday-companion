@@ -1,7 +1,10 @@
 /* Furniture model builders: furniture-models-bathroom */
 window.ArdayFurnitureModelCategories = window.ArdayFurnitureModelCategories || Object.create(null);
 Object.assign(window.ArdayFurnitureModelCategories, {
- "洗衣机": function(ctx) { with(ctx) {
+ "洗衣机": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('washingMachine',id);
     width=.92;depth=.86;height=1.28;
@@ -21,8 +24,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     for(const x of [-.34,.34])box(x,.06,.28,.1,.12,.12,rubber);
     box(0,.06,-.3,.72,.12,.12,rubber);
    
- } return true; },
- "洗手台": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "洗手台": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('sink',id);width=1.28;depth=.82;height=1.72;
     const porcelain=mat(0xe8e5dc,.22),cabinet=mat(0x9b8064,.82),brass=mat(0xb18b58,.34,.58),mirror=mat(0xa9bdc0,.16,.42);
@@ -33,8 +42,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     box(0,1.58,-.37,1.12,.58,.045,m.wood);box(0,1.58,-.34,1.02,.48,.018,mirror);
     for(const x of [-.55,.55])box(x,.42,.39,.045,.7,.045,m.oak);
    
- } return true; },
- "马桶": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "马桶": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     width=.78;depth=1.12;height=.82;const ceramic=mat(0xe9e6de,.24),shadow=mat(0xb8b9b2,.55),seat=mat(0x59636a,.32);
     box(0,.55,-.34,.68,.72,.42,ceramic);box(0,.83,-.34,.72,.12,.46,m.cream);
@@ -44,8 +59,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     const inner=new T.Mesh(new T.CircleGeometry(.21,32),shadow);inner.rotation.x=-Math.PI/2;inner.position.set(0,.555,.2);group.add(inner);
     box(0,.93,-.35,.42,.035,.025,m.metal);box(.25,.97,-.34,.08,.06,.045,m.gold);
    
- } return true; },
- "淋浴间": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "淋浴间": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('sink',id);width=1.48;depth=1.42;height=2.32;
     const glass=mat(0xc8d9d8,.12,.08);glass.transparent=true;glass.opacity=.25;glass.depthWrite=false;const frame=mat(0x9b8064,.38,.52),stone=mat(0xc9c8c0,.42);
@@ -57,13 +78,22 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     const head=new T.Mesh(new T.CylinderGeometry(.16,.2,.055,24),m.metal);head.rotation.x=Math.PI/2;head.position.set(-.5,2.17,-.18);group.add(head);
     cyl(-.48,1.08,-.42,.055,.055,.09,m.gold,12);box(-.48,1.2,-.42,.24,.035,.035,m.metal);
    
- } return true; },
- "浴缸": function(ctx) { with(ctx) {
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ },
+ "浴缸": function(ctx) {
+  const {T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast}=ctx;
+  let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
+
 
     action=()=>openFurnitureActions('sink',id);width=2.25;depth=1.12;height=.72;const enamel=mat(0xe8e4dc,.26),outer=mat(0xd2c7b7,.72),metal=mat(0xaeb5b4,.28,.58);
     box(0,.34,0,2.16,.56,1.02,outer);box(0,.57,0,2.22,.16,1.1,enamel);box(0,.62,0,1.82,.035,.74,mat(0xb9c7c5,.3));
     for(const x of [-.9,.9])for(const z of [-.39,.39])sphere(x,.38,z,.12,.2,.12,enamel);
     cyl(.82,.78,-.37,.035,.035,.16,metal,12);cyl(.82,.87,-.37,.055,.055,.045,m.gold,12);
    
- } return true; }
+ 
+  Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
+ }
 });
