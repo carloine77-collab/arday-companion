@@ -1572,3 +1572,10 @@ html body .stage .drawer.profile-expanded.open .choices{
 
 /* The schedule heading is not a fourth status section divider. */
 .current-schedule-group .stat-group-title{border-bottom:0!important}
+
+
+/* Combat average is a compact value beside the section title; only five attributes retain meters. */
+.combat-group-title{display:flex;align-items:center;justify-content:flex-start;gap:8px}
+.combat-power-average{font:600 12px Georgia,serif;color:#536858;letter-spacing:0}
+.combat-group .combat-stat{display:none!important}
+.status-tags:empty{display:none!important}
