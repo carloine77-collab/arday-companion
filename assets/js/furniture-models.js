@@ -49,7 +49,7 @@ window.ArdayFurnitureModels = (() => {
    const restoring=!!record&&['x','y','z','rotation','wallSide','wallOffset'].some(key=>Object.prototype.hasOwnProperty.call(record,key));
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>{};
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
-   const modelContext={T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,openFurnitureActions,openKitchenPanel,document,addWindowSun,box,cyl,sphere,legs,restoring,width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action,toast};
+   const modelContext={T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,box,cyl,sphere,legs,restoring,width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action,toast};
    const modelBuilder=window.ArdayFurnitureModelCategories?.[modelName];
    if(!modelBuilder){toast('没有找到这种家具模型：'+name);return null}
    modelBuilder(modelContext);
