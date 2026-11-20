@@ -8,6 +8,10 @@
   const paleGlow=new T.MeshBasicMaterial({color:0xd7fbff,toneMapped:false});
   const glass=new T.MeshPhysicalMaterial({color:0x9de6f0,metalness:.25,roughness:.12,transparent:true,opacity:.32,depthWrite:false,side:T.DoubleSide});
   const matteWhite=standard(0xc5d0d7,.35,.52);
+  const hallAmbient=new T.HemisphereLight(0xbde8f1,0x182737,1.05);hallAmbient.position.set(-20,24,0);root.add(hallAmbient);
+  const hallKey=new T.DirectionalLight(0xd9f5ff,1.35);hallKey.position.set(-8,26,12);hallKey.castShadow=true;root.add(hallKey);
+  const cyanFill=new T.PointLight(0x57d5e8,18,52,1.8);cyanFill.position.set(-20,17,0);root.add(cyanFill);
+  const whiteFill=new T.PointLight(0xd9f1ff,12,38,1.7);whiteFill.position.set(-20,8,-12);root.add(whiteFill);
   const floor=new T.Mesh(new T.PlaneGeometry(108,108),floorMat);floor.rotation.x=-Math.PI/2;floor.position.set(-20,-.18,0);floor.receiveShadow=true;floor.name='hall-walkable-ground';floor.userData.hallFloor=true;root.add(floor);
   const floorGrid=new T.Group();floorGrid.position.set(-20,-.165,0);root.add(floorGrid);
   for(let i=-50;i<=50;i+=5){
@@ -26,6 +30,13 @@
   const bgTex=new T.CanvasTexture(background);bgTex.encoding=T.sRGBEncoding;
   const sky=new T.Mesh(new T.SphereGeometry(145,48,28),new T.MeshBasicMaterial({map:bgTex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,18,0);sky.renderOrder=-8;root.add(sky);
   const ceiling=new T.Group();ceiling.position.set(-20,0,0);root.add(ceiling);
+  // Two elevated observation decks create the scale of a multi-storey transit concourse.
+  [8,14].forEach((height,index)=>{
+   const deck=new T.Mesh(new T.RingGeometry(29,34,128),index===0?titanium:graphite);deck.rotation.x=-Math.PI/2;deck.position.set(-20,height,0);deck.receiveShadow=true;root.add(deck);
+   ring(root,29,.11,height+.28,silver);ring(root,34,.09,height+.28,cyan);
+   const rail=new T.Mesh(new T.TorusGeometry(31.5,.055,8,128),glass);rail.rotation.x=Math.PI/2;rail.position.set(-20,height+1.15,0);root.add(rail);
+   for(let i=0;i<32;i++){const a=i*Math.PI/16,x=Math.cos(a),z=Math.sin(a);const post=box(root,-20+x*31.5,height+.65,z*31.5,.07,1.3,.07,silver);post.rotation.y=-a}
+  });
   [14,20,28,39].forEach((r,i)=>ring(ceiling,r,i===3?.34:.16,24-i*.25,i%2?graphite:silver));
   for(let i=0;i<24;i++){
    const a=i*Math.PI/12,x=Math.cos(a),z=Math.sin(a);
