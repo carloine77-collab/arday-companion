@@ -43,7 +43,7 @@
   function strip(x1,z1,x2,z2,width,material,y=-.105){const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),angle=Math.atan2(dx,dz),o=new T.Mesh(new T.BoxGeometry(width,.035,len),material);o.rotation.y=angle;o.position.set((x1+x2)/2,y,(z1+z2)/2);o.castShadow=false;o.receiveShadow=false;root.add(o);return o}
   // A continuous perimeter frame replaces the old forest of repeated columns and trim.
   const perimeter=new T.Group();perimeter.name='hall-outdoor-perimeter-colonnade';perimeter.scale.set(1.25,1,1.25);root.add(perimeter);
-  const columnMat=[silver,titanium,graphite],warmMetal=mat(0x756858,.56,.54),paleStone=mat(0x929894,.08,.94);
+  const columnMat=[silver,titanium,graphite],warmMetal=mat(0x756858,.56,.54),paleStone=mat(0x929894,.08,.94),ivory=mat(0xb8b2a3,.06,.92),copper=mat(0x806b5a,.58,.62);
   const amber=new T.MeshStandardMaterial({color:0x9b8060,emissive:0x49311e,emissiveIntensity:.1,metalness:.2,roughness:.62,envMapIntensity:.76});
   const violet=new T.MeshStandardMaterial({color:0x656577,emissive:0x29283e,emissiveIntensity:.09,metalness:.18,roughness:.66,envMapIntensity:.72});
   const coral=new T.MeshStandardMaterial({color:0x936b68,emissive:0x3e2425,emissiveIntensity:.06,metalness:.1,roughness:.72,envMapIntensity:.7});
@@ -326,7 +326,7 @@
    const addScreen=(x,y,zz,w,h,accentMat=cyan)=>{
     // One recessed housing and a single curved glass surface.
     addRoundedShell(x,y,zz,w+1.0,h+.8,.72,graphite,Math.min(.8,h*.12),.12);
-    const display=new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,emissive:accentMat.color||0x70ddeb,emissiveIntensity:.22,toneMapped:false,side:T.DoubleSide});
+    const display=new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,toneMapped:false,side:T.DoubleSide});
     addCurvedScreen(x,y,zz+.39,w*.94,h*.9,display);
    };
    const addCounter=(x,y,zz,w,d,top=ivory,front=graphite)=>{
