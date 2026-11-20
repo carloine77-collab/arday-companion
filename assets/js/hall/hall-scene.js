@@ -104,30 +104,47 @@
   for(let i=0;i<2600;i++){ctx.fillStyle='rgba(180,225,245,'+(.08+rand()*.32)+')';ctx.beginPath();ctx.arc(rand()*2048,rand()*1024,.3+rand()*1.2,0,Math.PI*2);ctx.fill()}
   for(let i=0;i<90;i++){const x=i*24,w=8+rand()*36,h=120+rand()*420;ctx.fillStyle='rgba(75,125,155,.24)';ctx.fillRect(x,930-h,w,h)}
   const tex=new T.CanvasTexture(bg);tex.encoding=T.sRGBEncoding;const sky=new T.Mesh(new T.SphereGeometry(720,64,36),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));sky.position.set(-20,24,0);sky.renderOrder=-8;root.add(sky);
-  // Monumental central landmark: a layered kinetic-orbit sculpture, offset from the home portal.
-  // Its low plinth remains walkable around the perimeter; the vertical core anchors the plaza visually.
+  // Central civic landmark: a navigational astrolabe, not another service district.
+  // Its layered orbital frame is visible above the surrounding architecture and readable from the home portal.
   const core=new T.Group();core.name='hall-central-kinetic-core';core.position.set(18,0,0);root.add(core);
-  const coreBase=new T.Mesh(new T.CylinderGeometry(19,22,1.2,12),graphite);coreBase.position.y=.35;coreBase.receiveShadow=true;core.add(coreBase);
-  const coreRim=new T.Mesh(new T.TorusGeometry(19,.42,12,96),warmMetal);coreRim.rotation.x=Math.PI/2;coreRim.position.y=1.05;core.add(coreRim);
-  const coreInset=new T.Mesh(new T.CylinderGeometry(15.5,15.5,.22,12),silver);coreInset.position.y=1.08;core.add(coreInset);
+  const coreBase=new T.Mesh(new T.CylinderGeometry(25,28,1.5,16),graphite);coreBase.position.y=.45;coreBase.receiveShadow=true;core.add(coreBase);
+  const baseRim=new T.Mesh(new T.TorusGeometry(25,.55,12,112),warmMetal);baseRim.rotation.x=Math.PI/2;baseRim.position.y=1.25;core.add(baseRim);
+  const baseInner=new T.Mesh(new T.TorusGeometry(20,.2,10,112),cyan);baseInner.rotation.x=Math.PI/2;baseInner.position.y=1.28;core.add(baseInner);
+  const coreInset=new T.Mesh(new T.CylinderGeometry(18,18,.28,16),silver);coreInset.position.y=1.25;core.add(coreInset);
+  // Eight separated pylons support a floating orbital instrument; the open gaps keep the plaza visually permeable.
   for(let i=0;i<8;i++){
-   const a=i*Math.PI/4,x=Math.cos(a)*12.5,z=Math.sin(a)*12.5;
-   const p=new T.Mesh(new T.BoxGeometry(1.2,8,1.2),i%2?copper:titanium);p.position.set(x,5,z);p.rotation.y=-a;core.add(p);
-   const light=new T.Mesh(new T.BoxGeometry(.18,6,.18),i%2?amber:cyan);light.position.set(x*1.02,5,z*1.02);light.rotation.y=-a;core.add(light);
+   const a=i*Math.PI/4,x=Math.cos(a)*15,z=Math.sin(a)*15;
+   const foot=new T.Mesh(new T.CylinderGeometry(1.7,2.6,1.1,8),graphite);foot.position.set(x,2,z);core.add(foot);
+   const p=new T.Mesh(new T.CylinderGeometry(.62,1.25,13,8),i%2?copper:titanium);p.position.set(x,8.5,z);p.rotation.z=Math.cos(a)*-.12;p.rotation.x=Math.sin(a)*.12;core.add(p);
+   const collar=new T.Mesh(new T.TorusGeometry(1.25,.16,8,32),i%2?amber:cyan);collar.position.set(x,14.5,z);core.add(collar);
   }
-  const coreSpire=new T.Mesh(new T.CylinderGeometry(2.2,4.8,24,10),silver);coreSpire.position.y=13;coreSpire.castShadow=true;core.add(coreSpire);
-  const coreDark=new T.Mesh(new T.CylinderGeometry(2.35,2.35,12,10),graphite);coreDark.position.y=13;core.add(coreDark);
-  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(4.3,2),new T.MeshPhysicalMaterial({color:0xb7e8ee,metalness:.55,roughness:.16,emissive:0x235d70,emissiveIntensity:.55,transparent:true,opacity:.92}));coreOrb.position.y=26;coreOrb.castShadow=true;core.add(coreOrb);
+  const coreSpire=new T.Mesh(new T.CylinderGeometry(1.8,4.8,30,12),silver);coreSpire.position.y=17;coreSpire.castShadow=true;core.add(coreSpire);
+  const coreDark=new T.Mesh(new T.CylinderGeometry(2.05,2.05,17,12),graphite);coreDark.position.y=17;core.add(coreDark);
+  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.4,2),new T.MeshPhysicalMaterial({color:0xc4edf0,metalness:.48,roughness:.12,emissive:0x286b7c,emissiveIntensity:.72,transparent:true,opacity:.94}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
+  // Three differently inclined orbital bands make the landmark legible in silhouette from every approach.
   for(let i=0;i<3;i++){
-   const ring=new T.Mesh(new T.TorusGeometry(8+i*3,.28-i*.035,10,96),i===1?warmMetal:i===2?violet:cyan);
-   ring.position.y=24+i*3.2;ring.rotation.set(Math.PI/2+(i-.8)*.34,0,(i-1)*.48);core.add(ring);
+   const ring=new T.Mesh(new T.TorusGeometry(12+i*5,.34-i*.045,12,112),i===1?warmMetal:i===2?violet:cyan);
+   ring.position.y=31+i*4.2;ring.rotation.set(Math.PI/2+(i-1)*.42,0,(i-1)*.58);core.add(ring);
   }
-  const crown=new T.Mesh(new T.TorusGeometry(5.5,.22,10,72),amber);crown.rotation.x=Math.PI/2;crown.position.y=31;core.add(crown);
-  for(let i=0;i<4;i++){
-   const a=i*Math.PI/2;
-   const ray=new T.Mesh(new T.BoxGeometry(.16,15,.16),whiteGlow);ray.position.set(Math.cos(a)*7.2,18,Math.sin(a)*7.2);ray.rotation.z=.18*Math.cos(a);ray.rotation.x=.18*Math.sin(a);core.add(ray);
+  const meridian=new T.Mesh(new T.TorusGeometry(8,.24,10,96),silver);meridian.rotation.y=Math.PI/2;meridian.position.y=32;core.add(meridian);
+  const crown=new T.Mesh(new T.TorusGeometry(7,.28,10,96),amber);crown.rotation.x=Math.PI/2;crown.position.y=42;core.add(crown);
+  // Seven luminous constellation nodes form a floating wayfinding halo above the core.
+  const constellation=[];
+  for(let i=0;i<7;i++){
+   const a=-Math.PI/2+i*Math.PI*2/7,x=Math.cos(a)*34,z=Math.sin(a)*34,y=39+(i%2)*4;
+   const node=new T.Mesh(new T.OctahedronGeometry(1.8,1),[amber,coral,jade,violet,cyan,warmMetal,silver][i]);node.position.set(x,y,z);core.add(node);const stem=new T.Mesh(new T.CylinderGeometry(.08,.08,9,6),whiteGlow);stem.position.set(x,y-5,z);core.add(stem);
+   constellation.push(new T.Vector3(x,y,z));
   }
-  const coreLight=new T.PointLight(0x7bd9e8,18,85,1.8);coreLight.position.set(18,23,0);root.add(coreLight);
+  for(let i=0;i<7;i++){
+   const pts=[constellation[i],constellation[(i+1)%7],new T.Vector3(0,30,0),constellation[(i+3)%7]];
+   const geo=new T.BufferGeometry().setFromPoints(pts);
+   core.add(new T.Line(geo,new T.LineBasicMaterial({color:i%2?0x8bcbd8:0xd8b78b,transparent:true,opacity:.62})));
+  }
+  for(let i=0;i<7;i++){
+   const a=-Math.PI/2+i*Math.PI*2/7;
+   const ray=new T.Mesh(new T.BoxGeometry(.22,13,.22),i%2?cyan:amber);ray.position.set(Math.cos(a)*9,23,Math.sin(a)*9);ray.rotation.z=.22*Math.cos(a);ray.rotation.x=.22*Math.sin(a);core.add(ray);
+  }
+  const coreLight=new T.PointLight(0x7bd9e8,25,110,1.8);coreLight.position.set(18,29,0);root.add(coreLight);
   function labelTexture(title,sub){const c=document.createElement('canvas');c.width=768;c.height=224;const g=c.getContext('2d');g.fillStyle='rgba(8,23,37,.88)';g.fillRect(8,8,752,208);g.strokeStyle='#78d9e8';g.lineWidth=4;g.strokeRect(12,12,744,200);g.fillStyle='#effaff';g.textAlign='center';g.textBaseline='middle';g.font='bold 66px sans-serif';g.fillText(title,384,88);g.fillStyle='#82c9d9';g.font='25px sans-serif';g.fillText(sub,384,163);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t}
   const zones=[
    {id:'exchange',name:'兑换区',sub:'RMB EXCHANGE',x:-118,z:-48,w:118,d:100,shape:[[-60,-40],[28,-54],[69,-18],[62,34],[8,55],[-53,38],[-73,-3]]},
@@ -138,6 +155,29 @@
    {id:'entertainment',name:'娱乐区',sub:'SIMULATION DECK',x:5,z:137,w:138,d:114,shape:[[-70,-46],[38,-60],[82,-8],[59,56],[-28,62],[-84,9]]},
    {id:'food',name:'美食区',sub:'FOOD & SUPPLY',x:-112,z:105,w:124,d:104,shape:[[-63,-42],[34,-54],[73,-5],[54,48],[-24,56],[-76,8]]}
   ];
+  // Clear pedestrian spokes connect the home arrival, central astrolabe and each district forecourt.
+  const routeAccent={exchange:amber,ranking:coral,recruitment:jade,commissions:amber,teams:violet,entertainment:violet,food:coral};
+  const hub={x:18,z:0};
+  // A broad, restrained arrival axis leads from the residential portal to the central landmark.
+  strip(-20,0,-10,0,13,floorDark);strip(-20,0,-10,0,1.1,cyan);
+  zones.forEach((z,i)=>{
+   const dx=z.x-hub.x,dz=z.z-hub.z,len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len;
+   const sx=hub.x+ux*29,sz=hub.z+uz*29,ex=z.x-ux*54,ez=z.z-uz*54;
+   const accent=routeAccent[z.id];
+   strip(sx,sz,ex,ez,10,floorDark);
+   strip(sx,sz,ex,ez,2.1,accent);
+   const px=-uz*3.1,pz=ux*3.1;
+   strip(sx+px,sz+pz,ex+px,ez+pz,.22,silver);
+   strip(sx-px,sz-pz,ex-px,ez-pz,.22,silver);
+   // Repeated floor chevrons communicate travel direction without adding another UI panel.
+   for(let k=1;k<=4;k++){
+    const t=k/5,x=sx+(ex-sx)*t,zp=sz+(ez-sz)*t;
+    const marker=new T.Mesh(new T.ConeGeometry(1.45,2.8,3),accent);
+    marker.rotation.x=-Math.PI/2;marker.rotation.z=Math.atan2(ux,uz);marker.position.set(x,.035,zp);root.add(marker);
+   }
+   const node=new T.Mesh(new T.CylinderGeometry(5.5,6.5,.42,12),graphite);node.position.set(ex,.12,ez);root.add(node);
+   const nodeRing=new T.Mesh(new T.TorusGeometry(5.2,.22,8,48),accent);nodeRing.rotation.x=Math.PI/2;nodeRing.position.set(ex,.42,ez);root.add(nodeRing);
+  });
   const zoneObjects=[];
   zones.forEach((z,index)=>{
    const area=new T.Group();
@@ -293,6 +333,99 @@
      for(const side of [-1,1]){addBox(x+side*11,6,-37,1.5,12,1.5,graphite);addBox(x+side*11,6,-36.1,.14,9,.12,i===0?amber:coral)}
      addBox(x,8,-29.3,20,.35,.45,i===0?coral:jade);
     }
+   }
+   // Secondary sculptural pass: make the service buildings read as inhabited architecture,
+   // with distinct entrances, structural depth and recognizable interior spatial rhythms.
+   const front=-z.d*.53,gateAccent=accent;
+   const gateRadius=z.id==='ranking'?13:z.id==='entertainment'?14:z.id==='teams'?12:z.id==='food'?10:11;
+   const gateRing=new T.Mesh(new T.TorusGeometry(gateRadius,.72,14,88),z.id==='teams'?silver:gateAccent);
+   gateRing.position.set(0,gateRadius,front);gateRing.scale.set(z.id==='food'?1.35:1.0,1,1);area.add(gateRing);
+   const gateInner=new T.Mesh(new T.TorusGeometry(gateRadius-1.45,.16,8,88),z.id==='teams'?violet:ivory);
+   gateInner.position.set(0,gateRadius,front-.18);gateInner.scale.copy(gateRing.scale);area.add(gateInner);
+   for(const side of [-1,1]){
+    const pier=addCylinder(side*(gateRadius+.4),gateRadius*.48,front,.95,1.65,gateRadius*.96,graphite,10);
+    const collar=addCylinder(side*(gateRadius+.4),gateRadius*.86,front,1.45,1.45,.62,warmMetal,10);
+    const inlay=addCylinder(side*(gateRadius+.4),gateRadius*.5,front-.98,.16,.16,gateRadius*.72,gateAccent,8);
+   }
+   const lintel=new T.Mesh(new T.BoxGeometry(gateRadius*1.55,.55,1.1),z.id==='food'?ivory:silver);lintel.position.set(0,gateRadius*1.92,front);area.add(lintel);
+   const crest=new T.Mesh(new T.OctahedronGeometry(1.7,1),gateAccent);crest.position.set(0,gateRadius*2.18,front);area.add(crest);
+   // A shallow forecourt apron visually joins each building entrance to the district avenue.
+   const apron=new T.Mesh(new T.CylinderGeometry(gateRadius*1.18,gateRadius*1.28,.24,12),z.id==='food'?paleStone:floorDark);
+   apron.position.set(0,.08,front+4.8);area.add(apron);
+   const apronRim=new T.Mesh(new T.TorusGeometry(gateRadius*1.16,.18,8,72),gateAccent);apronRim.rotation.x=Math.PI/2;apronRim.position.set(0,.22,front+4.8);area.add(apronRim);
+   if(z.id==='exchange'){
+    // Three transaction bays with suspended coin-like medallions and recessed waiting benches.
+    for(let i=-1;i<=1;i++){
+     const x=i*29;
+     addCylinder(x,8,-20,7.2,7.2,.55,warmMetal,32);
+     const canopy=new T.Mesh(new T.TorusGeometry(7,.34,10,64),amber);canopy.position.set(x,14,-20);area.add(canopy);
+     addBox(x,9,-20,11,1.1,7,graphite);addBox(x,10,-16.2,8,.16,.12,ivory);
+     const coin=new T.Mesh(new T.CylinderGeometry(2.8,2.8,.48,32),warmMetal);coin.rotation.z=Math.PI/2;coin.position.set(x,19,-20);area.add(coin);
+     const coinFace=new T.Mesh(new T.TorusGeometry(1.7,.14,8,48),amber);coinFace.position.set(x,19.28,-20);area.add(coinFace);
+    }
+    for(let i=0;i<4;i++){const x=(i-1.5)*15;addBox(x,.8,42,11,1.2,4,ivory);addBox(x,1.48,42,10,.16,3.7,warmMetal)}
+    addTorus(0,25,-20,28,.28,amber);
+   }else if(z.id==='ranking'){
+    // A stepped public amphitheatre faces the ranking wall, with a central ceremonial podium.
+    for(let row=0;row<4;row++){
+     const depth=5.5+row*4.2,y=.65+row*.72,zp=20+row*5.1;
+     addBox(0,y,zp,88-row*9,1.15,4.8, row%2?plum:graphite);
+     addBox(0,y+.62,zp,84-row*9,.12,4.4,row%2?coral:warmMetal);
+    }
+    const podium=new T.Mesh(new T.CylinderGeometry(7,9,2.2,10),warmMetal);podium.position.set(0,1.1,-2);area.add(podium);
+    const podiumTop=new T.Mesh(new T.CylinderGeometry(6.2,6.2,.22,10),ivory);podiumTop.position.set(0,2.3,-2);area.add(podiumTop);
+    for(let i=-3;i<=3;i++){const fin=addBox(i*7,14,-45,.65,28,.8,i%2?coral:graphite);fin.rotation.z=(i%2?1:-1)*.055}
+   }else if(z.id==='recruitment'){
+    // Six semi-private interview pods, each framed by a circular identity halo.
+    for(let i=0;i<6;i++){
+     const x=(i%3-1)*31,zp=i<3?17:42;
+     const pod=new T.Mesh(new T.CylinderGeometry(7.5,8.2,1.2,12),plum);pod.position.set(x,.65,zp);area.add(pod);
+     const halo=new T.Mesh(new T.TorusGeometry(6.2,.3,10,64),i%2?jade:amber);halo.position.set(x,7,zp-3);area.add(halo);
+     for(const side of [-1,1]){addBox(x+side*6.5,4,zp-3,1,8,1,graphite);addBox(x+side*6.5,4,zp-2.35,.12,6,.08,i%2?jade:amber)}
+     const identity=new T.Mesh(new T.OctahedronGeometry(1.6,1),i%2?jade:ivory);identity.position.set(x,10,zp-3);area.add(identity);
+    }
+   }else if(z.id==='commissions'){
+    // Tiered dispatch consoles and a high-level command dais distinguish contract classes.
+    for(let tier=0;tier<3;tier++){
+     const x=-36+tier*36,zp=15+tier*7;
+     const plinth=new T.Mesh(new T.CylinderGeometry(8,9,1.4,8),tier===1?warmMetal:graphite);plinth.position.set(x,.7,zp);area.add(plinth);
+     const terminal=new T.Mesh(new T.BoxGeometry(10,7,2),tier===1?ivory:plum);terminal.position.set(x,5,zp);area.add(terminal);
+     const screen=new T.Mesh(new T.PlaneGeometry(8,4.8),new T.MeshBasicMaterial({color:tier===1?0xffc77e:0x80d8e5,transparent:true,opacity:.78,side:T.DoubleSide}));screen.position.set(x,5.2,zp-1.08);area.add(screen);
+     for(let j=0;j<3;j++){const node=new T.Mesh(new T.OctahedronGeometry(.72,0),tier===1?amber:cyan);node.position.set(x+(j-1)*2.3,9.3,zp);area.add(node)}
+    }
+    const commandRing=new T.Mesh(new T.TorusGeometry(24,.48,10,80),warmMetal);commandRing.rotation.x=Math.PI/2;commandRing.position.set(0,17,3);area.add(commandRing);
+   }else if(z.id==='teams'){
+    // Four team cells branch from the central gathering table; each has its own seat arc and beacon.
+    for(let cell=0;cell<4;cell++){
+     const a=cell*Math.PI/2,x=Math.cos(a)*27,zp=Math.sin(a)*27;
+     const pad=new T.Mesh(new T.CylinderGeometry(10,11,1,12),cell%2?plum:graphite);pad.position.set(x,.5,zp);area.add(pad);
+     const ring=new T.Mesh(new T.TorusGeometry(9,.22,8,56),violet);ring.rotation.x=Math.PI/2;ring.position.set(x,1.1,zp);area.add(ring);
+     for(let j=0;j<3;j++){const sa=a+(j-1)*.48,sx=x+Math.cos(sa)*7,sz=zp+Math.sin(sa)*7;const seat=addBox(sx,1.2,sz,4.8,1.5,3.2,j%2?ivory:plum);seat.rotation.y=-sa}
+     const beacon=new T.Mesh(new T.OctahedronGeometry(2.1,1),cell%2?violet:amber);beacon.position.set(x,9,zp);area.add(beacon);
+    }
+    const centralMap=new T.Mesh(new T.IcosahedronGeometry(4.2,1),new T.MeshPhysicalMaterial({color:0x9fe5ed,metalness:.5,roughness:.16,transparent:true,opacity:.82,emissive:0x1b6573,emissiveIntensity:.55}));centralMap.position.set(0,9,0);area.add(centralMap);
+   }else if(z.id==='entertainment'){
+    // Five distinct simulation bays: circular launch pads, overhead rings and angled entry fins.
+    for(let i=0;i<5;i++){
+     const x=-40+i*20,zp=18+(i%2)*14;
+     const pad=new T.Mesh(new T.CylinderGeometry(7.2,8.5,.9,12),plum);pad.position.set(x,.5,zp);area.add(pad);
+     const ring=new T.Mesh(new T.TorusGeometry(6.6,.34,10,64),i%2?violet:coral);ring.rotation.x=Math.PI/2;ring.position.set(x,1,zp);area.add(ring);
+     const arch=new T.Mesh(new T.TorusGeometry(5.2,.38,10,64),i%2?violet:amber);arch.position.set(x,6,zp-3);area.add(arch);
+     for(const side of [-1,1]){const fin=addBox(x+side*5,4,zp-3,.65,8,.85,graphite);fin.rotation.z=side*.12}
+     const orb=new T.Mesh(new T.IcosahedronGeometry(1.6,1),i%2?violet:amber);orb.position.set(x,10,zp-3);area.add(orb);
+    }
+    const canopyRing=new T.Mesh(new T.TorusGeometry(47,.52,10,96),violet);canopyRing.position.set(0,24,22);area.add(canopyRing);
+   }else if(z.id==='food'){
+    // Three individually framed food stalls and a shared circular dining commons.
+    for(let i=0;i<3;i++){
+     const x=(i-1)*34,zp=-15;
+     const roof=new T.Mesh(new T.CylinderGeometry(10,10,.75,6),i===1?warmMetal:ivory);roof.position.set(x,11,zp);roof.rotation.y=Math.PI/6;area.add(roof);
+     const roofRim=new T.Mesh(new T.TorusGeometry(9,.22,8,64),i===1?amber:jade);roofRim.position.set(x,11.45,zp);area.add(roofRim);
+     for(let j=0;j<3;j++){const a=j*Math.PI*2/3;const sx=x+Math.cos(a)*7.5,sz=zp+Math.sin(a)*7.5;addCylinder(sx,5.4,sz,.34,.72,10,graphite,8);addCylinder(sx,10.4,sz,.7,.7,.38,i===1?amber:jade,10)}
+    }
+    const dining=new T.Mesh(new T.CylinderGeometry(17,18,1.1,12),paleStone);dining.position.set(0,.55,26);area.add(dining);
+    const diningRim=new T.Mesh(new T.TorusGeometry(17,.28,8,88),coral);diningRim.rotation.x=Math.PI/2;diningRim.position.set(0,1.15,26);area.add(diningRim);
+    for(let i=0;i<8;i++){const a=i*Math.PI/4,x=Math.cos(a)*22,zp=26+Math.sin(a)*22;const table=new T.Mesh(new T.CylinderGeometry(2.5,2.8,1.1,10),copper);table.position.set(x,1.2,zp);area.add(table);for(let j=0;j<3;j++){const sa=a+j*Math.PI*2/3,sx=x+Math.cos(sa)*4.2,sz=zp+Math.sin(sa)*4.2;addBox(sx,.85,sz,2.8,1.3,2.8,j%2?jade:ivory)}}
    }
    zoneObjects.push(area);
   });
