@@ -190,14 +190,35 @@
    // Unified architectural language: consistent vertical proportions, structural depth and material hierarchy.
    // The seven districts are built as inhabited architectural spaces, not collections of floating props.
    // Each frontage faces the central concourse; structural frames, wall depth and equipment share one scale.
-   const title=new T.Mesh(new T.PlaneGeometry(24,6),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));
-   title.position.set(0,17,z.d*.34);
+   // District identity sign: a framed, supported architectural gateway plaque.
+   // Its elevation is matched to each hall's roofline instead of using one low, shared height.
+   const signHeights={exchange:35,ranking:42,recruitment:35,commissions:42,teams:39,entertainment:40,food:33};
+   const roofHeights={exchange:29,ranking:35,recruitment:28,commissions:35,teams:32,entertainment:33,food:27};
+   const signY=signHeights[z.id],signZ=z.d*.34,signMountY=roofHeights[z.id]+1.5;
+   for(const sx of [-17,17]){
+    const support=new T.Mesh(new T.BoxGeometry(1.05,Math.max(2,signY-signMountY-3),1.2),graphite);
+    support.position.set(sx,(signY+signMountY)/2-1.5,signZ);area.add(support);
+    const reveal=new T.Mesh(new T.BoxGeometry(.12,Math.max(1,signY-signMountY-3.5),1.28),accentSet[z.id]||cyan);
+    reveal.position.set(sx-.59,(signY+signMountY)/2-1.5,signZ);area.add(reveal);
+    const foot=new T.Mesh(new T.BoxGeometry(2.2,.65,2.4),warmMetal);foot.position.set(sx,signMountY,signZ);area.add(foot);
+   }
+   const signRoot=new T.Group();signRoot.position.set(0,signY,signZ);area.add(signRoot);
+   const signBack=new T.Mesh(new T.BoxGeometry(34,9.2,1.15),graphite);signRoot.add(signBack);
+   const signFace=new T.Mesh(new T.BoxGeometry(32.8,8.0,.18),titanium);signFace.position.z=.62;signRoot.add(signFace);
+   const signInset=new T.Mesh(new T.BoxGeometry(31.8,7.05,.12),plum);signInset.position.z=.73;signRoot.add(signInset);
+   for(const sy of [-4.25,4.25]){
+    const trim=new T.Mesh(new T.BoxGeometry(34.4,.22,1.35),warmMetal);trim.position.y=sy;signRoot.add(trim);
+   }
+   for(const sx of [-16.8,16.8]){
+    const trim=new T.Mesh(new T.BoxGeometry(.22,8.5,1.35),accentSet[z.id]||cyan);trim.position.x=sx;signRoot.add(trim);
+   }
+   const title=new T.Mesh(new T.PlaneGeometry(29,6.4),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.FrontSide,depthWrite:false,toneMapped:false}));
+   title.position.set(0,0,.82);signRoot.add(title);
    const plaqueWorld=new T.Vector3(),cameraWorld=new T.Vector3();
-   title.onBeforeRender=(renderer,activeScene,camera)=>{
-    title.getWorldPosition(plaqueWorld);camera.getWorldPosition(cameraWorld);
-    title.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
+   signRoot.onBeforeRender=(renderer,activeScene,camera)=>{
+    signRoot.getWorldPosition(plaqueWorld);camera.getWorldPosition(cameraWorld);
+    signRoot.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
    };
-   area.add(title);
    const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
    const localCylinder=(x,y,zz,rt,rb,h,m,segments=12)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),m);o.position.set(x,y,zz);area.add(o);return o};
    const addPlanter=(x,zz,w=8,d=5,foliage=jade,variant=0)=>{
@@ -449,6 +470,10 @@
     addKiosk(-47,28,coral,.82);addKiosk(47,28,jade,.82);addPlanter(-49,39,10,6,jade,1);addPlanter(49,39,10,6,jade,2);addStorageRack(-36,25,8,5,coral);addStorageRack(36,25,8,5,jade);
     for(const x of [-42,-21,21,42])addBeacon(x,6,x<0?coral:jade,5);for(let i=-3;i<=3;i++)addOverheadLamp(i*13,4,i%2?coral:amber);for(const x of [-29,29]){addBench(x,34,coral);addPlanter(x,43,7,4,jade,0)}
    }
+   // Paired perimeter gardens create a planted edge and a sense of depth in every district.
+   const gardenAccent={exchange:jade,ranking:jade,recruitment:jade,commissions:jade,teams:jade,entertainment:jade,food:jade}[z.id];
+   addLandscapeBed(-55,19,25,gardenAccent,index);
+   addLandscapeBed(55,19,25,gardenAccent,index+1);
    // Public-life layer: planted edges, sheltered seating, service fixtures and wayfinding.
    // These are arranged around the perimeter of each forecourt; the central approach stays open.
    const addLinearGarden=(x,z,w,m=jade)=>{
@@ -457,6 +482,39 @@
     for(let k=0;k<n;k++){const px=x+(k-(n-1)/2)*(w-2)/(n-1),pz=z+(k%2?-.55:.55);
      const stem=new T.Mesh(new T.CylinderGeometry(.06,.1,1.1,6),warmMetal);stem.position.set(px,1.55,pz);area.add(stem);
      const leaf=new T.Mesh(k%3===0?new T.SphereGeometry(.7,7,5):new T.ConeGeometry(.58,1.6,6),k%2?m:jade);leaf.position.set(px,2.15,pz);leaf.scale.set(1.15,1.2,1);area.add(leaf);
+    }
+   };
+   // Layered edge gardens: architectural planter beds with trees, shrubs and low ground cover.
+   // These soften the hard service architecture without obstructing the central circulation aisle.
+   const addLandscapeBed=(x,z,length,m=jade,variant=0)=>{
+    const width=6.8;
+    addBox(x,.48,z,width,.96,length,graphite);
+    addBox(x,1.02,z,width-.42,.16,length-.42,ivory);
+    addBox(x,1.14,z,width-.9,.08,length-.9,paleStone);
+    addBox(x,1.22,z,width-1.15,.12,length-1.15,variant%2?plum:graphite);
+    const count=variant%2?3:4;
+    for(let n=0;n<count;n++){
+     const pz=z+(n-(count-1)/2)*(length-3)/Math.max(1,count-1);
+     const px=x+(n%2?-.72:.72);
+     const trunk=new T.Mesh(new T.CylinderGeometry(.16,.26,3.4+(n%2)*.65,7),warmMetal);
+     trunk.position.set(px,2.9,pz);area.add(trunk);
+     if(variant%3===0){
+      const crown=new T.Mesh(new T.SphereGeometry(1.65,9,7),n%2?m:jade);
+      crown.position.set(px,5.0+(n%2)*.4,pz);crown.scale.set(1.0,1.18,1.0);area.add(crown);
+      const crown2=new T.Mesh(new T.SphereGeometry(1.05,8,6),n%2?jade:m);
+      crown2.position.set(px+.85,5.45,pz+.45);area.add(crown2);
+     }else{
+      const crown=new T.Mesh(new T.ConeGeometry(1.55,3.7,7),n%2?m:jade);
+      crown.position.set(px,5.1,pz);crown.scale.z=1.12;area.add(crown);
+      const crown2=new T.Mesh(new T.ConeGeometry(1.05,2.5,7),n%2?jade:m);
+      crown2.position.set(px,6.35,pz);area.add(crown2);
+     }
+    }
+    for(let n=0;n<Math.floor(length/2.4);n++){
+     const pz=z-length*.42+n*2.4;
+     const shrub=new T.Mesh(new T.SphereGeometry(.62,7,5),n%2?jade:m);
+     shrub.position.set(x+(n%2?1.65:-1.65),1.72,pz);shrub.scale.set(1.25,.7,1.1);area.add(shrub);
+     if(n%3===0){const flower=new T.Mesh(new T.SphereGeometry(.2,7,5),n%2?coral:amber);flower.position.set(x+(n%2?1.65:-1.65),2.18,pz);area.add(flower)}
     }
    };
    const addPublicBench=(x,z,m=warmMetal,rot=0)=>{
