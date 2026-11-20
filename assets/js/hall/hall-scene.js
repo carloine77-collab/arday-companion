@@ -182,12 +182,12 @@
    // Each district turns its main frontage toward the central arrival concourse.
    // Local -Z is the frontage axis; the rotation therefore differs by district location.
    const hallCenter={x:-20,z:0};
-   area.rotation.y=Math.atan2(-(hallCenter.x-z.x),-(hallCenter.z-z.z));
+   area.rotation.y=Math.atan2(hallCenter.x-z.x,hallCenter.z-z.z);
    area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
    // The seven districts are built as inhabited architectural spaces, not collections of floating props.
    // Each frontage faces the central concourse; structural frames, wall depth and equipment share one scale.
    const title=new T.Mesh(new T.PlaneGeometry(24,6),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));
-   title.position.set(0,17,-z.d*.34);
+   title.position.set(0,17,z.d*.34);
    const plaqueWorld=new T.Vector3(),cameraWorld=new T.Vector3();
    title.onBeforeRender=(renderer,activeScene,camera)=>{
     title.getWorldPosition(plaqueWorld);camera.getWorldPosition(cameraWorld);
