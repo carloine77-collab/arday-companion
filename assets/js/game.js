@@ -1306,7 +1306,7 @@ function initArday3D(){
  const stage=$('stage');
  try{
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xd9d7d1);
-  const camera=new T.PerspectiveCamera(38,1,.1,900);
+  const camera=new T.PerspectiveCamera(38,1,.1,1800);
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
