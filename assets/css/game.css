@@ -1903,3 +1903,51 @@ html body .stage .drawer.profile-expanded.open .choices{
  .dungeon-cover-poster:before,.dungeon-cover-poster:after{top:12%;bottom:12%}
  .dungeon-board-title{font-size:clamp(38px,8vh,74px)!important}
 }
+
+/* Campus board art direction: restrained editorial horror, shared ink / ivory / brass palette. */
+.stage .drawer:has(.dungeon-board-view) .choices.dungeon-board-view{background:#14252b!important}
+.dungeon-board-cover{position:relative!important;isolation:isolate!important;display:block!important;min-height:0!important;padding:0!important;overflow:hidden!important;background:radial-gradient(ellipse at 78% 35%,#718079 0%,#394d4d 24%,transparent 55%),linear-gradient(125deg,#101f29 0%,#243a3d 56%,#536358 100%)!important}
+.dungeon-board-cover:before{content:"";position:absolute;z-index:0;inset:0;background:radial-gradient(ellipse at 72% 44%,#d7c9a52a 0%,transparent 35%),linear-gradient(180deg,#101e2a22 0%,transparent 48%,#101d24a8 100%)!important;pointer-events:none}
+.dungeon-board-cover:after{content:"";position:absolute;z-index:1;left:0;right:0;bottom:0;height:36%;background:linear-gradient(0deg,#101d24aa,transparent)!important;pointer-events:none}
+.dungeon-campus-art{z-index:0!important;opacity:1!important;background:linear-gradient(180deg,#172a36 0%,#33484a 58%,#687364 100%)!important}
+.dungeon-campus-art:before{opacity:.75!important;background-image:radial-gradient(1px 1px at 14% 19%,#f0e5c9 99%,transparent),radial-gradient(1px 1px at 34% 28%,#f0e5c9aa 99%,transparent),radial-gradient(1px 1px at 57% 14%,#f0e5c9aa 99%,transparent),radial-gradient(1px 1px at 86% 23%,#f0e5c9 99%,transparent)!important}
+.dungeon-campus-art:after{height:58%!important;bottom:-26%!important;background:radial-gradient(ellipse at 16% 100%,#d8d1b044,transparent 46%),radial-gradient(ellipse at 79% 100%,#c1c8b044,transparent 51%),linear-gradient(180deg,transparent,#0d1b22dd)!important;filter:blur(10px)!important}
+.campus-moon{right:17%!important;top:12%!important;width:clamp(42px,7vh,72px)!important;background:radial-gradient(circle at 34% 30%,#fff8e8 0%,#e1d6b8 54%,#9b9e88 100%)!important;box-shadow:0 0 18px 5px #e7d8b333,0 0 62px 20px #e7d8b31c!important}
+.campus-tower{right:25%!important;bottom:4%!important;width:clamp(40px,7vw,78px)!important;height:88%!important;background:linear-gradient(90deg,#14262e,#59675d 48%,#172a31)!important;filter:drop-shadow(0 8px 12px #07151c99)!important}
+.campus-tower:after{background:#e5d4a5!important;box-shadow:0 23px #d8c79b,0 46px #c9ba94,0 69px #b5ad8c!important}
+.campus-building{bottom:4%!important;height:42%!important;background:repeating-linear-gradient(90deg,transparent 0 13px,#d8cba044 13px 15px),linear-gradient(90deg,#172b31,#657064 52%,#182b32)!important;filter:drop-shadow(0 5px 12px #07151c88)!important}
+.campus-building-a{right:-1%!important;width:29%!important}.campus-building-b{right:44%!important;width:18%!important;height:34%!important}
+.campus-fog{bottom:-12%!important;height:48%!important;filter:blur(10px)!important;opacity:.9!important}
+.dungeon-cover-poster{position:absolute!important;z-index:3!important;inset:0!important;display:flex!important;align-items:flex-end!important;justify-content:flex-start!important;width:100%!important;height:100%!important;min-height:0!important;padding:0 0 clamp(12px,2.2vh,22px) clamp(22px,5vw,58px)!important;box-sizing:border-box!important;text-align:left!important;pointer-events:none}
+.dungeon-cover-poster:before{content:"";position:absolute;left:clamp(22px,5vw,58px);bottom:clamp(15px,2.8vh,27px);width:5px;height:clamp(28px,5vh,48px);border-radius:5px;background:#d7c39a;box-shadow:0 0 15px #d7c39a55}
+.dungeon-cover-poster:after{content:"";position:absolute;left:clamp(36px,6.4vw,74px);bottom:clamp(17px,3vh,29px);width:clamp(30px,5vw,58px);height:clamp(24px,4vh,38px);background:radial-gradient(ellipse at 50% 50%,#e5d5b833,transparent 70%);opacity:.9}
+.dungeon-board-title{display:block!important;position:relative!important;margin:0!important;padding:0!important;font-family:"Noto Serif SC","Songti SC",Georgia,serif!important;font-size:clamp(32px,5.6vh,58px)!important;font-weight:600!important;line-height:1.08!important;letter-spacing:.2em!important;text-indent:0!important;color:#f0e7d5!important;-webkit-text-stroke:0!important;text-shadow:0 2px 16px #09171caa,0 1px 0 #111f25!important}
+.dungeon-board-map{background:radial-gradient(circle at 48% 42%,#eee7d7 0%,#d8d0bd 68%,#a8a895 100%)!important;box-shadow:inset 0 0 0 1px #f4ead4aa,inset 0 0 0 5px #9c9b8655,0 8px 24px #07151c44!important}
+.dungeon-board-grid{background:linear-gradient(145deg,#65766b,#344b48)!important;box-shadow:inset 0 0 0 2px #b8b39e!important}
+.dungeon-board-cell{background:linear-gradient(145deg,#f1ead9,#d5cdb9)!important;border:1px solid #a8a18c!important;box-shadow:inset 0 1px #fff9,0 1px 2px #172a2b33!important}
+.dungeon-board-center{background:radial-gradient(circle at 36% 28%,#f5edda,#c8c7b2 72%,#8e9a88)!important;box-shadow:0 0 0 4px #e6dfcf,0 6px 18px #15282b55!important}
+.dungeon-board-controls{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:clamp(22px,4vw,42px)!important;min-height:0!important;padding:4px 18px calc(4px + env(safe-area-inset-bottom))!important;background:radial-gradient(ellipse at 50% -20%,#344c4b 0%,#1c3035 60%,#12242a 100%)!important;overflow:hidden!important}
+.dungeon-board-controls:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,#d6c39a12,transparent 62%);pointer-events:none}
+.dungeon-dice-display{position:relative!important;z-index:1!important;transform:scale(clamp(1,1.08vh,1.22))!important;filter:drop-shadow(0 5px 8px #07151c77)!important}
+.dungeon-roll-button{position:relative!important;z-index:1!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;min-width:clamp(116px,15vw,148px)!important;min-height:clamp(48px,7vh,60px)!important;padding:0 19px!important;border:1px solid #bda978!important;border-radius:999px!important;background:linear-gradient(155deg,#3b5551 0%,#213b3b 58%,#172e33 100%)!important;color:#f1e6ce!important;box-shadow:inset 0 1px 0 #ffffff30,inset 0 -2px 0 #071a1c77,0 5px 14px #07151c88,0 0 0 3px #d2c29a22!important;text-shadow:0 1px 2px #07151c!important;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease!important}
+.dungeon-roll-button:before{content:"⚄";display:block;font:22px/1 Georgia,serif;color:#e0cfaa;text-shadow:0 1px 5px #d9c79a55}
+.dungeon-roll-button span{font:600 clamp(13px,1.8vh,16px) "Noto Serif SC","Songti SC",serif!important;letter-spacing:.16em!important;color:#f1e6ce!important}
+.dungeon-roll-button:active:not(:disabled){transform:translateY(2px) scale(.98)!important;filter:brightness(1.12)!important;box-shadow:inset 0 2px 5px #07151c88,0 2px 7px #07151c88,0 0 0 3px #d2c29a22!important}
+.dungeon-roll-button:disabled{opacity:.42!important;filter:grayscale(.35)!important;box-shadow:none!important}
+@media(max-width:600px){
+ .dungeon-cover-poster{padding-left:22px!important;padding-bottom:12px!important}
+ .dungeon-cover-poster:before{left:22px!important;bottom:14px!important}
+ .dungeon-cover-poster:after{left:36px!important;bottom:16px!important}
+ .dungeon-board-title{font-size:clamp(30px,5.4vh,48px)!important;letter-spacing:.18em!important}
+ .dungeon-board-controls{gap:20px!important;padding-left:12px!important;padding-right:12px!important}
+ .dungeon-dice-display{transform:scale(1)!important}
+ .dungeon-roll-button{min-width:112px!important;min-height:46px!important;padding:0 15px!important}
+ .dungeon-roll-button:before{font-size:19px!important}
+}
+@media(orientation:landscape) and (max-height:620px){
+ .dungeon-board-title{font-size:clamp(28px,5.5vh,44px)!important}
+ .dungeon-cover-poster{padding-bottom:8px!important}
+ .dungeon-board-controls{gap:24px!important}
+ .dungeon-dice-display{transform:scale(.9)!important}
+ .dungeon-roll-button{min-height:42px!important}
+}
