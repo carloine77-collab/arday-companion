@@ -1306,7 +1306,7 @@ function initArday3D(){
  const stage=$('stage');
  try{
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xd9d7d1);
-  const camera=new T.PerspectiveCamera(38,1,.1,420);
+  const camera=new T.PerspectiveCamera(38,1,.1,900);
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
@@ -1605,7 +1605,7 @@ function initArday3D(){
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0,lastHotspotUpdate=0;
   let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0),hallCameraOffset=new T.Vector3();
-  function applyCamera(){targetPhi=Math.max(roomMode==='hall'?.78:.48,Math.min(roomMode==='hall'?1.48:1.42,targetPhi));targetRadius=roomMode==='hall'?Math.max(18,Math.min(88,targetRadius)):Math.max(7.2,Math.min(21,targetRadius))}
+  function applyCamera(){targetPhi=Math.max(roomMode==='hall'?.78:.48,Math.min(roomMode==='hall'?1.48:1.42,targetPhi));targetRadius=roomMode==='hall'?Math.max(28,Math.min(175,targetRadius)):Math.max(7.2,Math.min(21,targetRadius))}
   function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
    [living,bedroom,kitchen,bathroom].forEach(g=>{if(g.userData.ceilingMesh)g.userData.ceilingMesh.visible=decorating;
     if(g.userData.backWall)g.userData.backWall.visible=camera.position.z>-2.8;
@@ -3425,7 +3425,7 @@ function persistFurniture(item){
    roomMode=mode==='hall'?'hall':['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';hall.visible=roomMode==='hall';
    if(roomMode==='hall'){
-    scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);hallCameraOffset.set(0,0,0);targetTheta=.72;targetPhi=1.22;targetRadius=48;applyCamera();updateDaylight(true);scene.background.set(0x07111f);return;
+    scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);hallCameraOffset.set(0,0,0);targetTheta=.72;targetPhi=1.22;targetRadius=92;applyCamera();updateDaylight(true);scene.background.set(0x07111f);return;
    }
    const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
    applyWallpaperToRoom(root,wallpaper);
