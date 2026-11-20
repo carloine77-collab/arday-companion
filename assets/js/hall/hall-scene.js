@@ -1,6 +1,6 @@
 (function(global){
  'use strict';
- function create(T,scene,M,box){
+ function create(T,scene,M,box,options={}){
   const root=new T.Group();root.name='ArdayPublicHall';root.position.set(-5.18,0,0);scene.add(root);
   const mat=(c,m=.42,r=.58)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r,envMapIntensity:.72});
   // Organic surface library: procedural bark, leaf and soil maps keep plants out of the metallic material family.
@@ -11,7 +11,7 @@
    if(kind==='bark'){for(let i=0;i<95;i++){const x=rnd()*256,w=1+rnd()*5;q.strokeStyle=i%2?low:high;q.globalAlpha=.12+rnd()*.24;q.lineWidth=w;q.beginPath();q.moveTo(x,0);q.bezierCurveTo(x+(rnd()-.5)*18,85,x+(rnd()-.5)*18,170,x+(rnd()-.5)*12,256);q.stroke()}for(let i=0;i<420;i++){q.fillStyle=i%2?low:high;q.globalAlpha=.12;q.fillRect(rnd()*256,rnd()*256,1+rnd()*3,2+rnd()*8)}}
    else if(kind==='leaf'){for(let i=0;i<125;i++){const x=rnd()*256,y=rnd()*256;q.strokeStyle=i%3?low:high;q.globalAlpha=.12+rnd()*.2;q.lineWidth=.7+rnd()*1.2;q.beginPath();q.moveTo(x,y);q.quadraticCurveTo(x+(rnd()-.5)*18,y+5+rnd()*12,x+(rnd()-.5)*26,y+12+rnd()*26);q.stroke()}}
    else{for(let i=0;i<2400;i++){q.fillStyle=i%2?low:high;q.globalAlpha=.08+rnd()*.12;q.fillRect(rnd()*256,rnd()*256,1+rnd()*3,1+rnd()*3)}}
-   q.globalAlpha=1;const t=new T.CanvasTexture(c);if(T.sRGBEncoding!==undefined)t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=4;return t;
+   q.globalAlpha=1;const t=new T.CanvasTexture(c);if(T.sRGBEncoding!==undefined)t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=options.lowPower?2:4;return t;
   };
   const barkMap=makeOrganicMap('#514d49','#34383a','#797267','bark'),leafMap=makeOrganicMap('#5b665f','#3e4a47','#8c9184','leaf'),soilMap=makeOrganicMap('#464641','#292f31','#68665e','soil');
   const barkMat=new T.MeshStandardMaterial({map:barkMap,bumpMap:barkMap,bumpScale:.16,color:0xffffff,roughness:.94,metalness:0});
@@ -32,7 +32,7 @@
   const titanium=mat(0x77838d,.62,.48),silver=mat(0x9aa5ab,.66,.42),graphite=mat(0x1d2934,.48,.62),dark=mat(0x0d1721,.38,.68),floorMat=mat(0x414c58,.18,.82),floorDark=mat(0x26333f,.34,.72),cyan=new T.MeshStandardMaterial({color:0x789da6,emissive:0x183b45,emissiveIntensity:.16,metalness:.22,roughness:.52,envMapIntensity:.76}),whiteGlow=new T.MeshBasicMaterial({color:0xa9c1c4,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x8faeb5,metalness:.08,roughness:.34,transparent:false,opacity:1,depthWrite:true,transmission:.1,clearcoat:.24,clearcoatRoughness:.34,envMapIntensity:.82,side:T.DoubleSide});
   // Layered cool-neutral lighting: broad ambient fill, a directional key, a soft blue bounce and a restrained warm rim.
   root.add(new T.HemisphereLight(0x9baeb8,0x111a24,.48));
-  const key=new T.DirectionalLight(0xb9c8d0,.68);key.position.set(-42,92,54);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-360;key.shadow.camera.right=360;key.shadow.camera.top=310;key.shadow.camera.bottom=-310;key.shadow.camera.near=1;key.shadow.camera.far=520;key.shadow.bias=-.00022;key.shadow.normalBias=.045;key.shadow.radius=5;key.shadow.camera.updateProjectionMatrix();root.add(key);
+  const key=new T.DirectionalLight(0xb9c8d0,.68);key.position.set(-42,92,54);key.castShadow=true;key.shadow.mapSize.set(options.lowPower?1024:2048,options.lowPower?1024:2048);key.shadow.camera.left=-360;key.shadow.camera.right=360;key.shadow.camera.top=310;key.shadow.camera.bottom=-310;key.shadow.camera.near=1;key.shadow.camera.far=520;key.shadow.bias=-.00022;key.shadow.normalBias=.045;key.shadow.radius=5;key.shadow.camera.updateProjectionMatrix();root.add(key);
   const fillLight=new T.DirectionalLight(0x718a9a,.19);fillLight.position.set(58,52,-72);root.add(fillLight);
   const rimLight=new T.DirectionalLight(0xb6a18a,.075);rimLight.position.set(12,34,76);root.add(rimLight);
   const fill=new T.PointLight(0x5e8994,7,260,1.8);fill.position.set(-54,38,-26);root.add(fill);
