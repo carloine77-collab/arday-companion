@@ -15,15 +15,15 @@
   };
   const barkMap=makeOrganicMap('#65452f','#38281f','#a77b4d','bark'),leafMap=makeOrganicMap('#4d7836','#234b27','#9bbd54','leaf'),soilMap=makeOrganicMap('#4b3d2b','#2b261c','#786043','soil');
   const barkMat=new T.MeshStandardMaterial({map:barkMap,bumpMap:barkMap,bumpScale:.16,color:0xffffff,roughness:.94,metalness:0});
+  // Three.js r128 does not implement the later MeshPhysicalMaterial sheen pipeline.
+  // Keep foliage on the stable Standard shader path; variation comes from texture and per-leaf palette.
   const leafPalette=[
-   new T.MeshPhysicalMaterial({color:0x315d32,map:leafMap,roughness:.84,metalness:0,sheen:.28,sheenColor:new T.Color(0x527b39),side:T.DoubleSide}),
-   new T.MeshPhysicalMaterial({color:0x477a36,map:leafMap,roughness:.8,metalness:0,sheen:.32,sheenColor:new T.Color(0x7e9c43),side:T.DoubleSide}),
-   new T.MeshPhysicalMaterial({color:0x6b8d3c,map:leafMap,roughness:.86,metalness:0,sheen:.22,sheenColor:new T.Color(0x9eaf54),side:T.DoubleSide}),
-   new T.MeshPhysicalMaterial({color:0x526b2e,map:leafMap,roughness:.88,metalness:0,sheen:.24,sheenColor:new T.Color(0x788d3d),side:T.DoubleSide}),
-   new T.MeshPhysicalMaterial({color:0x2e6848,map:leafMap,roughness:.82,metalness:0,sheen:.3,sheenColor:new T.Color(0x4c9362),side:T.DoubleSide})
+   new T.MeshStandardMaterial({color:0x315d32,map:leafMap,roughness:.88,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x477a36,map:leafMap,roughness:.84,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x6b8d3c,map:leafMap,roughness:.9,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x526b2e,map:leafMap,roughness:.91,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x2e6848,map:leafMap,roughness:.86,metalness:0,side:T.DoubleSide})
   ];
-  // Static procedural shader breakup adds subtle natural tonal variation without time-based flicker.
-  leafPalette.forEach((m,i)=>{m.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n diffuseColor.rgb *= 0.986 + 0.014 * sin(vUv.x * '+(7.1+i*.37).toFixed(2)+' + vUv.y * 9.3);');};m.customProgramCacheKey=()=> 'arday-leaf-natural-'+i;});
   const soilMat=new T.MeshStandardMaterial({map:soilMap,bumpMap:soilMap,bumpScale:.12,color:0xffffff,roughness:1,metalness:0});
   const leafGeometry=(()=>{const sh=new T.Shape();sh.moveTo(0,0);sh.quadraticCurveTo(.2,.24,.02,.9);sh.quadraticCurveTo(-.2,.24,0,0);const g=new T.ExtrudeGeometry(sh,{depth:.035,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.018,bevelThickness:.012,curveSegments:10});g.computeVertexNormals();return g;})();
 
