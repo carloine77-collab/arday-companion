@@ -23,7 +23,7 @@
   flat(-20,0,21,21,pathMat,-.065);
   const centerDisc=new T.Mesh(new T.CircleGeometry(10.5,64),mat(0xd2c5ad));centerDisc.rotation.x=-Math.PI/2;centerDisc.position.set(-20,-.045,0);root.add(centerDisc);
   function pathBetween(x1,z1,x2,z2,width=3.4){const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),mesh=new T.Mesh(new T.PlaneGeometry(width,len),pathMat);mesh.rotation.x=-Math.PI/2;mesh.rotation.z=-Math.atan2(dx,dz);mesh.position.set((x1+x2)/2,-.07,(z1+z2)/2);root.add(mesh);return mesh}
-  pathBetween(-2,0,-20,0,3.2);
+  pathBetween(9.2,0,-20,0,3.2);
   const zones=[
    {id:'exchange',name:'兑换区',sub:'RMB EXCHANGE',x:-35,z:-7,color:0xb78c64,desc:'人民币账户与交易服务。大厅不引入代币、积分币或第二套货币。',tab:'账户'},
    {id:'ranking',name:'排行区',sub:'HALL OF RECORDS',x:-20,z:-19,color:0x8b9b8c,desc:'玩家排行与赛季记录展示区。在线榜单和跨玩家数据需要服务端接入。'},
@@ -63,6 +63,11 @@
    const lantern=new T.Mesh(new T.SphereGeometry(.16,12,10),new T.MeshBasicMaterial({color:0xf0d8a2}));lantern.position.set(0,2.8,.5);b.add(lantern);
    zoneObjects.push(b);
   });
+  // Physical return portal: the only route back to the private apartment.
+  const portal=new T.Group();portal.position.set(9.2,0,0);portal.userData.roomTarget='living';portal.name='hall-home-portal';root.add(portal);
+  box(portal,-1.35,1.55,0,.22,3.1,.28,wood);box(portal,1.35,1.55,0,.22,3.1,.28,wood);box(portal,0,3.05,0,2.92,.24,.3,wood);
+  box(portal,0,1.42,-.08,2.38,2.72,.12,cream);
+  const portalSign=new T.Mesh(new T.PlaneGeometry(2.15,.52),new T.MeshBasicMaterial({map:signTexture('回到房间','HOME',0),toneMapped:false,side:T.DoubleSide}));portalSign.position.set(0,3.48,.02);portal.add(portalSign);
   // Central plaza: a shallow fountain, benches, flower beds and shade trees.
   const fountain=new T.Group();fountain.position.set(-20,0,0);root.add(fountain);
   const basin=new T.Mesh(new T.CylinderGeometry(3.1,3.35,.48,40),mat(0x9b9788));basin.position.y=.18;fountain.add(basin);
@@ -76,7 +81,7 @@
   function flowerbed(x,z){const g=new T.Group();g.position.set(x,0,z);root.add(g);box(g,0,.14,0,3.4,.28,1.35,wood);for(let i=0;i<15;i++){const f=new T.Mesh(new T.SphereGeometry(.16,9,7),mat([0xc68f83,0xd4b68a,0x9eaf91][i%3]));f.position.set(-1.45+(i%5)*.7,.48,Math.floor(i/5)*.34-.35);g.add(f)}}
   flowerbed(-12,-12);flowerbed(-29,-13);flowerbed(-44,11);
   // The edge is intentionally invisible: the distant painted panorama implies a much larger world.
-  return {group:root,zones,zoneObjects,ground,center:{x:-25.18,z:0},spawn:{x:-8.78,z:0},radius:42};
+  return {group:root,zones,zoneObjects,ground,center:{x:-25.18,z:0},spawn:{x:4.02,z:0},radius:42};
  }
  global.ArdayHallScene={create};
 })(window);
