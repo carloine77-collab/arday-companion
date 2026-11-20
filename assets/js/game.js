@@ -99,7 +99,7 @@ s.placed.forEach((item,index)=>{
  if(typeof item.name!=='string'||!item.name.trim())return;
  if(!item.id)item.id='legacy-placed-'+(item.room||'unknown')+'-'+index;
  const parts=item.name.split('·');if(!item.kind)item.kind=item.name.startsWith('成品食物·')?'food':'furniture';if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';
- if(!['living','bedroom','kitchen'].includes(item.room))item.room='living';
+ if(!['living','bedroom','kitchen','bathroom'].includes(item.room))item.room='living';
  if(!Number.isFinite(Number(item.x)))item.x=0;
  if(!Number.isFinite(Number(item.y)))item.y=0;
  if(!Number.isFinite(Number(item.z)))item.z=0;
@@ -676,8 +676,8 @@ function completeAutonomousCooking(at=Date.now()){
  return true;
 }
 function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);saySystem('食材放进冰箱了。');save();render();openTab('商店',true)}
-function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
-function kitchenClose(){$('stage').classList.remove('kitchen-mode');$('stage').classList.remove('bedroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
+function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode','bathroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
+function kitchenClose(){$('stage').classList.remove('kitchen-mode','bedroom-mode','bathroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
 function openKitchenPanel(){
  $('drawer').classList.remove('furniture-drawer','shop-drawer','profile-expanded');
  $('drawer').querySelector('.furniture-close')?.remove();
@@ -788,7 +788,7 @@ function furnitureKindForPlaced(item){
  if(/餐桌/.test(name))return 'dining';
  if(/^冰箱/.test(name))return 'fridge';
  if(/灶/.test(name))return 'stove';
- if(/水槽/.test(name))return 'sink';
+ if(/水槽|洗手台|淋浴间/.test(name))return 'sink';
  if(/上床下桌/.test(name))return 'loftBed';
  if(/^(?:床(?:$|·)|布艺床|双人床|软包床|木框床|榻榻米)/.test(name))return 'bed';
  if(/椅/.test(name)||/凳子/.test(name))return 'chair';
@@ -811,7 +811,7 @@ function furnitureKindForPlaced(item){
 function autonomousFurnitureOptions(){
  const options=[];
  for(const item of (s.placed||[])){
-  if(!item||!['living','bedroom','kitchen'].includes(item.room))continue;
+  if(!item||!['living','bedroom','kitchen','bathroom'].includes(item.room))continue;
   const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind];
   if(!set?.activities)continue;
   for(const [activity,context] of Object.entries(set.activities)){
@@ -1005,7 +1005,7 @@ function openFurnitureActions(kind,furnitureId=null){
  closeFurnitureActions();
  drawer.classList.remove('open','furniture-drawer','shop-drawer','profile-expanded');
  const targetItem=window.ArdayGetFurnitureHotspot?.(furnitureId)?.__furnitureItem||null;
- const room=targetItem?.room||(s.placed||[]).find(item=>String(item.id)===String(furnitureId))?.room||(stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
+ const room=targetItem?.room||(s.placed||[]).find(item=>String(item.id)===String(furnitureId))?.room||(stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
  const actions=Object.entries(set.activities||{}).filter(([activity,meta])=>activityMeta[activity]&&furnitureRequirementAvailable(activityMeta[activity].requires,room));
  const blockedReason=furnitureInteractionBlockReason();
  const stageRect=stage.getBoundingClientRect();
@@ -1310,7 +1310,7 @@ function initArday3D(){
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
-  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.86;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   // A restrained studio equirectangular environment gives metal, glass and polished wood something to reflect.
   const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;
   const environmentContext=environmentCanvas.getContext('2d');
@@ -1332,9 +1332,9 @@ function initArday3D(){
   environmentTexture.generateMipmaps=true;environmentTexture.minFilter=T.LinearMipmapLinearFilter;
   scene.environment=environmentTexture;
   host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
-  const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.72);scene.add(hemi);
-  const sun=new T.DirectionalLight(0xfff1dc,1.35);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
-  const fill=new T.DirectionalLight(0xc8d0d8,.28);fill.position.set(5,4,-5);scene.add(fill);
+  const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.64);scene.add(hemi);
+  const sun=new T.DirectionalLight(0xfff1dc,1.18);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
+  const fill=new T.DirectionalLight(0xc8d0d8,.23);fill.position.set(5,4,-5);scene.add(fill);
   const daylightWindows=[],practicalLights=[];let lastDaylightUpdate=0;
   const lampShadow=new T.SpotLight(0xffd8a6,0,5.5,Math.PI/3,.82,1.8);lampShadow.castShadow=false;lampShadow.shadow.mapSize.set(256,256);lampShadow.shadow.camera.near=.12;lampShadow.shadow.camera.far=6;lampShadow.shadow.bias=-.00016;lampShadow.shadow.normalBias=.035;lampShadow.shadow.radius=5;scene.add(lampShadow,lampShadow.target);
   function addWindowSun(root,windowGroup,centerY=2.65){
@@ -1360,9 +1360,9 @@ function initArday3D(){
    const a=keys[i],b=keys[Math.min(i+1,keys.length-1)],t=Math.max(0,Math.min(1,(h-a.h)/(b.h-a.h))),mix=(x,y)=>x+(y-x)*t,col=new T.Color(a.c).lerp(new T.Color(b.c),t);
    hemi.color.copy(col);hemi.intensity=mix(a.a,b.a);sun.color.copy(col).lerp(new T.Color(0xfff1dc),.42);sun.intensity=mix(a.s,b.s);sun.castShadow=sun.intensity>.08;
    sun.position.set(-Math.cos((h-6)/12*Math.PI)*7,8,Math.sin((h-6)/12*Math.PI)*5+1);sun.target.position.set(0,0,0);sun.target.updateMatrixWorld();
-   fill.color.copy(col).lerp(new T.Color(0xa8c4e2),.48);fill.intensity=mix(a.e,b.e);renderer.toneMappingExposure=mix(.76,.98,Math.min(1,hemi.intensity));scene.background.copy(col).lerp(new T.Color(0xd9d7d1),.58);
+   fill.color.copy(col).lerp(new T.Color(0xa8c4e2),.48);fill.intensity=mix(a.e,b.e);renderer.toneMappingExposure=mix(.70,.88,Math.min(1,hemi.intensity));scene.background.copy(col).lerp(new T.Color(0xd9d7d1),.58);
    const daylight=Math.max(0,Math.min(1,(h-5.8)/1.7,(20-h)/2.2)),night=h>=20||h<5?1:h>=18?(h-18)/2:h<7?(7-h)/2:0;
-   daylightWindows.forEach(w=>{const active=w.root===(roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living)&&w.windowGroup.visible!==false,strength=mix(a.s,b.s)*1.55*daylight*(active?1:.12),sunDrift=Math.sin((h-8)/12*Math.PI)*1.05;w.spot.intensity=strength;w.spot.target.position.set(sunDrift,.32,3.75);w.spot.target.updateMatrixWorld();w.spot.castShadow=active&&strength>.08;w.beam.position.x=sunDrift*.46;w.beam.material.uniforms.sunStrength.value=daylight*(active?1:.12)*Math.max(.18,mix(a.s,b.s));w.beam.material.uniforms.sunColor.value.copy(col).lerp(new T.Color(0xffdca5),.62)});
+   daylightWindows.forEach(w=>{const active=w.root===(roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living)&&w.windowGroup.visible!==false,strength=mix(a.s,b.s)*1.55*daylight*(active?1:.12),sunDrift=Math.sin((h-8)/12*Math.PI)*1.05;w.spot.intensity=strength;w.spot.target.position.set(sunDrift,.32,3.75);w.spot.target.updateMatrixWorld();w.spot.castShadow=active&&strength>.08;w.beam.position.x=sunDrift*.46;w.beam.material.uniforms.sunStrength.value=daylight*(active?1:.12)*Math.max(.18,mix(a.s,b.s));w.beam.material.uniforms.sunColor.value.copy(col).lerp(new T.Color(0xffdca5),.62)});
    practicalLights.forEach(item=>{item.light.intensity=item.enabled?item.base*(item.light.distance>9?.48+.52*night:.5+.5*night):0;if(item.bulb){item.bulb.material.color.setHex(item.enabled?0xffe4b5:0x786f63);item.bulb.material.emissive?.setHex(item.enabled?0x8d5422:0x000000);item.bulb.material.emissiveIntensity=item.enabled?.55:0}if(item.glow)item.glow.visible=item.enabled});
    const shadowSource=practicalLights.find(item=>item.enabled&&item.room===roomMode);
    if(shadowSource){const position=shadowSource.group.localToWorld(shadowSource.light.position.clone());lampShadow.position.copy(position);lampShadow.target.position.set(position.x,.06,position.z+.12);lampShadow.target.updateMatrixWorld();lampShadow.intensity=.72;lampShadow.castShadow=true}else{lampShadow.intensity=0;lampShadow.castShadow=false}
@@ -1571,9 +1571,17 @@ function initArday3D(){
   }
   const livingBedroomDoor=roomDoor(living,-1.45,'卧室','bedroom',0x77513b);
   const livingKitchenDoor=roomDoor(living,1.45,'厨房','kitchen',0x718778);
+  // Tiled bathroom shell; no sanitary fixtures are pre-installed.
+  const bathroom=new T.Group();scene.add(bathroom);roomShell(bathroom,0xd7d8d4,0xb8b6aa);
+  const bathroomTile=M(0xd9d7cf,.96);
+  for(let x=-5.12;x<=5.12;x+=.34){box(bathroom,x,.66,-3.965,.31,1.18,.025,bathroomTile);box(bathroom,x,.66,3.965,.31,1.18,.025,bathroomTile)}
+  for(let z=-3.8;z<=3.81;z+=.34){box(bathroom,-5.165,.66,z,.025,1.18,.31,bathroomTile);box(bathroom,5.165,.66,z,.025,1.18,.31,bathroomTile)}
+  const bathroomAccent=M(0xb4b9b1,.9);box(bathroom,0,1.28,-3.94,10.3,.035,.035,bathroomAccent);box(bathroom,0,1.28,3.94,10.3,.035,.035,bathroomAccent);
+  const bathroomDoor=roomDoor(living,0,'卫生间','bathroom',0x82928a);
+  const bathroomLivingDoor=roomDoor(bathroom,.45,'起居室','living',0x82928a);
   const bedroomLivingDoor=roomDoor(bedroom,.45,'起居室','living',0x77513b);
   const kitchenLivingDoor=roomDoor(kitchen,.45,'起居室','living',0x718778);
-  kitchen.visible=false;bedroom.visible=false;
+  kitchen.visible=false;bedroom.visible=false;bathroom.visible=false;
   // Detailed stylized character with articulated shoulders, elbows, hips and knees.
   const person=new T.Group();scene.add(person);const rig=new T.Group();person.add(rig);const body=new T.Group();rig.add(body);
   // Character v2: fully rebuilt silhouette, facial topology, hair and outfit.
@@ -1617,7 +1625,7 @@ function initArday3D(){
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0);
   function applyCamera(){targetPhi=Math.max(.48,Math.min(1.42,targetPhi));targetRadius=Math.max(7.2,Math.min(21,targetRadius))}
   function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
-   [living,bedroom,kitchen].forEach(g=>{if(g.userData.ceilingMesh)g.userData.ceilingMesh.visible=decorating;
+   [living,bedroom,kitchen,bathroom].forEach(g=>{if(g.userData.ceilingMesh)g.userData.ceilingMesh.visible=decorating;
     if(g.userData.backWall)g.userData.backWall.visible=camera.position.z>-2.8;
     if(g.userData.frontWall)g.userData.frontWall.visible=camera.position.z<2.8;
     if(g.userData.leftWall)g.userData.leftWall.visible=camera.position.x>-2.15;
@@ -1691,9 +1699,10 @@ function initArday3D(){
   }
   const furnitureHotspots=[];
   function enterRoomFromDoor(mode){
-   stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode');
+   stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode');
    if(mode==='kitchen')stage.classList.add('kitchen-mode');
    if(mode==='bedroom')stage.classList.add('bedroom-mode');
+   if(mode==='bathroom')stage.classList.add('bathroom-mode');
    closeFurnitureActions();
    $('drawer').classList.remove('open','profile-expanded','furniture-drawer');
    $('drawer').querySelector('.furniture-close')?.remove();
@@ -1709,14 +1718,16 @@ function initArday3D(){
    registerWallObject({id:'living-bedroom-door',name:'卧室门',room:'living',group:livingBedroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bedroom')}),
    registerWallObject({id:'living-kitchen-door',name:'厨房门',room:'living',group:livingKitchenDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('kitchen')}),
    registerWallObject({id:'bedroom-living-door',name:'起居室门',room:'bedroom',group:bedroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
-   registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>setRoom('living')})
+   registerWallObject({id:'kitchen-living-door',name:'起居室门',room:'kitchen',group:kitchenLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')}),
+   registerWallObject({id:'living-bathroom-door',name:'卫生间门',room:'living',group:bathroomDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('bathroom')}),
+   registerWallObject({id:'bathroom-living-door',name:'起居室门',room:'bathroom',group:bathroomLivingDoor,axis:'z',side:'right',range:3.0,anchor:[0,2.55],action:()=>enterRoomFromDoor('living')})
   ];
   const furnitureModelAliases={"开放书架":{"model":"书架","variant":"开放格架"},"坐垫":{"model":"坐垫","variant":""},"雾面墙纸":{"model":"墙纸","variant":"雾面"},"极简书桌":{"model":"书桌","variant":"白蜡木极简"},"屏风":{"model":"隔断","variant":""},"陶瓷灶":{"model":"灶台","variant":"奶油陶瓷"},"锥形吊灯":{"model":"吊灯","variant":"锥形金属"},"复古沙发":{"model":"沙发","variant":"经典款"},"床头柜":{"model":"床头柜","variant":""},"陶土花瓶":{"model":"花瓶","variant":""},"伞架":{"model":"伞架","variant":""},"三抽斗柜":{"model":"斗柜","variant":"奶油三抽"},"木格书架":{"model":"书架","variant":"白蜡木开放格"},"吊柜":{"model":"吊柜","variant":""},"展示柜":{"model":"展示柜","variant":""},"躺椅":{"model":"躺椅","variant":""},"布艺床":{"model":"床","variant":""},"海报":{"model":"海报","variant":""},"深海墙纸":{"model":"墙纸","variant":"深海"},"棕榈树":{"model":"棕榈树绿植","variant":""},"水磨地板":{"model":"地板","variant":"水磨"},"蘑菇台灯":{"model":"台灯","variant":"蘑菇"},"默认室内木门":{"model":"门","variant":""},"门":{"model":"门","variant":""},"懒人沙发":{"model":"懒人沙发","variant":""},"纸罩灯":{"model":"落地灯","variant":"纸罩"},"鞋柜":{"model":"鞋柜","variant":""},"梳妆台":{"model":"梳妆台","variant":""},"电视柜":{"model":"电视柜","variant":""},"玻璃书柜":{"model":"书架","variant":"玻璃门书柜"},"沙发床":{"model":"沙发床","variant":""},"榻榻米":{"model":"榻榻米","variant":""},"软包床":{"model":"床","variant":"奶油软包"},"复古书桌":{"model":"书桌","variant":"深胡桃木复古"},"哑铃架":{"model":"哑铃架","variant":""},"石材茶几":{"model":"茶几","variant":"米白石材"},"珐琅灶":{"model":"灶台","variant":"复古珐琅"},"壁画":{"model":"壁画","variant":""},"长餐桌":{"model":"餐桌","variant":"浅橡木长桌"},"几何地毯":{"model":"地毯","variant":"海盐蓝"},"水泥地板":{"model":"地板","variant":"水泥"},"抽屉书桌":{"model":"书桌","variant":"抽屉工作台"},"双臂壁灯":{"model":"壁灯","variant":"黄铜双臂"},"方形边桌":{"model":"边桌","variant":"深木方桌"},"木框床":{"model":"床","variant":"浅橡木框架"},"默认窗户":{"model":"窗","variant":""},"窗":{"model":"窗","variant":""},"圆形茶几":{"model":"茶几","variant":"圆形浅橡木"},"折线台灯":{"model":"台灯","variant":"陶瓷折线"},"卧室地毯":{"model":"地毯","variant":"羊毛米白"},"上床下桌":{"model":"上床下桌","variant":""},"木框挂钟":{"model":"挂钟","variant":""},"波斯地毯":{"model":"地毯","variant":"波斯绛红"},"羊毛沙发":{"model":"沙发","variant":"暖灰羊毛"},"亚麻窗帘":{"model":"窗帘","variant":""},"藤编柜":{"model":"床头柜","variant":"藤编抽屉"},"橱柜":{"model":"橱柜","variant":""},"钢琴":{"model":"钢琴","variant":""},"玻璃台灯":{"model":"台灯","variant":"琥珀玻璃"},"洗衣机":{"model":"洗衣机","variant":""},"亚麻沙发":{"model":"沙发","variant":"亚麻燕麦"},"餐边柜":{"model":"餐边柜","variant":""},"三脚灯":{"model":"落地灯","variant":"黑色三脚"},"冰箱":{"model":"冰箱","variant":""},"不锈钢灶":{"model":"灶台","variant":"不锈钢"},"圆形餐桌":{"model":"餐桌","variant":"圆形餐桌"},"酒柜":{"model":"酒柜","variant":""},"料理台":{"model":"料理台","variant":""},"复古妆台":{"model":"梳妆台","variant":""},"玻璃吊灯":{"model":"吊灯","variant":"乳白玻璃"},"石膏墙纸":{"model":"墙纸","variant":"石膏"},"休闲沙发":{"model":"沙发","variant":""},"任务板":{"model":"任务板","variant":""},"照片墙":{"model":"照片墙","variant":""},"唱片机":{"model":"唱片机","variant":""},"花束":{"model":"捧花摆件","variant":""},"复古书柜":{"model":"书架","variant":"深胡桃木书柜"},"四抽斗柜":{"model":"斗柜","variant":"胡桃木四抽"},"跑步机":{"model":"跑步机","variant":""},"藤编餐椅":{"model":"餐桌椅","variant":"藤编餐椅"},"双人床":{"model":"床","variant":""},"抽屉茶几":{"model":"茶几","variant":"胡桃木抽屉"},"水槽":{"model":"水槽","variant":""},"羊毛地毯":{"model":"地毯","variant":"羊毛米白"},"游戏机":{"model":"游戏机","variant":""},"衣柜":{"model":"衣柜","variant":""},"拱形镜":{"model":"全身镜","variant":"黄铜拱形"},"扶手餐椅":{"model":"餐桌椅","variant":"软包扶手椅"},"绒布沙发":{"model":"沙发","variant":"雾蓝绒布"},"网布椅":{"model":"办公椅","variant":""},"单臂壁灯":{"model":"壁灯","variant":"单臂"},"置物架":{"model":"置物架","variant":""},"衣帽架":{"model":"衣帽架","variant":""},"黄铜桌":{"model":"边桌","variant":"黄铜圆桌"},"格纹地毯":{"model":"地毯","variant":"奶油棋盘"},"电脑":{"model":"电脑","variant":""},"弧背椅":{"model":"椅子","variant":""},"藤编吊灯":{"model":"吊灯","variant":"藤编圆罩"},"电视":{"model":"电视","variant":""},"弧形灯":{"model":"落地灯","variant":"黄铜弧形"},"凳子":{"model":"凳子","variant":""}};
   function createOwnedFurniture(name,record=null){
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
    const modelName=alias?.model??name.split('·')[0].trim();
-   const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;
+   const room=record?.room||roomMode||'living',parent=room==='bedroom'?bedroom:room==='kitchen'?kitchen:room==='bathroom'?bathroom:living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
    const mat=(color,rough=.78,metalness=0)=>{const material=stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,rough)),metalness:Math.max(0,Math.min(.9,metalness))}));material.userData.dyeable=metalness<.58&&rough>=.28;return material};
@@ -2832,6 +2843,38 @@ function initArday3D(){
     box(.25,.98,.445,.22,.035,.018,m.cream);
     for(const x of [-.34,.34])box(x,.06,.28,.1,.12,.12,rubber);
     box(0,.06,-.3,.72,.12,.12,rubber);
+   }else if(modelName==='洗手台'){
+    action=()=>openFurnitureActions('sink',id);width=1.28;depth=.82;height=1.72;
+    const porcelain=mat(0xe8e5dc,.22),cabinet=mat(0x9b8064,.82),brass=mat(0xb18b58,.34,.58),mirror=mat(0xa9bdc0,.16,.42);
+    box(0,.42,0,1.22,.82,.76,cabinet);box(0,.86,0,1.32,.12,.84,m.cream);box(0,.96,.02,1.12,.1,.66,porcelain);box(0,1.015,.04,.78,.035,.43,m.cream);
+    const bowl=new T.Mesh(new T.TorusGeometry(.29,.045,10,32),porcelain);bowl.rotation.x=Math.PI/2;bowl.position.set(0,1.04,.04);group.add(bowl);
+    const faucet=new T.CatmullRomCurve3([new T.Vector3(0,1.02,-.25),new T.Vector3(0,1.28,-.25),new T.Vector3(0,1.4,-.08),new T.Vector3(0,1.4,.05)]);group.add(new T.Mesh(new T.TubeGeometry(faucet,20,.024,8,false),brass));
+    for(const x of [-.42,.42])cyl(x,1.04,-.22,.035,.035,.055,brass,12);
+    box(0,1.58,-.37,1.12,.58,.045,m.wood);box(0,1.58,-.34,1.02,.48,.018,mirror);
+    for(const x of [-.55,.55])box(x,.42,.39,.045,.7,.045,m.oak);
+   }else if(modelName==='马桶'){
+    width=.78;depth=1.12;height=.82;const ceramic=mat(0xe9e6de,.24),shadow=mat(0xb8b9b2,.55),seat=mat(0x59636a,.32);
+    box(0,.55,-.34,.68,.72,.42,ceramic);box(0,.83,-.34,.72,.12,.46,m.cream);
+    const pedestal=new T.Mesh(new T.CylinderGeometry(.27,.31,.43,28),ceramic);pedestal.position.set(0,.25,.13);group.add(pedestal);
+    const bowl=new T.Mesh(new T.SphereGeometry(1,28,18),ceramic);bowl.scale.set(.38,.19,.48);bowl.position.set(0,.43,.2);group.add(bowl);
+    const opening=new T.Mesh(new T.TorusGeometry(.245,.035,10,32),seat);opening.rotation.x=Math.PI/2;opening.position.set(0,.57,.2);group.add(opening);
+    const inner=new T.Mesh(new T.CircleGeometry(.21,32),shadow);inner.rotation.x=-Math.PI/2;inner.position.set(0,.555,.2);group.add(inner);
+    box(0,.93,-.35,.42,.035,.025,m.metal);box(.25,.97,-.34,.08,.06,.045,m.gold);
+   }else if(modelName==='淋浴间'){
+    action=()=>openFurnitureActions('sink',id);width=1.48;depth=1.42;height=2.32;
+    const glass=mat(0xc8d9d8,.12,.08);glass.transparent=true;glass.opacity=.25;glass.depthWrite=false;const frame=mat(0x9b8064,.38,.52),stone=mat(0xc9c8c0,.42);
+    box(0,.12,0,1.42,.18,1.36,stone);box(0,.22,0,1.26,.045,1.2,m.cream);
+    for(const x of [-.68,.68])box(x,1.15,-.55,.045,2.1,.045,frame);
+    for(const z of [-.55,.62])box(.68,1.15,z,.045,2.1,.045,frame);
+    box(.68,1.15,.035,.025,2.0,1.12,glass);box(0,1.15,-.55,1.35,2.0,.025,glass);
+    const pipe=new T.CatmullRomCurve3([new T.Vector3(-.5,2.05,-.45),new T.Vector3(-.5,2.18,-.45),new T.Vector3(-.5,2.2,-.22)]);group.add(new T.Mesh(new T.TubeGeometry(pipe,12,.025,8,false),m.metal));
+    const head=new T.Mesh(new T.CylinderGeometry(.16,.2,.055,24),m.metal);head.rotation.x=Math.PI/2;head.position.set(-.5,2.17,-.18);group.add(head);
+    cyl(-.48,1.08,-.42,.055,.055,.09,m.gold,12);box(-.48,1.2,-.42,.24,.035,.035,m.metal);
+   }else if(modelName==='浴缸'){
+    width=2.25;depth=1.12;height=.72;const enamel=mat(0xe8e4dc,.26),outer=mat(0xd2c7b7,.72),metal=mat(0xaeb5b4,.28,.58);
+    box(0,.34,0,2.16,.56,1.02,outer);box(0,.57,0,2.22,.16,1.1,enamel);box(0,.62,0,1.82,.035,.74,mat(0xb9c7c5,.3));
+    for(const x of [-.9,.9])for(const z of [-.39,.39])sphere(x,.38,z,.12,.2,.12,enamel);
+    cyl(.82,.78,-.37,.035,.035,.16,metal,12);cyl(.82,.87,-.37,.055,.055,.045,m.gold,12);
    }else if(modelName==='酒柜'){
     width=1.25;depth=.58;height=1.72;surfaceType='table';surfaceY=1.75;
     const wood=mat(0x503626,.62),back=mat(0x34251e,.82),glass=mat(0xc9dadd,.14,.12);glass.transparent=true;glass.opacity=.2;
@@ -3311,18 +3354,18 @@ function persistFurniture(item){
    });
   }
   function setRoom(mode){
-   roomMode=mode==='kitchen'||mode==='bedroom'?mode:'living';
-   living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';
-   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
+   roomMode=['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
+   living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';
+   const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
    applyWallpaperToRoom(root,wallpaper);
    if(finish?.floor){root.userData.floorMesh.material=M(finish.floor==='buy-floor-concrete'?0x69727b:0x424d5b)}
-   const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46};scene.background.set(colors[roomMode]);
-   cameraTarget.set(0,1,roomMode==='kitchen'?-1:0);updateDaylight(true);
-   targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:13.4;applyCamera();
+   const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46,bathroom:0x3b4546};scene.background.set(colors[roomMode]);
+   cameraTarget.set(0,1,roomMode==='kitchen'?-1:roomMode==='bathroom'?-.35:0);updateDaylight(true);
+   targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:roomMode==='bathroom'?.72:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:roomMode==='bathroom'?13.1:13.4;applyCamera();
   }
   function updateActivity(a,anchorOverride,roomOverride,furnitureIdOverride){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave',anchor:'default'};
-   activeActivity=act;const characterRoom=roomOverride==='bedroom'||roomOverride==='kitchen'?roomOverride:(act==='sleep'?'bedroom':'living');person.visible=characterRoom===roomMode;
+   activeActivity=act;const characterRoom=['bedroom','kitchen','bathroom'].includes(roomOverride)?roomOverride:(act==='sleep'?'bedroom':'living');person.visible=characterRoom===roomMode;
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y,poseOverride=null;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
@@ -3408,7 +3451,7 @@ function persistFurniture(item){
    sceneDismissTap=$('drawer').classList.contains('furniture-drawer')&&$('drawer').classList.contains('open')?{pointerId:e.pointerId,x:e.clientX,y:e.clientY}:null;
    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
    raycaster.setFromCamera(pointerNdc,camera);
-   const activeRoom=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:living;
+   const activeRoom=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living;
    // Arday is attached to the scene root, not to any room group. Include the character explicitly so its meshes can receive tap hits in every room.
    const hits=raycaster.intersectObjects([...activeRoom.children,person],true);
    if(decorating){
@@ -3656,7 +3699,7 @@ function persistFurniture(item){
   scene.traverse(o=>{if(o.isMesh){const mats=Array.isArray(o.material)?o.material:[o.material],opaque=mats.every(m=>m&&!m.transparent&&(m.opacity??1)>=.98);o.castShadow=opaque&&!o.userData.furnitureContactShadow;o.receiveShadow=opaque&&!o.userData.furnitureContactShadow}});
   updateDaylight(true);applyInkOutlines(scene);
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':roomMode==='bathroom'?'bathroom':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
@@ -3676,13 +3719,13 @@ function persistFurniture(item){
  }
 }
 function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity||'idle',anchor=s.activeInteraction?.anchor||s.currentActivityAnchor||null,room=s.activeInteraction?.room||s.currentActivityRoom||null,furnitureId=s.activeInteraction?.furnitureId||s.currentActivityFurnitureId||null){
- const stage=$('stage'),mode=stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
+ const stage=$('stage'),mode=stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
  if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor,room,furnitureId)}
  else{
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
  }
- const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':'起居室';}
+ const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':mode==='bathroom'?'卫生间':'起居室';}
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;render();renderCalendar();generateDailyEvents();save();
