@@ -11,6 +11,8 @@ const APP_SHELL = [
   "./assets/css/dungeon-board.css?v=20261121-modular-css1",
   "./assets/js/game-config.js",
   "./assets/js/furniture-catalog.js?v=20261121-modular-js1",
+  "./assets/js/game-data/dungeon-data.js?v=20261121-modular-js1",
+  "./assets/js/game-data/career-data.js?v=20261121-modular-js1",
   "./assets/js/furniture-placement.js",
   "./assets/js/economy.js",
   "./assets/js/chat-copy.js",
