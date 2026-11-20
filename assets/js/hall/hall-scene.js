@@ -364,6 +364,7 @@
     addRoundedShell(x,.52,zz,w,1.04,d,graphite,.42,.12);
     addRoundedShell(x,1.08,zz,w-.48,.2,d-.48,ivory,.36,.06);
     addRoundedShell(x,1.2,zz,w-1,.1,d-1,paleStone,.3,.04);
+    const planterSoil=new T.Mesh(new T.PlaneGeometry(w-1.35,d-1.35),soilMat);planterSoil.rotation.x=-Math.PI/2;planterSoil.position.set(x,1.27,zz);area.add(planterSoil);
     const count=Math.max(3,Math.floor(w/2.2));
     for(let n=0;n<count;n++){
      const px=x+(n-(count-1)/2)*(w-1.8)/Math.max(1,count-1),pz=zz+(n%2?.65:-.65);
@@ -665,6 +666,7 @@
     addBox(x,1.02,z,width-.42,.16,length-.42,ivory);
     addBox(x,1.14,z,width-.9,.08,length-.9,paleStone);
     addBox(x,1.22,z,width-1.15,.12,length-1.15,variant%2?plum:graphite);
+    const bedSoil=new T.Mesh(new T.PlaneGeometry(width-1.55,length-1.55),soilMat);bedSoil.rotation.x=-Math.PI/2;bedSoil.position.set(x,1.285,z);area.add(bedSoil);
     const count=variant%2?3:4;
     for(let n=0;n<count;n++){
      const pz=z+(n-(count-1)/2)*(length-3)/Math.max(1,count-1);
