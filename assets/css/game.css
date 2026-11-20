@@ -1556,3 +1556,16 @@ html body .stage .drawer.profile-expanded.open .choices{
 .combat-group .combat-attribute:last-child{border-bottom:0}
 .guild-section-heading{flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:9px;row-gap:2px}
 .faction-card-copy>small,.candidate-copy>strong{display:none}
+
+
+/* Sidebar: keep only the three section-title separators. */
+.stats .stat{border-bottom:0!important;border-right:0!important}
+.current-schedule-list{display:flex;flex-direction:column;gap:5px}
+.current-schedule-item{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:7px;padding:6px 5px;border:0;border-radius:7px;background:#f3eee5}
+.current-schedule-item.is-current{background:#e8e0d1;box-shadow:inset 2px 0 #8b7960}
+.current-schedule-time{display:flex;flex-direction:column;gap:2px}
+.current-schedule-time b{font:600 10px "Noto Serif SC",serif;color:#8c765a}
+.current-schedule-time small{font:9px Georgia,serif;color:#9a9388}
+.current-schedule-item>strong{min-width:0;font:500 10px/1.4 "Noto Serif SC",serif;color:#4c5148;overflow-wrap:anywhere}
+.guild-official-caption{font:10px "Noto Serif SC",serif;color:#c9b995;letter-spacing:.08em}
+.guild-bureau-grant-note{margin:8px 0 2px;color:#8c806c;font:10px/1.6 "Noto Serif SC",serif}
