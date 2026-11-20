@@ -110,6 +110,9 @@
     title.getWorldPosition(plaqueWorld);
     camera.getWorldPosition(cameraWorld);
     title.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
+    // PlaneGeometry's visible front is local +Z; flip the back-facing lookAt result
+    // so the canvas text is viewed from its front and never appears mirrored.
+    title.rotateY(Math.PI);
    };
    area.add(title);
    const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
