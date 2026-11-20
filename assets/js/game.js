@@ -1306,7 +1306,7 @@ function initArday3D(){
  const stage=$('stage');
  try{
   const T=THREE,scene=new T.Scene();scene.background=new T.Color(0xd9d7d1);
-  const camera=new T.PerspectiveCamera(38,1,.1,80);
+  const camera=new T.PerspectiveCamera(38,1,.1,420);
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
@@ -1604,8 +1604,8 @@ function initArday3D(){
   const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0,lastHotspotUpdate=0;
   let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600;
-  let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0);
-  function applyCamera(){targetPhi=Math.max(.48,Math.min(1.42,targetPhi));targetRadius=Math.max(7.2,Math.min(21,targetRadius))}
+  let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0),hallCameraOffset=new T.Vector3();
+  function applyCamera(){targetPhi=Math.max(roomMode==='hall'?.78:.48,Math.min(roomMode==='hall'?1.48:1.42,targetPhi));targetRadius=roomMode==='hall'?Math.max(18,Math.min(88,targetRadius)):Math.max(7.2,Math.min(21,targetRadius))}
   function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
    [living,bedroom,kitchen,bathroom].forEach(g=>{if(g.userData.ceilingMesh)g.userData.ceilingMesh.visible=decorating;
     if(g.userData.backWall)g.userData.backWall.visible=camera.position.z>-2.8;
@@ -1682,7 +1682,7 @@ function initArday3D(){
   const furnitureHotspots=[];
   function enterRoomFromDoor(mode){
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode','hall-mode');
-   if(mode==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);activeActivity='idle';}else if(roomMode==='hall'){person.position.set(-4.25,0,0);target.copy(person.position);}
+   if(mode==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);hallCameraOffset.set(0,0,0);activeActivity='idle';}else if(roomMode==='hall'){person.position.set(-4.25,0,0);target.copy(person.position);}
    else{
     if(mode==='kitchen')stage.classList.add('kitchen-mode');
     if(mode==='bedroom')stage.classList.add('bedroom-mode');
@@ -3425,7 +3425,7 @@ function persistFurniture(item){
    roomMode=mode==='hall'?'hall':['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';hall.visible=roomMode==='hall';
    if(roomMode==='hall'){
-    scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);targetTheta=.72;targetPhi=1.34;targetRadius=27.5;applyCamera();updateDaylight(true);scene.background.set(0x07111f);return;
+    scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);hallCameraOffset.set(0,0,0);targetTheta=.72;targetPhi=1.22;targetRadius=48;applyCamera();updateDaylight(true);scene.background.set(0x07111f);return;
    }
    const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
    applyWallpaperToRoom(root,wallpaper);
@@ -3642,7 +3642,7 @@ function persistFurniture(item){
      const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.y=0;right.normalize();
      const forward=new T.Vector3(-Math.sin(theta),0,-Math.cos(theta));
      const scale=targetRadius/Math.max(1,stage.clientHeight);
-     cameraTarget.addScaledVector(right,-dx*scale);cameraTarget.addScaledVector(forward,dy*scale);
+     if(roomMode==='hall'){hallCameraOffset.addScaledVector(right,-dx*scale);hallCameraOffset.addScaledVector(forward,dy*scale);}else{cameraTarget.addScaledVector(right,-dx*scale);cameraTarget.addScaledVector(forward,dy*scale);}
     }
    }
    else if(pointers.size===2){
@@ -3653,8 +3653,7 @@ function persistFurniture(item){
      const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.y=0;right.normalize();
      const forward=new T.Vector3(-Math.sin(theta),0,-Math.cos(theta));
      const scale=targetRadius/Math.max(1,stage.clientHeight);
-     cameraTarget.addScaledVector(right,-(center.x-pinchCenter.x)*scale);
-     cameraTarget.addScaledVector(forward,(center.y-pinchCenter.y)*scale);
+     if(roomMode==='hall'){hallCameraOffset.addScaledVector(right,-(center.x-pinchCenter.x)*scale);hallCameraOffset.addScaledVector(forward,(center.y-pinchCenter.y)*scale);}else{cameraTarget.addScaledVector(right,-(center.x-pinchCenter.x)*scale);cameraTarget.addScaledVector(forward,(center.y-pinchCenter.y)*scale);}
      const angle=Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x),deltaAngle=angle-pinchAngle;
      targetTheta-=deltaAngle;pinchAngle=angle;pinchCenter=center;applyCamera();
     }
@@ -3719,7 +3718,7 @@ function persistFurniture(item){
   function frame(t){const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
    if(roomMode==='hall'){
     const dx=target.x-hallScene.center.x,dz=target.z-hallScene.center.z,len=Math.hypot(dx,dz);if(len>hallScene.radius){const k=hallScene.radius/len;target.x=hallScene.center.x+dx*k;target.z=hallScene.center.z+dz*k;}
-    cameraTarget.x+=(person.position.x-cameraTarget.x)*(1-Math.exp(-dt*3));cameraTarget.z+=(person.position.z-cameraTarget.z)*(1-Math.exp(-dt*3));
+    const follow=1-Math.exp(-dt*3);cameraTarget.x+=(person.position.x+hallCameraOffset.x-cameraTarget.x)*follow;cameraTarget.z+=(person.position.z+hallCameraOffset.z-cameraTarget.z)*follow;
    }
    let delta=target.clone().sub(person.position),distance=delta.length(),moving=distance>.075;
    if(moving){const step=Math.min(distance,(roomMode==='hall'?2.35:pose==='idleWalk'?1.7:1.55)*dt);person.position.add(delta.normalize().multiplyScalar(step));
