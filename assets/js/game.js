@@ -1646,8 +1646,8 @@ function initArday3D(){
   const camera=new T.PerspectiveCamera(38,1,.1,1800);
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
-  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.76;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.0:1.5));renderer.outputEncoding=T.sRGBEncoding;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.76;renderer.shadowMap.enabled=true;renderer.shadowMap.type=isTouchDevice?T.PCFShadowMap:T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   // A restrained studio equirectangular environment gives metal, glass and polished wood something to reflect.
   const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;
   const environmentContext=environmentCanvas.getContext('2d');
@@ -1794,7 +1794,7 @@ function initArday3D(){
    root.traverse(object=>{
     if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
     if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();
-    if((object.geometry.boundingSphere?.radius||0)<.23)return;
+    if(isTouchDevice&&object.userData.hallIllustration)return;if((object.geometry.boundingSphere?.radius||0)<.23)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
     if(!materials.some(material=>material&&material.isMeshStandardMaterial&&!material.transparent&&(material.opacity??1)>.94&&(material.roughness??1)>.28))return;
     const shell=new T.Mesh(object.geometry,object.userData.hallIllustration?hallInkOutlineMaterial:inkOutlineMaterial);
@@ -1896,7 +1896,7 @@ function initArday3D(){
   box(kitchen,0,1.12,-3.91,7.7,.55,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=.88;y<=1.35;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
   // All room doors are now instances of the same owned, movable furniture model.
-  const hallScene=window.ArdayHallScene?.create(T,scene,M,box);if(!hallScene)throw new Error('Public hall scene failed to initialize');
+  const hallScene=window.ArdayHallScene?.create(T,scene,M,box,{lowPower:isTouchDevice});if(!hallScene)throw new Error('Public hall scene failed to initialize');
   const hall=hallScene.group;hall.visible=false;
   // Tiled bathroom shell; no sanitary fixtures are pre-installed.
   const bathroom=new T.Group();scene.add(bathroom);roomShell(bathroom,0xd7d8d4,0xb8b6aa);
@@ -1948,7 +1948,7 @@ function initArday3D(){
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0),hallCameraOffset=new T.Vector3();
   function applyCamera(){targetPhi=Math.max(roomMode==='hall'?.78:.48,Math.min(roomMode==='hall'?1.48:1.42,targetPhi));targetRadius=roomMode==='hall'?Math.max(28,Math.min(175,targetRadius)):Math.max(7.2,Math.min(21,targetRadius))}
   function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
-   [living,bedroom,kitchen,bathroom].forEach(g=>{if(g.userData.ceilingMesh)g.userData.ceilingMesh.visible=decorating;
+   if(roomMode!=='hall')[living,bedroom,kitchen,bathroom].forEach(g=>{if(g.userData.ceilingMesh)g.userData.ceilingMesh.visible=decorating;
     if(g.userData.backWall)g.userData.backWall.visible=camera.position.z>-2.8;
     if(g.userData.frontWall)g.userData.frontWall.visible=camera.position.z<2.8;
     if(g.userData.leftWall)g.userData.leftWall.visible=camera.position.x>-2.15;
@@ -3727,6 +3727,7 @@ function persistFurniture(item){
    item.group.rotation.y=next;moveSupportedFurniture(item,ox,oy,oz,oa);persistFurniture(item);updateFurnitureHotspots();
   };
   function updateFurnitureHotspots(){
+   if(roomMode==='hall')return;
    const now=performance.now();if(now-lastHotspotUpdate<33)return;lastHotspotUpdate=now;
    const rect=stage.getBoundingClientRect();
    for(const item of furnitureRegistry){
@@ -3766,6 +3767,7 @@ function persistFurniture(item){
    roomMode=mode==='hall'?'hall':['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';hall.visible=roomMode==='hall';
    if(roomMode==='hall'){
+    furnitureRegistry.forEach(item=>{if(item.button)item.button.style.visibility='hidden'});
     scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);hallCameraOffset.set(0,0,0);targetTheta=.72;targetPhi=1.22;targetRadius=92;applyCamera();updateDaylight(true);renderer.shadowMap.needsUpdate=true;scene.background.set(0x07111f);return;
    }
    const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
@@ -3862,7 +3864,8 @@ function persistFurniture(item){
   const pointers=new Map();let drag=null,pinchStart=0,pinchRadius=radius,pinchCenter=null,pinchAngle=0,doorTap=null,furnitureTap=null,sceneDismissTap=null,inertiaTheta=0,inertiaPhi=0,dragVelocityTheta=0,dragVelocityPhi=0,lastPointerTime=0;
   let selectedFurniture=null,furnitureDrag=null,characterTap=null,hallTap=null;
   const floorPlane=new T.Plane(new T.Vector3(0,1,0),0),dragPoint=new T.Vector3(),dragOffset=new T.Vector3();
-  const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2();
+  const raycaster=new T.Raycaster(),pointerNdc=new T.Vector2(),gestureRight=new T.Vector3(),gestureForward=new T.Vector3();
+  const hallInteractionTargets=hall.children.filter(object=>object.userData?.hallFloor||object.userData?.hallAction);
   // Camera gestures are handled by the stage, not the canvas. The canvas itself
   // is click-through so it can never steal taps from the footer or room controls.
   const canvas=renderer.domElement,gestureSurface=stage;
@@ -3876,7 +3879,7 @@ function persistFurniture(item){
    raycaster.setFromCamera(pointerNdc,camera);
    const activeRoom=roomMode==='hall'?hall:roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living;
    // Arday is attached to the scene root, not to any room group. Include the character explicitly so its meshes can receive tap hits in every room.
-   const hits=raycaster.intersectObjects([...activeRoom.children,person],true);
+   const hits=raycaster.intersectObjects(roomMode==='hall'?[...hallInteractionTargets,person]:[...activeRoom.children,person],true);
    if(decorating){
     let furniture=null;
     for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.furnitureKey){furniture=node;break}node=node.parent}if(furniture)break}
@@ -3979,11 +3982,10 @@ function persistFurniture(item){
    if(pointers.size===1&&drag){
     if(activeCameraGesture==='orbit'){targetTheta-=dx*.0065;targetPhi+=dy*.0045;applyCamera();}
     else{
-     camera.updateMatrixWorld(true);
-     const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.y=0;right.normalize();
-     const forward=new T.Vector3(-Math.sin(theta),0,-Math.cos(theta));
+     gestureRight.set(Math.cos(theta),0,-Math.sin(theta));
+     gestureForward.set(-Math.sin(theta),0,-Math.cos(theta));
      const scale=targetRadius/Math.max(1,stage.clientHeight);
-     if(roomMode==='hall'){hallCameraOffset.addScaledVector(right,-dx*scale);hallCameraOffset.addScaledVector(forward,dy*scale);}else{cameraTarget.addScaledVector(right,-dx*scale);cameraTarget.addScaledVector(forward,dy*scale);}
+     if(roomMode==='hall'){hallCameraOffset.addScaledVector(gestureRight,-dx*scale);hallCameraOffset.addScaledVector(gestureForward,dy*scale);}else{cameraTarget.addScaledVector(gestureRight,-dx*scale);cameraTarget.addScaledVector(gestureForward,dy*scale);}
     }
    }
    else if(pointers.size===2){
@@ -4140,7 +4142,7 @@ function persistFurniture(item){
    updateFurnitureHotspots();
    const renderInterval=isTouchDevice?1000/40:1000/60;if(t-lastDraw>=renderInterval){renderer.render(scene,camera);lastDraw=t}
    arday3D.raf=requestAnimationFrame(frame)}
-  scene.traverse(o=>{if(o.isMesh){const mats=Array.isArray(o.material)?o.material:[o.material],opaque=mats.every(m=>m&&!m.transparent&&(m.opacity??1)>=.98);o.castShadow=opaque&&!o.userData.furnitureContactShadow;o.receiveShadow=opaque&&!o.userData.furnitureContactShadow}});
+  scene.traverse(o=>{if(o.isMesh&&!o.userData.hallIllustration){const mats=Array.isArray(o.material)?o.material:[o.material],opaque=mats.every(m=>m&&!m.transparent&&(m.opacity??1)>=.98);o.castShadow=opaque&&!o.userData.furnitureContactShadow;o.receiveShadow=opaque&&!o.userData.furnitureContactShadow}});
   updateDaylight(true);applyInkOutlines(scene);
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
   arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':roomMode==='bathroom'?'bathroom':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
