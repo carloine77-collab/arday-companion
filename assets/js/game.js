@@ -157,7 +157,29 @@ s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='obj
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun','combat'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(s.combat);const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');renderStatusTags();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
+function applyBureauDailyGrant(at=Date.now()){
+ if(s.factionMembership!=='anomaly-bureau'||!s.lastDungeonResult)return 0;
+ const today=keyAt(at);if(s.bureauGrantDate===today)return 0;
+ const amount=Math.floor(Math.max(0,Number(s.lastDungeonResult.points)||0)*.4);
+ s.bureauGrantDate=today;s.bureauGrantAmount=amount;
+ if(amount>0){s.points=(Number(s.points)||0)+amount;addEvent('管理局每日拨款','根据上一次副本结算，管理局发放 '+amount+' 积分（结算积分的 40%）。','daily')}
+ save();return amount;
+}
+function render(){applyBureauDailyGrant();statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(s.combat);const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');renderStatusTags();renderCurrentSchedulePeek();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
+function renderCurrentSchedulePeek(){
+ const node=$('currentSchedulePeek');if(!node)return;
+ const now=new Date(),hourStart=new Date(now);hourStart.setMinutes(0,0,0);
+ const pad=n=>String(n).padStart(2,'0');
+ const esc=value=>String(value||'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
+ const rows=[0,1,2].map(offset=>{
+  const time=new Date(hourStart.getTime()+offset*3600000),key=dayKey(time),hour=time.getHours(),ev=eventAt(key,hour);
+  const activity=ev?.activity||(offset===0?s.currentActivity:'idle')||'idle';
+  const title=ev?.title||activityLabel(activity)||'自由时间';
+  const label=offset===0?'现在':('+'+offset+' 小时');
+  return '<div class="current-schedule-item '+(offset===0?'is-current':'')+'"><div class="current-schedule-time"><b>'+label+'</b><small>'+pad(hour)+':00</small></div><strong>'+esc(title)+'</strong></div>';
+ }).join('');
+ node.innerHTML=rows;
+}
 function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.length?items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join(''):'<span class="status-empty">暂无状态</span>'};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
 function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
@@ -757,15 +779,7 @@ function relation(action){
 function pantryCount(k){return Math.max(0,Number(s.pantry?.[k]||0))}
 function canCook(id){const r=recipes[id];return !!r&&Object.entries(r.ingredients).every(([k,n])=>pantryCount(k)>=n)}
 function hasCookableRecipe(){return (s.unlockedRecipes||[]).some(id=>canCook(id))}
-function completeAutonomousCooking(at=Date.now()){
- const choices=(s.unlockedRecipes||[]).filter(id=>canCook(id));if(!choices.length)return false;
- const id=choices[Math.floor(Math.random()*choices.length)],recipe=recipes[id];
- Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);
- addInventoryItem('成品食物·'+recipe.name,'food');
- addEvent('阿尔完成了料理',recipe.name+'已放入物品栏。','autonomous');
- remember('cooking','阿尔亲手制作：'+recipe.name,2);
- return true;
-}
+
 function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);saySystem('食材放进冰箱了。');save();render();openTab('商店',true)}
 function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode','bathroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode','bedroom-mode','bathroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
@@ -1008,8 +1022,8 @@ function processActivityAt(value){
  let ev=resolved.event,activity=resolved.activity;
  let placedMealEaten=false;
  if([7,12,18].includes(hour)){
-  const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·'));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:Math.min(45,recipe?.hunger||28),fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
+  const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·')&&['living','bedroom','kitchen','bathroom'].includes(item.room));
+  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
   else{
    const mealKey=key+'-'+({7:'breakfast',12:'lunch',18:'dinner'}[hour]);
    if(!s.mealMissedKeys.includes(mealKey)){
@@ -1030,8 +1044,7 @@ function processActivityAt(value){
   // Scene presentation is applied once after the authoritative state is committed.
  }
  if(sessionStart&&!s.activeInteraction){
-  if(activity==='cook')completeAutonomousCooking(d.getTime());
-  else if(ev?.kind==='autonomous'){
+  if(ev?.kind==='autonomous'){
    const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。'};
    if(notes[activity])addEvent('阿尔的日常记录',notes[activity],'autonomous');
   }
@@ -1385,23 +1398,23 @@ const ARDAY_GUILD_MATERIALS=['异常结晶','稳定剂','旧时代零件','记�
 function guildWeekKey(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function renderGuildCareer(){
  $('drawerTitle').textContent='职业';$('choices').className='choices career-view';
- const g=ARDAY_FACTIONS.find(f=>f.id===s.factionMembership&&f.type==='工会'),tabs='<nav class="career-tabs"><button data-career-tab="real"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild" class="active"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>';
+ const g=ARDAY_FACTIONS.find(f=>f.id===s.factionMembership),tabs='<nav class="career-tabs"><button data-career-tab="real"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild" class="active"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>';
  if(!g){$('choices').innerHTML=tabs+'<section class="guild-career-empty"><div class="guild-empty-emblem"><i>✣</i><b>GUILD</b></div><h2>未登记组织</h2><button id="guildRecruitJump" class="recruit-action">选择组织</button></section>';$('choices').querySelector('#guildRecruitJump').onclick=()=>openTab('招募',true);$('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));$('drawer').classList.add('open');return}
- const last=Math.max(0,Number(s.lastDungeonResult?.points)||0),due=Math.ceil(last*.2),today=keyAt(Date.now());
+ const isBureau=g.id==='anomaly-bureau',last=Math.max(0,Number(s.lastDungeonResult?.points)||0),due=Math.ceil(last*.2),today=keyAt(Date.now()),bureauGrant=Math.floor(last*.4);
  s.guildMaterials=s.guildMaterials||{week:'',free:0,paid:0};if(s.guildMaterials.week!==guildWeekKey())s.guildMaterials={week:guildWeekKey(),free:0,paid:0};
  if(!s.guildApplicants||s.guildApplicants.guildId!==g.id){const ix=highestUnlockedDungeonIndex();s.guildApplicants={guildId:g.id,list:['裴知行','顾南枝','陆闻舟'].map((name,i)=>({id:'guild-'+g.id+'-'+i,name,role:['前线突击','异常侦察','战术支援'][i],combat:Math.min(100,s.combat+18+i*9),malice:10+i*12,maxTier:DUNGEON_TIERS[Math.min(8,ix+i+1)],portrait:['刃','鸦','灯'][i]}))}}
  const people=s.guildApplicants.list.filter(m=>!s.teamRoster.some(x=>x.id===m.id));
  s.guildCommission=s.guildCommission||{status:'available',title:'边境异常清剿',detail:'完成一次成功副本挑战',minTier:highestUnlockedDungeonTier(),reward:90};const c=s.guildCommission;s.guildPanelOpen=s.guildPanelOpen||{};
   const panel=(id,art,eyebrow,title,content)=>`<details class="guild-career-section" data-guild-panel="${id}" ${s.guildPanelOpen[id]===false?'':'open'}><summary><div class="guild-section-art ${art}"><i></i><b></b><em></em></div><div class="guild-section-heading"><small>${eyebrow}</small><strong>${title}</strong></div><span class="guild-section-toggle" aria-hidden="true"></span></summary><div class="guild-section-body">${content}</div></details>`;
   $('choices').innerHTML = tabs +
-    `<section class="guild-career-banner"><div class="guild-banner-sigil"><i>${g.mark}</i></div><div class="guild-banner-identity"><small>FACTION RECORD / ${String(g.guildRank).padStart(2,'0')}</small><h2>${g.name}</h2><div class="guild-rank-track"><i style="width:${(5-g.guildRank)*25}%"></i></div></div><b class="guild-banner-rank">#${g.guildRank}</b></section>` +
-    panel('contribution','art-contribution','01 / DAILY DUES','组织贡献',`<strong class="guild-due">${due} <small>积分 · 今日应缴</small></strong><button id="guildContribute" class="recruit-action" ${s.guildContributionDay===today||!last||s.points<due?'disabled':''}>${s.guildContributionDay===today?'今日已贡献':!last?'完成副本后开放':s.points<due?'积分不足':'提交贡献'}</button><div class="guild-contribution-total"><i>✦</i><b>${s.guildContributionTotal||0}</b><small>累计贡献</small></div>`) +
+    `<section class="guild-career-banner"><div class="guild-banner-sigil"><i>${g.mark}</i></div><div class="guild-banner-identity"><small>${isBureau?'OFFICIAL AUTHORITY':'FACTION RECORD / '+String(g.guildRank).padStart(2,'0')}</small><h2>${g.name}</h2>${isBureau?'<span class="guild-official-caption">官方直属机构</span>':'<div class="guild-rank-track"><i style="width:${(5-g.guildRank)*25}%"></i></div>'}</div>${isBureau?'<b class="guild-banner-rank">局</b>':'<b class="guild-banner-rank">#'+g.guildRank+'</b>'}</section>` +
+    (isBureau?panel('contribution','art-contribution','01 / DAILY ALLOCATION','每日积分拨款',`<strong class="guild-due">+${bureauGrant} <small>积分 · 每日发放</small></strong><div class="guild-bureau-grant-note">依据上一次副本结算积分的 40% 计算</div><div class="guild-contribution-total"><i>✦</i><b>${s.bureauGrantDate===today?'已发放':s.lastDungeonResult?'待发放':'等待首次副本结算'}</b><small>今日拨款状态</small></div>`):panel('contribution','art-contribution','01 / DAILY DUES','组织贡献',`<strong class="guild-due">${due} <small>积分 · 今日应缴</small></strong><button id="guildContribute" class="recruit-action" ${s.guildContributionDay===today||!last||s.points<due?'disabled':''}>${s.guildContributionDay===today?'今日已贡献':!last?'完成副本后开放':s.points<due?'积分不足':'提交贡献'}</button><div class="guild-contribution-total"><i>✦</i><b>${s.guildContributionTotal||0}</b><small>累计贡献</small></div>`)) +
     panel('applicants','art-applicants','02 / PERSONNEL','成员引荐',`<div class="guild-applicant-list">${people.map(m=>`<article class="guild-applicant"><div class="guild-applicant-mark">${m.portrait}</div><div><b>${m.name}</b><small>战力 ${m.combat} · 最高副本 ${m.maxTier}</small></div><button data-guild-invite="${m.id}">邀请</button></article>`).join('')}</div>`) +
     panel('materials','art-materials','03 / QUARTERMASTER','物资配给',`<div class="guild-material-count">免费 ${s.guildMaterials.free}/1 · 积分兑换 ${s.guildMaterials.paid}/2</div><div class="guild-material-grid">${ARDAY_GUILD_MATERIALS.map((n,i)=>`<button data-guild-material="${i}">${n}<small>${s.guildMaterials.free<1?'免费':'60 积分'}</small></button>`).join('')}</div>`) +
     panel('commission','art-commission','04 / FIELD OPERATION','特别行动',`<h3>${c.title}</h3><div class="guild-contract-meta"><b>${c.minTier}</b><span>等级</span><strong>${c.reward}</strong><span>积分</span></div><button id="guildCommission" class="recruit-action" ${c.status!=='available'?'disabled':''}>${c.status==='active'?'委托进行中':c.status==='completed'?'已完成':'接受委托'}</button>`);
  $('choices').querySelectorAll('[data-guild-panel]').forEach(el=>el.addEventListener('toggle',()=>{s.guildPanelOpen[el.dataset.guildPanel]=el.open;save()}));
  $('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));
- $('choices').querySelector('#guildContribute').onclick=()=>{if(s.guildContributionDay===today||!last||s.points<due)return;s.points-=due;s.guildContributionDay=today;s.guildContributionTotal=(s.guildContributionTotal||0)+due;save();render();renderGuildCareer();toast('今日公会贡献已提交')};
+ if(!isBureau){const contributeButton=$('choices').querySelector('#guildContribute');if(contributeButton)contributeButton.onclick=()=>{if(s.guildContributionDay===today||!last||s.points<due)return;s.points-=due;s.guildContributionDay=today;s.guildContributionTotal=(s.guildContributionTotal||0)+due;save();render();renderGuildCareer();toast('今日公会贡献已提交')}}
  $('choices').querySelectorAll('[data-guild-invite]').forEach(b=>b.onclick=()=>{if(s.teamRoster.length>=8){toast('队友名单已满');return}const m=people.find(x=>x.id===b.dataset.guildInvite);if(!m)return;if(Math.random()<.78){s.teamRoster.push({...m,selected:false,recruited:true});save();toast(m.name+'已加入队友名单')}else toast(m.name+'暂时无法离开当前任务');renderGuildCareer()});
  $('choices').querySelectorAll('[data-guild-material]').forEach(b=>b.onclick=()=>{const n=ARDAY_GUILD_MATERIALS[Number(b.dataset.guildMaterial)];if(!n)return;if(s.guildMaterials.free<1)s.guildMaterials.free++;else{if(s.guildMaterials.paid>=2){toast('本周兑换次数已用完');return}if(s.points<60){toast('积分不足，需要 60 积分');return}s.points-=60;s.guildMaterials.paid++}addInventoryItem(n,'material');save();render();renderGuildCareer()});
  $('choices').querySelector('#guildCommission').onclick=()=>{if(c.status!=='available')return;s.guildCommission={...c,status:'active'};save();renderGuildCareer();toast('已接受特殊委托')};
