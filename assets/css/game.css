@@ -1598,3 +1598,30 @@ html body .stage .drawer.profile-expanded.open .choices{
 .dungeon-event-scene.tone-apparition,.dungeon-event-scene.tone-trap{background:linear-gradient(145deg,#3d3033,#76544e)}.dungeon-event-scene.tone-investigate,.dungeon-event-scene.tone-rules{background:linear-gradient(145deg,#29394a,#586879)}.dungeon-event-scene.tone-supply,.dungeon-event-scene.tone-reward{background:linear-gradient(145deg,#3b4339,#7a7659)}.dungeon-event-scene.tone-cognition{background:linear-gradient(145deg,#393247,#62536c)}
 .dungeon-event-label{margin-bottom:8px;color:#8e806a;font:700 8px Arial,sans-serif;letter-spacing:.18em}.dungeon-event-choice{display:flex;width:100%;min-height:48px;align-items:center;gap:11px;padding:9px 10px;border:0;border-top:1px solid #d8d1c3;background:transparent;color:#46534e;text-align:left}.dungeon-event-choice>span{color:#a18c6b;font:italic 14px Georgia,serif}.dungeon-event-choice>b{flex:1;font:600 11px "Noto Serif SC",serif}.dungeon-event-choice>i{color:#a18c6b;font:normal 20px Georgia,serif}.dungeon-event-footnote{margin:0;padding:0 3px;color:#8e887b;font:9px/1.8 "Noto Serif SC",serif}
 @media(max-width:390px){.dungeon-board-grid{grid-template-rows:repeat(4,58px)}.dungeon-board-cell b{font-size:8px}.dungeon-board-center{width:94px;height:94px}.dungeon-board-meta{gap:8px}.dungeon-board-title{font-size:27px}}
+
+/* Optional board choice: keep the original black-box mission intact */
+.mission-board-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 12px 4px}
+.mission-board-choice button{min-height:48px;border:1px solid #b8ad98;background:linear-gradient(145deg,#e9e3d6,#d8d2c4);color:#495b53;font:600 12px "Noto Serif SC",serif;letter-spacing:.08em;box-shadow:0 3px 0 #b8ae9b}
+.mission-board-choice button:first-child{border-color:#52665d;background:linear-gradient(145deg,#586f63,#344b45);color:#f0e7d5;font-size:16px}
+.mission-board-choice button:active{transform:translateY(2px);box-shadow:0 1px 0 #b8ae9b}
+.dungeon-board-cover{padding:18px 19px 13px}
+.dungeon-board-title{margin:0;font-size:27px}
+.dungeon-board-map{padding:10px 9px}
+.dungeon-board-grid{grid-template-rows:repeat(4,58px);gap:4px}
+.dungeon-board-cell{border-color:#d0cabb;background:linear-gradient(145deg,#f0ede5,#e2dfd4)}
+.dungeon-board-cell span{font-size:22px}
+.dungeon-board-cell b{font-size:9px;letter-spacing:.04em}
+.dungeon-board-center{width:94px;height:94px;border-color:#aaa38e;background:radial-gradient(circle,#eee9dc,#c9c9bb)}
+.dungeon-board-controls{justify-content:center;padding:9px 12px}
+.dungeon-dice-display{min-width:54px;align-items:center}
+.dungeon-dice-display b{font-size:30px}
+.dungeon-roll-button{max-width:180px;min-height:48px;font-size:24px}
+.dungeon-board-notes{padding:7px 10px}
+.dungeon-log-row{font-size:9px;padding:5px 0}
+.dungeon-event-scene{min-height:205px;padding:25px 19px 20px}
+.dungeon-event-symbol{margin:12px 0 7px;font-size:40px}
+.dungeon-event-scene h2{font-size:21px}
+.dungeon-event-scene p{font-size:11px}
+.dungeon-event-choices{padding:7px 12px}
+.dungeon-event-choice{min-height:44px}
+.dungeon-event-footnote,.dungeon-board-kicker,.dungeon-board-cover>p,.dungeon-board-map-head{display:none!important}
