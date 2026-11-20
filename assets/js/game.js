@@ -1544,10 +1544,11 @@ function keepClassicDungeon(){const mission=s.activeDungeon;if(!mission)return;m
 function showDungeonPending(){
  const mission=s.activeDungeon;if(!mission)return;
  if(mission.mode==='board'){if(mission.board?.pending)renderDungeonEvent();else renderDungeonBoard();return}
- $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view mission-status-view';
- const end=Number(mission.scheduleEndAt||mission.endsAt),time=end?new Date(end).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'—';
- $('choices').innerHTML='<section class="mission-status-compact"><div class="mission-status">副本进行中</div><div class="mission-clock" id="missionClock">日程结束时结算 · '+time+'</div><div class="mission-finish">预计结束 '+time+'</div></section><section class="mission-board-choice"><button id="enterDungeonBoard" aria-label="进入转盘">⚄</button><button id="keepClassicDungeon">继续</button></section>';
- const enter=$('enterDungeonBoard');if(enter)enter.onclick=chooseDungeonBoard;const keep=$('keepClassicDungeon');if(keep)keep.onclick=keepClassicDungeon;updateDungeonCountdown();
+ $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view';
+ $('choices').innerHTML='<section class="mission-waiting"><div class="mission-portal"><svg viewBox="0 0 240 220" role="img" aria-label="副本入口"><path d="M25 198V87Q25 20 120 12Q215 20 215 87V198" fill="none" stroke="#6e7770" stroke-width="4"/><path d="M48 198V90Q48 38 120 30Q192 38 192 90V198" fill="none" stroke="#a18d70" stroke-width="2"/><path d="M83 198V99Q83 65 120 60Q157 65 157 99V198" fill="#5b6870" stroke="#d2c4aa" stroke-width="2"/><circle cx="120" cy="111" r="13" fill="none" stroke="#e4d5b8" stroke-width="2"/><path d="M120 93V129M102 111H138" stroke="#e4d5b8" stroke-width="1.5"/><path d="M12 198H228M40 211H200" stroke="#7d796e" stroke-width="2"/></svg></div><div class="mission-seal">'+mission.tier+'</div><div class="mission-status">副本进行中</div></section>';
+ const matched=mission.snapshot?.matchedStrangers||[];$('choices').innerHTML+='<section class="mission-matchmaking"><div class="mission-matchmaking-head"><b>临时匹配</b><small>BLACK-BOX MATCHMAKING</small></div><div class="mission-matchmaking-slots">'+matched.map((m,i)=>'<div class="mission-match-slot"><span>?</span><b>陌生队友 '+(i+1)+'</b><small>数据未知</small></div>').join('')+'</div></section>';
+ $('choices').innerHTML+='<section class="mission-board-choice"><button id="enterDungeonBoard" aria-label="进入转盘">⚄</button><button id="keepClassicDungeon">继续</button></section>';
+ const enter=$('enterDungeonBoard');if(enter)enter.onclick=chooseDungeonBoard;const keep=$('keepClassicDungeon');if(keep)keep.onclick=keepClassicDungeon;
 }
 function updateDungeonCountdown(){const m=s.activeDungeon;if(!m||m.mode==='board')return;const clock=$('missionClock');if(clock)clock.textContent='日程结束时结算 · '+new Date(Number(m.scheduleEndAt||m.endsAt)).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}
 function dungeonCooldownRemaining(){return 0}
