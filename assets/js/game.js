@@ -1682,7 +1682,7 @@ function initArday3D(){
   const furnitureHotspots=[];
   function enterRoomFromDoor(mode){
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode','hall-mode');
-   if(mode==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);activeActivity='idle';}
+   if(mode==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);activeActivity='idle';}else if(roomMode==='hall'){person.position.set(-4.25,0,0);target.copy(person.position);}
    else{
     if(mode==='kitchen')stage.classList.add('kitchen-mode');
     if(mode==='bedroom')stage.classList.add('bedroom-mode');
@@ -3213,6 +3213,8 @@ function initArday3D(){
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
+  const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door'];
+  s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id));
   const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.kind!=='scene');
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
   // Resolve support relationships after every saved item exists. The old
@@ -3647,6 +3649,7 @@ function persistFurniture(item){
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
     const dragState=furnitureDrag,g=dragState.group,item=furnitureRegistry.find(x=>x.group===g);furnitureDrag=null;
     if(item){persistFurniture(item);persistSupportedChildren(item);if(item.isDoor&&!dragState.moved)openDoorWheel(item);else toast(item.name+'位置已保存');}
+    pointers.delete(e.pointerId);drag=null;pinchCenter=null;inertiaTheta=0;inertiaPhi=0;
     return;
    }
    if(doorTap&&doorTap.pointerId===e.pointerId){
