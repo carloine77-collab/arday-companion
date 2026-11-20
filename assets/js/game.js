@@ -1656,7 +1656,7 @@ function initArday3D(){
    else{
     /* Position is restored from the canonical placed entity above. */
    }
-   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:!!group.userData.isDoor,doorDestination:record?.destination||group.userData.roomTarget||(group.userData.isDoor?'living':null)};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;}
+   const item={id,name,room,group,width,depth,anchor,action,button:null,wallAxis,wallSide,wallRange,wallAnchorY:wallAxis?(anchor?.[1]??2.55)-group.position.y:0,isDoor:!!group.userData.isDoor,doorDestination:record?.destination||group.userData.roomTarget||(group.userData.isDoor?'living':null)};if(item.isDoor){group.userData.roomTarget=item.doorDestination||'living';group.userData.doorFurniture=true;updateDoorDestinationLabel(group,item.doorDestination||'living');}
    const existing=document.querySelector('.spot-'+id);
    item.button=existing||document.createElement('button');
    if(!existing){
@@ -2678,6 +2678,11 @@ function initArday3D(){
     // Consistent brass lever, lock escutcheon and destination plaque.
     cyl(.39,1.18,.16,.065,.065,.025,brass,18);box(.47,1.18,.19,.19,.035,.035,brass);cyl(.39,.94,.16,.035,.035,.025,m.metal,14);
     const plaque=box(0,2.06,.19,.52,.18,.045,brass);plaque.userData.doorDestinationPlaque=true;
+    const labelCanvas=document.createElement('canvas');labelCanvas.width=320;labelCanvas.height=96;
+    const labelTexture=new T.CanvasTexture(labelCanvas);labelTexture.encoding=T.sRGBEncoding;
+    const labelMesh=new T.Mesh(new T.PlaneGeometry(.96,.29),new T.MeshBasicMaterial({map:labelTexture,transparent:true,side:T.DoubleSide,depthWrite:false}));
+    labelMesh.position.set(0,2.66,.205);group.add(labelMesh);
+    group.userData.doorDestinationCanvas=labelCanvas;group.userData.doorDestinationTexture=labelTexture;group.userData.doorDestinationLabel=labelMesh;
     group.userData.doorVariant=variant||'标准胡桃木';group.userData.doorPlaque=plaque;
    }else if(modelName==='懒人沙发'){
     width=1.5;depth=1.25;height=.85;action=()=>openFurnitureActions('sofa',id);
@@ -3321,13 +3326,26 @@ function persistFurniture(item){
    if(item.wallAxis){saved.wallSide=item.wallSide;saved.wallOffset=wallOffset(item)}
    save();
   }
+  function updateDoorDestinationLabel(group,destination){
+   const canvas=group?.userData?.doorDestinationCanvas,texture=group?.userData?.doorDestinationTexture;
+   if(!canvas||!texture)return;
+   const labels={living:'起居室',kitchen:'厨房',bedroom:'卧室',bathroom:'卫生间',hall:'公共大厅'},label=labels[destination]||'起居室',ctx=canvas.getContext('2d');
+   ctx.clearRect(0,0,canvas.width,canvas.height);
+   ctx.fillStyle='rgba(247,239,224,.96)';ctx.beginPath();ctx.roundRect(3,3,314,90,15);ctx.fill();
+   ctx.strokeStyle='#967657';ctx.lineWidth=5;ctx.stroke();
+   ctx.fillStyle='#574532';ctx.font='600 48px "Noto Serif SC",serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,160,49);
+   texture.needsUpdate=true;
+  }
   function openDoorWheel(item){
    if(!item?.isDoor)return;
    closeFurnitureActions();
    const rect=stage.getBoundingClientRect(),button=item.button;
-   const x=button?Number.parseFloat(button.style.left):rect.width/2,y=button?Number.parseFloat(button.style.top):rect.height/2;
-   const cx=Number.isFinite(x)?x:rect.width/2,cy=Number.isFinite(y)?y:rect.height/2;
-   const radius=Math.max(78,Math.min(102,Math.min(rect.width,rect.height)*.19));
+   const rawX=button?Number.parseFloat(button.style.left):rect.width/2,rawY=button?Number.parseFloat(button.style.top):rect.height/2;
+   let radius=Math.min(92,Math.min(rect.width,rect.height)*.18);
+   radius=Math.max(48,radius);
+   const extent=()=>radius*.76+36;
+   if(rect.width<extent()*2||rect.height<extent()*2)radius=Math.max(42,Math.min(radius,(Math.min(rect.width,rect.height)-16)/2.1));
+   const edge=extent(),cx=Math.max(edge,Math.min(rect.width-edge,Number.isFinite(rawX)?rawX:rect.width/2)),cy=Math.max(edge,Math.min(rect.height-edge,Number.isFinite(rawY)?rawY:rect.height/2));
    const wheel=document.createElement('div');wheel.className='furniture-wheel door-wheel';wheel.style.left=cx+'px';wheel.style.top=cy+'px';wheel.style.width=radius*2+'px';wheel.style.height=radius*2+'px';
    const center=document.createElement('div');center.className='furniture-wheel-center';center.style.left=radius+'px';center.style.top=radius+'px';
    const title=document.createElement('span');title.className='furniture-wheel-title';title.textContent='门的去向';
@@ -3338,13 +3356,9 @@ function persistFurniture(item){
     const icon=document.createElement('span');icon.className='furniture-wheel-icon';icon.textContent=symbol;
     const textNode=document.createElement('span');textNode.className='furniture-wheel-label';textNode.textContent=label;
     button.append(icon,textNode);button.setAttribute('aria-pressed',item.doorDestination===value?'true':'false');
-    button.onclick=()=>{item.doorDestination=value;item.group.userData.roomTarget=value;const plaque=item.group.userData.doorPlaque;if(plaque?.material?.color)plaque.material.color.setHex(value==='hall'?0xc6ad83:value==='bathroom'?0xa6b9ae:0xc5a15d);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
+    button.onclick=()=>{item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);const plaque=item.group.userData.doorPlaque;if(plaque?.material?.color)plaque.material.color.setHex(value==='hall'?0xc6ad83:value==='bathroom'?0xa6b9ae:0xc5a15d);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
     wheel.appendChild(button);
    });
-   const recycle=document.createElement('button');recycle.type='button';recycle.className='furniture-wheel-action door-wheel-recycle';recycle.style.left=radius+'px';recycle.style.top=(radius*1.91)+'px';
-   const recycleIcon=document.createElement('span');recycleIcon.className='furniture-wheel-icon';recycleIcon.textContent='⌫';
-   const recycleLabel=document.createElement('span');recycleLabel.className='furniture-wheel-label';recycleLabel.textContent='收回背包';recycle.append(recycleIcon,recycleLabel);
-   recycle.onclick=()=>{closeFurnitureActions();recycleDoor(item)};wheel.appendChild(recycle);
    stage.appendChild(wheel);
    wheel._outsideHandler=event=>{if(!wheel.contains(event.target)&&event.target!==item.button)closeFurnitureActions()};
    wheel._escapeHandler=event=>{if(event.key==='Escape')closeFurnitureActions()};
