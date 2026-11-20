@@ -157,7 +157,7 @@ s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='obj
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun','combat'];
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s))}catch(e){}}
-function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(s.combat);const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>'<div class="combat-attribute"><div class="combat-attribute-head"><span>'+n+'</span><b>'+s.attributes[k]+'</b></div><i class="combat-attribute-meter"><b style="width:'+s.attributes[k]+'%"></b></i></div>').join('');renderStatusTags();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
+function render(){statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(s.combat);const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');renderStatusTags();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});let cash=$('cash');if(cash)cash.textContent='共同账户 ¥'+s.money;if(typeof refreshTopActions==='function')refreshTopActions();}
 function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.length?items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join(''):'<span class="status-empty">暂无状态</span>'};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
 function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
@@ -658,6 +658,25 @@ function ensureScheduleAt(value){
  ensureDay(currentKey);
  for(let i=1;i<=2;i++)ensureDay(dayKey(plusDays(dayAnchor(),i)));
  if(requestedKey>=currentKey)ensureDay(requestedKey);
+ // Replan only future autonomous slots when the set or placement of home furniture changes.
+ const furnitureSignature=JSON.stringify((s.placed||[]).filter(item=>item&&item.id).map(item=>({id:String(item.id),name:String(item.name||''),room:String(item.room||''),supportId:String(item.supportId||''),kind:furnitureKindForPlaced(item)})).sort((a,b)=>a.id.localeCompare(b.id)));
+ if(s.calendar.autonomyFurnitureSignature!==furnitureSignature){
+  const currentHour=new Date().getHours();
+  let recent=(s.activityLog||[]).slice(-5).map(item=>item.activity).filter(Boolean);
+  Object.keys(s.calendar.days||{}).filter(key=>key>=currentKey).sort().forEach(key=>{
+   const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start);
+   day.forEach(ev=>{
+    const isFuture=key>currentKey||Number(ev.start)>currentHour;
+    if(ev.kind==='autonomous'&&isFuture){
+     const start=ev.start,end=ev.end,withPlayer=ev.withPlayer;
+     const planned=createAutonomousScheduleEvent(start,recent);
+     Object.assign(ev,planned,{start,end,...(withPlayer?{withPlayer}: {})});
+    }
+    if(ev.activity&&ev.activity!=='idle'&&ev.activity!=='autonomous'){recent.push(ev.activity);if(recent.length>5)recent.shift()}
+   });
+  });
+  s.calendar.autonomyFurnitureSignature=furnitureSignature;
+ }
  if(s.job?.active){
   Object.keys(s.calendar.days).filter(k=>k>=s.job.startDate).sort().forEach(key=>{
    if(!(s.calendar.days[key]||[]).some(e=>e.jobShift&&e.jobId===s.job.id)){
@@ -910,7 +929,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   if(!grouped.has(id))grouped.set(id,[]);
   grouped.get(id).push(option);
  }
- const repeatCosts=[3.5,2.2,1.3,.7,.3];
+ const repeatCosts=[7,4.5,2.5,1.2,.4];
  const candidates=[...grouped.entries()].map(([id,options])=>{
   // One activity receives one score regardless of how many pieces of furniture can host it.
   const option=options[Math.floor(Math.random()*options.length)],{meta}=option,spec=meta.autonomy;
@@ -926,7 +945,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
  }).filter(item=>Number.isFinite(item.score));
  if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bathroom-mode')?'bathroom':$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
- const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/10)}));
+ const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/13)}));
  const total=weighted.reduce((sum,item)=>sum+item.weight,0);
  let roll=Math.random()*total;
  for(const item of weighted){roll-=item.weight;if(roll<=0)return item}
@@ -1395,8 +1414,8 @@ function showRecruitment(tab){
  $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');$('drawerTitle').textContent='招募';$('choices').className='choices recruitment-view';
  const active=tab||s.recruitmentTab||'organization';s.recruitmentTab=active;
  if(active==='personal'&&(!recruitmentCandidates.length||recruitmentMarketDay!==keyAt(Date.now())))refreshRecruitmentMarket(false);
- const orgs=ARDAY_FACTIONS.map((f,i)=>{const member=s.factionMembership===f.id,clue=({0:'signal',3:'dispatch',6:'seal'})[i],found=clue&&s.factionClues.includes(clue);return '<article class="faction-card faction-tone-'+(i%4)+' faction-'+f.id+'"><div class="faction-poster"><span>'+f.type+'</span><b>'+f.mark+'</b><small>'+String(i+1).padStart(2,'0')+' / PUBLIC FACTION</small></div><div class="faction-card-copy">'+(f.type==='工会'?'<div class="guild-rank-mark"><small>GUILD RANK</small><b>#'+f.guildRank+'</b></div>':'')+'<small>'+f.field+'</small><h3>'+f.name+'</h3><p>'+f.desc+'</p><button class="recruit-action" data-faction="'+f.id+'" '+(s.factionMembership&&!member?'disabled':'')+'>'+(member?'已加入':s.factionMembership?'已加入其他组织':s.factionApplications[f.id]?'再次申请':'申请加入')+'</button>'+(clue?'<button class="faction-clue '+(found?'found':'')+'" data-clue="'+clue+'">'+(found?'线索已记录':'拾取异常档案')+'</button>':'')+'</div></article>'}).join('');
- const candidates=recruitmentCandidates.map((c,i)=>{const inv=recruitmentInvites[c.id]||{},joined=s.teamRoster.some(m=>m.id===c.id),action=joined?'已确认队友':inv.status==='pending'?'查看回复':'邀请入队',attr=joined?'disabled':inv.status==='pending'?'data-check-invite="'+c.id+'"':'data-invite-candidate="'+c.id+'"';return '<article class="candidate-card candidate-tone-'+(i%4)+'"><div class="candidate-portrait"><i>'+c.portrait+'</i><b></b></div><div class="candidate-copy"><div class="candidate-power"><small>COMBAT POWER</small><b>'+c.combat+'</b></div><h3>'+c.name+'</h3><strong>'+c.role+'</strong><div class="candidate-tier">最高副本等级 <b>'+c.maxTier+'</b></div><div class="candidate-meter"><i style="width:'+c.combat+'%"></i></div><button class="recruit-action" '+attr+' '+(joined?'disabled':'')+'>'+action+'</button></div></article>'}).join('');
+ const orgs=ARDAY_FACTIONS.map((f,i)=>{const member=s.factionMembership===f.id,clue=({0:'signal',3:'dispatch',6:'seal'})[i],found=clue&&s.factionClues.includes(clue);return '<article class="faction-card faction-tone-'+(i%4)+' faction-'+f.id+'"><div class="faction-poster"><span>'+f.type+'</span><b>'+f.mark+'</b><small>'+String(i+1).padStart(2,'0')+' / PUBLIC FACTION</small></div><div class="faction-card-copy">'+(f.type==='工会'?'<div class="guild-rank-mark"><small>GUILD RANK</small><b>#'+f.guildRank+'</b></div>':'')+'<h3>'+f.name+'</h3><p>'+f.desc+'</p><button class="recruit-action" data-faction="'+f.id+'" '+(s.factionMembership&&!member?'disabled':'')+'>'+(member?'已加入':s.factionMembership?'已加入其他组织':s.factionApplications[f.id]?'再次申请':'申请加入')+'</button>'+(clue?'<button class="faction-clue '+(found?'found':'')+'" data-clue="'+clue+'">'+(found?'线索已记录':'拾取异常档案')+'</button>':'')+'</div></article>'}).join('');
+ const candidates=recruitmentCandidates.map((c,i)=>{const inv=recruitmentInvites[c.id]||{},joined=s.teamRoster.some(m=>m.id===c.id),action=joined?'已确认队友':inv.status==='pending'?'查看回复':'邀请入队',attr=joined?'disabled':inv.status==='pending'?'data-check-invite="'+c.id+'"':'data-invite-candidate="'+c.id+'"';return '<article class="candidate-card candidate-tone-'+(i%4)+'"><div class="candidate-portrait"><i>'+c.portrait+'</i><b></b></div><div class="candidate-copy"><div class="candidate-power"><small>COMBAT POWER</small><b>'+c.combat+'</b></div><h3>'+c.name+'</h3><div class="candidate-tier">最高副本等级 <b>'+c.maxTier+'</b></div><div class="candidate-meter"><i style="width:'+c.combat+'%"></i></div><button class="recruit-action" '+attr+' '+(joined?'disabled':'')+'>'+action+'</button></div></article>'}).join('');
  const n=s.factionClues.length,hidden=n>=3?'<article class="faction-card hidden-rebel-card"><div class="faction-poster"><span>UNLISTED · 09</span><b>零</b><small>NO PUBLIC RECORD</small></div><div class="faction-card-copy"><small>未登记组织</small><h3>零号反抗组织</h3><p>加密联络入口</p><button class="recruit-action" data-rebel-contact="true" '+(s.factionMembership?'disabled':'')+'>'+(s.factionMembership==='zero-resistance'?'已建立联系':s.factionMembership?'已加入其他组织':'建立秘密联系')+'</button></div></article>':'<div class="hidden-faction-note is-locked"><small>ARCHIVE FRAGMENTS</small><b>缺失档案 '+n+' / 3</b></div>';
  const orgPanel='<section class="recruitment-masthead"><div class="recruitment-kicker">ARDAY PUBLIC HALL · FACTION OFFICE</div><h2>组织招募</h2></section><div class="faction-grid">'+orgs+'</div>'+hidden;
  const refreshDay=s.marketRefresh.day===keyAt(Date.now())?s.marketRefresh.count:0,personalPanel='<section class="recruitment-masthead personal-masthead"><div class="recruitment-kicker">ARDAY · OPEN PARTY CALL</div><h2>个人招募</h2></section><button class="market-refresh" data-refresh-market="true" '+(refreshDay>=2?'disabled':'')+'>↻　刷新人才市场　'+refreshDay+' / 2</button><div class="candidate-grid">'+candidates+'</div>';
