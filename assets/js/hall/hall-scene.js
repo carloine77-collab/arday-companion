@@ -177,12 +177,17 @@
   const zoneObjects=[];
   zones.forEach((z,index)=>{
    const area=new T.Group();
-   area.position.set(z.x,0,z.z);area.scale.set(1.2,1,1.2);
+   area.position.set(z.x,0,z.z);
+   // One shared vertical proportion rule keeps every ceiling-related element in the same architectural scale:
+   // walls, piers, capitals, roof trusses, fascia, suspended lights, signs and interior equipment all rise together.
+   // The base remains at floor level because the scale is applied around the district origin.
+   area.scale.set(1.2,1.16,1.2);
    // Each district turns its main frontage toward the central arrival concourse.
    // Local -Z is the frontage axis; the rotation therefore differs by district location.
    const hallCenter={x:-20,z:0};
    area.rotation.y=Math.atan2(hallCenter.x-z.x,hallCenter.z-z.z);
    area.userData.hallAction=z.id;area.name='hall-district-'+z.id;root.add(area);
+   // Unified architectural language: consistent vertical proportions, structural depth and material hierarchy.
    // The seven districts are built as inhabited architectural spaces, not collections of floating props.
    // Each frontage faces the central concourse; structural frames, wall depth and equipment share one scale.
    const title=new T.Mesh(new T.PlaneGeometry(24,6),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));
