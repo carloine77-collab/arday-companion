@@ -37,6 +37,7 @@ s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferen
 s.combat=clamp(Number(s.combat??35));
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[{id:'lin',name:'林澈',role:'前锋',combat:72,malice:12,selected:true,portrait:'⚔'},{id:'mori',name:'森',role:'侦察',combat:58,malice:8,selected:true,portrait:'⌕'},{id:'qiao',name:'乔',role:'支援',combat:46,malice:38,selected:false,portrait:'✦'}];
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});
+s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object'?s.recruitmentInvites:{};s.factionApplications=s.factionApplications&&typeof s.factionApplications==='object'?s.factionApplications:{};s.factionMembership=s.factionMembership||null;s.factionClues=Array.isArray(s.factionClues)?s.factionClues:[];
 s.points=Math.max(0,Math.floor(Number(s.points)||0));
 s.activeDungeon=s.activeDungeon&&s.activeDungeon.status==='active'?s.activeDungeon:null;
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
@@ -1298,40 +1299,24 @@ function showCareer(){
  $('drawer').classList.add('open');
 }
 
-function showRecruitment(){
- $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');
- $('drawerTitle').textContent='人才招募 · RECRUITMENT';
- $('choices').className='choices recruitment-view';
- const jobs=[
-  {id:'assistant-editor',title:'出版编辑助理',salary:185,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:'协助整理稿件、核对资料与日常出版事务。'},
-  {id:'research-assistant',title:'研究助理',salary:260,start:9,end:12,minFriend:28,minEnergy:42,skill:'reading',skillMin:2,desc:'参与资料检索、文献整理与专题研究。'},
-  {id:'content-planner',title:'内容策划',salary:225,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:'负责内容构思、文字撰写与专题策划。'}
- ];
- const day=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[day]=s.jobApplications[day]||{};
- const status=s.job?.active?'<section class="recruitment-current">'+careerPoster(s.job.title,0)+'<strong>'+s.job.title+'</strong><p>¥'+s.job.salary+' / DAY</p></section>':'';
- const cards=jobs.map((j,i)=>{
-  const attempted=!!s.jobApplications[day][j.id],skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0);
-  const eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
-  const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
-  return '<article class="recruitment-card illustrated-recruitment-card">'+careerPoster(j.title,i)+'<div class="recruitment-card-top"><span>✦</span><span class="recruitment-salary">¥'+j.salary+' <small>/ DAY</small></span></div><h3>'+j.title+'</h3><div class="recruitment-meta"><span>◷ '+pad(j.start)+':00–'+pad(j.end)+':00</span><span>✧ '+Math.round(chance*100)+'%</span></div><button class="recruitment-apply" data-recruit-job="'+j.id+'" '+(attempted||s.job?.active?'disabled':'')+'>'+(s.job?.active?'已有在职岗位':attempted?'今日已申请':'提交申请')+'</button></article>';
- }).join('');
- $('choices').innerHTML='<header class="recruitment-masthead">'+careerPoster('人才招募',0)+'<div class="recruitment-kicker">ARDAY PUBLIC HALL</div><h2>人才招募处</h2></header>'+status+'<div class="recruitment-section-label"><span>公开职位</span></div>'+cards+'<footer class="recruitment-footnote"></footer>';
- $('drawer').classList.add('open');
- $('choices').querySelectorAll('[data-recruit-job]').forEach(button=>button.onclick=()=>{
-  const j=jobs.find(item=>item.id===button.dataset.recruitJob);if(!j)return;
-  if(s.job?.active){toast('当前已有在职岗位');return}
-  s.jobApplications=s.jobApplications||{};s.jobApplications[day]=s.jobApplications[day]||{};
-  if(s.jobApplications[day][j.id]){toast('这个职位今天已经申请过了');return}
-  s.jobApplications[day][j.id]={at:Date.now()};save();
-  const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
-  if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');showRecruitment();return}
-  const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));
-  if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showRecruitment();return}
-  const nextWorkday=plusDays(dayAnchor(),1);nextWorkday.setHours(12,0,0,0);const startDate=dayKey(nextWorkday);
-  s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(nextWorkday);save();
-  addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');
-  say('我找到工作了。明天开始上班，薪资按天结算。');showRecruitment();renderCalendar();toast('录用成功');
- });
+const ARDAY_FACTIONS=[
+{id:'iron-gate',name:'铁门公会',type:'工会',mark:'鐵',field:'边境探索',desc:'承接高危区域勘探与前线委托。'},{id:'night-heron',name:'夜鹭公会',type:'工会',mark:'鷺',field:'侦察情报',desc:'负责情报搜集、路线测绘与目标追踪。'},{id:'cinder-forge',name:'余烬公会',type:'工会',mark:'爐',field:'装备工造',desc:'研究异常材料、维护装备与改造器械。'},{id:'blue-transit',name:'蓝线公会',type:'工会',mark:'線',field:'运输后勤',desc:'经营补给网络、跨区运输与安全撤离。'},{id:'stillwater',name:'静水教团',type:'教团',mark:'水',field:'意识与梦境',desc:'招募能够辨识梦境污染与精神回响的人。'},{id:'convergence',name:'归一教团',type:'教团',mark:'一',field:'异常理论',desc:'以统一理论解释不同异常现象。'},{id:'last-candle',name:'余烛教团',type:'教团',mark:'燭',field:'遗物与仪式',desc:'保存旧时代遗物，研究仪式性异常。'},{id:'anomaly-bureau',name:'异常事务管理局',type:'管理局',mark:'局',field:'官方机构',desc:'负责异常事件登记、管制与公共安全。'}];
+const ARDAY_CANDIDATES=[
+{id:'candidate-yun',name:'闻野',role:'近战突入',combat:78,malice:18,portrait:'野',acceptance:.76,desc:'行动果断，擅长正面突破。'},{id:'candidate-sui',name:'苏弥',role:'环境侦察',combat:64,malice:9,portrait:'弥',acceptance:.82,desc:'观察敏锐，熟悉复杂地形。'},{id:'candidate-zhou',name:'周既白',role:'战术支援',combat:71,malice:27,portrait:'白',acceptance:.68,desc:'擅长临场调度，判断较为谨慎。'},{id:'candidate-luo',name:'罗缇',role:'异常研究',combat:52,malice:6,portrait:'缇',acceptance:.88,desc:'战斗能力一般，但能识别异常机制。'},{id:'candidate-yan',name:'严朔',role:'重装防御',combat:86,malice:42,portrait:'朔',acceptance:.55,desc:'防御能力突出，合作意愿不稳定。'},{id:'candidate-qi',name:'祁雾',role:'远程压制',combat:74,malice:61,portrait:'雾',acceptance:.48,desc:'输出能力强，行为动机难以判断。'}];
+function showRecruitment(tab){
+ $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');$('drawerTitle').textContent='招募';$('choices').className='choices recruitment-view';
+ const active=tab||s.recruitmentTab||'organization';s.recruitmentTab=active;
+ const orgs=ARDAY_FACTIONS.map((f,i)=>{const applied=!!s.factionApplications[f.id],member=s.factionMembership===f.id,clue=({0:'signal',3:'dispatch',6:'seal'})[i],found=clue&&s.factionClues.includes(clue);return '<article class="faction-card faction-tone-'+(i%4)+'"><div class="faction-poster"><span>'+f.type+'</span><b>'+f.mark+'</b><small>'+String(i+1).padStart(2,'0')+' / PUBLIC FACTION</small></div><div class="faction-card-copy"><small>'+f.field+'</small><h3>'+f.name+'</h3><p>'+f.desc+'</p><button class="recruit-action" data-faction="'+f.id+'" '+(s.factionMembership&&!member?'disabled':'')+'>'+(member?'已加入':s.factionMembership?'已加入其他组织':applied?'申请未通过':'申请加入')+'</button>'+(clue?'<button class="faction-clue '+(found?'found':'')+'" data-clue="'+clue+'">'+(found?'线索已记录':'拾取异常档案')+'</button>':'')+'</div></article>'}).join('');
+ const candidates=ARDAY_CANDIDATES.map((c,i)=>{const inv=s.recruitmentInvites[c.id]||{},joined=s.teamRoster.some(m=>m.id===c.id),action=joined?'已确认队友':inv.status==='pending'?'查看回复':inv.status==='accepted'?'已同意':inv.status==='declined'?'再次邀请':'发送邀请',attr=joined?'disabled':inv.status==='pending'?'data-check-invite="'+c.id+'"':'data-invite-candidate="'+c.id+'"';return '<article class="candidate-card candidate-tone-'+(i%4)+'"><div class="candidate-portrait"><i>'+c.portrait+'</i><b></b></div><div class="candidate-copy"><small>战力 '+c.combat+'　·　恶意 '+c.malice+'</small><h3>'+c.name+'</h3><strong>'+c.role+'</strong><p>'+c.desc+'</p><div class="candidate-meter"><i style="width:'+c.combat+'%"></i></div><button class="recruit-action" '+attr+' '+(joined?'disabled':'')+'>'+action+'</button></div></article>'}).join('');
+ const n=s.factionClues.length,hidden=n>=3?'<div class="hidden-faction-note"><small>UNLISTED SIGNAL · 09</small><b>一条被删除的组织记录</b><span>三份档案指向同一个不存在于公开名册中的组织。联络方式仍未完整。</span></div>':'<div class="hidden-faction-note is-locked"><small>ARCHIVE FRAGMENTS</small><b>缺失档案 '+n+' / 3</b><span>公开名册之外，似乎还有一条被人为抹除的记录。</span></div>';
+ const orgPanel='<section class="recruitment-masthead"><div class="recruitment-kicker">ARDAY PUBLIC HALL · FACTION OFFICE</div><h2>组织招募</h2><p>八个公开组织正在招募。另有一份被删除的记录。</p></section><div class="faction-count-strip"><b>04</b><span>公会</span><b>03</b><span>教团</span><b>01</b><span>管理局</span></div><div class="faction-grid">'+orgs+'</div>'+hidden;
+ const personalPanel='<section class="recruitment-masthead personal-masthead"><div class="recruitment-kicker">ARDAY · OPEN PARTY CALL</div><h2>个人招募</h2><p>在人才市场发出邀请。对方同意后，才会成为可编入队伍的队友。</p></section><div class="candidate-summary"><span>已确认队友</span><b>'+s.teamRoster.filter(m=>m.recruited).length+'</b><small> / '+ARDAY_CANDIDATES.length+'</small></div><div class="candidate-grid">'+candidates+'</div>';
+ $('choices').innerHTML='<nav class="recruitment-tabs"><button data-recruit-tab="organization" class="'+(active==='organization'?'active':'')+'">组织招募</button><button data-recruit-tab="personal" class="'+(active==='personal'?'active':'')+'">个人招募</button></nav>'+(active==='personal'?personalPanel:orgPanel);$('drawer').classList.add('open');
+ $('choices').querySelectorAll('[data-recruit-tab]').forEach(b=>b.onclick=()=>showRecruitment(b.dataset.recruitTab));
+ $('choices').querySelectorAll('[data-faction]').forEach(b=>b.onclick=()=>{const f=ARDAY_FACTIONS.find(x=>x.id===b.dataset.faction);if(!f)return;if(s.factionMembership){toast('你已经加入一个组织');return}if(s.factionApplications[f.id]){toast('该组织暂未通过申请');return}const chance=Math.max(.28,Math.min(.94,.48+(Number(s.combat)||0)*.003+(Number(s.friend)||0)*.001));if(Math.random()<chance){s.factionMembership=f.id;addEvent('加入组织','你已加入'+f.name+'。','long');toast('申请通过')}else{s.factionApplications[f.id]={status:'declined',at:Date.now()};toast('申请暂未通过')}save();showRecruitment('organization')});
+ $('choices').querySelectorAll('[data-clue]').forEach(b=>b.onclick=()=>{const clue=b.dataset.clue;if(!s.factionClues.includes(clue)){s.factionClues.push(clue);save();toast('发现一份异常档案')}showRecruitment('organization')});
+ $('choices').querySelectorAll('[data-invite-candidate]').forEach(b=>b.onclick=()=>{const c=ARDAY_CANDIDATES.find(x=>x.id===b.dataset.inviteCandidate);if(!c)return;s.recruitmentInvites[c.id]={status:'pending',sentAt:Date.now()};save();say('邀请已经发出。对方还没有回复。','system');showRecruitment('personal')});
+ $('choices').querySelectorAll('[data-check-invite]').forEach(b=>b.onclick=()=>{const c=ARDAY_CANDIDATES.find(x=>x.id===b.dataset.checkInvite);if(!c)return;const inv=s.recruitmentInvites[c.id];if(!inv||inv.status!=='pending')return;if(Math.random()<c.acceptance){inv.status='accepted';if(!s.teamRoster.some(m=>m.id===c.id))s.teamRoster.push({id:c.id,name:c.name,role:c.role,combat:c.combat,malice:c.malice,selected:false,recruited:true,portrait:c.portrait});addEvent('队友确认加入',c.name+'接受了你的组队邀请，已加入队友名单。','long');toast(c.name+'已同意')}else{inv.status='declined';toast(c.name+'暂未接受邀请')}inv.repliedAt=Date.now();save();showRecruitment('personal')});
 }
 
 
@@ -1354,13 +1339,13 @@ function showDungeon(){
  $('choices').innerHTML='<section class="guild-cover"><div class="guild-cover-sky"></div><div class="guild-cover-mountains"></div><div class="guild-cover-arch"><i></i><b></b></div><div class="guild-cover-copy"><small>THE FRONTIER · GUILD HALL</small><h2>组队</h2><span>选择目的地，召集队友</span></div><div class="guild-wallet"><small>持有积分</small><b>'+s.points.toLocaleString('zh-CN')+'</b></div></section><section class="guild-destinations"><div class="guild-gate-grid">'+tiers+'</div></section><section class="guild-party"><div class="guild-section-head"><span>队友</span><small>'+selected.length+' / '+s.teamRoster.length+' SELECTED</small></div><div class="guild-roster">'+members+'</div></section><section class="guild-strength"><div class="guild-strength-emblem">⚔</div><div class="guild-strength-copy"><small>EXPEDITION POWER</small><b>'+combined+'</b><span>队伍综合战力</span></div><div class="guild-strength-meter"><i style="width:'+Math.max(0,Math.min(100,combined))+'%"></i></div></section>';
  $('drawer').classList.add('open');
  $('choices').querySelectorAll('[data-instance-tier]').forEach(button=>button.onclick=()=>startDungeon(button.dataset.instanceTier));
- $('choices').querySelectorAll('[data-member]').forEach(button=>button.onclick=()=>{const m=s.teamRoster.find(x=>x.id===button.dataset.member);if(m)m.selected=!m.selected;save();showDungeon()});
+ $('choices').querySelectorAll('[data-member]').forEach(button=>button.onclick=()=>{const m=s.teamRoster.find(x=>x.id===button.dataset.member);if(!m)return;if(!m.selected&&s.teamRoster.filter(x=>x.selected).length>=3){toast('最多携带 3 名自己的队友');return}m.selected=!m.selected;save();showDungeon()});
 }
 function showDungeonPending(){
  const mission=s.activeDungeon;if(!mission)return;
  $('drawerTitle').textContent='副本派遣';$('choices').className='choices infinite-view';
  $('choices').innerHTML='<section class="mission-waiting"><div class="mission-portal"><svg viewBox="0 0 240 220" role="img" aria-label="封闭的副本入口"><path d="M25 198V87Q25 20 120 12Q215 20 215 87V198" fill="none" stroke="#6e7770" stroke-width="4"/><path d="M48 198V90Q48 38 120 30Q192 38 192 90V198" fill="none" stroke="#a18d70" stroke-width="2"/><path d="M83 198V99Q83 65 120 60Q157 65 157 99V198" fill="#5b6870" stroke="#d2c4aa" stroke-width="2"/><circle cx="120" cy="111" r="13" fill="none" stroke="#e4d5b8" stroke-width="2"/><path d="M120 93V129M102 111H138" stroke="#e4d5b8" stroke-width="1.5"/><path d="M12 198H228M40 211H200" stroke="#7d796e" stroke-width="2"/></svg></div><div class="mission-seal">'+mission.tier+'</div><div class="mission-status">派遣中</div><div class="mission-clock" id="missionClock"></div><div class="mission-track"><i id="missionProgress"></i></div><div class="mission-finish">预计结束 '+new Date(mission.endsAt).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+'</div></section>';
- updateDungeonCountdown();
+ const matched=mission.snapshot?.matchedStrangers||[];$('choices').innerHTML+='<section class="mission-matchmaking"><div class="mission-matchmaking-head"><b>临时匹配</b><small>BLACK-BOX MATCHMAKING</small></div><div class="mission-matchmaking-slots">'+matched.map((m,i)=>'<div class="mission-match-slot"><span>?</span><b>陌生队友 '+(i+1)+'</b><small>数据未知</small></div>').join('')+'</div></section>';updateDungeonCountdown();
 }
 function updateDungeonCountdown(){
  const m=s.activeDungeon;if(!m)return;
@@ -1378,10 +1363,12 @@ function startDungeon(tier){
 }
 function dispatchDungeon(tier,energyCost,base){
  const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),duration=1;
- const selected=s.teamRoster.filter(m=>m.selected),teamPower=selected.length?selected.reduce((n,m)=>n+m.combat,0)/selected.length:0,teamMalice=selected.length?selected.reduce((n,m)=>n+m.malice,0)/selected.length:0;
+ const selected=s.teamRoster.filter(m=>m.selected);
+ const matchedStrangers=Array.from({length:2},(_,index)=>({id:'stranger-'+Date.now()+'-'+index,name:'陌生匹配者 '+(index+1),role:'临时队员',combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82),anonymous:true}));
+ const fullTeam=[...selected,...matchedStrangers],teamPower=fullTeam.reduce((n,m)=>n+m.combat,0)/fullTeam.length,teamMalice=fullTeam.reduce((n,m)=>n+m.malice,0)/fullTeam.length;
  const difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)],end=now+3600000;
  s.energy=Math.max(0,s.energy-energyCost);
- s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,energyCost,baseReward:base,difficulty,startAt:now,endsAt:end,duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice}))}};
+ s.activeDungeon={id:'dungeon-'+Date.now(),status:'active',tier,energyCost,baseReward:base,difficulty,startAt:now,endsAt:end,duration,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers}};
  // Dungeon dispatch overrides every scheduled activity for this one-hour block.
  writeBlockForKey(key,hour,hour+1,{title:'副本派遣',kind:'dungeon',activity:'idle',dungeonId:s.activeDungeon.id,priority:'forced'});
  save();render();renderCalendar();showDungeonPending();$('drawer').classList.add('open');
@@ -1398,7 +1385,7 @@ function settleDungeonIfDue(at=Date.now()){
  const earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.12));
  s.points+=earned;if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
  const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x));
- const result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),at:at,unlocked:newly};
+ const result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at:at,unlocked:newly};
  s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
  addEvent('副本结算报告 · '+result.tier,'副本任务已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(newly.length?' 新解锁：'+newly.join('、')+'。':''),'daily');
  save();render();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='副本派遣')showDungeonResult(result);return true;
@@ -1420,9 +1407,9 @@ function showRanking(){
   if(!npc){npc={id:member.id,name:member.name,points:npcDefaults[member.id]??Math.max(300,760-index*110)};s.rankingNPCs.push(npc)}
   npc.name=member.name;npc.points=Math.max(0,Math.floor(Number(npc.points)||0));
  });
- const entries=[{id:'player',name:'玩家',points:s.points,isPlayer:true},...s.rankingNPCs.map(npc=>({id:npc.id,name:npc.name,points:npc.points,isPlayer:false}))].sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name,'zh-CN'));
- const podium=entries.slice(0,3).map((entry,index)=>'<article class="leader-podium leader-place-'+(index+1)+(entry.isPlayer?' is-player':'')+'"><div class="leader-podium-crown">'+(index===0?'✦':index===1?'✧':'◇')+'</div><div class="leader-podium-avatar"><i></i><b></b></div><strong>'+entry.name+(entry.isPlayer?'<small>YOU</small>':'')+'</strong><span class="leader-podium-score">'+entry.points.toLocaleString('zh-CN')+'</span><em>积分</em><div class="leader-podium-step"><b>'+(index+1)+'</b></div></article>').join('');
- const rest=entries.slice(3).map((entry,index)=>'<article class="leader-row '+(entry.isPlayer?'is-player':'')+'"><b class="leader-row-number">'+(index+4).toString().padStart(2,'0')+'</b><span class="leader-row-avatar">'+(entry.isPlayer?'我':entry.name.slice(0,1))+'</span><strong>'+entry.name+(entry.isPlayer?'<small>YOU</small>':'')+'</strong><b class="leader-row-score">'+entry.points.toLocaleString('zh-CN')+'</b></article>').join('');
+ const entries=[{id:'player',name:'Arday',points:s.points,isPlayer:true},...s.rankingNPCs.map(npc=>({id:npc.id,name:npc.name,points:npc.points,isPlayer:false}))].sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name,'zh-CN'));
+ const podium=entries.slice(0,3).map((entry,index)=>'<article class="leader-podium leader-place-'+(index+1)+(entry.isPlayer?' is-player':'')+'"><div class="leader-podium-crown">'+(index===0?'✦':index===1?'✧':'◇')+'</div><div class="leader-podium-avatar '+(entry.isPlayer?'leader-avatar-arday':'')+'">'+(entry.isPlayer?'<strong>A</strong>':'<i></i><b></b>')+'</div><strong>'+entry.name+(entry.isPlayer?'<small>ARDAY</small>':'')+'</strong><span class="leader-podium-score">'+entry.points.toLocaleString('zh-CN')+'</span><em>积分</em><div class="leader-podium-step"><b>'+(index+1)+'</b></div></article>').join('');
+ const rest=entries.slice(3).map((entry,index)=>'<article class="leader-row '+(entry.isPlayer?'is-player':'')+'"><b class="leader-row-number">'+(index+4).toString().padStart(2,'0')+'</b><span class="leader-row-avatar">'+(entry.isPlayer?'A':entry.name.slice(0,1))+'</span><strong>'+entry.name+(entry.isPlayer?'<small>YOU</small>':'')+'</strong><b class="leader-row-score">'+entry.points.toLocaleString('zh-CN')+'</b></article>').join('');
  const playerRank=entries.findIndex(entry=>entry.isPlayer)+1;
  $('choices').innerHTML='<section class="leader-cover"><div class="leader-cover-glow"></div><div class="leader-cover-copy"><small>ARDAY GUILD · LEADERBOARD</small><h2>积分排行榜</h2><span>RANKED BY POINTS</span></div><div class="leader-cover-insignia">榜</div></section><section class="leader-self"><div><small>MY POSITION</small><b>#'+playerRank+'</b></div><div class="leader-self-score"><small>我的积分</small><strong>'+s.points.toLocaleString('zh-CN')+'</strong></div></section><section class="leader-podium-wrap"><div class="leader-podium-grid">'+podium+'</div></section>'+(rest?'<section class="leader-list">'+rest+'</section>':'');
  $('drawer').classList.add('open');
