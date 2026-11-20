@@ -1726,3 +1726,13 @@ html body .stage .drawer.profile-expanded.open .choices{
 .guild-cover-utility .guild-wallet b{font-size:19px;line-height:1.2}
 .guild-cover-utility .guild-dungeon-deadline{position:static;max-width:100%;padding:0;border:0;background:transparent;color:#eadbbd;font-size:8px;line-height:1.45;text-align:right}
 @media(max-width:420px){.guild-cover-utility{right:9px;top:9px;max-width:53%;padding:7px 8px}.guild-cover-copy{left:13px;bottom:14px}.guild-cover-copy h2{font-size:24px}}
+
+
+/* Team header utility: two aligned metrics with enough room for the deadline. */
+.guild-cover-utility{width:min(64%,310px)!important;max-width:64%!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)!important;align-items:center!important;gap:0!important;padding:9px 12px!important;box-sizing:border-box!important}
+.guild-utility-stat{display:flex;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 10px}
+.guild-utility-stat:first-child{padding-left:0;border-right:1px solid #eadbbd55}
+.guild-utility-stat:last-child{padding-right:0;padding-left:12px}
+.guild-utility-stat small{font:8px/1.3 "Noto Serif SC",serif!important;color:#d4c6a8!important;white-space:nowrap}
+.guild-utility-stat b{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:italic 18px/1.15 Georgia,serif!important;font-variant-numeric:tabular-nums;color:#f0d9a9!important}
+@media(max-width:420px){.guild-cover-utility{width:64%!important;max-width:64%!important;right:9px!important;top:9px!important;padding:7px 8px!important}.guild-utility-stat{padding-right:6px}.guild-utility-stat:last-child{padding-left:8px}.guild-utility-stat b{font-size:16px!important}}
