@@ -221,6 +221,41 @@
     signRoot.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
    };
    const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
+   // Higher-fidelity architectural primitives: bevelled extrusions, lathed metal profiles and curved display skins.
+   const addRoundedShell=(x,y,z,w,h,d,material,radius=0.7,bevel=0.12)=>{
+    const s=new T.Shape(),r=Math.min(radius,w*.22,h*.22);
+    s.moveTo(-w/2+r,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);
+    s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);
+    s.lineTo(-w/2+r,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);
+    s.lineTo(-w/2,-h/2+r);s.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);
+    const g=new T.ExtrudeGeometry(s,{depth:Math.max(.08,d-2*bevel),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:bevel,bevelThickness:bevel,curveSegments:8});
+    g.computeVertexNormals();const o=new T.Mesh(g,material);o.position.set(x,y,z-d/2+bevel);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
+   };
+   const addLathedProfile=(x,y,z,profile,material,segments=24)=>{
+    const pts=profile.map(p=>new T.Vector2(p[0],p[1]));
+    const g=new T.LatheGeometry(pts,segments);g.computeVertexNormals();
+    const o=new T.Mesh(g,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
+   };
+   const addCurvedScreen=(x,y,z,w,h,material)=>{
+    const verts=[],uv=[],indices=[],nx=20,ny=8,curve=Math.min(1.8,w*.045);
+    for(let iy=0;iy<=ny;iy++)for(let ix=0;ix<=nx;ix++){
+     const u=ix/nx-.5,v=iy/ny-.5;
+     verts.push(x+u*w,y+v*h,z+curve*(1-4*u*u));
+     uv.push(ix/nx,iy/ny);
+    }
+    for(let iy=0;iy<ny;iy++)for(let ix=0;ix<nx;ix++){
+     const a=iy*(nx+1)+ix,b=a+1,c0=a+nx+1,d0=c0+1;
+     indices.push(a,b,c0,b,d0,c0);
+    }
+    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();
+    const m=material.clone();m.side=T.DoubleSide;const o=new T.Mesh(g,m);area.add(o);return o;
+   };
+   const addVaultCanopy=(x,y,z,w,depth,material)=>{
+    const s=new T.Shape();s.moveTo(-w/2,0);s.lineTo(w/2,0);s.quadraticCurveTo(w*.34,depth*.42,0,depth*.5);s.quadraticCurveTo(-w*.34,depth*.42,-w/2,0);
+    const g=new T.ExtrudeGeometry(s,{depth:Math.max(.2,depth*.08),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:.16,bevelThickness:.12,curveSegments:24});
+    g.computeVertexNormals();const o=new T.Mesh(g,material);o.rotation.x=Math.PI/2;o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
+   };
+
    const localCylinder=(x,y,zz,rt,rb,h,m,segments=12)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),m);o.position.set(x,y,zz);area.add(o);return o};
    const addPlanter=(x,zz,w=8,d=5,foliage=jade,variant=0)=>{
     addBox(x,.52,zz,w,1.04,d,graphite);addBox(x,1.08,zz,w-.55,.18,d-.55,ivory);addBox(x,1.19,zz,w-1,.08,d-1,paleStone);
@@ -237,20 +272,32 @@
    const addColumn=(x,zz,h=18,width=2.2,m=graphite)=>addBox(x,h/2,zz,width,h,width,m);
    const addBeam=(x,y,zz,w,h,d,m=graphite,rz=0)=>{const o=addBox(x,y,zz,w,h,d,m);o.rotation.z=rz;return o};
    const addFacadeBay=(x,zz,w,h,accentMat=accent)=>{
-    addColumn(x-w/2,zz,h,1.8,graphite);addColumn(x+w/2,zz,h,1.8,graphite);
-    addBeam(x,h,zz,w+1.8,1.5,2.2,silver);
-    addBeam(x,h+.92,zz,w*.72,.18,2.35,accentMat);
-    addBeam(x,1.0,zz,w,.5,2.0,warmMetal);
+    // Deep portal surround with softened shoulders, a curved crown and sculpted metal piers.
+    const pierProfile=[[0,0],[.72,0],[.86,.22],[.68,.52],[.58,1.15],[.72,1.45],[.58,h*.72],[.88,h*.9],[.82,h],[0,h]];
+    for(const side of [-1,1]){
+     addLathedProfile(x+side*(w/2),0,zz,pierProfile.map(p=>[p[0],p[1]]),graphite,20);
+     addLathedProfile(x+side*(w/2),0,zz,pierProfile.map((p,i)=>[p[0]+(i===0||i===9?0:.13),p[1]]),silver,20);
+     addRoundedShell(x+side*(w/2),.55,zz,2.5,1.1,3.0,warmMetal,.38,.08);
+    }
+    addVaultCanopy(x,h,zz-1.05,w+2.4,3.2,silver);
+    addRoundedShell(x,h+.55,zz-.92,w*.78,.28,2.8,accentMat,.12,.06);
+    addRoundedShell(x,.95,zz,w,.48,2.5,warmMetal,.18,.08);
    };
    const addScreen=(x,y,zz,w,h,accentMat=cyan)=>{
-    addBox(x,y,zz,w+.9,h+.9,.72,graphite);
-    addBox(x,y,zz+.39,w,h,.08,plum);
-    addPanel(x,y,zz+.46,w*.91,h*.88,new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,emissive:accentMat.color||0x70ddeb,emissiveIntensity:.32,toneMapped:false}));
-    for(const sx of [-1,1])addBox(x+sx*(w/2+.28),y,zz+.43,.16,h+.25,.16,silver);
+    addRoundedShell(x,y,zz,w+1.15,h+1.0,.9,graphite,Math.min(1.1,h*.12),.16);
+    addRoundedShell(x,y,zz+.43,w+.18,h+.12,.14,plum,Math.min(.9,h*.1),.045);
+    const display=new T.MeshBasicMaterial({color:accentMat.color||0x70ddeb,emissive:accentMat.color||0x70ddeb,emissiveIntensity:.32,toneMapped:false,side:T.DoubleSide});
+    addCurvedScreen(x,y,zz+.53,w*.92,h*.88,display);
+    for(const sx of [-1,1]){
+     addLathedProfile(x+sx*(w/2+.39),y-h*.5,zz+.36,[[.12,0],[.16,.12],[.11,.32],[.11,h-.32],[.17,h-.12],[.12,h]],silver,12);
+    }
    };
    const addCounter=(x,y,zz,w,d,top=ivory,front=graphite)=>{
-    addBox(x,y,zz,w,1.8,d,front);addBox(x,y+1.02,zz-.08,w+.5,.34,d+.32,top);
-    addBox(x,y+1.94,zz+d*.34,w*.82,.16,.12,warmMetal);
+    // Furniture-grade counter: radiused carcass, layered stone worktop and recessed service fascia.
+    addRoundedShell(x,y,zz,w,1.85,d,front,Math.min(.72,d*.16),.14);
+    addRoundedShell(x,y+1.0,zz-.08,w+.48,.34,d+.3,top,.32,.09);
+    addRoundedShell(x,y+.28,zz+d*.5+.035,w*.78,.72,.12,plum,.18,.04);
+    addRoundedShell(x,y+1.94,zz+d*.34,w*.82,.16,.16,warmMetal,.07,.035);
    };
    const addStair=(x,zz,w,steps,depth,material=graphite)=>{
     for(let n=0;n<steps;n++){const h=.55+n*.48;addBox(x,h/2,zz+n*depth,w,h,depth+.08,material);addBox(x,h+.06,zz+n*depth,w,.12,depth+.08,n%2?silver:warmMetal)}
