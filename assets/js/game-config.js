@@ -809,13 +809,12 @@ window.ArdayGameConfig = {
       ]
     ],
     "门": [
-      [
-        "默认室内木门",
-        "▧",
-        "buy-furniture-catalog-023",
-        "680",
-        ""
-      ]
+      ["默认室内木门","▧","buy-furniture-catalog-023","680",""],
+      ["白橡木玻璃门","▧","buy-furniture-door-glass","860",""],
+      ["奶油法式双线门","▧","buy-furniture-door-cream","920",""],
+      ["藤编门","▧","buy-furniture-door-rattan","780",""],
+      ["深色格栅推拉门","▧","buy-furniture-door-sliding","980",""],
+      ["复古拱顶门","▧","buy-furniture-door-arch","1080",""]
     ],
     "墙纸": [
       [
