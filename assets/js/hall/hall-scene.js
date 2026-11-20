@@ -172,7 +172,7 @@
    strip(sx+px,sz+pz,ex+px,ez+pz,.22,silver,routeY+.034);
    strip(sx-px,sz-pz,ex-px,ez-pz,.22,silver,routeY+.034);
    // Continuous flush inlay marks the route end without circular pads, rings or repeated chevrons.
-   const terminal=new T.Mesh(new T.PlaneGeometry(10,.8),accent);terminal.rotation.x=-Math.PI/2;terminal.rotation.z=-Math.atan2(ux,uz);terminal.position.set(ex,.028,ez);root.add(terminal);
+   const terminal=new T.Mesh(new T.BoxGeometry(10,.035,.8),accent);terminal.rotation.y=Math.atan2(ux,uz);terminal.position.set(ex,-.045+i*.045,ez);terminal.castShadow=false;terminal.receiveShadow=false;root.add(terminal);
   });
   const zoneObjects=[];
   zones.forEach((z,index)=>{
