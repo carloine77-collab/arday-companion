@@ -1928,7 +1928,7 @@ function initArday3D(){
   const furnitureModelBuilder=window.ArdayFurnitureModels.create({
    T,getRoomMode:()=>roomMode,rooms:{bedroom,kitchen,bathroom,living},furnitureModelAliases,
    stylizeMaterial,recolorFurniture,createPainterTexture,applyPainterMap,roomWallMap,
-   openFurnitureActions,openKitchenPanel,document,addWindowSun,toast
+   openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,toast
   });
   function createOwnedFurniture(name,record=null){
    const model=furnitureModelBuilder.build(name,record);
