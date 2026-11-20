@@ -813,6 +813,8 @@ function beginImmediateInteraction(action,options={}){
  Object.keys(s.interactionAttempts).forEach(key=>{if(key.slice(0,10)<hourKey.slice(0,10))delete s.interactionAttempts[key]});save();
  if(meta.duration==='long'&&Math.random()<immediateInteractionRefusalRate){rejectActivityProposal(activity);save();return false}
  const startedAt=now,durationMs=meta.duration==='short'?24000:120000;
+ const nextScheduleBoundary=new Date(now);nextScheduleBoundary.setMinutes(0,0,0);nextScheduleBoundary.setHours(nextScheduleBoundary.getHours()+1);
+ if(startedAt+durationMs>nextScheduleBoundary.getTime()){say('这段时间不够完成互动，等下一段日程开始再说吧。');return false}
  s.activeInteraction={activity,anchor:options.anchor||meta.anchor||null,furnitureId,room:sourceFurniture?.room||options.room||'living',startedAt,endsAt:startedAt+durationMs,interrupted:{activity:s.currentActivity||availability.activity||'idle',anchor:s.currentActivityAnchor||null},presentationHourKey:hourKey};
  presentActivity(activity,s.activeInteraction.anchor,s.activeInteraction.room,furnitureId);say('想让我陪你？那我勉为其难试试吧。');save();return true;
 }
@@ -951,6 +953,8 @@ function updateStatusBuffs(at=Date.now()){
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
+ // An immediate interaction may never leak into the next scheduled hour.
+ if(s.activeInteraction)s.activeInteraction=null;
  // Preserve fractional hourly decay; integer clamping would round small losses to zero.
  const hourlyLoss={energy:Number(energyConfig.hourlyDecay)||0,hunger:Number(needDecay.hungerHourlyDecay)||0,clean:Number(needDecay.cleanHourlyDecay)||0,fun:Number(needDecay.funHourlyDecay)||0};
  for(const [k,loss] of Object.entries(hourlyLoss))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
