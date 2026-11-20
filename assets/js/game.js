@@ -838,7 +838,7 @@ function finishImmediateInteraction(at=Date.now()){
  if(meta){
   const effects={...(meta.effect||{})};
   if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
-  change(effects);
+  applyActivityEffectsWithFeedback(effects);
   recordActivityPreference(activity,at);
   if(['read','write','program'].includes(activity))updatePersonalGoal(activity==='program'?'write':activity,at);
   relation(activity);
@@ -1031,6 +1031,12 @@ function updateStatusBuffs(at=Date.now()){
   if(rule.active&&state.active){if(!Number(state.nextEffectAt)){state.since=at;state.nextEffectAt=at+period}if(at>=state.nextEffectAt){const periods=Math.floor((at-state.nextEffectAt)/period)+1;rule.apply(periods);state.nextEffectAt+=periods*period}}
  }
 }
+function applyActivityEffectsWithFeedback(effects){
+ const before={};for(const key of Object.keys(effects||{}))before[key]=Number(s[key])||0;
+ change(effects);
+ const gains={};for(const key of Object.keys(before)){const delta=(Number(s[key])||0)-before[key];if(delta>0)gains[key]=delta;}
+ if(Object.keys(gains).length)arday3D?.showStatGain?.(gains);
+}
 function processActivityAt(value){
  const d=new Date(value),hour=d.getHours(),key=ensureScheduleAt(d),hourKey=key+'-'+hour;
  if(s.lastUnifiedHourKey===hourKey)return false;
@@ -1045,7 +1051,7 @@ function processActivityAt(value){
  let placedMealEaten=false;
  if([7,12,18].includes(hour)){
   const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·')&&['living','bedroom','kitchen','bathroom'].includes(item.room));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);change({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
+  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);applyActivityEffectsWithFeedback({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
   else{
    const mealKey=key+'-'+({7:'breakfast',12:'lunch',18:'dinner'}[hour]);
    if(!s.mealMissedKeys.includes(mealKey)){
@@ -1060,7 +1066,7 @@ function processActivityAt(value){
  if(meta&&!s.activeInteraction){
   const effects={...(meta.effect||{})};if(activity==='sleep')effects.energy=Number(energyConfig.sleepRecoveryPerHour)||1;else if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
   if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('好饿。今天我能得到神明的投喂吗？');delete effects.hunger}
-  change(effects);
+  applyActivityEffectsWithFeedback(effects);
   
   recordActivityPreference(activity,d.getTime());
   // Scene presentation is applied once after the authoritative state is committed.
@@ -1646,7 +1652,7 @@ function initArday3D(){
   const camera=new T.PerspectiveCamera(38,1,.1,1800);
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.0:1.5));renderer.outputEncoding=T.sRGBEncoding;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.5:1.75));renderer.outputEncoding=T.sRGBEncoding;
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.76;renderer.shadowMap.enabled=true;renderer.shadowMap.type=isTouchDevice?T.PCFShadowMap:T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   // A restrained studio equirectangular environment gives metal, glass and polished wood something to reflect.
   const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;
@@ -3019,10 +3025,10 @@ function initArday3D(){
     // Consistent brass lever, lock escutcheon and destination plaque.
     cyl(.39,1.18,.16,.065,.065,.025,brass,18);box(.47,1.18,.19,.19,.035,.035,brass);cyl(.39,.94,.16,.035,.035,.025,m.metal,14);
     const plaque=box(0,2.06,.19,.52,.18,.045,brass);plaque.userData.doorDestinationPlaque=true;
-    const labelCanvas=document.createElement('canvas');labelCanvas.width=320;labelCanvas.height=96;
+    const labelCanvas=document.createElement('canvas');labelCanvas.width=640;labelCanvas.height=192;
     const labelTexture=new T.CanvasTexture(labelCanvas);labelTexture.encoding=T.sRGBEncoding;
     const labelMesh=new T.Mesh(new T.PlaneGeometry(.96,.29),new T.MeshBasicMaterial({map:labelTexture,transparent:true,side:T.DoubleSide,depthWrite:false}));
-    labelMesh.position.set(0,2.66,.205);group.add(labelMesh);
+    labelMesh.position.set(0,2.32,.215);group.add(labelMesh);
     group.userData.doorDestinationCanvas=labelCanvas;group.userData.doorDestinationTexture=labelTexture;group.userData.doorDestinationLabel=labelMesh;
     group.userData.doorVariant=variant||'标准胡桃木';group.userData.doorPlaque=plaque;
    }else if(modelName==='懒人沙发'){
@@ -3672,9 +3678,9 @@ function persistFurniture(item){
    if(!canvas||!texture)return;
    const labels={living:'起居室',kitchen:'厨房',bedroom:'卧室',bathroom:'卫生间',hall:'公共大厅'},label=labels[destination]||'起居室',ctx=canvas.getContext('2d');
    ctx.clearRect(0,0,canvas.width,canvas.height);
-   ctx.fillStyle='rgba(247,239,224,.96)';ctx.beginPath();ctx.roundRect(3,3,314,90,15);ctx.fill();
-   ctx.strokeStyle='#967657';ctx.lineWidth=5;ctx.stroke();
-   ctx.fillStyle='#574532';ctx.font='600 48px "Noto Serif SC",serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,160,49);
+   ctx.fillStyle='rgba(247,239,224,.97)';ctx.beginPath();ctx.roundRect(6,6,628,180,28);ctx.fill();
+   ctx.strokeStyle='#967657';ctx.lineWidth=8;ctx.stroke();
+   ctx.fillStyle='#574532';ctx.font='600 96px "Noto Serif SC",serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,320,98);
    texture.needsUpdate=true;
   }
   function openDoorWheel(item){
@@ -3847,7 +3853,7 @@ function persistFurniture(item){
    basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
-   rig.rotation.set(0,0,0);rig.position.set(0,0,0);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep')rig.rotation.set(-Math.PI/2,0,0);
+   rig.rotation.set(0,0,0);rig.position.set(0,0,0);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
    body.position.y=pose==='sit'?-.32:0;legs.forEach(l=>{l.hip.rotation.x=pose==='sit'?-1.15:pose==='sleep'?-1.35:0;l.knee.rotation.x=pose==='sit'?1.45:pose==='sleep'?1.5:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
@@ -4039,6 +4045,7 @@ function persistFurniture(item){
     const tap=characterTap;characterTap=null;sceneDismissTap=null;
     if(e.type==='pointerup'&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<18){
      const lines=window.ArdayCharacterTapLines;
+     arday3D?.showCharacterTap?.();
      if(Array.isArray(lines)&&lines.length)say(lines[Math.floor(Math.random()*lines.length)]);
      return;
     }
@@ -4058,7 +4065,35 @@ function persistFurniture(item){
    if(e.target.closest('button,.day-timeline,.calendar-view,.drawer,input,textarea,select'))return;
    targetRadius+=e.deltaY*.012;applyCamera();e.preventDefault();
   },{passive:false});
-  function frame(t){const frameInterval=isTouchDevice?(roomMode==='hall'?1000/30:1000/40):1000/60;if(t-lastDraw<frameInterval){arday3D.raf=requestAnimationFrame(frame);return}const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
+  const feedbackEffects=[];
+  const statNames={energy:'精力',hunger:'食欲',clean:'卫生',fun:'娱乐',agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',will:'意志'};
+  function showCharacterTap(){
+   const group=new T.Group();group.position.copy(person.position);group.position.y+=1.95;scene.add(group);
+   for(let i=0;i<7;i++){const material=new T.MeshBasicMaterial({color:0xffe6a8,transparent:true,opacity:.92,depthWrite:false});const star=new T.Mesh(new T.OctahedronGeometry(i%2?.075:.105,0),material);const angle=i/7*Math.PI*2;star.position.set(Math.cos(angle)*(.24+(i%2)*.12),Math.sin(angle)*(.2+(i%3)*.035),.08+(i%3)*.035);group.add(star)}
+   feedbackEffects.push({group,age:0,duration:.72,kind:'tap'});
+  }
+  function showStatGain(gains){
+   const entries=Object.entries(gains||{}).filter(([key,value])=>statNames[key]&&Number(value)>0);if(!entries.length)return;
+   entries.slice(0,3).forEach(([key,value],index)=>{
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const ctx=canvas.getContext('2d');
+    ctx.fillStyle='rgba(22,34,35,.72)';ctx.beginPath();ctx.roundRect(12,12,488,104,32);ctx.fill();
+    ctx.fillStyle='#f4dfad';ctx.font='600 52px "Noto Serif SC",serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(statNames[key]+'  +'+(Math.round(Number(value)*10)/10),256,65);
+    const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;
+    const sprite=new T.Sprite(new T.SpriteMaterial({map:texture,transparent:true,opacity:.86,depthWrite:false,depthTest:true}));
+    sprite.position.copy(person.position);sprite.position.y+=2.35+index*.22;sprite.scale.set(1.45,.36,1);scene.add(sprite);
+    feedbackEffects.push({group:sprite,age:0,duration:1.05,kind:'gain',texture});
+   });
+  }
+  function updateFeedbackEffects(dt){
+   for(let i=feedbackEffects.length-1;i>=0;i--){
+    const effect=feedbackEffects[i];effect.age+=dt;const progress=Math.min(1,effect.age/effect.duration),fade=1-progress;
+    effect.group.position.y+=dt*(effect.kind==='tap'?.48:.34);
+    if(effect.kind==='tap'){effect.group.rotation.y+=dt*1.8;effect.group.children.forEach((child,j)=>{child.rotation.x+=dt*(1.8+j*.12);child.rotation.z+=dt*(j%2?2.1:-2.1);child.material.opacity=.92*fade;child.scale.setScalar(.72+Math.sin(progress*Math.PI)*.55)})}
+    else effect.group.material.opacity=.86*fade;
+    if(progress>=1){scene.remove(effect.group);effect.group.traverse?.(node=>{if(node.material){if(Array.isArray(node.material))node.material.forEach(m=>m.dispose());else node.material.dispose()}});effect.texture?.dispose();feedbackEffects.splice(i,1)}
+   }
+  }
+  function frame(t){const frameInterval=isTouchDevice?(roomMode==='hall'?1000/30:1000/40):1000/60;if(t-lastDraw<frameInterval){arday3D.raf=requestAnimationFrame(frame);return}const dt=Math.min(.06,(t-last)/1000);last=t;updateDaylight();updateFeedbackEffects(dt);if(pointers.size===0){targetTheta+=inertiaTheta*dt*1000;targetPhi+=inertiaPhi*dt*1000;const damp=Math.exp(-dt*5.2);inertiaTheta*=damp;inertiaPhi*=damp;if(Math.abs(inertiaTheta)<.000002)inertiaTheta=0;if(Math.abs(inertiaPhi)<.000002)inertiaPhi=0;applyCamera()}syncCamera(dt);
    if(roomMode==='hall'){
     const dx=target.x-hallScene.center.x,dz=target.z-hallScene.center.z,len=Math.hypot(dx,dz);if(len>hallScene.radius){const k=hallScene.radius/len;target.x=hallScene.center.x+dx*k;target.z=hallScene.center.z+dz*k;}
     const follow=1-Math.exp(-dt*3);cameraTarget.x+=(person.position.x+hallCameraOffset.x-cameraTarget.x)*follow;cameraTarget.z+=(person.position.z+hallCameraOffset.z-cameraTarget.z)*follow;
@@ -4145,7 +4180,7 @@ function persistFurniture(item){
   scene.traverse(o=>{if(o.isMesh&&!o.userData.hallIllustration){const mats=Array.isArray(o.material)?o.material:[o.material],opaque=mats.every(m=>m&&!m.transparent&&(m.opacity??1)>=.98);o.castShadow=opaque&&!o.userData.furnitureContactShadow;o.receiveShadow=opaque&&!o.userData.furnitureContactShadow}});
   updateDaylight(true);applyInkOutlines(scene);
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,cancelGesture,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':roomMode==='bathroom'?'bathroom':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,showCharacterTap,showStatGain,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':roomMode==='bathroom'?'bathroom':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
