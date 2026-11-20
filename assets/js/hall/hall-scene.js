@@ -347,7 +347,7 @@
    const crest=new T.Mesh(new T.OctahedronGeometry(1.7,1),gateAccent);crest.position.set(0,gateHeight+3,front);area.add(crest);
    // Broad rectangular forecourt apron is flush with the plaza and connects to the avenue.
    const apron=new T.Mesh(new T.BoxGeometry(gateWidth*1.42,.22,17),z.id==='food'?paleStone:floorDark);
-   apron.position.set(0,.015,front+8);apron.receiveShadow=true;area.add(apron);
+   apron.position.set(0,.13,front+8);apron.receiveShadow=true;area.add(apron);
    addBox(0,.15,front+16,gateWidth*1.18,.12,.32,gateAccent);
    if(z.id==='exchange'){
     // Three transaction bays with suspended coin-like medallions and recessed waiting benches.
