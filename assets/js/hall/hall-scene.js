@@ -357,7 +357,7 @@
     // Three transaction bays with suspended coin-like medallions and recessed waiting benches.
     for(let i=-1;i<=1;i++){
      const x=i*29;
-     addCylinder(x,8,-20,7.2,7.2,.55,warmMetal,32);
+     addCylinder(x,.32,-20,7.2,7.2,.55,warmMetal,32);
      const canopy=new T.Mesh(new T.TorusGeometry(7,.34,10,64),amber);canopy.position.set(x,14,-20);area.add(canopy);
      addBox(x,9,-20,11,1.1,7,graphite);addBox(x,10,-16.2,8,.16,.12,ivory);
      const coin=new T.Mesh(new T.CylinderGeometry(2.8,2.8,.48,32),warmMetal);coin.rotation.z=Math.PI/2;coin.position.set(x,19,-20);area.add(coin);
