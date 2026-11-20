@@ -3425,7 +3425,7 @@ function persistFurniture(item){
    roomMode=mode==='hall'?'hall':['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';hall.visible=roomMode==='hall';
    if(roomMode==='hall'){
-    scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);targetTheta=.72;targetPhi=1.34;targetRadius=20.5;applyCamera();updateDaylight(true);scene.background.set(0x07111f);return;
+    scene.background.set(0x07111f);cameraTarget.set(person.position.x,6.2,person.position.z);targetTheta=.72;targetPhi=1.34;targetRadius=27.5;applyCamera();updateDaylight(true);scene.background.set(0x07111f);return;
    }
    const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
    applyWallpaperToRoom(root,wallpaper);
