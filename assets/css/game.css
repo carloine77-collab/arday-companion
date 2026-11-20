@@ -1712,3 +1712,17 @@ html body .stage .drawer.profile-expanded.open .choices{
 .dungeon-result-note{font-size:12px;color:#857d6e;text-align:center}
 .dungeon-result-continue{width:100%;min-height:43px;border:0;border-radius:6px;background:#435c51;color:#f3ead8;font:600 13px "Noto Serif SC",serif}
 @media(max-width:480px){.dungeon-event-view{padding:12px!important}.dungeon-event-modal{width:100%;max-height:78vh;padding:20px 17px 15px}.dungeon-event-modal h2{font-size:19px}.dungeon-event-modal>p{font-size:12px}}
+
+/* Party footer cards: reserve clear vertical space for every text line. */
+.guild-strength{min-height:88px;padding:12px 14px 20px;align-items:center;overflow:hidden;box-sizing:border-box}
+.guild-strength-copy{min-width:0;gap:2px;padding:1px 0 3px;line-height:1.35}
+.guild-strength-copy small{line-height:1.4}
+.guild-strength-copy b{display:block;line-height:1.2;padding:1px 0}
+.guild-strength-copy span{display:block;line-height:1.5;white-space:normal}
+.guild-strength-meter{left:64px;right:14px;bottom:8px;width:auto}
+.guild-cover-utility{position:absolute;z-index:4;right:13px;top:12px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:55%;padding:8px 10px;background:#172b35c9;border-radius:4px 12px 4px 12px;box-sizing:border-box}
+.guild-cover-utility .guild-wallet{position:static;display:flex;flex-direction:column;align-items:flex-end;padding:0;background:transparent;border-radius:0}
+.guild-cover-utility .guild-wallet small{font-size:7px;line-height:1.3}
+.guild-cover-utility .guild-wallet b{font-size:19px;line-height:1.2}
+.guild-cover-utility .guild-dungeon-deadline{position:static;max-width:100%;padding:0;border:0;background:transparent;color:#eadbbd;font-size:8px;line-height:1.45;text-align:right}
+@media(max-width:420px){.guild-cover-utility{right:9px;top:9px;max-width:53%;padding:7px 8px}.guild-cover-copy{left:13px;bottom:14px}.guild-cover-copy h2{font-size:24px}}
