@@ -246,7 +246,7 @@
    };
    const addCanopy=(x,zz,w,d,y,accent=accentMat)=>{
     // Shallow canopy over the rear work zone; the public-facing edge remains completely open.
-    addBox(x,y,zz,w,d*.1,d,graphite);addBox(x,y+.62,zz,w-1,.22,d-.8,silver);addBox(x,y+.78,zz,w*.86,.12,.22,accent);
+    addBox(x,y,zz,w,.48,d,graphite);addBox(x,y+.34,zz,w-1,.18,d-.8,silver);addBox(x,y+.78,zz,w*.86,.12,.22,accent);
     for(let n=-4;n<=4;n++)addBox(x+n*w*.105,y-.58,zz,.22,.95,d-.7,n%2?warmMetal:graphite);
     for(const side of [-1,1]){addBox(x+side*(w/2-.8),y-1.35,zz,.42,2.7,.55,silver);addBox(x+side*(w/2-.8),y-2.72,zz,.9,.18,.9,warmMetal)}
    };
