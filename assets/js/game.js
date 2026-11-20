@@ -1310,7 +1310,7 @@ function initArday3D(){
   const isTouchDevice=window.matchMedia('(pointer: coarse)').matches;
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,isTouchDevice?1.25:1.5));renderer.outputEncoding=T.sRGBEncoding;
-  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.86;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.66;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   // A restrained studio equirectangular environment gives metal, glass and polished wood something to reflect.
   const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;
   const environmentContext=environmentCanvas.getContext('2d');
@@ -1323,18 +1323,18 @@ function initArday3D(){
    environmentContext.fillStyle=glow;environmentContext.fillRect(x-w*.4,y-h*.4,w*1.8,h*1.8);
    environmentContext.fillStyle=`rgba(255,250,239,${alpha*.55})`;environmentContext.fillRect(x,y,w,h);
   };
-  softbox(112,84,86,238,.58);softbox(470,48,142,174,.48);softbox(824,104,72,210,.5);
+  softbox(112,84,86,238,.30);softbox(470,48,142,174,.25);softbox(824,104,72,210,.27);
   const floorBounce=environmentContext.createLinearGradient(0,300,0,512);
-  floorBounce.addColorStop(0,'rgba(225,197,158,0)');floorBounce.addColorStop(1,'rgba(225,197,158,.24)');
+  floorBounce.addColorStop(0,'rgba(225,197,158,0)');floorBounce.addColorStop(1,'rgba(225,197,158,.11)');
   environmentContext.fillStyle=floorBounce;environmentContext.fillRect(0,300,1024,212);
   const environmentTexture=new T.CanvasTexture(environmentCanvas);
   environmentTexture.mapping=T.EquirectangularReflectionMapping;environmentTexture.encoding=T.sRGBEncoding;
   environmentTexture.generateMipmaps=true;environmentTexture.minFilter=T.LinearMipmapLinearFilter;
   scene.environment=environmentTexture;
   host=document.createElement('div');host.className='three-scene';host.setAttribute('aria-label','Arday 三维生活场景，可拖动旋转视角');host.appendChild(renderer.domElement);stage.insertBefore(host,stage.firstChild);
-  const hemi=new T.HemisphereLight(0xf4f2ed,0x514b43,.64);scene.add(hemi);
-  const sun=new T.DirectionalLight(0xfff1dc,1.18);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
-  const fill=new T.DirectionalLight(0xc8d0d8,.23);fill.position.set(5,4,-5);scene.add(fill);
+  const hemi=new T.HemisphereLight(0xe8e3da,0x514b43,.48);scene.add(hemi);
+  const sun=new T.DirectionalLight(0xe8d9c2,.68);sun.position.set(-4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.camera.near=.5;sun.shadow.camera.far=24;sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;sun.shadow.radius=3;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
+  const fill=new T.DirectionalLight(0xb8c2cb,.16);fill.position.set(5,4,-5);scene.add(fill);
   const daylightWindows=[],practicalLights=[];let lastDaylightUpdate=0;
   const lampShadow=new T.SpotLight(0xffd8a6,0,5.5,Math.PI/3,.82,1.8);lampShadow.castShadow=false;lampShadow.shadow.mapSize.set(256,256);lampShadow.shadow.camera.near=.12;lampShadow.shadow.camera.far=6;lampShadow.shadow.bias=-.00016;lampShadow.shadow.normalBias=.035;lampShadow.shadow.radius=5;scene.add(lampShadow,lampShadow.target);
   function addWindowSun(root,windowGroup,centerY=2.65){
@@ -1355,14 +1355,14 @@ function initArday3D(){
   function updateDaylight(force=false){
    const now=Date.now();if(!force&&now-lastDaylightUpdate<1000)return;lastDaylightUpdate=now;
    const d=new Date(),h=d.getHours()+d.getMinutes()/60+d.getSeconds()/3600;
-   const keys=[{h:0,c:0x26334c,a:.16,s:0,e:.18},{h:5,c:0x596b8a,a:.24,s:.05,e:.3},{h:7,c:0xe8b58a,a:.65,s:.45,e:.55},{h:10,c:0xffedcf,a:1.05,s:1.25,e:.92},{h:14,c:0xfff0d9,a:1.1,s:1.35,e:1},{h:17,c:0xf2a16f,a:.78,s:.8,e:.72},{h:19,c:0x5b6689,a:.32,s:.12,e:.32},{h:21,c:0x29364f,a:.18,s:0,e:.2},{h:24,c:0x26334c,a:.16,s:0,e:.18}];
+   const keys=[{h:0,c:0x26334c,a:.10,s:0,e:.12},{h:5,c:0x596b8a,a:.14,s:.02,e:.18},{h:7,c:0xe8b58a,a:.32,s:.16,e:.30},{h:10,c:0xffedcf,a:.52,s:.58,e:.48},{h:14,c:0xfff0d9,a:.55,s:.62,e:.52},{h:17,c:0xf2a16f,a:.38,s:.32,e:.38},{h:19,c:0x5b6689,a:.18,s:.05,e:.18},{h:21,c:0x29364f,a:.11,s:0,e:.12},{h:24,c:0x26334c,a:.10,s:0,e:.12}];
    let i=0;while(i<keys.length-1&&h>keys[i+1].h)i++;
    const a=keys[i],b=keys[Math.min(i+1,keys.length-1)],t=Math.max(0,Math.min(1,(h-a.h)/(b.h-a.h))),mix=(x,y)=>x+(y-x)*t,col=new T.Color(a.c).lerp(new T.Color(b.c),t);
    hemi.color.copy(col);hemi.intensity=mix(a.a,b.a);sun.color.copy(col).lerp(new T.Color(0xfff1dc),.42);sun.intensity=mix(a.s,b.s);sun.castShadow=sun.intensity>.08;
    sun.position.set(-Math.cos((h-6)/12*Math.PI)*7,8,Math.sin((h-6)/12*Math.PI)*5+1);sun.target.position.set(0,0,0);sun.target.updateMatrixWorld();
-   fill.color.copy(col).lerp(new T.Color(0xa8c4e2),.48);fill.intensity=mix(a.e,b.e);renderer.toneMappingExposure=mix(.70,.88,Math.min(1,hemi.intensity));scene.background.copy(col).lerp(new T.Color(0xd9d7d1),.58);
+   fill.color.copy(col).lerp(new T.Color(0xa8c4e2),.48);fill.intensity=mix(a.e,b.e);renderer.toneMappingExposure=mix(.56,.68,Math.min(1,hemi.intensity));scene.background.copy(col).lerp(new T.Color(0xd9d7d1),.58);
    const daylight=Math.max(0,Math.min(1,(h-5.8)/1.7,(20-h)/2.2)),night=h>=20||h<5?1:h>=18?(h-18)/2:h<7?(7-h)/2:0;
-   daylightWindows.forEach(w=>{const active=w.root===(roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living)&&w.windowGroup.visible!==false,strength=mix(a.s,b.s)*1.55*daylight*(active?1:.12),sunDrift=Math.sin((h-8)/12*Math.PI)*1.05;w.spot.intensity=strength;w.spot.target.position.set(sunDrift,.32,3.75);w.spot.target.updateMatrixWorld();w.spot.castShadow=active&&strength>.08;w.beam.position.x=sunDrift*.46;w.beam.material.uniforms.sunStrength.value=daylight*(active?1:.12)*Math.max(.18,mix(a.s,b.s));w.beam.material.uniforms.sunColor.value.copy(col).lerp(new T.Color(0xffdca5),.62)});
+   daylightWindows.forEach(w=>{const active=w.root===(roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living)&&w.windowGroup.visible!==false,strength=mix(a.s,b.s)*.92*daylight*(active?1:.12),sunDrift=Math.sin((h-8)/12*Math.PI)*1.05;w.spot.intensity=strength;w.spot.target.position.set(sunDrift,.32,3.75);w.spot.target.updateMatrixWorld();w.spot.castShadow=active&&strength>.08;w.beam.position.x=sunDrift*.46;w.beam.material.uniforms.sunStrength.value=daylight*(active?1:.12)*Math.max(.12,mix(a.s,b.s));w.beam.material.uniforms.sunColor.value.copy(col).lerp(new T.Color(0xffdca5),.62)});
    practicalLights.forEach(item=>{item.light.intensity=item.enabled?item.base*(item.light.distance>9?.48+.52*night:.5+.5*night):0;if(item.bulb){item.bulb.material.color.setHex(item.enabled?0xffe4b5:0x786f63);item.bulb.material.emissive?.setHex(item.enabled?0x8d5422:0x000000);item.bulb.material.emissiveIntensity=item.enabled?.55:0}if(item.glow)item.glow.visible=item.enabled});
    const shadowSource=practicalLights.find(item=>item.enabled&&item.room===roomMode);
    if(shadowSource){const position=shadowSource.group.localToWorld(shadowSource.light.position.clone());lampShadow.position.copy(position);lampShadow.target.position.set(position.x,.06,position.z+.12);lampShadow.target.updateMatrixWorld();lampShadow.intensity=.72;lampShadow.castShadow=true}else{lampShadow.intensity=0;lampShadow.castShadow=false}
@@ -1380,15 +1380,15 @@ function initArday3D(){
      `float inkLuminance=dot(outgoingLight,vec3(0.2126,0.7152,0.0722));
       float inkShadow=smoothstep(0.12,0.25,inkLuminance);
       float inkMid=smoothstep(0.38,0.58,inkLuminance);
-      float inkBand=mix(0.79,0.91,inkShadow);
-      inkBand=mix(inkBand,1.035,inkMid);
+      float inkBand=mix(0.66,0.82,inkShadow);
+      inkBand=mix(inkBand,0.89,inkMid);
       outgoingLight*=inkBand;
       float paperGrain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5;
-      float brushStroke=sin(gl_FragCoord.y*1.7+gl_FragCoord.x*.21)*0.003;\n      outgoingLight*=1.0+paperGrain*0.014+brushStroke;
+      float brushStroke=sin(gl_FragCoord.y*1.7+gl_FragCoord.x*.21)*0.003;\n      outgoingLight*=0.985+paperGrain*0.009+brushStroke*.72;
       #include <tonemapping_fragment>`
     );
    };
-   material.customProgramCacheKey=()=> 'arday-soft-light-v5';
+   material.customProgramCacheKey=()=> 'arday-soft-light-v6';
       return material;
   }
   const M=(color,roughness=.82,metalness=0)=>stylizeMaterial(new T.MeshStandardMaterial({color:recolorFurniture(color),roughness:Math.max(.08,Math.min(1,roughness)),metalness:Math.max(0,Math.min(.9,metalness))}));
@@ -1498,7 +1498,7 @@ function initArday3D(){
    const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;return texture;
   }
   const contactShadowTexture=radialTexture('rgba(29,24,20,.28)','rgba(29,24,20,.12)');
-  const lampGlowTexture=radialTexture('rgba(255,224,174,.5)','rgba(255,198,126,.16)');
+  const lampGlowTexture=radialTexture('rgba(255,224,174,.30)','rgba(255,198,126,.09)');
   function addContactShadow(group,width,depth){
    const mesh=new T.Mesh(new T.PlaneGeometry(width*1.16,depth*1.16),new T.MeshBasicMaterial({map:contactShadowTexture,transparent:true,depthWrite:false,toneMapped:false}));
    mesh.rotation.x=-Math.PI/2;mesh.position.y=.012;mesh.renderOrder=0;mesh.userData.furnitureContactShadow=true;mesh.castShadow=false;mesh.receiveShadow=false;group.add(mesh);return mesh;
@@ -3102,7 +3102,7 @@ function initArday3D(){
    if(record?.supportId){const savedSupport=s.placed?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.modelName==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support&&support.surfaceType==='table'){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}else{supportId=null;y=0}}
    if(modelName==='壁画'){x=record?.x??-2.1;z=-3.78;y=record?.y??1.9}
    if(!wallAxis&&surfaceType==='floor'&&modelName!=='地毯'&&modelName!=='卧室地毯')addContactShadow(group,width,depth);
-   if(modelName==='台灯'||modelName==='壁灯'||modelName==='吊灯'||modelName==='落地灯'){const isCeiling=modelName==='吊灯',isFloor=modelName==='落地灯',lampPoint=new T.PointLight(0xffd39a,isCeiling?2.5:isFloor?1.8:1.05,isCeiling?8.5:isFloor?7:4.8,1.8);lampPoint.position.set(isFloor&&variant==='黄铜弧形'?.47:0,isCeiling?-.56:isFloor?1.48:modelName==='台灯'?.72:-.02,isCeiling?0:modelName==='壁灯'?.24:0);lampPoint.castShadow=false;group.add(lampPoint);const enabled=record?.lightOn!==false,bulb=new T.Mesh(new T.SphereGeometry(isCeiling?.105:.075,16,12),new T.MeshStandardMaterial({color:enabled?0xffe4b5:0x786f63,emissive:enabled?0x8d5422:0x000000,emissiveIntensity:enabled?.55:0,roughness:.28,metalness:.05}));bulb.position.copy(lampPoint.position);group.add(bulb);const glow=new T.Sprite(new T.SpriteMaterial({map:lampGlowTexture,color:0xffdfae,transparent:true,opacity:enabled?.48:0,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));glow.position.copy(lampPoint.position);glow.scale.set(isCeiling?1.15:.82,isCeiling?1.15:.82,1);glow.visible=enabled;group.add(glow);practicalLights.push({light:lampPoint,base:lampPoint.intensity,enabled,bulb,glow,group,room});group.userData.lampLight=lampPoint;group.userData.lampBulb=bulb;action=()=>{const item=furnitureRegistry.find(x=>x.group===group);if(!item)return;item.lightOn=!item.lightOn;const light=practicalLights.find(x=>x.light===lampPoint);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}updateDaylight(true);persistFurniture(item);toast(item.name+(item.lightOn?'已开启':'已关闭'))}}
+   if(modelName==='台灯'||modelName==='壁灯'||modelName==='吊灯'||modelName==='落地灯'){const isCeiling=modelName==='吊灯',isFloor=modelName==='落地灯',lampPoint=new T.PointLight(0xffd39a,isCeiling?2.5:isFloor?1.8:1.05,isCeiling?8.5:isFloor?7:4.8,1.8);lampPoint.position.set(isFloor&&variant==='黄铜弧形'?.47:0,isCeiling?-.56:isFloor?1.48:modelName==='台灯'?.72:-.02,isCeiling?0:modelName==='壁灯'?.24:0);lampPoint.castShadow=false;group.add(lampPoint);const enabled=record?.lightOn!==false,bulb=new T.Mesh(new T.SphereGeometry(isCeiling?.105:.075,16,12),new T.MeshStandardMaterial({color:enabled?0xffe4b5:0x786f63,emissive:enabled?0x8d5422:0x000000,emissiveIntensity:enabled?.55:0,roughness:.28,metalness:.05}));bulb.position.copy(lampPoint.position);group.add(bulb);const glow=new T.Sprite(new T.SpriteMaterial({map:lampGlowTexture,color:0xffdfae,transparent:true,opacity:enabled?.30:0,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));glow.position.copy(lampPoint.position);glow.scale.set(isCeiling?1.15:.82,isCeiling?1.15:.82,1);glow.visible=enabled;group.add(glow);practicalLights.push({light:lampPoint,base:lampPoint.intensity,enabled,bulb,glow,group,room});group.userData.lampLight=lampPoint;group.userData.lampBulb=bulb;action=()=>{const item=furnitureRegistry.find(x=>x.group===group);if(!item)return;item.lightOn=!item.lightOn;const light=practicalLights.find(x=>x.light===lampPoint);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}updateDaylight(true);persistFurniture(item);toast(item.name+(item.lightOn?'已开启':'已关闭'))}}
    group.position.set(x,y,z);group.rotation.y=rotation;
    const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:[0,.5],action,wallAxis,wallSide,wallRange:4.5,record});
    item.owned=true;item.kind=record?.kind||(name.startsWith('成品食物·')?'food':'furniture');if(group.userData.lampLight){item.lightOn=record?.lightOn!==false;const light=practicalLights.find(x=>x.light===group.userData.lampLight);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}}item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
