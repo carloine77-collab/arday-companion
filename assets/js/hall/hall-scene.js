@@ -5,7 +5,7 @@
   const mat=(c,m=.68,r=.32)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r});
   const addCylinder=(parent,x,y,z,rt,rb,h,material,segments=16)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
   const addTorus=(parent,x,y,z,r,t,material)=>{const o=new T.Mesh(new T.TorusGeometry(r,t,10,56),material);o.position.set(x,y,z);parent.add(o);return o};
-  const titanium=mat(0x9eabb4,.82,.25),silver=mat(0xd1dce1,.76,.22),graphite=mat(0x263440,.72,.34),dark=mat(0x111e2a,.6,.42),floorMat=mat(0x667783,.72,.3),floorDark=mat(0x344550,.72,.34),cyan=new T.MeshStandardMaterial({color:0x70ddeb,emissive:0x137d96,emissiveIntensity:.55,metalness:.4,roughness:.25}),whiteGlow=new T.MeshBasicMaterial({color:0xd9faff,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x9de6f0,metalness:.18,roughness:.28,transparent:true,opacity:.14,depthWrite:false,side:T.FrontSide});
+  const titanium=mat(0x9eabb4,.82,.25),silver=mat(0xd1dce1,.76,.22),graphite=mat(0x263440,.72,.34),dark=mat(0x111e2a,.6,.42),floorMat=mat(0x667783,.72,.3),floorDark=mat(0x344550,.72,.34),cyan=new T.MeshStandardMaterial({color:0x70ddeb,emissive:0x137d96,emissiveIntensity:.55,metalness:.4,roughness:.25}),whiteGlow=new T.MeshBasicMaterial({color:0xd9faff,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x9de6f0,metalness:.12,roughness:.2,transparent:false,opacity:1,depthWrite:true,transmission:.22,thickness:.12,clearcoat:.55,clearcoatRoughness:.18,side:T.DoubleSide});
   root.add(new T.HemisphereLight(0xc2e9f1,0x172737,.82));
   const key=new T.DirectionalLight(0xe1f6ff,.92);key.position.set(-30,75,35);key.castShadow=false;root.add(key);
   const fill=new T.PointLight(0x57d5e8,32,220,1.7);fill.position.set(-50,35,-20);root.add(fill);
@@ -231,6 +231,47 @@
     bevel=Math.min(bevel,d*.22,h*.22,w*.22);const g=new T.ExtrudeGeometry(s,{depth:Math.max(.04,d-2*bevel),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:bevel,bevelThickness:bevel,curveSegments:8});
     g.computeVertexNormals();const o=new T.Mesh(g,material);o.position.set(x,y,z-d/2+bevel);o.castShadow=true;o.receiveShadow=true;area.add(o);return o;
    };
+   const addCurvedVolume=(x,y,z,w,h,d,material,bulge=1.1)=>{
+    // Closed, curved architectural volume: front and rear skins plus sealed side walls.
+    const nx=28,ny=8,verts=[],indices=[];
+    const front=(u,v)=>[x+(u-.5)*w,y+(v-.5)*h,z-d/2-bulge*(1-4*(u-.5)*(u-.5))];
+    const back=(u,v)=>[x+(u-.5)*w,y+(v-.5)*h,z+d/2];
+    const pushGrid=(fn)=>{
+     const base=verts.length/3;
+     for(let j=0;j<=ny;j++)for(let i=0;i<=nx;i++)verts.push(...fn(i/nx,j/ny));
+     for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+      const a=base+j*(nx+1)+i,b=a+1,c0=a+nx+1,d0=c0+1;
+      indices.push(a,b,c0,b,d0,c0);
+     }
+    };
+    pushGrid(front);pushGrid(back);
+    const frontCount=(nx+1)*(ny+1),backBase=frontCount;
+    // Close the four perimeter edges with triangulated strips.
+    const edge=(a,b,c0,d0)=>indices.push(a,b,c0,b,d0,c0);
+    for(let i=0;i<nx;i++){
+     edge(i,i+1,backBase+i,backBase+i+1);
+     const f=(ny*(nx+1))+i,b=backBase+f;
+     edge(f+1,f,b+1,b);
+    }
+    for(let j=0;j<ny;j++){
+     const f0=j*(nx+1),f1=(j+1)*(nx+1);
+     edge(f0,f1,backBase+f0,backBase+f1);
+     const r0=f0+nx,r1=f1+nx;
+     edge(r1,r0,backBase+r1,backBase+r0);
+    }
+    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();
+    const mesh=new T.Mesh(g,material);mesh.castShadow=true;mesh.receiveShadow=true;area.add(mesh);return mesh;
+   };
+   const addCurvedGlazing=(x,y,z,w,h,d,material,bulge=.8)=>{
+    const pane=addCurvedVolume(x,y,z,w,h,d,material,bulge);
+    // Slim extruded mullions sit proud of the glazing and are spaced away from its surface.
+    for(let i=-2;i<=2;i++){
+     const u=i/4,zz=z-d/2-bulge*(1-4*u*u)-.09;
+     const mullion=addRoundedShell(x+u*w,y,zz,.13,h+.18,.18,warmMetal,.05,.035);
+     mullion.rotation.z=0;
+    }
+    return pane;
+   };
    const addSculptedFacade=(x,y,z,w,h,depth,material,bulge=1.2)=>{
     // A continuous, subtly bowed architectural skin with real surface curvature.
     const verts=[],uv=[],indices=[],nx=36,ny=10;
@@ -390,7 +431,7 @@
    if(z.id==='exchange'){
     // Exchange hall: a deep banking concourse with a vaulted service frontage and seven teller bays.
     addSculptedFacade(0,13,-43,100,26,2.4,graphite,1.8);
-    addBox(0,25.2,-41.55,94,1.0,.22,warmMetal);
+    addCurvedVolume(0,25.2,-41.55,94,1.0,.7,warmMetal,.65);
     for(let i=-3;i<=3;i++){
      const x=i*13.1;
      addFacadeBay(x,-40,11.2,17,amber);
@@ -405,7 +446,7 @@
      addBox(side*47.4,18,-13,3.4,1.2,60,silver);
      addTrussBay(side*34,-12,24,27,amber);
     }
-    addBox(0,28,-13,101,1.6,58,silver);
+    addVaultCanopy(0,28,-42,101,58,silver);
     for(let i=-4;i<=4;i++)addBeam(i*11,27.05,-13,.34,1.1,56,i%2?warmMetal:graphite);
     addBox(0,29,-13,82,.22,1.2,amber);
     // A waiting gallery sits behind the teller line, with real seating and service dividers.
@@ -414,7 +455,7 @@
    }else if(z.id==='ranking'){
     // Ranking forum: a monumental stepped display wall, flanked by deep buttresses and public tiers.
     addSculptedFacade(0,18,-45,102,36,3.2,graphite,2.2);
-    addBox(0,35,-43.18,94,1.0,.45,silver);
+    addCurvedVolume(0,35,-43.18,94,1.0,.8,silver,.7);
     for(let i=-5;i<=5;i++){
      const x=i*8.4,h=20+(Math.abs(i)%3)*3;
      addBox(x,h/2,-42.9,1.25,h,1.0,i%2?plum:graphite);
@@ -435,13 +476,13 @@
    }else if(z.id==='recruitment'){
     // Recruitment pavilion: three private interview suites with glazed partitions and shared circulation.
     addSculptedFacade(0,14,-43,100,28,2.2,graphite,1.8);
-    addBox(0,28,-40.9,103,1.5,6,silver);
+    addVaultCanopy(0,28,-40.9,103,6,silver);
     for(let bay=-1;bay<=1;bay++){
      const x=bay*32;
      addFacadeBay(x,-40,25,25,jade);
-     addBox(x,8,-30,23,16,1.2,graphite);
-     addBox(x,8,-29.32,19,12,.08,glass);
-     addBox(x,8,-28.95,18,11,.08,jade);
+     addCurvedVolume(x,8,-30,23,16,1.2,graphite,1.05);
+     addCurvedGlazing(x,8,-29.32,19,12,.16,glass,.78);
+     addCurvedVolume(x,8,-28.95,18,11,.22,jade,.72);
      addBox(x,1.5,-19,19,2.1,6,plum);
      addCounter(x,2.0,-37,12,3,ivory,graphite);
      addBox(x,5.3,-35.1,10,.18,.12,jade);
@@ -461,10 +502,10 @@
    }else if(z.id==='commissions'){
     // Dispatch center: a two-level mission control wall with cantilevered terminal gantries.
     addSculptedFacade(0,17,-45,104,34,3.2,graphite,2.0);
-    addBox(0,35,-43.1,108,1.6,4.2,silver);
+    addVaultCanopy(0,35,-43.1,108,4.2,silver);
     for(let i=0;i<5;i++){
      const x=-40+i*20;
-     addBox(x,11,-42.95,17,18,.3,plum);
+     addCurvedVolume(x,11,-42.95,17,18,.55,plum,.65);
      addScreen(x,15,-42.7,13,9,i%2?cyan:amber);
      addBox(x,3,-39,16,1.2,5,graphite);
      addBox(x,4,-37,14,.18,3,ivory);
@@ -475,7 +516,7 @@
      addBox(side*49.8,13,-12,.18,21,58,amber);
      addTrussBay(side*37,-12,27,31,amber);
     }
-    addBox(0,32,-13,105,1.8,62,silver);
+    addVaultCanopy(0,32,-42,105,62,silver);
     for(let i=-4;i<=4;i++)addBeam(i*12,30.9,-13,.4,1.3,60,i%2?amber:graphite);
     // Separate task-class consoles have different housings and approach clearances.
     for(let tier=0;tier<3;tier++){
@@ -491,8 +532,8 @@
     addScreen(0,9,-44,28,13,violet);
     for(let cell=0;cell<4;cell++){
      const sx=(cell%2?1:-1)*31,sz=cell<2?-28:27;
-     addBox(sx,7,sz,30,14,1.2,graphite);
-     addBox(sx,7,sz+.68,26,10,.08,glass);
+     addCurvedVolume(sx,7,sz,30,14,1.2,graphite,.9);
+     addCurvedGlazing(sx,7,sz+.68,26,10,.16,glass,.62);
      addBox(sx,1.2,sz+7,26,2.4,12,plum);
      addBox(sx,2.55,sz+7,23,.18,10,ivory);
      for(let j=-1;j<=1;j++){addBox(sx+j*8,4,sz+13,1.2,4,1.4,violet);addBox(sx+j*8,6.3,sz+13,4,.18,1.6,warmMetal)}
@@ -513,9 +554,9 @@
     for(let bay=-1;bay<=1;bay++){
      const x=bay*34;
      addTrussBay(x,-20,28,bay===0?33:29,violet);
-     addBox(x,8,-18,24,16,1.5,plum);
-     addBox(x,8,-17.1,20,12,.12,glass);
-     addBox(x,8,-16.85,18,10,.1,violet);
+     addCurvedVolume(x,8,-18,24,16,1.5,plum,1.05);
+     addCurvedGlazing(x,8,-17.1,20,12,.2,glass,.82);
+     addCurvedVolume(x,8,-16.85,18,10,.2,violet,.72);
      addBox(x,2,-5,20,2.2,8,graphite);
      addBox(x,3.25,-5,17,.18,7,ivory);
      for(let side=-1;side<=1;side+=2){
@@ -532,7 +573,7 @@
    }else if(z.id==='food'){
     // Food hall: a covered market street with three service fronts and a shared dining room.
     addSculptedFacade(0,9,-44,104,18,2.8,graphite,1.6);
-    addBox(0,18.5,-41.8,108,1.3,5.2,warmMetal);
+    addVaultCanopy(0,18.5,-41.8,108,5.2,warmMetal);
     for(let bay=0;bay<3;bay++){
      const x=(bay-1)*34,stallAccent=bay===0?coral:bay===1?amber:jade;
      addFacadeBay(x,-40,28,15,stallAccent);
