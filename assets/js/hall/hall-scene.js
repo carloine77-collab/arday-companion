@@ -2,7 +2,7 @@
  'use strict';
  function create(T,scene,M,box){
   const root=new T.Group();root.name='ArdayPublicHall';root.position.set(-5.18,0,0);scene.add(root);
-  const mat=(c,m=.68,r=.32)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r});
+  const mat=(c,m=.58,r=.42)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r,envMapIntensity:1.12});
   // Organic surface library: procedural bark, leaf and soil maps keep plants out of the metallic material family.
   const makeOrganicMap=(base,low,high,kind)=>{
    const c=document.createElement('canvas');c.width=256;c.height=256;const q=c.getContext('2d');
@@ -13,26 +13,29 @@
    else{for(let i=0;i<2400;i++){q.fillStyle=i%2?low:high;q.globalAlpha=.08+rnd()*.12;q.fillRect(rnd()*256,rnd()*256,1+rnd()*3,1+rnd()*3)}}
    q.globalAlpha=1;const t=new T.CanvasTexture(c);if(T.sRGBEncoding!==undefined)t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=4;return t;
   };
-  const barkMap=makeOrganicMap('#65452f','#38281f','#a77b4d','bark'),leafMap=makeOrganicMap('#4d7836','#234b27','#9bbd54','leaf'),soilMap=makeOrganicMap('#4b3d2b','#2b261c','#786043','soil');
+  const barkMap=makeOrganicMap('#625d54','#3e4140','#8d8170','bark'),leafMap=makeOrganicMap('#69776f','#45574f','#a1a99a','leaf'),soilMap=makeOrganicMap('#55534c','#343b3b','#77746a','soil');
   const barkMat=new T.MeshStandardMaterial({map:barkMap,bumpMap:barkMap,bumpScale:.16,color:0xffffff,roughness:.94,metalness:0});
   // Three.js r128 does not implement the later MeshPhysicalMaterial sheen pipeline.
   // Keep foliage on the stable Standard shader path; variation comes from texture and per-leaf palette.
   const leafPalette=[
-   new T.MeshStandardMaterial({color:0x315d32,map:leafMap,roughness:.88,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x477a36,map:leafMap,roughness:.84,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x6b8d3c,map:leafMap,roughness:.9,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x526b2e,map:leafMap,roughness:.91,metalness:0,side:T.DoubleSide}),
-   new T.MeshStandardMaterial({color:0x2e6848,map:leafMap,roughness:.86,metalness:0,side:T.DoubleSide})
+   new T.MeshStandardMaterial({color:0x586c65,map:leafMap,roughness:.9,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x718078,map:leafMap,roughness:.87,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x8a9182,map:leafMap,roughness:.92,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x66736b,map:leafMap,roughness:.92,metalness:0,side:T.DoubleSide}),
+   new T.MeshStandardMaterial({color:0x5b7470,map:leafMap,roughness:.89,metalness:0,side:T.DoubleSide})
   ];
   const soilMat=new T.MeshStandardMaterial({map:soilMap,bumpMap:soilMap,bumpScale:.12,color:0xffffff,roughness:1,metalness:0});
   const leafGeometry=(()=>{const sh=new T.Shape();sh.moveTo(0,0);sh.quadraticCurveTo(.2,.24,.02,.9);sh.quadraticCurveTo(-.2,.24,0,0);const g=new T.ExtrudeGeometry(sh,{depth:.035,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.018,bevelThickness:.012,curveSegments:10});g.computeVertexNormals();return g;})();
 
   const addCylinder=(parent,x,y,z,rt,rb,h,material,segments=16)=>{const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
   const addTorus=(parent,x,y,z,r,t,material)=>{const o=new T.Mesh(new T.TorusGeometry(r,t,10,56),material);o.position.set(x,y,z);parent.add(o);return o};
-  const titanium=mat(0x9eabb4,.82,.25),silver=mat(0xd1dce1,.76,.22),graphite=mat(0x263440,.72,.34),dark=mat(0x111e2a,.6,.42),floorMat=mat(0x667783,.72,.3),floorDark=mat(0x344550,.72,.34),cyan=new T.MeshStandardMaterial({color:0x70ddeb,emissive:0x137d96,emissiveIntensity:.55,metalness:.4,roughness:.25}),whiteGlow=new T.MeshBasicMaterial({color:0xd9faff,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0x9de6f0,metalness:.12,roughness:.2,transparent:false,opacity:1,depthWrite:true,transmission:.22,thickness:.12,clearcoat:.55,clearcoatRoughness:.18,side:T.DoubleSide});
-  root.add(new T.HemisphereLight(0xc2e9f1,0x172737,.82));
-  const key=new T.DirectionalLight(0xe1f6ff,.92);key.position.set(-30,75,35);key.castShadow=false;root.add(key);
-  const fill=new T.PointLight(0x57d5e8,32,220,1.7);fill.position.set(-50,35,-20);root.add(fill);
+  const titanium=mat(0x9eabb4,.72,.36),silver=mat(0xd1dce1,.78,.3),graphite=mat(0x263440,.62,.48),dark=mat(0x111e2a,.5,.56),floorMat=mat(0x667783,.32,.66),floorDark=mat(0x344550,.5,.56),cyan=new T.MeshStandardMaterial({color:0x9bcbd2,emissive:0x285b66,emissiveIntensity:.28,metalness:.32,roughness:.38,envMapIntensity:1.2}),whiteGlow=new T.MeshBasicMaterial({color:0xd9faff,toneMapped:false}),glass=new T.MeshPhysicalMaterial({color:0xa8cbd0,metalness:.12,roughness:.24,transparent:false,opacity:1,depthWrite:true,transmission:.16,thickness:.16,clearcoat:.42,clearcoatRoughness:.26,envMapIntensity:1.3,side:T.DoubleSide});
+  // Layered cool-neutral lighting: broad ambient fill, a directional key, a soft blue bounce and a restrained warm rim.
+  root.add(new T.HemisphereLight(0xcbd9df,0x202b34,.96));
+  const key=new T.DirectionalLight(0xe4edf2,1.18);key.position.set(-42,92,54);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-360;key.shadow.camera.right=360;key.shadow.camera.top=310;key.shadow.camera.bottom=-310;key.shadow.camera.near=1;key.shadow.camera.far=520;key.shadow.bias=-.00018;key.shadow.normalBias=.035;key.shadow.radius=4;key.shadow.camera.updateProjectionMatrix();root.add(key);
+  const fillLight=new T.DirectionalLight(0x9ab9c8,.42);fillLight.position.set(58,52,-72);root.add(fillLight);
+  const rimLight=new T.DirectionalLight(0xf0d9bd,.16);rimLight.position.set(12,34,76);root.add(rimLight);
+  const fill=new T.PointLight(0x78b9c7,18,260,1.65);fill.position.set(-54,38,-26);root.add(fill);
   // A vast continuous floor; districts are embedded in its geography rather than isolated platforms.
   const floor=new T.Mesh(new T.PlaneGeometry(780,680),floorMat);floor.rotation.x=-Math.PI/2;floor.position.set(-20,-.18,0);floor.receiveShadow=false;floor.castShadow=false;floor.name='hall-walkable-ground';floor.userData.hallFloor=true;root.add(floor);
   // Continuous floor without intersecting coplanar grid planes.
@@ -41,12 +44,12 @@
   // Open-air public forum: a monumental perimeter colonnade encloses the plaza.
   // There is deliberately no indoor ceiling or interior column grid; the sky remains visible.
   const perimeter=new T.Group();perimeter.name='hall-outdoor-perimeter-colonnade';perimeter.scale.set(1.25,1,1.25);root.add(perimeter);
-  const columnMat=[silver,titanium,graphite],warmMetal=mat(0xb68a55,.78,.24),paleStone=mat(0xd9d0bd,.42,.42);
-  const amber=new T.MeshStandardMaterial({color:0xffbd68,emissive:0x9b4d12,emissiveIntensity:.48,metalness:.36,roughness:.28});
-  const violet=new T.MeshStandardMaterial({color:0x9b83d8,emissive:0x49318b,emissiveIntensity:.42,metalness:.42,roughness:.25});
-  const coral=new T.MeshStandardMaterial({color:0xd97865,emissive:0x6f251c,emissiveIntensity:.25,metalness:.24,roughness:.38});
-  const jade=new T.MeshStandardMaterial({color:0x78aa91,emissive:0x1b503c,emissiveIntensity:.2,metalness:.22,roughness:.38});
-  const ivory=mat(0xe7dfcf,.36,.38),copper=mat(0x9d6548,.8,.28),plum=mat(0x51415f,.58,.32);
+  const columnMat=[silver,titanium,graphite],warmMetal=mat(0x9d876b,.7,.4),paleStone=mat(0xbfc4c0,.18,.82);
+  const amber=new T.MeshStandardMaterial({color:0xd7ad78,emissive:0x76502b,emissiveIntensity:.24,metalness:.3,roughness:.42,envMapIntensity:1.05});
+  const violet=new T.MeshStandardMaterial({color:0x85869b,emissive:0x393c59,emissiveIntensity:.2,metalness:.28,roughness:.46,envMapIntensity:1.05});
+  const coral=new T.MeshStandardMaterial({color:0xb77d76,emissive:0x5b3535,emissiveIntensity:.13,metalness:.18,roughness:.52,envMapIntensity:.95});
+  const jade=new T.MeshStandardMaterial({color:0x819b91,emissive:0x30483f,emissiveIntensity:.12,metalness:.16,roughness:.56,envMapIntensity:.95});
+  const ivory=mat(0xc9c9bf,.12,.78),copper=mat(0x876f5c,.68,.42),plum=mat(0x514f5c,.38,.56);
   const addColumn=(x,z,index)=>{
    const g=new T.Group();g.position.set(x,0,z);perimeter.add(g);
    const h=54+(index%4)*3.5,base=5.8,shaftR=index%3===0?2.45:2.05;
@@ -143,7 +146,7 @@
   }
   const coreSpire=new T.Mesh(new T.CylinderGeometry(1.8,4.8,30,12),silver);coreSpire.position.y=17;coreSpire.castShadow=true;core.add(coreSpire);
   const coreDark=new T.Mesh(new T.CylinderGeometry(2.05,2.05,17,12),graphite);coreDark.position.y=17;core.add(coreDark);
-  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.4,2),new T.MeshPhysicalMaterial({color:0xc4edf0,metalness:.48,roughness:.12,emissive:0x286b7c,emissiveIntensity:.72,transparent:true,opacity:.94}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
+  const coreOrb=new T.Mesh(new T.IcosahedronGeometry(5.4,2),new T.MeshPhysicalMaterial({color:0xc3d9dc,metalness:.42,roughness:.2,emissive:0x244d56,emissiveIntensity:.38,transparent:true,opacity:.94,envMapIntensity:1.35}));coreOrb.position.y=33;coreOrb.castShadow=true;core.add(coreOrb);
   // Three differently inclined orbital bands make the landmark legible in silhouette from every approach.
   for(let i=0;i<3;i++){
    const ring=new T.Mesh(new T.TorusGeometry(12+i*5,.34-i*.045,12,112),i===1?warmMetal:i===2?violet:cyan);
@@ -166,7 +169,7 @@
    const a=-Math.PI/2+i*Math.PI*2/7;
    const ray=new T.Mesh(new T.BoxGeometry(.22,13,.22),i%2?cyan:amber);ray.position.set(Math.cos(a)*9,23,Math.sin(a)*9);ray.rotation.z=.22*Math.cos(a);ray.rotation.x=.22*Math.sin(a);core.add(ray);
   }
-  const coreLight=new T.PointLight(0x7bd9e8,25,110,1.8);coreLight.position.set(18,29,0);root.add(coreLight);
+  const coreLight=new T.PointLight(0x91c9d2,14,120,1.8);coreLight.position.set(18,29,0);root.add(coreLight);
   function labelTexture(title,sub){const c=document.createElement('canvas');c.width=768;c.height=224;const g=c.getContext('2d');g.fillStyle='rgba(8,23,37,.88)';g.fillRect(8,8,752,208);g.strokeStyle='#78d9e8';g.lineWidth=4;g.strokeRect(12,12,744,200);g.fillStyle='#effaff';g.textAlign='center';g.textBaseline='middle';g.font='bold 66px sans-serif';g.fillText(title,384,88);g.fillStyle='#82c9d9';g.font='25px sans-serif';g.fillText(sub,384,163);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return t}
   const zones=[
 
