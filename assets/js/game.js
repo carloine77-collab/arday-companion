@@ -43,7 +43,7 @@ s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object
 s.points=Math.max(0,Math.floor(Number(s.points)||0));
 if(!s.leaderboardPopulationV2){if(s.points===0)s.points=100;s.leaderboardPopulationV2=true;}
 s.activeDungeon=s.activeDungeon&&s.activeDungeon.status==='active'?s.activeDungeon:null;
-if(s.activeDungeon){s.activeDungeon.endsAt=0;s.activeDungeon.scheduleEndAt=0;s.activeDungeon.board=s.activeDungeon.board||{steps:0,position:0,lap:0,chanceModifier:0,fatalRisk:false,flags:{},history:[],pending:null};}
+if(s.activeDungeon){const m=s.activeDungeon;m.board=m.board||{steps:0,position:0,chanceModifier:0,fatalRisk:false,flags:{},history:[],pending:null};m.mode=m.mode==='board'?'board':'classic';if(m.mode==='classic'&&!Number(m.scheduleEndAt||m.endsAt)){const start=Number(m.startAt)||Date.now();m.scheduleEndAt=Math.floor(start/3600000)*3600000+3600000;m.endsAt=m.scheduleEndAt;}}
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
 s.dungeonProgress=s.dungeonProgress&&typeof s.dungeonProgress==='object'?s.dungeonProgress:{};
 s.dungeonHistory=Array.isArray(s.dungeonHistory)?s.dungeonHistory:[];
@@ -1486,21 +1486,16 @@ function showDungeon(){
  $('choices').querySelectorAll('[data-remove-member]').forEach(button=>button.onclick=event=>{event.stopPropagation();const index=s.teamRoster.findIndex(x=>x.id===button.dataset.removeMember);if(index<0)return;const removed=s.teamRoster.splice(index,1)[0];save();toast('已移除队友：'+removed.name);showDungeon()});
 }
 const DUNGEON_BOARD_TILES=[
-['explore','场景探索','⌂'],['apparition','灵异遭遇','◌'],['investigate','调查线索','⌕'],['rules','规则禁忌','≋'],['supply','物资补给','＋'],['route','路线选择','↗'],['npc','人物遭遇','♙'],['cognition','精神认知','◉'],['environment','时间环境','☾'],['trap','陷阱危机','△'],['reward','特殊机会','✦'],['climax','阶段剧情','◇']];
-const DUNGEON_ITEM_CATALOG={stimulant:{name:'肾上腺素注射剂',type:'buff',icon:'✚',effects:{energy:16,agility:5,willpower:4}},standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},hex:{name:'恶意诅咒钉',type:'harm',icon:'†',tradeOnly:true},fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',tradeOnly:true},reprieve:{name:'七日豁免令',type:'extension',icon:'⌛',extendDays:7}};
+['scene','场景','⌂'],['anomaly','异象','◌'],['clue','调查','⌕'],['crisis','危机','△'],['supply','补给','＋'],['turning','节点','◇'],
+['scene','场景','⌂'],['anomaly','异象','◌'],['clue','调查','⌕'],['crisis','危机','△'],['supply','补给','＋'],['turning','节点','◇']];
+const DUNGEON_ITEM_CATALOG={stimulant:{name:'肾上腺素注射剂',type:'buff',icon:'✚',effects:{energy:16,agility:1,willpower:1}},standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},hex:{name:'恶意诅咒钉',type:'harm',icon:'†',tradeOnly:true},fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',tradeOnly:true},reprieve:{name:'七日豁免令',type:'extension',icon:'⌛',extendDays:7}};
 const DUNGEON_EVENT_LIBRARY={
-explore:{title:'封闭的实验楼',desc:'走廊的灯一盏盏亮起，尽头的门牌却写着不存在的楼层。',options:[{label:'检查门牌和墙体',effects:{perception:3,intelligence:2,energy:-2},chance:2},{label:'沿安全通道离开',effects:{willpower:2,clean:-1} }]},
-apparition:{title:'走廊尽头的人影',desc:'一个穿着旧校服的人影背对着你。它的脚没有落在地面上。',options:[{label:'保持距离，观察它',effects:{perception:3,willpower:-2},chance:2},{label:'迅速撤离',effects:{energy:-3,agility:2},chance:-3,risk:true}]},
-investigate:{title:'被涂改的值班记录',desc:'记录本上有一页被反复撕贴，残留字迹似乎在描述今晚的校园。',options:[{label:'整理残留信息',effects:{intelligence:3,perception:2,fun:-1},chance:3,flag:'optional-clue'},{label:'不再停留',effects:{willpower:1,energy:1}}]},
-rules:{title:'广播中的校规',desc:'广播要求午夜后不得回应自己的名字。播音员随后念出了你的名字。',options:[{label:'不回应，关闭广播',effects:{willpower:4,energy:-2},chance:2},{label:'回应并询问身份',effects:{intelligence:2,willpower:-5,fun:-3},chance:-5,risk:true}]},
-supply:{title:'器材室',desc:'器材室门没有锁，里面有旧手电、急救包和一排空荡荡的储物柜。',options:[{label:'搜寻可用物资',effects:{perception:2,energy:-1},item:'stimulant'},{label:'快速离开',effects:{agility:2,clean:1}}]},
-route:{title:'两条楼梯',desc:'左侧楼梯通向明亮的大厅，右侧楼梯传来规律的敲击声。',options:[{label:'走向明亮处',effects:{willpower:2,energy:-1}},{label:'进入右侧楼梯',effects:{perception:3,agility:-2},chance:3,flag:'optional-route'}]},
-npc:{title:'没有脸的值日生',desc:'值日生递来一张纸条，声称可以告诉你离开校园的方法。',options:[{label:'接受纸条并询问细节',effects:{intelligence:2,willpower:-1},flag:'npc-note'},{label:'拒绝接触，保持警惕',effects:{perception:2,willpower:2}}]},
-cognition:{title:'重复的教室',desc:'教室里坐着许多和你一模一样的人。他们同时抬起头。',options:[{label:'确认自己的记忆',effects:{intelligence:2,willpower:3,fun:-3}},{label:'闭眼沿墙移动',effects:{agility:2,energy:-2},risk:true}]},
-environment:{title:'全校停电',desc:'广播停止，钟表停在 23:17。窗外的操场却出现了清晨的日光。',options:[{label:'利用光线寻找出口',effects:{perception:2,agility:2,energy:-1}},{label:'留在原地等待',effects:{willpower:2,fun:-2,hunger:-1}}]},
-trap:{title:'地板下的空洞',desc:'脚下的地砖突然塌陷，下面传来许多人的低声交谈。',options:[{label:'抓住栏杆翻越',effects:{strength:3,agility:-3,energy:-3},risk:true},{label:'退后寻找绕行路线',effects:{perception:2,energy:-2}}]},
-reward:{title:'无人认领的储物柜',desc:'柜门上贴着你的名字，里面放着一件从未见过的物品。',options:[{label:'取走柜中物品',effects:{willpower:-1},item:'fate'},{label:'检查柜体后离开',effects:{intelligence:2,perception:1}}]},
-climax:{title:'第三次钟声',desc:'钟声响起。校园布局正在向最初的样子收缩。',options:[{label:'记住变化并继续前进',effects:{intelligence:3,willpower:2},chance:4},{label:'趁空间收缩时冲刺',effects:{agility:3,energy:-4},risk:true}]}
+scene:{title:'封闭的实验楼',desc:'走廊灯光逐盏亮起，尽头出现一扇陌生的门。',options:[{label:'靠近查看',effects:{perception:1,intelligence:1,energy:-1},chance:1},{label:'沿墙离开',effects:{willpower:1,clean:-1}}]},
+anomaly:{title:'走廊里的人影',desc:'旧校服背对着你，双脚悬在地面上。',options:[{label:'留在原地观察',effects:{perception:1,willpower:-1},chance:2},{label:'立刻撤离',effects:{agility:1,energy:-1},chance:-1}]},
+clue:{title:'值班记录',desc:'被撕掉的纸页下，留下了今晚的日期。',options:[{label:'拼回纸页',effects:{intelligence:1,perception:1,fun:-1},chance:2},{label:'放下记录',effects:{willpower:1,energy:1}}]},
+crisis:{title:'塌陷的地砖',desc:'地面裂开，黑暗里传来敲击声。',options:[{label:'翻过缺口',effects:{strength:1,agility:-1,energy:-1}},{label:'绕路离开',effects:{perception:1,energy:-1}}]},
+supply:{title:'器材室',desc:'急救箱旁放着一支未拆封的注射剂。',options:[{label:'取走物资',effects:{perception:1},item:'stimulant'},{label:'不作停留',effects:{agility:1,clean:1}}]},
+turning:{title:'第三次钟声',desc:'钟声响起，校园的出口正在改变位置。',options:[{label:'记住变化',effects:{intelligence:1,willpower:1},chance:2},{label:'趁隙冲出',effects:{agility:1,energy:-1},chance:-1}]}
 };
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;return item}
 function useDungeonItem(entity,index){
@@ -1518,34 +1513,45 @@ function applyDungeonDeadlinePenalty(at=Date.now()){
  s.dungeonOverduePenaltyDay=today;s.energy=clamp((Number(s.energy)||0)-6);s.hunger=clamp((Number(s.hunger)||0)-5);s.clean=clamp((Number(s.clean)||0)-3);s.fun=clamp((Number(s.fun)||0)-5);s.attributes.willpower=clamp((Number(s.attributes.willpower)||0)-2);s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);addEvent('副本期限逾期','连续七天未进入副本，异常侵蚀影响了生存状态与意志。','daily');save();
 }
 function renderDungeonBoard(){
- const mission=s.activeDungeon;if(!mission)return;const board=mission.board||(mission.board={steps:0,position:0,chanceModifier:0,fatalRisk:false,flags:{},history:[]});$('drawerTitle').textContent='校园灵异 · 副本';$('choices').className='choices infinite-view dungeon-board-view';
- const current=board.position||0,lap=Math.min(3,Math.floor((board.steps||0)/12)+1),progress=Math.min(100,(board.steps||0)/36*100);
- const cells=DUNGEON_BOARD_TILES.map((tile,i)=>'<div class="dungeon-board-cell tone-'+tile[0]+' '+(i===current?'is-here':'')+'"><span>'+tile[2]+'</span><b>'+tile[1]+'</b><small>'+String(i+1).padStart(2,'0')+'</small></div>').join('');
- const history=(board.history||[]).slice(-4).reverse().map(h=>'<div class="dungeon-log-row"><b>'+h.title+'</b><span>'+h.outcome+'</span></div>').join('');
- $('choices').innerHTML='<section class="dungeon-board-cover"><div class="dungeon-board-kicker">CAMPUS ANOMALY / INFINITE INSTANCE</div><div class="dungeon-board-title">校园</div><p>教学楼 · 实验楼 · 宿舍区 · 地下通道</p><div class="dungeon-board-meta"><span>副本等级 <b>'+mission.tier+'</b></span><span>第 <b>'+Math.min(3,lap)+'</b> / 3 圈</span><span>通关修正 <b>'+((board.chanceModifier||0)>=0?'+':'')+board.chanceModifier+'%</b></span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-map-head"><b>校园路线</b><small>掷骰前进 · 共三圈</small></div><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><span>ROUND</span><strong>'+Math.min(3,lap)+'</strong><small>'+Math.min(36,board.steps||0)+' / 36 STEPS</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display"><span>LAST ROLL</span><b>'+(board.lastRoll||'—')+'</b><small>'+(board.lastMove?'前进 '+board.lastMove+' 格':'等待掷骰')+'</small></div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=36?'disabled':'')+'>掷骰前进 <span>⚄</span></button></section><section class="dungeon-board-notes"><div class="dungeon-board-map-head"><b>事件记录</b><small>线索不是通关门槛</small></div>'+(history||'<p>尚无事件记录。校园的第一声钟响还没有出现。</p>')+'</section><div class="dungeon-deadline-note">'+dungeonDeadlineText()+'</div>';
+ const mission=s.activeDungeon;if(!mission)return;const board=mission.board||(mission.board={steps:0,position:0,chanceModifier:0,history:[]});$('drawerTitle').textContent='副本';$('choices').className='choices infinite-view dungeon-board-view';
+ const lap=Math.min(3,Math.floor((board.steps||0)/12)+1),progress=Math.min(100,(board.steps||0)/36*100),current=board.position||0;
+ const cells=DUNGEON_BOARD_TILES.map((tile,i)=>'<div class="dungeon-board-cell tone-'+tile[0]+' '+(i===current?'is-here':'')+'"><span>'+tile[2]+'</span><b>'+tile[1]+'</b></div>').join('');
+ const history=(board.history||[]).slice(-3).reverse().map(h=>'<div class="dungeon-log-row"><b>'+h.title+'</b><span>'+h.outcome+'</span></div>').join('');
+ $('choices').innerHTML='<section class="dungeon-board-cover"><div class="dungeon-board-title">校园</div><div class="dungeon-board-meta"><span>'+mission.tier+'</span><span>'+lap+' / 3</span><span>'+((board.chanceModifier||0)>=0?'+':'')+(board.chanceModifier||0)+'%</span></div><div class="dungeon-board-progress"><i style="width:'+progress+'%"></i></div></section><section class="dungeon-board-map"><div class="dungeon-board-grid">'+cells+'</div><div class="dungeon-board-center"><strong>'+lap+'</strong><small> / 3</small></div></section><section class="dungeon-board-controls"><div class="dungeon-dice-display"><b>'+(board.lastRoll||'—')+'</b></div><button class="dungeon-roll-button" id="dungeonRoll" '+(board.steps>=36?'disabled':'')+'>⚄</button></section>'+(history?'<section class="dungeon-board-notes">'+history+'</section>':'');
  const roll=$('dungeonRoll');if(roll)roll.onclick=rollDungeonBoard;
 }
 function rollDungeonBoard(){
- const mission=s.activeDungeon;if(!mission||mission.board?.pending)return;const board=mission.board,roll=1+Math.floor(Math.random()*6),move=Math.min(roll,36-board.steps);board.lastRoll=roll;board.lastMove=move;board.steps+=move;board.position=board.steps%12;
+ const mission=s.activeDungeon;if(!mission||mission.mode!=='board'||mission.board?.pending)return;const board=mission.board,roll=1+Math.floor(Math.random()*6),move=Math.min(roll,36-board.steps);board.lastRoll=roll;board.lastMove=move;board.steps+=move;board.position=board.steps%12;
  const tile=DUNGEON_BOARD_TILES[board.position],event={...DUNGEON_EVENT_LIBRARY[tile[0]]};
- if(board.steps===12||board.steps===24){event.title=board.steps===12?'第一圈结束 · 广播室':'第二圈结束 · 地下档案室';event.desc=board.steps===12?'你已经确认校园的异常并非单一现象。广播里出现新的路线提示。':'校园的时间结构开始崩坏，远处的出口与入口逐渐重合。';event.options=[{label:'整理现有信息，继续调查',effects:{intelligence:3,perception:2,willpower:1},chance:3},{label:'不再停留，尽快前进',effects:{agility:2,energy:-2}}]}
+ if(board.steps===12||board.steps===24){event.title=board.steps===12?'广播室':'地下档案室';event.desc=board.steps===12?'广播里传来与你相同的声音。':'出口与入口正在重合。';event.options=[{label:'继续调查',effects:{intelligence:1,perception:1},chance:1},{label:'尽快离开',effects:{agility:1,energy:-1}}]}
  board.pending={event,tile:tile[0]};save();renderDungeonEvent();
 }
 function renderDungeonEvent(){
- const mission=s.activeDungeon;if(!mission?.board?.pending)return;const {event,tile}=mission.board.pending,cell=DUNGEON_BOARD_TILES.find(t=>t[0]===tile),lap=Math.min(3,Math.ceil(mission.board.steps/12));$('drawerTitle').textContent='事件 · '+event.title;$('choices').className='choices infinite-view dungeon-event-view';
- $('choices').innerHTML='<section class="dungeon-event-scene tone-'+tile+'"><small>ROUND 0'+lap+' / '+cell[1]+'</small><div class="dungeon-event-symbol">'+cell[2]+'</div><h2>'+event.title+'</h2><p>'+event.desc+'</p></section><section class="dungeon-event-choices"><div class="dungeon-event-label">选择行动</div>'+event.options.map((option,i)=>'<button class="dungeon-event-choice" data-dungeon-choice="'+i+'"><span>0'+(i+1)+'</span><b>'+option.label+'</b><i>›</i></button>').join('')+'</section><p class="dungeon-event-footnote">事件影响生存与战斗九项数值；少数事件改变通关概率或提供道具。线索与钥匙均非强制条件。</p>';
+ const mission=s.activeDungeon;if(!mission?.board?.pending)return;const {event,tile}=mission.board.pending,cell=DUNGEON_BOARD_TILES.find(t=>t[0]===tile);$('drawerTitle').textContent=event.title;$('choices').className='choices infinite-view dungeon-event-view';
+ $('choices').innerHTML='<section class="dungeon-event-scene tone-'+tile+'"><div class="dungeon-event-symbol">'+cell[2]+'</div><h2>'+event.title+'</h2><p>'+event.desc+'</p></section><section class="dungeon-event-choices">'+event.options.map((option,i)=>'<button class="dungeon-event-choice" data-dungeon-choice="'+i+'"><span>'+(i+1)+'</span><b>'+option.label+'</b><i>›</i></button>').join('')+'</section>';
  $('choices').querySelectorAll('[data-dungeon-choice]').forEach(button=>button.onclick=()=>resolveDungeonEvent(Number(button.dataset.dungeonChoice)));
 }
 function resolveDungeonEvent(index){
  const mission=s.activeDungeon;if(!mission?.board?.pending)return;const board=mission.board,event=board.pending.event,option=event.options[index];if(!option)return;
  board.statGains=board.statGains||{};Object.entries(option.effects||{}).forEach(([key,value])=>{const target=key in s.attributes?s.attributes:['energy','hunger','clean','fun'].includes(key)?s:null;if(!target)return;let delta=Number(value)||0;if(delta>0){const used=Number(board.statGains[key])||0;delta=Math.min(delta,Math.max(0,2-used));board.statGains[key]=used+delta}target[key]=clamp((Number(target[key])||0)+delta)});
- s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);mission.snapshot.playerPower=s.combat;mission.snapshot.energy=s.energy;mission.snapshot.hunger=s.hunger;mission.snapshot.clean=s.clean;if(option.chance)board.chanceModifier=Math.max(-25,Math.min(25,(Number(board.chanceModifier)||0)+option.chance));if(option.flag)board.flags[option.flag]=true;if(option.risk)board.fatalRisk=true;
- let reward='无额外收获';if(option.item&&Math.random()<.68){let id=option.item;const rare=Math.random();if(rare<.07)id='standin';else if(rare<.12)id='reprieve';else if(rare<.17)id='hex';else if(rare<.21)id='misfortune';const item=addDungeonItem(id);if(item)reward='获得道具：'+item.name}
- board.history=Array.isArray(board.history)?board.history:[];board.history.push({title:event.title,outcome:option.label+' · '+reward});board.history=board.history.slice(-12);board.pending=null;
+ s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);mission.snapshot.playerPower=s.combat;mission.snapshot.energy=s.energy;mission.snapshot.hunger=s.hunger;mission.snapshot.clean=s.clean;
+ if(option.chance)board.chanceModifier=Math.max(-10,Math.min(10,(Number(board.chanceModifier)||0)+option.chance));if(option.item&&!board.itemFound&&Math.random()<.18){addDungeonItem(option.item);board.itemFound=true}
+ board.history=Array.isArray(board.history)?board.history:[];board.history.push({title:event.title,outcome:option.label});board.history=board.history.slice(-12);board.pending=null;
  if(board.steps>=36){mission.scheduleEndAt=Date.now();save();settleDungeonIfDue(Date.now());return}save();render();renderDungeonBoard();
 }
-function showDungeonPending(){if(s.activeDungeon?.board?.pending)renderDungeonEvent();else renderDungeonBoard()}
-function updateDungeonCountdown(){const m=s.activeDungeon;if(!m)return;const roll=$('dungeonRoll');if(roll)roll.disabled=!!m.board?.pending||(m.board?.steps||0)>=36}
+function chooseDungeonBoard(){const mission=s.activeDungeon;if(!mission)return;mission.mode='board';mission.boardChoiceMade=true;mission.scheduleEndAt=0;mission.endsAt=0;save();renderDungeonBoard()}
+function keepClassicDungeon(){const mission=s.activeDungeon;if(!mission)return;mission.mode='classic';mission.boardChoiceMade=true;save();showDungeonPending()}
+function showDungeonPending(){
+ const mission=s.activeDungeon;if(!mission)return;
+ if(mission.mode==='board'){if(mission.board?.pending)renderDungeonEvent();else renderDungeonBoard();return}
+ $('drawerTitle').textContent='副本';$('choices').className='choices infinite-view';
+ const end=Number(mission.scheduleEndAt||mission.endsAt),time=end?new Date(end).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'—';
+ $('choices').innerHTML='<section class="mission-waiting"><div class="mission-portal"><svg viewBox="0 0 240 220" role="img" aria-label="副本入口"><path d="M25 198V87Q25 20 120 12Q215 20 215 87V198" fill="none" stroke="#6e7770" stroke-width="4"/><path d="M48 198V90Q48 38 120 30Q192 38 192 90V198" fill="none" stroke="#a18d70" stroke-width="2"/><path d="M83 198V99Q83 65 120 60Q157 65 157 99V198" fill="#5b6870" stroke="#d2c4aa" stroke-width="2"/><circle cx="120" cy="111" r="13" fill="none" stroke="#e4d5b8" stroke-width="2"/><path d="M120 93V129M102 111H138" stroke="#e4d5b8" stroke-width="1.5"/><path d="M12 198H228M40 211H200" stroke="#7d796e" stroke-width="2"/></svg></div><div class="mission-seal">'+mission.tier+'</div><div class="mission-status">副本进行中</div><div class="mission-clock" id="missionClock">日程结束时结算</div><div class="mission-finish">预计结束 '+time+'</div></section>';
+ const matched=mission.snapshot?.matchedStrangers||[];$('choices').innerHTML+='<section class="mission-matchmaking"><div class="mission-matchmaking-head"><b>临时匹配</b><small>BLACK-BOX MATCHMAKING</small></div><div class="mission-matchmaking-slots">'+matched.map((m,i)=>'<div class="mission-match-slot"><span>?</span><b>陌生队友 '+(i+1)+'</b><small>数据未知</small></div>').join('')+'</div></section>';
+ if(!mission.boardChoiceMade)$('choices').innerHTML+='<section class="mission-board-choice"><button id="enterDungeonBoard">⚄</button><button id="keepClassicDungeon">继续</button></section>';
+ const enter=$('enterDungeonBoard');if(enter)enter.onclick=chooseDungeonBoard;const keep=$('keepClassicDungeon');if(keep)keep.onclick=keepClassicDungeon;updateDungeonCountdown();
+}
+function updateDungeonCountdown(){const m=s.activeDungeon;if(!m||m.mode==='board')return;const clock=$('missionClock');if(clock)clock.textContent='日程结束时结算 · '+new Date(Number(m.scheduleEndAt||m.endsAt)).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}
 function dungeonCooldownRemaining(){return 0}
 function startDungeon(tier){
  if(s.activeDungeon){showDungeonPending();$('drawer').classList.add('open');return}
@@ -1553,11 +1559,16 @@ function startDungeon(tier){
  if(!dungeonUnlocked(tier)){toast('尚未解锁');return}const energyCost=Number(({F:5,E:7,D:9,C:12,B:15,A:18,S:22,SS:26,SSS:30})[tier]||5);if(s.energy<energyCost){toast('精力不足');return}dispatchDungeon(tier,energyCost,DUNGEON_BASE_REWARD[tier]||25);
 }
 function dispatchDungeon(tier,energyCost,base){
- const now=Date.now(),selected=s.teamRoster.filter(m=>m.selected);if(selected.some(m=>dungeonTierIndex(m.maxTier)<dungeonTierIndex(tier))){toast('队友副本等级不足，无法进入');return}
- const strangers=Array.from({length:2},(_,i)=>({id:'stranger-'+now+'-'+i,name:'陌生匹配者 '+(i+1),combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82)})),team=[...selected,...strangers],teamPower=team.reduce((n,m)=>n+m.combat,0)/team.length,teamMalice=team.reduce((n,m)=>n+m.malice,0)/team.length,difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)];
+ if(dungeonCooldownRemaining()>0){toast('副本每 24 小时只能进行一次');return}
+ if(s.teamRoster.some(m=>m.selected&&dungeonTierIndex(m.maxTier)<dungeonTierIndex(tier))){toast('队友副本等级不足，无法进入');return}
+ const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),scheduleStart=new Date(now);scheduleStart.setMinutes(0,0,0);const scheduleEnd=new Date(scheduleStart.getTime()+3600000),selected=s.teamRoster.filter(m=>m.selected);
+ const matchedStrangers=Array.from({length:2},(_,i)=>({id:'stranger-'+now+'-'+i,name:'陌生匹配者 '+(i+1),role:'临时队员',combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82),anonymous:true}));
+ const fullTeam=[...selected,...matchedStrangers],teamPower=fullTeam.reduce((n,m)=>n+m.combat,0)/fullTeam.length,teamMalice=fullTeam.reduce((n,m)=>n+m.malice,0)/fullTeam.length,difficulty=[8,14,21,29,38,48,59,71,84][DUNGEON_TIERS.indexOf(tier)],end=scheduleEnd.getTime();
  s.energy=Math.max(0,s.energy-energyCost);s.lastDungeonAt=now;s.nextDungeonDueAt=now+7*86400000;const nextModifier=Number(s.nextDungeonChanceModifier)||0;s.nextDungeonChanceModifier=0;
- s.activeDungeon={id:'dungeon-'+now,status:'active',tier,energyCost,baseReward:base,difficulty,startAt:now,endsAt:0,scheduleEndAt:0,successChanceModifier:nextModifier,snapshot:{playerPower:s.combat,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers:strangers},board:{steps:0,position:0,chanceModifier:0,fatalRisk:false,flags:{},history:[],pending:null}};
- s.activeInteraction=null;s.currentActivity='idle';s.currentActivityAnchor=null;s.currentActivityRoom=null;s.currentActivityFurnitureId=null;save();render();renderDungeonBoard();$('drawer').classList.add('open');
+ s.activeDungeon={id:'dungeon-'+now,status:'active',mode:'classic',boardChoiceMade:false,tier,energyCost,baseReward:base,difficulty,startAt:scheduleStart.getTime(),endsAt:end,scheduleKey:key,scheduleStartHour:hour,scheduleEndAt:end,duration:1,successChanceModifier:nextModifier,snapshot:{playerPower:Number(s.combat)||0,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers},board:{steps:0,position:0,chanceModifier:0,history:[],pending:null}};
+ writeBlockForKey(key,hour,hour+1,{title:'副本',kind:'dungeon',activity:'dungeon',dungeonId:s.activeDungeon.id,priority:'forced'});
+ s.activeInteraction=null;s.currentActivity='dungeon';s.currentActivityAnchor=null;s.currentActivityRoom='dungeon';s.currentActivityFurnitureId=null;s.lastUnifiedHourKey=key+'-'+hour;s.lastProcessedSessionKey=key+'-'+hour+'-dungeon';
+ save();render();renderCalendar();showDungeonPending();$('drawer').classList.add('open');
 }
 function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active')return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;
