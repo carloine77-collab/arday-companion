@@ -75,7 +75,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   else if(hour>=18&&hour<22&&['chat','watchTV','listenRecords','music','computerPlay','game'].includes(id))timeBias=1.3;
   return {...option,score:needScore+(spec.base||0)+preference+socialBonus+timeBias-repeatPenalty+Math.random()*2};
  }).filter(item=>Number.isFinite(item.score)&&!(normalizeActivity(recent[recent.length-1])===item.activity&&item.activity!=='sleep'));
- if(!candidates.length)return {activity:'idle',room:$('stage').classList.contains('bathroom-mode')?'bathroom':$('stage').classList.contains('bedroom-mode')?'bedroom':$('stage').classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
+ if(!candidates.length)return {activity:'idle',room:getStage()?.classList.contains('bathroom-mode')?'bathroom':getStage()?.classList.contains('bedroom-mode')?'bedroom':getStage()?.classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
  const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/13)}));
  const total=weighted.reduce((sum,item)=>sum+item.weight,0);
@@ -107,7 +107,7 @@ function resolveScheduledActivity(key,hour){
   const activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
   if(ev){ev.title=activity==='idle'?'自由时间':(meta.menuLabel||meta.title);ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'day-ahead';ev.unresolved=false;ev.resolvedAt=Date.now();ev.room=choice.room;ev.anchor=choice.anchor;ev.furnitureId=choice.furnitureId;ev.furnitureKind=choice.furnitureKind;if(stalePlan)ev.replannedAt=Date.now()}
   else{writeBlockForKey(key,hour,hour+1,{title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind});ev=eventAt(key,hour)}
-  if($('stage').classList.contains('calendar-mode'))renderCalendar();
+  if(getStage()?.classList.contains('calendar-mode'))renderCalendar();
  }
  return {event:ev,activity:normalizeActivity(ev?.activity||'idle')};
 }
