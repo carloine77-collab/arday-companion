@@ -42,6 +42,7 @@
    c.fillStyle='#907b64';c.font='22px Georgia';c.fillText(sub,320,139);
    const tex=new T.CanvasTexture(canvas);tex.encoding=T.sRGBEncoding;return tex;
   }
+  const cylinder=(parent,x,y,z,top,bottom,h,material,segments=18)=>{const mesh=new T.Mesh(new T.CylinderGeometry(top,bottom,h,segments),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh};
   const zoneObjects=[];
   zones.forEach((z,index)=>{
    pathBetween(-20,0,z.x,z.z,2.8);
@@ -61,6 +62,24 @@
    const awning=box(b,0,2.45,.25,4.1,.12,.85,trim);awning.rotation.x=-.08;
    for(const x of [-1.35,-.45,.45,1.35])box(b,x,1.2,.35,.65,1.65,.08,index%2?cream:wall);
    const lantern=new T.Mesh(new T.SphereGeometry(.16,12,10),new T.MeshBasicMaterial({color:0xf0d8a2}));lantern.position.set(0,2.8,.5);b.add(lantern);
+   if(z.id==='exchange'){
+    box(b,0,.68,.92,2.65,.12,.72,wood);for(const x of [-.8,0,.8]){cylinder(b,x,.9,.9,.22,.22,.08,mat(0xc7a45e,.45,.25));cylinder(b,x,1.0,.9,.18,.18,.08,mat(0xd7bd7c,.45,.22))}
+   }else if(z.id==='ranking'){
+    for(let n=0;n<3;n++){const x=(n-1)*.85,h=[.62,1.0,.78][n];box(b,x,.2+h/2,.85,.68,h,.58,mat([0xb7a078,0xd0b16d,0x9d9c8e][n]));cylinder(b,x,.2+h+.12,.85,.14,.14,.24,metal)}
+   }else if(z.id==='recruitment'||z.id==='commissions'||z.id==='events'){
+    box(b,0,1.35,.82,2.5,1.72,.18,wood);box(b,0,1.35,.72,2.25,1.48,.035,cream);
+    for(let n=0;n<4;n++){box(b,-.72+(n%2)*1.42,1.72-Math.floor(n/2)*.55,.68,.92,.035,.025,mat(n%2?0xc59a72:0x9aa58f));}
+    for(let x of [-1.15,1.15])cylinder(b,x,.34,.8,.055,.07,.5,metal);
+   }else if(z.id==='teams'){
+    for(const x of [-1.35,0,1.35]){cylinder(b,x,1.65,.88,.035,.035,2.9,metal,12);const flag=new T.Mesh(new T.PlaneGeometry(.85,.48),new T.MeshStandardMaterial({color:x<0?0xb77d68:x>0?0x879d91:0xc9ad77,side:T.DoubleSide,roughness:.9}));flag.position.set(x+.42,2.62,.88);b.add(flag)}
+   }else if(z.id==='entertainment'){
+    for(const x of [-1.25,0,1.25]){box(b,x,.95,.88,.82,1.55,.48,dark);box(b,x,1.2,.61,.65,.62,.035,mat(x===0?0x9cae9d:0xc18b73));box(b,x,.35,.61,.56,.16,.04,metal);for(const dx of [-.18,.18])cylinder(b,x+dx,.38,.57,.045,.045,.05,mat(0xd6b36e))}
+   }else if(z.id==='food'){
+    for(const x of [-1.25,0,1.25]){box(b,x,.82,.92,.9,.12,.78,wood);for(let n=0;n<3;n++){const fruit=new T.Mesh(new T.SphereGeometry(.16,12,10),mat([0xc98261,0xd5b06e,0x91a17d][n]));fruit.position.set(x-.22+n*.22,1.12,.9);b.add(fruit)}}
+   }else if(z.id==='showcase'){
+    cylinder(b,0,.42,.9,1.05,1.2,.48,mat(0xb5a68d));cylinder(b,0,.78,.9,.76,.76,.25,cream);
+    const star=new T.Mesh(new T.IcosahedronGeometry(.5,1),mat(0xc5a76b,.55,.25));star.position.set(0,1.48,.9);b.add(star);
+   }
    zoneObjects.push(b);
   });
   // Physical return portal: the only route back to the private apartment.
