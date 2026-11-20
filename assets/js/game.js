@@ -2871,7 +2871,7 @@ function initArday3D(){
     const head=new T.Mesh(new T.CylinderGeometry(.16,.2,.055,24),m.metal);head.rotation.x=Math.PI/2;head.position.set(-.5,2.17,-.18);group.add(head);
     cyl(-.48,1.08,-.42,.055,.055,.09,m.gold,12);box(-.48,1.2,-.42,.24,.035,.035,m.metal);
    }else if(modelName==='浴缸'){
-    width=2.25;depth=1.12;height=.72;const enamel=mat(0xe8e4dc,.26),outer=mat(0xd2c7b7,.72),metal=mat(0xaeb5b4,.28,.58);
+    action=()=>openFurnitureActions('sink',id);width=2.25;depth=1.12;height=.72;const enamel=mat(0xe8e4dc,.26),outer=mat(0xd2c7b7,.72),metal=mat(0xaeb5b4,.28,.58);
     box(0,.34,0,2.16,.56,1.02,outer);box(0,.57,0,2.22,.16,1.1,enamel);box(0,.62,0,1.82,.035,.74,mat(0xb9c7c5,.3));
     for(const x of [-.9,.9])for(const z of [-.39,.39])sphere(x,.38,z,.12,.2,.12,enamel);
     cyl(.82,.78,-.37,.035,.035,.16,metal,12);cyl(.82,.87,-.37,.055,.055,.045,m.gold,12);
