@@ -3024,13 +3024,12 @@ function initArday3D(){
     }
     // Consistent brass lever, lock escutcheon and destination plaque.
     cyl(.39,1.18,.16,.065,.065,.025,brass,18);box(.47,1.18,.19,.19,.035,.035,brass);cyl(.39,.94,.16,.035,.035,.025,m.metal,14);
-    const plaque=box(0,2.06,.19,.52,.18,.045,brass);plaque.userData.doorDestinationPlaque=true;
     const labelCanvas=document.createElement('canvas');labelCanvas.width=640;labelCanvas.height=192;
     const labelTexture=new T.CanvasTexture(labelCanvas);labelTexture.encoding=T.sRGBEncoding;
     const labelMesh=new T.Mesh(new T.PlaneGeometry(.96,.29),new T.MeshBasicMaterial({map:labelTexture,transparent:true,side:T.DoubleSide,depthWrite:false}));
     labelMesh.position.set(0,2.32,.215);group.add(labelMesh);
     group.userData.doorDestinationCanvas=labelCanvas;group.userData.doorDestinationTexture=labelTexture;group.userData.doorDestinationLabel=labelMesh;
-    group.userData.doorVariant=variant||'标准胡桃木';group.userData.doorPlaque=plaque;
+    group.userData.doorVariant=variant||'标准胡桃木';
    }else if(modelName==='懒人沙发'){
     width=1.5;depth=1.25;height=.85;action=()=>openFurnitureActions('sofa',id);
     const fabric=mat(0xb7a18d,.98),welt=mat(0x8d7866,.9);
@@ -3703,7 +3702,7 @@ function persistFurniture(item){
     const icon=document.createElement('span');icon.className='furniture-wheel-icon';icon.textContent=symbol;
     const textNode=document.createElement('span');textNode.className='furniture-wheel-label';textNode.textContent=label;
     button.append(icon,textNode);button.setAttribute('aria-pressed',item.doorDestination===value?'true':'false');
-    button.onclick=()=>{item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);const plaque=item.group.userData.doorPlaque;if(plaque?.material?.color)plaque.material.color.setHex(value==='hall'?0xc6ad83:value==='bathroom'?0xa6b9ae:0xc5a15d);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
+    button.onclick=()=>{item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
     wheel.appendChild(button);
    });
    stage.appendChild(wheel);
