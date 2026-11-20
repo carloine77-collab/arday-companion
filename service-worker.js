@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v93";
+const CACHE_NAME = "arday-shell-v94";
 const APP_SHELL = [
   "./",
   "./index.html",
