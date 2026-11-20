@@ -101,7 +101,17 @@
    // Low architectural inlays define the district's internal circulation.
    for(let i=-2;i<=2;i++){const seam=new T.Mesh(new T.PlaneGeometry(.06,z.d*.66),cyan);seam.rotation.x=-Math.PI/2;seam.position.set(i*z.w*.13,.035,0);area.add(seam)}
    // Varied landmarks replace the repetitive notice-board wall: each district has a different spatial identity.
-   const title=new T.Mesh(new T.PlaneGeometry(24,6),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));title.position.set(0,15,-z.d*.34);area.add(title);
+   const title=new T.Mesh(new T.PlaneGeometry(24,6),new T.MeshBasicMaterial({map:labelTexture(z.name,z.sub),transparent:true,side:T.DoubleSide,depthWrite:false,toneMapped:false}));
+   title.position.set(0,15,-z.d*.34);
+   // Keep the plaque upright while continuously turning its face toward the active camera.
+   // The callback uses world coordinates so the district group's own rotation cannot skew it.
+   const plaqueWorld=new T.Vector3(),cameraWorld=new T.Vector3();
+   title.onBeforeRender=(renderer,activeScene,camera)=>{
+    title.getWorldPosition(plaqueWorld);
+    camera.getWorldPosition(cameraWorld);
+    title.lookAt(cameraWorld.x,plaqueWorld.y,cameraWorld.z);
+   };
+   area.add(title);
    const addBox=(x,y,zz,w,h,d,m)=>box(area,x,y,zz,w,h,d,m);
    if(z.id==='exchange'){
     // A broad banking counter, suspended currency halo and several recessed service kiosks.
