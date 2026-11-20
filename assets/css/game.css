@@ -1081,7 +1081,7 @@ html body .stage .drawer.profile-expanded.open .choices{
 
 
 /* Furniture-anchored radial interaction menu */
-.furniture-wheel{position:absolute;z-index:180;pointer-events:none;transform:translate(-50%,-50%);overflow:visible;isolation:isolate;}
+.furniture-wheel{position:absolute;z-index:180;pointer-events:none;transform:translate(-50%,-50%);overflow:visible;isolation:isolate;max-width:calc(100% - 8px);max-height:calc(100% - 8px);}
 .furniture-wheel::before{content:"";position:absolute;left:50%;top:50%;width:100%;height:100%;transform:translate(-50%,-50%);border:1px solid rgba(157,129,94,.7);border-radius:50%;background:radial-gradient(circle,rgba(249,244,234,.28) 0 42%,rgba(240,229,211,.12) 70%,rgba(249,244,234,.02) 100%);box-shadow:0 0 0 5px rgba(255,250,240,.14),0 7px 22px rgba(52,40,27,.12);pointer-events:none;z-index:0;}
 .furniture-wheel-center{cursor:pointer;user-select:none;-webkit-user-select:none;position:absolute;transform:translate(-50%,-50%);width:72px;height:72px;border:1px solid #c4ad8e;border-radius:50%;background:linear-gradient(145deg,#fffdf8,#eee3d2);box-shadow:0 4px 15px rgba(54,42,29,.22),inset 0 1px 2px rgba(255,255,255,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:auto;z-index:2;}
 .furniture-wheel-title{max-width:59px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#574633;font:600 11px/1.3 Georgia,"Noto Serif SC",serif;text-align:center;}
