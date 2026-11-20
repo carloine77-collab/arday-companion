@@ -1,0 +1,350 @@
+/* Hand-inked paper visual system shared by all public-hall panels */
+.drawer{background-color:#e9e1d2!important;background-image:radial-gradient(#71685a13 .65px,transparent .75px),repeating-linear-gradient(0deg,transparent 0 23px,#7c71540a 24px)!important;background-size:7px 7px,100% 24px!important;border:1px solid #a99b85!important;border-radius:5px 8px 4px 7px!important;box-shadow:0 12px 34px #1b263044,inset 0 0 0 3px #f4eddf!important}.drawer-head{background:transparent!important;border-bottom:1px solid #b9ad99!important}.drawer-head strong{font-family:Georgia,"Noto Serif SC",serif!important;letter-spacing:.08em!important;color:#35434a!important}.choices{background:transparent!important}.choices .infinite-note,.choices .recruitment-footnote,.choices .calendar-note,.choices .edit-hint{display:none!important}.choices .infinite-masthead,.choices .instance-brief,.choices .instance-result{position:relative;overflow:hidden;border:1px solid #8d8b7d;border-radius:3px 7px 4px 8px!important;background:linear-gradient(135deg,#354653,#4a5657)!important;box-shadow:2px 3px 0 #8f8778!important}.illustrated-masthead{position:relative;padding:15px;border:1px solid #b7aa94;background:#eee6d7;color:#35434a;box-shadow:2px 3px 0 #c3b69f}.ink-illustration{height:92px;margin:-5px 0 8px;color:#d5c6a9}.ink-illustration svg{width:100%;height:100%;overflow:visible}.compact-illustration{height:68px}.instance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.instance-tier{min-height:82px!important;position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:9px!important;border:1px solid #b8ad9b!important;border-radius:3px 7px 4px 6px!important;background:linear-gradient(145deg,#f2ebde,#ded5c5)!important;box-shadow:2px 3px 0 #c5b9a5!important}.instance-tier-code{width:auto!important;height:auto!important;border:0!important;font:italic 30px Georgia,serif!important;color:#45575c!important}.instance-tier-copy strong{font:600 12px Georgia,"Noto Serif SC",serif!important}.instance-tier-copy small{font:9px Georgia,serif!important}.instance-tier-mark{position:absolute;right:8px;top:8px}.instance-tier.locked{filter:grayscale(.85);opacity:.55}.team-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.team-member{display:flex;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:9px 5px;border:1px solid #b7aa95;border-radius:4px;background:#eee6d8;color:#455057;box-shadow:1px 2px 0 #c9bda9}.team-member.selected{border:2px solid #667b72;background:#e1e7dc}.team-portrait{display:grid;place-items:center;width:48px;height:48px;border:1px solid #a79b87;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f5eee0,#c8c0af);font:26px Georgia,serif;color:#52645d}.team-member strong{font:600 12px "Noto Serif SC",serif}.team-member small,.team-member em{font:9px "Noto Serif SC",serif;color:#827969}.team-member em{font-style:normal;text-align:center}.team-meter{width:80%;height:4px;background:#c8c0b2}.team-meter i{display:block;height:100%;background:#647c72}.team-strength{display:flex;justify-content:space-between;padding:9px 11px;border:1px solid #b7aa95;background:#e4dccd;color:#5e665f;font:11px "Noto Serif SC",serif}.team-strength b{font:italic 19px Georgia,serif;color:#435b53}.strategy-grid,.illustrated-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.instance-strategy{min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border:1px solid #b9ad99!important;border-radius:4px!important;background:linear-gradient(145deg,#f4ecde,#ded5c6)!important;color:#45524e!important;box-shadow:2px 3px 0 #c6b9a5!important}.instance-strategy span{font-size:25px}.instance-strategy strong{font:600 11px "Noto Serif SC",serif!important}.instance-result p{display:none!important}.instance-result-detail{background:#e5ddcf;border:1px solid #bdb09c}.recruitment-masthead{border-radius:3px!important;box-shadow:2px 3px 0 #b6aa96}.recruitment-card,.exchange-item,.ranking-self,.profile-section,.account-balance,.account-personal{border-radius:3px 7px 4px 6px!important;border-color:#bdb09d!important;background:linear-gradient(145deg,#f2ebde,#e4dbcc)!important;box-shadow:2px 3px 0 #c9bda9!important}.recruitment-card h3,.exchange-item h3{font-family:Georgia,"Noto Serif SC",serif!important}.recruitment-apply,.instance-primary,.instance-back{border-radius:3px!important;box-shadow:2px 2px 0 #a79b88!important}.stat-group.combat-group{border-top:0;padding-top:0}.combat-stat .meter i{background:linear-gradient(90deg,#92765d,#ba8c67)!important}.stat-group-title{font-family:Georgia,"Noto Serif SC",serif!important;letter-spacing:.14em}
+
+/* Illustrated mobile-game UI: reduce copy, increase pictorial hierarchy */
+.gate-art{height:132px;margin:-3px 0 8px;color:#e2d3b8;filter:drop-shadow(1px 2px 0 #1d2c31)}.gate-art svg{width:100%;height:100%}.compact-gate-art{height:82px}
+.instance-grid{gap:9px}.instance-tier{min-height:104px!important;align-items:center!important;justify-content:center!important;gap:2px!important;padding:8px 5px!important;background:radial-gradient(circle at 50% 36%,#f7f0e3,#ddd2bf)!important;overflow:hidden}.tier-art{display:grid;place-items:center;width:48px;height:48px;border:1px solid #9c907c;border-radius:50%;background:radial-gradient(circle,#f8f1e4 0 45%,#cfc1a9 47% 49%,transparent 51%);font:25px Georgia,serif;color:#66766e;text-shadow:1px 1px #fff}.instance-tier-code{font:italic 22px Georgia,serif!important;line-height:1!important}.tier-progress{font:9px Georgia,serif;color:#887b68;letter-spacing:.08em}.team-heading{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 8px;color:#4b5b56;font:600 14px "Noto Serif SC",serif}.team-heading b{font:11px Georgia,serif;color:#9a876d}.team-roster{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.team-member{position:relative;padding:7px 4px 10px!important;overflow:hidden}.team-portrait{width:100%;height:88px;border:0!important;border-radius:3px!important;background:linear-gradient(145deg,#e3dacb,#c9c3b5)!important}.team-portrait svg{width:100%;height:100%;display:block}.team-member strong{font-size:12px}.team-member em{font-size:9px}.team-check{position:absolute;right:6px;top:6px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#e7e0d2;color:#5b7466;font-style:normal;font-size:12px}.team-member:not(.selected) .team-check{color:#aaa08e}.team-strength{margin-top:9px}.strategy-grid{gap:10px}.instance-strategy{min-height:102px!important}.strategy-art{display:grid;place-items:center;width:50px;height:50px;border:1px solid #aa9b84;border-radius:50%;background:radial-gradient(circle,#f7f0e4,#d8cbb6);font:28px Georgia,serif;color:#60736b}.mission-waiting{position:relative;min-height:340px;padding:18px 12px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#d7d0c1,#eee6d8 62%,#e5dccd);border:1px solid #b8aa94;box-shadow:3px 4px 0 #c8bba7}.mission-portal{width:min(100%,260px);height:205px;display:grid;place-items:center;color:#63716d;animation:portal-breathe 4s ease-in-out infinite}.mission-portal svg{height:100%;width:100%;filter:drop-shadow(2px 3px 0 #b5a68f)}.mission-seal{display:grid;place-items:center;width:48px;height:48px;margin:-10px auto 8px;border:2px solid #8f8069;border-radius:50%;background:#eee5d5;color:#465c55;font:italic 25px Georgia,serif;box-shadow:0 0 0 4px #e2d7c5}.mission-status{font:600 14px "Noto Serif SC",serif;letter-spacing:.2em;color:#465c55}.mission-clock{margin:9px 0 10px;color:#7b6a54;font:italic 26px Georgia,serif;font-variant-numeric:tabular-nums}.mission-track{width:80%;height:5px;background:#c9bead;overflow:hidden}.mission-track i{display:block;width:0;height:100%;background:#728579;transition:width .4s}.mission-finish{margin-top:10px;color:#8a7e6d;font:10px Georgia,"Noto Serif SC",serif}.result-emblem{font:38px Georgia,serif;color:#e0cfaa}.result-tier{margin-top:8px;font:italic 13px Georgia,serif;color:#e0cfaa}.ranking-illustration{height:88px;display:grid;place-items:center;color:#e4d4b8;font:68px Georgia,serif;text-shadow:2px 3px 0 #1c2b31}.ranking-rank span{display:block;font-size:28px;color:#9a896e}.exchange-item{display:grid!important;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:12px}.exchange-art{width:70px;height:70px;display:grid;place-items:center;border:1px solid #b6a78f;border-radius:50%;background:radial-gradient(circle,#f8f0e2,#d7cbb7);font:32px Georgia,serif;color:#66776e;box-shadow:inset 0 0 0 4px #e9dfcf}.exchange-item p{display:none!important}.recruitment-card{position:relative;padding-left:112px!important;min-height:164px}.recruitment-art{position:absolute;left:12px;top:38px;width:86px;height:102px;display:grid;place-items:center;border:1px solid #b8aa95;background:linear-gradient(145deg,#d7d1c4,#eee5d6);color:#66776e;font:40px Georgia,serif;box-shadow:inset 0 0 0 4px #e7dece}.recruitment-art-1{color:#6b7c82;background:linear-gradient(145deg,#d1d9d4,#eae3d5)}.recruitment-art-2{color:#9a7b69;background:linear-gradient(145deg,#e1d0c7,#eee4d6)}.recruitment-description,.recruitment-requirements{display:none!important}.recruitment-meta{display:flex;flex-wrap:wrap;gap:5px}.recruitment-meta span{padding:4px 6px;background:#e4dccd;border:1px solid #c8bca8;font-size:10px}.day-slot button.dungeon{background:#d8ded5;border:1px solid #7d8b7b;color:#465c53;box-shadow:inset 3px 0 #708779}.day-slot button.dungeon:before{content:'✦';margin-right:7px;color:#718575}
+@keyframes portal-breathe{0%,100%{transform:translateY(0) scale(1);opacity:.92}50%{transform:translateY(-3px) scale(1.015);opacity:1}}
+
+
+.drawer .choices.recruitment-view{gap:9px!important;padding:0 12px 18px!important}
+.recruitment-masthead{padding:12px 14px 10px!important;margin-bottom:7px!important;min-height:0!important;background:#e8dfcf!important;color:#36434a!important}
+.recruitment-masthead .career-poster{height:142px;margin:0 0 7px!important}
+.recruitment-masthead h2{margin:5px 0 0!important;font-size:20px!important;color:#34434a!important}
+.recruitment-kicker{color:#8e806d!important}
+.illustrated-recruitment-card{display:grid;grid-template-columns:116px minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:12px;align-items:start;padding:10px!important;min-height:0!important;margin:0!important;border:1px solid #bdb09b!important;background:#eee6d8!important;box-shadow:2px 3px 0 #c8bba6!important}
+.illustrated-recruitment-card .career-poster{grid-column:1;grid-row:1/5;width:116px;height:150px;margin:0!important;align-self:stretch}
+.illustrated-recruitment-card .recruitment-card-top{grid-column:2;grid-row:1;display:block!important;margin:2px 0 5px!important}
+.illustrated-recruitment-card .recruitment-card-top>span:first-child{display:none}
+.illustrated-recruitment-card .recruitment-salary{font-size:20px!important}
+.illustrated-recruitment-card h3{grid-column:2;grid-row:2;margin:3px 0 7px!important;font-size:16px!important;line-height:1.3}
+.illustrated-recruitment-card .recruitment-meta{grid-column:2;grid-row:3;display:grid!important;gap:5px!important;padding:0!important;border:0!important}
+.illustrated-recruitment-card .recruitment-apply{grid-column:2;grid-row:4;min-height:31px!important;margin-top:7px}
+.illustrated-recruitment-card .career-poster strong{font-size:15px!important;writing-mode:vertical-rl;letter-spacing:.12em}
+.illustrated-recruitment-card .career-poster i{font-size:48px!important;right:8px!important;bottom:5px!important}
+.recruitment-current{display:grid!important;grid-template-columns:96px 1fr;gap:8px!important;align-items:center;padding:9px!important}
+.recruitment-current .career-poster{grid-row:span 2;width:96px;height:116px;margin:0!important}
+.recruitment-current p{margin:0!important}
+.recruitment-section-label{margin:2px 1px 4px!important;padding:0!important;border:0!important}
+.career-poster{position:relative;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;overflow:hidden;padding:13px 11px!important;background:linear-gradient(145deg,hsl(var(--poster-hue) 20% 29%),hsl(var(--poster-hue) 17% 43%))!important;border:1px solid #b7a78e!important;box-shadow:inset 0 0 0 4px #e9deca,inset 0 0 0 5px #a99a80!important;color:#f1e8d7!important}
+.career-poster:before{content:"";position:absolute;width:96px;height:96px;right:-18px;top:20px;border:1px solid #e9ddc288;border-radius:50%;box-shadow:0 0 0 9px #e9ddc21c,0 0 0 20px #e9ddc211}
+.career-poster:after{content:"";position:absolute;left:12px;right:12px;bottom:24px;height:1px;background:#e9ddc288;transform:rotate(-8deg)}
+.career-poster .career-poster-kicker{position:relative;z-index:1;font-size:6px!important;letter-spacing:.1em!important;color:#e3d4b8!important}
+.career-poster strong{position:relative;z-index:1;max-width:100%;margin-top:14px;font:600 18px/1.3 Georgia,"Noto Serif SC",serif!important;color:#f2e9d9!important}
+.career-poster i{position:absolute;right:9px;bottom:6px;font:italic 62px/1 Georgia,serif!important;color:#f1e5cc!important;opacity:.8}
+.career-poster small{position:absolute;left:12px;bottom:9px;font:6px Georgia,serif!important;letter-spacing:.12em;color:#e0d2bb!important}
+.drawer-head{display:flex!important;align-items:center;justify-content:space-between}
+.drawer-close-button{width:34px;height:34px;flex:0 0 34px;border:0!important;background:#ded5c5!important;color:#46554f!important;border-radius:50%!important;font:25px/1 Georgia,serif!important;cursor:pointer}
+#app button,#app section,#app article,#app header,#app footer,#app nav,#app .drawer,#app .choices,#app .calendar-content,#app .profile-section,#app .account-balance,#app .recruitment-card,#app .instance-tier,#app .exchange-item,#app .ranking-self,#app .day-card,#app .day-slot,#app .stat-group,#app .stat,#app .career-poster{border-top:0!important;border-bottom:0!important}
+#app hr,#app .recruitment-rule,#app .infinite-section-title:after,#app .calendar-title-mark{display:none!important}
+#app .drawer-head{border:0!important}
+.drawer .choices.infinite-view{gap:7px!important;padding-bottom:14px!important}
+.drawer .choices.infinite-view .infinite-masthead{padding-top:13px!important;padding-bottom:12px!important}
+.drawer .choices.infinite-view .gate-art{height:104px!important}
+.drawer .choices.infinite-view .instance-grid{gap:6px!important}
+.drawer .choices.infinite-view .instance-tier{min-height:88px!important}
+.drawer .choices.infinite-view .team-heading{margin:8px 2px 3px!important}
+.drawer .choices.infinite-view .team-portrait{height:72px!important}
+.drawer .choices.infinite-view .team-member{padding:5px 3px 7px!important;gap:3px!important}
+.drawer .choices.infinite-view .mission-waiting{min-height:270px!important}
+.drawer .choices.infinite-view .mission-portal{height:165px!important}
+
+
+
+
+/* === Ranking board: one score, one shared ladder === */
+.drawer .choices.ranking-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:0 0 22px!important;overflow-y:auto!important;background:#e6dfd0!important;color:#293a39!important}
+.leader-cover{height:164px;position:relative;display:flex;align-items:flex-end;padding:0 20px 18px;overflow:hidden;background:linear-gradient(115deg,#182e39,#3c5351 57%,#806e54);color:#f2e7d0}
+.leader-cover:before{content:"";position:absolute;right:7%;bottom:-48px;width:160px;height:180px;border-radius:50% 50% 0 0;background:linear-gradient(90deg,#1b3437,#899078 52%,#263d3c);box-shadow:-42px 30px 0 -13px #213a3a,42px 35px 0 -12px #263c39}
+.leader-cover-glow{position:absolute;inset:0;background:radial-gradient(circle at 72% 25%,#f1d8a566,transparent 22%),linear-gradient(180deg,transparent 40%,#142a31aa)}
+.leader-cover-copy{position:relative;z-index:2}.leader-cover-copy small,.leader-cover-copy span{display:block;font:7px Georgia,serif;letter-spacing:.19em;color:#d5c6a7}.leader-cover-copy h2{margin:8px 0 4px;font:600 27px "Noto Serif SC",serif;letter-spacing:.12em}.leader-cover-copy span{font-size:7px;color:#b9b49e}.leader-cover-insignia{position:absolute;right:22px;top:22px;width:56px;height:56px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,#e9d8b5 0 43%,#9d865f 45% 51%,#d8c59e 53% 60%,#615b4c 62%);color:#4b594d;font:20px "Noto Serif SC",serif;transform:rotate(12deg);box-shadow:0 5px 16px #101e2766}
+.leader-self{display:flex;align-items:center;justify-content:space-between;margin:12px 13px 14px;padding:11px 16px;background:linear-gradient(115deg,#f5eddd,#d7c9b0);border-radius:4px 14px 4px 14px;box-shadow:0 5px 13px #554a3520}
+.leader-self>div{display:flex;flex-direction:column;gap:2px}.leader-self small{font:7px Georgia,serif;letter-spacing:.15em;color:#9b896a}.leader-self>div:first-child b{font:italic 27px Georgia,serif;color:#8e704b}.leader-self-score{text-align:right}.leader-self-score strong{font:italic 25px Georgia,serif;color:#43574b}
+.leader-podium-wrap{padding:0 13px 14px}.leader-podium-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-items:end}
+.leader-podium{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;padding:10px 4px 0;background:linear-gradient(155deg,#f3ead8,#d0c2aa);border-radius:7px 14px 4px 4px;box-shadow:0 5px 12px #51463018;overflow:hidden}
+.leader-podium:before{content:"";position:absolute;inset:4px;border:1px solid #a38d6c44;border-radius:4px 11px 3px 3px;pointer-events:none}
+.leader-place-1{min-height:172px}.leader-place-2,.leader-place-3{min-height:151px}
+.leader-podium-crown{height:19px;color:#a18350;font:16px Georgia,serif}
+.leader-podium-avatar{position:relative;width:54px;height:58px;margin:1px 0 7px;overflow:hidden;border-radius:50% 50% 7px 7px;background:radial-gradient(ellipse at 50% 30%,#e2cba7,#9c8b70 72%,#52625a)}
+.leader-podium-avatar i{position:absolute;z-index:2;left:13px;top:9px;width:29px;height:32px;border-radius:48% 48% 43% 43%;background:linear-gradient(100deg,#e6c9a5,#b48a6c);box-shadow:inset -5px -2px #8c6e58}
+.leader-podium-avatar b{position:absolute;z-index:3;left:9px;top:4px;width:38px;height:25px;background:linear-gradient(100deg,#393832,#7b664f);border-radius:50% 50% 18% 18%;clip-path:polygon(0 0,100% 0,92% 80%,70% 54%,55% 100%,38% 55%,17% 90%)}
+.leader-podium strong{display:flex;align-items:center;gap:4px;max-width:100%;font:600 11px "Noto Serif SC",serif;color:#40534a;white-space:nowrap}.leader-podium strong small,.leader-row strong small{font:6px Georgia,serif;color:#a77d4e;letter-spacing:.08em}
+.leader-podium-score{margin-top:4px;font:italic 18px Georgia,serif;color:#8d704b}.leader-podium em{font:7px "Noto Serif SC",serif;font-style:normal;color:#a08c6e}
+.leader-podium-step{width:100%;height:25px;margin-top:7px;display:grid;place-items:center;background:linear-gradient(90deg,#b49a6b,#e4d1a9,#a88d60);color:#554c3b;font:italic 14px Georgia,serif}
+.leader-place-1 .leader-podium-step{height:36px}.leader-place-2 .leader-podium-step{height:27px}.leader-place-3 .leader-podium-step{height:22px}
+.leader-podium.is-player{background:linear-gradient(155deg,#e7eadb,#bfcdbb)}
+.leader-list{display:flex;flex-direction:column;gap:7px;padding:0 13px}
+.leader-row{display:grid;grid-template-columns:29px 36px 1fr auto;align-items:center;gap:9px;min-height:57px;padding:6px 12px;background:linear-gradient(105deg,#f1e9d9,#d7cbb8);border-radius:4px 13px 4px 13px;box-shadow:0 3px 9px #51463012}
+.leader-row.is-player{background:linear-gradient(105deg,#e7eadb,#c6d1bd);box-shadow:inset 3px 0 #7e9477}
+.leader-row-number{font:italic 15px Georgia,serif;color:#9b835d;text-align:center}.leader-row-avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(140deg,#788c7c,#334b45);color:#eee2c9;font:13px "Noto Serif SC",serif}.leader-row strong{display:flex;align-items:center;gap:5px;font:600 12px "Noto Serif SC",serif;color:#40534a}.leader-row-score{font:italic 17px Georgia,serif;color:#8d704b}
+/* === Party screen: compact destination grid and teammate roster === */
+.drawer .choices.party-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:0 0 18px!important;overflow-y:auto!important;background:#ded9ca!important;color:#293a39!important}
+.guild-cover{height:190px;position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(160deg,#182e3b,#314b50 54%,#8b765d);color:#f2e7d0}
+.guild-cover-sky{position:absolute;inset:0;background:radial-gradient(ellipse at 72% 26%,#e7c98b77,transparent 21%),linear-gradient(180deg,transparent 30%,#162b32aa 100%)}
+.guild-cover-mountains{position:absolute;inset:50px -10px 0;background:#263e40;clip-path:polygon(0 70%,15% 28%,27% 60%,43% 9%,58% 58%,75% 20%,100% 65%,100% 100%,0 100%);opacity:.9}.guild-cover-mountains:after{content:"";position:absolute;inset:15px 0 0;background:#71806b;clip-path:polygon(0 70%,16% 43%,29% 75%,46% 24%,61% 68%,78% 38%,100% 72%,100% 100%,0 100%);opacity:.45}
+.guild-cover-arch{position:absolute;right:13%;top:5px;width:104px;height:150px;border:14px solid #b6a17c;border-bottom:0;border-radius:60px 60px 0 0;box-shadow:inset 7px 0 0 #e1cfaa55,0 0 0 5px #1a313355,0 0 26px #d4bd8055}.guild-cover-arch:before{content:"";position:absolute;inset:13px 11px 0;background:radial-gradient(ellipse at 50% 35%,#d8c38a55,transparent 58%),linear-gradient(180deg,#172b36aa,#172b36)}.guild-cover-arch i{position:absolute;z-index:2;left:25px;top:34px;width:24px;height:24px;border-radius:50%;background:#e7d19b;box-shadow:0 0 30px 12px #e7d19b66}.guild-cover-arch b{position:absolute;z-index:2;bottom:0;left:-18px;width:108px;height:15px;background:linear-gradient(#c9b68f,#655c4d)}
+.guild-cover-copy{position:absolute;left:19px;bottom:17px;z-index:3}.guild-cover-copy small{font:7px Georgia,serif;letter-spacing:.18em;color:#d7c8a9}.guild-cover-copy h2{margin:7px 0 3px;font:600 27px Georgia,"Noto Serif SC",serif;letter-spacing:.12em}.guild-cover-copy span{font:9px "Noto Serif SC",serif;color:#d3c8b0}
+.guild-wallet{position:absolute;z-index:3;right:13px;bottom:15px;display:flex;flex-direction:column;align-items:flex-end;padding:7px 10px;background:#172b35b8;border-radius:4px 12px 4px 12px}.guild-wallet small{font:7px "Noto Serif SC",serif;color:#d4c6a8}.guild-wallet b{font:italic 21px Georgia,serif;color:#f0d9a9}
+.guild-destinations{padding:8px 13px 0}.guild-gate-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.guild-gate{position:relative;height:105px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:0 4px 7px;border:0!important;border-radius:5px 13px 5px 13px!important;overflow:hidden;background:#354b49;color:#f1e5ca;box-shadow:0 5px 12px #27382c25;isolation:isolate}
+.guild-gate-scene{position:absolute;inset:0;z-index:-1;overflow:hidden;background:linear-gradient(160deg,#64766c,#273e3b 70%)}
+.guild-gate-scene:before{content:"";position:absolute;left:20%;bottom:17px;width:60%;height:72px;border-radius:50% 50% 0 0;background:linear-gradient(90deg,#1e3835,#9a9b76 50%,#263d37);box-shadow:-27px 14px 0 -9px #1b3532,27px 15px 0 -7px #243c36}
+.guild-gate-scene:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,#172b2caa 100%)}
+.guild-gate .gate-orb{position:absolute;left:calc(50% - 12px);top:12px;width:24px;height:24px;border-radius:50%;background:#e5d19c;box-shadow:0 0 20px 9px #e5d19c55}
+.guild-gate .gate-spire{position:absolute;left:calc(50% - 15px);bottom:19px;width:30px;height:58px;background:linear-gradient(90deg,#263b38,#c1b18b,#3c5148);clip-path:polygon(50% 0,88% 24%,100% 100%,0 100%,12% 24%)}
+.guild-gate .gate-ground{position:absolute;bottom:0;left:0;width:100%;height:18px;background:linear-gradient(#6d765c,#293a33)}
+.guild-gate-code{font:italic 21px Georgia,serif;text-shadow:0 2px 5px #172b2b}.guild-gate-state{font:7px "Noto Serif SC",serif;letter-spacing:.08em;color:#e2d5b9}.guild-gate-progress{position:absolute;left:0;right:0;top:0;height:3px;background:#f2e6c433}.guild-gate-progress i{display:block;height:100%;background:#e6c88c;box-shadow:0 0 8px #f4d99d}
+.guild-gate.scene-fog .guild-gate-scene{background:linear-gradient(150deg,#b3c0bd,#4b6469 70%)}.guild-gate.scene-crypt .guild-gate-scene{background:linear-gradient(150deg,#a5a08d,#3c4444 75%)}.guild-gate.scene-ember .guild-gate-scene{background:linear-gradient(150deg,#b77b5a,#493a3b 75%)}.guild-gate.scene-wild .guild-gate-scene{background:linear-gradient(150deg,#9da47a,#354b3b 75%)}.guild-gate.scene-moon .guild-gate-scene{background:linear-gradient(150deg,#aaa0b6,#3c3c59 75%)}.guild-gate.scene-storm .guild-gate-scene{background:linear-gradient(150deg,#8194a0,#293b50 75%)}.guild-gate.scene-abyss .guild-gate-scene{background:linear-gradient(150deg,#716a91,#202b42 75%)}.guild-gate.scene-eclipse .guild-gate-scene{background:linear-gradient(150deg,#c4a66c,#38313a 75%)}
+.guild-gate.sealed{filter:grayscale(.7);opacity:.48}.guild-gate.sealed:after{content:"";position:absolute;inset:0;background:#1b272c66;z-index:1}.guild-gate.sealed .guild-gate-state{z-index:2}
+.guild-party{padding:10px 13px 12px}.guild-roster{display:grid;grid-template-columns:1fr;gap:8px}
+.guild-section-head{padding:0 2px 7px}.guild-section-head span{font:600 15px "Noto Serif SC",serif;letter-spacing:.08em}.guild-section-head small{font:7px Georgia,serif;letter-spacing:.15em;color:#9c8c70}
+.guild-member{position:relative;display:grid;grid-template-columns:88px 1fr 25px;align-items:center;gap:11px;min-height:104px;padding:7px 10px 7px 7px;border:0!important;border-radius:5px 16px 5px 16px!important;background:linear-gradient(105deg,#f2ead9,#d2c8b5);box-shadow:0 5px 12px #3c40321c;text-align:left;color:#344740;overflow:hidden}
+.guild-member.is-selected{background:linear-gradient(105deg,#e7e8d8,#c6d2be);box-shadow:inset 4px 0 #7d9276,0 6px 14px #3c403225}
+.guild-member-art{position:relative;height:88px;display:block;overflow:hidden;border-radius:4px 12px 4px 12px;background:radial-gradient(ellipse at 50% 30%,#e2cda8,#a08b72 72%,#5d6357)}
+.guild-member-art:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#fff7d533,transparent 60%)}
+.guild-member-art .member-face{position:absolute;z-index:2;left:29px;top:18px;width:31px;height:39px;border-radius:48% 48% 43% 43%;background:linear-gradient(100deg,#e8c9a5,#b88d70);box-shadow:inset -6px -2px #8b6c58}
+.guild-member-art .member-hair{position:absolute;z-index:3;left:24px;top:10px;width:43px;height:34px;border-radius:55% 55% 22% 22%;background:linear-gradient(100deg,#332f2e,#79634d 60%,#3b3530);clip-path:polygon(0 0,100% 0,95% 70%,75% 52%,64% 100%,47% 60%,29% 100%,19% 54%,5% 80%)}
+.guild-member-art .member-neck{position:absolute;z-index:1;left:38px;top:50px;width:14px;height:17px;background:#b78d70}
+.guild-member-art .member-shoulders{position:absolute;z-index:2;left:9px;bottom:-25px;width:72px;height:63px;border-radius:50% 50% 0 0;background:linear-gradient(100deg,#31443e,#82917a 50%,#34443d)}
+.guild-member-art .member-cloak{position:absolute;z-index:3;left:29px;bottom:-27px;width:32px;height:64px;background:linear-gradient(90deg,#c1aa82,#e0d0ae,#8a755d);clip-path:polygon(50% 0,100% 30%,86% 100%,14% 100%,0 30%)}
+.guild-member-art .member-light{position:absolute;z-index:4;right:8px;top:8px;width:7px;height:7px;border-radius:50%;background:#f4dca7;box-shadow:0 0 13px 6px #f4dca766}
+.guild-member-art.tone-1{background:radial-gradient(ellipse at 50% 30%,#d6e1d9,#82979a 70%,#45555b)}.guild-member-art.tone-2{background:radial-gradient(ellipse at 50% 30%,#e0c6bf,#987b83 70%,#4d4652)}.guild-member-art.tone-3{background:radial-gradient(ellipse at 50% 30%,#d5d9b8,#879477 70%,#485a4a)}
+.guild-member-art.tone-1 .member-shoulders{background:linear-gradient(100deg,#394a5a,#8295a1 50%,#394553)}.guild-member-art.tone-2 .member-shoulders{background:linear-gradient(100deg,#554251,#9b7d8a 50%,#51404f)}.guild-member-art.tone-3 .member-shoulders{background:linear-gradient(100deg,#354b3b,#91a17c 50%,#354b3b)}
+.guild-member-info{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}.guild-member-info strong{font:600 14px "Noto Serif SC",serif;color:#3e5048}.guild-member-info small{font:9px "Noto Serif SC",serif;color:#8e7d62}.guild-member-stats{display:flex;gap:12px;font:9px "Noto Serif SC",serif;color:#647467}.guild-member-stats em{font-style:normal;color:#a07861}.guild-member-meter{width:100%;height:4px;background:#b9b4a4;border-radius:4px;overflow:hidden}.guild-member-meter i{display:block;height:100%;background:linear-gradient(90deg,#728b73,#c1a574);border-radius:4px}
+.guild-member-check{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#d7c9ad;color:#62735f;font:13px Georgia,serif}.guild-member:not(.is-selected) .guild-member-check{background:#e3d9c8;color:#a3947d}
+.guild-strength{position:relative;display:flex;align-items:center;gap:12px;margin:0 13px 10px;padding:11px 14px;background:linear-gradient(110deg,#273d3e,#52665a);border-radius:5px 16px 5px 16px;color:#e9dec7;overflow:hidden}.guild-strength-emblem{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,#e2d2ad,#a78c5c);color:#405348;font-size:20px}.guild-strength-copy{display:flex;flex-direction:column;gap:1px}.guild-strength-copy small{font:7px Georgia,serif;letter-spacing:.15em;color:#c8b994}.guild-strength-copy b{font:italic 25px Georgia,serif;color:#f0d9a7}.guild-strength-copy span{font:8px "Noto Serif SC",serif;color:#d0c6ae}.guild-strength-meter{position:absolute;right:14px;bottom:8px;width:34%;height:3px;background:#ffffff28}.guild-strength-meter i{display:block;height:100%;background:#d8bc84}
+@media(min-width:600px){.leader-podium-grid{gap:10px}.leader-podium{min-height:170px}.guild-roster{grid-template-columns:repeat(2,minmax(0,1fr))}.guild-member{grid-template-columns:78px 1fr 22px}.guild-member-art{height:90px}}
+
+.drawer .choices.recruitment-view{box-sizing:border-box!important;width:100%;max-width:100%;min-width:0!important;overflow-x:hidden!important;padding:0 12px 18px!important;gap:9px!important}
+.drawer .choices.recruitment-view>*{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+.recruitment-view .career-poster{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important}
+.recruitment-view .recruitment-masthead{width:100%!important;margin:0 0 9px!important;padding:13px 14px!important;min-width:0!important;overflow:hidden!important}
+.recruitment-view .faction-card,.recruitment-view .candidate-card{box-sizing:border-box!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+.recruitment-view .faction-card{display:grid;grid-template-columns:minmax(86px,31%) minmax(0,1fr);gap:10px;padding:9px;background:#f1eadc;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}
+.faction-grid,.candidate-grid{display:grid;grid-template-columns:1fr;gap:9px;min-width:0}
+.faction-poster{position:relative;min-height:128px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;overflow:hidden;padding:10px;background:linear-gradient(145deg,#263d47,#667366);color:#e9dfca}
+.faction-tone-1 .faction-poster{background:linear-gradient(145deg,#394451,#8b7962)}.faction-tone-2 .faction-poster{background:linear-gradient(145deg,#364d48,#879078)}.faction-tone-3 .faction-poster{background:linear-gradient(145deg,#3b3c4b,#877b87)}
+.faction-poster:after{content:"";position:absolute;width:90px;height:90px;right:-25px;top:20px;border:1px solid #f1e5cc66;border-radius:50%;box-shadow:0 0 0 12px #f1e5cc13,0 0 0 25px #f1e5cc0d}
+.faction-poster span,.faction-poster small{position:relative;z-index:1;font:7px Georgia,serif;letter-spacing:.12em;color:#e3d4b8}.faction-poster b{position:relative;z-index:1;align-self:center;font:34px "Noto Serif SC",serif;color:#f1e4cb}
+.faction-card-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.faction-card-copy>small{font:7px Georgia,serif;letter-spacing:.12em;color:#99876a}.faction-card-copy h3{margin:1px 0;color:#3b4a43;font:600 15px "Noto Serif SC",serif;overflow-wrap:anywhere}.faction-card-copy p{margin:0 0 4px;color:#817866;font:10px/1.5 "Noto Serif SC",serif}
+.recruit-action{width:100%;min-height:31px;padding:5px 8px;border:1px solid #718075;border-radius:3px;background:#40554b;color:#f1e8d8;font:10px "Noto Serif SC",serif}.recruit-action:disabled{background:#d8d3c8;color:#8d897e;border-color:#c6bdad}
+.faction-clue{border:0;background:transparent;color:#a47751;font:9px "Noto Serif SC",serif;text-decoration:underline;text-underline-offset:3px}.faction-clue.found{color:#72836b;text-decoration:none}
+.recruitment-tabs{position:sticky;top:0;z-index:8;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:7px 0 9px;background:#e8e0d2}
+.recruitment-tabs button{min-height:39px;border:0;border-radius:5px;background:#d8d0c1;color:#756d5f;font:600 12px "Noto Serif SC",serif}.recruitment-tabs button.active{background:#344a49;color:#f0e5cf;box-shadow:0 3px 8px #344a492b}
+.faction-count-strip{display:flex;align-items:baseline;gap:5px;margin:1px 0 10px;padding:8px 10px;background:#ded6c7;color:#8c806c;font:9px "Noto Serif SC",serif}.faction-count-strip b{margin-left:8px;color:#455b51;font:italic 17px Georgia,serif}.faction-count-strip b:first-child{margin-left:0}
+.hidden-faction-note{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding:13px 14px;background:linear-gradient(110deg,#303a42,#4a4a48);color:#e9dfcb;border-left:3px solid #ad8d63}.hidden-faction-note small{font:7px Georgia,serif;letter-spacing:.17em;color:#c6b28d}.hidden-faction-note b{font:600 13px "Noto Serif SC",serif}.hidden-faction-note span{font:9px/1.6 "Noto Serif SC",serif;color:#c9c1b2}.hidden-faction-note.is-locked{opacity:.78}
+.candidate-card{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;padding:9px;background:#f0e8d9;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}
+.candidate-portrait{position:relative;min-height:108px;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 28%,#d6c5a4,#758478 70%,#364c46);color:#f4e8d1}.candidate-portrait:before{content:"";position:absolute;left:15px;right:15px;bottom:-20px;height:74px;border-radius:50% 50% 0 0;background:linear-gradient(90deg,#34483f,#b2a080,#405347)}.candidate-portrait i{position:relative;z-index:1;font:29px "Noto Serif SC",serif;font-style:normal;text-shadow:0 2px 8px #172b2b}.candidate-portrait b{position:absolute;z-index:2;top:14px;left:22px;width:30px;height:12px;border-radius:50% 50% 0 0;background:#393b36}
+.candidate-tone-1 .candidate-portrait{background:radial-gradient(circle at 50% 28%,#d9d9c6,#789194 70%,#384b52)}.candidate-tone-2 .candidate-portrait{background:radial-gradient(circle at 50% 28%,#e0c7bc,#a07b83 70%,#4b3f4d)}.candidate-tone-3 .candidate-portrait{background:radial-gradient(circle at 50% 28%,#d7d5ad,#899374 70%,#3e5346)}
+.candidate-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.candidate-copy>small{font:7px Georgia,serif;color:#9a886d}.candidate-copy h3{margin:0;color:#3b4a43;font:600 15px "Noto Serif SC",serif}.candidate-copy strong{font:9px "Noto Serif SC",serif;color:#81745f}.candidate-copy p{margin:0;color:#817866;font:9px/1.5 "Noto Serif SC",serif}
+.candidate-meter{width:100%;height:3px;background:#d2c8b6}.candidate-meter i{display:block;height:100%;background:linear-gradient(90deg,#728c76,#b59b6e)}
+.candidate-summary{display:flex;align-items:baseline;gap:5px;padding:7px 10px;margin:0 0 9px;background:#ded6c7;color:#7e7565;font:10px "Noto Serif SC",serif}.candidate-summary b{color:#40564c;font:italic 18px Georgia,serif}
+.mission-matchmaking{margin:10px 14px 0;padding:11px;background:#263e40;border-radius:5px 14px 5px 14px;color:#e9dfcb}.mission-matchmaking-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.mission-matchmaking-head b{font:600 12px "Noto Serif SC",serif}.mission-matchmaking-head small{font:7px Georgia,serif;letter-spacing:.12em;color:#c3b28f}.mission-matchmaking-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.mission-match-slot{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:1px 7px;padding:7px;background:#ffffff10}.mission-match-slot>span{grid-row:span 2;width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:#a89570;color:#263e40;font:italic 17px Georgia,serif}.mission-match-slot b{font:9px "Noto Serif SC",serif}.mission-match-slot small{font:7px "Noto Serif SC",serif;color:#b9b19f}
+.leader-avatar-arday{background:radial-gradient(circle,#f0dfb8 0 43%,#9d835d 45% 53%,#40574c 55% 100%)!important;box-shadow:0 0 0 3px #e7d5b0,0 4px 10px #243b3355}.leader-avatar-arday strong{display:grid;place-items:center;width:100%;height:100%;font:italic 29px Georgia,serif;color:#40564a;text-shadow:1px 1px #fff4d9}
+@media(min-width:560px){.faction-grid,.candidate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.recruitment-view .faction-card{grid-template-columns:minmax(70px,30%) minmax(0,1fr)}}
+
+/* Distinct faction poster identities */
+.faction-iron-gate .faction-poster{background:linear-gradient(145deg,#171f28,#59616a 55%,#a18a69)}.faction-iron-gate .faction-poster:before{content:"";position:absolute;inset:18%;border:5px double #d4c29c;transform:rotate(45deg)}
+.faction-night-heron .faction-poster{background:radial-gradient(ellipse at 55% 35%,#b3c0b0,#344a50 55%,#182c34)}.faction-night-heron .faction-poster:before{content:"";position:absolute;left:12%;right:12%;top:18%;height:65%;border-left:1px solid #d6dfd0;border-right:1px solid #d6dfd0;clip-path:polygon(50% 0,100% 100%,50% 75%,0 100%);background:#d6dfd033}
+.faction-cinder-forge .faction-poster{background:radial-gradient(ellipse at 50% 85%,#dc8650,#6b3930 42%,#242b31 78%)}.faction-cinder-forge .faction-poster:before{content:"";position:absolute;left:20%;right:20%;top:14%;height:72%;border:2px solid #f0b77b;clip-path:polygon(50% 0,90% 35%,72% 100%,28% 100%,10% 35%)}
+.faction-blue-transit .faction-poster{background:repeating-linear-gradient(135deg,#243d51 0 13px,#31596a 13px 15px,#243d51 15px 28px)}.faction-blue-transit .faction-poster:before{content:"";position:absolute;inset:18% 25%;border:2px solid #b7d0ce;border-radius:50%;box-shadow:0 0 0 10px #b7d0ce22,0 0 0 20px #b7d0ce12}
+.faction-stillwater .faction-poster{background:radial-gradient(ellipse at 50% 48%,#9cb7b4,#3d6664 48%,#203e48)}.faction-stillwater .faction-poster:before{content:"";position:absolute;left:10%;right:10%;top:20%;height:60%;border-top:1px solid #d9e8d8;border-bottom:1px solid #d9e8d8;border-radius:50%;transform:rotate(-25deg);box-shadow:0 12px 0 -5px #d9e8d877,0 -12px 0 -5px #d9e8d877}
+.faction-convergence .faction-poster{background:linear-gradient(135deg,#514c68,#a79ab4 48%,#39384c)}.faction-convergence .faction-poster:before{content:"";position:absolute;inset:18%;background:repeating-conic-gradient(from 0deg,#e8dced 0 3deg,transparent 3deg 30deg);mask:radial-gradient(circle,transparent 0 18%,#000 19% 22%,transparent 23% 33%,#000 34% 37%,transparent 38%)}
+.faction-last-candle .faction-poster{background:radial-gradient(ellipse at 50% 55%,#d6a36c,#59473e 35%,#252d32 75%)}.faction-last-candle .faction-poster:before{content:"";position:absolute;left:46%;top:20%;height:57%;width:8%;background:linear-gradient(90deg,#bd8c54,#f4d59b,#9c6845);box-shadow:0 0 20px 8px #efb76a66;border-radius:4px}
+.faction-anomaly-bureau .faction-poster{background:linear-gradient(90deg,#2c3d43 0 48%,#9caa9e 48% 51%,#2c3d43 51%)}.faction-anomaly-bureau .faction-poster:before{content:"";position:absolute;inset:16%;border:1px solid #d4e0d0;background:repeating-linear-gradient(0deg,transparent 0 10px,#d4e0d033 10px 11px)}
+.hidden-rebel-card .faction-poster{background:radial-gradient(ellipse at center,#8d3434,#2b2027 68%,#171b21)}.hidden-rebel-card .faction-poster:before{content:"";position:absolute;inset:15%;border:1px dashed #e3aaa0;transform:rotate(45deg)}
+.market-refresh{width:100%;margin:0 0 10px;padding:9px 12px;border:1px dashed #95856c;background:#ded6c7;color:#526257;font:11px "Noto Serif SC",serif;letter-spacing:.06em}
+.dossier-power{display:flex;align-items:baseline;gap:9px;margin-top:7px;color:#526459}.dossier-power small{font:9px "Noto Serif SC",serif}.dossier-power b{font:italic 27px Georgia,serif}
+.dossier-attributes{margin:14px 0;padding:14px;background:#e9e1d3;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}.dossier-attributes header{display:flex;justify-content:space-between;margin-bottom:13px;color:#8b7e68}.dossier-attributes header span{font:7px Georgia,serif;letter-spacing:.15em}.dossier-attributes header b{font:11px "Noto Serif SC",serif;color:#48594e}
+.dossier-attribute{display:grid;grid-template-columns:42px 1fr 26px;gap:9px;align-items:center;margin:9px 0;color:#596257;font:10px "Noto Serif SC",serif}.dossier-attribute>i{height:5px;background:#d2c8b6;overflow:hidden}.dossier-attribute>i>b{display:block;height:100%;background:linear-gradient(90deg,#6b8272,#b69b6f)}.dossier-attribute strong{text-align:right;font:10px Georgia,serif;color:#8c7757}
+
+
+/* Guild ranking, recruitment power emphasis, and lifetime dungeon dossier */
+.guild-rank-mark{display:flex;align-items:center;justify-content:space-between;width:100%;padding:5px 8px;margin:0 0 4px;background:linear-gradient(100deg,#e1d4b8,#f1e8d7 65%,#d2c2a4);border-left:3px solid #94794f;color:#64553d}
+.guild-rank-mark small{font:7px Georgia,serif;letter-spacing:.16em}.guild-rank-mark b{font:italic 20px Georgia,serif;color:#715a37}
+.candidate-power{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin:1px 0 7px;padding:4px 0 7px;border-bottom:1px solid #c9b99e;color:#8e7958}
+.candidate-power small{font:8px Georgia,serif;letter-spacing:.14em}.candidate-power b{font:700 34px/.95 Georgia,serif;letter-spacing:-.055em;color:#40584b;text-shadow:0 1px 0 #fff7e8}
+.dossier-dungeon-records{margin:14px 0 24px;padding:14px;background:#e9e1d3;border:1px solid #c9bba5;border-radius:5px 14px 5px 14px}
+.dossier-dungeon-records>header{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:12px;color:#8b7e68}.dossier-dungeon-records>header span{font:7px Georgia,serif;letter-spacing:.15em}.dossier-dungeon-records>header b{font:11px "Noto Serif SC",serif;color:#48594e}.dossier-dungeon-records>header small{margin-left:auto;font:9px Georgia,serif}
+.dossier-tier-list{display:flex;flex-direction:column;gap:6px}.dossier-tier-record{display:grid;grid-template-columns:35px minmax(0,1fr) auto;align-items:center;gap:9px;padding:8px 5px;border-bottom:1px solid #d4c8b5}
+.dossier-tier-code{font:italic 19px Georgia,serif;color:#6d806e}.dossier-tier-main{min-width:0}.dossier-tier-numbers{display:flex;align-items:baseline;gap:5px;color:#5d675c}.dossier-tier-numbers>b{font:19px Georgia,serif;color:#45594d}.dossier-tier-numbers small,.dossier-tier-numbers span{font:8px "Noto Serif SC",serif}
+.dossier-tier-ratings{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.dungeon-rating-chip{padding:2px 5px;border:1px solid #c4b69e;border-radius:2px;color:#766447;font:8px Georgia,serif}.dungeon-rating-chip b{font-weight:600}
+.dungeon-result-mark{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;margin-left:3px;border:1px solid #a48c65;border-radius:50%;font:italic 10px Georgia,serif;color:#766447}.dungeon-result-mark.is-fail{border-color:#a66e64;color:#a66e64}.no-rating{font:8px "Noto Serif SC",serif;color:#a99c88}.dossier-tier-recent{white-space:nowrap}
+.leader-list-caption{padding:7px 2px;color:#88785d;font:8px Georgia,serif;letter-spacing:.16em}.leader-row.elite-ranker{background:linear-gradient(90deg,#e8dfce,#e0d4bd);border-left:2px solid #a28a61}.leader-row.elite-ranker .leader-row-number{color:#98794d}
+.elite-encounter-result{display:flex;flex-direction:column;gap:5px;margin:12px 0;padding:13px 16px;border:1px solid #b69a70;background:linear-gradient(120deg,#e9dfcc,#d7d0bd);color:#46564d}
+.elite-encounter-result small{font:8px Georgia,serif;letter-spacing:.15em}.elite-encounter-result b{font:20px "Noto Serif SC",serif}.elite-encounter-result span{font:10px "Noto Serif SC",serif}
+.elite-encounter-result.is-hostile{border-color:#a66c62;background:linear-gradient(120deg,#e7d8d0,#d8c8c2)}
+
+.guild-member-card{position:relative;min-width:0}.guild-member-card .guild-member{width:100%;padding-right:38px}
+.guild-member-remove{position:absolute;right:8px;top:8px;z-index:4;width:25px;height:25px;border:1px solid #bcae98;border-radius:50%;background:#f1e7d7;color:#926b5b;font:18px/1 Georgia,serif;box-shadow:0 2px 4px #4c413322}
+.guild-member-remove:active{transform:scale(.94)}.guild-roster{gap:9px}
+.dossier-dungeon-records{padding:0;overflow:hidden}
+.dossier-dungeon-records>summary{display:flex;align-items:baseline;gap:9px;list-style:none;cursor:pointer;padding:14px;background:#e9e1d3;color:#8b7e68}
+.dossier-dungeon-records>summary::-webkit-details-marker{display:none}
+.dossier-dungeon-records>summary span{font:7px Georgia,serif;letter-spacing:.15em}.dossier-dungeon-records>summary b{font:11px "Noto Serif SC",serif;color:#48594e}.dossier-dungeon-records>summary small{margin-left:auto;font:9px Georgia,serif}
+.dossier-dungeon-records[open]>summary{border-bottom:1px solid #c9bba5}.dossier-dungeon-records .dossier-tier-list{padding:8px 14px 14px}
+.combat-attributes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:2px}
+.combat-attribute{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 1px;background:#f3ecdf;border-radius:4px;color:#8c7d68}
+.combat-attribute span{font:9px "Noto Serif SC",serif}.combat-attribute b{font:12px Georgia,serif;color:#536858}
+.stat-group.combat-group{gap:5px}
+
+.career-tabs{display:flex;gap:8px;margin:0 0 14px;padding:5px;background:#e7ddcc;border:1px solid #c9b99f;border-radius:8px}.career-tabs button{flex:1;min-height:36px;border:0;border-radius:5px;background:transparent;color:#88785f}.career-tabs button.active{background:#536b5a;color:#f6eddf}
+.guild-career-banner{padding:19px;margin:0 0 13px;background:linear-gradient(125deg,#394d45,#667766 58%,#9b8a6b);color:#f1e8d8;border-radius:8px}.guild-career-banner small{font:8px Georgia,serif;letter-spacing:.17em}.guild-career-banner h2{margin:8px 0;font:24px "Noto Serif SC",serif}.guild-career-section{margin:12px 0;padding:14px;background:#eee6d8;border:1px solid #d2c4ad;border-radius:7px}.guild-career-section>header{display:flex;justify-content:space-between;margin-bottom:9px;color:#4c5f50}.guild-career-section>header small{font:7px Georgia,serif;letter-spacing:.14em;color:#a08d6d}.guild-career-section p{margin:6px 0 10px;color:#887b68;font:10px/1.6 "Noto Serif SC",serif}.guild-due{display:block;font:32px Georgia,serif;color:#40594a}.guild-due small{font:10px "Noto Serif SC",serif}.guild-applicant-list{display:flex;flex-direction:column;gap:7px}.guild-applicant{display:flex;align-items:center;gap:10px;padding:8px;background:#f5eee2;border:1px solid #ddd0bc;border-radius:5px}.guild-applicant-mark{display:grid;place-items:center;width:36px;height:36px;background:#d9d0bd;color:#536858;border-radius:50%;font:italic 18px Georgia,serif}.guild-applicant>div:nth-child(2){display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}.guild-applicant small{font-size:9px;color:#93846d}.guild-applicant button{padding:6px 11px;border:1px solid #899681;border-radius:4px;background:#e3e8dc;color:#4d6553}.guild-material-count{margin:4px 0 10px;color:#8b795c;font:10px Georgia,serif}.guild-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.guild-material-grid button{display:flex;flex-direction:column;gap:5px;padding:10px;text-align:left;border:1px solid #cfc0a7;border-radius:5px;background:#eee6d8;color:#536252}.guild-material-grid small{font:9px Georgia,serif;color:#a08b69}.guild-contract{padding:12px;background:linear-gradient(135deg,#e4ddce,#d3d3c3);border-left:3px solid #8a7958}.guild-career-empty{padding:28px 18px;text-align:center;background:#eee6d8;border:1px solid #d2c4ad;border-radius:8px}.candidate-tier{margin:5px 0;color:#9a896e;font:9px "Noto Serif SC",serif}.candidate-tier b{margin-left:4px;color:#526957;font:italic 14px Georgia,serif}
+
+/* Compact party cards and five-dimensional combat meters */
+.guild-member{grid-template-columns:68px minmax(0,1fr) 22px;min-height:82px;gap:9px;padding:6px 8px 6px 6px}
+.guild-member-art{height:68px}
+.guild-member-info{display:flex;min-width:0;flex-direction:column;gap:4px}
+.guild-member-info>strong{font-size:12px;line-height:1.25}
+.guild-member-info>small{font-size:9px;line-height:1.2;color:#8b7d68}
+.guild-member-stats{display:flex;align-items:center;gap:6px}
+.guild-member-stats b{font:600 10px Georgia,serif;color:#526858}
+.guild-member-meter{width:100%;height:3px;margin-top:1px}
+.combat-attributes{display:flex;flex-direction:column;gap:7px;margin-top:7px}
+.combat-attribute{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:0;background:transparent;border-radius:0}
+.combat-attribute-head{display:flex;align-items:center;justify-content:space-between;color:#817663;font:9px "Noto Serif SC",serif}
+.combat-attribute-head b{font:10px Georgia,serif;color:#536858}
+.combat-attribute-meter{display:block;width:100%;height:4px;overflow:hidden;background:#d9d0c1;border-radius:5px}
+.combat-attribute-meter>b{display:block;height:100%;background:linear-gradient(90deg,#718b78,#b9a078);border-radius:5px}
+
+/* Career boards: editorial tabs and graphic-first guild workspace */
+.career-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:7px;margin:0 0 14px;border:0;border-radius:14px;background:linear-gradient(135deg,#242e2c,#3a4038);box-shadow:inset 0 1px 0 #ffffff20,0 5px 16px #171b1920}
+.career-tabs button{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border:1px solid #c6bda433;border-radius:9px;background:transparent;color:#c8c0ad;font:600 12px "Noto Serif SC",serif;letter-spacing:.12em}
+.career-tabs button.active{background:linear-gradient(145deg,#e4d8bd,#c7b58e);color:#303a34;border-color:#f1e6ce;box-shadow:0 3px 10px #10161355}
+.career-tab-glyph{font:20px Georgia,serif;opacity:.9}
+.guild-career-banner{position:relative;display:flex;align-items:center;gap:15px;min-height:124px;padding:18px;overflow:hidden;border:1px solid #c4b38b66;border-radius:13px;background:radial-gradient(ellipse at 12% 50%,#a9a17b45,transparent 48%),linear-gradient(120deg,#263632,#435047 58%,#252f2c);color:#eee4cf}
+.guild-career-banner:after{content:"";position:absolute;inset:8px;border:1px solid #d7c79b44;border-radius:8px;pointer-events:none}
+.guild-banner-sigil{display:grid;place-items:center;flex:0 0 78px;width:78px;height:78px;border:1px solid #c9b889;border-radius:50%;background:radial-gradient(circle,#b8aa7c55 0 35%,transparent 36%),repeating-conic-gradient(from 0deg,#d6c69b22 0 8deg,transparent 8deg 16deg);box-shadow:0 0 0 5px #d7c99b12,inset 0 0 18px #d7c99b22}
+.guild-banner-sigil i{font:38px "Noto Serif SC",serif;color:#e0d2a8;font-style:normal}
+.guild-banner-identity{position:relative;z-index:1;min-width:0;flex:1}
+.guild-banner-identity>small{font:9px Georgia,serif;letter-spacing:.2em;color:#c5b78e}
+.guild-banner-identity h2{margin:5px 0 10px;font:600 19px "Noto Serif SC",serif;letter-spacing:.1em}
+.guild-rank-track{height:3px;max-width:150px;background:#d8d0bd35}.guild-rank-track i{display:block;height:100%;background:#d8c493}
+.guild-banner-rank{position:relative;z-index:1;font:italic 30px Georgia,serif;color:#e4d5ad}
+.guild-career-section{position:relative;margin-top:12px;padding:14px;border:1px solid #a89c8050;border-radius:12px;background:linear-gradient(145deg,#f0e9d9,#e2dac8);box-shadow:0 5px 13px #29271d0c}
+.guild-career-section>header{display:flex;align-items:center;gap:9px;margin-bottom:12px;border:0}
+.guild-career-section>header>b{font:600 13px "Noto Serif SC",serif;letter-spacing:.1em;color:#34433a}
+.guild-career-section>header>small{margin-left:auto;font:10px Georgia,serif;letter-spacing:.14em;color:#9a8c70}
+.guild-section-icon{display:grid;place-items:center;width:29px;height:29px;border:1px solid #a99a7466;border-radius:8px;background:#d8cdb5;color:#536653;font:18px Georgia,serif;font-style:normal}
+.guild-due{display:block;font:42px Georgia,serif;line-height:1;color:#455e4d}.guild-due small{font:11px "Noto Serif SC",serif;color:#8c8069}
+.guild-contribution-total{display:flex;align-items:center;gap:6px;margin-top:10px;color:#82785f}.guild-contribution-total i{font-style:normal;color:#a78d55}.guild-contribution-total b{font:17px Georgia,serif;color:#536653}.guild-contribution-total small{font-size:10px}
+.guild-applicant-list{display:grid;gap:7px}.guild-applicant{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;padding:7px;border-radius:9px;background:#d8d0bd80}
+.guild-applicant-mark{display:grid;place-items:center;width:40px;height:40px;border:1px solid #a99a75;border-radius:50%;background:radial-gradient(circle,#aeb79d,#56675a);color:#f1e8d2;font:20px "Noto Serif SC",serif}
+.guild-applicant>div:nth-child(2){display:flex;flex-direction:column;gap:4px;min-width:0}.guild-applicant>div:nth-child(2)>b{font:600 12px "Noto Serif SC",serif;color:#39453c}.guild-applicant>div:nth-child(2)>small{font-size:9px;color:#887e6c}
+.guild-applicant>button,.guild-career-section .recruit-action{border:1px solid #8d987d;border-radius:7px;background:#536858;color:#f4eddd;padding:7px 12px;font-size:11px}
+.guild-material-count{display:inline-block;margin-bottom:10px;padding:5px 9px;border-radius:20px;background:#d5cbb4;color:#68745e;font-size:10px}
+.guild-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.guild-material-grid button{position:relative;min-height:82px;padding:34px 8px 8px;border:1px solid #b8aa8b;border-radius:9px;background:linear-gradient(145deg,#e8dfca,#d5c9ae);color:#4c594d;font:600 11px "Noto Serif SC",serif}
+.guild-material-grid button:before{content:"✧";position:absolute;top:7px;left:50%;transform:translateX(-50%);font:25px Georgia,serif;color:#9b8b5e}
+.guild-material-grid button small{display:block;margin-top:4px;font-size:9px;color:#92866d}
+.guild-contract-meta{display:flex;align-items:baseline;gap:5px;margin:4px 0 12px;color:#9a8b70}.guild-contract-meta b{font:22px Georgia,serif;color:#536858}.guild-contract-meta strong{margin-left:12px;font:22px Georgia,serif;color:#536858}
+.guild-career-empty{text-align:center;padding:28px 16px;border:1px solid #b7aa8c;border-radius:14px;background:linear-gradient(145deg,#e9e0cd,#d8cfbb)}
+.guild-empty-emblem{display:grid;place-items:center;width:92px;height:92px;margin:0 auto 15px;border:1px solid #a89a78;border-radius:50%;background:repeating-conic-gradient(#b4a47e22 0 10deg,transparent 10deg 20deg)}
+.guild-empty-emblem i{font:42px Georgia,serif;color:#68745e;font-style:normal}.guild-empty-emblem b{font:8px Georgia,serif;letter-spacing:.2em;color:#8c8069}
+.guild-career-empty h2{font:600 17px "Noto Serif SC",serif;color:#4c594d}
+
+
+/* Guild career: collapsible illustrated dossiers */
+.drawer .choices.career-view>.guild-career-section{
+  display:block;position:relative;margin:0;padding:0;overflow:hidden;
+  border:1px solid #a99b7e;border-radius:11px;
+  background:linear-gradient(145deg,#f1eadb,#e2d8c5);
+  box-shadow:0 5px 15px #2d302817;
+}
+.guild-career-section>summary{
+  display:grid;grid-template-columns:96px minmax(0,1fr) 22px;
+  align-items:center;gap:13px;min-height:104px;padding:10px 13px;
+  list-style:none;cursor:pointer;position:relative;
+}
+.guild-career-section>summary::-webkit-details-marker{display:none}
+.guild-career-section>summary:after{content:none!important}
+.guild-section-art{
+  position:relative;display:block;width:96px;height:80px;overflow:hidden;
+  border:1px solid #ffffff55;box-shadow:inset 0 0 0 4px #ffffff20,0 3px 8px #25251e22;
+}
+.guild-section-art:before,.guild-section-art:after{content:"";position:absolute;display:block}
+.guild-section-art i,.guild-section-art b,.guild-section-art em{position:absolute;display:block;font-style:normal}
+.guild-section-heading{display:flex;flex-direction:column;gap:6px;min-width:0}
+.guild-section-heading small{font:9px Georgia,serif;letter-spacing:.17em;color:#92846a}
+.guild-section-heading strong{font:600 15px "Noto Serif SC",serif;letter-spacing:.08em;color:#34443a}
+.guild-section-toggle{width:19px;height:19px;position:relative;border:1px solid #a99b7e;background:#e5dcc9}
+.guild-section-toggle:before,.guild-section-toggle:after{content:"";position:absolute;left:5px;right:5px;top:8px;height:1px;background:#596b58}
+.guild-section-toggle:after{transform:rotate(90deg);transition:transform .2s}
+.guild-career-section[open] .guild-section-toggle:after{transform:rotate(0)}
+.guild-section-body{padding:0 15px 16px 122px;border-top:1px solid #c6b99f88}
+.guild-section-body:before{content:"";display:block;width:100%;height:1px;margin:0 0 12px;background:linear-gradient(90deg,#a9976d,#a9976d00)}
+.guild-section-body .guild-due{font-size:39px}
+.guild-section-body .guild-applicant-list{gap:8px}
+.guild-section-body .guild-material-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.guild-section-body .guild-contract-meta{margin-top:12px}
+.guild-section-body>h3{margin:12px 0 0;font:600 15px "Noto Serif SC",serif;color:#465647}
+/* 01: contribution ledger, stamped columns and ink lines */
+.art-contribution{background:linear-gradient(135deg,#687b69,#344a40 65%,#283a34)}
+.art-contribution:before{left:13px;top:10px;width:43px;height:57px;background:linear-gradient(#e7d8b7 0 0) 0 0/100% 4px no-repeat, repeating-linear-gradient(to bottom,transparent 0 10px,#e7d8b755 10px 11px);border-left:1px solid #e5d5b2;border-right:1px solid #e5d5b2;transform:skewY(-5deg)}
+.art-contribution:after{right:8px;bottom:9px;width:25px;height:25px;border:2px solid #d4bd87;border-radius:50%;box-shadow:inset 0 0 0 4px #344a40,inset 0 0 0 5px #d4bd87}
+.art-contribution i{left:19px;top:18px;width:27px;height:3px;background:#e8d9b8;box-shadow:0 10px #e8d9b877,0 20px #e8d9b877}
+.art-contribution b{right:13px;top:12px;width:12px;height:26px;background:#b9a16d;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+/* 02: personnel silhouettes against a field dossier */
+.art-applicants{background:linear-gradient(130deg,#b4a17d,#7c8068 52%,#46594c)}
+.art-applicants:before{left:9px;right:9px;bottom:9px;height:24px;background:linear-gradient(150deg,transparent 0 20%,#34483d 21% 42%,transparent 43%),linear-gradient(30deg,transparent 0 25%,#34483d 26% 55%,transparent 56%)}
+.art-applicants:after{left:8px;top:8px;width:78px;height:1px;background:#f0e6ce;box-shadow:0 5px #f0e6ce77}
+.art-applicants i,.art-applicants b,.art-applicants em{bottom:19px;width:17px;height:29px;background:#d7c8a7;clip-path:polygon(50% 0,75% 12%,82% 35%,100% 100%,0 100%,18% 35%,25% 12%);z-index:1}
+.art-applicants i{left:13px}.art-applicants b{left:39px;height:36px;background:#34483d}.art-applicants em{left:65px;background:#c3ae82}
+/* 03: stacked supply crates and a field map */
+.art-materials{background:linear-gradient(145deg,#b7a17b,#82765b 60%,#4d594b)}
+.art-materials:before{left:10px;bottom:10px;width:34px;height:28px;background:repeating-linear-gradient(90deg,#6e795f 0 5px,#899071 5px 7px);border:2px solid #dfc99a;transform:skewY(-8deg);box-shadow:35px -16px 0 -2px #a78f61,35px -16px 0 0 #e0c99b}
+.art-materials:after{right:8px;top:9px;width:23px;height:23px;border:1px solid #f0dfb7;border-radius:50%;box-shadow:0 0 0 5px #f0dfb722}
+.art-materials i{left:13px;bottom:23px;width:28px;height:2px;background:#e6d3aa;z-index:1}
+.art-materials b{right:13px;top:14px;width:13px;height:13px;border:1px solid #f0dfb7;transform:rotate(45deg)}
+/* 04: topographic field-operation map and signal marker */
+.art-commission{background:linear-gradient(145deg,#657a78,#344b50 62%,#27383d)}
+.art-commission:before{left:-8px;right:-8px;bottom:8px;height:45px;background:linear-gradient(145deg,transparent 0 22%,#a7aa8d 23% 31%,transparent 32%),linear-gradient(35deg,transparent 0 34%,#c3b58e 35% 42%,transparent 43%),linear-gradient(155deg,transparent 0 55%,#7d927e 56% 68%,transparent 69%)}
+.art-commission:after{left:46px;top:9px;width:28px;height:28px;border:1px solid #e2d3aa;transform:rotate(45deg);box-shadow:0 0 0 5px #e2d3aa22}
+.art-commission i{left:57px;top:17px;width:7px;height:7px;border-radius:50%;background:#e8d8a9;z-index:2;box-shadow:0 0 0 4px #e8d8a933}
+.art-commission b{left:13px;top:12px;width:24px;height:1px;background:#e2d3aa;box-shadow:0 6px #e2d3aa88,0 12px #e2d3aa55}
+@media(max-width:420px){
+ .guild-career-section>summary{grid-template-columns:82px minmax(0,1fr) 20px;gap:10px;padding:9px}
+ .guild-section-art{width:82px;height:72px}
+ .guild-section-body{padding:0 11px 14px}
+}
+
+
+/* Combat attributes use the exact same stat row and meter language as survival/emotion. */
+.combat-attributes{display:flex;flex-direction:column;gap:5px;margin-top:7px}
+.combat-group .combat-attribute{
+ display:grid;grid-template-columns:34px 24px minmax(0,1fr);gap:4px;align-items:center;
+ min-width:0;text-align:left;border:0;border-bottom:1px solid #eee5d8;
+ padding:5px 1px;background:transparent;border-radius:0;color:inherit;
+}
+.combat-group .combat-attribute label{display:block;margin:0;font-size:10px;color:var(--muted);white-space:nowrap}
+.combat-group .combat-attribute b{display:block;margin:0;font-size:11px;text-align:right;color:inherit}
+.combat-group .combat-attribute .meter{height:5px;border-radius:9px;background:#eee4d6;overflow:hidden}
+.combat-group .combat-attribute .meter i{display:block;height:100%;border-radius:9px;background:var(--green)}
+.combat-group .combat-attribute:last-child{border-bottom:0}
+.guild-section-heading{flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:9px;row-gap:2px}
+.faction-card-copy>small,.candidate-copy>strong{display:none}
+
+
+/* Sidebar: keep only the three section-title separators. */
+.stats .stat{border-bottom:0!important;border-right:0!important}
+.current-schedule-list{display:flex;flex-direction:column;gap:5px}
+.current-schedule-item{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:7px;padding:6px 5px;border:0;border-radius:7px;background:#f3eee5}
+.current-schedule-item.is-current{background:#e8e0d1;box-shadow:inset 2px 0 #8b7960}
+.current-schedule-time{display:flex;flex-direction:column;gap:2px}
+.current-schedule-time b{font:600 10px "Noto Serif SC",serif;color:#8c765a}
+.current-schedule-time small{font:9px Georgia,serif;color:#9a9388}
+.current-schedule-item>strong{min-width:0;font:500 10px/1.4 "Noto Serif SC",serif;color:#4c5148;overflow-wrap:anywhere}
+.guild-official-caption{font:10px "Noto Serif SC",serif;color:#c9b995;letter-spacing:.08em}
+.guild-bureau-grant-note{margin:8px 0 2px;color:#8c806c;font:10px/1.6 "Noto Serif SC",serif}
+
+/* The schedule heading is not a fourth status section divider. */
+.current-schedule-group .stat-group-title{border-bottom:0!important}
+
+
+/* Combat average is a compact value beside the section title; only five attributes retain meters. */
+.combat-group-title{display:flex;align-items:center;justify-content:flex-start;gap:8px}
+.combat-power-average{font:600 12px Georgia,serif;color:#536858;letter-spacing:0}
+.combat-group .combat-stat{display:none!important}
+.status-tags:empty{display:none!important}
+
+
