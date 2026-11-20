@@ -1449,6 +1449,10 @@ function initArday3D(){
    side:T.BackSide,transparent:true,depthTest:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,toneMapped:false
   });
   const inkDetailMaterial=new T.LineBasicMaterial({color:0x59463d,transparent:true,opacity:.2,depthTest:true,depthWrite:false,toneMapped:false});
+  const hallInkOutlineMaterial=inkOutlineMaterial.clone();
+  hallInkOutlineMaterial.uniforms.outlineThickness.value=.035;
+  hallInkOutlineMaterial.uniforms.outlineAlpha.value=.74;
+  hallInkOutlineMaterial.uniforms.outlineColor.value.setHex(0x303640);
   function applyInkOutlines(root){
    root.traverse(object=>{
     if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
@@ -1456,7 +1460,7 @@ function initArday3D(){
     if((object.geometry.boundingSphere?.radius||0)<.23)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
     if(!materials.some(material=>material&&material.isMeshStandardMaterial&&!material.transparent&&(material.opacity??1)>.94&&(material.roughness??1)>.28))return;
-    const shell=new T.Mesh(object.geometry,inkOutlineMaterial);
+    const shell=new T.Mesh(object.geometry,object.userData.hallIllustration?hallInkOutlineMaterial:inkOutlineMaterial);
     shell.name='hand-drawn-ink-outline';shell.userData.inkOutline=true;shell.frustumCulled=false;
     shell.castShadow=false;shell.receiveShadow=false;shell.renderOrder=1;
     object.userData.hasInkOutline=true;object.add(shell);
