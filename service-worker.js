@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v121";
+const CACHE_NAME = "arday-shell-v122";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -11,7 +11,7 @@ const APP_SHELL = [
   "./assets/js/chat-system.js",
   "./assets/js/character-tap-lines.js",
   "./assets/js/hall/hall-scene.js",
-  "./assets/js/game.js",
+  "./assets/js/game.js?v=20261121-career-syntaxfix3",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
