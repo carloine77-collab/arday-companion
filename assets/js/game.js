@@ -40,7 +40,7 @@ s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.int
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[{id:'lin',name:'林澈',role:'前锋',combat:34,malice:8,selected:true,portrait:'⚔'},{id:'mori',name:'森',role:'侦察',combat:30,malice:6,selected:true,portrait:'⌕'},{id:'qiao',name:'乔',role:'支援',combat:26,malice:12,selected:false,portrait:'✦'}];
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});if(s.teamRoster.length>8)s.teamRoster=s.teamRoster.slice(0,8);
 s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object'?s.recruitmentInvites:{};s.factionApplications=s.factionApplications&&typeof s.factionApplications==='object'?s.factionApplications:{};s.factionMembership=s.factionMembership||null;s.factionClues=Array.isArray(s.factionClues)?s.factionClues:[];
-s.points=Math.max(0,Math.floor(Number(s.points)||0));s.dungeonProtection=Math.max(0,Math.min(2,Math.floor(Number(s.dungeonProtection)||0)));
+s.points=Math.max(0,Math.floor(Number(s.points)||0));s.dungeonProtection=Math.max(0,Math.min(2,Math.floor(Number(s.dungeonProtection)||0)));s.nextDungeonChanceModifier=Math.max(-.08,Math.min(.08,Number(s.nextDungeonChanceModifier)||0));s.nextDungeonDifficultyReduction=Math.max(0,Math.min(6,Number(s.nextDungeonDifficultyReduction)||0));s.nextDungeonMaliceReduction=Math.max(0,Math.min(10,Number(s.nextDungeonMaliceReduction)||0));
 if(!s.leaderboardPopulationV2){if(s.points===0)s.points=20;s.leaderboardPopulationV2=true;}
 s.activeDungeon=s.activeDungeon&&s.activeDungeon.status==='active'?s.activeDungeon:null;
 if(s.activeDungeon){
