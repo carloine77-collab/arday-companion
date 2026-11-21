@@ -91,3 +91,69 @@
 .goal-proposal-condition small{font:700 8px Arial,sans-serif;letter-spacing:.14em;color:#a16d51}
 .goal-proposal-condition strong{font:11px/1.65 "Noto Serif SC",serif;font-weight:500}
 @media(max-width:430px){.goal-card{grid-template-columns:62px minmax(0,1fr);min-height:138px}.goal-card-main{padding:10px 10px 9px}.goal-card-main h3{font-size:13px}.goal-condition{font-size:9px}}
+
+
+/* ARDAY commission terminal — cold alloy, measured geometry, instrument-panel hierarchy. */
+.drawer .choices.commission-view:has(.commission-masthead){gap:9px!important;background:#c8d0d2}
+.commission-masthead{isolation:isolate;min-height:142px;padding:19px 18px 17px;background:linear-gradient(118deg,#101a22 0%,#263641 57%,#344954 100%);border:1px solid #647781;color:#e2e9e9}
+.commission-masthead:before{right:66px;top:-82px;width:210px;height:210px;border:1px solid #a8c1c533;border-radius:0;transform:rotate(45deg);box-shadow:0 0 0 12px #a8c1c50a,0 0 0 26px #a8c1c508}
+.commission-masthead:after{content:"";position:absolute;z-index:-1;inset:0;background:repeating-linear-gradient(0deg,transparent 0 17px,#a6c0ca0b 18px),repeating-linear-gradient(90deg,transparent 0 27px,#a6c0ca0a 28px);pointer-events:none}
+.commission-masthead-copy{position:relative;z-index:1;min-width:0}
+.commission-kicker{display:block;color:#9bb4bd;font:700 8px/1.4 Arial,sans-serif;letter-spacing:.24em}
+.commission-masthead h2{margin:9px 0 7px;color:#edf2f0;font:600 25px/1.1 "Noto Sans SC",Arial,sans-serif;letter-spacing:.13em}
+.commission-masthead p{color:#9eb1b7;font:8px/1.5 "IBM Plex Mono",Consolas,monospace;letter-spacing:.12em}
+.commission-masthead p i{padding:0 4px;color:#6f929e;font-style:normal}
+.commission-seal{position:relative;z-index:1;width:68px;height:68px;flex-basis:68px;display:flex;align-items:baseline;align-content:center;gap:2px;padding:20px 5px 8px;border:1px solid #8299a1;border-radius:0;background:#15232b;box-shadow:inset 0 0 0 4px #8da7ad12}
+.commission-seal:before,.commission-seal:after{content:"";position:absolute;background:#a8c4cb}
+.commission-seal:before{left:-4px;top:10px;width:6px;height:1px}.commission-seal:after{right:-4px;bottom:10px;width:6px;height:1px}
+.commission-seal span{position:absolute;top:8px;bottom:auto;color:#91a9b1;font:6px Arial,sans-serif;letter-spacing:.12em}
+.commission-seal b{color:#f0f4f1;font:25px/1 Consolas,monospace}
+.commission-seal small{color:#8da6ae;font:9px Consolas,monospace}
+.commission-seal i{position:absolute;left:9px;right:9px;bottom:7px;height:2px;background:linear-gradient(90deg,#7faab1 0 55%,#40545d 55%)}
+.commission-masthead-index{position:absolute;right:15px;bottom:8px;color:#7f969e;font:7px Consolas,monospace;letter-spacing:.16em}
+.commission-board-meta{padding:2px 4px 5px;color:#53636a;font:8px Consolas,"Noto Sans SC",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.commission-board-meta span{display:flex;align-items:center;gap:6px}
+.commission-board-meta span:first-child i{width:5px;height:5px;background:#6f9b9d;box-shadow:0 0 5px #6f9b9d}
+.commission-grid{gap:8px}
+.commission-card{isolation:isolate;min-height:220px;padding:11px 11px 10px;background:linear-gradient(145deg,#293740 0%,#202c34 58%,#1a252d 100%);border:1px solid #56666c;border-radius:0;box-shadow:inset 0 1px #9fb1b21c,0 3px 0 #121b21;overflow:hidden}
+.commission-card:before{content:"";position:absolute;z-index:-1;inset:0;background:repeating-linear-gradient(0deg,transparent 0 15px,#c5d4d50a 16px),repeating-linear-gradient(90deg,transparent 0 21px,#c5d4d508 22px);pointer-events:none}
+.commission-card:after{right:-22px;top:43px;width:84px;height:84px;border:1px solid #9eb6ba25;border-radius:0;transform:rotate(45deg);box-shadow:0 0 0 8px #9eb6ba08}
+.commission-survival,.commission-emotion,.commission-combat{background:linear-gradient(145deg,#293740 0%,#202c34 58%,#1a252d 100%)}
+.commission-card-top{position:relative;z-index:1;min-height:17px;padding-bottom:7px;border-bottom:1px solid #84969a45}
+.commission-module{display:flex;align-items:center;gap:6px;color:#a9c0bd;font:600 9px "Noto Sans SC",sans-serif;letter-spacing:.15em}
+.commission-module i{display:grid;place-items:center;width:16px;height:16px;border:1px solid #708b8c;color:#b5cbca;font:10px Consolas,monospace;font-style:normal}
+.commission-emotion .commission-module,.commission-combat .commission-module{color:#a9c0bd}
+.commission-slot{padding:2px 4px;border:1px solid #60747a;color:#8fa4a9;font:7px Consolas,"Noto Sans SC",sans-serif;letter-spacing:.06em}
+.commission-card-code{color:#738990;font:7px Consolas,monospace;letter-spacing:.12em}
+.commission-card-title{position:relative;z-index:1;justify-content:space-between;gap:5px;margin:9px 0 7px}
+.commission-card-title h3{color:#e0e8e6;font:600 13px/1.35 "Noto Sans SC",sans-serif;letter-spacing:.04em}
+.commission-icon{display:none}
+.commission-art{isolation:isolate;height:78px;min-height:78px;margin:0 0 9px;background:linear-gradient(135deg,#253a43,#344c54);border:1px solid #637e83}
+.commission-art:before{z-index:-1;inset:0;width:auto;height:auto;right:auto;top:auto;border:0;border-radius:0;background:linear-gradient(90deg,transparent 49.5%,#b3c9ca20 50%,transparent 50.5%),linear-gradient(0deg,transparent 49.5%,#b3c9ca20 50%,transparent 50.5%),repeating-linear-gradient(90deg,transparent 0 15px,#b3c9ca12 16px),repeating-linear-gradient(0deg,transparent 0 15px,#b3c9ca12 16px);box-shadow:none}
+.commission-art:after{right:0;bottom:12px;width:100%;height:1px;background:#9db8ba55;transform:none}
+.commission-art i{left:calc(50% - 21px);top:15px;width:42px;height:42px;border:1px solid #a7c0c0;border-radius:0;background:linear-gradient(135deg,#8aa5a655,#243a43);box-shadow:inset 0 0 0 5px #9eb9ba18,0 0 0 5px #a8c1c01a;transform:rotate(45deg)}
+.commission-art b{left:calc(50% - 10px);top:26px;width:20px;height:20px;border:1px solid #c2d4d0;border-radius:0;background:#526d73;transform:rotate(45deg)}
+.commission-art span{left:calc(50% + 31px);top:11px;width:4px;height:4px;border-radius:0;background:#b4d0cd;box-shadow:-93px 48px 0 #b4d0cd,88px 37px 0 #b4d0cd,-75px 4px 0 #b4d0cd}
+.commission-art em{position:absolute;left:9px;top:8px;width:22px;height:22px;border-top:1px solid #8ca9ad;border-left:1px solid #8ca9ad}
+.commission-art-survival{background:linear-gradient(135deg,#253a43,#354d54)}
+.commission-art-survival i{border-radius:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:#809c93;box-shadow:0 0 0 5px #a8c1c01a}
+.commission-art-survival b{background:#2b454a;border-radius:0}
+.commission-art-emotion{background:linear-gradient(135deg,#293b47,#3c5059)}
+.commission-art-emotion i{border-radius:0;clip-path:polygon(50% 0,90% 25%,90% 75%,50% 100%,10% 75%,10% 25%);background:#a0b6b7;box-shadow:0 0 0 5px #a8c1c01a}
+.commission-art-emotion b{border-radius:0;background:#354b53}
+.commission-art-combat{background:linear-gradient(135deg,#233841,#3d5960)}
+.commission-art-combat i{border-radius:0;clip-path:polygon(50% 0,95% 20%,85% 80%,50% 100%,15% 80%,5% 20%);background:linear-gradient(135deg,#c2d0c9,#66878a);filter:none}
+.commission-art-combat b{border-radius:0;background:#38535b}
+.commission-progress{position:relative;z-index:1;gap:8px}
+.commission-progress-track{height:3px;border-radius:0;background:#101a20;border:1px solid #56686d}
+.commission-progress-track i{border-radius:0;background:#92b6b2;box-shadow:0 0 7px #85b9b4aa}
+.commission-emotion .commission-progress-track i,.commission-combat .commission-progress-track i{background:#92b6b2}
+.commission-progress>b{color:#b6c5c2;font:9px Consolas,monospace}
+.commission-card-foot{position:relative;z-index:1;gap:7px;margin-top:10px;padding-top:8px;border-top:1px solid #83969a35}
+.commission-card-foot>small{display:flex;align-items:center;gap:7px;color:#aab8b5;font:8px "Noto Sans SC",sans-serif}
+.commission-card-foot>small span{color:#708b91;font:7px Consolas,monospace;letter-spacing:.13em}
+.commission-actions{gap:5px}
+.commission-actions button{min-height:29px;border:1px solid #65777c;border-radius:0;background:#273841;color:#bdcbc7;font:600 9px "Noto Sans SC",sans-serif;letter-spacing:.06em}
+.commission-actions .commission-claim{border-color:#8ca8a5;background:#91aaa5;color:#14232a}
+.commission-actions button:disabled{border-color:#48585d;background:#25323a;color:#718087;opacity:.58}
+@media(max-width:520px){.commission-masthead{min-height:132px;padding:16px 14px}.commission-masthead h2{font-size:22px}.commission-seal{width:60px;height:60px;flex-basis:60px}.commission-card{min-height:0;padding:10px 11px}.commission-art{height:64px;min-height:64px}.commission-card-title{margin:8px 0 6px}}
