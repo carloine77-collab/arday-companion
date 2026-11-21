@@ -1391,9 +1391,9 @@ function updateGuildContributionCompliance(at=Date.now()){
  const todayDate=new Date(at);todayDate.setHours(0,0,0,0);const today=keyAt(todayDate);
  if(!s.guildContributionComplianceDay){s.guildContributionComplianceDay=today;return}
  const parse=key=>{const [y,m,d]=String(key).split('-').map(Number);return new Date(y,m-1,d)};
- let cursor=parse(s.guildContributionComplianceDay);const end=new Date(todayDate);end.setDate(end.getDate()-1);
+ let cursor=parse(s.guildContributionComplianceDay);const end=new Date(todayDate);end.setDate(end.getDate()-1);const windowStart=new Date(end);windowStart.setDate(windowStart.getDate()-6);if(cursor<windowStart)cursor=windowStart;
  while(cursor<=end){const key=keyAt(cursor),week=guildWeekKey(cursor);if(s.guildContributionComplianceWeek!==week){s.guildContributionComplianceWeek=week;s.guildContributionMisses=0}
-  if(s.guildContributionDay!==key){s.guildContributionMisses=(Number(s.guildContributionMisses)||0)+1;s.guildContributionMissedDates=Array.isArray(s.guildContributionMissedDates)?s.guildContributionMissedDates:[];s.guildContributionMissedDates.push(key);s.guildContributionMissedDates=s.guildContributionMissedDates.slice(-28)}
+  const dailyDue=Math.ceil(Math.max(0,Number(s.lastDungeonResult?.points)||0)*.2);if(dailyDue>0&&s.guildContributionDay!==key){s.guildContributionMisses=(Number(s.guildContributionMisses)||0)+1;s.guildContributionMissedDates=Array.isArray(s.guildContributionMissedDates)?s.guildContributionMissedDates:[];s.guildContributionMissedDates.push(key);s.guildContributionMissedDates=s.guildContributionMissedDates.slice(-28)}
   s.guildContributionComplianceDay=key;cursor.setDate(cursor.getDate()+1);
   if(Number(s.guildContributionMisses)>=4){const faction=ARDAY_FACTIONS.find(x=>x.id===member);s.factionMembership=null;s.guildExpelledAt=key;s.guildExpelledFrom=member;addEvent('组织资格终止','因本周累计四次未提交组织贡献，你已被'+(faction?.name||'所属组织')+'除名。','daily');save();return}
  }
