@@ -24,7 +24,7 @@
    ].filter(x=>(!x.requires||has(x.requires))&&(x.type!=='save'||s.personalMoney<500));
   }
   function ensurePersonalGoal(at=Date.now()){
-   s.personalGoals=s.personalGoals.filter(g=>g&&g.status==='active');
+   s.personalGoals=s.personalGoals.filter(g=>g&&g.status==='active').slice(0,2);
    while(s.personalGoals.length<2){
     const options=personalGoalCatalog().filter(x=>!s.personalGoals.some(g=>g.type===x.type));
     if(!options.length)break;
