@@ -6,7 +6,7 @@
 
 
 (()=>{
-const {activityMeta,shopCatalog,recipes,ingredientNames,furnitureActivities,bookCategories}=window.ArdayGameConfig;
+const {activityMeta,activityDailyLimits,shopCatalog,recipes,ingredientNames,furnitureActivities,bookCategories}=window.ArdayGameConfig;
 const characterStats=window.ArdayGameConfig.characterStats||{};
 const energyConfig=characterStats.energy||{};const energyEffects=energyConfig.activityEffects||{};const needDecay=characterStats.needs||{};
 const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(100,Math.round(n))), pad=n=>String(n).padStart(2,'0');
@@ -145,7 +145,7 @@ s.jobApplications=s.jobApplications||{};
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun','combat'];
-const scheduleEngine=window.ArdayScheduleEngine.create({state:s,furnitureActivities,activityMeta,furnitureKindForPlaced,furnitureRequirementAvailable,hasCookableRecipe,eventAt,writeBlockForKey,renderCalendar,getStage:()=>$('stage'),normalizeActivity});
+const scheduleEngine=window.ArdayScheduleEngine.create({state:s,furnitureActivities,activityMeta,activityDailyLimits,furnitureKindForPlaced,furnitureRequirementAvailable,hasCookableRecipe,eventAt,writeBlockForKey,renderCalendar,getStage:()=>$('stage'),normalizeActivity});
 const {decayActivityPreferences,recordActivityPreference,activityPreferenceScore,furnitureSatisfiesRequirement,hasAutonomyFurniture,autonomousFurnitureOptions,chooseAutonomousActivity,scheduledFurnitureIsValid,resolveScheduledActivity}=scheduleEngine;
 function save(){s.last=Date.now();try{localStorage.setItem('arday-save-v2',JSON.stringify(s));return true}catch(e){console.error('Arday save failed:',e);return false}}
 function applyBureauDailyGrant(at=Date.now()){
@@ -503,8 +503,8 @@ function prioritizeRecoverySchedule(key,hour){
  const options=autonomousFurnitureOptions().filter(option=>option.activity==='rest');
  if(!options.length)return false;
  const day=s.calendar?.days?.[key]||[];
- const dailyRestCount=day.filter(ev=>ev.activity==='rest').length;
- if(dailyRestCount>=2)return false;
+ const dailyRestCount=day.filter(ev=>normalizeActivity(ev.activity)==='rest').length;
+ if(dailyRestCount>=Number(activityDailyLimits?.rest??2))return false;
  const futureRests=day.filter(ev=>ev.activity==='rest'&&Number(ev.start)>=hour).sort((a,b)=>a.start-b.start);
  if(futureRests.length&&Number(futureRests[0].start)<=hour+1)return false;
  const slot=day.filter(ev=>ev.kind==='autonomous'&&Number(ev.start)>=hour).sort((a,b)=>a.start-b.start)[0];
@@ -724,7 +724,6 @@ function ensureScheduleAt(value){
   if(!existing)s.calendar.days[key]=buildDay(key);
   const day=s.calendar.days[key];
   for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end)){
-   const preceding=day.filter(ev=>ev.end<=hour).sort((a,b)=>a.start-b.start).slice(-5).map(ev=>ev.activity).filter(Boolean);
    const history=day.filter(ev=>Number(ev.start)<hour).sort((a,b)=>a.start-b.start);
    const recent=history.map(ev=>ev.activity).filter(Boolean);
    const planned=createAutonomousScheduleEvent(hour,recent,history);day.push(planned);
@@ -748,20 +747,18 @@ function ensureScheduleAt(value){
      const history=day.filter(item=>Number(item.start)<Number(start));
      const planned=createAutonomousScheduleEvent(start,recent,history);
      Object.assign(ev,planned,{start,end,...(withPlayer?{withPlayer}: {})});
-     if(ev.activity&&ev.activity!=='idle')recent.push(ev.activity);
     }
-    if(ev.activity&&ev.activity!=='idle'&&ev.activity!=='autonomous'&&!recent.includes(ev.activity))recent.push(ev.activity);
+    if(ev.activity&&ev.activity!=='idle'&&ev.activity!=='autonomous')recent.push(ev.activity);
    });
   });
   s.calendar.autonomyFurnitureSignature=furnitureSignature;
  }
  // Enforce per-day limits on already-saved future autonomous blocks as well as newly generated ones.
- const dailyActivityLimits={wash:1,rest:2,laundry:1,exercise:1};
  Object.keys(s.calendar.days||{}).filter(key=>key>=currentKey).sort().forEach(key=>{
   const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start),counts={},history=[];
   const currentHour=key===currentKey?new Date().getHours():-1;
   for(const ev of day){
-   const activity=normalizeActivity(ev.activity),limit=dailyActivityLimits[activity];
+   const activity=normalizeActivity(ev.activity),limit=activityDailyLimits?.[activity];
    const editable=ev.kind==='autonomous'&&(key>currentKey||Number(ev.start)>currentHour);
    if(editable&&Number.isFinite(limit)&&(counts[activity]||0)>=limit){
     const recent=history.map(item=>item.activity).filter(Boolean);
