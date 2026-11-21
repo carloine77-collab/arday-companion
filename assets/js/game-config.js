@@ -845,31 +845,31 @@ window.ArdayGameConfig = {
 },
   characterStats: {
    energy: {
-    hourlyDecay: 1.65,
-    sleepRecoveryPerHour: 14.2,
-    minimumSleepHours: 0,
+    hourlyDecay: 2.25,
+    sleepRecoveryPerHour: 12.8,
+    minimumSleepHours: 6,
     maximumSleepHours: 8,
     activityEffects: {
-     rest:12, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
+     rest:8, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
      computerPlay:-3, watchTV:-2, listenRecords:-1, music:-1, walk:-5, game:-3, write:-3, work:-4,
      sitChair:5, food:0, tea:0, company:0
     }
    },
-   needs: { hungerHourlyDecay:2.15, cleanHourlyDecay:0.82, funHourlyDecay:1.15 }
+   needs: { hungerHourlyDecay:2.25, cleanHourlyDecay:0.9, funHourlyDecay:1.25 }
   },
   activityDailyLimits: {wash:1,rest:2,laundry:1,exercise:1},
   activityMeta: {
  rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:72,weight:2.2,base:1.5},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
- eat:{title:'吃东西',duration:'long',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:17}},
- food:{title:'一起吃东西',duration:'long',autonomous:false,menuLabel:'一起吃东西',location:'table',pose:'sit',anchor:'table',effect:{hunger:19,fun:3}},
- wash:{title:'洗漱',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},requires:'sink',menuLabel:'洗漱',location:'kitchen',pose:'stand',anchor:'sink',effect:{clean:17}},
+ eat:{title:'吃东西',duration:'long',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:19}},
+ food:{title:'一起吃东西',duration:'long',autonomous:false,menuLabel:'一起吃东西',location:'table',pose:'sit',anchor:'table',effect:{hunger:21,fun:3}},
+ wash:{title:'洗漱',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},requires:'sink',menuLabel:'洗漱',location:'kitchen',pose:'stand',anchor:'sink',effect:{clean:18}},
  cook:{title:'烹饪',duration:'long',autonomous:false,requires:'stove',menuLabel:'烹饪',location:'kitchen',pose:'stand',anchor:'stove',effect:{hunger:18}},
  admireView:{title:'欣赏窗外景色',duration:'short',autonomous:false,menuLabel:'室外景观',location:'window',pose:'stand',anchor:'window',effect:{fun:1}},
  admireDecor:{title:'欣赏与回忆',duration:'short',autonomous:false,menuLabel:'欣赏与回忆',location:'center',pose:'stand',anchor:'wallArt',effect:{fun:1}},
  hug:{title:'拥抱',duration:'short',autonomous:false,menuLabel:'拥抱',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:2}},
  playPiano:{title:'弹奏',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:56,weight:.8,base:1.8},requires:'piano',menuLabel:'弹奏',location:'center',pose:'sit',anchor:'piano',effect:{fun:9}},
- laundry:{title:'洗衣服',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:55,weight:.65,base:.6},requires:'washingMachine',menuLabel:'洗衣服',location:'center',pose:'stand',anchor:'washingMachine',effect:{clean:9,energy:-2}},
+ laundry:{title:'洗衣服',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:55,weight:.65,base:.6},requires:'washingMachine',menuLabel:'洗衣服',location:'center',pose:'stand',anchor:'washingMachine',effect:{clean:12,energy:-2}},
  exercise:{title:'锻炼',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:62,weight:.85,base:2},requires:'treadmill',menuLabel:'锻炼',location:'center',pose:'walk',anchor:'treadmill',effect:{fun:7,energy:-4}},
  browseWeb:{title:'浏览网站',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:62,weight:.55},requires:'computer',menuLabel:'浏览网站',location:'desk',pose:'sit',anchor:'desk',effect:{fun:4}},
  program:{title:'编程',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.42},requires:'computer',menuLabel:'编程',location:'desk',pose:'sit',anchor:'desk',effect:{fun:3}},
