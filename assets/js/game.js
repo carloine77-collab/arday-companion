@@ -1062,7 +1062,7 @@ function processActivityAt(value){
   }
   if(ev?.withPlayer){
    relation(activity);
-   if(activity==='walk')advanceSharedGoal(activity,d.getTime());
+   advanceSharedGoal(activity,d.getTime());
   }
   if(['read','write'].includes(activity))updatePersonalGoal(activity,d.getTime());
  }
@@ -1223,10 +1223,13 @@ function eventChoices(e){
 
 
 /* === Shared goals and situational events === */
-s.sharedGoal=s.sharedGoal||null;
-s.sharedGoalHistory=s.sharedGoalHistory||[];
-s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
-s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
+s.sharedGoals=Array.isArray(s.sharedGoals)?s.sharedGoals:[];
+ if(!s.sharedGoals.length&&s.sharedGoal?.status==='active'&&!['room','meal'].includes(s.sharedGoal.id))s.sharedGoals.push(s.sharedGoal);
+ s.sharedGoals=s.sharedGoals.filter(g=>g&&g.status==='active').slice(0,2);
+ delete s.sharedGoal;
+ s.sharedGoalHistory=Array.isArray(s.sharedGoalHistory)?s.sharedGoalHistory:[];
+ s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
+ s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
 
 function ardayLine(kind, fallback){
  const lines={
@@ -1256,50 +1259,59 @@ function ardayLine(kind, fallback){
  return line||fallback;
 }
 function sharedGoalCatalog(){
- return [
-  {id:'outing',title:'找一天出门走走',detail:'把手头的事情放一放，一起出门散步两次。',target:2,unit:'次共同出门',action:'walk'}
- ];
-}
-function proposeSharedGoal(at=Date.now()){
- if(s.sharedGoal?.status==='active')return;
- if(at-s.lastSharedProposalAt<72*3600000)return;
- if(s.events.some(e=>e.status==='open'&&e.type==='shared-goal-proposal'))return;
- const pool=sharedGoalCatalog().filter(g=>g.id!==(s.sharedGoalHistory[0]?.id));
- const g=pool[Math.floor(Math.random()*pool.length)];
- if(!g)return;
- s.lastSharedProposalAt=at;
- const e=addEvent('阿尔想和你一起做件事',g.detail,'shared-goal-proposal');if(!e)return;e.goalId=g.id;s.lastArdayLetterAt=at;say(ardayLine('proposal',g.detail));
-}
-if(s.project?.status==='active'&&s.sharedGoal?.status!=='active'){
- const legacy=sharedGoalCatalog().find(x=>x.id==='room');
- if(legacy)s.sharedGoal={...legacy,progress:Math.min(legacy.target,Number(s.project.progress)||0),status:'active',startedAt:Date.now(),variant:'migrated'};
-}
-delete s.project;
-Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'||ev.activity==='tidy'){ev.activity='idle';ev.title='自由时间';ev.kind='free'}}));
-function acceptSharedGoal(id,variant='normal'){
- const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return;
- const target=variant==='slow'?Math.max(1,g.target-1):g.target;
- s.sharedGoal={...g,target,progress:0,status:'active',startedAt:Date.now(),variant};
- say(ardayLine('accept','好，那就一起做吧。'));
- remember('shared-goal','你们决定一起做：'+g.title,2);
- addEvent('你们有了一项共同计划','你和阿尔决定一起完成「'+g.title+'」。','daily');
-}
-function advanceSharedGoal(action,at=Date.now()){
- const g=s.sharedGoal;if(!g||g.status!=='active')return;
- if(g.action!==action)return;
- g.progress=Math.min(g.target,(g.progress||0)+1);
- g.updatedAt=at;
- if(g.progress>=g.target){
-  g.status='completed';g.completedAt=at;
-  s.sharedGoalHistory.unshift({id:g.id,title:g.title,completedAt:at});
-  s.sharedGoalHistory=s.sharedGoalHistory.slice(0,10);
-  change({friend:2,fun:3});
-  addEvent('你们完成了一件共同计划', '「'+g.title+'」已经完成。那些零碎的时间，最后真的拼成了一件事。','daily');
-  remember('shared-goal','共同完成：'+g.title,3);
-  say('原来一起做一件事，最后会留下这样的感觉。');
+  return [
+   {id:'outing',title:'找一天出门走走',detail:'我想和你一起出门散步。天气合适的话，就沿着熟悉的街道慢慢走。',condition:'在日程中选择一次散步并邀请阿尔同行，实际完成 2 次。',target:2,unit:'次共同散步',action:'walk',icon:'⌁'},
+   {id:'reading',title:'找个晚上一起读书',detail:'找个不赶时间的晚上，各自拿本书坐一会儿。我想和你待在同一盏灯下面。',condition:'在阿尔的阅读安排上选择「问他能否一起」，共同完成 2 次阅读。',target:2,unit:'次共同阅读',action:'read',icon:'▤'}
+  ];
  }
-}
-function createSituationalEvent(at=Date.now()){
+ function proposeSharedGoal(at=Date.now()){
+  const active=s.sharedGoals.filter(g=>g.status==='active');
+  const pending=s.events.filter(e=>e.status==='open'&&e.type==='shared-goal-proposal');
+  if(active.length+pending.length>=2)return;
+  const available=sharedGoalCatalog().filter(g=>!active.some(x=>x.id===g.id)&&!pending.some(e=>e.goalId===g.id));
+  if(!available.length)return;
+  const recent=s.sharedGoalHistory.slice(0,2).map(g=>g.id);
+  const fresh=available.filter(g=>!recent.includes(g.id));
+  const pool=fresh.length?fresh:available;
+  const g=pool[Math.floor(Math.random()*pool.length)];
+  if(!g)return;
+  s.lastSharedProposalAt=at;
+  const e=addEvent('阿尔想和你一起做件事',g.detail,'shared-goal-proposal');if(!e)return;
+  e.goalId=g.id;e.goalCondition=g.condition;s.lastArdayLetterAt=at;say(ardayLine('proposal',g.detail));
+ }
+ if(s.project?.status==='active'&&!s.sharedGoals.length){
+  const legacy=sharedGoalCatalog().find(x=>x.id==='outing');
+  if(legacy)s.sharedGoals.push({...legacy,progress:0,status:'active',startedAt:Date.now(),variant:'migrated'});
+ }
+ delete s.project;
+ Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'||ev.activity==='tidy'){ev.activity='idle';ev.title='自由时间';ev.kind='free'}}));
+ function acceptSharedGoal(id,variant='normal'){
+  s.sharedGoals=s.sharedGoals.filter(g=>g&&g.status==='active');
+  if(s.sharedGoals.length>=2||s.sharedGoals.some(g=>g.id===id))return false;
+  const g=sharedGoalCatalog().find(x=>x.id===id);if(!g)return false;
+  const target=variant==='slow'?Math.max(1,g.target-1):g.target;
+  s.sharedGoals.push({...g,target,progress:0,status:'active',startedAt:Date.now(),variant});
+  say(ardayLine('accept','好。那就把这件事记下来。'));
+  remember('shared-goal','你们决定一起做：'+g.title,2);
+  return true;
+ }
+ function advanceSharedGoal(action,at=Date.now()){
+  s.sharedGoals.forEach(g=>{
+   if(g.status!=='active'||g.action!==action)return;
+   g.progress=Math.min(g.target,(g.progress||0)+1);g.updatedAt=at;
+   if(g.progress>=g.target){
+    g.status='completed';g.completedAt=at;
+    s.sharedGoalHistory.unshift({id:g.id,title:g.title,completedAt:at});
+    s.sharedGoalHistory=s.sharedGoalHistory.slice(0,10);
+    change({friend:2,fun:3});
+    addEvent('你们完成了一件共同计划','「'+g.title+'」已经完成。那些零碎的时间，最后真的拼成了一件事。','daily');
+    remember('shared-goal','共同完成：'+g.title,3);
+    say('原来一起做一件事，最后会留下这样的感觉。');
+   }
+  });
+  s.sharedGoals=s.sharedGoals.filter(g=>g.status==='active');
+ }
+ function createSituationalEvent(at=Date.now()){
  if(s.events.filter(e=>e.status==='open').length>=4)return;
  if(at-s.lastRandomEventAt<22*3600000)return;
  const hour=new Date(at).getHours();
@@ -1337,15 +1349,16 @@ const oldEventChoicesForGoals=eventChoices;
 eventChoices=function(e){
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  if(e.type==='shared-goal-proposal'){
-  const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
-  if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
-  $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
-  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="sg-accept">一起做</button><button id="sg-decline">这次先不安排</button></div>';
-  $('sg-accept').onclick=()=>{acceptSharedGoal(g.id);completeEvent(e,'接受共同计划');save();render();renderEvents()};
-  $('sg-decline').onclick=()=>{say(ardayLine('decline'));s.lastSharedProposalAt=Date.now();completeEvent(e,'暂不安排');save();renderEvents()};
-  $('drawer').classList.add('open');return;
- }
- if(e.type==='life-memory'){
+   const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
+   if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
+   $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
+   const condition=e.goalCondition||g.condition;
+   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="goal-proposal-condition"><small>完成条件</small><strong>'+condition+'</strong></div><div class="calendar-actions"><button id="sg-accept">同意，一起做</button><button id="sg-decline">这次先不安排</button></div>';
+   $('sg-accept').onclick=()=>{if(!acceptSharedGoal(g.id)){toast('共同目标已满');return}completeEvent(e,'接受共同计划');save();render();renderEvents()};
+   $('sg-decline').onclick=()=>{say(ardayLine('decline'));completeEvent(e,'暂不安排');save();renderEvents()};
+   $('drawer').classList.add('open');return;
+  }
+  if(e.type==='life-memory'){
   $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="memory-ask">问问纸条的来历</button><button id="memory-keep">替他收起来</button></div>';
   $('memory-ask').onclick=()=>{say('你倒是很会挑时候。只是这件事，我还没想好要从哪里说起。');remember('old-memory','你问起那张旧纸条，阿尔没有立刻回答。',2);change({friend:1});completeEvent(e,'询问纸条来历');save();renderEvents()};
@@ -1669,45 +1682,50 @@ function showExchange(){
 }
 
 function showGoals(tab='personal'){
- ensurePersonalGoal();
- const g=s.personalGoal,sg=s.sharedGoal;
- const personal=g&&g.status==='active'?'<strong>'+g.title+'</strong><p class="goal-progress">'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>':'<p>暂无正在进行的个人计划。</p>';
- const shared=sg?.status==='active'?'<strong>'+sg.title+'</strong><p class="goal-progress">'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>':'<p>暂无正在进行的共同计划。</p>';
- const active=['commission','personal','shared'].includes(tab)?tab:'commission';
-  const nav=active==='commission'?'':'<nav class="commission-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人计划</button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同计划</button></nav>';
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='委托';$('choices').className='choices commission-view';
- let content='';
- if(active==='commission'){
-  const board=commissionSystem.getBoard(),claimed=board.tasks.filter(task=>task.claimed).length;
-  const cards=board.tasks.map(task=>{
-   const progress=commissionSystem.getProgress(task),ready=progress>=task.target,canReroll=!task.claimed&&progress===0&&board.rerolls<1;
-   const reward=task.module==='combat'?'随机战斗属性 +1 · 25% 概率获得补给':'随机属性 +1';
-   const action=task.claimed?'已领取':ready?'领取奖励':progress+'/'+task.target+' · 进行中';
+  ensurePersonalGoal();
+  const active=['commission','personal','shared'].includes(tab)?tab:'personal';
+  const nav=active==='commission'?'':'<nav class="commission-tabs goal-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人目标 <i>'+s.personalGoals.length+'/2</i></button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同目标 <i>'+s.sharedGoals.length+'/2</i></button></nav>';
+  $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent=active==='commission'?'委托':'目标';$('choices').className='choices commission-view';
+  let content='';
+  if(active==='commission'){
+   const board=commissionSystem.getBoard(),claimed=board.tasks.filter(task=>task.claimed).length;
+   const cards=board.tasks.map(task=>{
+    const progress=commissionSystem.getProgress(task),ready=progress>=task.target,canReroll=!task.claimed&&progress===0&&board.rerolls<1;
+    const reward=task.module==='combat'?'随机战斗属性 +1 · 25% 概率获得补给':'随机属性 +1';
+    const action=task.claimed?'已领取':ready?'领取奖励':progress+'/'+task.target+' · 进行中';
     return '<article class="commission-card commission-'+task.module+'"><div class="commission-card-top"><span class="commission-module">'+task.moduleMark+' '+task.moduleLabel+'</span><span class="commission-slot">'+(task.slot==='bonus'?'随机事务':'每日事务')+'</span></div><div class="commission-card-title"><span class="commission-icon">'+task.icon+'</span><h3>'+task.title+'</h3></div><div class="commission-art commission-art-'+task.module+'" aria-hidden="true"><i></i><b></b><span></span></div><div class="commission-progress"><div class="commission-progress-track"><i style="width:'+Math.round(progress/task.target*100)+'%"></i></div><b>'+progress+' / '+task.target+'</b></div><div class="commission-card-foot"><small>'+reward+'</small><div class="commission-actions"><button type="button" data-commission-reroll="'+task.id+'" '+(canReroll?'':'disabled')+'>更换</button><button type="button" class="commission-claim" data-commission-claim="'+task.id+'" '+(ready&&!task.claimed?'':'disabled')+'>'+action+'</button></div></div></article>';
-  }).join('');
+   }).join('');
    content='<section class="commission-masthead"><div><h2>委托</h2><p>'+board.day.replace(/-/g,'.')+'</p></div><div class="commission-seal"><b>'+String(claimed).padStart(2,'0')+'</b><small> / '+String(board.tasks.length).padStart(2,'0')+'</small><span>完成</span></div></section><div class="commission-board-meta"><span>'+claimed+' / 4 已领取</span><span>更换 '+(board.rerolls<1?'1 / 1':'0 / 1')+'</span></div><div class="commission-grid">'+cards+'</div>';
- }else if(active==='personal'){
-  content='<section class="profile-section commission-plan-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section>';
- }else{
-  content='<section class="profile-section commission-plan-section"><div class="section-kicker">TOGETHER</div><h3>共同计划</h3>'+shared+'</section>';
+  }else if(active==='personal'){
+   const cards=s.personalGoals.map((g,index)=>{
+    const progress=Math.min(g.target,Math.max(0,Number(g.progress)||0)),pct=Math.round(progress/g.target*100);
+    return '<article class="goal-card goal-personal"><div class="goal-card-art"><span>'+(g.icon||'◇')+'</span><i>0'+(index+1)+'</i></div><div class="goal-card-main"><small>PERSONAL / IN PROGRESS</small><h3>'+g.title+'</h3><p class="goal-condition"><b>完成条件</b>'+g.condition+'</p><div class="goal-progress-track"><i style="width:'+pct+'%"></i></div><div class="goal-progress-label"><strong>'+progress+' / '+g.target+'</strong><span>'+g.unit+'</span></div></div></article>';
+   }).join('');
+   content='<section class="goal-board-head"><span>ARDAY / PERSONAL LOG</span><strong>个人目标</strong><small>'+s.personalGoals.length+' / 2 项进行中</small></section><div class="goal-card-list">'+(cards||'<div class="goal-empty">暂时没有可用目标</div>')+'</div>';
+  }else{
+   const cards=s.sharedGoals.map((g,index)=>{
+    const progress=Math.min(g.target,Math.max(0,Number(g.progress)||0)),pct=Math.round(progress/g.target*100);
+    return '<article class="goal-card goal-shared"><div class="goal-card-art"><span>'+(g.icon||'⌁')+'</span><i>0'+(index+1)+'</i></div><div class="goal-card-main"><small>TOGETHER / ACCEPTED</small><h3>'+g.title+'</h3><p class="goal-condition"><b>完成条件</b>'+g.condition+'</p><div class="goal-progress-track"><i style="width:'+pct+'%"></i></div><div class="goal-progress-label"><strong>'+progress+' / '+g.target+'</strong><span>'+g.unit+'</span></div></div></article>';
+   }).join('');
+   const pending=s.events.filter(e=>e.status==='open'&&e.type==='shared-goal-proposal').length;
+   content='<section class="goal-board-head goal-board-shared"><span>ARDAY / TOGETHER</span><strong>共同目标</strong><small>'+s.sharedGoals.length+' / 2 项已同意'+(pending?' · '+pending+' 封待回复邀约':'')+'</small></section><div class="goal-card-list">'+(cards||'<div class="goal-empty">尚无共同目标</div>')+'</div>';
+  }
+  $('choices').innerHTML=nav+content;
+  $('choices').querySelectorAll('[data-goal-tab]').forEach(button=>button.onclick=()=>showGoals(button.dataset.goalTab));
+  $('choices').querySelectorAll('[data-commission-reroll]').forEach(button=>button.onclick=()=>{
+   const result=commissionSystem.reroll(button.dataset.commissionReroll);
+   if(!result.ok){toast(result.reason||'暂时无法更换');return}
+   save();showGoals('commission');toast('已更换一项委托');
+  });
+  $('choices').querySelectorAll('[data-commission-claim]').forEach(button=>button.onclick=()=>{
+   const result=commissionSystem.claim(button.dataset.commissionClaim);
+   if(!result.ok){toast(result.reason||'委托尚未完成');return}
+   save();render();showGoals('commission');
+   const reward=result.statLabel+' +'+result.amount+(result.itemName?' · '+result.itemName:'')+(result.fallbackPoints?' · 积分 +'+result.fallbackPoints:'');
+   toast('委托完成：'+reward);
+  });
+  $('drawer').classList.add('open');
  }
- $('choices').innerHTML=nav+content;
- $('choices').querySelectorAll('[data-goal-tab]').forEach(button=>button.onclick=()=>showGoals(button.dataset.goalTab));
- $('choices').querySelectorAll('[data-commission-reroll]').forEach(button=>button.onclick=()=>{
-  const result=commissionSystem.reroll(button.dataset.commissionReroll);
-  if(!result.ok){toast(result.reason||'暂时无法更换');return}
-  save();showGoals('commission');toast('已更换一项委托');
- });
- $('choices').querySelectorAll('[data-commission-claim]').forEach(button=>button.onclick=()=>{
-  const result=commissionSystem.claim(button.dataset.commissionClaim);
-  if(!result.ok){toast(result.reason||'委托尚未完成');return}
-  save();render();showGoals('commission');
-  const reward=result.statLabel+' +'+result.amount+(result.itemName?' · '+result.itemName:'')+(result.fallbackPoints?' · 积分 +'+result.fallbackPoints:'');
-  toast('委托完成：'+reward);
- });
- $('drawer').classList.add('open');
-}
-
 
 
 /* Three.js room system. Simulation state remains authoritative. */
