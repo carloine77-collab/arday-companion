@@ -1383,8 +1383,8 @@ function showCareer(tab='real'){
   const jobs=ARDAY_SOCIAL_JOBS;
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
   $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav><div class="career-jobs-grid">'+jobs.map((j,index)=>{
-   const attempted=!!s.jobApplications[applicationDay][j.id],parts=careerStatBreakdown(j),fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start,main=parts[0],rest=parts.slice(1);
-   return '<article class="career-job-card"><div class="career-job-poster">'+careerPoster(j.title,index)+'</div><div class="career-job-content"><div class="career-job-heading"><strong>¥'+j.salary+'<small>/日</small></strong></div><div class="career-job-time">'+pad(j.start)+':00–'+pad(j.end)+':00 <span>'+hours+'小时</span></div><div class="career-job-score"><span>适配 '+Math.round(fitScore)+' / '+j.minScore+'</span><span>录用 '+(eligible?Math.round(chance*100):0)+'%</span></div><div class="career-job-priority"><b>重点要求</b><strong>'+main.label+' '+main.weight+'% <small>当前 '+Math.round(main.value)+'</small></strong></div><div class="career-job-secondary">'+rest.map(x=>'<span>'+x.label+' '+x.weight+'% <b>'+Math.round(x.value)+'</b></span>').join('')+'</div><button class="career-job-apply" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></div></article>';;
+   const attempted=!!s.jobApplications[applicationDay][j.id],parts=careerStatBreakdown(j),fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start,main=parts[0];
+   return '<article class="career-job-card"><div class="career-job-poster">'+careerPoster(j.title,index)+'</div><div class="career-job-content"><div class="career-job-heading"><strong>¥'+j.salary+'<small>/日</small></strong></div><div class="career-job-time">'+pad(j.start)+':00–'+pad(j.end)+':00 <span>'+hours+'小时</span></div><div class="career-job-score"><span>适配 '+Math.round(fitScore)+' / '+j.minScore+'</span><span>录用 '+(eligible?Math.round(chance*100):0)+'%</span></div><div class="career-job-priority"><b>重点要求</b><strong>'+main.label+' '+main.weight+'% <small>当前 '+Math.round(main.value)+'</small></strong></div><button class="career-job-apply" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></div></article>';;
   }).join('')+'</div>';
   $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{
    const j=jobs.find(x=>x.id===b.dataset.applyJob);if(!j)return;
@@ -1405,17 +1405,15 @@ function showCareer(tab='real'){
 const {ARDAY_SOCIAL_JOBS,ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
 function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function createGuildMaterialStock(guildId,week){
- const products=(shopCatalog['食物食材']||[]).filter(row=>Array.isArray(row)&&row[0]&&row[2]).map(([label,icon,shopId,price])=>({name:shopId==='buy-food'?'点心':String(label).replace(/\s*×1$/,''),icon:icon||'✦',shopId,price:Number(price)||0}));
+ const products=Object.entries(DUNGEON_ITEM_CATALOG).map(([id,item])=>({id,name:item.name,icon:item.icon||'✦',type:item.type,price:Number(DUNGEON_EXCHANGE_PRICES[id])||0}));
  let seed=Array.from(String(guildId)+'|'+String(week)).reduce((value,ch)=>((value*31)+ch.charCodeAt(0))>>>0,2166136261);
  const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
  for(let i=products.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[products[i],products[j]]=[products[j],products[i]]}
  return products.slice(0,4);
 }
 function grantGuildShopItem(item){
- if(!item||typeof item.shopId!=='string')return false;
- if(item.shopId==='buy-food'){addItem('点心');return true}
- if(item.shopId.startsWith('buy-ingredient-')){const key=item.shopId.slice('buy-ingredient-'.length);if(!(key in ingredientNames))return false;s.pantry[key]=pantryCount(key)+1;return true}
- return false;
+ if(!item||!DUNGEON_ITEM_CATALOG[item.id])return false;
+ return !!addDungeonItem(item.id);
 }
 function updateGuildContributionCompliance(at=Date.now()){
  const member=s.factionMembership;if(!member||member==='anomaly-bureau'||!ARDAY_FACTIONS.some(f=>f.id===member))return;
