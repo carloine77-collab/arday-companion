@@ -845,12 +845,12 @@ window.ArdayGameConfig = {
 },
   characterStats: {
    energy: {
-    hourlyDecay: 5,
-    sleepRecoveryPerHour: 13,
-    minimumSleepHours: 1,
+    hourlyDecay: 3.5,
+    sleepRecoveryPerHour: 14,
+    minimumSleepHours: 7,
     maximumSleepHours: 8,
     activityEffects: {
-     rest:10, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
+     rest:12, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
      computerPlay:-3, watchTV:-2, listenRecords:-1, music:-1, walk:-5, game:-3, write:-3, work:-4,
      sitChair:5, food:0, tea:0, company:0
     }
@@ -858,7 +858,7 @@ window.ArdayGameConfig = {
    needs: { hungerHourlyDecay:7.5, cleanHourlyDecay:1.6666666667, funHourlyDecay:2.5 }
   },
   activityMeta: {
- rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:62,weight:1.65},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
+ rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:70,weight:1.9,base:1},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{hunger:-1}},
  eat:{title:'吃东西',duration:'long',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:18}},
  food:{title:'一起吃东西',duration:'long',autonomous:false,menuLabel:'一起吃东西',location:'table',pose:'sit',anchor:'table',effect:{hunger:20,fun:3}},
