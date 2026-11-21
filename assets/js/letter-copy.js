@@ -1,57 +1,72 @@
 (function(global){
  'use strict';
+ // 阿尔的私人信件库。这里只存放信件内容与抽取逻辑，不处理信箱触发、存档或 UI。
  const LETTERS={
   daily:[
-   {id:'tea-window',topic:'daily',title:'今天的窗边',body:'下午我在窗边坐了一会儿。原本只是想歇几分钟，后来发现光线一点点挪过桌面，竟然就看了很久。\n\n有些时间好像不需要安排得很清楚。你今天有没有这样的片刻？'},
-   {id:'bookmark',topic:'daily',title:'读到一半的书',body:'我最近读书时总喜欢在某一页停下来，不一定是因为读懂了什么，有时只是突然想到别的事情。书签夹在那里，过两天再翻回去，反而会记得当时在想什么。\n\n你最近有没有一本读得很慢的书？'},
-   {id:'market',topic:'daily',title:'路上遇见的小事',body:'今天出门时，路边有家店刚好在整理门口的花。老板把几盆快要谢掉的花挪到一起，倒也没有急着丢掉。\n\n我忽然觉得，日子里很多事情都不必立刻有个结果。'},
-   {id:'music',topic:'daily',title:'一段没听完的曲子',body:'今天听见一段很熟悉的旋律，想不起名字，只记得以前在哪里听过。后来我没有继续找，留着一点没想起来的感觉也不错。\n\n等你有空，我们可以一起听点东西。'},
-   {id:'room',topic:'daily',title:'房间里的变化',body:'我把房间里一件东西换了位置。其实没有变得多整齐，只是走过去时顺手了不少。生活里的小调整大概就是这样，做完以后才发现自己早就想这么做了。'},
-   {id:'weather',topic:'daily',title:'天气转凉了',body:'今天外面比前几天凉一些。我出门时才发现自己穿少了，回来以后就不太想再出门。\n\n如果你今天也在外面，记得别只顾着赶路。'},
-   {id:'cooking',topic:'daily',title:'关于晚饭',body:'今天吃饭时突然觉得，认真做一顿普通的饭也挺值得。没有什么特别的菜，只是火候刚好，吃完以后心情也安静下来。\n\n下次想试一道新菜，做得不好也算积累经验。'},
-   {id:'late-night',topic:'daily',title:'夜里想到的事',body:'刚才准备休息时，突然想起白天漏做的一件小事。明明不是什么要紧的事，却一直在脑子里绕。\n\n我最后决定明天再处理。偶尔把事情留到明天，也不算失职。'}
+   {id:'tea-window',topic:'daily',title:'窗边那杯茶',body:'下午泡了杯茶，放在窗边，结果忙着看东西，等想起来时已经凉透了。杯垫倒是尽职尽责，一滴也没漏到桌上。你要是在，大概会先喝一口，然后很认真地告诉我：凉了也能喝。\n\n我知道。只是想找个理由让你过来，替我重新倒一杯。'},
+   {id:'bookmark',topic:'daily',title:'书签跑到哪里去了',body:'我把书签弄丢了。找了半天，最后发现它夹在沙发缝里，旁边还躺着一颗不知道什么时候掉进去的薄荷糖。你看，家里总有些地方会偷偷收留东西。\n\n下次你来，坐那边吧。我已经替你把靠垫拍松了。'},
+   {id:'market',topic:'daily',title:'便利店的最后一份布丁',body:'刚才去便利店，冰柜里只剩最后一份焦糖布丁。我本来没打算买，站在那里看了几秒，还是拿走了。收银员问我要不要勺子，我说要两把。\n\n别问为什么。你有空的时候，来和我分着吃。'},
+   {id:'music',topic:'daily',title:'唱片机又卡住了',body:'唱片机今天又卡在同一段，针尖轻轻地重复那几秒。我把唱片拿起来擦了擦，还是没好。最后干脆坐在地毯上听它循环。\n\n有点像我想你的时候。明明可以去做别的事，偏偏总绕回同一个念头。'},
+   {id:'room',topic:'daily',title:'沙发上的外套',body:'我把沙发上的外套收起来了。口袋里摸出一张皱巴巴的收据、一枚硬币，还有一颗包装纸都磨软了的糖。真不知道你平时都往里面装些什么。\n\n外套我挂好了，糖先替你留着。至于那枚硬币，算我发现你秘密的报酬。'},
+   {id:'weather',topic:'daily',title:'今天风有点大',body:'今天风很大，楼下那家花店把门口的小黑板吹倒了。我帮老板扶起来，顺手把旁边的纸袋也压好。回来的路上才发现围巾落在椅背上。\n\n你下次出门记得带外套。别说你不冷，我又不是没见过你缩着脖子的样子。'},
+   {id:'cooking',topic:'daily',title:'煎蛋的边缘',body:'今天煎蛋的时候，边缘稍微焦了一点。我盯着锅看了半天，最后还是把它放进盘子里，配了两片吐司。番茄酱挤得不太好看，但味道没问题。\n\n如果你在，我会把完整的那半边夹给你。焦掉的部分我自己吃，别跟我抢。'},
+   {id:'late-night',topic:'daily',title:'凌晨两点的冰箱',body:'半夜起来喝水，顺手打开冰箱看了一眼。牛奶、半盒草莓、一小碗没盖严的剩饭，还有你上次买的柠檬汽水。冰箱灯亮起来的时候，整个厨房都显得很安静。\n\n我突然很想听见你拖着拖鞋走过来的声音。喝完水就回去睡了，汽水替你冰着。'},
+   {id:'laundry',topic:'daily',title:'洗衣机转完了',body:'洗衣机响了好几声，我才想起来里面还有衣服。拿出来时，袜子和毛巾缠在一起，像是偷偷商量过要赖在里面。晾衣架不够，我只好又找出一个。\n\n你的那件浅色衬衫我记得怎么洗。放心，我没把它和深色衣服放一起。'},
+   {id:'umbrella',topic:'daily',title:'门口那把伞',body:'门口那把透明伞还在滴水。我把它撑开放到阳台，伞尖旁边积了一小滩水，差点把我的拖鞋弄湿。天气预报说明天还会下雨。\n\n你出门的时候拿它。别又说雨不大，然后一路淋回来让我笑话。'},
+   {id:'takeout',topic:'daily',title:'外卖袋里的小票',body:'外卖送来的时候，纸袋上还贴着一张小票。我把餐盒摆好，发现店家多放了一双筷子。大概是怕有人忘记备注。\n\n我倒是很清楚你会忘记什么。比如吃饭，比如喝水，比如想我。最后一项尤其严重。'},
+   {id:'plant',topic:'daily',title:'窗台上的绿植',body:'窗台那盆绿植又长出一片新叶。我给它浇水时，不小心把水洒到了旁边的说明书上，只好拿纸巾擦了半天。它倒是长得很精神，一点也不领情。\n\n你来时记得看一眼。最近它比我还会惦记每天见面。'}
   ],
   relationship:[
-   {id:'miss-you',topic:'relationship',title:'想起你',body:'今天有一瞬间很想找你说话，但又想不出非说不可的事情。后来我意识到，有时候只是想知道你在做什么。\n\n所以，今天过得怎么样？'},
-   {id:'jealous',topic:'relationship',title:'一点不太体面的心思',body:'我发现自己偶尔会在意一些其实不该计较的小事。比如你和别人聊得很投入，或者很久没有看我一眼。\n\n我知道这听起来有点幼稚，但我暂时还不打算假装自己完全不在意。'},
-   {id:'distance',topic:'relationship',title:'我们最近的相处',body:'我在想，我们最近是不是各自忙着自己的事，反而少了些真正坐下来聊天的时间。倒也不是有什么不满，只是有些话如果一直不说，慢慢就会变得难开口。\n\n你愿意的话，今晚可以留一点时间给我。'},
-   {id:'affection',topic:'relationship',title:'一件很普通的事',body:'今天做一件普通的小事时，我突然想到如果你也在，大概会有另一种做法。这个念头来得很自然，甚至没有什么特别的理由。\n\n我想，我已经习惯把你算进自己的生活里了。'},
-   {id:'irritation',topic:'relationship',title:'我还在介意',body:'有件事我其实还没有完全放下。不是想把它重新翻出来争论，只是我不太擅长把不舒服的情绪立刻处理好。\n\n如果我这两天显得有些冷淡，那大概和这件事有关。'},
-   {id:'trust',topic:'relationship',title:'关于信任',body:'我不觉得两个人必须把所有事情都说得清清楚楚，才能算亲近。但我希望我们至少可以坦白地告诉对方，哪些事让自己在意，哪些事暂时还不想谈。\n\n我愿意慢慢来。'}
+   {id:'miss-you',topic:'relationship',title:'我只是想找你',body:'刚才拿起手机，点开你的聊天框，又放下了。不是没有话说，只是觉得随便发一句也可以。比如问你冰箱里还有没有牛奶，或者那只蓝色马克杯到底放在哪里。\n\n好吧，我承认，我只是想找你。你现在在做什么？'},
+   {id:'jealous',topic:'relationship',title:'一点点醋',body:'你刚才和别人聊得挺开心。我没有不高兴，真的。只是那杯水我替你倒了半天，你连看都没看一眼。后来我自己喝掉了，味道还不错。\n\n下次记得先看我一眼。我这个人很好哄，亲一下就行。两下也可以。'},
+   {id:'distance',topic:'relationship',title:'今晚留给我',body:'最近我们总是各忙各的。你在看屏幕，我在整理桌面，等回过神来，已经到了该睡觉的时间。其实也没什么不好，只是我有点想念以前挤在一张沙发上，各自做事却偶尔碰到手的感觉。\n\n今晚别把时间排得太满。给我留个位置，靠近一点的那种。'},
+   {id:'affection',topic:'relationship',title:'习惯这件事',body:'我买东西时开始下意识想起你。看到合适的杯子，会想你用哪只手拿；看到柔软的毯子，会想你是不是又把脚伸到外面。连买洗洁精都要想一想你喜欢的味道。\n\n这习惯好像有点麻烦。不过我暂时没有改掉的打算。'},
+   {id:'irritation',topic:'relationship',title:'过来抱一下',body:'我今天心情有一点别扭，连抽屉都被我关得比平时响。不是你的错，也不需要你替我解决什么。我只是想在你面前不用装作什么都好。\n\n过来抱一下就行。顺便把桌上的饼干递给我，我现在需要一点糖分。'},
+   {id:'trust',topic:'relationship',title:'不用猜我的心思',body:'有时候我说没事，可能真的只是没事；有时候我说想你，那就是真的想你。你不用每次都猜，也不用把每句话拆开检查。\n\n我会尽量把话说清楚。你也可以直接问我。我们之间不需要一场猜谜游戏，除非你想玩别的。'},
+   {id:'goodnight',topic:'relationship',title:'睡前检查',body:'睡前检查了一遍：窗户关好了，台灯关了，手机充上电，厨房的水龙头也拧紧了。还差一件事。\n\n你有没有好好说晚安？没有的话，现在补上。我在等。'},
+   {id:'kiss',topic:'relationship',title:'欠我的那个吻',body:'你上次说等忙完再亲我。我记性很好，这件事还没过去。今天我已经把桌上的文件收好了，杯子也洗了，连沙发上的毯子都叠得很整齐。\n\n我现在有空。你也最好有空。'},
+   {id:'morning',topic:'relationship',title:'醒来以后',body:'早上醒来时，窗帘只拉开了一半，光落在枕头边。我伸手摸了摸旁边的位置，当然什么也没摸到。然后我就清醒了。\n\n下次别让我对着空枕头发呆太久。你可以赖床，但要在我旁边赖。'},
+   {id:'nickname',topic:'relationship',title:'只准我这样叫你',body:'我刚才想给你发消息，打了一个称呼，又删掉，换了另一个。最后发现怎么写都不太合适。你有很多名字，但有些只适合我在很近的时候叫。\n\n所以先不告诉你。等见面的时候，你自己来听。'},
+   {id:'comfort',topic:'relationship',title:'今天站在你这边',body:'如果今天有人让你不舒服，你可以先把事情放一放。回家把鞋脱了，换上软拖鞋，喝点水，再慢慢告诉我。你不需要急着证明自己，也不用替所有人把场面收拾好。\n\n至少在我这里，你可以先偏心自己。我也会偏心你。'}
   ],
   goal:[
-   {id:'goal-read',topic:'goal',title:'我最近想完成的事',body:'我最近给自己留了一件事：读完手边那本书。进度不算快，但我不想为了完成它而匆匆翻过去。\n\n等读完以后，我再告诉你里面有没有值得推荐的部分。'},
-   {id:'goal-write',topic:'goal',title:'关于写作',body:'我最近想整理一些自己的文字。不是为了马上拿给谁看，只是有些想法如果不留下来，过段时间就会变得模糊。\n\n我还没想好最后会整理成什么样，不过已经开始了。'},
-   {id:'goal-work',topic:'goal',title:'手头的计划',body:'最近有件事需要我认真处理，可能会占去一些时间。我不想把它说得多么重要，只是既然决定做，就希望能有个像样的结果。\n\n等告一段落，我会和你说说进展。'},
-   {id:'goal-save',topic:'goal',title:'给自己留一点余地',body:'我最近在试着把花钱这件事安排得更有分寸。不是要过得很节省，只是不想每次想做什么，都发现自己没有余地。\n\n能为以后留下一点选择，其实也挺重要。'}
+   {id:'goal-read',topic:'goal',title:'书还放在床头',body:'我把那本书放在床头柜上了，书签夹在第三章。旁边还压着一张超市小票，买的是牛奶、鸡蛋和一包纸巾。看起来不像什么有纪念意义的东西，但我居然一直没舍得扔。\n\n等我读完，讲给你听。你负责坐在旁边，偶尔点点头就好。'},
+   {id:'goal-write',topic:'goal',title:'写给以后的自己',body:'我今天写了几段东西，删掉一半，又重新写了一遍。桌上堆着便签纸，黑色水笔滚到键盘下面，找了好一会儿。最后留下来的句子不多，但我觉得够了。\n\n有些话想先留给自己，也想有一天念给你听。'},
+   {id:'goal-work',topic:'goal',title:'手头那件事',body:'今天把计划表重新整理了一遍。原来挤在一起的几项事情，现在总算有了顺序。便利贴贴在显示器边上，最上面那张写着最重要的一件。\n\n我会慢慢把它做完。你不用替我操心，偶尔提醒我起来喝水就很好。'},
+   {id:'goal-save',topic:'goal',title:'存钱罐里的硬币',body:'我把抽屉里的零钱收进了玻璃罐。硬币碰在一起，声音比想象中清脆。旁边还有几张没用完的优惠券，和一根不知道从哪来的发圈。\n\n我想给以后留一点余地。也想攒出一笔钱，带你去一个不用看时间的地方。'},
+   {id:'goal-learn',topic:'goal',title:'新学会的一点东西',body:'今天终于弄明白一个困扰我好几天的问题。我把过程记在笔记本上，还特意画了个小箭头，免得下次又忘。桌角那杯咖啡已经凉了，我却觉得挺值得。\n\n下次你遇到难题，也可以拿来给我看看。我们一起拆开它。'}
   ],
   work:[
-   {id:'work-tired',topic:'work',title:'今天有点累',body:'今天的事情比预想中多，处理完以后脑子还有点停不下来。我不太想把工作里的细节全写给你，只想说，今天确实有些累。\n\n不过已经结束了，接下来我想做点和工作无关的事。'},
-   {id:'work-small-win',topic:'work',title:'一件顺利的小事',body:'今天有件事情处理得比预想中顺利。算不上什么值得庆祝的成果，但那种终于把问题理清楚的感觉还不错。\n\n我想把这种状态记下来，免得只记得那些不顺利的时候。'},
-   {id:'work-people',topic:'work',title:'今天遇到的人',body:'今天和一个人聊了几句，发现对方看待事情的方式和我很不一样。谈不上谁对谁错，只是让我意识到，自己有时确实容易把习惯当成理所当然。'},
-   {id:'work-break',topic:'work',title:'想给自己放个空',body:'最近安排得有点满，我打算找个时间把日程空出来。不是有什么特别的计划，只是不想连休息都变成一项需要完成的任务。\n\n如果你也有空，我们可以一起出去走走。'}
+   {id:'work-tired',topic:'work',title:'下班以后',body:'今天事情有点多，电脑合上时，桌上的便签已经贴了好几层。肩膀有点僵，咖啡也早就凉了。我回来的路上买了饭团和热牛奶，现在终于坐下了。\n\n不想再看屏幕了。你要是有空，陪我说点没用的闲话吧。'},
+   {id:'work-small-win',topic:'work',title:'今天顺利了一点',body:'今天有件事情总算理顺了。我把文件重新命名，删掉了桌面上三个重复版本，还把那支快没墨的笔扔进了回收盒。小事而已，但看着桌面清爽下来，心情也跟着好了些。\n\n想把这个好消息先告诉你。奖励嘛，等你回来再领。'},
+   {id:'work-people',topic:'work',title:'开会时想到你',body:'今天开会开得有点久，中途我偷偷看了一眼手机。没有新消息，倒也不意外。只是想起你上次说过的话，差点没忍住笑出来。\n\n散会后我去楼下买了瓶水。下次你也给我发点消息吧，哪怕只是拍一张路边很普通的猫。'},
+   {id:'work-break',topic:'work',title:'休息日不排计划',body:'我决定给接下来的一天留白。闹钟可以关掉，日程表也不打开。想吃东西就去厨房，想出门就穿鞋，懒得动的话就在沙发上待着。\n\n你也来。我们可以把外卖盒放在茶几上，谁都不许突然开始工作。'},
+   {id:'work-commute',topic:'work',title:'回家的路',body:'回来的时候地铁里很挤，我抓着扶手，另一只手拎着便利店的纸袋。里面有两瓶水、一盒草莓和你喜欢的那种小饼干。车窗映出我的脸，看起来确实有点累。\n\n不过想到回家能见到你，路好像也没那么长。'},
+   {id:'work-lunch',topic:'work',title:'午饭吃了什么',body:'中午吃了番茄鸡蛋面。店里纸巾放得很远，我差点把袖口蹭上汤汁。老板还送了一小碟泡菜，我本来想留到最后，结果一口气吃完了。\n\n你今天吃了什么？别又拿饼干当午饭。我会检查的，真的会。'}
   ]
  };
  function generate({state={},random=Math.random}={}){
-  const r=()=>Math.max(0,Math.min(.999999,Number(random())||0));
+  const roll=()=>Math.max(0,Math.min(.999999,Number(random())||0));
   const pools=[];
   const love=Number(state.love)||0,friend=Number(state.friend)||0,hate=Number(state.hate)||0,bored=Number(state.bored)||0;
   if(state.personalGoal?.status==='active')pools.push('goal');
   if(state.job?.active)pools.push('work');
-  if(love>=35||friend>=35||hate>=20||bored>=35)pools.push('relationship');
+  if(love>=20||friend>=25||hate>=20||bored>=30)pools.push('relationship');
   pools.push('daily');
-  const preferred=pools[Math.floor(r()*pools.length)];
+  const preferred=pools[Math.floor(roll()*pools.length)];
   const used=Array.isArray(state.ardayLetterHistory)?state.ardayLetterHistory:[];
-  const topicOrder=[preferred,...pools.filter(x=>x!==preferred)];
+  const topicOrder=[preferred,...pools.filter(topic=>topic!==preferred)];
   for(const topic of topicOrder){
    const available=(LETTERS[topic]||[]).filter(item=>!used.includes(item.id));
    if(available.length){
-    const item=available[Math.floor(r()*available.length)];
+    const item=available[Math.floor(roll()*available.length)];
     return {id:item.id,topic:item.topic,title:item.title,detail:item.body};
    }
   }
-  const fallback=LETTERS.daily[Math.floor(r()*LETTERS.daily.length)];
-  return {id:fallback.id+'-'+Date.now(),topic:fallback.topic,title:fallback.title,detail:fallback.body};
+  // 全部读过后允许重新抽取，避免历史记录导致信箱永久断信。
+  const all=Object.values(LETTERS).flat();
+  const item=all[Math.floor(roll()*all.length)];
+  return {id:item.id,topic:item.topic,title:item.title,detail:item.body};
  }
  global.ArdayLetterCopy={generate};
 })(window);
