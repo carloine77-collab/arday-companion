@@ -40,7 +40,7 @@ s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.int
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[{id:'lin',name:'林澈',role:'前锋',combat:34,malice:8,selected:true,portrait:'⚔'},{id:'mori',name:'森',role:'侦察',combat:30,malice:6,selected:true,portrait:'⌕'},{id:'qiao',name:'乔',role:'支援',combat:26,malice:12,selected:false,portrait:'✦'}];
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});if(s.teamRoster.length>8)s.teamRoster=s.teamRoster.slice(0,8);
 s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object'?s.recruitmentInvites:{};s.factionApplications=s.factionApplications&&typeof s.factionApplications==='object'?s.factionApplications:{};s.factionMembership=s.factionMembership||null;s.factionClues=Array.isArray(s.factionClues)?s.factionClues:[];
-s.points=Math.max(0,Math.floor(Number(s.points)||0));
+s.points=Math.max(0,Math.floor(Number(s.points)||0));s.dungeonProtection=Math.max(0,Math.min(2,Math.floor(Number(s.dungeonProtection)||0)));
 if(!s.leaderboardPopulationV2){if(s.points===0)s.points=20;s.leaderboardPopulationV2=true;}
 s.activeDungeon=s.activeDungeon&&s.activeDungeon.status==='active'?s.activeDungeon:null;
 if(s.activeDungeon){
@@ -1391,7 +1391,7 @@ function updateGuildContributionCompliance(at=Date.now()){
  const todayDate=new Date(at);todayDate.setHours(0,0,0,0);const today=keyAt(todayDate);
  if(!s.guildContributionComplianceDay){s.guildContributionComplianceDay=today;return}
  const parse=key=>{const [y,m,d]=String(key).split('-').map(Number);return new Date(y,m-1,d)};
- let cursor=parse(s.guildContributionComplianceDay);cursor.setDate(cursor.getDate()+1);const end=new Date(todayDate);end.setDate(end.getDate()-1);
+ let cursor=parse(s.guildContributionComplianceDay);const end=new Date(todayDate);end.setDate(end.getDate()-1);
  while(cursor<=end){const key=keyAt(cursor),week=guildWeekKey(cursor);if(s.guildContributionComplianceWeek!==week){s.guildContributionComplianceWeek=week;s.guildContributionMisses=0}
   if(s.guildContributionDay!==key){s.guildContributionMisses=(Number(s.guildContributionMisses)||0)+1;s.guildContributionMissedDates=Array.isArray(s.guildContributionMissedDates)?s.guildContributionMissedDates:[];s.guildContributionMissedDates.push(key);s.guildContributionMissedDates=s.guildContributionMissedDates.slice(-28)}
   s.guildContributionComplianceDay=key;cursor.setDate(cursor.getDate()+1);
@@ -1497,7 +1497,7 @@ window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save
 
 function useDungeonItem(entity,index){
  const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
- const applyEffects=effects=>{Object.entries(effects||{}).forEach(([key,value])=>{if(key in s.attributes)s.attributes[key]=clamp((Number(s.attributes[key])||0)+value);else if(key in s)s[key]=clamp((Number(s[key])||0)+value)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)};
+ const applyEffects=effects=>{const today=keyAt(Date.now());if(s.dungeonItemStatGainDay!==today){s.dungeonItemStatGainDay=today;s.dungeonItemStatGains={}}s.dungeonItemStatGains=s.dungeonItemStatGains||{};Object.entries(effects||{}).forEach(([key,value])=>{const amount=Number(value)||0;if(key in s.attributes){if(amount>0){const used=Number(s.dungeonItemStatGains[key])||0,allowed=Math.min(amount,Math.max(0,2-used));s.attributes[key]=clamp((Number(s.attributes[key])||0)+allowed);s.dungeonItemStatGains[key]=used+allowed}else s.attributes[key]=clamp((Number(s.attributes[key])||0)+amount)}else if(key in s)s[key]=clamp((Number(s[key])||0)+amount)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)};
  if(data.lifeSave){const current=Math.max(0,Number(s.dungeonProtection)||0);if(current>=2){toast('保命储备已达上限');return}s.dungeonProtection=Math.min(2,current+Math.max(1,Number(data.protectionCharges)||1));applyEffects(data.effects);s.inventory.splice(index,1);toast(data.name+'已生效')}
  else if(data.type==='probability'){const current=Number(s.nextDungeonChanceModifier)||0,addition=Math.max(0,Number(data.chance)||0)/100;s.nextDungeonChanceModifier=Math.min(.08,current+Math.min(.04,addition));s.inventory.splice(index,1);toast('下次副本概率加成已调整')}
  else if(data.type==='tactical'){s.nextDungeonDifficultyReduction=Math.min(6,(Number(s.nextDungeonDifficultyReduction)||0)+Math.min(4,Number(data.difficultyReduction)||0));s.nextDungeonMaliceReduction=Math.min(10,(Number(s.nextDungeonMaliceReduction)||0)+Math.min(6,Number(data.maliceReduction)||0));s.inventory.splice(index,1);toast(data.name+'已部署')}
