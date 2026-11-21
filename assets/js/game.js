@@ -1160,7 +1160,7 @@ buyIngredient=function(id,label,cost){
 function eventChoices(e){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  if(e.type!=='bill')return eventChoicesLegacy(e);
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view';$('drawerTitle').textContent=e.title;
+ $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices compact-action-view';$('drawerTitle').textContent=e.title;
  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">从共同账户支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
  $('paybill').onclick=()=>{
   if(s.money>=80){s.money-=80;s.unpaidBill=Math.max(0,(s.unpaidBill||0)-80);moneyRecord('shared','expense',80,'水电与日常开销');say('共同账户已经支付本周开销。')}
@@ -1282,21 +1282,21 @@ eventChoices=function(e){
  if(e.type==='shared-goal-proposal'){
   const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
   if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
-  $('drawerTitle').textContent=e.title;
+  $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="sg-accept">一起做</button><button id="sg-decline">这次先不安排</button></div>';
   $('sg-accept').onclick=()=>{acceptSharedGoal(g.id);completeEvent(e,'接受共同计划');save();render();renderEvents()};
   $('sg-decline').onclick=()=>{say(ardayLine('decline'));s.lastSharedProposalAt=Date.now();completeEvent(e,'暂不安排');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  if(e.type==='life-memory'){
-  $('drawerTitle').textContent=e.title;
+  $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="memory-ask">问问纸条的来历</button><button id="memory-keep">替他收起来</button></div>';
   $('memory-ask').onclick=()=>{say('你倒是很会挑时候。只是这件事，我还没想好要从哪里说起。');remember('old-memory','你问起那张旧纸条，阿尔没有立刻回答。',2);change({friend:1});completeEvent(e,'询问纸条来历');save();renderEvents()};
   $('memory-keep').onclick=()=>{say('替我收着吧。说不定哪天，我会想起它。');remember('old-memory','你替阿尔收起了旧纸条。',2);completeEvent(e,'收起纸条');save();renderEvents()};
   $('drawer').classList.add('open');return;
  }
  if(e.type==='life-evening'){
-  $('drawerTitle').textContent=e.title;
+  $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="evening-together">今晚一起待着</button><button id="evening-free">维持原定安排</button></div>';
   $('evening-together').onclick=()=>{change({friend:1,fun:2});say('我就知道你会答应。过来吧，今晚不必赶时间。');remember('evening','你们临时改变安排，共度了一个晚上。',2);completeEvent(e,'一起度过晚上');save();renderEvents()};
   $('evening-free').onclick=()=>{say('也好。今晚就照原来的安排来。');completeEvent(e,'维持原定安排');save();renderEvents()};
