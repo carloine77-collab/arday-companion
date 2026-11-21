@@ -447,6 +447,7 @@ window.ArdayFurnitureModels = (() => {
      for(let i=0;i<9;i++){const stud=new T.Mesh(new T.SphereGeometry(.022,8,6),metal);stud.position.set(-.96+i*.24,.36,-.495);group.add(stud)}
      for(const x of [-.92,.92]){const cushion=soft(x,.83,.08,.19,.11,.17,lightFabric);cushion.rotation.z=x*.08}
     }
+    if(isVelvet){group.children.forEach(child=>{child.position.z-=.55})}
    }else if(modelName==='壁画'){
     action=()=>openFurnitureActions('wallArt',id);
     width=1.5;depth=.14;height=1.18;wallAxis='x';wallSide='back';anchor=[0,1.9];
@@ -1172,7 +1173,7 @@ window.ArdayFurnitureModels = (() => {
    }else if(modelName==='上床下桌'){
     // Full loft-bed workstation: four structural posts, guarded upper bunk, ladder,
     // mattress and bedding above a usable desk with drawers and task lighting.
-    width=3.0;depth=2.12;height=2.92;action=()=>openFurnitureActions('bed',id);
+    width=3.0;depth=2.22;height=2.92;anchor=[0,0,2.48];action=()=>openFurnitureActions('bed',id);
     const frame=mat(0x806044,.58),frameEdge=mat(0xb18a61,.56),darkMetal=mat(0x46515a,.42,.62),bedding=mat(0xd8d0c3,.98),sheet=mat(0xeee5d8,.98),deskTop=mat(0xc7a77e,.56),deskFront=mat(0x8a6848,.62),accent=mat(0xb99a69,.42,.48),fabricMat=mat(0xb7a7a0,.98);
     applyPainterMap(frame,woodMap,.012);applyPainterMap(frameEdge,woodMap,.012);applyPainterMap(bedding,fabricMap,.022);applyPainterMap(sheet,fabricMap,.018);applyPainterMap(deskTop,woodMap,.01);
     // Main posts and continuous perimeter beams.
