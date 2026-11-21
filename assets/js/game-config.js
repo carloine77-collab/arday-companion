@@ -1,6 +1,6 @@
 window.ArdayGameConfig = {
   shopCatalog: {
- '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6'],['牛奶 ×1','🥛','buy-ingredient-milk','8'],['奶酪 ×1','🧀','buy-ingredient-cheese','12'],['洋葱 ×1','🧅','buy-ingredient-onion','4'],['胡萝卜 ×1','🥕','buy-ingredient-carrot','4'],['大蒜 ×1','🧄','buy-ingredient-garlic','3']],
+ '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6'],['牛奶 ×1','🥛','buy-ingredient-milk','8'],['奶酪 ×1','🧀','buy-ingredient-cheese','12'],['洋葱 ×1','🧅','buy-ingredient-onion','4'],['胡萝卜 ×1','🥕','buy-ingredient-carrot','4'],['大蒜 ×1','🧄','buy-ingredient-garlic','3'],['鸡腿肉 ×1','🍗','buy-ingredient-chicken','18'],['玉米 ×1','🌽','buy-ingredient-corn','6'],['草莓 ×1','🍓','buy-ingredient-strawberry','12'],['黄油 ×1','🧈','buy-ingredient-butter','9']],
  furnitureCategories:  {
     "坐卧类": {
       "办公椅": [
@@ -1065,9 +1065,14 @@ window.ArdayGameConfig = {
    cheesePotatoGratin:{name:'芝士焗土豆',ingredients:{potato:2,cheese:1,milk:1},hunger:44},
    mushroomTofuEgg:{name:'香菇豆腐蒸蛋',ingredients:{egg:2,tofu:1,mushroom:1},hunger:38},
    carrotBeefRice:{name:'胡萝卜牛肉烩饭',ingredients:{rice:1,beef:1,carrot:1,onion:1},hunger:48},
-   garlicMushroomPancake:{name:'蒜香蘑菇煎饼',ingredients:{flour:1,mushroom:1,egg:1,garlic:1,oil:1},hunger:36}
+   garlicMushroomPancake:{name:'蒜香蘑菇煎饼',ingredients:{flour:1,mushroom:1,egg:1,garlic:1,oil:1},hunger:36},
+   teriyakiChickenRice:{name:'照烧鸡腿饭',ingredients:{rice:1,chicken:1,onion:1,garlic:1},hunger:52},
+   creamyCornSoup:{name:'奶油玉米浓汤',ingredients:{corn:2,milk:1,butter:1,flour:1},hunger:38},
+   strawberryPancake:{name:'草莓奶油松饼',ingredients:{flour:2,egg:1,milk:1,strawberry:2,butter:1},hunger:42},
+   chickenMushroomPasta:{name:'奶油鸡肉蘑菇意面',ingredients:{chicken:1,noodles:1,mushroom:1,milk:1,butter:1},hunger:56},
+   cornCheeseRice:{name:'芝士玉米焗饭',ingredients:{rice:1,corn:1,cheese:1,milk:1,butter:1},hunger:50}
   },
-  ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包',milk:'牛奶',cheese:'奶酪',onion:'洋葱',carrot:'胡萝卜',garlic:'大蒜'},
+  ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包',milk:'牛奶',cheese:'奶酪',onion:'洋葱',carrot:'胡萝卜',garlic:'大蒜',chicken:'鸡腿肉',corn:'玉米',strawberry:'草莓',butter:'黄油'},
   bookCategories: {'菜谱':[
    ['牛肉面','📖','buy-recipe-beefNoodles','38','解锁牛肉面的制作方法'],
    ['奶油蘑菇饭','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇饭的制作方法'],
@@ -1080,6 +1085,11 @@ window.ArdayGameConfig = {
    ['芝士焗土豆','📖','buy-recipe-cheesePotatoGratin','55','解锁芝士焗土豆的制作方法'],
    ['香菇豆腐蒸蛋','📖','buy-recipe-mushroomTofuEgg','42','解锁香菇豆腐蒸蛋的制作方法'],
    ['胡萝卜牛肉烩饭','📖','buy-recipe-carrotBeefRice','50','解锁胡萝卜牛肉烩饭的制作方法'],
-   ['蒜香蘑菇煎饼','📖','buy-recipe-garlicMushroomPancake','40','解锁蒜香蘑菇煎饼的制作方法']
+   ['蒜香蘑菇煎饼','📖','buy-recipe-garlicMushroomPancake','40','解锁蒜香蘑菇煎饼的制作方法'],
+   ['照烧鸡腿饭','📖','buy-recipe-teriyakiChickenRice','58','解锁照烧鸡腿饭的制作方法'],
+   ['奶油玉米浓汤','📖','buy-recipe-creamyCornSoup','44','解锁奶油玉米浓汤的制作方法'],
+   ['草莓奶油松饼','📖','buy-recipe-strawberryPancake','48','解锁草莓奶油松饼的制作方法'],
+   ['奶油鸡肉蘑菇意面','📖','buy-recipe-chickenMushroomPasta','64','解锁奶油鸡肉蘑菇意面的制作方法'],
+   ['芝士玉米焗饭','📖','buy-recipe-cornCheeseRice','56','解锁芝士玉米焗饭的制作方法']
   ]}
 };
