@@ -491,7 +491,7 @@ function ensureSleepSchedule(key){
  let p=plans[key];
  if(!valid(p))p=plans[key]=makeSleepPlan(key,key===today?energy:100,emergencyBedtime);
  else if(key===today&&((hour<22&&Math.abs(energy-(Number(p.energyAtPlanning)||0))>=8)||emergencyBedtime<Number(p.bedtime)))p=plans[key]=makeSleepPlan(key,energy,emergencyBedtime);
- else if(key===today&&hour>=22&&makeSleepPlan(key,energy,emergencyBedtime).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy,emergencyBedtime);
+ else if(key===today&&hour>=22&&energy<25&&makeSleepPlan(key,energy,emergencyBedtime).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy,emergencyBedtime);
  p=plans[key];const previous=plans[previousKey],previousHours=Math.max(0,Number(previous.duration||0)-(24-Number(previous.bedtime??22))),tonightEnd=Math.min(24,Number(p.bedtime)+Number(p.duration));
  const day=s.calendar.days[key]||(s.calendar.days[key]=[]);s.calendar.days[key]=day.filter(ev=>ev.activity!=='sleep');
  if(previousHours>0)reserveSleepRange(key,0,Math.min(24,previousHours));
