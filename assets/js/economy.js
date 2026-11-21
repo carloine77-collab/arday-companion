@@ -40,15 +40,21 @@
   }
  }
  function reviewPersonalSpending(at){
-  if(s.personalMoney<60)return;
-  if((s.lastPersonalSpendingReview||0)>0&&at-s.lastPersonalSpendingReview<48*3600000)return;
+  const date=new Date(at),dayKey=date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate();
+  if(s.personalLivingCostDay!==dayKey){
+   s.personalLivingCostDay=dayKey;
+   const due=18+Math.floor(Math.random()*19),paid=Math.min(Math.max(0,Number(s.personalMoney)||0),due);
+   if(paid>0){s.personalMoney-=paid;moneyRecord('personal','expense',paid,'日常交通与生活开销',at)}
+  }
+  if((s.lastPersonalSpendingReview||0)>0&&at-s.lastPersonalSpendingReview<24*3600000)return;
   s.lastPersonalSpendingReview=at;
   if(s.personalGoal?.status==='active'&&s.personalGoal.type==='save')return;
-  if(Math.random()>.28)return;
+  if(s.personalMoney<45||Math.random()>.65)return;
   const options=[
-   {name:'一本私人藏书',cost:48},
-   {name:'一套书写用品',cost:32},
-   {name:'一张自己收藏的唱片',cost:68}
+   {name:'一本私人藏书',cost:38},
+   {name:'一套书写用品',cost:46},
+   {name:'一张自己收藏的唱片',cost:58},
+   {name:'一件日常用品',cost:72}
   ].filter(x=>x.cost<=s.personalMoney);
   if(!options.length)return;
   const item=options[Math.floor(Math.random()*options.length)];
