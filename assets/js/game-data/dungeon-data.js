@@ -1,6 +1,7 @@
-/* Dungeon progression data: tier order, unlock thresholds and base rewards. */
+/* Each threshold is the number of successful clears required in the previous tier.
+   The cumulative path to SSS requires 233 successful clears across F–SS. */
 window.ArdayDungeonData = {
  DUNGEON_TIERS: ['F','E','D','C','B','A','S','SS','SSS'],
- DUNGEON_CLEAR_REQUIREMENTS: {F:0,E:3,D:4,C:5,B:6,A:8,S:10,SS:12,SSS:15},
- DUNGEON_BASE_REWARD: {F:25,E:40,D:60,C:85,B:115,A:150,S:195,SS:250,SSS:330}
+ DUNGEON_CLEAR_REQUIREMENTS: {F:0,E:8,D:12,C:18,B:24,A:30,S:36,SS:45,SSS:60},
+ DUNGEON_BASE_REWARD: {F:18,E:28,D:40,C:56,B:76,A:100,S:132,SS:170,SSS:220}
 };
