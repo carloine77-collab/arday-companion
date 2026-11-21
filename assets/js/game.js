@@ -349,7 +349,7 @@ function openTab(name,force=false){
 
 function eventChoicesLegacy(e){
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view note-detail-view';
- $('drawerTitle').textContent=e.category==='letter'?'阿尔的留言':'生活记录';
+ $('drawerTitle').textContent=e.category==='letter'?'阿尔的来信':'生活记录';
  const date=new Date(e.created||Date.now()).toLocaleString('zh-CN',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
  const type=e.category==='letter'?'阿尔写给你':'生活记录';
  const paper=document.createElement('article');paper.className='note-paper '+(e.category==='letter'?'personal-note':'system-note');
@@ -368,7 +368,7 @@ function renderEvents(){
  const open=s.events.filter(e=>e.status==='open'&&e.category==='letter').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
- const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 张';$('choices').appendChild(count);
+ const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 封';$('choices').appendChild(count);
  if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无纸条</h3>';$('choices').appendChild(empty);}
  open.forEach(e=>{
   const isLetter=true;const b=document.createElement('button');b.type='button';b.className='choice event-card letter-card';
