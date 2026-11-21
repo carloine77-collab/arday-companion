@@ -105,17 +105,32 @@ function resumeDungeonBoard(mission){const runtime=window.ArdayDungeonBoardRunti
 function startDungeonBoardMovement(mission){const b=mission?.board;if(!b||!b.isMoving||dungeonBoardAnimatingMissionId===mission.id)return;dungeonBoardAnimatingMissionId=mission.id;const token=++dungeonBoardRunToken;animateDungeonBoardMove(mission,token)}
 function dungeonCloneEvent(event){return {...event,options:event.options.map(option=>({...option,effects:{...(option.effects||{})},check:option.check?{...option.check,success:{...option.check.success,effects:{...(option.check.success.effects||{})}},failure:{...option.check.failure,effects:{...(option.check.failure.effects||{})}}}:null}))}}
 function dungeonPickEvent(type,history,lap){const pool=DUNGEON_EVENT_LIBRARY[type]||DUNGEON_EVENT_LIBRARY.scene,available=pool.filter(event=>!history.includes(event.id+':lap'+lap)),candidates=available.length?available:pool,total=candidates.reduce((sum,event)=>sum+Math.max(.05,Number(event.weight)||1),0);let roll=Math.random()*total;for(const event of candidates){roll-=Math.max(.05,Number(event.weight)||1);if(roll<=0)return event}return candidates[candidates.length-1]}
-function dungeonStageEvent(event,lap){const copy=dungeonCloneEvent(event);if(lap===2){copy.title+=' · 重现';copy.desc+=' 你认出这处场景，但其中一件物品的位置与上次不同。'}else if(lap===3){copy.title+=' · 封锁';copy.desc+=' 警报已经响起，身后的追逐声越来越近。'}copy.options.forEach(option=>{if(option.check)option.check.difficulty=Math.min(78,option.check.difficulty+(lap-1)*4)});return copy}
+function dungeonStageEvent(event,lap){const copy=dungeonCloneEvent(event);copy.lap=lap;if(lap===2){copy.title+=' · 重现';copy.desc+=' 你认出这处场景，但异常已经改变了原有路线。'}else if(lap===3){copy.title+=' · 封锁';copy.desc+=' 校园进入全面封锁，追逐者正在逼近，任何误判都会付出代价。'}copy.options.forEach(option=>{if(option.check)option.check.difficulty=Math.min(78,option.check.difficulty+(lap-1)*8)});return copy}
 function createDungeonBoardPending(mission){
  const b=mission.board,layout=ensureDungeonBoardLayout(b),tile=DUNGEON_BOARD_TILES[layout[b.position]??b.position],type=tile[0];b.eventHistory=Array.isArray(b.eventHistory)?b.eventHistory:[];
  let event;
- if(b.steps===36||b.steps===72){
-  const first=b.steps===36;
-  event={id:first?'milestone-broadcast':'milestone-archive',title:first?'广播室的回声':'地下档案室',desc:first?'广播传出你的声音，控制台的监控画面却停留在十分钟前。扬声器里还有一个声音，在替你回答尚未提出的问题。':'地下档案柜里每份档案都贴着同一张照片，照片拍摄日期是明天。最底层的抽屉正在从里面缓慢敲击。',options:[
-   O(first?'追查广播源':'比对档案日期',{intelligence:1},0,C('intelligence',64,first?'你定位到广播信号来自已经拆除的旧楼。':'你发现所有档案都对应同一个尚未发生的日期。',{perception:1},'监控画面突然切换为实时视角，你只能先行撤离。',{energy:-1,fun:-1},2,-1)),
-   O(first?'拆除控制台':'打开最底层抽屉',{strength:1,energy:-1},1,C('strength',60,'异常设备停止运转，内部留下应急补给。',{willpower:1},'设备反向启动，你被迫放弃现场。',{clean:-1},1,-1),'stimulant'),
-   O('记下位置后离开',{agility:1,willpower:1},-1)
-  ]};
+ if([36,72,108].includes(b.steps)){
+  const nodeIndex=b.steps/36,first=nodeIndex===1,second=nodeIndex===2;
+  const nodeId='node-'+nodeIndex;
+  if(first){
+   event={id:'milestone-broadcast',nodeId,lap:1,title:'广播室的回声',desc:'广播传出你的声音，控制台的监控画面却停留在十分钟前。这里保存着校园异常的第一份原始记录。',options:[
+    O('解码广播源',{intelligence:1},0,C('intelligence',62,'你定位到广播信号来自已经拆除的旧楼，获得了后续路线的关键坐标。',{perception:1},'信号反向锁定了你的位置，解码过程留下了明显破绽。',{willpower:-1},2,-2)),
+    O('强行拆除控制台',{strength:1,energy:-1},0,C('strength',60,'控制台停止运转，备用通道的门禁暂时解除。',{willpower:1},'设备反向启动，金属碎片划伤了手臂。',{clean:-1},1,-1),'stimulant'),
+    O('抄下线路图后撤离',{agility:1,willpower:1},-1)
+   ]};
+  }else if(second){
+   event={id:'milestone-archive',nodeId,lap:2,title:'地下档案室',desc:'档案柜里每份记录都贴着同一张照片，日期却来自未来。第二圈的异常在这里汇合，档案室保存着逃生闸门的权限记录。',options:[
+    O('比对档案时间戳',{perception:1},0,C('perception',68,'你找到了闸门权限的真实序列，出口路线变得清晰。',{intelligence:1},'档案中的时间戳开始覆盖你的记忆，你丢失了关键线索。',{willpower:-1},2,-2)),
+    O('打开最底层抽屉',{strength:1,energy:-1},0,C('strength',70,'抽屉里有一枚闸门控制钥匙。',{willpower:1},'抽屉内部传来反向拉力，你被迫松手。',{strength:-1},1,-1),'fate'),
+    O('销毁重复档案',{willpower:1,clean:-1},-1)
+   ]};
+  }else{
+   event={id:'milestone-escape',nodeId,lap:3,title:'封锁区的逃生闸门',desc:'广播宣布所有出口即将永久关闭。闸门控制台要求输入一段只有前两圈线索才能还原的序列，身后的追逐声已经抵达走廊。',options:[
+    O('输入还原后的权限序列',{intelligence:1},0,C('intelligence',74,'闸门识别了权限序列，出口完全开启。',{agility:1},'序列被判定为伪造，闸门进入强制锁闭。',{intelligence:-1,willpower:-1},2,-2)),
+    O('手动撑住闸门',{strength:1,energy:-1},0,C('strength',76,'你撑住了最后一段闭合行程，队伍得以通过。',{willpower:1},'闸门反弹，你的力量被迅速耗尽。',{strength:-1,energy:-1},1,-1)),
+    O('趁闸门闭合前冲刺',{agility:1,energy:-2},0,C('agility',72,'你在封锁完成前冲出校园。',{willpower:1},'追逐者逼近，你在门前被迫急停。',{agility:-1,willpower:-1},2,-2))
+   ]};
+  }
  }else{
   const lap=Math.min(3,Math.max(1,Math.floor((b.steps-1)/36)+1)),selected=dungeonPickEvent(type,b.eventHistory,lap);event=dungeonStageEvent(selected,lap);b.eventHistory.push(selected.id+':lap'+lap);b.eventHistory=b.eventHistory.slice(-48);
  }
@@ -146,14 +161,18 @@ function renderDungeonEvent(){
 function resolveDungeonEvent(index){
  const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
  if(settleDungeonIfDue?.(Date.now()))return;const mission=s.activeDungeon;if(!mission?.board?.pending)return;const b=mission.board,event=b.pending.event,option=event.options[index];if(!option)return;
- let outcome=null,checkChance=null,checkStat=null;
- if(option.check){checkStat=option.check.stat;const target=checkStat in s.attributes?s.attributes:s,score=Math.max(0,Math.min(100,Number(target[checkStat])||0));checkChance=Math.max(20,Math.min(85,Math.round(52+(score-50)*.58-(Number(option.check.difficulty||55)-55)*.72)));const passed=Math.random()*100<checkChance;outcome=passed?option.check.success:option.check.failure}
- const effects={...(option.effects||{})};Object.entries(outcome?.effects||{}).forEach(([key,value])=>effects[key]=(Number(effects[key])||0)+(Number(value)||0));const changes=[];b.statGains=b.statGains||{};
+ let outcome=null,checkChance=null,checkStat=null,checkPassed=true;
+ if(option.check){checkStat=option.check.stat;const target=checkStat in s.attributes?s.attributes:s,score=Math.max(0,Math.min(100,Number(target[checkStat])||0));checkChance=Math.max(20,Math.min(85,Math.round(52+(score-50)*.58-(Number(option.check.difficulty||55)-55)*.72)));checkPassed=Math.random()*100<checkChance;outcome=checkPassed?option.check.success:option.check.failure}
+ const effects={...(option.effects||{})};Object.entries(outcome?.effects||{}).forEach(([key,value])=>effects[key]=(Number(effects[key])||0)+(Number(value)||0));
+ const eventLap=Math.max(1,Math.min(3,Number(event.lap)||Math.ceil(b.steps/36)));
+ if(option.check&&!checkPassed&&checkStat in s.attributes)effects[checkStat]=(Number(effects[checkStat])||0)-(eventLap===3?2:1);
+ const changes=[];b.statGains=b.statGains||{};
  Object.entries(effects).forEach(([key,value])=>{if(!DUNGEON_STAT_KEYS.has(key))return;const target=key in s.attributes?s.attributes:s;const before=Number(target[key])||0;let delta=Number(value)||0;if(delta>0){const used=Number(b.statGains[key])||0;delta=Math.min(delta,Math.max(0,2-used));b.statGains[key]=used+delta}target[key]=clamp(before+delta);const actual=Number(target[key])-before;if(actual)changes.push({key,delta:actual})});
  s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);mission.snapshot.playerPower=s.combat;mission.snapshot.energy=s.energy;mission.snapshot.hunger=s.hunger;mission.snapshot.clean=s.clean;
- let chanceDelta=0;const chanceTotal=(Number(option.chance)||0)+(Number(outcome?.chance)||0);if(chanceTotal){const before=Number(b.chanceModifier)||0;b.chanceModifier=Math.max(-10,Math.min(10,before+chanceTotal));chanceDelta=b.chanceModifier-before}
+ let nodeModifier=0;if(event.nodeId){b.specialNodes=b.specialNodes||{};b.specialNodes[event.nodeId]=checkPassed;const bonuses=checkPassed?{'node-1':3,'node-2':4,'node-3':6}:{'node-1':-2,'node-2':-3,'node-3':-5};nodeModifier=bonuses[event.nodeId]||0}
+ let chanceDelta=0;const chanceTotal=(Number(option.chance)||0)+(Number(outcome?.chance)||0)+nodeModifier;if(chanceTotal){const before=Number(b.chanceModifier)||0;b.chanceModifier=Math.max(-10,Math.min(10,before+chanceTotal));chanceDelta=b.chanceModifier-before}
  let itemName='';const itemId=outcome?.item||option.item,itemChance=Number(outcome?.itemChance??option.itemChance??.18);if(itemId&&!b.itemFound&&Math.random()<Math.max(0,Math.min(1,itemChance))){const item=addDungeonItem(itemId);if(item){itemName=item.name||'特殊道具';b.itemFound=true}}
- b.pending=null;b.result={title:event.title,choice:option.label,changes,chanceDelta,itemName,outcomeText:outcome?.text||'',checkChance,checkStat,checkPassed:option.check?!!outcome&&outcome===option.check.success:null};save();renderDungeonResult();
+ b.pending=null;b.result={title:event.title,choice:option.label,changes,chanceDelta,itemName,outcomeText:outcome?.text||'',checkChance,checkStat,checkPassed,nodeId:event.nodeId||null,nodeModifier};save();renderDungeonResult();
 }
 function chooseDungeonBoard(){
  const {state:s,$,save,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};const mission=s.activeDungeon;if(!mission)return;if(settleDungeonIfDue?.(Date.now()))return;if(mission.boardChoiceMade&&mission.mode!=='board'){window.ArdayDungeonBoardRuntime?.showDungeon?.();return}mission.mode='board';mission.boardChoiceMade=true;mission.board=mission.board||{version:3,missionId:mission.id,steps:0,position:0,chanceModifier:0,pending:null};mission.board.eventHistory=Array.isArray(mission.board.eventHistory)?mission.board.eventHistory:[];ensureDungeonBoardLayout(mission.board);mission.board.missionId=mission.id;save();if(mission.board?.pending)renderDungeonEvent();else if(mission.board?.result)renderDungeonResult();else renderDungeonBoard()}
