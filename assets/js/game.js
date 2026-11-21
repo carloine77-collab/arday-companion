@@ -255,12 +255,12 @@ function openTab(name,force=false){
  $('drawer').classList.remove('profile-expanded','furniture-drawer');
  $('drawer').querySelector('.furniture-close')?.remove();
  const displayName=name==='物品'?'背包':name;
- $('drawerTitle').textContent=displayName+(name==='商店'&&shopCategory==='积分兑换'?' · ✦ '+s.points+' 积分':' · ¥'+s.money);$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
+ $('drawerTitle').textContent=displayName+(name==='商店'?' · ¥'+s.money:'');$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
  let shopGrid=null;
  if(name==='商店'){
   $('choices').classList.add('shop-content');
   const nav=document.createElement('div');nav.className='shop-categories';
-  ['食物食材','家具','书籍','积分兑换'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  ['食物食材','家具','书籍'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   const shopMasthead=document.createElement('section');shopMasthead.className='shop-masthead';shopMasthead.innerHTML='<div class="shop-kicker">ARDAY JOURNAL <span>HOME & LIVING</span></div><div class="shop-coverline"><span class="shop-cover-number">№ 08</span><span class="shop-cover-season">THE ART OF<br>EVERYDAY LIVING</span></div><div class="shop-cover-title">Objects<br><i>with a story.</i></div><div class="shop-cover-note"></div><div class="shop-cover-stamp">A HOME<br>IN THE<br>MAKING</div>'; 
   $('choices').appendChild(shopMasthead);
   $('choices').appendChild(nav);
@@ -286,12 +286,11 @@ function openTab(name,force=false){
    Object.keys(typeGroups).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFurnitureType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFurnitureType=type;openTab('商店',true)};typeNav.appendChild(button)});
    $('choices').appendChild(typeNav);
   }
-  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':shopCategory==='积分兑换'?'搜索道具':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
-  if(shopCategory==='积分兑换'){const typeNav=document.createElement('div');typeNav.className='shop-furniture-types shop-exchange-types';Object.values(DUNGEON_ITEM_TYPE_LABELS).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopDungeonType===type?' active':'');button.textContent=type;button.onclick=()=>{shopDungeonType=type;openTab('商店',true)};typeNav.appendChild(button)});$('choices').appendChild(typeNav)}
+  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
   shopGrid=document.createElement('div');shopGrid.className='shop-product-grid';$('choices').appendChild(shopGrid);
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
- const tabEntries=name==='商店'?(shopCategory==='积分兑换'?Object.entries(DUNGEON_ITEM_CATALOG).filter(([,item])=>DUNGEON_ITEM_TYPE_LABELS[item.type]===shopDungeonType).map(([id,item])=>[item.name,item.icon,'exchange-dungeon-'+id,DUNGEON_EXCHANGE_PRICES[id],'']):shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ const tabEntries=name==='商店'?(shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
@@ -331,7 +330,7 @@ function openTab(name,force=false){
     addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();saySystem('把'+item+'放进房间吧。');openTab('物品',true);return;
    }
    if(id==='kitchen'){openKitchenPanel(false);return}
-   if(id.startsWith('exchange-dungeon-')){purchaseDungeonExchangeItem(id.slice('exchange-dungeon-'.length));return}
+   if(id.startsWith('exchange-dungeon-')){toast('战斗物资不再通过商店兑换');return}
     if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
    if(id.startsWith('buy-')){purchase(id,label,+cost);return}
    if(id==='events'){renderEvents();return}
@@ -1432,7 +1431,8 @@ function showCareer(tab='real'){
 const {ARDAY_SOCIAL_JOBS,ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
 function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function createGuildMaterialStock(guildId,week){
- const products=Object.entries(DUNGEON_ITEM_CATALOG).map(([id,item])=>({id,name:item.name,icon:item.icon||'✦',type:item.type,price:Number(DUNGEON_EXCHANGE_PRICES[id])||0}));
+ const basicIds=['stimulant','focus','enhancer','resolve','reprieve','renewal','grace','hex'];
+ const products=basicIds.map(id=>{const item=DUNGEON_ITEM_CATALOG[id];return {id,name:item.name,icon:item.icon||'✦',type:item.type}});
  let seed=Array.from(String(guildId)+'|'+String(week)).reduce((value,ch)=>((value*31)+ch.charCodeAt(0))>>>0,2166136261);
  const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
  for(let i=products.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[products[i],products[j]]=[products[j],products[i]]}
@@ -1460,7 +1460,7 @@ function renderGuildCareer(){
  const g=ARDAY_FACTIONS.find(f=>f.id===s.factionMembership),tabs='<nav class="career-tabs"><button data-career-tab="real"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild" class="active"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>';
  if(!g){$('choices').innerHTML=tabs+'<section class="guild-career-empty"><div class="guild-empty-emblem"><i>✣</i><b>GUILD</b></div><h2>未登记组织</h2><button id="guildRecruitJump" class="recruit-action">选择组织</button></section>';$('choices').querySelector('#guildRecruitJump').onclick=()=>openTab('招募',true);$('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));$('drawer').classList.add('open');return}
  const isBureau=g.id==='anomaly-bureau',last=Math.max(0,Number(s.lastDungeonResult?.points)||0),due=Math.ceil(last*.2),today=keyAt(Date.now()),bureauGrant=Math.floor(last*.4);
- const guildWeek=guildWeekKey();if(!s.guildMaterials||s.guildMaterials.week!==guildWeek||s.guildMaterials.guildId!==g.id){s.guildMaterials={guildId:g.id,week:guildWeek,free:0,paid:0,stock:createGuildMaterialStock(g.id,guildWeek)}}else{if(!Array.isArray(s.guildMaterials.stock)||s.guildMaterials.stock.length!==4||!s.guildMaterials.stock.every(item=>item&&DUNGEON_ITEM_CATALOG[item.id]))s.guildMaterials.stock=createGuildMaterialStock(g.id,guildWeek);s.guildMaterials.free=Math.max(0,Math.min(1,Math.floor(Number(s.guildMaterials.free)||0)));s.guildMaterials.paid=Math.max(0,Math.min(2,Math.floor(Number(s.guildMaterials.paid)||0)))}
+ const guildWeek=guildWeekKey();if(!s.guildMaterials||s.guildMaterials.week!==guildWeek||s.guildMaterials.guildId!==g.id){s.guildMaterials={guildId:g.id,week:guildWeek,free:0,paid:0,stock:createGuildMaterialStock(g.id,guildWeek)}}else{if(!Array.isArray(s.guildMaterials.stock)||s.guildMaterials.stock.length!==4||!s.guildMaterials.stock.every(item=>item&&DUNGEON_ITEM_CATALOG[item.id]))s.guildMaterials.stock=createGuildMaterialStock(g.id,guildWeek);s.guildMaterials.free=Math.max(0,Math.min(1,Math.floor(Number(s.guildMaterials.free)||0)));s.guildMaterials.paid=0}
  if(!s.guildApplicants||s.guildApplicants.guildId!==g.id){const ix=highestUnlockedDungeonIndex();s.guildApplicants={guildId:g.id,list:['裴知行','顾南枝','陆闻舟'].map((name,i)=>({id:'guild-'+g.id+'-'+i,name,role:['前线突击','异常侦察','战术支援'][i],combat:Math.min(100,s.combat+10+i*2),malice:10+i*12,maxTier:DUNGEON_TIERS[Math.min(8,ix+i+1)],portrait:['刃','鸦','灯'][i]}))}}
  const people=s.guildApplicants.list.filter(m=>!s.teamRoster.some(x=>x.id===m.id));
  s.guildCommission=s.guildCommission||{status:'available',title:'边境异常清剿',detail:'完成一次成功副本挑战',minTier:highestUnlockedDungeonTier(),reward:90};const c=s.guildCommission;s.guildPanelOpen=s.guildPanelOpen||{};
@@ -1469,13 +1469,13 @@ function renderGuildCareer(){
     `<section class="guild-career-banner"><div class="guild-banner-sigil"><i>${g.mark}</i></div><div class="guild-banner-identity"><small>${isBureau?'OFFICIAL AUTHORITY':'FACTION RECORD / '+String(g.guildRank).padStart(2,'0')}</small><h2>${g.name}</h2>${isBureau?'<span class="guild-official-caption">官方直属机构</span>':'<div class="guild-rank-track"><i style="width:${(5-g.guildRank)*25}%"></i></div>'}</div>${isBureau?'<b class="guild-banner-rank">局</b>':'<b class="guild-banner-rank">#'+g.guildRank+'</b>'}</section>` +
     (isBureau?panel('contribution','art-contribution','01 / DAILY ALLOCATION','每日拨款',`<strong class="guild-due">+${bureauGrant} <small>积分 · 每日发放</small></strong><div class="guild-bureau-grant-note">依据上一次副本结算积分的 40% 计算</div><div class="guild-contribution-total"><i>✦</i><b>${s.bureauGrantDate===today?'已发放':s.lastDungeonResult?'待发放':'等待首次副本结算'}</b><small>今日拨款状态</small></div>`):panel('contribution','art-contribution','01 / DAILY DUES','组织贡献',`<strong class="guild-due">${due} <small>积分 · 今日应缴</small></strong><button id="guildContribute" class="recruit-action" ${s.guildContributionDay===today||!last||s.points<due?'disabled':''}>${s.guildContributionDay===today?'今日已贡献':!last?'完成副本后开放':s.points<due?'积分不足':'提交贡献'}</button><div class="guild-contribution-total"><i>✦</i><b>${s.guildContributionTotal||0}</b><small>累计贡献</small></div>`)) +
     panel('applicants','art-applicants','02 / PERSONNEL','成员引荐',`<div class="guild-applicant-list">${people.map(m=>`<article class="guild-applicant"><div class="guild-applicant-mark">${m.portrait}</div><div><b>${m.name}</b><small>战力 ${m.combat} · 最高副本 ${m.maxTier}</small></div><button data-guild-invite="${m.id}">邀请</button></article>`).join('')}</div>`) +
-    panel('materials','art-materials','03 / QUARTERMASTER','物资配给',`<div class="guild-material-count">免费 ${s.guildMaterials.free}/1 · 积分兑换 ${s.guildMaterials.paid}/2</div><div class="guild-material-grid">${s.guildMaterials.stock.map((item,i)=>`<button data-guild-material="${i}"><span class="guild-material-icon">${item.icon}</span>${item.name}<small>${s.guildMaterials.free<1?'免费':'60 积分'}</small></button>`).join('')}</div>`) +
+    panel('materials','art-materials','03 / QUARTERMASTER','物资配给',`<div class="guild-material-count">本周免费配给 ${s.guildMaterials.free}/1</div><div class="guild-material-grid">${s.guildMaterials.stock.map((item,i)=>`<button data-guild-material="${i}" ${s.guildMaterials.free>=1?'disabled':''}><span class="guild-material-icon">${item.icon}</span>${item.name}<small>${s.guildMaterials.free<1?'免费领取':'本周已领取'}</small></button>`).join('')}</div>`) +
     panel('commission','art-commission','04 / FIELD OPERATION','特别行动',`<h3>${c.title}</h3><div class="guild-contract-meta"><b>${c.minTier}</b><span>等级</span><strong>${c.reward}</strong><span>积分</span></div><button id="guildCommission" class="recruit-action" ${c.status!=='available'?'disabled':''}>${c.status==='active'?'委托进行中':c.status==='completed'?'已完成':'接受委托'}</button>`);
  $('choices').querySelectorAll('[data-guild-panel]').forEach(el=>el.addEventListener('toggle',()=>{s.guildPanelOpen[el.dataset.guildPanel]=el.open;save()}));
  $('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));
  if(!isBureau){const contributeButton=$('choices').querySelector('#guildContribute');if(contributeButton)contributeButton.onclick=()=>{if(s.guildContributionDay===today||!last||s.points<due)return;s.points-=due;s.guildContributionDay=today;s.guildContributionTotal=(s.guildContributionTotal||0)+due;const week=guildWeekKey(new Date());if(s.guildContributionComplianceWeek!==week){s.guildContributionComplianceWeek=week;s.guildContributionMisses=0}s.guildContributionComplianceDay=s.guildContributionComplianceDay||today;save();render();renderGuildCareer();toast('今日公会贡献已提交')}}
  $('choices').querySelectorAll('[data-guild-invite]').forEach(b=>b.onclick=()=>{if(s.teamRoster.length>=8){toast('队友名单已满');return}const m=people.find(x=>x.id===b.dataset.guildInvite);if(!m)return;const inviteChance=Math.max(.35,Math.min(.62,.48+Math.max(0,s.combat-m.combat)*.004));if(Math.random()<inviteChance){s.teamRoster.push({...m,combat:Math.min(Number(m.combat)||0,s.combat+15),selected:false,recruited:true});save();toast(m.name+'已加入队友名单')}else toast(m.name+'暂时无法离开当前任务');renderGuildCareer()});
- $('choices').querySelectorAll('[data-guild-material]').forEach(b=>b.onclick=()=>{const item=s.guildMaterials.stock[Number(b.dataset.guildMaterial)];if(!item)return;if(s.guildMaterials.free<1)s.guildMaterials.free++;else{if(s.guildMaterials.paid>=2){toast('本周兑换次数已用完');return}if(s.points<60){toast('积分不足，需要 60 积分');return}s.points-=60;s.guildMaterials.paid++}if(!grantGuildShopItem(item)){toast('该商品暂时无法配给');return}addEvent('领取组织物资','从'+g.name+'领取了'+item.name+'。','daily');save();render();renderGuildCareer();toast('已领取：'+item.name)});
+ $('choices').querySelectorAll('[data-guild-material]').forEach(b=>b.onclick=()=>{const item=s.guildMaterials.stock[Number(b.dataset.guildMaterial)];if(!item)return;if(s.guildMaterials.free>=1){toast('本周免费配给已领取');return}if(!grantGuildShopItem(item)){toast('该商品暂时无法配给');return}s.guildMaterials.free=1;addEvent('领取组织物资','从'+g.name+'领取了'+item.name+'。','daily');save();render();renderGuildCareer();toast('已领取：'+item.name)});
  $('choices').querySelector('#guildCommission').onclick=()=>{if(c.status!=='available')return;s.guildCommission={...c,status:'active'};save();renderGuildCareer();toast('已接受特殊委托')};
  $('drawer').classList.add('open');
 }
@@ -1544,9 +1544,8 @@ const DUNGEON_ITEM_CATALOG={
  longterm:{name:'综合补给',type:'buff',icon:'↻',effects:{energy:24,willpower:2}}
 };
 const DUNGEON_ITEM_TYPE_LABELS={buff:'增益类',life:'保命类',tactical:'战术干预',probability:'概率类'};
-const DUNGEON_EXCHANGE_PRICES={stimulant:85,focus:105,enhancer:135,resolve:115,standin:175,medkit:195,ward:215,soulpin:265,hex:115,weaken:160,seal:205,disrupt:175,fate:145,lucky:110,reverse:95,misfortune:90,reprieve:75,renewal:110,grace:145,longterm:185};
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;return item}
-function purchaseDungeonExchangeItem(id){const data=DUNGEON_ITEM_CATALOG[id],price=Number(DUNGEON_EXCHANGE_PRICES[id]);if(!data||!Number.isFinite(price)||price<=0){toast('兑换商品不存在');return}if(s.activeDungeon){toast('副本进行中无法兑换');return}if(s.points<price){toast('积分不足，还差 '+(price-s.points)+' 积分');return}s.points-=price;const item=addDungeonItem(id);if(!item){s.points+=price;toast('兑换失败');return}save();render();toast('已兑换：'+data.name);openTab('商店',true)}
+const commissionSystem=window.ArdayCommissionSystem.create({state:s,keyAt,addDungeonItem,grantPoints});
 // Narrow runtime bridge for the separately maintained dungeon-board module.
 window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save(),clamp:value=>clamp(value),addDungeonItem:id=>addDungeonItem(id),settleDungeonIfDue:at=>settleDungeonIfDue(at),pauseBoard:()=>pauseDungeonBoard(),showDungeon:()=>showDungeon()};
 
@@ -1648,19 +1647,58 @@ function showRanking(){
  $('choices').innerHTML='<section class="leader-cover"><div class="leader-cover-glow"></div><div class="leader-cover-copy"><small>ARDAY GUILD · 1,000 REGISTERED</small><h2>积分排行榜</h2><span>RANKED BY POINTS</span></div><div class="leader-cover-insignia">榜</div></section><section class="leader-self"><div><small>MY POSITION</small><b>#'+board.rank.toLocaleString('zh-CN')+'</b></div><div class="leader-self-score"><small>我的积分</small><strong>'+s.rankPoints.toLocaleString('zh-CN')+'</strong></div></section><section class="leader-podium-wrap"><div class="leader-podium-grid">'+podium+'</div></section><section class="leader-list"><div class="leader-list-caption">TOP 10 · PERSONAL SCORE</div>'+rest+'</section>';
  $('drawer').classList.add('open');
 }
-function showExchange(){shopCategory='积分兑换';openTab('商店',true)}
+function showExchange(){
+ $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='战斗物资档案';$('choices').className='choices supply-archive-view';
+ const entries=Object.entries(DUNGEON_ITEM_CATALOG).map(([id,item])=>{
+  const type=DUNGEON_ITEM_TYPE_LABELS[item.type]||'战斗补给',effects=item.effects||{},labels={energy:'精力',agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'};
+  const details=Object.entries(effects).map(([key,value])=>(labels[key]||key)+' +'+value);
+  if(item.lifeSave)details.push('抵挡一次致命风险');
+  if(item.difficultyReduction)details.push('降低难度 '+item.difficultyReduction);
+  if(item.maliceReduction)details.push('压制恶意 '+item.maliceReduction);
+  if(item.chance)details.push('成功概率 +'+item.chance+'%');
+  return '<article class="supply-archive-entry"><span class="supply-archive-icon">'+(item.icon||'✦')+'</span><div><small>'+type+'</small><strong>'+item.name+'</strong><p>'+details.join(' · ')+'</p></div></article>';
+ }).join('');
+ $('choices').innerHTML='<section class="supply-archive-masthead"><span>FIELD SUPPLY / ARCHIVE</span><h2>战斗物资</h2><p>委托与副本获取</p></section><div class="supply-archive-grid">'+entries+'</div>';
+ $('drawer').classList.add('open');
+}
 
-function showGoals(){
+function showGoals(tab='commission'){
  ensurePersonalGoal();
  const g=s.personalGoal,sg=s.sharedGoal;
- const personal=g&&g.status==='active'
-  ?'<strong>'+g.title+'</strong><p class="goal-progress">'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>'
-  :'<p>暂无正在进行的个人计划。</p>';
- const shared=sg?.status==='active'
-  ?'<strong>'+sg.title+'</strong><p class="goal-progress">'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>'
-  :'<p>暂无正在进行的共同计划。</p>';
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('drawerTitle').textContent='目标';$('choices').className='choices goals-view';
- $('choices').innerHTML='<section class="profile-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section><section class="profile-section"><div class="section-kicker">TOGETHER</div><h3>共同计划</h3>'+shared+'</section>';
+ const personal=g&&g.status==='active'?'<strong>'+g.title+'</strong><p class="goal-progress">'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>':'<p>暂无正在进行的个人计划。</p>';
+ const shared=sg?.status==='active'?'<strong>'+sg.title+'</strong><p class="goal-progress">'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>':'<p>暂无正在进行的共同计划。</p>';
+ const active=['commission','personal','shared'].includes(tab)?tab:'commission';
+ const nav='<nav class="commission-tabs"><button data-goal-tab="commission" class="'+(active==='commission'?'active':'')+'">每日委托</button><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人计划</button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同计划</button></nav>';
+ $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='委托';$('choices').className='choices commission-view';
+ let content='';
+ if(active==='commission'){
+  const board=commissionSystem.getBoard(),claimed=board.tasks.filter(task=>task.claimed).length;
+  const cards=board.tasks.map(task=>{
+   const progress=commissionSystem.getProgress(task),ready=progress>=task.target,canReroll=!task.claimed&&progress===0&&board.rerolls<1;
+   const reward=task.module==='combat'?'随机战斗属性 +1 · 概率获得补给':'随机属性 +1';
+   const action=task.claimed?'已领取':ready?'领取奖励':progress+'/'+task.target+' · 进行中';
+   return '<article class="commission-card commission-'+task.module+'"><div class="commission-card-top"><span class="commission-module">'+task.moduleMark+' '+task.moduleLabel+'</span><span class="commission-slot">'+(task.slot==='bonus'?'随机事务':'每日事务')+'</span></div><div class="commission-card-title"><span class="commission-icon">'+task.icon+'</span><h3>'+task.title+'</h3></div><p class="commission-detail">'+task.detail+'</p><div class="commission-progress"><div class="commission-progress-track"><i style="width:'+Math.round(progress/task.target*100)+'%"></i></div><b>'+progress+' / '+task.target+'</b></div><div class="commission-card-foot"><small>'+reward+'</small><div class="commission-actions"><button type="button" data-commission-reroll="'+task.id+'" '+(canReroll?'':'disabled')+'>更换</button><button type="button" class="commission-claim" data-commission-claim="'+task.id+'" '+(ready&&!task.claimed?'':'disabled')+'>'+action+'</button></div></div></article>';
+  }).join('');
+  content='<section class="commission-masthead"><div><span class="commission-kicker">ARDAY · DAILY FIELD ORDERS</span><h2>今日委托</h2><p>'+board.day.replace(/-/g,'.')+'</p></div><div class="commission-seal"><b>'+String(claimed).padStart(2,'0')+'</b><small> / 04</small><span>CLAIMED</span></div></section><div class="commission-board-meta"><span>已领取 '+claimed+' / 4</span><span>免费更换 '+(board.rerolls<1?'1 次':'已用完')+'</span></div><div class="commission-grid">'+cards+'</div>';
+ }else if(active==='personal'){
+  content='<section class="profile-section commission-plan-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section>';
+ }else{
+  content='<section class="profile-section commission-plan-section"><div class="section-kicker">TOGETHER</div><h3>共同计划</h3>'+shared+'</section>';
+ }
+ $('choices').innerHTML=nav+content;
+ $('choices').querySelectorAll('[data-goal-tab]').forEach(button=>button.onclick=()=>showGoals(button.dataset.goalTab));
+ $('choices').querySelectorAll('[data-commission-reroll]').forEach(button=>button.onclick=()=>{
+  const result=commissionSystem.reroll(button.dataset.commissionReroll);
+  if(!result.ok){toast(result.reason||'暂时无法更换');return}
+  save();showGoals('commission');toast('已更换一项委托');
+ });
+ $('choices').querySelectorAll('[data-commission-claim]').forEach(button=>button.onclick=()=>{
+  const result=commissionSystem.claim(button.dataset.commissionClaim);
+  if(!result.ok){toast(result.reason||'委托尚未完成');return}
+  save();render();showGoals('commission');
+  const reward=result.statLabel+' +'+result.amount+(result.itemName?' · '+result.itemName:'')+(result.fallbackPoints?' · 积分 +'+result.fallbackPoints:'');
+  toast('委托完成：'+reward);
+ });
  $('drawer').classList.add('open');
 }
 
