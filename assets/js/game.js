@@ -95,16 +95,26 @@ s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.
 const legacyItems=Array.isArray(s.items)?s.items:[];
 const legacyOwned=Array.isArray(s.ownedFurniture)?s.ownedFurniture:[];
 const legacyPlaced=Array.isArray(s.placedFurniture)?s.placedFurniture:[];
+// Remove obsolete placeholder rewards from old saves without touching narrative memories,
+// valid dungeon supplies, furniture, or any other owned inventory.
+const isPlaceholderDungeonItem=item=>{
+ const name=String(typeof item==='string'?item:item?.name||'').trim();
+ const itemId=String(item&&typeof item==='object'?item.itemId||'':'');
+ return /^(?:异常结晶|记忆碎片|异常核心|记忆残片|未知结晶|未知碎片)(?:$|[·\s×x_-])/u.test(name)
+  ||/^(?:anomaly[-_]?crystal|memory[-_]?(?:shard|fragment)|unknown[-_]?(?:crystal|fragment))$/i.test(itemId);
+};
 const legacyEntity=(name,kind,index)=>{const parts=name.split('·');return {id:'inv-'+kind+'-legacy-'+index,name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''}};
 const migratedInventory=[
- ...legacyItems.filter(name=>typeof name==='string'&&!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(name)).map((name,index)=>legacyEntity(name,'food',index)),
- ...legacyOwned.filter(name=>typeof name==='string').map((name,index)=>legacyEntity(name,name.startsWith('成品食物·')?'food':'furniture',index))
+ ...legacyItems.filter(name=>typeof name==='string'&&!isPlaceholderDungeonItem(name)&&!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(name)).map((name,index)=>legacyEntity(name,'food',index)),
+ ...legacyOwned.filter(name=>typeof name==='string'&&!isPlaceholderDungeonItem(name)).map((name,index)=>legacyEntity(name,name.startsWith('成品食物·')?'food':'furniture',index))
 ];
 if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))s.inventory=migratedInventory;
-else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string');
+else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string'&&!isPlaceholderDungeonItem(item));
 s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():''});
-const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string').map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
+const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&!isPlaceholderDungeonItem(item)).map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
 if(!Array.isArray(s.placed)||(!s.placed.length&&migratedPlaced.length))s.placed=migratedPlaced;
+if(!Array.isArray(s.placed))s.placed=[];
+else s.placed=s.placed.filter(item=>item&&typeof item==='object'&&!isPlaceholderDungeonItem(item));
 // The old furniture list described built-in scene fixtures, not owned inventory.
 const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
 legacySceneFurniture.filter(name=>typeof name==='string'&&name!=='沙发').forEach((name,index)=>{
@@ -2853,9 +2863,15 @@ tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
 showCurrentScheduleBubble();
  // Catch up immediately when Safari restores a backgrounded or suspended tab.
+ function dismissRestoredDungeonBoard(){
+  if(s.activeDungeon?.mode!=='board')return;
+  window.ArdayDungeonBoardRuntime?.pauseBoard?.();
+  $('drawer').classList.remove('open');
+  document.querySelectorAll('.tool').forEach(button=>button.classList.remove('active'));
+ }
  document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();updateArday3D();if(s.activeDungeon?.mode==='board'&&$('drawer').classList.contains('open'))showDungeonPending()}else{window.ArdayDungeonBoardRuntime?.pauseBoard?.();save()}});
- window.addEventListener('pageshow',()=>{tick();updateArday3D();if(s.activeDungeon?.mode==='board'&&$('drawer').classList.contains('open'))showDungeonPending()});
- window.addEventListener('pagehide',()=>{window.ArdayDungeonBoardRuntime?.pauseBoard?.();save()});
+ window.addEventListener('pageshow',()=>{dismissRestoredDungeonBoard();tick();updateArday3D()});
+ window.addEventListener('pagehide',()=>{dismissRestoredDungeonBoard();window.ArdayDungeonBoardRuntime?.pauseBoard?.();save()});
  setInterval(tick,30000);
  setInterval(()=>{if(s.activeInteraction&&Date.now()>=Number(s.activeInteraction.endsAt||0))finishImmediateInteraction(Date.now())},1000);
  setInterval(()=>{const key=keyAt(Date.now());if(s.calendar?.anchor!==key){ensureScheduleAt(Date.now());save();renderCalendar()}render()},60000);
