@@ -1070,22 +1070,53 @@ window.ArdayFurnitureModels = (() => {
 
     width=1.48;depth=.66;height=1.18;surfaceType='table';surfaceY=1.2;
     const carcass=mat(0x9a704d,.68),oak=mat(0xc39a70,.62),dark=mat(0x302923,.92),sole=mat(0xd8cfc0,.94),stitch=mat(0xe0d0b7,.9),leathers=[mat(0x493b34,.78),mat(0x263b46,.72),mat(0x8a5b43,.8),mat(0x6d6c62,.84)];
-    box(0,.57,-.015,1.4,1.08,.58,carcass);box(0,1.12,0,1.5,.1,.68,oak);box(0,.58,-.31,1.28,.94,.035,dark);box(0,.11,0,1.42,.18,.62,dark);
-    for(const x of [-.68,.68])box(x,.59,.005,.08,1.02,.64,oak);
-    for(const y of [.23,.54,.85]){box(0,y,-.015,1.28,.055,.55,oak);box(0,y+.035,.24,1.28,.025,.045,carcass)}
-    function shoe(x,y,z,idx){
-     const upper=leathers[idx%4],soleMesh=new T.Mesh(new T.SphereGeometry(1,24,16),sole);soleMesh.position.set(x,y+.025,z);soleMesh.scale.set(.09,.025,.19);group.add(soleMesh);
-     const vamp=sphere(x,y+.09,z-.015,.09,.07,.17,upper);vamp.rotation.x=-.08;
-     sphere(x,y+.09,z+.105,.08,.055,.09,upper);box(x,y+.105,z-.145,.12,.09,.075,upper);
-     const tongue=box(x,y+.157,z-.015,.055,.018,.12,stitch);tongue.rotation.x=-.12;
-     for(let k=0;k<3;k++){const lace=box(x,y+.17,z+.025-k*.035,.065,.008,.012,stitch);lace.rotation.y=(k-1)*.13}
-     for(const side of [-1,1])for(let k=0;k<2;k++)sphere(x+side*.06,y+.145,z-.055+k*.045,.009,.009,.009,oak);
+    // Open-front construction: separate panels replace the old solid cabinet block,
+    // so the shoes and the interior remain visible from the room-facing side (+Z).
+    box(0,1.13,0,1.5,.1,.68,oak);
+    box(0,.045,0,1.44,.09,.64,dark);
+    box(0,.59,-.292,1.34,1.02,.045,dark);
+    for(const x of [-.69,.69])box(x,.59,0,.1,1.08,.66,carcass);
+    for(const y of [.22,.54,.86]){
+     box(0,y,0,1.28,.055,.59,oak);
+     box(0,y+.033,.285,1.28,.022,.025,carcass);
+     // A narrow dark reveal makes each open compartment read as a separate cubby.
+     box(0,y+.07,-.263,1.24,.018,.012,mat(0x211d1a,.98));
     }
-    // Three open cubbies, each containing a visible pair; the cabinet crown is intentionally empty.
-    for(let row=0;row<3;row++){const y=.2+row*.31;shoe(-.3,y,.06,row);shoe(.3,y,.06,row+1);for(const x of [-.57,.57])cyl(x,y+.12,.29,.012,.012,.025,m.gold,10)}
-    for(const x of [-.55,.55])for(const z of [-.23,.23]){const foot=new T.Mesh(new T.CylinderGeometry(.045,.06,.13,12),dark);foot.position.set(x,.065,z);group.add(foot)}
-    box(0,1.19,0,1.48,.035,.66,oak);
-
+    function shoe(x,y,z,idx,side){
+     const upper=leathers[idx%leathers.length];
+     const soleMesh=new T.Mesh(new T.SphereGeometry(1,24,16),sole);
+     soleMesh.position.set(x,y+.022,z);soleMesh.scale.set(.092,.026,.19);group.add(soleMesh);
+     const vamp=sphere(x,y+.075,z-.018,.091,.068,.165,upper);vamp.rotation.x=-.08;
+     sphere(x,y+.078,z+.105,.079,.052,.086,upper);
+     box(x,y+.095,z-.145,.12,.078,.072,upper);
+     const tongue=box(x,y+.139,z-.018,.052,.014,.105,stitch);tongue.rotation.x=-.12;
+     for(let k=0;k<4;k++){
+      const lace=box(x,y+.151,z+.035-k*.031,.066,.008,.012,stitch);
+      lace.rotation.y=(k-1.5)*.12;
+     }
+     for(const sx of [-1,1])for(let k=0;k<2;k++)sphere(x+sx*.061,y+.128,z-.05+k*.045,.009,.009,.009,oak);
+     // Contrasting heel tab and side stripe improve silhouette recognition at game-camera distance.
+     box(x,y+.091,z+.158,.055,.018,.018,side?stitch:oak);
+     const stripe=box(x+side*.066,y+.105,z-.005,.012,.012,.12,stitch);stripe.rotation.x=-.08;
+    }
+    // Three fully open shelves; two individually modeled shoes sit above each shelf.
+    const shelfYs=[.22,.54,.86];
+    for(let row=0;row<3;row++){
+     const shoeY=shelfYs[row]+.055;
+     shoe(-.31,shoeY,.095,row, -1);
+     shoe(-.105,shoeY,.095,row+1,1);
+     shoe(.105,shoeY,.095,row+2,-1);
+     shoe(.31,shoeY,.095,row+3,1);
+     for(const x of [-.57,.57]){
+      const pin=cyl(x,shelfYs[row]+.105,.305,.012,.012,.025,m.gold,10);
+      pin.rotation.x=Math.PI/2;
+     }
+    }
+    for(const x of [-.55,.55])for(const z of [-.23,.23]){
+     const foot=new T.Mesh(new T.CylinderGeometry(.045,.06,.13,12),dark);
+     foot.position.set(x,.065,z);group.add(foot);
+    }
+    // No doors, opaque front fascia, or decorative objects cover the shoes.
    }else if(modelName==='沙发床'){
 
     width=2.42;depth=2.58;height=1.12;action=()=>openFurnitureActions('sofa',id);
