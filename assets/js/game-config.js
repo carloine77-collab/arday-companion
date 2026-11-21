@@ -857,6 +857,7 @@ window.ArdayGameConfig = {
    },
    needs: { hungerHourlyDecay:2.2, cleanHourlyDecay:0.7, funHourlyDecay:1.0 }
   },
+  activityDailyLimits: {wash:1,rest:2,laundry:1,exercise:1},
   activityMeta: {
  rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:72,weight:2.2,base:1.5},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
