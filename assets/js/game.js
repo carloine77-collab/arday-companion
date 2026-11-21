@@ -64,6 +64,8 @@ function highestUnlockedDungeonIndex(){return Math.max(0,...(s.dungeonUnlocks||[
 function highestUnlockedDungeonTier(){return DUNGEON_TIERS[highestUnlockedDungeonIndex()]}
 function dungeonTierIndex(t){return Math.max(0,DUNGEON_TIERS.indexOf(t||'F'))}
 s.marketRefresh=s.marketRefresh&&typeof s.marketRefresh==='object'?s.marketRefresh:{day:'',count:0};
+s.recruitmentCandidates=Array.isArray(s.recruitmentCandidates)?s.recruitmentCandidates:[];s.recruitmentMarketDay=String(s.recruitmentMarketDay||'');
+s.leaderboardSeasonStartAt=Number(s.leaderboardSeasonStartAt)||Date.now();
 s.teamRoster.forEach(m=>{if(!DUNGEON_TIERS.includes(m.maxTier))m.maxTier=highestUnlockedDungeonTier()});
 
 s.dungeonStats=s.dungeonStats&&typeof s.dungeonStats==='object'?s.dungeonStats:{};
@@ -471,7 +473,7 @@ function createAutonomousScheduleEvent(hour,recent=[],dayHistory=null){
 function makeSleepPlan(key,energy=100,bedtime=22){
  const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(0,Number.isFinite(Number(energyConfig.minimumSleepHours))?Number(energyConfig.minimumSleepHours):0),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),net=Math.max(.1,recovery-decay);
  const current=Math.max(0,Math.min(100,Number(energy)||0)),deficit=Math.max(0,100-current);
- const duration=deficit<=.001?0:Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/net)));
+ const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit<=.001?minSleep:Math.max(minSleep,deficit/net))));
  const start=Math.max(18,Math.min(23,Number(bedtime)||22));
  return {bedtime:start,duration,wake:(start+duration)%24,energyAtPlanning:current,recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now(),planVersion:3};
 }
@@ -988,8 +990,9 @@ function updateStatusBuffs(at=Date.now()){
  const hourMs=3600000,period=12*hourMs;s.statusBuffs=s.statusBuffs||{};
  const rules=[
   {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n);s.love=Math.max(0,(Number(s.love)||0)-n)}},
-  {id:'sick',active:Number(s.clean)<20&&Number(s.energy)<20,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+2*n)}},
-  {id:'fatigued',active:Number(s.energy)<25,apply:n=>{}}
+  {id:'starving',active:Number(s.hunger)<15,apply:n=>{s.energy=clamp(s.energy-2*n);s.fun=clamp(s.fun-n)}},
+  {id:'sick',active:Number(s.clean)<25,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+n);s.energy=clamp(s.energy-n)}},
+  {id:'fatigued',active:Number(s.energy)<25,apply:n=>{s.fun=clamp(s.fun-n);s.bored=Math.min(100,(Number(s.bored)||0)+n)}}
  ];
  for(const rule of rules){let state=s.statusBuffs[rule.id]||(s.statusBuffs[rule.id]={active:false,since:0,nextEffectAt:0});
   if(rule.active&&!state.active){state.active=true;state.since=at;state.nextEffectAt=at+period}
@@ -1049,6 +1052,7 @@ function processActivityAt(value){
  if(workCompleted)updatePersonalGoal('work',d.getTime());
  if(Number(s.fun)<=30)s.bored=Math.min(100,(Number(s.bored)||0)+(5/24));
  updateStatusBuffs(d.getTime());
+ updateGuildContributionCompliance(d.getTime());
 
  s.lastUnifiedHourKey=hourKey;s.lastHourKey=hourKey;s.currentActivity=activity;s.currentActivityAnchor=ev?.anchor||meta?.anchor||null;
  s.currentActivityRoom=ev?.room||(activity==='sleep'?'bedroom':'living');
@@ -1381,7 +1385,19 @@ function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
 }
 
 const {ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_GUILD_MATERIALS,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
-function guildWeekKey(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function updateGuildContributionCompliance(at=Date.now()){
+ const member=s.factionMembership;if(!member||member==='anomaly-bureau')return;
+ const todayDate=new Date(at);todayDate.setHours(0,0,0,0);const today=keyAt(todayDate);
+ if(!s.guildContributionComplianceDay){s.guildContributionComplianceDay=today;return}
+ const parse=key=>{const [y,m,d]=String(key).split('-').map(Number);return new Date(y,m-1,d)};
+ let cursor=parse(s.guildContributionComplianceDay);cursor.setDate(cursor.getDate()+1);const end=new Date(todayDate);end.setDate(end.getDate()-1);
+ while(cursor<=end){const key=keyAt(cursor),week=guildWeekKey(cursor);if(s.guildContributionComplianceWeek!==week){s.guildContributionComplianceWeek=week;s.guildContributionMisses=0}
+  if(s.guildContributionDay!==key){s.guildContributionMisses=(Number(s.guildContributionMisses)||0)+1;s.guildContributionMissedDates=Array.isArray(s.guildContributionMissedDates)?s.guildContributionMissedDates:[];s.guildContributionMissedDates.push(key);s.guildContributionMissedDates=s.guildContributionMissedDates.slice(-28)}
+  s.guildContributionComplianceDay=key;cursor.setDate(cursor.getDate()+1);
+  if(Number(s.guildContributionMisses)>=4){const faction=ARDAY_FACTIONS.find(x=>x.id===member);s.factionMembership=null;s.guildExpelledAt=key;s.guildExpelledFrom=member;addEvent('组织资格终止','因本周累计四次未提交组织贡献，你已被'+(faction?.name||'所属组织')+'除名。','daily');save();return}
+ }
+}
 function renderGuildCareer(){
  $('drawerTitle').textContent='职业';$('choices').className='choices career-view';
  const g=ARDAY_FACTIONS.find(f=>f.id===s.factionMembership),tabs='<nav class="career-tabs"><button data-career-tab="real"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild" class="active"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>';
@@ -1400,15 +1416,16 @@ function renderGuildCareer(){
     panel('commission','art-commission','04 / FIELD OPERATION','特别行动',`<h3>${c.title}</h3><div class="guild-contract-meta"><b>${c.minTier}</b><span>等级</span><strong>${c.reward}</strong><span>积分</span></div><button id="guildCommission" class="recruit-action" ${c.status!=='available'?'disabled':''}>${c.status==='active'?'委托进行中':c.status==='completed'?'已完成':'接受委托'}</button>`);
  $('choices').querySelectorAll('[data-guild-panel]').forEach(el=>el.addEventListener('toggle',()=>{s.guildPanelOpen[el.dataset.guildPanel]=el.open;save()}));
  $('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));
- if(!isBureau){const contributeButton=$('choices').querySelector('#guildContribute');if(contributeButton)contributeButton.onclick=()=>{if(s.guildContributionDay===today||!last||s.points<due)return;s.points-=due;s.guildContributionDay=today;s.guildContributionTotal=(s.guildContributionTotal||0)+due;save();render();renderGuildCareer();toast('今日公会贡献已提交')}}
+ if(!isBureau){const contributeButton=$('choices').querySelector('#guildContribute');if(contributeButton)contributeButton.onclick=()=>{if(s.guildContributionDay===today||!last||s.points<due)return;s.points-=due;s.guildContributionDay=today;s.guildContributionTotal=(s.guildContributionTotal||0)+due;const week=guildWeekKey(new Date());if(s.guildContributionComplianceWeek!==week){s.guildContributionComplianceWeek=week;s.guildContributionMisses=0}s.guildContributionComplianceDay=s.guildContributionComplianceDay||today;save();render();renderGuildCareer();toast('今日公会贡献已提交')}}
  $('choices').querySelectorAll('[data-guild-invite]').forEach(b=>b.onclick=()=>{if(s.teamRoster.length>=8){toast('队友名单已满');return}const m=people.find(x=>x.id===b.dataset.guildInvite);if(!m)return;const inviteChance=Math.max(.35,Math.min(.62,.48+Math.max(0,s.combat-m.combat)*.004));if(Math.random()<inviteChance){s.teamRoster.push({...m,combat:Math.min(Number(m.combat)||0,s.combat+15),selected:false,recruited:true});save();toast(m.name+'已加入队友名单')}else toast(m.name+'暂时无法离开当前任务');renderGuildCareer()});
  $('choices').querySelectorAll('[data-guild-material]').forEach(b=>b.onclick=()=>{const n=ARDAY_GUILD_MATERIALS[Number(b.dataset.guildMaterial)];if(!n)return;if(s.guildMaterials.free<1)s.guildMaterials.free++;else{if(s.guildMaterials.paid>=2){toast('本周兑换次数已用完');return}if(s.points<60){toast('积分不足，需要 60 积分');return}s.points-=60;s.guildMaterials.paid++}addInventoryItem(n,'material');save();render();renderGuildCareer()});
  $('choices').querySelector('#guildCommission').onclick=()=>{if(c.status!=='available')return;s.guildCommission={...c,status:'active'};save();renderGuildCareer();toast('已接受特殊委托')};
  $('drawer').classList.add('open');
 }
 
-let recruitmentCandidates=[],recruitmentInvites={};
-let recruitmentMarketDay='';
+let recruitmentCandidates=Array.isArray(s.recruitmentCandidates)?s.recruitmentCandidates:[];
+let recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object'?s.recruitmentInvites:{};
+let recruitmentMarketDay=String(s.recruitmentMarketDay||'');
 function refreshRecruitmentMarket(manual=false){
  const today=keyAt(Date.now());if(s.marketRefresh.day!==today)s.marketRefresh={day:today,count:0};
  if(manual&&s.marketRefresh.count>=2){toast('今天的人才市场刷新次数已用完');return false}
@@ -1416,7 +1433,7 @@ function refreshRecruitmentMarket(manual=false){
  const max=highestUnlockedDungeonIndex(),combatCap=Math.min(100,(Number(s.combat)||15)+15);
  const pool=ARDAY_CANDIDATE_POOL.map(c=>({...c,combat:Math.min(c.combat,Math.round((Number(s.combat)||15)*.78+c.combat*.22)),acceptance:Math.max(.42,Math.min(.78,c.acceptance*.82+.08)),maxTier:DUNGEON_TIERS[Math.max(0,max-Math.floor(Math.random()*3))]}));
  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
- recruitmentInvites={};recruitmentCandidates=pool.slice(0,6).map((c,i)=>({...c,id:'market-'+Date.now().toString(36)+'-'+i+'-'+Math.random().toString(36).slice(2,6)}));recruitmentMarketDay=today;save();return true
+ recruitmentInvites={};s.recruitmentInvites=recruitmentInvites;recruitmentCandidates=pool.slice(0,6).map((c,i)=>({...c,id:'market-'+Date.now().toString(36)+'-'+i+'-'+Math.random().toString(36).slice(2,6)}));recruitmentMarketDay=today;s.recruitmentCandidates=recruitmentCandidates;s.recruitmentMarketDay=today;save();return true
 }
 function showRecruitment(tab){
  $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');$('drawerTitle').textContent='招募';$('choices').className='choices recruitment-view';
@@ -1481,9 +1498,9 @@ window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save
 function useDungeonItem(entity,index){
  const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
  const applyEffects=effects=>{Object.entries(effects||{}).forEach(([key,value])=>{if(key in s.attributes)s.attributes[key]=clamp((Number(s.attributes[key])||0)+value);else if(key in s)s[key]=clamp((Number(s[key])||0)+value)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)};
- if(data.lifeSave){s.dungeonProtection=(Number(s.dungeonProtection)||0)+Math.max(1,Number(data.protectionCharges)||1);applyEffects(data.effects);s.inventory.splice(index,1);toast(data.name+'已生效')}
- else if(data.type==='probability'){s.nextDungeonChanceModifier=Math.max(-.25,Math.min(.25,(Number(s.nextDungeonChanceModifier)||0)+Number(data.chance||0)/100));s.inventory.splice(index,1);toast('下次副本概率 '+(data.chance>0?'+':'')+data.chance+'%')}
- else if(data.type==='tactical'){s.nextDungeonDifficultyReduction=Math.min(20,(Number(s.nextDungeonDifficultyReduction)||0)+Number(data.difficultyReduction||0));s.nextDungeonMaliceReduction=Math.min(30,(Number(s.nextDungeonMaliceReduction)||0)+Number(data.maliceReduction||0));s.inventory.splice(index,1);toast(data.name+'已部署')}
+ if(data.lifeSave){const current=Math.max(0,Number(s.dungeonProtection)||0);if(current>=2){toast('保命储备已达上限');return}s.dungeonProtection=Math.min(2,current+Math.max(1,Number(data.protectionCharges)||1));applyEffects(data.effects);s.inventory.splice(index,1);toast(data.name+'已生效')}
+ else if(data.type==='probability'){const current=Number(s.nextDungeonChanceModifier)||0,addition=Math.max(0,Number(data.chance)||0)/100;s.nextDungeonChanceModifier=Math.min(.08,current+Math.min(.04,addition));s.inventory.splice(index,1);toast('下次副本概率加成已调整')}
+ else if(data.type==='tactical'){s.nextDungeonDifficultyReduction=Math.min(6,(Number(s.nextDungeonDifficultyReduction)||0)+Math.min(4,Number(data.difficultyReduction)||0));s.nextDungeonMaliceReduction=Math.min(10,(Number(s.nextDungeonMaliceReduction)||0)+Math.min(6,Number(data.maliceReduction)||0));s.inventory.splice(index,1);toast(data.name+'已部署')}
  else if(data.type==='buff'){applyEffects(data.effects);s.inventory.splice(index,1);toast(data.name+'已使用')}
  else{toast('该道具暂不可使用');return}
  save();render();openTab('物品',true);
@@ -1527,11 +1544,12 @@ function dispatchDungeon(tier,energyCost,base){
 }
 function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active'||mission.settling)return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;mission.settling=true;const wasBoard=mission.mode==='board';
- const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.72+(Number(snap.teamPower)||0)*.28,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.035,Math.min(.97,.50+(power-mission.difficulty)*.0095-(Number(snap.teamMalice)||0)*.0009+modifier)),success=Math.random()<successChance;
+ const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.72+(Number(snap.teamPower)||0)*.28,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.05,Math.min(.95,.50+(power-mission.difficulty)*.0095-(Number(snap.teamMalice)||0)*.0009+modifier)),success=Math.random()<successChance;
  let fatal=false,survived=true;
- if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=false;s.energy=0;s.hunger=0;s.attributes.willpower=clamp(s.attributes.willpower-18-(board.fatalRisk?8:0));s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
+ if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=true;s.energy=clamp(s.energy-22);s.hunger=clamp(s.hunger-12);s.clean=clamp(s.clean-5);s.attributes.willpower=Math.max(5,clamp(s.attributes.willpower-5-(board.fatalRisk?2:0)));s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
  const successfulNodes=Object.values(board.specialNodes||{}).filter(Boolean).length,nodeScore=successfulNodes*4,raw=Math.round(Math.max(0,Math.min(100,52+power*.34-mission.difficulty*.17+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.025+(Number(board.chanceModifier)||0)*.25+nodeScore))),rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):'D',earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.08));
  grantPoints(earned);if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
+ if(success&&s.guildCommission?.status==='active'&&dungeonTierIndex(mission.tier)>=dungeonTierIndex(s.guildCommission.minTier||'F')){const commissionReward=Math.max(0,Math.floor(Number(s.guildCommission.reward)||0));if(commissionReward){grantPoints(commissionReward);s.guildCommission={...s.guildCommission,status:'completed',completedAt:at};addEvent('特别行动完成','完成组织委托，获得 '+commissionReward+' 积分。','daily')}}
  const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x)),result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at,unlocked:newly,survived,fatal,boardSteps:Math.max(0,Math.min(108,Number(board.steps)||0))};
  recordDungeonStat(result);const elite=maybeMeetElite(mission.tier,at);if(elite)result.eliteEncounter={name:elite.name,relation:elite.relation};s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
  addEvent('副本结算报告 · '+result.tier,'校园灵异副本已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(success?'':survived?'保命道具生效，失败后成功生还。':'未持有保命道具，角色遭受濒死重创。'),'daily');save();render();if($('drawer').classList.contains('open')&&($('drawerTitle').textContent.includes('副本')||wasBoard))showDungeonResult(result);return true;
@@ -1544,8 +1562,11 @@ function showDungeonResult(result){
 function showEntertainment(){ $('drawerTitle').textContent='娱乐';$('choices').className='choices infinite-view';$('choices').innerHTML='<div class="illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 300 100"><path d="M15 82 Q60 10 108 72 T205 38 T285 65" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="90" cy="38" r="20" fill="none" stroke="currentColor"/><path d="M80 38h20M90 28v20" stroke="currentColor"/></svg></div><h2>娱乐</h2></div><div class="illustrated-choice-grid"><button class="instance-strategy" onclick="toast(\'即将开放\')">🎴<strong>牌局</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">🎮<strong>街机</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">♟<strong>棋室</strong></button></div>';$('drawer').classList.add('open');}
 function leaderboardNPCs(){
  const surnames='沈顾裴陆温谢岑江许周林秦苏程叶白唐祁陈宋',given='星河照临川月深远知秋砚宁',roles=['探索者','战斗员','侦察员','支援者','研究员'];
- const generic=Array.from({length:19990},(_,i)=>{const seed=(i*9301+49297)%233280,rnd=seed/233280;const score=i<19700?Math.round(11900-i*(11800/19699)):Math.max(1,99-Math.floor((i-19700)*.34));return{id:'ranked-'+String(i+1).padStart(5,'0'),name:surnames[i%surnames.length]+given[(i*7)%given.length]+'·'+String(i+1).padStart(4,'0'),role:roles[i%roles.length],combat:35+Math.floor(rnd*55),malice:Math.floor(((i*233+719)%7919)%100),points:score,isElite:false}});
- return [...ARDAY_ELITE_RANKERS.map(x=>({...x,isElite:true})),...generic];
+ if(!Number.isFinite(Number(s.leaderboardSeasonStartAt)))s.leaderboardSeasonStartAt=Date.now();
+ const elapsedDays=Math.max(0,Math.floor((Date.now()-Number(s.leaderboardSeasonStartAt))/86400000));
+ const generic=Array.from({length:19990},(_,i)=>{const seed=(i*9301+49297)%233280,rnd=seed/233280;const baseScore=i<19700?Math.round(11900-i*(11800/19699)):Math.max(1,99-Math.floor((i-19700)*.34));const dailyGrowth=.18+((i*37)%100)/100*1.35;const score=baseScore+Math.floor(elapsedDays*dailyGrowth);return{id:'ranked-'+String(i+1).padStart(5,'0'),name:surnames[i%surnames.length]+given[(i*7)%given.length]+'·'+String(i+1).padStart(4,'0'),role:roles[i%roles.length],combat:35+Math.floor(rnd*55),malice:Math.floor(((i*233+719)%7919)%100),points:score,isElite:false}});
+ const elites=ARDAY_ELITE_RANKERS.map((x,i)=>({...x,points:x.points+Math.floor(elapsedDays*(13-i*.85)),isElite:true}));
+ return [...elites,...generic];
 }
 function getLeaderboard(){
  const all=[...leaderboardNPCs(),{id:'player',name:'Arday',points:s.rankPoints,isPlayer:true}].sort((a,b)=>b.points-a.points||a.id.localeCompare(b.id));
