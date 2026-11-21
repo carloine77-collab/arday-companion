@@ -1563,6 +1563,49 @@ window.ArdayFurnitureModels = (() => {
     }
     const ring=new T.Mesh(new T.TorusGeometry(.22,.025,8,32),timber);ring.rotation.x=Math.PI/2;ring.position.y=.29;group.add(ring);
     for(let i=0;i<8;i++){const a=i*Math.PI/4;const tack=sphere(Math.cos(a)*.29,.67,Math.sin(a)*.29,.018,.018,.018,brass)}
+   }else if(modelName==='空气净化器'){
+    width=.68;depth=.62;height=1.48;
+    const shell=mat(0xd9d7cc,.72),front=mat(0xece9df,.88),dark=mat(0x46545a,.72),metal=mat(0x9b9d94,.48,.35);
+    // Tall quiet appliance with a curved crown, recessed intake and a readable control deck.
+    box(0,.72,0,.58,1.34,.5,shell);
+    box(0,1.39,-.015,.61,.08,.53,front);
+    const crown=new T.Mesh(new T.CylinderGeometry(.29,.29,.08,40),front);crown.position.set(0,1.43,0);group.add(crown);
+    box(0,.72,.257,.43,.82,.018,dark);
+    for(let row=0;row<17;row++)box(0,.36+row*.044,.272,.37,.012,.012,metal);
+    const display=box(0,1.19,.276,.18,.09,.014,mat(0x263e48,.3));
+    display.material.emissive=new T.Color(0x315a63);display.material.emissiveIntensity=.22;
+    for(let x=-1;x<=1;x++)sphere(x*.09,1.19,.29,.012,.012,.012,mat(0x9dc6b7,.35));
+    for(const x of [-.2,.2])box(x,.18,0,.035,.12,.035,metal);
+    cyl(0,.055,0,.2,.2,.07,dark,32);
+    box(0,.68,-.257,.32,.56,.012,front);
+    for(let row=0;row<12;row++)box(0,.43+row*.04,-.267,.26,.008,.008,metal);
+   }else if(modelName==='智能音响'){
+    width=.64;depth=.58;height=.78;
+    const fabric=mat(0x6c7772,.98),top=mat(0x343e40,.42),trim=mat(0xb49a70,.42,.42);
+    // Compact fabric-wrapped speaker, circular acoustic drivers and a tactile top ring.
+    const body=new T.Mesh(new T.CylinderGeometry(.245,.27,.62,40,1,false),fabric);body.position.y=.37;group.add(body);
+    cyl(0,.695,0,.25,.25,.045,top,40);
+    const ring=new T.Mesh(new T.TorusGeometry(.19,.012,8,40),trim);ring.rotation.x=Math.PI/2;ring.position.y=.72;group.add(ring);
+    for(let i=0;i<24;i++){const a=i*Math.PI*2/24;const dot=sphere(Math.cos(a)*.205,.725,Math.sin(a)*.205,.009,.008,.009,mat(0xd5c7a7,.6));}
+    const face=new T.Mesh(new T.CircleGeometry(.155,40),top);face.position.set(0,.37,.246);group.add(face);
+    const driver=new T.Mesh(new T.TorusGeometry(.105,.012,8,36),trim);driver.position.set(0,.37,.258);group.add(driver);
+    sphere(0,.37,.258,.07,.07,.018,dark);
+    for(let i=0;i<4;i++)box(-.09+i*.06,.08,.245,.018,.012,.012,trim);
+   }else if(modelName==='窗'&&variant==='拱形'){
+    width=1.9;depth=.18;height=2.25;surfaceType='wall';
+    const frame=mat(0x765d43,.58),glass=mat(0x9ebbc0,.18,.12);
+    box(0,1.05,0,1.82,2.1,.12,frame);
+    box(0,.96,.068,1.64,1.72,.018,glass);
+    const arch=new T.Mesh(new T.TorusGeometry(.82,.07,10,48,Math.PI),frame);arch.rotation.z=Math.PI;arch.position.set(0,1.82,0);group.add(arch);
+    const archGlass=new T.Mesh(new T.CircleGeometry(.76,48,0,Math.PI),glass);archGlass.position.set(0,1.82,.07);group.add(archGlass);
+    box(0,.96,.09,.045,1.72,.025,frame);box(0,.98,.09,1.64,.045,.025,frame);
+    box(-.53,.98,.09,.025,1.7,.02,frame);box(.53,.98,.09,.025,1.7,.02,frame);
+   }else if(modelName==='木格栅隔断'){
+    width=1.85;depth=.22;height=2.15;surfaceType='floor';
+    const timber=mat(0x8b6748,.68),base=mat(0x5e4938,.58);
+    box(0,.08,0,1.92,.14,.28,base);box(0,2.05,0,1.92,.1,.28,timber);
+    for(let i=0;i<13;i++){const x=-.84+i*.14;box(x,1.08,0,.055,1.92,.16,timber);box(x+.035,1.08,.086,.012,1.72,.012,mat(0xb28b5e,.58))}
+    for(const x of [-.91,.91])box(x,1.08,0,.09,2.05,.24,base);
    }else{toast('没有找到这种家具模型：'+name);return null}
    // Fine finish pass: small joinery, upholstery and hardware details for existing models.
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
