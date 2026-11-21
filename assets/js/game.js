@@ -1356,29 +1356,36 @@ window.resignFromJob=function(event){
  addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();render();renderCalendar();toast('已离职');return false;
 };
 function careerPoster(title,index=0){const hue=[18,34,205,275,145][index%5],mark=String(title||'职').trim().slice(0,1);return '<div class="career-poster" style="--poster-hue:'+hue+'"><span class="career-poster-kicker">ARDAY JOURNAL / CAREER '+(index+1)+'</span><strong>'+title+'</strong><i>'+mark+'</i><small>AN EVERYDAY PROFESSION</small></div>'}
-function careerCompositeScore(job=null){
- const emotion=Math.max(0,Math.min(100,(Number(s.friend)||0)*.45+(Number(s.love)||0)*.25+(100-(Number(s.hate)||0))*.15+(100-(Number(s.bored)||0))*.15));
- const combat=Math.max(0,Math.min(100,Number(s.combat)||0));
- const survival=['energy','hunger','clean','fun'].reduce((sum,key)=>sum+Math.max(0,Math.min(100,Number(s[key])||0)),0)/4;
+function careerStatBreakdown(job){
+ const values={
+  emotion:Math.max(0,Math.min(100,(Number(s.friend)||0)*.45+(Number(s.love)||0)*.25+(100-(Number(s.hate)||0))*.15+(100-(Number(s.bored)||0))*.15)),
+  combat:Math.max(0,Math.min(100,Number(s.combat)||0)),
+  survival:['energy','hunger','clean','fun'].reduce((sum,key)=>sum+Math.max(0,Math.min(100,Number(s[key])||0)),0)/4
+ };
  const weights=job?.weights||{emotion:.45,combat:.40,survival:.15};
- return emotion*weights.emotion+combat*weights.combat+survival*weights.survival;
+ const labels={emotion:'情感',combat:'战斗',survival:'生存'};
+ return Object.keys(weights).map(key=>({key,label:labels[key],weight:Math.round(weights[key]*100),value:Math.round(values[key]||0)})).sort((a,b)=>b.weight-a.weight);
 }
-function careerApplicationChance(job,score=careerCompositeScore()){
+function careerCompositeScore(job=null){
+ return careerStatBreakdown(job).reduce((sum,item)=>sum+item.value*item.weight/100,0);
+}
+function careerApplicationChance(job,score=careerCompositeScore(job)){
  return Math.max(.12,Math.min(.94,.55+(score-Number(job.minScore||0))*.012-(Number(job.selectivity)||0)));
 }
-function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
- $('drawer').classList.remove('profile-expanded','shop-drawer');$('drawerTitle').textContent='职业';$('choices').className='choices career-view';
+function showCareer(tab='real'){
+ if(tab==='guild'){renderGuildCareer();return}
+ $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');
+ $('drawerTitle').textContent='职业';$('choices').className='choices career-view';
  if(s.job?.active){
   const j=s.job;
-  $('choices').innerHTML=careerPoster(j.title,0)+'<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
-
+  $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav><section class="career-current"><div class="career-current-mark">在职</div><div class="career-current-copy"><h2>'+j.title+'</h2><strong>¥'+j.salary+' / 日</strong><small>'+pad(j.start)+':00–'+pad(j.end)+':00 · '+(j.end-j.start)+'小时</small><small>入职日期 '+j.startDate+'</small></div><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></section>';
  }else{
   const jobs=ARDAY_SOCIAL_JOBS;
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
-  $('choices').innerHTML=jobs.map((j,i)=>{
-   const attempted=!!s.jobApplications[applicationDay][j.id],fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start;
-   return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">'+j.category+' · '+j.focus+'</div><h3>'+j.title+'</h3><p>'+j.description+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00（'+hours+'小时）</p><p>每日薪资：¥'+j.salary+'</p><p>入职门槛：综合适配 ≥ '+j.minScore+' · 当前 '+Math.round(fitScore)+'</p><p>录用概率：'+(eligible?Math.round(chance*100):0)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></section>';
-  }).join('');
+  $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav><div class="career-jobs-grid">'+jobs.map(j=>{
+   const attempted=!!s.jobApplications[applicationDay][j.id],parts=careerStatBreakdown(j),fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start,main=parts[0],rest=parts.slice(1);
+   return '<article class="career-job-card"><div class="career-job-heading"><h3>'+j.title+'</h3><strong>¥'+j.salary+'<small>/日</small></strong></div><div class="career-job-time">'+pad(j.start)+':00–'+pad(j.end)+':00 <span>'+hours+'小时</span></div><div class="career-job-score"><span>适配 '+Math.round(fitScore)+' / '+j.minScore+'</span><span>录用 '+(eligible?Math.round(chance*100):0)+'%</span></div><div class="career-job-priority"><b>重点要求</b><strong>'+main.label+' '+main.weight+'% <small>当前 '+main.value+'</small></strong></div><div class="career-job-secondary">'+rest.map(x=>'<span>'+x.label+' '+x.weight+'% <b>'+x.value+'</b></span>').join('')+'</div><button class="career-job-apply" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></article>';
+  }).join('')+'</div>';
   $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{
    const j=jobs.find(x=>x.id===b.dataset.applyJob);if(!j)return;
    if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}
@@ -1392,12 +1399,9 @@ function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
    say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功');
   });
  }
- $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>'+$('choices').innerHTML;
  $('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));
- $('choices').querySelectorAll('[data-guild-panel]').forEach(el=>el.addEventListener('toggle',()=>{s.guildPanelOpen[el.dataset.guildPanel]=el.open;save()}));
  $('drawer').classList.add('open');
 }
-
 const {ARDAY_SOCIAL_JOBS,ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_GUILD_MATERIALS,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
 function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function updateGuildContributionCompliance(at=Date.now()){
@@ -1413,6 +1417,7 @@ function updateGuildContributionCompliance(at=Date.now()){
  }
 }
 function renderGuildCareer(){
+ $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');
  $('drawerTitle').textContent='职业';$('choices').className='choices career-view';
  const g=ARDAY_FACTIONS.find(f=>f.id===s.factionMembership),tabs='<nav class="career-tabs"><button data-career-tab="real"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild" class="active"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>';
  if(!g){$('choices').innerHTML=tabs+'<section class="guild-career-empty"><div class="guild-empty-emblem"><i>✣</i><b>GUILD</b></div><h2>未登记组织</h2><button id="guildRecruitJump" class="recruit-action">选择组织</button></section>';$('choices').querySelector('#guildRecruitJump').onclick=()=>openTab('招募',true);$('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));$('drawer').classList.add('open');return}
@@ -1421,7 +1426,7 @@ function renderGuildCareer(){
  if(!s.guildApplicants||s.guildApplicants.guildId!==g.id){const ix=highestUnlockedDungeonIndex();s.guildApplicants={guildId:g.id,list:['裴知行','顾南枝','陆闻舟'].map((name,i)=>({id:'guild-'+g.id+'-'+i,name,role:['前线突击','异常侦察','战术支援'][i],combat:Math.min(100,s.combat+10+i*2),malice:10+i*12,maxTier:DUNGEON_TIERS[Math.min(8,ix+i+1)],portrait:['刃','鸦','灯'][i]}))}}
  const people=s.guildApplicants.list.filter(m=>!s.teamRoster.some(x=>x.id===m.id));
  s.guildCommission=s.guildCommission||{status:'available',title:'边境异常清剿',detail:'完成一次成功副本挑战',minTier:highestUnlockedDungeonTier(),reward:90};const c=s.guildCommission;s.guildPanelOpen=s.guildPanelOpen||{};
-  const panel=(id,art,eyebrow,title,content)=>`<details class="guild-career-section" data-guild-panel="${id}" ${s.guildPanelOpen[id]===false?'':'open'}><summary><div class="guild-section-art ${art}"><i></i><b></b><em></em></div><div class="guild-section-heading"><small>${eyebrow}</small><strong>${title}</strong></div><span class="guild-section-toggle" aria-hidden="true"></span></summary><div class="guild-section-body">${content}</div></details>`;
+  const panel=(id,art,eyebrow,title,content)=>{const expanded=s.guildPanelOpen[id]===undefined?id==='contribution':s.guildPanelOpen[id];return `<details class="guild-career-section" data-guild-panel="${id}" ${expanded?'open':''}><summary><div class="guild-section-art ${art}"><i></i><b></b><em></em></div><div class="guild-section-heading"><small>${eyebrow}</small><strong>${title}</strong></div><span class="guild-section-toggle" aria-hidden="true"></span></summary><div class="guild-section-body">${content}</div></details>`};
   $('choices').innerHTML = tabs +
     `<section class="guild-career-banner"><div class="guild-banner-sigil"><i>${g.mark}</i></div><div class="guild-banner-identity"><small>${isBureau?'OFFICIAL AUTHORITY':'FACTION RECORD / '+String(g.guildRank).padStart(2,'0')}</small><h2>${g.name}</h2>${isBureau?'<span class="guild-official-caption">官方直属机构</span>':'<div class="guild-rank-track"><i style="width:${(5-g.guildRank)*25}%"></i></div>'}</div>${isBureau?'<b class="guild-banner-rank">局</b>':'<b class="guild-banner-rank">#'+g.guildRank+'</b>'}</section>` +
     (isBureau?panel('contribution','art-contribution','01 / DAILY ALLOCATION','每日拨款',`<strong class="guild-due">+${bureauGrant} <small>积分 · 每日发放</small></strong><div class="guild-bureau-grant-note">依据上一次副本结算积分的 40% 计算</div><div class="guild-contribution-total"><i>✦</i><b>${s.bureauGrantDate===today?'已发放':s.lastDungeonResult?'待发放':'等待首次副本结算'}</b><small>今日拨款状态</small></div>`):panel('contribution','art-contribution','01 / DAILY DUES','组织贡献',`<strong class="guild-due">${due} <small>积分 · 今日应缴</small></strong><button id="guildContribute" class="recruit-action" ${s.guildContributionDay===today||!last||s.points<due?'disabled':''}>${s.guildContributionDay===today?'今日已贡献':!last?'完成副本后开放':s.points<due?'积分不足':'提交贡献'}</button><div class="guild-contribution-total"><i>✦</i><b>${s.guildContributionTotal||0}</b><small>累计贡献</small></div>`)) +
