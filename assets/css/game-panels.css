@@ -338,3 +338,54 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 @media(min-width:600px){.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:13px!important;padding:22px 20px 24px!important}.inventory-items>.choice{min-height:135px!important;font-size:13px!important}.shop-content .shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:13px!important}.shop-content .shop-product-card{min-height:125px!important;padding:15px!important;grid-template-columns:44px minmax(0,1fr)!important}.shop-content .shop-product-icon{width:44px!important;height:52px!important;font-size:29px!important}.shop-content .shop-product-info strong{font-size:15px!important}.shop-content .shop-product-price{font-size:19px!important}}
 @media(max-width:430px){.shop-content .shop-product-grid{grid-template-columns:1fr!important}.inventory-items{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 
+
+/* Compact schedule action sheet — action-only menus must not inherit the full-stage drawer. */
+.stage .drawer:has(.schedule-action-view){
+ position:absolute!important;inset:auto!important;left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;
+ width:min(440px,calc(100% - 28px))!important;height:auto!important;min-height:0!important;max-height:min(76%,390px)!important;
+ box-sizing:border-box!important;transform:translate(-50%,calc(-50% + 12px))!important;
+ padding:18px 18px 17px!important;border:1px solid #c8b89e!important;border-radius:9px!important;
+ background:linear-gradient(145deg,#f7efe2,#ece0ce)!important;box-shadow:0 18px 48px #30251b35!important;overflow:visible!important;
+}
+.stage .drawer.open:has(.schedule-action-view){transform:translate(-50%,-50%)!important}
+.stage .drawer:has(.schedule-action-view) .drawer-head{
+ min-height:0!important;flex:0 0 auto!important;margin:0 0 13px!important;padding:0!important;border:0!important;align-items:center!important;
+}
+.stage .drawer:has(.schedule-action-view) .drawer-head:before,
+.stage .drawer:has(.schedule-action-view) .drawer-head:after{display:none!important;content:none!important}
+.stage .drawer:has(.schedule-action-view) .drawer-head strong{font:600 19px/1.2 Georgia,"Noto Serif SC",serif!important;letter-spacing:.02em!important;color:#4b4032!important;text-shadow:none!important}
+.stage .drawer:has(.schedule-action-view) .drawer-close-button{width:30px!important;height:30px!important;flex:0 0 30px!important;font-size:21px!important}
+.stage .drawer:has(.schedule-action-view) .choices.schedule-action-view{
+ display:flex!important;flex:0 1 auto!important;flex-direction:column!important;gap:0!important;min-height:0!important;max-height:calc(76vh - 76px)!important;
+ padding:0!important;overflow:visible!important;background:transparent!important;
+}
+.schedule-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.schedule-action-button{
+ display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important;min-height:54px!important;padding:9px 10px!important;
+ border:1px solid #d9cbb7!important;border-radius:5px!important;background:#f7f1e7!important;color:#4d473c!important;
+ text-align:left!important;box-shadow:none!important;transition:background .16s ease,border-color .16s ease,transform .16s ease!important;
+}
+.schedule-action-button>span{flex:0 0 20px;color:#a17d5b;font:italic 10px Georgia,serif!important}
+.schedule-action-button>strong{min-width:0;flex:1;font:600 11px/1.45 "Noto Serif SC",serif!important;overflow-wrap:anywhere}
+.schedule-action-button>i{flex:0 0 auto;color:#a48d70;font:normal 15px Georgia,serif!important}
+.schedule-action-button:disabled{opacity:.48!important;cursor:default!important}
+.schedule-action-button.schedule-action-back{background:transparent!important;border-style:dashed!important}
+.schedule-action-grid-single{grid-template-columns:minmax(0,1fr)}
+.schedule-action-grid-single .schedule-action-button{min-height:43px!important}
+.schedule-time-editor{display:grid;grid-template-columns:1fr;gap:9px;padding:3px 0 0}
+.schedule-time-editor>label{color:#8d7559;font:700 9px Arial,sans-serif;letter-spacing:.12em}
+.schedule-time-editor>select{width:100%;min-height:42px;padding:0 12px;border:1px solid #cdbb9f;border-radius:5px;background:#fbf7ef;color:#493f32;font:600 13px "Noto Serif SC",serif}
+.schedule-time-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.schedule-time-actions button{min-height:42px;border-radius:5px;font:600 11px "Noto Serif SC",serif}
+.schedule-time-confirm{border:1px solid #8d7153;background:#8d7153;color:#fff8eb}
+.schedule-time-cancel{border:1px solid #d4c5af;background:#f7f1e7;color:#76654f}
+@media(max-width:430px){
+ .stage .drawer:has(.schedule-action-view){width:calc(100% - 24px)!important;padding:15px 13px 13px!important;max-height:min(72%,330px)!important}
+ .schedule-action-grid{gap:6px}
+ .schedule-action-button{min-height:49px!important;padding:8px 7px!important;gap:6px!important}
+ .schedule-action-button>strong{font-size:10px!important}
+}
+@media(orientation:landscape) and (max-height:560px){
+ .stage .drawer:has(.schedule-action-view){width:min(500px,calc(100% - 28px))!important;max-height:calc(100% - 24px)!important}
+ .schedule-action-button{min-height:44px!important}
+}
