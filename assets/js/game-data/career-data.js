@@ -42,7 +42,6 @@ window.ArdayCareerData = {
  ],
  ARDAY_CANDIDATE_POOL: [
 {name:'闻野',role:'近战突入',combat:78,malice:18,portrait:'野',acceptance:.76},{name:'苏弥',role:'环境侦察',combat:64,malice:9,portrait:'弥',acceptance:.82},{name:'周既白',role:'战术支援',combat:71,malice:27,portrait:'白',acceptance:.68},{name:'罗缇',role:'异常研究',combat:52,malice:6,portrait:'缇',acceptance:.88},{name:'严朔',role:'重装防御',combat:86,malice:42,portrait:'朔',acceptance:.55},{name:'祁雾',role:'远程压制',combat:74,malice:61,portrait:'雾',acceptance:.48},{name:'程照',role:'火力压制',combat:82,malice:33,portrait:'照',acceptance:.63},{name:'白榆',role:'医疗支援',combat:59,malice:11,portrait:'榆',acceptance:.84},{name:'沈砚',role:'近距格斗',combat:69,malice:24,portrait:'砚',acceptance:.72},{name:'唐梨',role:'异常感知',combat:67,malice:15,portrait:'梨',acceptance:.79},{name:'顾临',role:'机动侦察',combat:75,malice:49,portrait:'临',acceptance:.52},{name:'叶澄',role:'远程狙击',combat:88,malice:37,portrait:'澄',acceptance:.57}],
- ARDAY_GUILD_MATERIALS: ['异常结晶','稳定剂','旧时代零件','记忆碎片'],
  ARDAY_ELITE_RANKERS: [
 {id:'elite-01',name:'霜原',role:'独行者',combat:98,malice:12,points:28640},
 {id:'elite-02',name:'顾长夜',role:'战术指挥',combat:96,malice:19,points:25120},
