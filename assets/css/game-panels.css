@@ -389,3 +389,28 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
  .stage .drawer:has(.schedule-action-view){width:min(500px,calc(100% - 28px))!important;max-height:calc(100% - 24px)!important}
  .schedule-action-button{min-height:44px!important}
 }
+
+/* Compact event decision panels share the schedule sheet footprint. */
+.stage .drawer:has(.compact-action-view){
+ position:absolute!important;inset:auto!important;left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;
+ width:min(440px,calc(100% - 28px))!important;height:auto!important;min-height:0!important;max-height:min(76%,390px)!important;
+ box-sizing:border-box!important;transform:translate(-50%,calc(-50% + 12px))!important;
+ padding:18px 18px 17px!important;border:1px solid #c8b89e!important;border-radius:9px!important;
+ background:linear-gradient(145deg,#f7efe2,#ece0ce)!important;box-shadow:0 18px 48px #30251b35!important;overflow:visible!important;
+}
+.stage .drawer.open:has(.compact-action-view){transform:translate(-50%,-50%)!important}
+.stage .drawer:has(.compact-action-view) .drawer-head{min-height:0!important;flex:0 0 auto!important;margin:0 0 13px!important;padding:0!important;border:0!important;align-items:center!important}
+.stage .drawer:has(.compact-action-view) .drawer-head:before,.stage .drawer:has(.compact-action-view) .drawer-head:after{display:none!important;content:none!important}
+.stage .drawer:has(.compact-action-view) .drawer-head strong{font:600 19px/1.2 Georgia,"Noto Serif SC",serif!important;letter-spacing:.02em!important;color:#4b4032!important;text-shadow:none!important}
+.stage .drawer:has(.compact-action-view) .drawer-close-button{width:30px!important;height:30px!important;flex:0 0 30px!important;font-size:21px!important}
+.stage .drawer:has(.compact-action-view) .choices.compact-action-view{display:flex!important;flex:0 1 auto!important;flex-direction:column!important;gap:14px!important;min-height:0!important;max-height:calc(76vh - 76px)!important;padding:0!important;overflow:visible!important;background:transparent!important}
+.stage .drawer:has(.compact-action-view) .event-detail{padding:2px 1px 4px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#655744!important;font:400 12px/1.85 "Noto Serif SC",serif!important}
+.stage .drawer:has(.compact-action-view) .calendar-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:0!important}
+.stage .drawer:has(.compact-action-view) .calendar-actions button{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:46px!important;padding:9px 8px!important;border:1px solid #cbb99f!important;border-radius:5px!important;background:#f7f1e7!important;color:#62513d!important;font:600 11px/1.45 "Noto Serif SC",serif!important;letter-spacing:0!important}
+.stage .drawer:has(.compact-action-view) .calendar-actions button:first-child{border-color:#8d7153!important;background:#8d7153!important;color:#fff8eb!important}
+@media(max-width:430px){
+ .stage .drawer:has(.compact-action-view){width:calc(100% - 24px)!important;padding:15px 13px 13px!important;max-height:min(72%,360px)!important}
+ .stage .drawer:has(.compact-action-view) .event-detail{font-size:11px!important}
+ .stage .drawer:has(.compact-action-view) .calendar-actions{gap:6px!important}
+ .stage .drawer:has(.compact-action-view) .calendar-actions button{min-height:43px!important;font-size:10px!important}
+}
