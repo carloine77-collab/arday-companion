@@ -1413,7 +1413,7 @@ function refreshRecruitmentMarket(manual=false){
  if(manual&&s.marketRefresh.count>=2){toast('今天的人才市场刷新次数已用完');return false}
  if(manual)s.marketRefresh.count++;
  const max=highestUnlockedDungeonIndex(),combatCap=Math.min(100,(Number(s.combat)||15)+15);
- const pool=ARDAY_CANDIDATE_POOL.map(c=>({...c,combat:Math.min(c.combat,combatCap),acceptance:Math.max(.42,Math.min(.78,c.acceptance*.82+.08)),maxTier:DUNGEON_TIERS[Math.max(0,max-Math.floor(Math.random()*3))]}));
+ const pool=ARDAY_CANDIDATE_POOL.map(c=>({...c,combat:Math.min(c.combat,Math.round((Number(s.combat)||15)*.78+c.combat*.22)),acceptance:Math.max(.42,Math.min(.78,c.acceptance*.82+.08)),maxTier:DUNGEON_TIERS[Math.max(0,max-Math.floor(Math.random()*3))]}));
  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
  recruitmentInvites={};recruitmentCandidates=pool.slice(0,6).map((c,i)=>({...c,id:'market-'+Date.now().toString(36)+'-'+i+'-'+Math.random().toString(36).slice(2,6)}));recruitmentMarketDay=today;save();return true
 }
