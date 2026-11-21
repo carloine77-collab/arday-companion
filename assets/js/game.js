@@ -375,7 +375,7 @@ function renderEvents(){
   const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=e.type==='shared-goal-proposal'?'阿尔的邀约':'阿尔的来信';
   const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});top.append(kindNode,timeNode);
   const titleNode=document.createElement('strong');titleNode.className='note-card-title';titleNode.textContent=e.title;
-  const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail;
+  const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail+(e.goalCondition?' 完成条件：'+e.goalCondition:'');
   const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='↗';b.append(top,titleNode,detailNode,arrow);
   b.onclick=()=>eventChoices(e);$('choices').appendChild(b);
  });
