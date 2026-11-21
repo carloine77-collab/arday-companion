@@ -282,42 +282,82 @@ window.ArdayFurnitureModels = (() => {
    }else if(modelName==='地毯'){
     width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
     const wool=name==='羊毛地毯',bedroom=name==='卧室地毯';
-    box(0,.035,0,width,.07,depth,m.fabric);
-    const base=box(0,.074,0,3.48,.012,2.48,m.cream);
-    box(0,.083,0,3.25,.012,2.25,m.fabric);
-    for(const x of [-1.7,1.7])for(const z of [-1.2,1.2])box(x,.092,z,.14,.012,.14,m.gold);
     if(wool){
-     // Thick wool pile: raised irregular tufts and short fringe make this visibly softer than the flat bedroom rug.
-     const pile=mat(0xe9e1d4,.98),shade=mat(0xc8bca9,.98);
-     for(let row=0;row<8;row++)for(let col=0;col<17;col++){
-      const x=-1.48+col*.185+(row%2)*.045,z=-.98+row*.28;
-      const tuft=sphere(x,.104,z,.075,.018,.075,(row+col)%4===0?shade:pile);
-      tuft.scale.y=.55;
+     // A continuous padded backing, woven top cloth, bound perimeter and one merged
+     // fiber mesh replace the old grid of intersecting spheres and box fringe.
+     height=.14;surfaceY=.13;
+     const backing=mat(0xaaa08f,.99),top=mat(0xe7dfd2,.99),binding=mat(0xb8aa96,.98);
+     applyPainterMap(backing,fabricMap,.018);applyPainterMap(top,fabricMap,.022);applyPainterMap(binding,fabricMap,.014);
+     box(0,.032,0,width,.064,depth,backing);
+     box(0,.069,0,3.58,.012,2.58,top);
+     box(0,.079,-1.265,3.54,.018,.035,binding);
+     box(0,.079,1.265,3.54,.018,.035,binding);
+     box(-1.765,.079,0,.035,.018,2.52,binding);
+     box(1.765,.079,0,.035,.018,2.52,binding);
+     const positions=[],colors=[];
+     const rand=n=>{const v=Math.sin(n*127.1+311.7)*43758.5453123;return v-Math.floor(v)};
+     const addVertex=(x,y,z,r,g,b)=>{positions.push(x,y,z);colors.push(r,g,b)};
+     const fiberCount=920;
+     for(let i=0;i<fiberCount;i++){
+      const x=(rand(i*5+1)-.5)*3.42,z=(rand(i*5+2)-.5)*2.42;
+      const angle=rand(i*5+3)*Math.PI*2,length=.035+rand(i*5+4)*.055,height=.018+rand(i*5+5)*.035;
+      const dx=Math.cos(angle),dz=Math.sin(angle),sx=-dz,sz=dx,half=.003+rand(i*7+6)*.002;
+      const shade=.84+rand(i*7+7)*.22;
+      const fiberColor=[.91*shade,.87*shade,.80*shade];
+      const left=[],right=[];
+      for(let segment=0;segment<3;segment++){
+       const t=segment/2,curve=Math.sin(t*Math.PI)*.012*(rand(i*11+8)-.35);
+       const cx=x+dx*length*t+sx*curve,cz=z+dz*length*t+sz*curve;
+       const cy=.075+height*(t*(1.15-.15*t)),w=half*(1-.72*t);
+       left.push([cx-sx*w,cy,cz-sz*w]);right.push([cx+sx*w,cy,cz+sz*w]);
+      }
+      for(let segment=0;segment<2;segment++){
+       const a=left[segment],b=right[segment],c=left[segment+1],d=right[segment+1];
+       [a,b,c,b,d,c].forEach(v=>addVertex(v[0],v[1],v[2],fiberColor[0],fiberColor[1],fiberColor[2]));
+      }
      }
-     for(const z of [-1.28,1.28])for(let x=-1.58;x<=1.581;x+=.12){
-      const fringe=box(x,.07,z,.018,.025,.14,pile);fringe.rotation.y=(Math.round(x*10)%2)*.12;
+     const fibersGeometry=new T.BufferGeometry();
+     fibersGeometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+     fibersGeometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));
+     fibersGeometry.computeVertexNormals();
+     const fibersMaterial=stylizeMaterial(new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.99,metalness:0,side:T.DoubleSide}));
+     const fibers=new T.Mesh(fibersGeometry,fibersMaterial);fibers.castShadow=false;fibers.receiveShadow=true;group.add(fibers);
+     // Fine perimeter seams give the rug a finished textile edge without rigid tassels.
+     const seam=mat(0xd8cebf,.98);
+     for(let x=-1.62;x<=1.621;x+=.12){
+      box(x,.089,-1.245,.035,.006,.008,seam);
+      box(x,.089,1.245,.035,.006,.008,seam);
      }
-     for(const x of [-1.68,1.68])for(let z=-1.15;z<=1.151;z+=.12)box(x,.07,z,.14,.025,.018,pile);
-    }else if(bedroom){
-     // Bedroom rug: a restrained central medallion, double inset border and corner rosettes.
-     const border=mat(0xb69b78,.72),motif=mat(0x9c8064,.82);
-     for(const z of [-1.13,1.13])box(0,.105,z,3.28,.018,.035,border);
-     for(const x of [-1.58,1.58])box(x,.105,0,.035,.018,2.28,border);
-     for(const x of [-1.42,1.42])for(const z of [-.98,.98]){
-      const rosette=new T.Mesh(new T.OctahedronGeometry(.16,1),motif);rosette.position.set(x,.12,z);rosette.scale.set(1,.12,1);group.add(rosette);
-      const center=sphere(x,.14,z,.045,.018,.045,m.gold);
+     for(let z=-1.12;z<=1.121;z+=.12){
+      box(-1.745,.089,z,.008,.006,.035,seam);
+      box(1.745,.089,z,.008,.006,.035,seam);
      }
-     const medallion=new T.Mesh(new T.TorusGeometry(.48,.018,8,48),border);medallion.rotation.x=Math.PI/2;medallion.position.y=.115;group.add(medallion);
-     const inner=new T.Mesh(new T.TorusGeometry(.34,.012,8,48),motif);inner.rotation.x=Math.PI/2;inner.position.y=.118;group.add(inner);
-     for(let i=0;i<8;i++){const a=i*Math.PI/4;const leaf=sphere(Math.cos(a)*.28,.125,Math.sin(a)*.28,.11,.012,.045,m.gold);leaf.rotation.y=-a;}
-    }else if(variant==='波斯绛红'){
-     for(let x=-1.25;x<=1.25;x+=.42)for(let z=-.82;z<=.82;z+=.42){const motif=new T.Mesh(new T.OctahedronGeometry(.105,0),m.gold);motif.position.set(x,.105,z);motif.scale.y=.12;group.add(motif)}
-     box(0,.105,0,.08,.012,1.9,m.cream);
-    }else if(variant==='奶油棋盘'){
-     for(let x=-1.38;x<1.4;x+=.46)for(let z=-.92;z<.95;z+=.46)if((Math.round((x+1.38)/.46)+Math.round((z+.92)/.46))%2===0)box(x,.105,z,.44,.012,.44,m.sofa2);
-    }else if(variant==='海盐蓝'){
-     for(let z=-.82;z<=.82;z+=.28)box(0,.105,z,2.95,.012,.025,m.cream);
-     for(const x of [-1.52,1.52])for(let z=-.9;z<=.9;z+=.3)box(x,.11,z,.055,.018,.055,m.gold);
+    }else{
+     box(0,.035,0,width,.07,depth,m.fabric);
+     box(0,.074,0,3.48,.012,2.48,m.cream);
+     box(0,.083,0,3.25,.012,2.25,m.fabric);
+     for(const x of [-1.7,1.7])for(const z of [-1.2,1.2])box(x,.092,z,.14,.012,.14,m.gold);
+     if(bedroom){
+      // Bedroom rug: a restrained central medallion, double inset border and corner rosettes.
+      const border=mat(0xb69b78,.72),motif=mat(0x9c8064,.82);
+      for(const z of [-1.13,1.13])box(0,.105,z,3.28,.018,.035,border);
+      for(const x of [-1.58,1.58])box(x,.105,0,.035,.018,2.28,border);
+      for(const x of [-1.42,1.42])for(const z of [-.98,.98]){
+       const rosette=new T.Mesh(new T.OctahedronGeometry(.16,1),motif);rosette.position.set(x,.12,z);rosette.scale.set(1,.12,1);group.add(rosette);
+       sphere(x,.14,z,.045,.018,.045,m.gold);
+      }
+      const medallion=new T.Mesh(new T.TorusGeometry(.48,.018,8,48),border);medallion.rotation.x=Math.PI/2;medallion.position.y=.115;group.add(medallion);
+      const inner=new T.Mesh(new T.TorusGeometry(.34,.012,8,48),motif);inner.rotation.x=Math.PI/2;inner.position.y=.118;group.add(inner);
+      for(let i=0;i<8;i++){const a=i*Math.PI/4;const leaf=sphere(Math.cos(a)*.28,.125,Math.sin(a)*.28,.11,.012,.045,m.gold);leaf.rotation.y=-a;}
+     }else if(variant==='波斯绛红'){
+      for(let x=-1.25;x<=1.25;x+=.42)for(let z=-.82;z<=.82;z+=.42){const motif=new T.Mesh(new T.OctahedronGeometry(.105,0),m.gold);motif.position.set(x,.105,z);motif.scale.y=.12;group.add(motif)}
+      box(0,.105,0,.08,.012,1.9,m.cream);
+     }else if(variant==='奶油棋盘'){
+      for(let x=-1.38;x<1.4;x+=.46)for(let z=-.92;z<.95;z+=.46)if((Math.round((x+1.38)/.46)+Math.round((z+.92)/.46))%2===0)box(x,.105,z,.44,.012,.44,m.sofa2);
+     }else if(variant==='海盐蓝'){
+      for(let z=-.82;z<=.82;z+=.28)box(0,.105,z,2.95,.012,.025,m.cream);
+      for(const x of [-1.52,1.52])for(let z=-.9;z<=.9;z+=.3)box(x,.11,z,.055,.018,.055,m.gold);
+     }
     }
    }else if(modelName==='沙发'){
     width=2.35;depth=1.12;height=.94;action=()=>openFurnitureActions('sofa',id);
