@@ -4,6 +4,7 @@ window.ArdayScheduleEngine = (() => {
   const {state:s,furnitureActivities,activityMeta,furnitureKindForPlaced,furnitureRequirementAvailable,hasCookableRecipe,eventAt,writeBlockForKey,renderCalendar,getStage,normalizeActivity}=context;
   if(!s||!furnitureActivities||!activityMeta||typeof normalizeActivity!=='function')throw new Error('ArdayScheduleEngine: missing required dependencies');
 const preferenceCap=10,preferenceGain=.85,preferenceDailyDecay=.4;
+const dailyActivityLimits={wash:1,rest:2,laundry:1,exercise:1};
 const preferenceActivities=new Set(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','walk','bouquet','admireFlowers','smellFlowers']);
 function decayActivityPreferences(at=Date.now()){
  const last=Number(s.preferenceUpdatedAt)||at,days=Math.max(0,(at-last)/86400000);
@@ -51,9 +52,12 @@ function autonomousFurnitureOptions(){
  }
  return options;
 }
-function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()){
+function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours(),dayHistory=null){
  decayActivityPreferences();
  const recent=Array.isArray(recentOverride)?recentOverride:(s.activityLog||[]).slice(-5).map(item=>item.activity);
+ const history=Array.isArray(dayHistory)?dayHistory:(s.calendar?.days?.[new Date().toISOString().slice(0,10)]||[]);
+ const dailyCounts={};
+ history.forEach(ev=>{const id=normalizeActivity(ev?.activity);if(id)dailyCounts[id]=(dailyCounts[id]||0)+1});
  const grouped=new Map();
  for(const option of autonomousFurnitureOptions()){
   const {activity:id,meta}=option;
@@ -67,6 +71,8 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   const option=options[Math.floor(Math.random()*options.length)],{meta}=option,spec=meta.autonomy;
   const level=Number(s[spec.need]??50),needScore=Math.max(0,spec.threshold-level)*spec.weight;
   const repeatPenalty=recent.slice(-5).reverse().reduce((sum,value,index)=>sum+(normalizeActivity(value)===id?(repeatCosts[index]||0):0),0);
+  const dailyLimit=dailyActivityLimits[id];
+  if(Number.isFinite(dailyLimit)&&(dailyCounts[id]||0)>=dailyLimit)return null;
   const preference=activityPreferenceScore(id);
   const socialBonus=id==='chat'?(Number(s.friend)||0)*.02:0;
   let timeBias=0;
@@ -74,7 +80,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   else if(hour>=13&&hour<17&&['read','write','program','playPiano','exercise','walk'].includes(id))timeBias=1.3;
   else if(hour>=18&&hour<22&&['chat','watchTV','listenRecords','music','computerPlay','game'].includes(id))timeBias=1.3;
   return {...option,score:needScore+(spec.base||0)+preference+socialBonus+timeBias-repeatPenalty+Math.random()*2};
- }).filter(item=>Number.isFinite(item.score)&&!(normalizeActivity(recent[recent.length-1])===item.activity&&item.activity!=='sleep'));
+ }).filter(item=>item&&Number.isFinite(item.score)&&!(normalizeActivity(recent[recent.length-1])===item.activity&&item.activity!=='sleep'));
  if(!candidates.length)return {activity:'idle',room:getStage()?.classList.contains('bathroom-mode')?'bathroom':getStage()?.classList.contains('bedroom-mode')?'bedroom':getStage()?.classList.contains('kitchen-mode')?'kitchen':'living',anchor:'default',furnitureId:null,furnitureKind:null};
  const max=Math.max(...candidates.map(item=>item.score));
  const weighted=candidates.map(item=>({...item,weight:Math.exp((item.score-max)/13)}));
@@ -103,7 +109,11 @@ function resolveScheduledActivity(key,hour){
   if(stalePlan){
    const alternatives=autonomousFurnitureOptions().filter(option=>option.activity===normalizeActivity(ev.activity));
    choice=alternatives.length?alternatives[Math.floor(Math.random()*alternatives.length)]:chooseAutonomousActivity();
-  }else choice=chooseAutonomousActivity();
+  }else{
+   const history=(s.calendar?.days?.[key]||[]).filter(item=>Number(item.start)<hour).sort((a,b)=>a.start-b.start);
+   const recent=history.map(item=>item.activity).filter(Boolean);
+   choice=chooseAutonomousActivity(recent,hour,history);
+  }
   const activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
   if(ev){ev.title=activity==='idle'?'自由时间':(meta.menuLabel||meta.title);ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'day-ahead';ev.unresolved=false;ev.resolvedAt=Date.now();ev.room=choice.room;ev.anchor=choice.anchor;ev.furnitureId=choice.furnitureId;ev.furnitureKind=choice.furnitureKind;if(stalePlan)ev.replannedAt=Date.now()}
   else{writeBlockForKey(key,hour,hour+1,{title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind});ev=eventAt(key,hour)}
