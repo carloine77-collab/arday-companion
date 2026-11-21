@@ -377,24 +377,22 @@ function renderEvents(){
 function closeCalendar(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(arday3D?.cancelGesture)arday3D.cancelGesture();$('stage').classList.remove('calendar-mode');$('stage').style.touchAction='none';$('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'))}
 function slotClick(di,h){
  ensureSchedule();let d=plusDays(dayAnchor(),di),key=dayKey(d),ev=eventAt(key,h);
- $('drawer').classList.add('open');
+ $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('choices').className='choices schedule-action-view';$('drawer').classList.add('open');
  if(ev&&!(ev.kind==='autonomous'&&ev.unresolved)){
   $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
-  $('choices').innerHTML='<div class="calendar-actions"><button id="join">问他能否一起</button><button id="move">商量调整时间</button><button id="remove">'+(ev.kind==='autonomous'?'重新安排':'让他自己安排')+'</button><button id="return-existing">返回日程</button></div>';
+  $('choices').innerHTML='<div class="schedule-action-grid"><button type="button" class="schedule-action-button" id="join"><span>01</span><strong>问他能否一起</strong><i>↗</i></button><button type="button" class="schedule-action-button" id="move"><span>02</span><strong>商量调整时间</strong><i>↗</i></button><button type="button" class="schedule-action-button" id="remove" '+(['routine','sleep','work'].includes(ev.kind)?'disabled':'')+'><span>03</span><strong>'+(['routine','sleep','work'].includes(ev.kind)?'固定安排':ev.kind==='autonomous'?'重新安排':'让他自己安排')+'</strong><i>↗</i></button><button type="button" class="schedule-action-button schedule-action-back" id="return-existing"><span>04</span><strong>返回日程</strong><i>↗</i></button></div>';
   $('join').onclick=()=>{let yes=ev.kind!=='routine'&&ev.activity!=='sleep'&&ev.kind!=='work'&&s.energy>18&&s.bored<65&&s.hate<70;if(yes){ev.withPlayer=true;remember('planned','决定一起参与：'+ev.title,1);say('好啊，一起做也不错。')}else if(ev.activity==='sleep'||ev.title.includes('睡眠'))say('现在是我的睡眠时间。我不会为了临时邀请打乱作息。我们可以约在明天醒来以后。');else if(ev.kind==='work')say('我已经答应了这份工作，不能临时把它放下。等结束以后再一起安排吧。');else if(ev.kind==='routine')say('这是我固定的生活安排。我愿意商量，但不想直接取消它。');else say('这件事我想自己完成。等我结束后，我们再一起待一会儿。');save();render();$('drawer').classList.remove('open');renderCalendar();};
   $('move').onclick=()=>{
-    const target=prompt('想调整到几点？请输入 0–23 之间的整点。'),n=Number(target),duration=ev.end-ev.start,oldStart=ev.start;
-    if(!Number.isInteger(n)||n<0||n+duration>24){toast('这个时间不可用');return}
-    const conflict=(s.calendar.days[key]||[]).some(x=>x!==ev&&n<x.end&&n+duration>x.start);
-    if(conflict){toast('这个时段已有其他安排');return}
-    ev.start=n;ev.end=n+duration;
-    s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')
+    const duration=ev.end-ev.start,options=Array.from({length:Math.max(0,25-duration)},(_,n)=>{const conflict=(s.calendar.days[key]||[]).some(x=>x!==ev&&n<x.end&&n+duration>x.start);return '<option value="'+n+'" '+(n===ev.start?'selected':'')+' '+(conflict?'disabled':'')+'>'+pad(n)+':00'+(conflict?' · 已占用':'')+'</option>'}).join('');
+    $('choices').innerHTML='<div class="schedule-time-editor"><label for="scheduleTargetHour">调整至</label><select id="scheduleTargetHour">'+options+'</select><div class="schedule-time-actions"><button type="button" class="schedule-time-confirm" id="confirmScheduleMove">确认调整</button><button type="button" class="schedule-time-cancel" id="cancelScheduleMove">取消</button></div></div>';
+    $('confirmScheduleMove').onclick=()=>{const n=Number($('scheduleTargetHour').value),conflict=(s.calendar.days[key]||[]).some(x=>x!==ev&&n<x.end&&n+duration>x.start);if(!Number.isInteger(n)||n<0||n+duration>24||conflict){toast('这个时间不可用');return}ev.start=n;ev.end=n+duration;s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')};
+    $('cancelScheduleMove').onclick=()=>slotClick(di,h);
    };
   $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}if(ev.kind==='autonomous'){const recent=(s.calendar.days[key]||[]).filter(item=>item!==ev&&item.start<ev.start).sort((a,b)=>a.start-b.start).slice(-5).map(item=>item.activity).filter(Boolean);Object.assign(ev,createAutonomousScheduleEvent(ev.start,recent));save();renderCalendar();$('drawer').classList.remove('open');say('我重新安排了这段时间。');return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='自主安排 · '+dayLabel(d)+' '+pad(h)+':00';
- $('choices').innerHTML='<div class="calendar-actions"><button id="return-empty">返回日程</button></div>';
+ $('choices').innerHTML='<div class="schedule-action-grid schedule-action-grid-single"><button type="button" class="schedule-action-button schedule-action-back" id="return-empty"><span>↩</span><strong>返回日程</strong><i>↗</i></button></div>';
  $('return-empty').onclick=()=>$('drawer').classList.remove('open');
 }
 
@@ -519,6 +517,7 @@ function renderCalendar(){
  $('calendarContent').querySelectorAll('[data-hour]').forEach(b=>b.onclick=()=>slotClick(+b.dataset.day,+b.dataset.hour));
 }
 function renderProfile(){
+ $('choices').className='choices';
  const esc=x=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  $('drawerTitle').textContent='人物档案';
  $('drawer').classList.add('profile-expanded');
