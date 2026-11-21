@@ -278,7 +278,7 @@ function openTab(name,force=false){
    Object.keys(groups).forEach(group=>{const button=document.createElement('button');button.type='button';button.className='shop-group'+(shopFurnitureGroup===group?' active':'');button.textContent=group;button.onclick=()=>{shopFurnitureGroup=group;shopFurnitureType=Object.keys(groups[group]||{})[0]||'';openTab('商店',true)};groupNav.appendChild(button)});
    $('choices').appendChild(groupNav);
    const types=groups[shopFurnitureGroup]||{};
-   const typeAliases={'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'};
+   const typeAliases={'餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'};
    const typeGroups={};Object.entries(types).forEach(([type,items])=>{const displayType=typeAliases[type]||type;(typeGroups[displayType]||(typeGroups[displayType]=[])).push(...(items||[]))});
    shopFurnitureType=typeAliases[shopFurnitureType]||shopFurnitureType;
    if(!typeGroups[shopFurnitureType])shopFurnitureType=Object.keys(typeGroups)[0]||'';
