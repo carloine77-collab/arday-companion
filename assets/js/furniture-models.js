@@ -422,7 +422,7 @@ window.ArdayFurnitureModels = (() => {
      soft(1.35,.62,.91,.18,.3,.54,fabric);
      for(const x of [-1.02,1.02])for(const z of [-.35,1.23])leg(x,z,.2);
      for(const x of [-.95,-.65,-.35,-.05,.25,.55,.85]){const stud=new T.Mesh(new T.SphereGeometry(.025,10,8),metal);stud.position.set(x,.38,-.47);group.add(stud)}
-    }else{
+    }else if(isRetro){
      // Vintage Chesterfield: rolled arms, deep diamond button tufting, walnut plinth and brass nailheads.
      width=2.62;depth=1.34;height=1.18;
      box(0,.28,0,2.34,.2,.94,wood);
@@ -446,6 +446,20 @@ window.ArdayFurnitureModels = (() => {
      box(0,.19,-.48,2.12,.08,.04,wood);
      for(let i=0;i<9;i++){const stud=new T.Mesh(new T.SphereGeometry(.022,8,6),metal);stud.position.set(-.96+i*.24,.36,-.495);group.add(stud)}
      for(const x of [-.92,.92]){const cushion=soft(x,.83,.08,.19,.11,.17,lightFabric);cushion.rotation.z=x*.08}
+    }else{
+     // Neutral contemporary three-seat sofa for legacy and generic catalog entries.
+     width=2.42;depth=1.2;height=.98;
+     box(0,.27,0,2.18,.16,.9,wood);
+     for(const x of [-.7,0,.7]){
+      soft(x,.51,-.08,.34,.15,.39,fabric);
+      const back=soft(x,.79,.31,.34,.28,.16,lightFabric);back.rotation.x=-.1;
+      seam([[x-.28,.78,.16],[x,.81,.14],[x+.28,.78,.16]],.008,darkFabric);
+     }
+     for(const x of [-1.04,1.04]){
+      soft(x,.61,-.01,.18,.29,.48,fabric);
+      box(x,.39,.01,.06,.38,.78,wood);
+     }
+     for(const x of [-.88,.88])for(const z of [-.34,.34])leg(x,z,.24);
     }
     if(isVelvet){group.children.forEach(child=>{child.position.z-=.55})}
    }else if(modelName==='壁画'){
