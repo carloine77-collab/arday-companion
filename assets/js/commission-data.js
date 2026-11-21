@@ -25,9 +25,9 @@ window.ArdayCommissionData = {
       {id:'emotion-mood',title:'情绪调节',detail:'完成一次散步、听音乐或休闲活动。',activities:['admireView','admireDecor','music','watchTV','game','computerPlay','walk','listenRecords'],target:1}
     ]},
     {id:'combat',label:'战斗',mark:'⌁',icon:'⬡',tasks:[
-      {id:'combat-study',title:'战术研读',detail:'完成一次阅读、写作或资料整理。',activities:['read','write','program','browseWeb'],target:1},
-      {id:'combat-conditioning',title:'行动训练',detail:'完成一次锻炼或知识训练。',activities:['exercise','read','program'],target:1},
-      {id:'combat-prep',title:'出勤准备',detail:'完成一次阅读、电脑工作或资料整理。',activities:['read','write','computerWork','program','browseWeb','computerPlay'],target:1}
+      {id:'combat-study',title:'战斗档案',detail:'点击侧栏战斗标题，查看一次属性记录。',signal:'combat-inspect',target:1},
+      {id:'combat-conditioning',title:'出勤检查',detail:'打开组队界面，查看当前可进入的副本。',signal:'dungeon-open',target:1},
+      {id:'combat-prep',title:'补给检查',detail:'在背包中打开副本道具分类。',signal:'supply-review',target:1}
     ]}
   ]
 };
