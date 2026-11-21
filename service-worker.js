@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v223";
+const CACHE_NAME = "arday-shell-v224";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -30,7 +30,7 @@ const APP_SHELL = [
   "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1",
-  "./assets/js/game.js?v=20261122-recycle-blue3",
+  "./assets/js/game.js?v=20261122-exchange-guard1",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
@@ -42,6 +42,14 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  // Navigation is network-first so stale cached HTML cannot pair old scripts with new assets.
+  if (request.mode === "navigate") {
+    event.respondWith(fetch(request).then(response => {
+      if (response.ok) { const copy = response.clone(); caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy)); }
+      return response;
+    }).catch(() => caches.match("./index.html")));
+    return;
+  }
   const isScript = request.destination === "script" || /\.js$/i.test(new URL(request.url).pathname);
   if (isScript) {
     event.respondWith(fetch(request).then(response => {
