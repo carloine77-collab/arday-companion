@@ -1,846 +1,984 @@
 window.ArdayGameConfig = {
   shopCatalog: {
  '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6']],
- furnitureCategories:{
-  "坐卧类": {
-    "办公椅": [
-      [
-        "网布椅",
-        "▧",
-        "buy-furniture-catalog-088",
-        "480",
-        ""
-      ]
-    ],
-    "餐椅": [
-      [
-        "藤编餐椅",
-        "▧",
-        "buy-furniture-catalog-078",
-        "260",
-        ""
+ furnitureCategories:  {
+    "坐卧类": {
+      "办公椅": [
+        [
+          "网布椅",
+          "▧",
+          "buy-furniture-catalog-088",
+          "480",
+          ""
+        ]
       ],
-      [
-        "扶手餐椅",
-        "▧",
-        "buy-furniture-catalog-086",
-        "260",
-        ""
-      ]
-    ],
-    "床": [
-      [
-        "布艺床",
-        "▧",
-        "buy-furniture-catalog-017",
-        "1480",
-        ""
+      "餐椅": [
+        [
+          "藤编餐椅",
+          "▧",
+          "buy-furniture-catalog-078",
+          "260",
+          ""
+        ],
+        [
+          "扶手餐椅",
+          "▧",
+          "buy-furniture-catalog-086",
+          "260",
+          ""
+        ]
       ],
-      [
-        "软包床",
-        "▧",
-        "buy-furniture-catalog-032",
-        "1480",
-        ""
+      "床": [
+        [
+          "布艺床",
+          "▧",
+          "buy-furniture-catalog-017",
+          "1480",
+          ""
+        ],
+        [
+          "软包床",
+          "▧",
+          "buy-furniture-catalog-032",
+          "1480",
+          ""
+        ],
+        [
+          "木框床",
+          "▧",
+          "buy-furniture-catalog-044",
+          "1480",
+          ""
+        ],
+        [
+          "上床下桌",
+          "▧",
+          "buy-furniture-catalog-049",
+          "1480",
+          ""
+        ],
+        [
+          "双人床",
+          "▧",
+          "buy-furniture-catalog-079",
+          "1480",
+          ""
+        ]
       ],
-      [
-        "木框床",
-        "▧",
-        "buy-furniture-catalog-044",
-        "1480",
-        ""
+      "凳子": [
+        [
+          "凳子",
+          "▧",
+          "buy-furniture-catalog-099",
+          "180",
+          ""
+        ],
+        [
+          "弧形休闲长凳",
+          "▧",
+          "buy-furniture-catalog-104",
+          "460",
+          ""
+        ],
+        [
+          "软包脚凳",
+          "▧",
+          "buy-furniture-catalog-105",
+          "280",
+          ""
+        ]
       ],
-      [
-        "上床下桌",
-        "▧",
-        "buy-furniture-catalog-049",
-        "1480",
-        ""
+      "沙发": [
+        [
+          "复古沙发",
+          "▧",
+          "buy-furniture-catalog-008",
+          "1080",
+          ""
+        ],
+        [
+          "懒人沙发",
+          "▧",
+          "buy-furniture-catalog-024",
+          "1080",
+          ""
+        ],
+        [
+          "羊毛沙发",
+          "▧",
+          "buy-furniture-catalog-052",
+          "1080",
+          ""
+        ],
+        [
+          "亚麻沙发",
+          "▧",
+          "buy-furniture-catalog-059",
+          "1080",
+          ""
+        ],
+        [
+          "休闲沙发",
+          "▧",
+          "buy-furniture-catalog-070",
+          "1080",
+          ""
+        ],
+        [
+          "绒布沙发",
+          "▧",
+          "buy-furniture-catalog-087",
+          "1080",
+          ""
+        ]
       ],
-      [
-        "双人床",
-        "▧",
-        "buy-furniture-catalog-079",
-        "1480",
-        ""
-      ]
-    ],
-    "凳子": [
-      [
-        "凳子",
-        "▧",
-        "buy-furniture-catalog-099",
-        "180",
-        ""
-      ]
-    ],
-    "沙发": [
-      [
-        "复古沙发",
-        "▧",
-        "buy-furniture-catalog-008",
-        "1080",
-        ""
+      "沙发床": [
+        [
+          "沙发床",
+          "▧",
+          "buy-furniture-catalog-030",
+          "1680",
+          ""
+        ]
       ],
-      [
-        "懒人沙发",
-        "▧",
-        "buy-furniture-catalog-024",
-        "1080",
-        ""
+      "榻榻米": [
+        [
+          "榻榻米",
+          "▧",
+          "buy-furniture-catalog-031",
+          "980",
+          ""
+        ]
       ],
-      [
-        "羊毛沙发",
-        "▧",
-        "buy-furniture-catalog-052",
-        "1080",
-        ""
+      "躺椅": [
+        [
+          "躺椅",
+          "▧",
+          "buy-furniture-catalog-016",
+          "720",
+          ""
+        ]
       ],
-      [
-        "亚麻沙发",
-        "▧",
-        "buy-furniture-catalog-059",
-        "1080",
-        ""
+      "椅子": [
+        [
+          "弧背椅",
+          "▧",
+          "buy-furniture-catalog-095",
+          "320",
+          ""
+        ]
       ],
-      [
-        "休闲沙发",
-        "▧",
-        "buy-furniture-catalog-070",
-        "1080",
-        ""
+      "坐垫": [
+        [
+          "坐垫",
+          "▧",
+          "buy-furniture-catalog-002",
+          "90",
+          ""
+        ]
+      ]
+    },
+    "桌台类": {
+      "边桌": [
+        [
+          "方形边桌",
+          "▧",
+          "buy-furniture-catalog-043",
+          "300",
+          ""
+        ],
+        [
+          "黄铜桌",
+          "▧",
+          "buy-furniture-catalog-092",
+          "300",
+          ""
+        ],
+        [
+          "圆形边几",
+          "▧",
+          "buy-furniture-catalog-106",
+          "360",
+          ""
+        ],
+        [
+          "玄关窄桌",
+          "▧",
+          "buy-furniture-catalog-107",
+          "520",
+          ""
+        ]
       ],
-      [
-        "绒布沙发",
-        "▧",
-        "buy-furniture-catalog-087",
-        "1080",
-        ""
-      ]
-    ],
-    "沙发床": [
-      [
-        "沙发床",
-        "▧",
-        "buy-furniture-catalog-030",
-        "1680",
-        ""
-      ]
-    ],
-    "榻榻米": [
-      [
-        "榻榻米",
-        "▧",
-        "buy-furniture-catalog-031",
-        "980",
-        ""
-      ]
-    ],
-    "躺椅": [
-      [
-        "躺椅",
-        "▧",
-        "buy-furniture-catalog-016",
-        "720",
-        ""
-      ]
-    ],
-    "椅子": [
-      [
-        "弧背椅",
-        "▧",
-        "buy-furniture-catalog-095",
-        "320",
-        ""
-      ]
-    ],
-    "坐垫": [
-      [
-        "坐垫",
-        "▧",
-        "buy-furniture-catalog-002",
-        "90",
-        ""
-      ]
-    ]
-  },
-  "桌台类": {
-    "边桌": [
-      [
-        "方形边桌",
-        "▧",
-        "buy-furniture-catalog-043",
-        "300",
-        ""
+      "餐桌": [
+        [
+          "长餐桌",
+          "▧",
+          "buy-furniture-catalog-038",
+          "680",
+          ""
+        ],
+        [
+          "圆形餐桌",
+          "▧",
+          "buy-furniture-catalog-064",
+          "680",
+          ""
+        ]
       ],
-      [
-        "黄铜桌",
-        "▧",
-        "buy-furniture-catalog-092",
-        "300",
-        ""
-      ]
-    ],
-    "餐桌": [
-      [
-        "长餐桌",
-        "▧",
-        "buy-furniture-catalog-038",
-        "680",
-        ""
+      "茶几": [
+        [
+          "石材茶几",
+          "▧",
+          "buy-furniture-catalog-035",
+          "520",
+          ""
+        ],
+        [
+          "圆形茶几",
+          "▧",
+          "buy-furniture-catalog-046",
+          "520",
+          ""
+        ],
+        [
+          "抽屉茶几",
+          "▧",
+          "buy-furniture-catalog-080",
+          "520",
+          ""
+        ]
       ],
-      [
-        "圆形餐桌",
-        "▧",
-        "buy-furniture-catalog-064",
-        "680",
-        ""
-      ]
-    ],
-    "茶几": [
-      [
-        "石材茶几",
-        "▧",
-        "buy-furniture-catalog-035",
-        "520",
-        ""
+      "床头柜": [
+        [
+          "床头柜",
+          "▧",
+          "buy-furniture-catalog-009",
+          "320",
+          ""
+        ]
       ],
-      [
-        "圆形茶几",
-        "▧",
-        "buy-furniture-catalog-046",
-        "520",
-        ""
+      "料理台": [
+        [
+          "料理台",
+          "▧",
+          "buy-furniture-catalog-066",
+          "880",
+          ""
+        ]
       ],
-      [
-        "抽屉茶几",
-        "▧",
-        "buy-furniture-catalog-080",
-        "520",
-        ""
-      ]
-    ],
-    "床头柜": [
-      [
-        "床头柜",
-        "▧",
-        "buy-furniture-catalog-009",
-        "320",
-        ""
-      ]
-    ],
-    "料理台": [
-      [
-        "料理台",
-        "▧",
-        "buy-furniture-catalog-066",
-        "880",
-        ""
-      ]
-    ],
-    "书桌": [
-      [
-        "极简书桌",
-        "▧",
-        "buy-furniture-catalog-004",
-        "620",
-        ""
+      "书桌": [
+        [
+          "极简书桌",
+          "▧",
+          "buy-furniture-catalog-004",
+          "620",
+          ""
+        ],
+        [
+          "复古书桌",
+          "▧",
+          "buy-furniture-catalog-033",
+          "620",
+          ""
+        ],
+        [
+          "抽屉书桌",
+          "▧",
+          "buy-furniture-catalog-041",
+          "620",
+          ""
+        ]
       ],
-      [
-        "复古书桌",
-        "▧",
-        "buy-furniture-catalog-033",
-        "620",
-        ""
+      "梳妆台": [
+        [
+          "复古妆台",
+          "▧",
+          "buy-furniture-catalog-067",
+          "780",
+          ""
+        ],
+        [
+          "梳妆台",
+          "▧",
+          "buy-furniture-catalog-027",
+          "380",
+          ""
+        ]
       ],
-      [
-        "抽屉书桌",
-        "▧",
-        "buy-furniture-catalog-041",
-        "620",
-        ""
+      "洗手台": [
+        [
+          "洗手台",
+          "▧",
+          "buy-furniture-catalog-101",
+          "920",
+          ""
+        ]
       ]
-    ],
-    "梳妆台": [
-      [
-        "复古妆台",
-        "▧",
-        "buy-furniture-catalog-067",
-        "780",
-        ""
+    },
+    "收纳类": {
+      "柜类": [
+        [
+          "餐边柜",
+          "▧",
+          "buy-furniture-catalog-060",
+          "720",
+          ""
+        ],
+        [
+          "橱柜",
+          "▧",
+          "buy-furniture-catalog-055",
+          "1100",
+          ""
+        ],
+        [
+          "藤编柜",
+          "▧",
+          "buy-furniture-catalog-054",
+          "320",
+          ""
+        ],
+        [
+          "电视柜",
+          "▧",
+          "buy-furniture-catalog-028",
+          "780",
+          ""
+        ],
+        [
+          "吊柜",
+          "▧",
+          "buy-furniture-catalog-014",
+          "620",
+          ""
+        ],
+        [
+          "三抽斗柜",
+          "▧",
+          "buy-furniture-catalog-012",
+          "620",
+          ""
+        ],
+        [
+          "四抽斗柜",
+          "▧",
+          "buy-furniture-catalog-076",
+          "620",
+          ""
+        ],
+        [
+          "酒柜",
+          "▧",
+          "buy-furniture-catalog-065",
+          "880",
+          ""
+        ],
+        [
+          "玻璃书柜",
+          "▧",
+          "buy-furniture-catalog-029",
+          "720",
+          ""
+        ],
+        [
+          "复古书柜",
+          "▧",
+          "buy-furniture-catalog-075",
+          "720",
+          ""
+        ],
+        [
+          "鞋柜",
+          "▧",
+          "buy-furniture-catalog-026",
+          "620",
+          ""
+        ],
+        [
+          "衣柜",
+          "▧",
+          "buy-furniture-catalog-084",
+          "980",
+          ""
+        ],
+        [
+          "展示柜",
+          "▧",
+          "buy-furniture-catalog-015",
+          "980",
+          ""
+        ],
+        [
+          "藤编高柜",
+          "▧",
+          "buy-furniture-catalog-108",
+          "1180",
+          ""
+        ],
+        [
+          "双门餐边柜",
+          "▧",
+          "buy-furniture-catalog-109",
+          "980",
+          ""
+        ]
       ],
-      [
-        "梳妆台",
-        "▧",
-        "buy-furniture-catalog-027",
-        "380",
-        ""
+      "架类": [
+        [
+          "伞架",
+          "▧",
+          "buy-furniture-catalog-011",
+          "220",
+          ""
+        ],
+        [
+          "开放书架",
+          "▧",
+          "buy-furniture-catalog-001",
+          "680",
+          ""
+        ],
+        [
+          "木格书架",
+          "▧",
+          "buy-furniture-catalog-013",
+          "680",
+          ""
+        ],
+        [
+          "衣帽架",
+          "▧",
+          "buy-furniture-catalog-091",
+          "260",
+          ""
+        ],
+        [
+          "置物架",
+          "▧",
+          "buy-furniture-catalog-090",
+          "420",
+          ""
+        ]
       ]
-    ]
-  },
-  "收纳类": {
-    "餐边柜": [
-      [
-        "餐边柜",
-        "▧",
-        "buy-furniture-catalog-060",
-        "720",
-        ""
-      ]
-    ],
-    "橱柜": [
-      [
-        "橱柜",
-        "▧",
-        "buy-furniture-catalog-055",
-        "1100",
-        ""
-      ]
-    ],
-    "床头柜": [
-      [
-        "藤编柜",
-        "▧",
-        "buy-furniture-catalog-054",
-        "320",
-        ""
-      ]
-    ],
-    "电视柜": [
-      [
-        "电视柜",
-        "▧",
-        "buy-furniture-catalog-028",
-        "780",
-        ""
-      ]
-    ],
-    "吊柜": [
-      [
-        "吊柜",
-        "▧",
-        "buy-furniture-catalog-014",
-        "620",
-        ""
-      ]
-    ],
-    "斗柜": [
-      [
-        "三抽斗柜",
-        "▧",
-        "buy-furniture-catalog-012",
-        "620",
-        ""
+    },
+    "照明类": {
+      "壁灯": [
+        [
+          "双臂壁灯",
+          "▧",
+          "buy-furniture-catalog-042",
+          "260",
+          ""
+        ],
+        [
+          "单臂壁灯",
+          "▧",
+          "buy-furniture-catalog-089",
+          "260",
+          ""
+        ],
+        [
+          "玻璃壁灯",
+          "▧",
+          "buy-furniture-catalog-111",
+          "340",
+          ""
+        ]
       ],
-      [
-        "四抽斗柜",
-        "▧",
-        "buy-furniture-catalog-076",
-        "620",
-        ""
-      ]
-    ],
-    "酒柜": [
-      [
-        "酒柜",
-        "▧",
-        "buy-furniture-catalog-065",
-        "880",
-        ""
-      ]
-    ],
-    "伞架": [
-      [
-        "伞架",
-        "▧",
-        "buy-furniture-catalog-011",
-        "220",
-        ""
-      ]
-    ],
-    "书柜": [
-      [
-        "玻璃书柜",
-        "▧",
-        "buy-furniture-catalog-029",
-        "720",
-        ""
+      "吊灯": [
+        [
+          "锥形吊灯",
+          "▧",
+          "buy-furniture-catalog-007",
+          "420",
+          ""
+        ],
+        [
+          "玻璃吊灯",
+          "▧",
+          "buy-furniture-catalog-068",
+          "420",
+          ""
+        ],
+        [
+          "藤编吊灯",
+          "▧",
+          "buy-furniture-catalog-096",
+          "420",
+          ""
+        ]
       ],
-      [
-        "复古书柜",
-        "▧",
-        "buy-furniture-catalog-075",
-        "720",
-        ""
-      ]
-    ],
-    "书架": [
-      [
-        "开放书架",
-        "▧",
-        "buy-furniture-catalog-001",
-        "680",
-        ""
+      "落地灯": [
+        [
+          "纸罩灯",
+          "▧",
+          "buy-furniture-catalog-025",
+          "520",
+          ""
+        ],
+        [
+          "三脚灯",
+          "▧",
+          "buy-furniture-catalog-061",
+          "520",
+          ""
+        ],
+        [
+          "弧形灯",
+          "▧",
+          "buy-furniture-catalog-098",
+          "520",
+          ""
+        ],
+        [
+          "蘑菇落地灯",
+          "▧",
+          "buy-furniture-catalog-110",
+          "580",
+          ""
+        ]
       ],
-      [
-        "木格书架",
-        "▧",
-        "buy-furniture-catalog-013",
-        "680",
-        ""
+      "台灯": [
+        [
+          "蘑菇台灯",
+          "▧",
+          "buy-furniture-catalog-022",
+          "220",
+          ""
+        ],
+        [
+          "折线台灯",
+          "▧",
+          "buy-furniture-catalog-047",
+          "220",
+          ""
+        ],
+        [
+          "玻璃台灯",
+          "▧",
+          "buy-furniture-catalog-057",
+          "220",
+          ""
+        ]
       ]
-    ],
-    "鞋柜": [
-      [
-        "鞋柜",
-        "▧",
-        "buy-furniture-catalog-026",
-        "620",
-        ""
-      ]
-    ],
-    "衣柜": [
-      [
-        "衣柜",
-        "▧",
-        "buy-furniture-catalog-084",
-        "980",
-        ""
-      ]
-    ],
-    "衣帽架": [
-      [
-        "衣帽架",
-        "▧",
-        "buy-furniture-catalog-091",
-        "260",
-        ""
-      ]
-    ],
-    "展示柜": [
-      [
-        "展示柜",
-        "▧",
-        "buy-furniture-catalog-015",
-        "980",
-        ""
-      ]
-    ],
-    "置物架": [
-      [
-        "置物架",
-        "▧",
-        "buy-furniture-catalog-090",
-        "420",
-        ""
-      ]
-    ]
-  },
-  "照明类": {
-    "壁灯": [
-      [
-        "双臂壁灯",
-        "▧",
-        "buy-furniture-catalog-042",
-        "260",
-        ""
+    },
+    "装饰类": {
+      "窗帘": [
+        [
+          "亚麻窗帘",
+          "▧",
+          "buy-furniture-catalog-053",
+          "420",
+          ""
+        ]
       ],
-      [
-        "单臂壁灯",
-        "▧",
-        "buy-furniture-catalog-089",
-        "260",
-        ""
-      ]
-    ],
-    "吊灯": [
-      [
-        "锥形吊灯",
-        "▧",
-        "buy-furniture-catalog-007",
-        "420",
-        ""
+      "地毯": [
+        [
+          "几何地毯",
+          "▧",
+          "buy-furniture-catalog-039",
+          "460",
+          ""
+        ],
+        [
+          "卧室地毯",
+          "▧",
+          "buy-furniture-catalog-048",
+          "460",
+          ""
+        ],
+        [
+          "波斯地毯",
+          "▧",
+          "buy-furniture-catalog-051",
+          "460",
+          ""
+        ],
+        [
+          "羊毛地毯",
+          "▧",
+          "buy-furniture-catalog-082",
+          "460",
+          ""
+        ],
+        [
+          "格纹地毯",
+          "▧",
+          "buy-furniture-catalog-093",
+          "460",
+          ""
+        ]
       ],
-      [
-        "玻璃吊灯",
-        "▧",
-        "buy-furniture-catalog-068",
-        "420",
-        ""
+      "挂画": [
+        [
+          "壁画",
+          "▧",
+          "buy-furniture-catalog-037",
+          "180",
+          ""
+        ]
       ],
-      [
-        "藤编吊灯",
-        "▧",
-        "buy-furniture-catalog-096",
-        "420",
-        ""
-      ]
-    ],
-    "落地灯": [
-      [
-        "纸罩灯",
-        "▧",
-        "buy-furniture-catalog-025",
-        "520",
-        ""
+      "挂钟": [
+        [
+          "木框挂钟",
+          "▧",
+          "buy-furniture-catalog-050",
+          "260",
+          ""
+        ]
       ],
-      [
-        "三脚灯",
-        "▧",
-        "buy-furniture-catalog-061",
-        "520",
-        ""
+      "海报": [
+        [
+          "海报",
+          "▧",
+          "buy-furniture-catalog-018",
+          "120",
+          ""
+        ]
       ],
-      [
-        "弧形灯",
-        "▧",
-        "buy-furniture-catalog-098",
-        "520",
-        ""
-      ]
-    ],
-    "台灯": [
-      [
-        "蘑菇台灯",
-        "▧",
-        "buy-furniture-catalog-022",
-        "220",
-        ""
+      "花瓶": [
+        [
+          "陶土花瓶",
+          "▧",
+          "buy-furniture-catalog-010",
+          "190",
+          ""
+        ],
+        [
+          "陶艺摆件",
+          "▧",
+          "buy-furniture-catalog-112",
+          "260",
+          ""
+        ]
       ],
-      [
-        "折线台灯",
-        "▧",
-        "buy-furniture-catalog-047",
-        "220",
-        ""
+      "花束": [
+        [
+          "花束",
+          "▧",
+          "buy-furniture-catalog-074",
+          "120",
+          ""
+        ]
       ],
-      [
-        "玻璃台灯",
-        "▧",
-        "buy-furniture-catalog-057",
-        "220",
-        ""
-      ]
-    ]
-  },
-  "装饰类": {
-    "窗帘": [
-      [
-        "亚麻窗帘",
-        "▧",
-        "buy-furniture-catalog-053",
-        "420",
-        ""
-      ]
-    ],
-    "地毯": [
-      [
-        "几何地毯",
-        "▧",
-        "buy-furniture-catalog-039",
-        "460",
-        ""
+      "镜子": [
+        [
+          "拱形镜",
+          "▧",
+          "buy-furniture-catalog-085",
+          "480",
+          ""
+        ]
       ],
-      [
-        "卧室地毯",
-        "▧",
-        "buy-furniture-catalog-048",
-        "460",
-        ""
+      "绿植": [
+        [
+          "棕榈树",
+          "▧",
+          "buy-furniture-catalog-020",
+          "150",
+          ""
+        ],
+        [
+          "龟背竹盆栽",
+          "▧",
+          "buy-furniture-catalog-113",
+          "320",
+          ""
+        ]
       ],
-      [
-        "波斯地毯",
-        "▧",
-        "buy-furniture-catalog-051",
-        "460",
-        ""
+      "屏风": [
+        [
+          "屏风",
+          "▧",
+          "buy-furniture-catalog-005",
+          "360",
+          ""
+        ]
       ],
-      [
-        "羊毛地毯",
-        "▧",
-        "buy-furniture-catalog-082",
-        "460",
-        ""
+      "照片墙": [
+        [
+          "照片墙",
+          "▧",
+          "buy-furniture-catalog-072",
+          "360",
+          ""
+        ]
+      ]
+    },
+    "功能类": {
+      "冰箱": [
+        [
+          "冰箱",
+          "▧",
+          "buy-furniture-catalog-062",
+          "1500",
+          ""
+        ]
       ],
-      [
-        "格纹地毯",
-        "▧",
-        "buy-furniture-catalog-093",
-        "460",
-        ""
-      ]
-    ],
-    "挂画": [
-      [
-        "壁画",
-        "▧",
-        "buy-furniture-catalog-037",
-        "180",
-        ""
-      ]
-    ],
-    "挂钟": [
-      [
-        "木框挂钟",
-        "▧",
-        "buy-furniture-catalog-050",
-        "260",
-        ""
-      ]
-    ],
-    "海报": [
-      [
-        "海报",
-        "▧",
-        "buy-furniture-catalog-018",
-        "120",
-        ""
-      ]
-    ],
-    "花瓶": [
-      [
-        "陶土花瓶",
-        "▧",
-        "buy-furniture-catalog-010",
-        "190",
-        ""
-      ]
-    ],
-    "花束": [
-      [
-        "花束",
-        "▧",
-        "buy-furniture-catalog-074",
-        "120",
-        ""
-      ]
-    ],
-    "镜子": [
-      [
-        "拱形镜",
-        "▧",
-        "buy-furniture-catalog-085",
-        "480",
-        ""
-      ]
-    ],
-    "绿植": [
-      [
-        "棕榈树",
-        "▧",
-        "buy-furniture-catalog-020",
-        "150",
-        ""
-      ]
-    ],
-    "屏风": [
-      [
-        "屏风",
-        "▧",
-        "buy-furniture-catalog-005",
-        "360",
-        ""
-      ]
-    ],
-    "照片墙": [
-      [
-        "照片墙",
-        "▧",
-        "buy-furniture-catalog-072",
-        "360",
-        ""
-      ]
-    ]
-  },
-  "卫浴类": {
-    "马桶": [["马桶","▧","buy-furniture-catalog-100","780",""]],
-    "洗手台": [["洗手台","▧","buy-furniture-catalog-101","920",""]],
-    "淋浴间": [["淋浴间","▧","buy-furniture-catalog-102","1180",""]],
-    "浴缸": [["浴缸","▧","buy-furniture-catalog-103","1380",""]]
-  },
-  "功能类": {
-    "冰箱": [
-      [
-        "冰箱",
-        "▧",
-        "buy-furniture-catalog-062",
-        "1500",
-        ""
-      ]
-    ],
-    "唱片机": [
-      [
-        "唱片机",
-        "▧",
-        "buy-furniture-catalog-073",
-        "980",
-        ""
-      ]
-    ],
-    "电脑": [
-      [
-        "电脑",
-        "▧",
-        "buy-furniture-catalog-094",
-        "1200",
-        ""
-      ]
-    ],
-    "电视": [
-      [
-        "电视",
-        "▧",
-        "buy-furniture-catalog-097",
-        "1680",
-        ""
-      ]
-    ],
-    "钢琴": [
-      [
-        "钢琴",
-        "▧",
-        "buy-furniture-catalog-056",
-        "2200",
-        ""
-      ]
-    ],
-    "跑步机": [
-      [
-        "跑步机",
-        "▧",
-        "buy-furniture-catalog-077",
-        "1600",
-        ""
-      ]
-    ],
-    "任务板": [
-      [
-        "任务板",
-        "▧",
-        "buy-furniture-catalog-071",
-        "260",
-        ""
-      ]
-    ],
-    "水槽": [
-      [
-        "水槽",
-        "▧",
-        "buy-furniture-catalog-081",
-        "580",
-        ""
-      ]
-    ],
-    "洗衣机": [
-      [
-        "洗衣机",
-        "▧",
-        "buy-furniture-catalog-058",
-        "1180",
-        ""
-      ]
-    ],
-    "哑铃架": [
-      [
-        "哑铃架",
-        "▧",
-        "buy-furniture-catalog-034",
-        "520",
-        ""
-      ]
-    ],
-    "游戏机": [
-      [
-        "游戏机",
-        "▧",
-        "buy-furniture-catalog-083",
-        "760",
-        ""
-      ]
-    ],
-    "灶台": [
-      [
-        "陶瓷灶",
-        "▧",
-        "buy-furniture-catalog-006",
-        "780",
-        ""
+      "唱片机": [
+        [
+          "唱片机",
+          "▧",
+          "buy-furniture-catalog-073",
+          "980",
+          ""
+        ]
       ],
-      [
-        "珐琅灶",
-        "▧",
-        "buy-furniture-catalog-036",
-        "780",
-        ""
+      "电脑": [
+        [
+          "电脑",
+          "▧",
+          "buy-furniture-catalog-094",
+          "1200",
+          ""
+        ]
       ],
-      [
-        "不锈钢灶",
-        "▧",
-        "buy-furniture-catalog-063",
-        "780",
-        ""
-      ]
-    ]
-  },
-  "建筑类": {
-    "窗": [
-      [
-        "默认窗户",
-        "▧",
-        "buy-furniture-catalog-045",
-        "780",
-        ""
-      ]
-    ],
-    "地板": [
-      [
-        "水磨地板",
-        "▧",
-        "buy-floor-terrazzo",
-        "520",
-        ""
+      "电视": [
+        [
+          "电视",
+          "▧",
+          "buy-furniture-catalog-097",
+          "1680",
+          ""
+        ]
       ],
-      [
-        "水泥地板",
-        "▧",
-        "buy-floor-concrete",
-        "460",
-        ""
-      ]
-    ],
-    "门": [
-      ["默认室内木门","▧","buy-furniture-catalog-023","680",""],
-      ["白橡木玻璃门","▧","buy-furniture-door-glass","860",""],
-      ["奶油法式双线门","▧","buy-furniture-door-cream","920",""],
-      ["藤编门","▧","buy-furniture-door-rattan","780",""],
-      ["深色格栅推拉门","▧","buy-furniture-door-sliding","980",""],
-      ["复古拱顶门","▧","buy-furniture-door-arch","1080",""]
-    ],
-    "墙纸": [
-      [
-        "雾面墙纸",
-        "▧",
-        "buy-wallpaper-mist",
-        "320",
-        ""
+      "钢琴": [
+        [
+          "钢琴",
+          "▧",
+          "buy-furniture-catalog-056",
+          "2200",
+          ""
+        ]
       ],
-      [
-        "深海墙纸",
-        "▧",
-        "buy-wallpaper-deepblue",
-        "380",
-        ""
+      "跑步机": [
+        [
+          "跑步机",
+          "▧",
+          "buy-furniture-catalog-077",
+          "1600",
+          ""
+        ]
       ],
-      [
-        "石膏墙纸",
-        "▧",
-        "buy-wallpaper-warm-white",
-        "0",
-        ""
+      "任务板": [
+        [
+          "任务板",
+          "▧",
+          "buy-furniture-catalog-071",
+          "260",
+          ""
+        ]
+      ],
+      "水槽": [
+        [
+          "水槽",
+          "▧",
+          "buy-furniture-catalog-081",
+          "580",
+          ""
+        ]
+      ],
+      "洗衣机": [
+        [
+          "洗衣机",
+          "▧",
+          "buy-furniture-catalog-058",
+          "1180",
+          ""
+        ]
+      ],
+      "哑铃架": [
+        [
+          "哑铃架",
+          "▧",
+          "buy-furniture-catalog-034",
+          "520",
+          ""
+        ]
+      ],
+      "游戏机": [
+        [
+          "游戏机",
+          "▧",
+          "buy-furniture-catalog-083",
+          "760",
+          ""
+        ]
+      ],
+      "灶台": [
+        [
+          "陶瓷灶",
+          "▧",
+          "buy-furniture-catalog-006",
+          "780",
+          ""
+        ],
+        [
+          "珐琅灶",
+          "▧",
+          "buy-furniture-catalog-036",
+          "780",
+          ""
+        ],
+        [
+          "不锈钢灶",
+          "▧",
+          "buy-furniture-catalog-063",
+          "780",
+          ""
+        ]
+      ],
+      "卫浴设备": [
+        [
+          "马桶",
+          "▧",
+          "buy-furniture-catalog-100",
+          "780",
+          ""
+        ],
+        [
+          "淋浴间",
+          "▧",
+          "buy-furniture-catalog-102",
+          "1180",
+          ""
+        ],
+        [
+          "浴缸",
+          "▧",
+          "buy-furniture-catalog-103",
+          "1380",
+          ""
+        ]
+      ],
+      "家电": [
+        [
+          "空气净化器",
+          "▧",
+          "buy-furniture-catalog-114",
+          "1280",
+          ""
+        ],
+        [
+          "智能音响",
+          "▧",
+          "buy-furniture-catalog-115",
+          "860",
+          ""
+        ]
       ]
-    ]
+    },
+    "建筑类": {
+      "窗": [
+        [
+          "默认窗户",
+          "▧",
+          "buy-furniture-catalog-045",
+          "780",
+          ""
+        ],
+        [
+          "拱形落地窗",
+          "▧",
+          "buy-furniture-catalog-116",
+          "980",
+          ""
+        ]
+      ],
+      "地板": [
+        [
+          "水磨地板",
+          "▧",
+          "buy-floor-terrazzo",
+          "520",
+          ""
+        ],
+        [
+          "水泥地板",
+          "▧",
+          "buy-floor-concrete",
+          "460",
+          ""
+        ]
+      ],
+      "门": [
+        [
+          "默认室内木门",
+          "▧",
+          "buy-furniture-catalog-023",
+          "680",
+          ""
+        ],
+        [
+          "白橡木玻璃门",
+          "▧",
+          "buy-furniture-door-glass",
+          "860",
+          ""
+        ],
+        [
+          "奶油法式双线门",
+          "▧",
+          "buy-furniture-door-cream",
+          "920",
+          ""
+        ],
+        [
+          "藤编门",
+          "▧",
+          "buy-furniture-door-rattan",
+          "780",
+          ""
+        ],
+        [
+          "深色格栅推拉门",
+          "▧",
+          "buy-furniture-door-sliding",
+          "980",
+          ""
+        ],
+        [
+          "复古拱顶门",
+          "▧",
+          "buy-furniture-door-arch",
+          "1080",
+          ""
+        ]
+      ],
+      "墙纸": [
+        [
+          "雾面墙纸",
+          "▧",
+          "buy-wallpaper-mist",
+          "320",
+          ""
+        ],
+        [
+          "深海墙纸",
+          "▧",
+          "buy-wallpaper-deepblue",
+          "380",
+          ""
+        ],
+        [
+          "石膏墙纸",
+          "▧",
+          "buy-wallpaper-warm-white",
+          "0",
+          ""
+        ]
+      ],
+      "隔断": [
+        [
+          "木格栅隔断",
+          "▧",
+          "buy-furniture-catalog-117",
+          "620",
+          ""
+        ]
+      ]
+    }
   }
-}
 
 },
   characterStats: {
