@@ -198,7 +198,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 const tabs={'物品':[],'商店':[]};
 
-let shopCategory='食物食材';let shopBookType='菜谱';
+let shopCategory='食物食材';let shopBookType='菜谱';let shopDungeonType='增益类';
 let inventoryCategory='全部';
 let inventoryGrid=null;
 let shopFurnitureGroup='坐卧类';
@@ -272,11 +272,12 @@ function openTab(name,force=false){
    Object.keys(typeGroups).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFurnitureType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFurnitureType=type;openTab('商店',true)};typeNav.appendChild(button)});
    $('choices').appendChild(typeNav);
   }
-  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
+  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':shopCategory==='积分兑换'?'搜索道具':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
+  if(shopCategory==='积分兑换'){const typeNav=document.createElement('div');typeNav.className='shop-furniture-types shop-exchange-types';Object.values(DUNGEON_ITEM_TYPE_LABELS).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopDungeonType===type?' active':'');button.textContent=type;button.onclick=()=>{shopDungeonType=type;openTab('商店',true)};typeNav.appendChild(button)});$('choices').appendChild(typeNav)}
   shopGrid=document.createElement('div');shopGrid.className='shop-product-grid';$('choices').appendChild(shopGrid);
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
- const tabEntries=name==='商店'?(shopCategory==='积分兑换'?Object.entries(DUNGEON_ITEM_CATALOG).map(([id,item])=>[item.name,item.icon,'exchange-dungeon-'+id,DUNGEON_EXCHANGE_PRICES[id],DUNGEON_ITEM_TYPE_LABELS[item.type]+' · '+DUNGEON_ITEM_DESCRIPTIONS[id]]):shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ const tabEntries=name==='商店'?(shopCategory==='积分兑换'?Object.entries(DUNGEON_ITEM_CATALOG).filter(([,item])=>DUNGEON_ITEM_TYPE_LABELS[item.type]===shopDungeonType).map(([id,item])=>[item.name,item.icon,'exchange-dungeon-'+id,DUNGEON_EXCHANGE_PRICES[id],'']):shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
@@ -1437,10 +1438,30 @@ function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(s.acti
  $('choices').querySelectorAll('[data-remove-member]').forEach(button=>button.onclick=event=>{event.stopPropagation();const index=s.teamRoster.findIndex(x=>x.id===button.dataset.removeMember);if(index<0)return;const removed=s.teamRoster.splice(index,1)[0];save();toast('已移除队友：'+removed.name);showDungeon()});
 }
 
-const DUNGEON_ITEM_CATALOG={stimulant:{name:'肾上腺素注射剂',type:'buff',icon:'✚',effects:{energy:16,agility:1,willpower:1}},standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},hex:{name:'恶意诅咒钉',type:'harm',icon:'†',tradeOnly:true},fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',tradeOnly:true},reprieve:{name:'七日豁免令',type:'extension',icon:'⌛',extendDays:7}};
-const DUNGEON_ITEM_TYPE_LABELS={buff:'增益',life:'保命',harm:'干扰',probability:'概率',extension:'期限'};
-const DUNGEON_ITEM_DESCRIPTIONS={stimulant:'恢复精力，并提升敏捷与意志',standin:'抵消一次副本失败造成的濒死后果',hex:'干扰类交易物资，暂不支持直接使用',fate:'下次副本通关概率提高 8%',misfortune:'概率类交易物资，暂不支持直接使用',reprieve:'将下一次副本期限延后七天'};
-const DUNGEON_EXCHANGE_PRICES={stimulant:80,standin:180,hex:120,fate:150,misfortune:130,reprieve:220};
+const DUNGEON_ITEM_CATALOG={
+ stimulant:{name:'肾上腺素',type:'buff',icon:'✚',effects:{energy:16,agility:1,willpower:1}},
+ focus:{name:'清醒剂',type:'buff',icon:'◈',effects:{energy:8,intelligence:2,perception:1}},
+ enhancer:{name:'强化剂',type:'buff',icon:'✦',effects:{strength:2,agility:1}},
+ resolve:{name:'意志剂',type:'buff',icon:'⌁',effects:{willpower:3,energy:5}},
+ standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},
+ medkit:{name:'急救包',type:'life',icon:'✚',lifeSave:true},
+ ward:{name:'护命符',type:'life',icon:'◇',lifeSave:true},
+ soulpin:{name:'回魂针',type:'life',icon:'针',lifeSave:true},
+ hex:{name:'诅咒钉',type:'harm',icon:'†',tradeOnly:true},
+ weaken:{name:'衰弱符',type:'harm',icon:'▽',tradeOnly:true},
+ seal:{name:'封锁令',type:'harm',icon:'▣',tradeOnly:true},
+ disrupt:{name:'迷乱剂',type:'harm',icon:'⌁',tradeOnly:true},
+ fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},
+ lucky:{name:'幸运符',type:'probability',icon:'✧',chance:5},
+ reverse:{name:'逆命签',type:'probability',icon:'◉',chance:3},
+ misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',chance:-8,tradeOnly:true},
+ reprieve:{name:'七日券',type:'extension',icon:'⌛',extendDays:7},
+ renewal:{name:'续期符',type:'extension',icon:'↻',extendDays:3},
+ grace:{name:'宽限券',type:'extension',icon:'◇',extendDays:1},
+ longterm:{name:'长生契',type:'extension',icon:'∞',extendDays:14}
+};
+const DUNGEON_ITEM_TYPE_LABELS={buff:'增益类',life:'保命类',harm:'损益类',probability:'概率类',extension:'延长类'};
+const DUNGEON_EXCHANGE_PRICES={stimulant:80,focus:110,enhancer:130,resolve:100,standin:180,medkit:150,ward:210,soulpin:260,hex:120,weaken:160,seal:190,disrupt:140,fate:150,lucky:100,reverse:125,misfortune:130,reprieve:220,renewal:120,grace:60,longterm:360};
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;return item}
 function purchaseDungeonExchangeItem(id){const data=DUNGEON_ITEM_CATALOG[id],price=Number(DUNGEON_EXCHANGE_PRICES[id]);if(!data||!Number.isFinite(price)||price<=0){toast('兑换商品不存在');return}if(s.activeDungeon){toast('副本进行中无法兑换');return}if(s.points<price){toast('积分不足，还差 '+(price-s.points)+' 积分');return}s.points-=price;const item=addDungeonItem(id);if(!item){s.points+=price;toast('兑换失败');return}save();render();toast('已兑换：'+data.name);openTab('商店',true)}
 // Narrow runtime bridge for the separately maintained dungeon-board module.
@@ -1448,10 +1469,10 @@ window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save
 
 function useDungeonItem(entity,index){
  const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
- if(data.tradeOnly){toast('该道具目前仅作为交易物资保留，对人使用机制尚未开放');return}
- if(data.lifeSave){s.dungeonProtection=(Number(s.dungeonProtection)||0)+1;s.inventory.splice(index,1);toast('替身纸人已启用：下一次高危副本失败时自动生效')}
- else if(data.type==='probability'){s.nextDungeonChanceModifier=Math.min(.25,(Number(s.nextDungeonChanceModifier)||0)+data.chance/100);s.inventory.splice(index,1);toast('下次副本通关概率 +'+data.chance+'%')}
- else if(data.type==='extension'){s.nextDungeonDueAt=(Number(s.nextDungeonDueAt)||Date.now()+7*86400000)+data.extendDays*86400000;s.inventory.splice(index,1);toast('副本期限已延长七天')}
+ if(data.tradeOnly){toast('该道具暂不可使用');return}
+ if(data.lifeSave){s.dungeonProtection=(Number(s.dungeonProtection)||0)+1;s.inventory.splice(index,1);toast(data.name+'已生效')}
+ else if(data.type==='probability'){s.nextDungeonChanceModifier=Math.max(-.25,Math.min(.25,(Number(s.nextDungeonChanceModifier)||0)+Number(data.chance||0)/100));s.inventory.splice(index,1);toast('下次副本概率 '+(data.chance>0?'+':'')+data.chance+'%')}
+ else if(data.type==='extension'){s.nextDungeonDueAt=(Number(s.nextDungeonDueAt)||Date.now()+7*86400000)+data.extendDays*86400000;s.inventory.splice(index,1);toast('副本期限已延长')}
  else if(data.type==='buff'){Object.entries(data.effects).forEach(([key,value])=>{if(key in s.attributes)s.attributes[key]=clamp((Number(s.attributes[key])||0)+value);else if(key in s)s[key]=clamp((Number(s[key])||0)+value)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);s.inventory.splice(index,1);toast(data.name+'已使用')}
  save();render();openTab('物品',true);
 }
@@ -1538,22 +1559,7 @@ function showRanking(){
  $('choices').innerHTML='<section class="leader-cover"><div class="leader-cover-glow"></div><div class="leader-cover-copy"><small>ARDAY GUILD · 1,000 REGISTERED</small><h2>积分排行榜</h2><span>RANKED BY POINTS</span></div><div class="leader-cover-insignia">榜</div></section><section class="leader-self"><div><small>MY POSITION</small><b>#'+board.rank.toLocaleString('zh-CN')+'</b></div><div class="leader-self-score"><small>我的积分</small><strong>'+s.points.toLocaleString('zh-CN')+'</strong></div></section><section class="leader-podium-wrap"><div class="leader-podium-grid">'+podium+'</div></section><section class="leader-list"><div class="leader-list-caption">TOP 10 · PERSONAL SCORE</div>'+rest+'</section>';
  $('drawer').classList.add('open');
 }
-function showExchange(){
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
- $('drawerTitle').textContent='积分兑换 · EXCHANGE';
- $('choices').className='choices infinite-view';
- const goods=[{id:'energy',name:'能量补给',art:'♨',desc:'',price:45},{id:'recovery',name:'状态修复',art:'✚',desc:'',price:35},{id:'memory',name:'记忆档案',art:'▤',desc:'',price:120}];
- $('choices').innerHTML='<header class="infinite-masthead exchange-masthead"><div class="infinite-kicker">ARDAY POINT EXCHANGE</div><h2>兑换中心</h2><p></p><div class="infinite-balance"><span>可用积分</span><b>'+s.points.toLocaleString('zh-CN')+'</b></div><small class="exchange-rate">参考兑换比例：1 积分 = ¥1</small></header><div class="infinite-section-title">可兑换物资 <small>SUPPLY CATALOG</small></div>'+goods.map(x=>'<article class="exchange-item"><div class="exchange-art">'+x.art+'</div><div><span class="exchange-item-kicker">SUPPLY / '+x.id.toUpperCase()+'</span><h3>'+x.name+'</h3></div><button data-exchange="'+x.id+'" '+(s.points<x.price?'disabled':'')+'><b>'+x.price+'</b><small>积分兑换</small></button></article>').join('')+'<p class="infinite-note"></p>';
- $('drawer').classList.add('open');
- $('choices').querySelectorAll('[data-exchange]').forEach(b=>b.onclick=()=>{
-  const item=goods.find(x=>x.id===b.dataset.exchange);if(!item||s.points<item.price)return;
-  s.points-=item.price;
-  if(item.id==='energy')s.energy=Math.min(100,s.energy+35);
-  if(item.id==='recovery'){s.hunger=Math.min(100,s.hunger+25);s.clean=Math.min(100,s.clean+25)}
-  if(item.id==='memory'){s.memories.push({type:'archive',text:'积分兑换：特殊记忆档案',at:Date.now(),weight:2})}
-  save();render();toast('兑换成功：'+item.name);showExchange();
- });
-}
+function showExchange(){shopCategory='积分兑换';openTab('商店',true)}
 
 function showGoals(){
  ensurePersonalGoal();
