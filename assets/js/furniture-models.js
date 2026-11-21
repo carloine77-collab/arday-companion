@@ -706,7 +706,7 @@ window.ArdayFurnitureModels = (() => {
      for(const x of [-.48,.48]){box(x,.53,0,.42,.28,.34,walnut);box(x,.55,.18,.38,.22,.025,top);cyl(x,.55,.205,.018,.018,.035,brass,12)}
      for(const x of [-.64,.64]){const leg=box(x,.34,-.02,.055,.68,.055,walnut);leg.rotation.z=x*.035;box(x,.045,0,.12,.055,.12,brass)}
      box(0,.22,0,1.26,.045,.28,walnut);box(0,.19,.12,1.16,.035,.025,top);box(0,.7,.228,.58,.025,.018,brass);
-    }else{
+    }else if(variant==='深木方桌'||!variant){
      width=.72;depth=.72;height=.68;surfaceY=.7;const walnut=mat(0x62442f,.62),edge=mat(0x9a704b,.58),brass=mat(0xb28b58,.34,.65);
      box(0,.62,0,.72,.085,.72,walnut);box(0,.672,0,.68,.018,.68,edge);box(0,.42,.366,.52,.24,.025,edge);box(0,.42,.385,.46,.18,.018,walnut);
      for(const x of [-.13,.13])cyl(x,.42,.405,.018,.018,.035,brass,12);
@@ -907,7 +907,7 @@ window.ArdayFurnitureModels = (() => {
     }
     // Separate seat pan, rounded cushion and adjustable arm supports.
     box(0,.57,.025,.68,.14,.66,frame);
-    const cushion=new T.Mesh(new T.CapsuleGeometry(.29,.09,5,12),fabric);cushion.rotation.x=Math.PI/2;cushion.position.set(0,.67,.035);cushion.scale.set(1,.9,1);group.add(cushion);
+    const cushion=new T.Mesh(new T.SphereGeometry(1,28,18),fabric);cushion.position.set(0,.67,.035);cushion.scale.set(.29,.13,.33);group.add(cushion);
     box(0,.75,-.245,.12,.12,.12,frame);
     for(const x of [-.37,.37]){
      box(x,.79,-.015,.065,.38,.065,frame);
