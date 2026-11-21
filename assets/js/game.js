@@ -143,6 +143,7 @@ s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
 s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.unlockedRecipes=Array.isArray(s.unlockedRecipes)?s.unlockedRecipes:['eggRice','tomatoEgg','vegetableSoup'];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
+const balancedDailySalaries={'assistant-editor':80,'research-assistant':95,'content-planner':88};if(s.job?.active&&balancedDailySalaries[s.job.id])s.job.salary=balancedDailySalaries[s.job.id];
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun','combat'];
