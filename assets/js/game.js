@@ -1535,29 +1535,7 @@ function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();commissio
  $('choices').querySelectorAll('[data-remove-member]').forEach(button=>button.onclick=event=>{event.stopPropagation();const index=s.teamRoster.findIndex(x=>x.id===button.dataset.removeMember);if(index<0)return;const removed=s.teamRoster.splice(index,1)[0];save();toast('已移除队友：'+removed.name);showDungeon()});
 }
 
-const DUNGEON_ITEM_CATALOG={
- stimulant:{name:'能量剂',type:'buff',icon:'✚',effects:{energy:18,agility:1}},
- focus:{name:'专注剂',type:'buff',icon:'◈',effects:{energy:10,intelligence:2,perception:1}},
- enhancer:{name:'强化剂',type:'buff',icon:'⬡',effects:{strength:2,agility:1}},
- resolve:{name:'稳定剂',type:'buff',icon:'▤',effects:{willpower:2,energy:8}},
- standin:{name:'急救包',type:'life',icon:'✚',lifeSave:true,protectionCharges:1},
- medkit:{name:'防护盾',type:'life',icon:'⬡',lifeSave:true,protectionCharges:1,effects:{energy:16}},
- ward:{name:'救援器',type:'life',icon:'＋',lifeSave:true,protectionCharges:1,effects:{willpower:3}},
- soulpin:{name:'复苏剂',type:'life',icon:'▣',lifeSave:true,protectionCharges:2,effects:{willpower:2}},
- hex:{name:'干扰器',type:'tactical',icon:'⊘',difficultyReduction:5},
- weaken:{name:'压制器',type:'tactical',icon:'▤',difficultyReduction:8},
- seal:{name:'封锁器',type:'tactical',icon:'▣',difficultyReduction:11},
- disrupt:{name:'侵蚀剂',type:'tactical',icon:'◉',maliceReduction:14},
- fate:{name:'概率芯片',type:'probability',icon:'▦',chance:6},
- lucky:{name:'校准模块',type:'probability',icon:'⌗',chance:4},
- reverse:{name:'增幅模块',type:'probability',icon:'⬡',chance:2},
- misfortune:{name:'风险模块',type:'probability',icon:'◉',chance:1},
- reprieve:{name:'应急电池',type:'buff',icon:'▣',effects:{energy:24}},
- renewal:{name:'恢复模块',type:'buff',icon:'◷',effects:{energy:16,willpower:1}},
- grace:{name:'储备包',type:'buff',icon:'↗',effects:{energy:12,perception:1}},
- longterm:{name:'综合补给',type:'buff',icon:'↻',effects:{energy:24,willpower:2}}
-};
-const DUNGEON_ITEM_TYPE_LABELS={buff:'增益类',life:'保命类',tactical:'战术干预',probability:'概率类'};
+const {itemCatalog:DUNGEON_ITEM_CATALOG,typeLabels:DUNGEON_ITEM_TYPE_LABELS,exchangePrices:DUNGEON_EXCHANGE_PRICES}=window.ArdayExchangeData;
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;return item}
 const commissionSystem=window.ArdayCommissionSystem.create({state:s,keyAt,addDungeonItem,grantPoints,save});
 const combatCommissionHeader=document.querySelector('.combat-group-title');
@@ -1667,21 +1645,58 @@ function showRanking(){
  $('choices').innerHTML='<section class="leader-cover"><div class="leader-cover-glow"></div><div class="leader-cover-copy"><small>ARDAY GUILD · 1,000 REGISTERED</small><h2>积分排行榜</h2><span>RANKED BY POINTS</span></div><div class="leader-cover-insignia">榜</div></section><section class="leader-self"><div><small>MY POSITION</small><b>#'+board.rank.toLocaleString('zh-CN')+'</b></div><div class="leader-self-score"><small>我的积分</small><strong>'+s.rankPoints.toLocaleString('zh-CN')+'</strong></div></section><section class="leader-podium-wrap"><div class="leader-podium-grid">'+podium+'</div></section><section class="leader-list"><div class="leader-list-caption">TOP 10 · PERSONAL SCORE</div>'+rest+'</section>';
  $('drawer').classList.add('open');
 }
-function showExchange(){
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='战斗物资档案';$('choices').className='choices supply-archive-view';
- const entries=Object.entries(DUNGEON_ITEM_CATALOG).map(([id,item])=>{
-  const type=DUNGEON_ITEM_TYPE_LABELS[item.type]||'战斗补给',effects=item.effects||{},labels={energy:'精力',agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'};
-  const details=Object.entries(effects).map(([key,value])=>(labels[key]||key)+' +'+value);
-  if(item.lifeSave)details.push('抵挡一次致命风险');
-  if(item.difficultyReduction)details.push('降低难度 '+item.difficultyReduction);
-  if(item.maliceReduction)details.push('压制恶意 '+item.maliceReduction);
-  if(item.chance)details.push('成功概率 +'+item.chance+'%');
-  return '<article class="supply-archive-entry"><span class="supply-archive-icon">'+(item.icon||'✦')+'</span><div><small>'+type+'</small><strong>'+item.name+'</strong><p>'+details.join(' · ')+'</p></div></article>';
+function exchangeEffectText(item){
+ const labels={energy:'精力',agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'};
+ const details=Object.entries(item.effects||{}).map(([key,value])=>(labels[key]||key)+' +'+value);
+ if(item.lifeSave)details.push('抵挡致命风险 ×'+(item.protectionCharges||1));
+ if(item.difficultyReduction)details.push('副本难度 -'+item.difficultyReduction);
+ if(item.maliceReduction)details.push('恶意值 -'+item.maliceReduction);
+ if(item.chance)details.push('成功概率 +'+item.chance+'%');
+ return details.join('　/　');
+}
+function purchaseDungeonExchangeItem(id){
+ const item=DUNGEON_ITEM_CATALOG[id],price=Number(DUNGEON_EXCHANGE_PRICES[id]);
+ if(!item||!Number.isFinite(price)||price<=0){toast('兑换商品不存在');return false}
+ if(s.activeDungeon){toast('副本进行中无法兑换');return false}
+ if(Number(s.points)||0<price){toast('积分不足，还差 '+(price-(Number(s.points)||0))+' 积分');return false}
+ const entity=addDungeonItem(id);if(!entity){toast('兑换失败');return false}
+ s.points-=price;
+ addEvent('兑换战斗物资',item.name+'已放入背包。','player-action');
+ remember('purchase','积分兑换：'+item.name,2);
+ save();render();toast('兑换成功：'+item.name);return true;
+}
+function showExchange(activeType='all',searchTerm=''){
+ closeCalendar();
+ $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
+ $('drawer').classList.add('exchange-drawer');
+ $('drawerTitle').textContent='兑换区';
+ $('choices').className='choices exchange-view';
+ const filters=[['all','全部'],['buff','增益类'],['life','保命类'],['tactical','战术干预'],['probability','概率类']];
+ const items=Object.entries(DUNGEON_ITEM_CATALOG).filter(([id,item])=>activeType==='all'||item.type===activeType);
+ const cards=items.map(([id,item],index)=>{
+  const price=Number(DUNGEON_EXCHANGE_PRICES[id])||0;
+  const owned=s.inventory.filter(entry=>entry?.kind==='dungeon-item'&&entry.itemId===id).length;
+  const blocked=!!s.activeDungeon,poor=(Number(s.points)||0)<price;
+  const detail=exchangeEffectText(item);
+  const code='EX-'+String(Object.keys(DUNGEON_ITEM_CATALOG).indexOf(id)+1).padStart(2,'0');
+  return '<article class="exchange-product" data-exchange-search="'+(item.name+' '+DUNGEON_ITEM_TYPE_LABELS[item.type]+' '+detail).toLowerCase()+'"><div class="exchange-product-art"><span>'+item.icon+'</span><small>'+code+'</small></div><div class="exchange-product-main"><div class="exchange-product-kind">'+DUNGEON_ITEM_TYPE_LABELS[item.type]+'</div><h3>'+item.name+'</h3><p>'+detail+'</p><div class="exchange-product-stock">'+(owned?'持有 '+owned+' 件':'尚未持有')+'</div></div><div class="exchange-product-action"><strong>'+price+' <small>PT</small></strong><button type="button" data-exchange-buy="'+id+'" '+(blocked||poor?'disabled':'')+'>'+(blocked?'副本中':poor?'积分不足':'兑换')+'</button></div></article>';
  }).join('');
- $('choices').innerHTML='<section class="supply-archive-masthead"><span>FIELD SUPPLY / ARCHIVE</span><h2>战斗物资</h2><p>委托、副本与组织配给</p></section><div class="supply-archive-grid">'+entries+'</div>';
+ $('choices').innerHTML=
+  '<section class="exchange-masthead"><div class="exchange-orbit"><i></i><b>✦</b></div><div class="exchange-heading"><small>ARDAY / MATERIAL EXCHANGE</small><h2>物资兑换</h2><span>FIELD EQUIPMENT DIVISION</span></div><div class="exchange-balance"><small>AVAILABLE POINTS</small><strong>'+Number(s.points||0).toLocaleString('zh-CN')+'</strong><em>PT</em></div><span class="exchange-index">EXCHANGE<br>DEPOT / 04</span></section>'+
+  '<nav class="exchange-filters">'+filters.map(([id,label])=>'<button type="button" data-exchange-filter="'+id+'" class="'+(activeType===id?'active':'')+'">'+label+'</button>').join('')+'</nav>'+
+  '<label class="exchange-search-wrap"><span>⌕</span><input class="exchange-search" type="search" value="" placeholder="检索物资名称或功能" aria-label="检索兑换物资"></label>'+
+  '<div class="exchange-results-head"><span>物资目录</span><b>'+items.length.toString().padStart(2,'0')+' / '+Object.keys(DUNGEON_ITEM_CATALOG).length+'</b></div>'+
+  '<div class="exchange-product-grid">'+(cards||'<div class="exchange-empty">NO MATCHING EQUIPMENT</div>')+'</div>';
+ const search=$('choices').querySelector('.exchange-search');
+ search.value=searchTerm;
+ search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();$('choices').querySelectorAll('.exchange-product').forEach(card=>{card.hidden=!!q&&!card.dataset.exchangeSearch.includes(q)})});
+ $('choices').querySelectorAll('[data-exchange-filter]').forEach(button=>button.onclick=()=>showExchange(button.dataset.exchangeFilter,search.value));
+ $('choices').querySelectorAll('[data-exchange-buy]').forEach(button=>button.onclick=()=>{
+  const scroll=$('choices').scrollTop;
+  if(purchaseDungeonExchangeItem(button.dataset.exchangeBuy)){showExchange(activeType,search.value);$('choices').scrollTop=scroll}
+ });
  $('drawer').classList.add('open');
 }
-
 function showGoals(tab='personal'){
   ensurePersonalGoal();
   const active=['commission','personal','shared'].includes(tab)?tab:'personal';
