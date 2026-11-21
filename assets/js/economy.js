@@ -24,7 +24,11 @@
    ].filter(x=>(!x.requires||has(x.requires))&&(x.type!=='save'||s.personalMoney<500));
   }
   function ensurePersonalGoal(at=Date.now()){
-   s.personalGoals=s.personalGoals.filter(g=>g&&g.status==='active').slice(0,2);
+   const catalog=personalGoalCatalog();
+   s.personalGoals=s.personalGoals.filter(g=>g&&g.status==='active').map(g=>{
+    const template=catalog.find(x=>x.type===g.type);
+    return {...(template||{}),...g,condition:g.condition||template?.condition||'按照目标进度完成对应活动。',unit:g.unit||(template&&template.unit)||'次',icon:g.icon||(template&&template.icon)||'◇'};
+   }).slice(0,2);
    while(s.personalGoals.length<2){
     const options=personalGoalCatalog().filter(x=>!s.personalGoals.some(g=>g.type===x.type));
     if(!options.length)break;
