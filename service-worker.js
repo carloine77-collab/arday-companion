@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v203";
+const CACHE_NAME = "arday-shell-v204";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -24,7 +24,7 @@ const APP_SHELL = [
   "./assets/js/chat-system.js",
   "./assets/js/letter-copy.js?v=20261121-letters1",
   "./assets/js/character-tap-lines.js",
-  "./assets/js/hall/hall-scene.js?v=20261122-supply-archive1",
+  "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game.js?v=20261122-terminal1",
   "./assets/icons/arday-icon.svg"
