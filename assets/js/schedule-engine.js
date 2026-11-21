@@ -106,14 +106,15 @@ function resolveScheduledActivity(key,hour){
  const stalePlan=ev?.kind==='autonomous'&&!needsChoice&&!scheduledFurnitureIsValid(ev);
  if(needsChoice||stalePlan){
   let choice;
+  const history=(s.calendar?.days?.[key]||[]).filter(item=>Number(item.start)<hour).sort((a,b)=>a.start-b.start);
+  const recent=history.map(item=>item.activity).filter(Boolean);
   if(stalePlan){
-   const alternatives=autonomousFurnitureOptions().filter(option=>option.activity===normalizeActivity(ev.activity));
-   choice=alternatives.length?alternatives[Math.floor(Math.random()*alternatives.length)]:chooseAutonomousActivity();
-  }else{
-   const history=(s.calendar?.days?.[key]||[]).filter(item=>Number(item.start)<hour).sort((a,b)=>a.start-b.start);
-   const recent=history.map(item=>item.activity).filter(Boolean);
-   choice=chooseAutonomousActivity(recent,hour,history);
-  }
+   const dailyCounts={};
+   history.forEach(item=>{const id=normalizeActivity(item.activity);if(id)dailyCounts[id]=(dailyCounts[id]||0)+1});
+   const currentId=normalizeActivity(ev.activity),limit=dailyActivityLimits[currentId];
+   const alternatives=autonomousFurnitureOptions().filter(option=>option.activity===currentId&&(!Number.isFinite(limit)||(dailyCounts[currentId]||0)<limit));
+   choice=alternatives.length?alternatives[Math.floor(Math.random()*alternatives.length)]:chooseAutonomousActivity(recent,hour,history);
+  }else choice=chooseAutonomousActivity(recent,hour,history);
   const activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
   if(ev){ev.title=activity==='idle'?'自由时间':(meta.menuLabel||meta.title);ev.activity=activity;ev.kind='autonomous';ev.autonomous=true;ev.source=ev.source||'day-ahead';ev.unresolved=false;ev.resolvedAt=Date.now();ev.room=choice.room;ev.anchor=choice.anchor;ev.furnitureId=choice.furnitureId;ev.furnitureKind=choice.furnitureKind;if(stalePlan)ev.replannedAt=Date.now()}
   else{writeBlockForKey(key,hour,hour+1,{title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'simulation',unresolved:false,resolvedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind});ev=eventAt(key,hour)}
