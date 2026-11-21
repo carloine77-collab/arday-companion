@@ -441,7 +441,8 @@ function buildDay(key){
  const planNeedsRefresh=!existingPlan||Number(existingPlan.recoveryRate)!==recovery||Number(existingPlan.decayRate)!==decay||Number(existingPlan.minimumSleepHours)!==minSleep||Number(existingPlan.maximumSleepHours)!==maxSleep;
  if(planNeedsRefresh){
   const netRecovery=Math.max(.01,recovery-decay);
-  const deficit=Math.max(0,100-currentEnergy);
+  const planningEnergy=key===dayKey(new Date())?currentEnergy:100;
+  const deficit=Math.max(0,100-planningEnergy);
   const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/netRecovery)));
   const bedtime=22,wake=(bedtime+duration)%24;
   plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now()};
@@ -471,6 +472,37 @@ function buildDay(key){
 function createAutonomousScheduleEvent(hour,recent=[]){
  const choice=chooseAutonomousActivity(recent,hour),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
  return {start:hour,end:hour+1,title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'day-ahead',unresolved:false,plannedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind};
+}
+function makeSleepPlan(key,energy=100){
+ const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||7),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),net=Math.max(.1,recovery-decay);
+ const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(Math.max(0,100-Math.max(0,Math.min(100,Number(energy)||0)))/net)));
+ return {bedtime:22,duration,wake:(22+duration)%24,energyAtPlanning:Math.max(0,Math.min(100,Number(energy)||0)),recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now(),planVersion:2};
+}
+function reserveSleepRange(key,start,end){
+ const day=s.calendar.days[key]||(s.calendar.days[key]=[]),protectedEvents=day.filter(ev=>ev.activity!=='sleep'&&ev.kind!=='autonomous'&&ev.activity!=='idle'&&!ev.unresolved),kept=day.filter(ev=>ev.activity!=='sleep');
+ const conflicts=protectedEvents.filter(ev=>Number(ev.start)<end&&Number(ev.end)>start);
+ const next=kept.filter(ev=>(ev.kind!=='autonomous'&&ev.activity!=='idle'&&!ev.unresolved)||Number(ev.end)<=start||Number(ev.start)>=end);
+ const boundaries=new Set([start,end]);conflicts.forEach(ev=>{boundaries.add(Math.max(start,Number(ev.start)));boundaries.add(Math.min(end,Number(ev.end)))});
+ const points=[...boundaries].sort((a,b)=>a-b);
+ for(let i=0;i<points.length-1;i++){const a=points[i],b=points[i+1];if(b<=a||conflicts.some(ev=>Number(ev.start)<b&&Number(ev.end)>a))continue;next.push({start:a,end:b,title:'睡眠',kind:'routine',activity:'sleep'})}
+ next.sort((a,b)=>a.start-b.start);
+ const merged=[];for(const ev of next){const prev=merged[merged.length-1];if(ev.activity==='sleep'&&prev?.activity==='sleep'&&prev.end===ev.start)prev.end=ev.end;else merged.push(ev)}
+ s.calendar.days[key]=merged;
+}
+function ensureSleepSchedule(key){
+ const plans=s.sleepPlans||(s.sleepPlans={}),today=keyAt(Date.now()),hour=new Date().getHours(),previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate),recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||7),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),energy=Math.max(0,Math.min(100,Number(s.energy)||0));
+ const valid=p=>p&&Number.isFinite(Number(p.duration))&&Number(p.duration)>=minSleep&&Number(p.duration)<=maxSleep&&Number(p.bedtime)===22&&Number(p.recoveryRate)===recovery&&Number(p.decayRate)===decay;
+ if(!plans[previousKey])plans[previousKey]=makeSleepPlan(previousKey,100);
+ if(!plans[key])plans[key]=makeSleepPlan(key,key===today?energy:100);
+ let p=plans[key];
+ if(!valid(p))p=plans[key]=makeSleepPlan(key,key===today?energy:100);
+ else if(key===today&&hour<22&&Math.abs(energy-(Number(p.energyAtPlanning)||0))>=8)p=plans[key]=makeSleepPlan(key,energy);
+ else if(key===today&&hour>=22&&makeSleepPlan(key,energy).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy);
+ if(key===today&&hour<7&&energy<80){const previous=plans[previousKey];if(Number(previous.duration)<maxSleep){const extended=makeSleepPlan(previousKey,energy);if(extended.duration>Number(previous.duration))plans[previousKey]=extended}}
+ p=plans[key];const previous=plans[previousKey],previousHours=Math.max(0,Number(previous.duration||0)-(24-Number(previous.bedtime??22))),tonightEnd=Math.min(24,Number(p.bedtime)+Number(p.duration));
+ const day=s.calendar.days[key]||(s.calendar.days[key]=[]);s.calendar.days[key]=day.filter(ev=>ev.activity!=='sleep');
+ if(previousHours>0)reserveSleepRange(key,0,Math.min(24,previousHours));
+ if(Number(p.duration)>0&&tonightEnd>Number(p.bedtime))reserveSleepRange(key,Number(p.bedtime),tonightEnd);
 }
 function ensureSchedule(){ensureScheduleAt(Date.now())}
 
@@ -665,6 +697,7 @@ function ensureScheduleAt(value){
   });
   s.calendar.version=20;
  }
+ if((s.calendar.version||0)<21){s.sleepPlans=s.sleepPlans||{};s.calendar.version=21}
  
  
  
@@ -691,6 +724,7 @@ function ensureScheduleAt(value){
  ensureDay(currentKey);
  for(let i=1;i<=2;i++)ensureDay(dayKey(plusDays(dayAnchor(),i)));
  if(requestedKey>=currentKey)ensureDay(requestedKey);
+ [currentKey,dayKey(plusDays(dayAnchor(),1)),dayKey(plusDays(dayAnchor(),2)),requestedKey].filter((key,index,array)=>array.indexOf(key)===index&&s.calendar.days[key]).forEach(ensureSleepSchedule);
  // Replan only future autonomous slots when the set or placement of home furniture changes.
  const furnitureSignature=JSON.stringify((s.placed||[]).filter(item=>item&&item.id).map(item=>({id:String(item.id),name:String(item.name||''),room:String(item.room||''),supportId:String(item.supportId||''),kind:furnitureKindForPlaced(item)})).sort((a,b)=>a.id.localeCompare(b.id)));
  if(s.calendar.autonomyFurnitureSignature!==furnitureSignature){
