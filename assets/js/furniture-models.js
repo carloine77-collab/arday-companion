@@ -980,9 +980,9 @@ window.ArdayFurnitureModels = (() => {
     if(variant==='弧形休闲长凳'){
      width=2.34;depth=1.32;height=1.02;const timber=mat(0x76513a,.58),upholstery=mat(0xcbbda9,.97),accent=mat(0x9b8068,.82),brass=mat(0x9b805f,.42,.55);
      const plan=new T.Shape();plan.moveTo(-1.08,.38);plan.quadraticCurveTo(-.98,-.55,0,-.67);plan.quadraticCurveTo(.98,-.55,1.08,.38);plan.quadraticCurveTo(.58,.05,0,.02);plan.quadraticCurveTo(-.58,.05,-1.08,.38);plan.closePath();
-     const deck=new T.ExtrudeGeometry(plan,{depth:.15,bevelEnabled:true,bevelSegments:3,bevelThickness:.045,bevelSize:.045,curveSegments:16});deck.rotateX(-Math.PI/2);deck.translate(0,.48,0);group.add(new T.Mesh(deck,timber));
+     const deck=new T.ExtrudeGeometry(plan,{depth:.15,bevelEnabled:true,bevelSegments:3,bevelThickness:.045,bevelSize:.045,curveSegments:16});deck.rotateX(Math.PI/2);deck.translate(0,.63,0);group.add(new T.Mesh(deck,timber));
      const pad=new T.Shape();pad.moveTo(-1.0,.34);pad.quadraticCurveTo(-.9,-.48,0,-.56);pad.quadraticCurveTo(.9,-.48,1.0,.34);pad.quadraticCurveTo(.5,.09,0,.08);pad.quadraticCurveTo(-.5,.09,-1.0,.34);pad.closePath();
-     const padGeo=new T.ExtrudeGeometry(pad,{depth:.13,bevelEnabled:true,bevelSegments:4,bevelThickness:.055,bevelSize:.055,curveSegments:18});padGeo.rotateX(-Math.PI/2);padGeo.translate(0,.59,0);group.add(new T.Mesh(padGeo,upholstery));
+     const padGeo=new T.ExtrudeGeometry(pad,{depth:.13,bevelEnabled:true,bevelSegments:4,bevelThickness:.055,bevelSize:.055,curveSegments:18});padGeo.rotateX(Math.PI/2);padGeo.translate(0,.74,0);group.add(new T.Mesh(padGeo,upholstery));
      const backCurve=new T.CatmullRomCurve3([new T.Vector3(-1.02,.82,-.34),new T.Vector3(-.78,.96,-.57),new T.Vector3(-.36,1.02,-.67),new T.Vector3(0,1.04,-.69),new T.Vector3(.36,1.02,-.67),new T.Vector3(.78,.96,-.57),new T.Vector3(1.02,.82,-.34)]);
      group.add(new T.Mesh(new T.TubeGeometry(backCurve,56,.055,12,false),upholstery));
      const trimCurve=new T.CatmullRomCurve3([new T.Vector3(-1.03,.68,-.34),new T.Vector3(-.78,.79,-.57),new T.Vector3(-.36,.84,-.67),new T.Vector3(0,.86,-.69),new T.Vector3(.36,.84,-.67),new T.Vector3(.78,.79,-.57),new T.Vector3(1.03,.68,-.34)]);
