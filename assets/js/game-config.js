@@ -1,6 +1,6 @@
 window.ArdayGameConfig = {
   shopCatalog: {
- '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6']],
+ '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6'],['牛奶 ×1','🥛','buy-ingredient-milk','8'],['奶酪 ×1','🧀','buy-ingredient-cheese','12'],['洋葱 ×1','🧅','buy-ingredient-onion','4'],['胡萝卜 ×1','🥕','buy-ingredient-carrot','4'],['大蒜 ×1','🧄','buy-ingredient-garlic','3']],
  furnitureCategories:  {
     "坐卧类": {
       "办公椅": [
@@ -1059,15 +1059,27 @@ window.ArdayGameConfig = {
    eggToast:{name:'香煎蛋吐司',ingredients:{bread:2,egg:1,oil:1},hunger:32},
    tofuStew:{name:'豆腐煲',ingredients:{tofu:1,vegetable:1,mushroom:1},hunger:34},
    potatoBeef:{name:'土豆牛肉',ingredients:{potato:2,beef:1},hunger:45},
-   potatoPancake:{name:'葱香土豆饼',ingredients:{potato:1,flour:1,egg:1,oil:1},hunger:34}
+   potatoPancake:{name:'葱香土豆饼',ingredients:{potato:1,flour:1,egg:1,oil:1},hunger:34},
+   tomatoBeefPasta:{name:'番茄牛肉意面',ingredients:{beef:1,noodles:1,tomato:1,onion:1,garlic:1},hunger:46},
+   mushroomCreamSoup:{name:'奶油蘑菇浓汤',ingredients:{mushroom:2,milk:1,flour:1,onion:1},hunger:32},
+   cheesePotatoGratin:{name:'芝士焗土豆',ingredients:{potato:2,cheese:1,milk:1},hunger:44},
+   mushroomTofuEgg:{name:'香菇豆腐蒸蛋',ingredients:{egg:2,tofu:1,mushroom:1},hunger:38},
+   carrotBeefRice:{name:'胡萝卜牛肉烩饭',ingredients:{rice:1,beef:1,carrot:1,onion:1},hunger:48},
+   garlicMushroomPancake:{name:'蒜香蘑菇煎饼',ingredients:{flour:1,mushroom:1,egg:1,garlic:1,oil:1},hunger:36}
   },
-  ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包'},
+  ingredientNames: {rice:'大米',egg:'鸡蛋',vegetable:'蔬菜',tomato:'番茄',oil:'食用油',flour:'面粉',potato:'土豆',beef:'牛肉',noodles:'面条',mushroom:'鲜蘑菇',tofu:'嫩豆腐',bread:'吐司面包',milk:'牛奶',cheese:'奶酪',onion:'洋葱',carrot:'胡萝卜',garlic:'大蒜'},
   bookCategories: {'菜谱':[
-   ['牛肉面','📖','buy-recipe-beefNoodles','38','解锁红烧牛肉面的制作方法'],
-   ['奶油蘑菇饭','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇烩饭的制作方法'],
+   ['牛肉面','📖','buy-recipe-beefNoodles','38','解锁牛肉面的制作方法'],
+   ['奶油蘑菇饭','📖','buy-recipe-mushroomRisotto','42','解锁奶油蘑菇饭的制作方法'],
    ['香煎蛋吐司','📖','buy-recipe-eggToast','28','解锁香煎蛋吐司的制作方法'],
-   ['豆腐煲','📖','buy-recipe-tofuStew','35','解锁豆腐蔬菜煲的制作方法'],
-   ['土豆牛肉','📖','buy-recipe-potatoBeef','45','解锁土豆炖牛肉的制作方法'],
-   ['葱香土豆饼','📖','buy-recipe-potatoPancake','32','解锁葱香土豆饼的制作方法']
+   ['豆腐煲','📖','buy-recipe-tofuStew','35','解锁豆腐煲的制作方法'],
+   ['土豆牛肉','📖','buy-recipe-potatoBeef','45','解锁土豆牛肉的制作方法'],
+   ['葱香土豆饼','📖','buy-recipe-potatoPancake','32','解锁葱香土豆饼的制作方法'],
+   ['番茄牛肉意面','📖','buy-recipe-tomatoBeefPasta','52','解锁番茄牛肉意面的制作方法'],
+   ['奶油蘑菇浓汤','📖','buy-recipe-mushroomCreamSoup','46','解锁奶油蘑菇浓汤的制作方法'],
+   ['芝士焗土豆','📖','buy-recipe-cheesePotatoGratin','55','解锁芝士焗土豆的制作方法'],
+   ['香菇豆腐蒸蛋','📖','buy-recipe-mushroomTofuEgg','42','解锁香菇豆腐蒸蛋的制作方法'],
+   ['胡萝卜牛肉烩饭','📖','buy-recipe-carrotBeefRice','50','解锁胡萝卜牛肉烩饭的制作方法'],
+   ['蒜香蘑菇煎饼','📖','buy-recipe-garlicMushroomPancake','40','解锁蒜香蘑菇煎饼的制作方法']
   ]}
 };
