@@ -322,16 +322,6 @@ window.ArdayFurnitureModels = (() => {
      fibersGeometry.computeVertexNormals();
      const fibersMaterial=stylizeMaterial(new T.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.99,metalness:0,side:T.DoubleSide}));
      const fibers=new T.Mesh(fibersGeometry,fibersMaterial);fibers.castShadow=false;fibers.receiveShadow=true;group.add(fibers);
-     // Fine perimeter seams give the rug a finished textile edge without rigid tassels.
-     const seam=mat(0xd8cebf,.98);
-     for(let x=-1.62;x<=1.621;x+=.12){
-      box(x,.089,-1.245,.035,.006,.008,seam);
-      box(x,.089,1.245,.035,.006,.008,seam);
-     }
-     for(let z=-1.12;z<=1.121;z+=.12){
-      box(-1.745,.089,z,.008,.006,.035,seam);
-      box(1.745,.089,z,.008,.006,.035,seam);
-     }
     }else{
      box(0,.035,0,width,.07,depth,m.fabric);
      box(0,.074,0,3.48,.012,2.48,m.cream);
