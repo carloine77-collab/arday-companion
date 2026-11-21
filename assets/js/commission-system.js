@@ -2,7 +2,7 @@
  const data=window.ArdayCommissionData;
  const clamp=value=>Math.max(0,Math.min(100,Math.round(Number(value)||0)));
  window.ArdayCommissionSystem={
-  create({state,keyAt,addDungeonItem,grantPoints,random=Math.random}){
+  create({state,keyAt,addDungeonItem,grantPoints,save,random=Math.random}){
    const allTasks=data.modules.flatMap(module=>module.tasks.map(task=>({...task,module:module.id,moduleLabel:module.label,moduleMark:module.mark,icon:module.icon})));
    const pick=items=>items.length?items[Math.floor(random()*items.length)]:null;
    const createTask=(definition,slot,source)=>({...definition,slot,source,claimed:false,claimedAt:0});
@@ -18,16 +18,17 @@
      if(bonus)tasks.push(createTask(bonus,'bonus','any'));
      state.dailyCommissions={day,tasks,rerolls:0};
     }else{
-     existing.tasks=existing.tasks.filter(task=>task&&typeof task.id==='string'&&Array.isArray(task.activities)&&data.moduleStats[task.module]);
+     existing.tasks=existing.tasks.filter(task=>task&&typeof task.id==='string'&&(Array.isArray(task.activities)||typeof task.signal==='string')&&data.moduleStats[task.module]);
      existing.rerolls=Math.max(0,Math.min(data.freeRerolls,Math.floor(Number(existing.rerolls)||0)));
     }
     return state.dailyCommissions;
    }
    function getProgress(task,at=Date.now()){
-    const board=ensureBoard(at),entries=Array.isArray(state.activityLog)?state.activityLog:[];
+    const board=ensureBoard(at),entries=task.signal?(Array.isArray(state.commissionActionLog)?state.commissionActionLog:[]):(Array.isArray(state.activityLog)?state.activityLog:[]);
     const seen=new Set();let count=0;
     entries.forEach(entry=>{
-     if(entry?.key!==board.day||!task.activities.includes(entry.activity))return;
+     if(entry?.key!==board.day)return;
+     if(task.signal?entry.signal!==task.signal:!task.activities.includes(entry.activity))return;
      const stamp=task.distinctActivities?entry.activity:(entry.at||String(entry.key)+'-'+String(entry.hour)+'-'+String(entry.activity));
      if(seen.has(stamp))return;seen.add(stamp);count++;
     });
@@ -71,7 +72,16 @@
     board.tasks[taskIndex]=createTask(next,old.slot,old.source);board.rerolls++;
     return {ok:true,task:board.tasks[taskIndex]};
    }
-   return {ensureBoard,getBoard:()=>ensureBoard(),getProgress,claim,reroll};
+   function record(signal,at=Date.now()){
+    if(!signal)return false;
+    const board=ensureBoard(at);
+    state.commissionActionLog=Array.isArray(state.commissionActionLog)?state.commissionActionLog:[];
+    state.commissionActionLog.push({signal,key:board.day,at});
+    if(state.commissionActionLog.length>80)state.commissionActionLog.splice(0,state.commissionActionLog.length-80);
+    if(typeof save==='function')save();
+    return true;
+   }
+   return {ensureBoard,getBoard:()=>ensureBoard(),getProgress,claim,reroll,record};
   }
  };
 })();
