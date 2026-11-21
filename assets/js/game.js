@@ -2676,10 +2676,33 @@ function persistFurniture(item){
    // Arday is attached to the scene root, not to any room group. Include the character explicitly so its meshes can receive tap hits in every room.
    const hits=raycaster.intersectObjects(roomMode==='hall'?hallRaycastTargets:[...activeRoom.children,person],true);
    if(decorating){
-    let furniture=null;
-    for(const hit of hits){let node=hit.object;while(node&&node!==activeRoom){if(node.userData?.furnitureKey){furniture=node;break}node=node.parent}if(furniture)break}
-    if(furniture){
-     const item=furnitureRegistry.find(x=>x.group===furniture);
+    // Ignore scene occlusion while selecting furniture: a sofa can be covered
+    // by another mesh but must remain directly selectable for repositioning.
+    const roomFurniture=furnitureRegistry.filter(entry=>entry.room===roomMode&&entry.group?.visible);
+    const furnitureHits=raycaster.intersectObjects(roomFurniture.map(entry=>entry.group),true);
+    let furniture=null,item=null;
+    for(const hit of furnitureHits){
+     let node=hit.object;
+     while(node&&!node.userData?.furnitureKey)node=node.parent;
+     if(node?.userData?.furnitureKey){
+      item=roomFurniture.find(entry=>entry.group===node);
+      if(item){furniture=node;break}
+     }
+    }
+    // Forgiving whole-object fallback for mesh gaps and narrow collision surfaces.
+    if(!item){
+     let nearest=Infinity;
+     const bounds=new T.Box3(),boxHit=new T.Vector3();
+     for(const candidate of roomFurniture){
+      candidate.group.updateWorldMatrix(true,true);
+      bounds.setFromObject(candidate.group).expandByScalar(.12);
+      const point=raycaster.ray.intersectBox(bounds,boxHit);
+      if(!point)continue;
+      const distance=point.distanceTo(raycaster.ray.origin);
+      if(distance<nearest){nearest=distance;item=candidate;furniture=candidate.group}
+     }
+    }
+    if(furniture&&item){
      if(item){
       selectFurniture(item);
       const plane=item.wallAxis?(item.wallSide==='back'||item.wallSide==='front'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):new T.Plane(new T.Vector3(1,0,0),-furniture.position.x)):new T.Plane(new T.Vector3(0,1,0),-furniture.position.y);
