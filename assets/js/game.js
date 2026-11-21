@@ -1658,7 +1658,7 @@ function purchaseDungeonExchangeItem(id){
  const item=DUNGEON_ITEM_CATALOG[id],price=Number(DUNGEON_EXCHANGE_PRICES[id]);
  if(!item||!Number.isFinite(price)||price<=0){toast('兑换商品不存在');return false}
  if(s.activeDungeon){toast('副本进行中无法兑换');return false}
- if(Number(s.points)||0<price){toast('积分不足，还差 '+(price-(Number(s.points)||0))+' 积分');return false}
+ if((Number(s.points)||0)<price){toast('积分不足，还差 '+(price-(Number(s.points)||0))+' 积分');return false}
  const entity=addDungeonItem(id);if(!entity){toast('兑换失败');return false}
  s.points-=price;
  addEvent('兑换战斗物资',item.name+'已放入背包。','player-action');
