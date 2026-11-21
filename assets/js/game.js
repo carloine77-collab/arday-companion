@@ -172,7 +172,7 @@ function renderCurrentSchedulePeek(){
  }).join('');
  node.innerHTML=rows;
 }
-function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join('')};draw(emotion,'emotion');draw(survival,'survival');}
+function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});if(s.statusBuffs?.fatigued?.active)tags.push({group:'survival',label:'疲惫',kind:'fatigued'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join('')};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
 function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
 function saySystem(t){say(t,'system')}
@@ -434,21 +434,12 @@ function respondToChat(text){
 function buildDay(key){
  const plans=s.sleepPlans||(s.sleepPlans={});
  const currentEnergy=Math.max(0,Math.min(100,Number(s.energy)||0));
- const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||1);
- const decay=Math.max(0,Number(energyConfig.hourlyDecay)||0);
- const minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||1),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||12);
+ const planningEnergy=key===dayKey(new Date())?currentEnergy:100;
  const existingPlan=plans[key];
- const planNeedsRefresh=!existingPlan||Number(existingPlan.recoveryRate)!==recovery||Number(existingPlan.decayRate)!==decay||Number(existingPlan.minimumSleepHours)!==minSleep||Number(existingPlan.maximumSleepHours)!==maxSleep;
- if(planNeedsRefresh){
-  const netRecovery=Math.max(.01,recovery-decay);
-  const planningEnergy=key===dayKey(new Date())?currentEnergy:100;
-  const deficit=Math.max(0,100-planningEnergy);
-  const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/netRecovery)));
-  const bedtime=22,wake=(bedtime+duration)%24;
-  plans[key]={bedtime,duration,wake,energyAtPlanning:currentEnergy,recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now()};
- }
+ const planNeedsRefresh=!existingPlan||Number(existingPlan.planVersion)!==3;
+ if(planNeedsRefresh)plans[key]=makeSleepPlan(key,planningEnergy);
  const p=plans[key],previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate);
- const previous=plans[previousKey]||{duration:8,bedtime:22,wake:6};
+ const previous=plans[previousKey]||{duration:0,bedtime:22,wake:22};
  const d=[];
  const add=(start,end,title,kind='routine',activity='idle')=>{if(end>start)d.push({start,end,title,kind,activity})};
  const previousSleepHours=Math.max(0,Number(previous.duration||0)-(24-Number(previous.bedtime??22)));
@@ -457,7 +448,7 @@ function buildDay(key){
  add(12,13,'午餐','routine','eat');
  add(18,19,'晚餐','routine','eat');
  const tonightSleepEnd=Math.min(24,Number(p.bedtime)+Number(p.duration));
- if(p.duration>0&&tonightSleepEnd>p.bedtime)add(p.bedtime,tonightSleepEnd,'睡眠 · '+p.duration+'小时','routine','sleep');
+ if(Number(p.duration)>0&&tonightSleepEnd>Number(p.bedtime))add(Number(p.bedtime),tonightSleepEnd,'睡眠 · '+p.duration+'小时','routine','sleep');
  const occupied=new Set();
  d.forEach(ev=>{for(let h=Math.max(0,ev.start);h<Math.min(24,ev.end);h++)occupied.add(h)});
  const priorDay=(s.calendar?.days?.[previousKey]||[]).slice().sort((a,b)=>a.start-b.start);
@@ -473,10 +464,12 @@ function createAutonomousScheduleEvent(hour,recent=[]){
  const choice=chooseAutonomousActivity(recent,hour),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
  return {start:hour,end:hour+1,title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'day-ahead',unresolved:false,plannedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind};
 }
-function makeSleepPlan(key,energy=100){
- const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||7),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),net=Math.max(.1,recovery-decay);
- const duration=Math.min(maxSleep,Math.max(minSleep,Math.ceil(Math.max(0,100-Math.max(0,Math.min(100,Number(energy)||0)))/net)));
- return {bedtime:22,duration,wake:(22+duration)%24,energyAtPlanning:Math.max(0,Math.min(100,Number(energy)||0)),recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now(),planVersion:2};
+function makeSleepPlan(key,energy=100,bedtime=22){
+ const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(0,Number.isFinite(Number(energyConfig.minimumSleepHours))?Number(energyConfig.minimumSleepHours):0),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),net=Math.max(.1,recovery-decay);
+ const current=Math.max(0,Math.min(100,Number(energy)||0)),deficit=Math.max(0,100-current);
+ const duration=deficit<=.001?0:Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/net)));
+ const start=Math.max(18,Math.min(22,Number(bedtime)||22));
+ return {bedtime:start,duration,wake:(start+duration)%24,energyAtPlanning:current,recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now(),planVersion:3};
 }
 function reserveSleepRange(key,start,end){
  const day=s.calendar.days[key]||(s.calendar.days[key]=[]),protectedEvents=day.filter(ev=>ev.activity!=='sleep'&&ev.kind!=='autonomous'&&ev.activity!=='idle'&&!ev.unresolved),kept=day.slice();
@@ -490,19 +483,33 @@ function reserveSleepRange(key,start,end){
  s.calendar.days[key]=merged;
 }
 function ensureSleepSchedule(key){
- const plans=s.sleepPlans||(s.sleepPlans={}),today=keyAt(Date.now()),hour=new Date().getHours(),previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate),recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(1,Number(energyConfig.minimumSleepHours)||7),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),energy=Math.max(0,Math.min(100,Number(s.energy)||0));
- const valid=p=>p&&Number.isFinite(Number(p.duration))&&Number(p.duration)>=minSleep&&Number(p.duration)<=maxSleep&&Number(p.bedtime)===22&&Number(p.recoveryRate)===recovery&&Number(p.decayRate)===decay;
+ const plans=s.sleepPlans||(s.sleepPlans={}),today=keyAt(Date.now()),hour=new Date().getHours(),previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate),recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(0,Number.isFinite(Number(energyConfig.minimumSleepHours))?Number(energyConfig.minimumSleepHours):0),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),energy=Math.max(0,Math.min(100,Number(s.energy)||0));
+ const emergencyBedtime=key===today&&hour>=18&&energy<25?hour:22;
+ const valid=p=>p&&Number.isFinite(Number(p.duration))&&Number(p.duration)>=minSleep&&Number(p.duration)<=maxSleep&&Number(p.bedtime)>=18&&Number(p.bedtime)<=22&&Number(p.recoveryRate)===recovery&&Number(p.decayRate)===decay&&Number(p.planVersion)===3;
  if(!plans[previousKey])plans[previousKey]=makeSleepPlan(previousKey,100);
- if(!plans[key])plans[key]=makeSleepPlan(key,key===today?energy:100);
+ if(!plans[key])plans[key]=makeSleepPlan(key,key===today?energy:100,emergencyBedtime);
  let p=plans[key];
- if(!valid(p))p=plans[key]=makeSleepPlan(key,key===today?energy:100);
- else if(key===today&&hour<22&&Math.abs(energy-(Number(p.energyAtPlanning)||0))>=8)p=plans[key]=makeSleepPlan(key,energy);
- else if(key===today&&hour>=22&&makeSleepPlan(key,energy).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy);
- if(key===today&&hour<7&&energy<80){const previous=plans[previousKey];if(Number(previous.duration)<maxSleep){const extended=makeSleepPlan(previousKey,energy);if(extended.duration>Number(previous.duration))plans[previousKey]=extended}}
+ if(!valid(p))p=plans[key]=makeSleepPlan(key,key===today?energy:100,emergencyBedtime);
+ else if(key===today&&((hour<22&&Math.abs(energy-(Number(p.energyAtPlanning)||0))>=8)||emergencyBedtime<Number(p.bedtime)))p=plans[key]=makeSleepPlan(key,energy,emergencyBedtime);
+ else if(key===today&&hour>=22&&makeSleepPlan(key,energy,22).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy,22);
  p=plans[key];const previous=plans[previousKey],previousHours=Math.max(0,Number(previous.duration||0)-(24-Number(previous.bedtime??22))),tonightEnd=Math.min(24,Number(p.bedtime)+Number(p.duration));
  const day=s.calendar.days[key]||(s.calendar.days[key]=[]);s.calendar.days[key]=day.filter(ev=>ev.activity!=='sleep');
  if(previousHours>0)reserveSleepRange(key,0,Math.min(24,previousHours));
  if(Number(p.duration)>0&&tonightEnd>Number(p.bedtime))reserveSleepRange(key,Number(p.bedtime),tonightEnd);
+}
+function prioritizeRecoverySchedule(key,hour){
+ const energy=Math.max(0,Math.min(100,Number(s.energy)||0));
+ if(energy>=55)return false;
+ const options=autonomousFurnitureOptions().filter(option=>option.activity==='rest');
+ if(!options.length)return false;
+ const day=s.calendar?.days?.[key]||[];
+ const futureRests=day.filter(ev=>ev.activity==='rest'&&Number(ev.start)>=hour).sort((a,b)=>a.start-b.start);
+ if(futureRests.length&&Number(futureRests[0].start)<=hour+1)return false;
+ const slot=day.filter(ev=>ev.kind==='autonomous'&&Number(ev.start)>=hour).sort((a,b)=>a.start-b.start)[0];
+ if(!slot)return false;
+ const option=options[Math.floor(Math.random()*options.length)],meta=activityMeta.rest||{};
+ Object.assign(slot,{title:meta.menuLabel||meta.title||'休息',kind:'autonomous',activity:'rest',autonomous:true,source:'recovery',unresolved:false,plannedAt:Date.now(),room:option.room,anchor:option.anchor||meta.anchor||'sofa',furnitureId:option.furnitureId,furnitureKind:option.furnitureKind});
+ return true;
 }
 function ensureSchedule(){ensureScheduleAt(Date.now())}
 
@@ -959,7 +966,8 @@ function updateStatusBuffs(at=Date.now()){
  const hourMs=3600000,period=12*hourMs;s.statusBuffs=s.statusBuffs||{};
  const rules=[
   {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n);s.love=Math.max(0,(Number(s.love)||0)-n)}},
-  {id:'sick',active:Number(s.clean)<20&&Number(s.energy)<20,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+2*n)}}
+  {id:'sick',active:Number(s.clean)<20&&Number(s.energy)<20,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+2*n)}},
+  {id:'fatigued',active:Number(s.energy)<25,apply:n=>{}}
  ];
  for(const rule of rules){let state=s.statusBuffs[rule.id]||(s.statusBuffs[rule.id]={active:false,since:0,nextEffectAt:0});
   if(rule.active&&!state.active){state.active=true;state.since=at;state.nextEffectAt=at+period}
@@ -982,6 +990,8 @@ function processActivityAt(value){
  const hourlyLoss={energy:Number(energyConfig.hourlyDecay)||0,hunger:Number(needDecay.hungerHourlyDecay)||0,clean:Number(needDecay.cleanHourlyDecay)||0,fun:Number(needDecay.funHourlyDecay)||0};
  for(const [k,loss] of Object.entries(hourlyLoss))s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)-loss));
  
+ const recoveryScheduled=prioritizeRecoverySchedule(key,hour);
+ if(recoveryScheduled&&$('stage')?.classList.contains('calendar-mode'))renderCalendar();
  const resolved=resolveScheduledActivity(key,hour);
  let ev=resolved.event,activity=resolved.activity;
  let placedMealEaten=false;
@@ -989,19 +999,14 @@ function processActivityAt(value){
   const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·')&&['living','bedroom','kitchen','bathroom'].includes(item.room));
   if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);applyActivityEffectsWithFeedback({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
   else{
-   const mealKey=key+'-'+({7:'breakfast',12:'lunch',18:'dinner'}[hour]);
-   if(!s.mealMissedKeys.includes(mealKey)){
-    s.mealPrepMisses=(Number(s.mealPrepMisses)||0)+1;s.mealMissedKeys.push(mealKey);if(s.mealMissedKeys.length>90)s.mealMissedKeys.splice(0,s.mealMissedKeys.length-90);
-    const letters={7:['今天早上没看到准备好的早餐。你是不是忙忘了？','早餐时间到了，桌上却空空的。下次记得给我留一点。','我本来还挺期待早餐的……看来今天得自己想办法了。'],12:['午饭时间到了，今天好像没有我的那一份。','我看了看餐桌，什么也没有。你是不是把午饭忘了？','中午有点饿。下次能不能提前替我留一份？'],18:['晚饭还没有着落。你今天是不是忘记我也要吃饭了？','我刚刚去看了餐桌，还是空的。下次记得我一份。','晚饭时间到了。看来今天又得自己想办法了。']};
-    const options=letters[hour]||letters[12];addEvent('阿尔的留言',options[(s.mealPrepMisses-1)%options.length],'arday-letter');
-   }
+   // The scheduled meal is self-served when no prepared dish is placed; cooking upgrades its recovery.
   }
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
  if(meta&&!s.activeInteraction){
   const effects={...(meta.effect||{})};if(activity==='sleep')effects.energy=Number(energyConfig.sleepRecoveryPerHour)||1;else if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
-  if(activity==='eat'||activity==='food'){if(!placedMealEaten)say('好饿。今天我能得到神明的投喂吗？');delete effects.hunger}
+  if((activity==='eat'||activity==='food')&&placedMealEaten)delete effects.hunger
   applyActivityEffectsWithFeedback(effects);
   
   recordActivityPreference(activity,d.getTime());
