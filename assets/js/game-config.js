@@ -845,9 +845,9 @@ window.ArdayGameConfig = {
 },
   characterStats: {
    energy: {
-    hourlyDecay: 3.5,
+    hourlyDecay: 2.5,
     sleepRecoveryPerHour: 14,
-    minimumSleepHours: 7,
+    minimumSleepHours: 0,
     maximumSleepHours: 8,
     activityEffects: {
      rest:12, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
@@ -855,11 +855,11 @@ window.ArdayGameConfig = {
      sitChair:5, food:0, tea:0, company:0
     }
    },
-   needs: { hungerHourlyDecay:7.5, cleanHourlyDecay:1.6666666667, funHourlyDecay:2.5 }
+   needs: { hungerHourlyDecay:2.2, cleanHourlyDecay:0.7, funHourlyDecay:1.0 }
   },
   activityMeta: {
- rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:70,weight:1.9,base:1},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
- sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{hunger:-1}},
+ rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:72,weight:2.2,base:1.5},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
+ sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
  eat:{title:'吃东西',duration:'long',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:18}},
  food:{title:'一起吃东西',duration:'long',autonomous:false,menuLabel:'一起吃东西',location:'table',pose:'sit',anchor:'table',effect:{hunger:20,fun:3}},
  wash:{title:'洗漱',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},requires:'sink',menuLabel:'洗漱',location:'kitchen',pose:'stand',anchor:'sink',effect:{clean:17}},
