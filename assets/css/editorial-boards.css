@@ -172,13 +172,6 @@
   background:#f4eddf!important;color:#82765f!important;font:600 10px "Noto Serif SC",serif!important;letter-spacing:.05em!important;
 }
 .exchange-filters button.active{border-color:#78896d!important;background:#78896d!important;color:#fff8e9!important;box-shadow:0 2px 0 #c2b69e!important}
-.exchange-search-wrap{
-  display:flex!important;align-items:center!important;gap:9px!important;min-height:42px!important;padding:0 12px!important;
-  border:1px solid #d2c6b1!important;border-radius:2px!important;background:#f6efe2!important;color:#8b8a72!important;
-}
-.exchange-search-wrap>span{font:24px Georgia,serif!important}
-.exchange-search{height:40px!important;color:#4f4d40!important;font:11px "Noto Serif SC",serif!important}
-.exchange-search::placeholder{color:#a99d87!important}
 .exchange-results-head{display:flex!important;align-items:baseline!important;justify-content:space-between!important;padding:2px 2px 0!important;color:#5c5b49!important}
 .exchange-results-head span{font:700 15px "Noto Serif SC",serif!important;letter-spacing:.08em!important}
 .exchange-results-head b{color:#9b8c70!important;font:italic 13px Georgia,serif!important}
@@ -289,7 +282,7 @@
   box-sizing:border-box!important;width:100%!important;min-width:0!important;white-space:nowrap!important;
   padding:7px 5px!important;text-align:center!important;
 }
-.exchange-search-wrap{box-sizing:border-box!important;width:100%!important;min-height:40px!important}
+
 .exchange-results-head{min-height:24px!important;padding:0 2px!important}
 .exchange-product-grid{
   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
@@ -344,4 +337,28 @@
   .exchange-balance strong{font-size:20px!important}
   .exchange-product{grid-template-columns:58px minmax(0,1fr)!important;gap:8px!important}
   .exchange-product-art{width:56px!important;height:72px!important}
+}
+
+
+/* Exchange occupies the full playable stage, matching other primary panels. */
+.stage .drawer.exchange-drawer{
+  inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;
+  width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+  min-width:0!important;box-sizing:border-box!important;transform:translateY(12px)!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;
+  display:flex!important;flex-direction:column!important;padding:0!important;
+}
+.stage .drawer.exchange-drawer.open{transform:translateY(0)!important}
+.stage .drawer.exchange-drawer>.drawer-head{
+  position:absolute!important;top:10px!important;right:12px!important;z-index:12!important;
+  width:30px!important;height:30px!important;margin:0!important;padding:0!important;
+}
+.stage .drawer.exchange-drawer>.choices.exchange-view{
+  display:flex!important;flex:1 1 auto!important;min-width:0!important;min-height:0!important;
+  width:100%!important;height:100%!important;max-height:none!important;box-sizing:border-box!important;
+  margin:0!important;padding:18px 18px 24px!important;gap:12px!important;
+  overflow-x:hidden!important;overflow-y:auto!important;border:0!important;border-radius:0!important;
+}
+@media(max-width:620px){
+  .stage .drawer.exchange-drawer>.choices.exchange-view{padding:13px 11px calc(18px + env(safe-area-inset-bottom))!important}
 }
