@@ -381,9 +381,6 @@
 .career-job-priority>b{font:9px "Noto Serif SC",serif;color:#8b806a}
 .career-job-priority>strong{font:600 11px "Noto Serif SC",serif}
 .career-job-priority>strong small{margin-left:5px;color:#71816c;font:10px Georgia,"Noto Serif SC",serif}
-.career-job-secondary{display:flex;flex-wrap:wrap;gap:4px}
-.career-job-secondary span{padding:3px 5px;border:1px solid #d0c5b1;border-radius:3px;color:#7c715f;font:9px "Noto Serif SC",serif}
-.career-job-secondary b{margin-left:3px;color:#586b5b;font:10px Georgia,serif}
 .career-job-apply{
  width:100%;min-height:33px;margin-top:auto;padding:6px 8px!important;
  border:1px solid #7d8c76!important;border-radius:4px!important;
