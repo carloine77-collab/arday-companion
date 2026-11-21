@@ -1364,7 +1364,7 @@ function careerStatBreakdown(job){
  };
  const weights=job?.weights||{emotion:.45,combat:.40,survival:.15};
  const labels={emotion:'情感',combat:'战斗',survival:'生存'};
- return Object.keys(weights).map(key=>({key,label:labels[key],weight:Math.round(weights[key]*100),value:Math.round(values[key]||0)})).sort((a,b)=>b.weight-a.weight);
+ return Object.keys(weights).map(key=>({key,label:labels[key],weight:Math.round(weights[key]*100),value:values[key]||0})).sort((a,b)=>b.weight-a.weight);
 }
 function careerCompositeScore(job=null){
  return careerStatBreakdown(job).reduce((sum,item)=>sum+item.value*item.weight/100,0);
@@ -1384,7 +1384,7 @@ function showCareer(tab='real'){
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
   $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav><div class="career-jobs-grid">'+jobs.map(j=>{
    const attempted=!!s.jobApplications[applicationDay][j.id],parts=careerStatBreakdown(j),fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start,main=parts[0],rest=parts.slice(1);
-   return '<article class="career-job-card"><div class="career-job-heading"><h3>'+j.title+'</h3><strong>¥'+j.salary+'<small>/日</small></strong></div><div class="career-job-time">'+pad(j.start)+':00–'+pad(j.end)+':00 <span>'+hours+'小时</span></div><div class="career-job-score"><span>适配 '+Math.round(fitScore)+' / '+j.minScore+'</span><span>录用 '+(eligible?Math.round(chance*100):0)+'%</span></div><div class="career-job-priority"><b>重点要求</b><strong>'+main.label+' '+main.weight+'% <small>当前 '+main.value+'</small></strong></div><div class="career-job-secondary">'+rest.map(x=>'<span>'+x.label+' '+x.weight+'% <b>'+x.value+'</b></span>').join('')+'</div><button class="career-job-apply" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></article>';
+   return '<article class="career-job-card"><div class="career-job-heading"><h3>'+j.title+'</h3><strong>¥'+j.salary+'<small>/日</small></strong></div><div class="career-job-time">'+pad(j.start)+':00–'+pad(j.end)+':00 <span>'+hours+'小时</span></div><div class="career-job-score"><span>适配 '+Math.round(fitScore)+' / '+j.minScore+'</span><span>录用 '+(eligible?Math.round(chance*100):0)+'%</span></div><div class="career-job-priority"><b>重点要求</b><strong>'+main.label+' '+main.weight+'% <small>当前 '+Math.round(main.value)+'</small></strong></div><div class="career-job-secondary">'+rest.map(x=>'<span>'+x.label+' '+x.weight+'% <b>'+Math.round(x.value)+'</b></span>').join('')+'</div><button class="career-job-apply" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></article>';
   }).join('')+'</div>';
   $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{
    const j=jobs.find(x=>x.id===b.dataset.applyJob);if(!j)return;
