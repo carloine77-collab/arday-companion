@@ -145,7 +145,6 @@ s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
 s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};s.unlockedRecipes=Array.isArray(s.unlockedRecipes)?s.unlockedRecipes:['eggRice','tomatoEgg','vegetableSoup'];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
-const balancedDailySalaries={'assistant-editor':80,'research-assistant':95,'content-planner':88};if(s.job?.active&&balancedDailySalaries[s.job.id])s.job.salary=balancedDailySalaries[s.job.id];
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
 const statKeys=['friend','bored','hate','love','energy','hunger','clean','fun','combat'];
@@ -1357,6 +1356,15 @@ window.resignFromJob=function(event){
  addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();render();renderCalendar();toast('已离职');return false;
 };
 function careerPoster(title,index=0){const hue=[18,34,205,275,145][index%5],mark=String(title||'职').trim().slice(0,1);return '<div class="career-poster" style="--poster-hue:'+hue+'"><span class="career-poster-kicker">ARDAY JOURNAL / CAREER '+(index+1)+'</span><strong>'+title+'</strong><i>'+mark+'</i><small>AN EVERYDAY PROFESSION</small></div>'}
+function careerCompositeScore(){
+ const emotion=Math.max(0,Math.min(100,(Number(s.friend)||0)*.45+(Number(s.love)||0)*.25+(100-(Number(s.hate)||0))*.15+(100-(Number(s.bored)||0))*.15));
+ const combat=Math.max(0,Math.min(100,Number(s.combat)||0));
+ const survival=['energy','hunger','clean','fun'].reduce((sum,key)=>sum+Math.max(0,Math.min(100,Number(s[key])||0)),0)/4;
+ return emotion*.45+combat*.40+survival*.15;
+}
+function careerApplicationChance(job,score=careerCompositeScore()){
+ return Math.max(.12,Math.min(.94,.55+(score-Number(job.minScore||0))*.012-(Number(job.selectivity)||0)));
+}
 function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
  $('drawer').classList.remove('profile-expanded','shop-drawer');$('drawerTitle').textContent='职业';$('choices').className='choices career-view';
  if(s.job?.active){
@@ -1364,19 +1372,25 @@ function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
   $('choices').innerHTML=careerPoster(j.title,0)+'<section class="account-balance"><div><span>EMPLOYMENT</span><h2>'+j.title+'</h2></div><div class="account-symbol">¥</div><small>每日薪资 ¥'+j.salary+' · '+pad(j.start)+':00–'+pad(j.end)+':00</small></section><section class="profile-section"><div class="section-kicker">WORK STATUS</div><h3>在职</h3><p>入职日期：'+j.startDate+'</p><div class="calendar-actions"><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></div></section>';
 
  }else{
-  const jobs=[
-   {id:'assistant-editor',title:'出版编辑助理',salary:80,start:13,end:16,minFriend:12,minEnergy:28,skill:'reading',skillMin:0,desc:''},
-   {id:'research-assistant',title:'研究助理',salary:95,start:9,end:12,minFriend:28,minEnergy:42,skill:'reading',skillMin:2,desc:''},
-   {id:'content-planner',title:'内容策划',salary:88,start:14,end:17,minFriend:20,minEnergy:35,skill:'writing',skillMin:0,desc:''}
-  ];
+  const jobs=ARDAY_SOCIAL_JOBS;
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
+  const fitScore=careerCompositeScore();
   $('choices').innerHTML=jobs.map((j,i)=>{
-   const attempted=!!s.jobApplications[applicationDay][j.id];
-   const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;
-   const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+(eligible?.18:0)));
-   return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">POSITION · '+(i+1)+'</div><h3>'+j.title+'</h3><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00</p><p>每日薪资：¥'+j.salary+'</p><p>申请条件：精力 ≥ '+j.minEnergy+'，友谊 ≥ '+j.minFriend+(j.skillMin?'，阅读经验 ≥ '+j.skillMin:'')+'</p><p>当前录用概率：'+Math.round(chance*100)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted?'disabled':'')+'>'+(attempted?'今日已申请':'申请职位')+'</button></section>';
+   const attempted=!!s.jobApplications[applicationDay][j.id],eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start;
+   return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">'+j.category+' · '+j.focus+'</div><h3>'+j.title+'</h3><p>'+j.description+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00（'+hours+'小时）</p><p>每日薪资：¥'+j.salary+'</p><p>入职门槛：综合适配 ≥ '+j.minScore+' · 当前 '+Math.round(fitScore)+'</p><p>录用概率：'+(eligible?Math.round(chance*100):0)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></section>';
   }).join('');
-  $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{const j=jobs.find(x=>x.id===b.dataset.applyJob);if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};s.jobApplications[applicationDay][j.id]={at:Date.now()};save();const skill=j.skill==='reading'?(s.preferences.reading||0):(s.preferences.writing||0),eligible=s.energy>=j.minEnergy&&s.friend>=j.minFriend&&skill>=j.skillMin;if(!eligible){say('这份工作目前的要求还没有达到。我想再积累一些经验，或者等状态好一点再申请。');toast('暂不满足申请条件');showCareer();return}const chance=Math.max(0,Math.min(.92,.18+(s.energy-j.minEnergy)*.008+(s.friend-j.minFriend)*.006+Math.min(15,skill)*.018+.18));if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}const nextWorkday=plusDays(dayAnchor(),1);nextWorkday.setHours(12,0,0,0);const startDate=dayKey(nextWorkday);s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(nextWorkday);save();addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功')});
+  $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{
+   const j=jobs.find(x=>x.id===b.dataset.applyJob);if(!j)return;
+   if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}
+   const score=careerCompositeScore();if(score<j.minScore){toast('当前综合条件尚未达到职位要求');showCareer();return}
+   s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};s.jobApplications[applicationDay][j.id]={at:Date.now()};save();
+   const chance=careerApplicationChance(j,score);
+   if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}
+   const nextWorkday=plusDays(dayAnchor(),1);nextWorkday.setHours(12,0,0,0);const startDate=dayKey(nextWorkday);
+   s.job={...j,active:true,startDate,appliedAt:Date.now(),paidDays:[]};ensureScheduleAt(nextWorkday);save();
+   addEvent('阿尔找到工作了','他获得了'+j.title+'的职位，每日工作 '+pad(j.start)+':00–'+pad(j.end)+':00，日薪 ¥'+j.salary+'。','long');
+   say('我找到工作了。明天开始上班，薪资按天结算。');showCareer();renderCalendar();toast('录用成功');
+  });
  }
  $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>'+$('choices').innerHTML;
  $('choices').querySelectorAll('[data-career-tab]').forEach(b=>b.onclick=()=>showCareer(b.dataset.careerTab));
@@ -1384,7 +1398,7 @@ function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
  $('drawer').classList.add('open');
 }
 
-const {ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_GUILD_MATERIALS,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
+const {ARDAY_SOCIAL_JOBS,ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_GUILD_MATERIALS,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
 function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function updateGuildContributionCompliance(at=Date.now()){
  const member=s.factionMembership;if(!member||member==='anomaly-bureau'||!ARDAY_FACTIONS.some(f=>f.id===member))return;
