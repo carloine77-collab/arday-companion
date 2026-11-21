@@ -479,7 +479,7 @@ function makeSleepPlan(key,energy=100){
  return {bedtime:22,duration,wake:(22+duration)%24,energyAtPlanning:Math.max(0,Math.min(100,Number(energy)||0)),recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now(),planVersion:2};
 }
 function reserveSleepRange(key,start,end){
- const day=s.calendar.days[key]||(s.calendar.days[key]=[]),protectedEvents=day.filter(ev=>ev.activity!=='sleep'&&ev.kind!=='autonomous'&&ev.activity!=='idle'&&!ev.unresolved),kept=day.filter(ev=>ev.activity!=='sleep');
+ const day=s.calendar.days[key]||(s.calendar.days[key]=[]),protectedEvents=day.filter(ev=>ev.activity!=='sleep'&&ev.kind!=='autonomous'&&ev.activity!=='idle'&&!ev.unresolved),kept=day.slice();
  const conflicts=protectedEvents.filter(ev=>Number(ev.start)<end&&Number(ev.end)>start);
  const next=kept.filter(ev=>(ev.kind!=='autonomous'&&ev.activity!=='idle'&&!ev.unresolved)||Number(ev.end)<=start||Number(ev.start)>=end);
  const boundaries=new Set([start,end]);conflicts.forEach(ev=>{boundaries.add(Math.max(start,Number(ev.start)));boundaries.add(Math.min(end,Number(ev.end)))});
