@@ -1700,13 +1700,13 @@ function showGoals(tab='personal'){
   }else if(active==='personal'){
    const cards=s.personalGoals.map((g,index)=>{
     const progress=Math.min(g.target,Math.max(0,Number(g.progress)||0)),pct=Math.round(progress/g.target*100);
-    return '<article class="goal-card goal-personal"><div class="goal-card-art"><span>'+(g.icon||'◇')+'</span><i>0'+(index+1)+'</i></div><div class="goal-card-main"><small>PERSONAL / IN PROGRESS</small><h3>'+g.title+'</h3><p class="goal-condition"><b>完成条件</b>'+g.condition+'</p><div class="goal-progress-track"><i style="width:'+pct+'%"></i></div><div class="goal-progress-label"><strong>'+progress+' / '+g.target+'</strong><span>'+g.unit+'</span></div></div></article>';
+    return '<article class="goal-card goal-personal"><div class="goal-card-art"><span>'+(g.icon||'◇')+'</span><i>0'+(index+1)+'</i></div><div class="goal-card-main"><small>PERSONAL / IN PROGRESS</small><h3>'+g.title+'</h3><p class="goal-condition"><b>完成条件</b'+(g.condition||'按照目标进度完成对应活动。')+'</p><div class="goal-progress-track"><i style="width:'+pct+'%"></i></div><div class="goal-progress-label"><strong>'+progress+' / '+g.target+'</strong><span>'+g.unit+'</span></div></div></article>';
    }).join('');
    content='<section class="goal-board-head"><span>ARDAY / PERSONAL LOG</span><strong>个人目标</strong><small>'+s.personalGoals.length+' / 2 项进行中</small></section><div class="goal-card-list">'+(cards||'<div class="goal-empty">暂时没有可用目标</div>')+'</div>';
   }else{
    const cards=s.sharedGoals.map((g,index)=>{
     const progress=Math.min(g.target,Math.max(0,Number(g.progress)||0)),pct=Math.round(progress/g.target*100);
-    return '<article class="goal-card goal-shared"><div class="goal-card-art"><span>'+(g.icon||'⌁')+'</span><i>0'+(index+1)+'</i></div><div class="goal-card-main"><small>TOGETHER / ACCEPTED</small><h3>'+g.title+'</h3><p class="goal-condition"><b>完成条件</b>'+g.condition+'</p><div class="goal-progress-track"><i style="width:'+pct+'%"></i></div><div class="goal-progress-label"><strong>'+progress+' / '+g.target+'</strong><span>'+g.unit+'</span></div></div></article>';
+    return '<article class="goal-card goal-shared"><div class="goal-card-art"><span>'+(g.icon||'⌁')+'</span><i>0'+(index+1)+'</i></div><div class="goal-card-main"><small>TOGETHER / ACCEPTED</small><h3>'+g.title+'</h3><p class="goal-condition"><b>完成条件</b'+(g.condition||'按照目标进度完成对应活动。')+'</p><div class="goal-progress-track"><i style="width:'+pct+'%"></i></div><div class="goal-progress-label"><strong>'+progress+' / '+g.target+'</strong><span>'+g.unit+'</span></div></div></article>';
    }).join('');
    const pending=s.events.filter(e=>e.status==='open'&&e.type==='shared-goal-proposal').length;
    content='<section class="goal-board-head goal-board-shared"><span>ARDAY / TOGETHER</span><strong>共同目标</strong><small>'+s.sharedGoals.length+' / 2 项已同意'+(pending?' · '+pending+' 封待回复邀约':'')+'</small></section><div class="goal-card-list">'+(cards||'<div class="goal-empty">尚无共同目标</div>')+'</div>';
