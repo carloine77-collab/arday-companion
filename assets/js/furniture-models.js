@@ -1232,7 +1232,7 @@ window.ArdayFurnitureModels = (() => {
     const lampArm=box(.92,1.76,.04,.045,.045,.24,darkMetal);lampArm.rotation.x=.3;
     const shade=new T.Mesh(new T.CylinderGeometry(.12,.18,.12,20),accent);shade.position.set(.92,1.78,.16);group.add(shade);
     box(0,1.57,-.08,2.24,.025,.055,darkMetal);
-   }}else if(modelName==='钢琴'){
+   }else if(modelName==='钢琴'){
     action=()=>openFurnitureActions('piano',id);
     width=1.68;depth=1.02;height=1.5;
     const caseMat=mat(0x202326,.22,.5),wood=mat(0x68452f,.48),ivory=mat(0xf4eddd,.32),ebony=mat(0x151719,.2,.12);
