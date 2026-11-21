@@ -123,7 +123,7 @@ window.ArdayFurnitureModels = (() => {
    }else if(modelName==='壁灯'){
 
     width=.76;depth=.24;height=.82;wallAxis='x';wallSide='back';anchor=[0,3.15];
-    const plate=mat(0x9d794b,.36,.62),arm=mat(0xb58d56,.3,.66),backplate=new T.Mesh(new T.CapsuleGeometry(.13,.34,6,16),plate);backplate.position.set(0,0,-.045);group.add(backplate);
+    const plate=mat(0x9d794b,.36,.62),arm=mat(0xb58d56,.3,.66),backplate=new T.Mesh(new T.CylinderGeometry(.13,.13,.42,24),plate);backplate.position.set(0,0,-.045);group.add(backplate);for(const y of [-.2,.2])sphere(0,y,-.045,.13,.13,.04,plate);
     for(const y of [-.18,.18])cyl(0,y,.01,.025,.025,.025,arm,12);
     if(variant==='玻璃单臂'){
      const curve=new T.CatmullRomCurve3([new T.Vector3(0,-.02,0),new T.Vector3(.12,-.02,.08),new T.Vector3(.28,.02,.12),new T.Vector3(.31,.18,.12)]);group.add(new T.Mesh(new T.TubeGeometry(curve,24,.025,10,false),arm));
@@ -1318,7 +1318,7 @@ window.ArdayFurnitureModels = (() => {
     const walnut=mat(0x4b3024,.55),inner=mat(0x261d19,.86),trim=mat(0xb28b56,.34,.62),glass=mat(0xc8dfe0,.12,.18),labels=mat(0xe6d8bd,.86),bottles=[mat(0x244a39,.2,.22),mat(0x59352d,.2,.2),mat(0x314b50,.18,.2)];
     glass.transparent=true;glass.opacity=.42;
     box(0,.94,0,1.44,1.82,.62,walnut);box(0,1.86,0,1.56,.12,.72,trim);box(0,.08,0,1.46,.16,.66,walnut);box(0,.96,-.31,1.3,1.68,.025,inner);
-    for(const y of [.52,1.02,1.52])box(0,y,0,1.32,.045,.58,trim);
+    for(const y of [.22,.72,1.22])box(0,y,0,1.32,.045,.58,trim);
     for(const x of [-.67,.67])box(x,.98,.34,.045,1.76,.045,trim);
     for(const x of [-.32,.32]){const pane=new T.Mesh(new T.BoxGeometry(.62,1.58,.018),glass);pane.position.set(x,.98,.345);group.add(pane);for(const dx of [-.31,.31])box(x+dx,.98,.37,.018,1.62,.04,trim);for(const y of [.19,1.77])box(x,y,.37,.62,.018,.04,trim)}
     box(0,.98,.38,.025,1.62,.04,walnut);for(const x of [-.055,.055])cyl(x,.98,.41,.012,.012,.055,trim,10);
@@ -1334,7 +1334,7 @@ window.ArdayFurnitureModels = (() => {
     // Bottles lie on three internal racks, labels facing the glass doors.
     for(let row=0;row<3;row++){const y=.34+row*.5;for(let i=0;i<3;i++)bottle(-.43+i*.43,y,.04,row+i)}
     // Stemware hangs below the top shelf, also inside the cabinet.
-    for(let i=0;i<4;i++){const x=-.48+i*.32,stem=new T.Mesh(new T.CylinderGeometry(.008,.008,.13,8),glass);stem.position.set(x,1.64,.12);group.add(stem);const bowl=sphere(x,1.55,.12,.052,.07,.052,glass);const foot=new T.Mesh(new T.CylinderGeometry(.032,.032,.01,12),glass);foot.position.set(x,1.49,.12);group.add(foot)}
+    for(let i=0;i<4;i++){const x=-.48+i*.32,stem=new T.Mesh(new T.CylinderGeometry(.008,.008,.13,8),glass);stem.position.set(x,1.74,.12);group.add(stem);const bowl=sphere(x,1.65,.12,.052,.07,.052,glass);const foot=new T.Mesh(new T.CylinderGeometry(.032,.032,.01,12),glass);foot.position.set(x,1.82,.12);group.add(foot)}
     for(const x of [-.58,.58])for(const z of [-.24,.24]){const foot=new T.Mesh(new T.CylinderGeometry(.045,.06,.12,12),walnut);foot.position.set(x,.06,z);group.add(foot)}
 
    }else if(modelName==='料理台'){
