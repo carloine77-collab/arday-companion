@@ -1356,11 +1356,12 @@ window.resignFromJob=function(event){
  addEvent('阿尔辞去了工作','他结束了在'+title+'的任职。','daily');save();showCareer();render();renderCalendar();toast('已离职');return false;
 };
 function careerPoster(title,index=0){const hue=[18,34,205,275,145][index%5],mark=String(title||'职').trim().slice(0,1);return '<div class="career-poster" style="--poster-hue:'+hue+'"><span class="career-poster-kicker">ARDAY JOURNAL / CAREER '+(index+1)+'</span><strong>'+title+'</strong><i>'+mark+'</i><small>AN EVERYDAY PROFESSION</small></div>'}
-function careerCompositeScore(){
+function careerCompositeScore(job=null){
  const emotion=Math.max(0,Math.min(100,(Number(s.friend)||0)*.45+(Number(s.love)||0)*.25+(100-(Number(s.hate)||0))*.15+(100-(Number(s.bored)||0))*.15));
  const combat=Math.max(0,Math.min(100,Number(s.combat)||0));
  const survival=['energy','hunger','clean','fun'].reduce((sum,key)=>sum+Math.max(0,Math.min(100,Number(s[key])||0)),0)/4;
- return emotion*.45+combat*.40+survival*.15;
+ const weights=job?.weights||{emotion:.45,combat:.40,survival:.15};
+ return emotion*weights.emotion+combat*weights.combat+survival*weights.survival;
 }
 function careerApplicationChance(job,score=careerCompositeScore()){
  return Math.max(.12,Math.min(.94,.55+(score-Number(job.minScore||0))*.012-(Number(job.selectivity)||0)));
@@ -1374,15 +1375,14 @@ function showCareer(tab='real'){if(tab==='guild'){renderGuildCareer();return}
  }else{
   const jobs=ARDAY_SOCIAL_JOBS;
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
-  const fitScore=careerCompositeScore();
   $('choices').innerHTML=jobs.map((j,i)=>{
-   const attempted=!!s.jobApplications[applicationDay][j.id],eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start;
+   const attempted=!!s.jobApplications[applicationDay][j.id],fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start;
    return '<section class="profile-section job-card">'+careerPoster(j.title,i)+'<div class="section-kicker">'+j.category+' · '+j.focus+'</div><h3>'+j.title+'</h3><p>'+j.description+'</p><p>工作时间：'+pad(j.start)+':00–'+pad(j.end)+':00（'+hours+'小时）</p><p>每日薪资：¥'+j.salary+'</p><p>入职门槛：综合适配 ≥ '+j.minScore+' · 当前 '+Math.round(fitScore)+'</p><p>录用概率：'+(eligible?Math.round(chance*100):0)+'%</p><button class="choice" data-apply-job="'+j.id+'" '+(attempted||!eligible?'disabled':'')+'>'+(attempted?'今日已申请':eligible?'申请职位':'条件不足')+'</button></section>';
   }).join('');
   $('choices').querySelectorAll('[data-apply-job]').forEach(b=>b.onclick=()=>{
    const j=jobs.find(x=>x.id===b.dataset.applyJob);if(!j)return;
    if(s.jobApplications?.[applicationDay]?.[j.id]){toast('这个职位今天已经申请过了');return}
-   const score=careerCompositeScore();if(score<j.minScore){toast('当前综合条件尚未达到职位要求');showCareer();return}
+   const score=careerCompositeScore(j);if(score<j.minScore){toast('当前综合条件尚未达到职位要求');showCareer();return}
    s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};s.jobApplications[applicationDay][j.id]={at:Date.now()};save();
    const chance=careerApplicationChance(j,score);
    if(Math.random()>chance){say('这次面试没有通过。我会再看看其他机会。');addEvent('求职暂未成功','阿尔申请了'+j.title+'，但这次没有获得录用。','daily');save();showCareer();return}
