@@ -406,3 +406,11 @@
 .guild-active-mission-copy span{color:#c8c9bb;font:10px "Noto Serif SC","Songti SC",serif}
 .guild-active-mission>button{flex:0 0 auto;min-height:38px;padding:0 13px;border:1px solid #c6b58c;border-radius:3px;background:linear-gradient(145deg,#e7dcc2,#c9bb98);color:#263a38;font:700 12px "Noto Serif SC","Songti SC",serif}
 @media(max-width:480px){.dungeon-board-exit{left:7px;min-width:42px;padding:0 7px;font-size:10px}.guild-active-mission{gap:8px;padding:10px}.guild-active-mission-mark{flex-basis:36px;width:36px;height:36px}.guild-active-mission>button{padding:0 9px;font-size:11px}}
+
+/* Event variety: compact skill-check tags and a distinct resolution line. */
+.dungeon-event-choice{position:relative;gap:9px!important}
+.dungeon-event-choice>b{min-width:0;flex:1 1 auto!important}
+.dungeon-event-choice>small{flex:0 0 auto;margin-left:auto;color:#8b795c;font:600 8px/1.2 Arial,"Noto Serif SC",sans-serif;letter-spacing:.06em;white-space:nowrap}
+.dungeon-event-choice>i{flex:0 0 auto}
+.dungeon-result-outcome{margin:7px 0 10px;padding:9px 11px;border-left:2px solid #b49a6b;background:#e9e3d5;color:#625743;font:10px/1.75 "Noto Serif SC",serif}
+@media(max-width:390px){.dungeon-event-choice{gap:7px!important;padding-left:7px!important;padding-right:7px!important}.dungeon-event-choice>small{font-size:7px}.dungeon-result-outcome{font-size:9px;padding:8px}}
