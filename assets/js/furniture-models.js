@@ -508,7 +508,7 @@ window.ArdayFurnitureModels = (() => {
     }
    }else if(modelName==='棕榈树绿植'){
     if(variant==='龟背竹'){
-     width=1.42;depth=1.28;height=1.82;const potMat=mat(0x9b6b54,.42),leafMat=mat(0x356d4a,.88),leafLight=mat(0x6f9b65,.9),veinMat=mat(0xa8b77c,.9);
+     width=1.42;depth=1.28;height=2.15;const potMat=mat(0x9b6b54,.42),leafMat=mat(0x356d4a,.88),leafLight=mat(0x6f9b65,.9),veinMat=mat(0xa8b77c,.9);
      const pot=new T.Mesh(new T.CylinderGeometry(.28,.38,.48,28),potMat);pot.position.y=.25;group.add(pot);cyl(0,.5,0,.34,.34,.06,m.gold,24);
      const stem=new T.CatmullRomCurve3([new T.Vector3(0,.5,0),new T.Vector3(.02,.92,0),new T.Vector3(-.04,1.35,0)]);group.add(new T.Mesh(new T.TubeGeometry(stem,24,.035,10,false),m.wood));
      for(let i=0;i<7;i++){
