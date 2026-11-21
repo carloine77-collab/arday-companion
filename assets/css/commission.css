@@ -1,0 +1,40 @@
+/* Daily commissions: editorial field-order board, using the existing parchment and muted field palette. */
+.drawer .choices.commission-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;min-height:0!important;max-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:0 12px 22px!important;box-sizing:border-box!important}
+.commission-tabs{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:5px;padding:0 0 5px}
+.commission-tabs button{min-width:0;min-height:35px;padding:7px 4px;border:0;border-radius:2px;background:#e9dfcf;color:#88765f;font:600 10px "Noto Serif SC",serif;letter-spacing:.03em}
+.commission-tabs button.active{background:#53695a;color:#f8f0df;box-shadow:inset 0 -2px #c7ad7e}
+.commission-masthead{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:112px;padding:17px 19px;background:linear-gradient(125deg,#344b48,#65796d 66%,#9b9a7b);color:#f4ead4;overflow:hidden}
+.commission-masthead:before{content:"";position:absolute;right:43px;top:-45px;width:150px;height:150px;border:1px solid #e4d9bd55;border-radius:50%;box-shadow:0 0 0 13px #e4d9bd12,0 0 0 27px #e4d9bd0b}
+.commission-kicker{font:700 8px Arial,sans-serif;letter-spacing:.19em;color:#d7c9a7}
+.commission-masthead h2{position:relative;margin:7px 0 4px;font:600 25px/1.1 Georgia,"Noto Serif SC",serif;letter-spacing:.04em}
+.commission-masthead p{margin:0;color:#e0d4bc;font:10px Georgia,serif;letter-spacing:.12em}
+.commission-seal{position:relative;display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;width:70px;height:70px;flex:0 0 70px;padding:16px 5px 8px;border:1px solid #d8c9a1;border-radius:50%;box-shadow:inset 0 0 0 4px #ffffff12;color:#f1e3c4}
+.commission-seal b{font:25px Georgia,serif}.commission-seal small{font:10px Georgia,serif}.commission-seal span{position:absolute;bottom:13px;width:100%;text-align:center;font:6px Arial,sans-serif;letter-spacing:.13em}
+.commission-board-meta{display:flex;justify-content:space-between;gap:8px;padding:0 2px;color:#89775f;font:10px "Noto Serif SC",serif}
+.commission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:stretch}
+.commission-card{position:relative;display:flex;flex-direction:column;min-width:0;min-height:190px;padding:12px 11px 10px;background:linear-gradient(145deg,#f5eddf,#e9deca);box-shadow:1px 3px 0 #c7b99f66;overflow:hidden}
+.commission-card:after{content:"";position:absolute;right:-19px;top:42px;width:64px;height:64px;border:1px solid #a18b6a2b;border-radius:50%;pointer-events:none}
+.commission-survival{background:linear-gradient(145deg,#f1eddf,#e4e1cf)}.commission-emotion{background:linear-gradient(145deg,#f3e8df,#e8d9cd)}.commission-combat{background:linear-gradient(145deg,#e8ece4,#dce3d9)}
+.commission-card-top{display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0}
+.commission-module{color:#6c785e;font:700 9px "Noto Serif SC",serif;letter-spacing:.08em}.commission-emotion .commission-module{color:#a06f66}.commission-combat .commission-module{color:#52695f}
+.commission-slot{color:#a39680;font:8px Georgia,serif;letter-spacing:.06em;white-space:nowrap}
+.commission-card-title{display:flex;align-items:center;gap:8px;min-width:0;margin:13px 0 7px}
+.commission-icon{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:#d9dfcf;color:#596c59;font:16px Georgia,serif}
+.commission-emotion .commission-icon{background:#ead5ca;color:#986e63}.commission-combat .commission-icon{background:#d2ded4;color:#4f665a}
+.commission-card-title h3{min-width:0;margin:0;color:#4d4b3d;font:600 14px/1.35 "Noto Serif SC",serif;overflow-wrap:anywhere}
+.commission-detail{position:relative;z-index:1;min-height:34px;margin:0 0 12px;color:#857966;font:10px/1.65 "Noto Serif SC",serif}
+.commission-progress{display:flex;align-items:center;gap:7px;margin-top:auto}.commission-progress-track{height:4px;flex:1;overflow:hidden;border-radius:8px;background:#d8d0c0}.commission-progress-track i{display:block;height:100%;border-radius:8px;background:#7d8b70;transition:width .2s}.commission-emotion .commission-progress-track i{background:#b47f72}.commission-combat .commission-progress-track i{background:#647c6d}
+.commission-progress>b{color:#796e5b;font:10px Georgia,serif;white-space:nowrap}
+.commission-card-foot{display:flex;flex-direction:column;gap:8px;margin-top:11px}.commission-card-foot>small{color:#8b7a61;font:9px "Noto Serif SC",serif}
+.commission-actions{display:grid;grid-template-columns:1fr 1.2fr;gap:6px}.commission-actions button{min-width:0;min-height:30px;padding:5px 6px;border:1px solid #c6b99f;border-radius:2px;background:#f4eddf;color:#796a55;font:600 9px "Noto Serif SC",serif}
+.commission-actions .commission-claim{border-color:#6a7d68;background:#617663;color:#fff7e7}.commission-actions button:disabled{opacity:.42;cursor:default}
+.commission-plan-section{width:100%}
+.drawer .choices.supply-archive-view{display:flex!important;flex-direction:column!important;gap:10px!important;min-height:0!important;max-height:100%!important;overflow-y:auto!important;padding:0 12px 20px!important}
+.supply-archive-masthead{padding:18px 19px;background:linear-gradient(130deg,#344b48,#65796d);color:#f5ecd8}
+.supply-archive-masthead>span{font:700 8px Arial,sans-serif;letter-spacing:.18em;color:#d9c9a7}.supply-archive-masthead h2{margin:8px 0 4px;font:600 23px Georgia,"Noto Serif SC",serif}.supply-archive-masthead p{margin:0;color:#e1d5bf;font:10px "Noto Serif SC",serif}
+.supply-archive-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.supply-archive-entry{display:flex;align-items:flex-start;gap:9px;min-width:0;padding:11px 9px;background:#eee5d6;color:#514b3d}
+.supply-archive-icon{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:#dce3d8;color:#536a5a;font:17px Georgia,serif}
+.supply-archive-entry>div{display:flex;flex-direction:column;gap:4px;min-width:0}.supply-archive-entry small{color:#8b7b62;font:8px "Noto Serif SC",serif}.supply-archive-entry strong{color:#4e4b3e;font:600 11px "Noto Serif SC",serif}.supply-archive-entry p{margin:0;color:#8a7e6b;font:9px/1.5 "Noto Serif SC",serif;overflow-wrap:anywhere}
+.guild-material-grid button:disabled{opacity:.42;cursor:default}
+@media(max-width:520px){.drawer .choices.commission-view{padding-left:9px!important;padding-right:9px!important}.commission-grid{grid-template-columns:1fr;gap:7px}.commission-card{min-height:0;padding:11px 12px 10px}.commission-detail{min-height:0;margin-bottom:9px}.commission-card-title{margin:9px 0 5px}.commission-card-foot{gap:7px;margin-top:9px}.supply-archive-grid{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:560px){.commission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.commission-card{min-height:160px}}
