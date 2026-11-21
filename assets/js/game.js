@@ -1306,6 +1306,7 @@ function sharedGoalCatalog(){
    }
   });
   s.sharedGoals=s.sharedGoals.filter(g=>g.status==='active');
+  proposeSharedGoal(at);
  }
  function createSituationalEvent(at=Date.now()){
  if(s.events.filter(e=>e.status==='open').length>=4)return;
@@ -1337,7 +1338,7 @@ function generateDailyEvents(){
  if(s.dailyEventDate===today)return;
  s.dailyEventDate=today;
  const at=Date.now(),dayStart=new Date(at);dayStart.setHours(0,0,0,0);
- if(Math.random()<.16)proposeSharedGoal(at);
+ proposeSharedGoal(at);
  const alreadyWroteToday=s.events.some(e=>e.category==='letter'&&Number(e.created||0)>=dayStart.getTime());
  if(!alreadyWroteToday&&at-(Number(s.lastArdayLetterAt)||0)>=32*3600000&&Math.random()<.72)writeArdayLetter(at);
 }
@@ -1350,7 +1351,7 @@ eventChoices=function(e){
    $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
    const condition=e.goalCondition||g.condition;
    $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="goal-proposal-condition"><small>完成条件</small><strong>'+condition+'</strong></div><div class="calendar-actions"><button id="sg-accept">同意，一起做</button><button id="sg-decline">这次先不安排</button></div>';
-   $('sg-accept').onclick=()=>{if(!acceptSharedGoal(g.id)){toast('共同目标已满');return}completeEvent(e,'接受共同计划');save();render();renderEvents()};
+   $('sg-accept').onclick=()=>{if(!acceptSharedGoal(g.id)){toast('共同目标已满');return}completeEvent(e,'接受共同计划');proposeSharedGoal(Date.now());save();render();renderEvents()};
    $('sg-decline').onclick=()=>{say(ardayLine('decline'));completeEvent(e,'暂不安排');save();renderEvents()};
    $('drawer').classList.add('open');return;
   }
