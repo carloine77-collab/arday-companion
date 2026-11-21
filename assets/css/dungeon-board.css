@@ -391,3 +391,18 @@
 @media(max-width:600px){.dungeon-cover-poster{padding-left:20px!important;padding-right:20px!important}.campus-edition{font-size:8px!important}.dungeon-board-title{font-size:clamp(32px,5vh,44px)!important}.campus-seal{width:27px;height:27px}.dungeon-roll-button{min-width:122px!important;min-height:48px!important;grid-template-columns:30px auto!important;column-gap:8px!important}.dungeon-roll-button:before{width:24px;height:24px}}
 @media(orientation:landscape) and (max-height:620px){.dungeon-board-title{font-size:clamp(28px,5vh,40px)!important}.campus-edition{margin-top:8px!important}.dungeon-cover-poster{padding-bottom:9px!important}.dungeon-roll-button{min-height:43px!important}}
 
+
+
+/* Dungeon lifecycle controls and resumable mission entry. */
+.dungeon-board-controls{position:relative!important}
+.dungeon-board-exit{position:absolute!important;left:12px;top:50%;z-index:4;transform:translateY(-50%);min-width:48px;min-height:34px;padding:0 10px;border:1px solid #c9bb98;border-radius:4px;background:#263d3d;color:#f0e6d0;font:600 11px/1.2 "Noto Serif SC","Songti SC",serif;letter-spacing:.08em;box-shadow:0 2px 8px #07151c55}
+.dungeon-event-modal{position:relative}
+.dungeon-event-modal>.dungeon-board-exit{top:12px;left:auto;right:12px;transform:none;background:#263d3d;color:#f0e6d0}
+.guild-active-mission{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 14px;border:1px solid #a99a78;background:linear-gradient(125deg,#263d3d,#172b31);color:#eee4d0;box-shadow:0 5px 16px #15282b22}
+.guild-active-mission-mark{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid #c9b88e;border-radius:50%;color:#e8d7b3;font:600 17px Georgia,serif}
+.guild-active-mission-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:3px}
+.guild-active-mission-copy small{color:#c6b991;font:600 8px Georgia,serif;letter-spacing:.16em}
+.guild-active-mission-copy b{font:600 14px "Noto Serif SC","Songti SC",serif}
+.guild-active-mission-copy span{color:#c8c9bb;font:10px "Noto Serif SC","Songti SC",serif}
+.guild-active-mission>button{flex:0 0 auto;min-height:38px;padding:0 13px;border:1px solid #c6b58c;border-radius:3px;background:linear-gradient(145deg,#e7dcc2,#c9bb98);color:#263a38;font:700 12px "Noto Serif SC","Songti SC",serif}
+@media(max-width:480px){.dungeon-board-exit{left:7px;min-width:42px;padding:0 7px;font-size:10px}.guild-active-mission{gap:8px;padding:10px}.guild-active-mission-mark{flex-basis:36px;width:36px;height:36px}.guild-active-mission>button{padding:0 9px;font-size:11px}}
