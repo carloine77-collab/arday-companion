@@ -214,6 +214,7 @@ const tabs={'物品':[],'商店':[]};
 
 let shopCategory='食物食材';let shopBookType='菜谱';let shopDungeonType='增益类';
 let inventoryCategory='全部';
+let inventoryRecycleMode=false;
 let inventoryGrid=null;
 let shopFurnitureGroup='坐卧类';
 let shopFurnitureType='沙发';
@@ -278,7 +279,7 @@ function openTab(name,force=false){
  $('drawer').classList.remove('exchange-drawer');
  $('drawer').classList.remove('profile-expanded','furniture-drawer');
  $('drawer').querySelector('.furniture-close')?.remove();
- const displayName=name==='物品'?'背包':name;
+ const displayName=name==='物品'?(inventoryRecycleMode?'背包 · 回收':'背包'):name;
  $('drawerTitle').textContent=displayName+(name==='商店'?' · ¥'+s.money:'');$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
  let shopGrid=null;
  if(name==='商店'){
@@ -323,8 +324,11 @@ function openTab(name,force=false){
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   
   const nav=document.createElement('div');nav.className='inventory-categories';
-  ['全部','食物','家具','副本道具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
-  $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
+  ['全部','食物','家具','副本道具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category&&!inventoryRecycleMode?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;inventoryRecycleMode=false;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
+  const recycleTab=document.createElement('button');recycleTab.type='button';recycleTab.className='inventory-category inventory-recycle-tab'+(inventoryRecycleMode?' active':'');recycleTab.textContent='回收';recycleTab.onclick=()=>{inventoryRecycleMode=true;openTab('物品',true)};nav.appendChild(recycleTab);
+  $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);
+  if(inventoryRecycleMode){tabEntries.splice(0,tabEntries.length,...tabEntries.filter(entry=>{const key=entry[2].startsWith('pantry-inventory-')?entry[2].slice('pantry-inventory-'.length):null;const entity=key?null:s.inventory[Number(entry[2].replace(/^(?:use-inventory-|place-owned-)/,''))];return (key?Number(ingredientUnitPrices[key])||0:inventoryOriginalPrice(entity))>0}))}
+  const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
@@ -368,13 +372,17 @@ function openTab(name,force=false){
   const renderTarget=isShop?shopGrid:(name==='物品'?inventoryGrid:$('choices'));
   if(name==='物品'){
    const entry=document.createElement('div');entry.className='inventory-item-entry';entry.appendChild(b);
-   const recycle=document.createElement('button');recycle.type='button';recycle.className='inventory-recycle-button';
-   const pantryKey=id.startsWith('pantry-inventory-')?id.slice('pantry-inventory-'.length):null;
-   const entity=pantryKey?null:s.inventory[Number(id.replace(/^(?:use-inventory-|place-owned-)/,''))];
-   const original=pantryKey?ingredientUnitPrices[pantryKey]:inventoryOriginalPrice(entity),refund=Math.round((Number(original)||0)*.3),isDungeonItem=entity?.kind==='dungeon-item';
-   recycle.textContent=refund>0?'回收 '+(isDungeonItem?refund+'积分':'¥'+refund):'不可回收';recycle.disabled=refund<=0;
-   recycle.onclick=event=>{event.preventDefault();event.stopPropagation();if(pantryKey)recyclePantryIngredient(pantryKey);else recycleInventoryItem(Number(id.replace(/^(?:use-inventory-|place-owned-)/,'')))};
-   entry.appendChild(recycle);renderTarget.appendChild(entry);
+   if(inventoryRecycleMode){
+    const pantryKey=id.startsWith('pantry-inventory-')?id.slice('pantry-inventory-'.length):null;
+    const entity=pantryKey?null:s.inventory[Number(id.replace(/^(?:use-inventory-|place-owned-)/,''))];
+    const original=pantryKey?ingredientUnitPrices[pantryKey]:inventoryOriginalPrice(entity),refund=Math.round((Number(original)||0)*.3),isDungeonItem=entity?.kind==='dungeon-item';
+    b.disabled=true;b.classList.add('recycle-preview');
+    const amount=document.createElement('small');amount.className='recycle-value';amount.textContent='原价 '+original+' · 返还 '+(isDungeonItem?refund+' 积分':'¥'+refund);b.appendChild(amount);
+    const recycle=document.createElement('button');recycle.type='button';recycle.className='inventory-recycle-button';recycle.textContent=isDungeonItem?'回收并返还 '+refund+' 积分':'回收并返还 ¥'+refund;
+    recycle.onclick=event=>{event.preventDefault();event.stopPropagation();if(pantryKey)recyclePantryIngredient(pantryKey);else recycleInventoryItem(Number(id.replace(/^(?:use-inventory-|place-owned-)/,'')))};
+    entry.appendChild(recycle);
+   }
+   renderTarget.appendChild(entry);
   }else renderTarget.appendChild(b);
  });
  $('drawer').classList.add('open');document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
