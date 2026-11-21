@@ -1668,13 +1668,13 @@ function showExchange(){
  $('drawer').classList.add('open');
 }
 
-function showGoals(tab='commission'){
+function showGoals(tab='personal'){
  ensurePersonalGoal();
  const g=s.personalGoal,sg=s.sharedGoal;
  const personal=g&&g.status==='active'?'<strong>'+g.title+'</strong><p class="goal-progress">'+Math.min(g.progress||0,g.target)+' / '+g.target+' '+g.unit+'</p>':'<p>暂无正在进行的个人计划。</p>';
  const shared=sg?.status==='active'?'<strong>'+sg.title+'</strong><p class="goal-progress">'+sg.progress+' / '+sg.target+' '+sg.unit+'</p>':'<p>暂无正在进行的共同计划。</p>';
  const active=['commission','personal','shared'].includes(tab)?tab:'commission';
- const nav='<nav class="commission-tabs"><button data-goal-tab="commission" class="'+(active==='commission'?'active':'')+'">每日委托</button><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人计划</button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同计划</button></nav>';
+  const nav=active==='commission'?'':'<nav class="commission-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人计划</button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同计划</button></nav>';
  $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='委托';$('choices').className='choices commission-view';
  let content='';
  if(active==='commission'){
@@ -1683,9 +1683,9 @@ function showGoals(tab='commission'){
    const progress=commissionSystem.getProgress(task),ready=progress>=task.target,canReroll=!task.claimed&&progress===0&&board.rerolls<1;
    const reward=task.module==='combat'?'随机战斗属性 +1 · 25% 概率获得补给':'随机属性 +1';
    const action=task.claimed?'已领取':ready?'领取奖励':progress+'/'+task.target+' · 进行中';
-   return '<article class="commission-card commission-'+task.module+'"><div class="commission-card-top"><span class="commission-module">'+task.moduleMark+' '+task.moduleLabel+'</span><span class="commission-slot">'+(task.slot==='bonus'?'随机事务':'每日事务')+'</span></div><div class="commission-card-title"><span class="commission-icon">'+task.icon+'</span><h3>'+task.title+'</h3></div><p class="commission-detail">'+task.detail+'</p><div class="commission-progress"><div class="commission-progress-track"><i style="width:'+Math.round(progress/task.target*100)+'%"></i></div><b>'+progress+' / '+task.target+'</b></div><div class="commission-card-foot"><small>'+reward+'</small><div class="commission-actions"><button type="button" data-commission-reroll="'+task.id+'" '+(canReroll?'':'disabled')+'>更换</button><button type="button" class="commission-claim" data-commission-claim="'+task.id+'" '+(ready&&!task.claimed?'':'disabled')+'>'+action+'</button></div></div></article>';
+    return '<article class="commission-card commission-'+task.module+'"><div class="commission-card-top"><span class="commission-module">'+task.moduleMark+' '+task.moduleLabel+'</span><span class="commission-slot">'+(task.slot==='bonus'?'随机事务':'每日事务')+'</span></div><div class="commission-card-title"><span class="commission-icon">'+task.icon+'</span><h3>'+task.title+'</h3></div><div class="commission-art commission-art-'+task.module+'" aria-hidden="true"><i></i><b></b><span></span></div><div class="commission-progress"><div class="commission-progress-track"><i style="width:'+Math.round(progress/task.target*100)+'%"></i></div><b>'+progress+' / '+task.target+'</b></div><div class="commission-card-foot"><small>'+reward+'</small><div class="commission-actions"><button type="button" data-commission-reroll="'+task.id+'" '+(canReroll?'':'disabled')+'>更换</button><button type="button" class="commission-claim" data-commission-claim="'+task.id+'" '+(ready&&!task.claimed?'':'disabled')+'>'+action+'</button></div></div></article>';
   }).join('');
-  content='<section class="commission-masthead"><div><span class="commission-kicker">ARDAY · DAILY FIELD ORDERS</span><h2>今日委托</h2><p>'+board.day.replace(/-/g,'.')+'</p></div><div class="commission-seal"><b>'+String(claimed).padStart(2,'0')+'</b><small> / '+String(board.tasks.length).padStart(2,'0')+'</small><span>CLAIMED</span></div></section><div class="commission-board-meta"><span>已领取 '+claimed+' / 4</span><span>免费更换 '+(board.rerolls<1?'1 次':'已用完')+'</span></div><div class="commission-grid">'+cards+'</div>';
+   content='<section class="commission-masthead"><div><h2>委托</h2><p>'+board.day.replace(/-/g,'.')+'</p></div><div class="commission-seal"><b>'+String(claimed).padStart(2,'0')+'</b><small> / '+String(board.tasks.length).padStart(2,'0')+'</small><span>完成</span></div></section><div class="commission-board-meta"><span>'+claimed+' / 4 已领取</span><span>更换 '+(board.rerolls<1?'1 / 1':'0 / 1')+'</span></div><div class="commission-grid">'+cards+'</div>';
  }else if(active==='personal'){
   content='<section class="profile-section commission-plan-section"><div class="section-kicker">ARDAY · PERSONAL</div><h3>个人计划</h3>'+personal+'</section>';
  }else{
@@ -2566,7 +2566,7 @@ function persistFurniture(item){
    const lines={};
    if(id==='exchange'){showExchange();return}
    if(id==='recruitment'){closeCalendar();showRecruitment();document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
-   if(id==='commissions'){openTab('目标');return}
+    if(id==='commissions'){closeCalendar();showGoals('commission');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
    if(id==='food'){shopCategory='食物食材';openTab('商店',true);return}
    if(id==='ranking'){showRanking();return}if(id==='teams'){showDungeon();return}if(id==='entertainment'){showEntertainment();return}say(lines[id]||zone.name);
   }
