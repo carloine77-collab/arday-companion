@@ -235,7 +235,8 @@
 .guild-material-count{display:inline-block;margin-bottom:10px;padding:5px 9px;border-radius:20px;background:#d5cbb4;color:#68745e;font-size:10px}
 .guild-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .guild-material-grid button{position:relative;min-height:82px;padding:34px 8px 8px;border:1px solid #b8aa8b;border-radius:9px;background:linear-gradient(145deg,#e8dfca,#d5c9ae);color:#4c594d;font:600 11px "Noto Serif SC",serif}
-.guild-material-grid button:before{content:"✧";position:absolute;top:7px;left:50%;transform:translateX(-50%);font:25px Georgia,serif;color:#9b8b5e}
+.guild-material-grid button:before{content:none}
+.guild-material-grid .guild-material-icon{position:absolute;top:5px;left:50%;width:100%;text-align:center;font-size:22px;line-height:1.2}
 .guild-material-grid button small{display:block;margin-top:4px;font-size:9px;color:#92866d}
 .guild-contract-meta{display:flex;align-items:baseline;gap:5px;margin:4px 0 12px;color:#9a8b70}.guild-contract-meta b{font:22px Georgia,serif;color:#536858}.guild-contract-meta strong{margin-left:12px;font:22px Georgia,serif;color:#536858}
 .guild-career-empty{text-align:center;padding:28px 16px;border:1px solid #b7aa8c;border-radius:14px;background:linear-gradient(145deg,#e9e0cd,#d8cfbb)}
@@ -360,13 +361,17 @@
 .drawer .choices.career-view>.career-tabs{flex:0 0 auto!important;margin:0 0 2px!important}
 .career-jobs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch;min-width:0}
 .career-job-card{
- display:flex;flex-direction:column;gap:7px;min-width:0;padding:10px!important;
+ display:grid;grid-template-columns:88px minmax(0,1fr);align-items:stretch;gap:9px;min-width:0;padding:9px!important;
  border:1px solid #c5b79f!important;border-radius:7px 10px 6px 9px!important;
  background:linear-gradient(145deg,#f4eddf,#e5dccb)!important;color:#455047!important;
  box-shadow:1px 3px 0 #c8bba6!important;
 }
-.career-job-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;min-width:0}
-.career-job-heading h3{min-width:0;margin:0!important;font:600 13px/1.45 "Noto Serif SC",serif!important;color:#3d4c43!important;overflow-wrap:anywhere}
+.career-job-poster{display:flex;min-width:0;min-height:148px}
+.career-job-poster .career-poster{width:100%;min-height:148px;height:100%;padding:10px 8px!important}
+.career-job-poster .career-poster strong{font-size:14px!important;line-height:1.35!important;overflow-wrap:anywhere}
+.career-job-poster .career-poster i{font-size:50px!important;right:6px!important;bottom:5px!important}
+.career-job-content{display:flex;flex-direction:column;gap:7px;min-width:0}
+.career-job-heading{display:flex;align-items:flex-start;justify-content:flex-end;gap:6px;min-width:0}
 .career-job-heading>strong{flex:0 0 auto;color:#8d6847;font:italic 19px/1 Georgia,serif!important;white-space:nowrap}
 .career-job-heading>strong small{font:9px "Noto Serif SC",serif;font-style:normal}
 .career-job-time{display:flex;justify-content:space-between;gap:5px;color:#86765e;font:10px Georgia,"Noto Serif SC",serif}
@@ -438,8 +443,9 @@
 .guild-career-empty h2{margin:5px 0 12px!important;font-size:16px!important}
 @media(max-width:520px){
  .career-jobs-grid{grid-template-columns:minmax(0,1fr)!important;gap:7px!important}
- .career-job-card{padding:9px!important}
- .career-job-heading h3{font-size:13px!important}
+ .career-job-card{grid-template-columns:76px minmax(0,1fr);gap:8px;padding:8px!important}
+ .career-job-poster,.career-job-poster .career-poster{min-height:138px}
+ .career-job-content{gap:6px}
  .drawer .choices.career-view>.guild-career-banner{min-height:78px!important;padding:10px!important}
  .guild-banner-sigil{flex-basis:48px!important;width:48px!important;height:48px!important}
  .guild-banner-sigil i{font-size:25px!important}
@@ -449,6 +455,7 @@
 @media(orientation:landscape) and (max-height:560px){
  .drawer .choices.career-view{padding-bottom:10px!important}
  .career-jobs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
- .career-job-card{gap:5px!important;padding:8px!important}
+ .career-job-card{grid-template-columns:76px minmax(0,1fr);gap:7px!important;padding:7px!important}
+ .career-job-poster,.career-job-poster .career-poster{min-height:130px}
  .drawer .choices.career-view>.guild-career-section>summary{min-height:54px!important}
 }
