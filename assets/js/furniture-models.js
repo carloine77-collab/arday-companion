@@ -106,6 +106,8 @@ window.ArdayFurnitureModels = (() => {
      pillow(-.65,.94,-.91,.56,.34,linenPillow,-.04);
      pillow(.65,.94,-.91,.48,.3,oatPillow,.08);
      for(const x of [-.82,-.41,0,.41,.82])box(x,.82,.96,.012,.012,.34,piping);
+     box(0,.86,1.04,2.48,.09,.38,mat(0x8f9c98,.98));
+     for(const x of [-.95,-.63,-.31,.31,.63,.95])box(x,.91,1.04,.012,.012,.31,linenPillow);
      for(const x of [-1.12,1.12])box(x,.76,.32,.025,.018,1.52,piping);
     }else if(isDouble){
      // Double bed: wider wingback headboard, two independent sleeping places and a central upholstered seam.
@@ -142,6 +144,8 @@ window.ArdayFurnitureModels = (() => {
      box(0,.72,.48,2.54,.13,1.82,duvetMat);
      pillow(-.64,.9,-.91,.58,.34,linenPillow,-.08);
      pillow(.64,.9,-.91,.5,.32,oatPillow,.08);
+     box(0,.84,1.02,2.5,.1,.42,mat(0xb1a08d,.98));
+     for(const x of [-1,-.66,-.33,0,.33,.66,1])box(x,.9,1.02,.012,.012,.36,mat(0x806b59,.88));
      box(0,.78,1.38,2.5,.14,.38,upholstery);
     }
    }else if(modelName==='床头柜'){
@@ -713,7 +717,7 @@ window.ArdayFurnitureModels = (() => {
     else if(variant==='米白石材'){box(0,.43,0,1.44,.11,.9,mat(0xe5dfd4,.34));for(const x of [-.54,.54])for(const z of [-.3,.3])box(x,.21,z,.075,.42,.075,m.dark)}
     else{box(0,.4,0,1.42,.12,.86,m.wood);box(0,.47,0,1.38,.035,.82,m.oak);for(const x of [-.58,.58])for(const z of [-.32,.32])box(x,.2,z,.075,.38,.075,m.wood);for(const x of [-.36,.36]){box(x,.27,.44,.48,.19,.035,m.oak);cyl(x,.27,.47,.025,.025,.045,m.gold,10)}}
    }else if(modelName==='边桌'){
-    action=()=>openFurnitureActions('table',id);surfaceType='table';
+    surfaceType='table';
     if(variant==='黄铜圆桌'){
      width=.72;depth=.72;height=.68;surfaceY=.7;const brass=mat(0xb58c54,.32,.78),dark=mat(0x6c5946,.48,.55);
      cyl(0,.64,0,.34,.34,.075,brass,40);const inset=new T.Mesh(new T.TorusGeometry(.285,.012,8,48),dark);inset.rotation.x=Math.PI/2;inset.position.y=.682;group.add(inset);cyl(0,.34,0,.055,.075,.52,brass,24);
