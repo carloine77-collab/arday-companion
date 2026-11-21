@@ -1,10 +1,10 @@
 /* Autonomous schedule selection and activity-preference engine. */
 window.ArdayScheduleEngine = (() => {
  function create(context) {
-  const {state:s,furnitureActivities,activityMeta,furnitureKindForPlaced,furnitureRequirementAvailable,hasCookableRecipe,eventAt,writeBlockForKey,renderCalendar,getStage,normalizeActivity}=context;
+  const {state:s,furnitureActivities,activityMeta,activityDailyLimits,furnitureKindForPlaced,furnitureRequirementAvailable,hasCookableRecipe,eventAt,writeBlockForKey,renderCalendar,getStage,normalizeActivity}=context;
   if(!s||!furnitureActivities||!activityMeta||typeof normalizeActivity!=='function')throw new Error('ArdayScheduleEngine: missing required dependencies');
 const preferenceCap=10,preferenceGain=.85,preferenceDailyDecay=.4;
-const dailyActivityLimits={wash:1,rest:2,laundry:1,exercise:1};
+const dailyActivityLimits=activityDailyLimits||{wash:1,rest:2,laundry:1,exercise:1};
 const preferenceActivities=new Set(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','walk','bouquet','admireFlowers','smellFlowers']);
 function decayActivityPreferences(at=Date.now()){
  const last=Number(s.preferenceUpdatedAt)||at,days=Math.max(0,(at-last)/86400000);
