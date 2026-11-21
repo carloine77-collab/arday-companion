@@ -1,0 +1,249 @@
+/* Editorial poster system for Commission + Exchange. Visual-only overrides; gameplay logic stays in game.js. */
+.drawer.commission-drawer,.stage .drawer.exchange-drawer{
+  background:#eee7d9!important;color:#4c493d!important;border:1px solid #d3c5ad!important;
+  box-shadow:0 18px 48px #51483826!important;
+}
+.drawer .choices.commission-view,.drawer .choices.exchange-view{
+  background:#eee7d9!important;color:#4c493d!important;
+  scrollbar-color:#b7a88d transparent;
+}
+.drawer .choices.commission-view:has(.commission-masthead),
+.drawer .choices.exchange-view{gap:13px!important}
+.drawer .choices.commission-view{padding:0 14px 24px!important}
+.drawer .choices.exchange-view{padding:13px 14px 24px!important}
+
+/* Commission board: an illustrated printed field guide. */
+.commission-masthead{
+  position:relative!important;isolation:isolate;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;gap:12px!important;min-height:178px!important;
+  padding:22px 21px!important;overflow:hidden!important;border:0!important;border-radius:2px!important;
+  color:#494b3c!important;
+  background:
+    radial-gradient(ellipse at 82% 48%,#f9e6c6 0 15%,transparent 15.5%),
+    linear-gradient(112deg,#d8dfce 0%,#e7e1ce 50%,#e8cdb9 100%)!important;
+}
+.commission-masthead:before{
+  content:"";position:absolute!important;z-index:-1;right:7%;top:-46px;width:220px;height:220px;
+  border:1px solid #71816b66!important;border-radius:50%!important;
+  box-shadow:0 0 0 12px #71816b12,0 0 0 26px #71816b0c,0 0 0 46px #71816b08!important;
+  transform:none!important;
+}
+.commission-masthead:after{
+  content:"";position:absolute;z-index:-1;right:12%;bottom:-40px;width:140px;height:165px;
+  background:linear-gradient(145deg,#84947a,#a6ad8d);clip-path:polygon(50% 0,100% 100%,0 100%);
+  opacity:.3;transform:rotate(18deg);
+}
+.commission-masthead-copy{position:relative;z-index:2;min-width:0}
+.commission-kicker{display:block!important;color:#7c8068!important;font:700 8px/1.5 Arial,sans-serif!important;letter-spacing:.23em!important}
+.commission-masthead h2{
+  margin:12px 0 8px!important;color:#424738!important;
+  font:800 clamp(34px,6vw,48px)/1 "Noto Serif SC","Songti SC",serif!important;
+  letter-spacing:.03em!important;text-shadow:2px 2px 0 #ffffff65;
+}
+.commission-masthead p{color:#73735f!important;font:9px/1.6 Georgia,serif!important;letter-spacing:.1em!important}
+.commission-masthead p i{color:#b27d68!important}
+.commission-seal{
+  position:relative!important;z-index:2;display:flex!important;align-items:baseline!important;justify-content:center!important;
+  align-content:center!important;gap:3px!important;width:84px!important;height:84px!important;flex:0 0 84px!important;
+  padding:25px 5px 8px!important;border:1px solid #8a8b70!important;border-radius:50%!important;
+  background:#f1e8d5a8!important;box-shadow:inset 0 0 0 5px #ffffff70!important;color:#535b46!important;
+}
+.commission-seal:before,.commission-seal:after{display:none!important}
+.commission-seal span{position:absolute!important;top:12px!important;bottom:auto!important;color:#85856d!important;font:7px "Noto Serif SC",serif!important;letter-spacing:.08em}
+.commission-seal b{color:#505a47!important;font:italic 34px/.9 Georgia,serif!important}
+.commission-seal small{color:#85856d!important;font:10px Georgia,serif!important}
+.commission-seal i{position:absolute!important;left:15px!important;right:15px!important;bottom:10px!important;height:2px!important;background:linear-gradient(90deg,#71866c 0 55%,#d6cbb5 55%)!important}
+.commission-masthead-index{right:14px!important;bottom:8px!important;color:#88866e!important;font:7px Georgia,serif!important;letter-spacing:.16em!important}
+.commission-board-meta{
+  display:flex!important;justify-content:space-between!important;gap:10px!important;padding:0 3px 2px!important;
+  color:#8b8069!important;font:9px "Noto Serif SC",serif!important;letter-spacing:.03em!important;text-transform:none!important;
+}
+.commission-board-meta span{display:flex;align-items:center;gap:6px}
+.commission-board-meta span:first-child i{width:6px;height:6px;background:#879778!important;box-shadow:none!important;border-radius:50%}
+.commission-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+.commission-card{
+  position:relative!important;display:flex!important;flex-direction:column!important;min-width:0!important;min-height:252px!important;
+  padding:13px 13px 12px!important;overflow:hidden!important;border:0!important;border-radius:2px!important;
+  background:#f5eddf!important;box-shadow:0 3px 0 #c9bda8,0 8px 18px #786c5620!important;
+}
+.commission-card:before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(135deg,#ffffff66,transparent 48%)!important}
+.commission-card:after{
+  content:"";position:absolute!important;right:-35px!important;top:38px!important;width:112px!important;height:112px!important;
+  border:1px solid #8e94744a!important;border-radius:50%!important;transform:none!important;box-shadow:0 0 0 10px #8e94740b!important;
+}
+.commission-survival{background:#f0eddf!important}
+.commission-emotion{background:#f3e6df!important}
+.commission-combat{background:#e6ece3!important}
+.commission-card-top,.commission-card-title,.commission-art,.commission-progress,.commission-card-foot{position:relative;z-index:1}
+.commission-card-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:5px!important;min-height:19px!important;padding:0 0 7px!important;border:0!important}
+.commission-module{display:flex!important;align-items:center!important;gap:6px!important;color:#68765d!important;font:700 9px "Noto Serif SC",serif!important;letter-spacing:.1em!important}
+.commission-module i{display:grid;place-items:center;width:19px;height:19px;border:1px solid #a4aa91!important;border-radius:50%!important;color:#68765d!important;font:10px Georgia,serif!important;font-style:normal!important}
+.commission-emotion .commission-module{color:#a26f66!important}.commission-combat .commission-module{color:#567260!important}
+.commission-slot{padding:2px 0!important;border:0!important;color:#a1947d!important;font:8px Georgia,serif!important}
+.commission-card-code{color:#a49a84!important;font:8px Georgia,serif!important;letter-spacing:.12em!important}
+.commission-card-title{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:6px!important;margin:9px 0 8px!important}
+.commission-card-title h3{margin:0!important;color:#464638!important;font:700 clamp(16px,2.5vw,19px)/1.3 "Noto Serif SC","Songti SC",serif!important;letter-spacing:.02em!important}
+.commission-icon{display:none!important}
+.commission-art{
+  position:relative!important;isolation:isolate;height:105px!important;min-height:105px!important;margin:0 0 11px!important;
+  overflow:hidden!important;border:0!important;border-radius:1px!important;
+  background:
+    radial-gradient(circle at 67% 36%,#f7edda 0 12%,transparent 12.5%),
+    linear-gradient(120deg,#d7dfcf,#aebda5)!important;
+}
+.commission-art:before{
+  content:"";position:absolute!important;z-index:0!important;inset:0!important;width:auto!important;height:auto!important;
+  right:auto!important;top:auto!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:repeating-linear-gradient(90deg,transparent 0 23px,#ffffff32 24px),linear-gradient(140deg,transparent 45%,#ffffff44 45.5% 46%,transparent 46.5%)!important;
+}
+.commission-art:after{
+  content:"";position:absolute!important;right:10%!important;bottom:-23px!important;top:auto!important;width:112px!important;height:112px!important;
+  border:1px solid #ffffff9c!important;border-radius:50%!important;background:transparent!important;transform:none!important;
+  box-shadow:0 0 0 10px #ffffff24,0 0 0 22px #ffffff18!important;
+}
+.commission-art i,.commission-art b,.commission-art span,.commission-art em{position:absolute!important;z-index:1}
+.commission-art i{left:26%!important;top:17px!important;width:58px!important;height:68px!important;border:0!important;border-radius:48% 52% 42% 58%!important;background:linear-gradient(145deg,#879c7c,#536d59)!important;box-shadow:9px 8px 0 #f1eadb8c!important;transform:rotate(-24deg)!important;clip-path:none!important}
+.commission-art b{left:calc(26% + 18px)!important;top:31px!important;width:22px!important;height:37px!important;border:0!important;border-radius:70% 0 70% 0!important;background:#e8e5d3!important;transform:rotate(25deg)!important}
+.commission-art span{left:calc(26% + 73px)!important;top:16px!important;width:6px!important;height:6px!important;border-radius:50%!important;background:#f9f1dc!important;box-shadow:15px 25px 0 #f9f1dc,-13px 55px 0 #f9f1dc!important}
+.commission-art em{left:10px!important;top:10px!important;width:30px!important;height:30px!important;border:0!important;border-left:1px solid #fff9!important;border-top:1px solid #fff9!important}
+.commission-art-emotion{background:radial-gradient(circle at 68% 38%,#f8eee4 0 13%,transparent 13.5%),linear-gradient(120deg,#ead5ca,#c99a8d)!important}
+.commission-art-emotion i{left:27%!important;top:23px!important;width:54px!important;height:54px!important;border-radius:8px 50% 50% 50%!important;background:#a96f68!important;box-shadow:8px 8px 0 #f3e6d8!important;transform:rotate(-45deg)!important}
+.commission-art-emotion b{left:calc(27% + 13px)!important;top:34px!important;width:29px!important;height:29px!important;border:1px solid #f3dfd4!important;border-radius:50%!important;background:#d8a99b!important;transform:none!important}
+.commission-art-emotion span{background:#fff1e6!important;box-shadow:15px 25px 0 #fff1e6,-13px 55px 0 #fff1e6!important}
+.commission-art-combat{background:radial-gradient(circle at 68% 36%,#edf0df 0 13%,transparent 13.5%),linear-gradient(120deg,#d4e0d3,#8da995)!important}
+.commission-art-combat i{left:27%!important;top:16px!important;width:58px!important;height:70px!important;border:0!important;border-radius:0!important;background:linear-gradient(145deg,#f1eddb,#6f8d77)!important;clip-path:polygon(50% 0,95% 20%,85% 76%,50% 100%,15% 76%,5% 20%)!important;box-shadow:none!important;filter:drop-shadow(5px 6px 0 #526e5d55)!important;transform:none!important}
+.commission-art-combat b{left:calc(27% + 18px)!important;top:34px!important;width:22px!important;height:31px!important;border:1px solid #557360!important;border-radius:0!important;background:#dce6d7!important;clip-path:polygon(50% 0,100% 20%,80% 80%,50% 100%,20% 80%,0 20%)!important;transform:none!important}
+.commission-art-combat span{background:#f7f0dc!important;box-shadow:15px 25px 0 #f7f0dc,-13px 55px 0 #f7f0dc!important}
+.commission-progress{display:flex!important;align-items:center!important;gap:8px!important}
+.commission-progress-track{height:4px!important;flex:1!important;border:0!important;border-radius:8px!important;background:#ded7c8!important}
+.commission-progress-track i{height:100%!important;border:0!important;border-radius:8px!important;background:#849579!important;box-shadow:none!important}
+.commission-emotion .commission-progress-track i{background:#bc887b!important}.commission-combat .commission-progress-track i{background:#668674!important}
+.commission-progress>b{color:#77715f!important;font:10px Georgia,serif!important}
+.commission-card-foot{display:flex!important;flex-direction:column!important;gap:8px!important;margin-top:auto!important;padding-top:10px!important;border:0!important}
+.commission-card-foot>small{display:flex!important;align-items:center!important;gap:6px!important;color:#8a7b63!important;font:9px "Noto Serif SC",serif!important}
+.commission-card-foot>small span{color:#a27d61!important;font:700 7px Georgia,serif!important;letter-spacing:.12em!important}
+.commission-actions{display:grid!important;grid-template-columns:.8fr 1.2fr!important;gap:7px!important}
+.commission-actions button{min-height:34px!important;padding:6px 8px!important;border:1px solid #c9bda8!important;border-radius:2px!important;background:#eee6d7!important;color:#81745e!important;font:600 10px "Noto Serif SC",serif!important}
+.commission-actions .commission-claim{border-color:#73866c!important;background:#71866d!important;color:#fff8e9!important}
+.commission-actions button:disabled{opacity:.45!important;box-shadow:none!important}
+
+/* Exchange: collectible product catalogue arranged like a printed art and design annual. */
+.drawer .choices.exchange-view{padding-top:12px!important}
+.exchange-masthead{
+  position:relative!important;isolation:isolate;display:grid!important;grid-template-columns:86px minmax(0,1fr) auto!important;
+  align-items:center!important;gap:15px!important;min-height:190px!important;padding:20px 20px!important;overflow:hidden!important;
+  border:0!important;border-radius:2px!important;color:#4b4b3d!important;
+  background:
+    radial-gradient(circle at 78% 50%,#f6d7ad 0 13%,transparent 13.5%),
+    linear-gradient(115deg,#e5dfcb 0%,#d8e0d0 54%,#e9d3bd 100%)!important;
+}
+.exchange-masthead:before{
+  content:"";position:absolute;z-index:-1;right:9%;top:-48px;width:220px;height:220px;border:1px solid #78866e70;
+  border-radius:50%;box-shadow:0 0 0 13px #78866e14,0 0 0 29px #78866e0b,0 0 0 48px #78866e08;
+}
+.exchange-masthead:after{
+  content:"";position:absolute;z-index:-1;right:17%;bottom:-34px;width:160px;height:120px;
+  background:linear-gradient(135deg,#8d9b7c,#c1ad89);clip-path:polygon(0 100%,40% 0,100% 100%);opacity:.38;
+}
+.exchange-orbit{
+  position:relative!important;display:grid!important;place-items:center!important;width:82px!important;height:82px!important;
+  border:1px solid #7f8c72!important;border-radius:50%!important;background:#f4eddd8c!important;color:#6f8067!important;
+}
+.exchange-orbit:before{width:112px!important;height:43px!important;border:1px solid #87977a!important;border-radius:50%!important;transform:rotate(-32deg)!important}
+.exchange-orbit:after{width:43px!important;height:112px!important;border:1px solid #87977a!important;border-radius:50%!important;transform:rotate(-32deg)!important}
+.exchange-orbit i{width:9px!important;height:9px!important;right:5px!important;top:14px!important;background:#b8795f!important;box-shadow:none!important}
+.exchange-orbit b{color:#657d62!important;font:36px Georgia,serif!important;text-shadow:none!important}
+.exchange-heading{position:relative;z-index:1;min-width:0}
+.exchange-heading>small,.exchange-heading>span{display:block!important;color:#85836b!important;font:700 8px/1.5 Georgia,serif!important;letter-spacing:.2em!important}
+.exchange-heading h2{margin:9px 0 7px!important;color:#41483a!important;font:800 clamp(34px,6vw,47px)/1.05 "Noto Serif SC","Songti SC",serif!important;letter-spacing:.04em!important;text-shadow:2px 2px 0 #ffffff70}
+.exchange-heading>span{color:#a47d60!important;font-size:8px!important}
+.exchange-balance{
+  position:relative;z-index:1;display:flex!important;align-self:center!important;min-width:98px!important;flex-direction:column!important;
+  align-items:flex-end!important;justify-content:center!important;padding:8px 0 8px 14px!important;
+  border-left:1px solid #8d967b80!important;text-align:right!important;
+}
+.exchange-balance small{color:#85836b!important;font:7px Georgia,serif!important;letter-spacing:.12em!important}
+.exchange-balance strong{margin:6px 0 0!important;color:#64785d!important;font:italic 32px/1 Georgia,serif!important}
+.exchange-balance em{margin-top:4px!important;color:#a17e5f!important;font:normal 8px Georgia,serif!important;letter-spacing:.2em!important}
+.exchange-index{right:14px!important;top:8px!important;color:#85866e!important;font:7px Georgia,serif!important}
+.exchange-filters{display:flex!important;flex-wrap:wrap!important;gap:7px!important;padding:1px 0!important}
+.exchange-filters button{
+  min-height:34px!important;padding:7px 13px!important;border:1px solid #cfc3ad!important;border-radius:2px!important;
+  background:#f4eddf!important;color:#82765f!important;font:600 10px "Noto Serif SC",serif!important;letter-spacing:.05em!important;
+}
+.exchange-filters button.active{border-color:#78896d!important;background:#78896d!important;color:#fff8e9!important;box-shadow:0 2px 0 #c2b69e!important}
+.exchange-search-wrap{
+  display:flex!important;align-items:center!important;gap:9px!important;min-height:42px!important;padding:0 12px!important;
+  border:1px solid #d2c6b1!important;border-radius:2px!important;background:#f6efe2!important;color:#8b8a72!important;
+}
+.exchange-search-wrap>span{font:24px Georgia,serif!important}
+.exchange-search{height:40px!important;color:#4f4d40!important;font:11px "Noto Serif SC",serif!important}
+.exchange-search::placeholder{color:#a99d87!important}
+.exchange-results-head{display:flex!important;align-items:baseline!important;justify-content:space-between!important;padding:2px 2px 0!important;color:#5c5b49!important}
+.exchange-results-head span{font:700 15px "Noto Serif SC",serif!important;letter-spacing:.08em!important}
+.exchange-results-head b{color:#9b8c70!important;font:italic 13px Georgia,serif!important}
+.exchange-product-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+.exchange-product{
+  position:relative!important;display:grid!important;grid-template-columns:78px minmax(0,1fr) auto!important;align-items:center!important;
+  gap:11px!important;min-width:0!important;min-height:132px!important;padding:12px!important;overflow:hidden!important;
+  border:0!important;border-radius:2px!important;background:#f5eddf!important;box-shadow:0 3px 0 #c9bda8,0 7px 15px #786c561b!important;
+}
+.exchange-product:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#8b9a7b!important}
+.exchange-product[hidden]{display:none!important}
+.exchange-product-art{
+  position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  gap:5px!important;width:76px!important;height:100px!important;clip-path:none!important;border-radius:1px!important;
+  background:radial-gradient(circle at 70% 25%,#f7edda 0 12%,transparent 12.5%),linear-gradient(145deg,#d5ddc9,#a6b69c)!important;
+  color:#536b55!important;box-shadow:none!important;
+}
+.exchange-product-art:before{content:"";position:absolute;inset:5px;border:1px solid #ffffff9c!important;clip-path:none!important}
+.exchange-product-art>span{z-index:1;font:38px/1 Georgia,"Noto Serif SC",serif!important;text-shadow:2px 3px 0 #ffffff80!important}
+.exchange-product-art>small{z-index:1;color:#71816a!important;font:7px Georgia,serif!important;letter-spacing:.12em!important}
+.exchange-product:nth-child(4n+2) .exchange-product-art{background:radial-gradient(circle at 70% 25%,#fff0e6 0 12%,transparent 12.5%),linear-gradient(145deg,#ead5ca,#c99b8e)!important;color:#986d63!important}
+.exchange-product:nth-child(4n+3) .exchange-product-art{background:radial-gradient(circle at 70% 25%,#f2eddb 0 12%,transparent 12.5%),linear-gradient(145deg,#d5e0d5,#91aa98)!important;color:#55745f!important}
+.exchange-product:nth-child(4n) .exchange-product-art{background:radial-gradient(circle at 70% 25%,#f7e8c9 0 12%,transparent 12.5%),linear-gradient(145deg,#e7d9b9,#c1a77d)!important;color:#8b7550!important}
+.exchange-product-main{position:relative;z-index:1;min-width:0;align-self:center}
+.exchange-product-kind{color:#a17c5e!important;font:700 8px Georgia,serif!important;letter-spacing:.12em!important}
+.exchange-product-main h3{margin:5px 0 5px!important;color:#48483b!important;font:700 14px "Noto Serif SC",serif!important}
+.exchange-product-main p{margin:0!important;color:#857b68!important;font:9px/1.55 "Noto Serif SC",serif!important}
+.exchange-product-stock{margin-top:8px!important;color:#9a8e78!important;font:8px "Noto Serif SC",serif!important}
+.exchange-product-action{position:relative;z-index:1;display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:center!important;gap:8px!important;min-width:64px!important}
+.exchange-product-action>strong{color:#687d5e!important;font:italic 20px Georgia,serif!important;white-space:nowrap!important}
+.exchange-product-action>strong small{font:8px Georgia,serif!important}
+.exchange-product-action button{
+  min-width:64px!important;min-height:33px!important;padding:6px 9px!important;border:1px solid #71866a!important;border-radius:2px!important;
+  background:#778b6d!important;color:#fff8e9!important;font:600 10px "Noto Serif SC",serif!important;letter-spacing:.06em!important;
+  box-shadow:0 2px 0 #c0b49d!important;
+}
+.exchange-product-action button:active:not(:disabled){transform:translateY(1px)!important;box-shadow:none!important}
+.exchange-product-action button:disabled{border-color:#c9c0b0!important;background:#ded7ca!important;color:#9b927f!important;box-shadow:none!important;opacity:1!important}
+.exchange-empty{grid-column:1/-1!important;padding:32px 12px!important;text-align:center!important;color:#95866e!important;font:10px Georgia,serif!important;letter-spacing:.18em!important}
+@media(max-width:620px){
+  .drawer .choices.commission-view{padding-left:10px!important;padding-right:10px!important}
+  .commission-masthead{min-height:145px!important;padding:17px 14px!important}
+  .commission-masthead h2{font-size:34px!important}
+  .commission-seal{width:66px!important;height:66px!important;flex-basis:66px!important;padding-top:20px!important}
+  .commission-seal b{font-size:27px!important}
+  .commission-grid{grid-template-columns:1fr!important;gap:9px!important}
+  .commission-card{min-height:0!important;padding:12px!important}
+  .commission-art{height:82px!important;min-height:82px!important}
+  .exchange-masthead{grid-template-columns:62px minmax(0,1fr) auto!important;gap:9px!important;min-height:150px!important;padding:15px 11px!important}
+  .exchange-orbit{width:58px!important;height:58px!important}.exchange-orbit:before{width:78px!important;height:30px!important}.exchange-orbit:after{width:30px!important;height:78px!important}.exchange-orbit b{font-size:25px!important}
+  .exchange-heading h2{font-size:29px!important}
+  .exchange-balance{min-width:69px!important;padding-left:8px!important}.exchange-balance strong{font-size:24px!important}.exchange-balance small{font-size:6px!important}
+  .exchange-index{right:9px!important;top:5px!important;font-size:5px!important}
+  .exchange-filters{gap:5px!important}.exchange-filters button{flex:1 1 auto!important;min-height:32px!important;padding:5px 8px!important;font-size:9px!important}
+  .exchange-product-grid{grid-template-columns:1fr!important;gap:8px!important}
+  .exchange-product{grid-template-columns:64px minmax(0,1fr) 67px!important;min-height:112px!important;padding:9px!important;gap:9px!important}
+  .exchange-product-art{width:62px!important;height:82px!important}
+  .exchange-product-art>span{font-size:32px!important}
+  .exchange-product-main h3{font-size:13px!important}
+  .exchange-product-main p{font-size:9px!important}
+}
+@media(max-width:380px){
+  .exchange-masthead{grid-template-columns:49px minmax(0,1fr) auto!important;gap:7px!important;padding:12px 8px!important}
+  .exchange-orbit{width:46px!important;height:46px!important}.exchange-orbit:before{width:62px!important;height:24px!important}.exchange-orbit:after{width:24px!important;height:62px!important}
+  .exchange-heading h2{font-size:25px!important}.exchange-balance{min-width:60px!important;padding-left:6px!important}
+  .exchange-balance strong{font-size:21px!important}
+}
+@media(prefers-reduced-motion:reduce){.commission-progress-track i,.exchange-product-action button{transition:none!important}}
