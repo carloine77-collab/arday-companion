@@ -389,7 +389,7 @@ function slotClick(di,h){
     $('confirmScheduleMove').onclick=()=>{const n=Number($('scheduleTargetHour').value),conflict=(s.calendar.days[key]||[]).some(x=>x!==ev&&n<x.end&&n+duration>x.start);if(!Number.isInteger(n)||n<0||n+duration>24||conflict){toast('这个时间不可用');return}ev.start=n;ev.end=n+duration;s.calendar.days[key].sort((a,b)=>a.start-b.start);save();renderCalendar();$('drawer').classList.remove('open');say('我把安排调整到了 '+pad(n)+':00。')};
     $('cancelScheduleMove').onclick=()=>slotClick(di,h);
    };
-  $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}if(ev.kind==='autonomous'){const recent=(s.calendar.days[key]||[]).filter(item=>item!==ev&&item.start<ev.start).sort((a,b)=>a.start-b.start).slice(-5).map(item=>item.activity).filter(Boolean);Object.assign(ev,createAutonomousScheduleEvent(ev.start,recent));save();renderCalendar();$('drawer').classList.remove('open');say('我重新安排了这段时间。');return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
+  $('remove').onclick=()=>{if(ev.kind==='routine'||ev.kind==='sleep'||ev.kind==='work'){say(ev.kind==='work'?'这份工作已经答应下来，不能直接取消。':'这属于我的基本生活安排，我不打算取消。你可以和我商量调整，但不能直接替我决定。');s.revealedTraits=[...new Set([...(s.revealedTraits||[]),'重视自主'])];save();return}if(ev.kind==='autonomous'){const history=(s.calendar.days[key]||[]).filter(item=>item!==ev&&item.start<ev.start).sort((a,b)=>a.start-b.start),recent=history.map(item=>item.activity).filter(Boolean);Object.assign(ev,createAutonomousScheduleEvent(ev.start,recent,history));save();renderCalendar();$('drawer').classList.remove('open');say('我重新安排了这段时间。');return}s.calendar.days[key]=s.calendar.days[key].filter(x=>x!==ev);save();renderCalendar();$('drawer').classList.remove('open');say('好，这段时间我自己决定。')};
   $('return-existing').onclick=()=>{$('drawer').classList.remove('open')};return;
  }
  $('drawerTitle').textContent='自主安排 · '+dayLabel(d)+' '+pad(h)+':00';
@@ -451,17 +451,17 @@ function buildDay(key){
  if(Number(p.duration)>0&&tonightSleepEnd>Number(p.bedtime))add(Number(p.bedtime),tonightSleepEnd,'睡眠 · '+p.duration+'小时','routine','sleep');
  const occupied=new Set();
  d.forEach(ev=>{for(let h=Math.max(0,ev.start);h<Math.min(24,ev.end);h++)occupied.add(h)});
- const priorDay=(s.calendar?.days?.[previousKey]||[]).slice().sort((a,b)=>a.start-b.start);
- const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity),...priorDay.map(item=>item.activity).filter(activity=>activity&&activity!=='idle')].slice(-5);
+ const recent=[];
  for(let hour=0;hour<24;hour++){
   if(occupied.has(hour)){const prior=d.find(ev=>hour-1>=ev.start&&hour-1<ev.end);if(prior?.activity&&prior.activity!=='idle'){recent.push(prior.activity);if(recent.length>5)recent.shift()}continue}
-  const planned=createAutonomousScheduleEvent(hour,recent);d.push(planned);
-  if(planned.activity!=='idle'){recent.push(planned.activity);if(recent.length>5)recent.shift()}
+  const dayHistory=d.filter(ev=>Number(ev.start)<hour);
+  const planned=createAutonomousScheduleEvent(hour,recent,dayHistory);d.push(planned);
+  if(planned.activity!=='idle')recent.push(planned.activity)
  }
  return d.sort((a,b)=>a.start-b.start);
 }
-function createAutonomousScheduleEvent(hour,recent=[]){
- const choice=chooseAutonomousActivity(recent,hour),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
+function createAutonomousScheduleEvent(hour,recent=[],dayHistory=null){
+ const choice=chooseAutonomousActivity(recent,hour,dayHistory),activity=normalizeActivity(choice.activity),meta=activityMeta[activity]||{title:'自由时间'};
  return {start:hour,end:hour+1,title:activity==='idle'?'自由时间':(meta.menuLabel||meta.title),kind:'autonomous',activity,autonomous:true,source:'day-ahead',unresolved:false,plannedAt:Date.now(),room:choice.room,anchor:choice.anchor,furnitureId:choice.furnitureId,furnitureKind:choice.furnitureKind};
 }
 function makeSleepPlan(key,energy=100,bedtime=22){
@@ -503,6 +503,8 @@ function prioritizeRecoverySchedule(key,hour){
  const options=autonomousFurnitureOptions().filter(option=>option.activity==='rest');
  if(!options.length)return false;
  const day=s.calendar?.days?.[key]||[];
+ const dailyRestCount=day.filter(ev=>ev.activity==='rest').length;
+ if(dailyRestCount>=2)return false;
  const futureRests=day.filter(ev=>ev.activity==='rest'&&Number(ev.start)>=hour).sort((a,b)=>a.start-b.start);
  if(futureRests.length&&Number(futureRests[0].start)<=hour+1)return false;
  const slot=day.filter(ev=>ev.kind==='autonomous'&&Number(ev.start)>=hour).sort((a,b)=>a.start-b.start)[0];
@@ -723,9 +725,9 @@ function ensureScheduleAt(value){
   const day=s.calendar.days[key];
   for(let hour=0;hour<24;hour++)if(!day.some(ev=>hour>=ev.start&&hour<ev.end)){
    const preceding=day.filter(ev=>ev.end<=hour).sort((a,b)=>a.start-b.start).slice(-5).map(ev=>ev.activity).filter(Boolean);
-   const recent=[...(s.activityLog||[]).slice(-5).map(item=>item.activity),...preceding].slice(-5);
-   const previous=eventAt(key,hour-1);if(previous?.activity&&previous.activity!=='idle')recent.push(previous.activity);
-   const planned=createAutonomousScheduleEvent(hour,recent);day.push(planned);
+   const history=day.filter(ev=>Number(ev.start)<hour).sort((a,b)=>a.start-b.start);
+   const recent=history.map(ev=>ev.activity).filter(Boolean);
+   const planned=createAutonomousScheduleEvent(hour,recent,history);day.push(planned);
   }
   day.sort((a,b)=>a.start-b.start);
  };
@@ -737,22 +739,41 @@ function ensureScheduleAt(value){
  const furnitureSignature=JSON.stringify((s.placed||[]).filter(item=>item&&item.id).map(item=>({id:String(item.id),name:String(item.name||''),room:String(item.room||''),supportId:String(item.supportId||''),kind:furnitureKindForPlaced(item)})).sort((a,b)=>a.id.localeCompare(b.id)));
  if(s.calendar.autonomyFurnitureSignature!==furnitureSignature){
   const currentHour=new Date().getHours();
-  let recent=(s.activityLog||[]).slice(-5).map(item=>item.activity).filter(Boolean);
   Object.keys(s.calendar.days||{}).filter(key=>key>=currentKey).sort().forEach(key=>{
-   const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start);
+   const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start),recent=[];
    day.forEach(ev=>{
     const isFuture=key>currentKey||Number(ev.start)>currentHour;
     if(ev.kind==='autonomous'&&isFuture){
      const start=ev.start,end=ev.end,withPlayer=ev.withPlayer;
-     const planned=createAutonomousScheduleEvent(start,recent);
+     const history=day.filter(item=>Number(item.start)<Number(start));
+     const planned=createAutonomousScheduleEvent(start,recent,history);
      Object.assign(ev,planned,{start,end,...(withPlayer?{withPlayer}: {})});
-     if(ev.activity&&ev.activity!=='idle'){recent.push(ev.activity);if(recent.length>5)recent.shift()}
+     if(ev.activity&&ev.activity!=='idle')recent.push(ev.activity);
     }
-    if(ev.activity&&ev.activity!=='idle'&&ev.activity!=='autonomous'){recent.push(ev.activity);if(recent.length>5)recent.shift()}
+    if(ev.activity&&ev.activity!=='idle'&&ev.activity!=='autonomous'&&!recent.includes(ev.activity))recent.push(ev.activity);
    });
   });
   s.calendar.autonomyFurnitureSignature=furnitureSignature;
  }
+ // Enforce per-day limits on already-saved future autonomous blocks as well as newly generated ones.
+ const dailyActivityLimits={wash:1,rest:2,laundry:1,exercise:1};
+ Object.keys(s.calendar.days||{}).filter(key=>key>=currentKey).sort().forEach(key=>{
+  const day=(s.calendar.days[key]||[]).sort((a,b)=>a.start-b.start),counts={},history=[];
+  const currentHour=key===currentKey?new Date().getHours():-1;
+  for(const ev of day){
+   const activity=normalizeActivity(ev.activity),limit=dailyActivityLimits[activity];
+   const editable=ev.kind==='autonomous'&&(key>currentKey||Number(ev.start)>currentHour);
+   if(editable&&Number.isFinite(limit)&&(counts[activity]||0)>=limit){
+    const recent=history.map(item=>item.activity).filter(Boolean);
+    const replacement=createAutonomousScheduleEvent(Number(ev.start),recent,history);
+    Object.assign(ev,replacement,{start:ev.start,end:ev.end});
+   }
+   const finalActivity=normalizeActivity(ev.activity);
+   if(finalActivity)counts[finalActivity]=(counts[finalActivity]||0)+1;
+   history.push(ev);
+  }
+  s.calendar.days[key]=day;
+ });
  if(s.job?.active){
   Object.keys(s.calendar.days).filter(k=>k>=s.job.startDate).sort().forEach(key=>{
    if(!(s.calendar.days[key]||[]).some(e=>e.jobShift&&e.jobId===s.job.id)){
