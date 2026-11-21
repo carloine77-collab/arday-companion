@@ -3,14 +3,14 @@ window.ArdayFoodModels = (() => {
  function build(ctx) {
   const {T,group,mat,cyl,variant}=ctx;
   const dish=String(variant||'');
-  const porcelain=mat(0xf3eee3,.24,.04),rim=mat(0xb58d5d,.34,.38),rice=mat(0xf1e5c9,.96),egg=mat(0xf2cf72,.88),tomato=mat(0xc85f43,.86),greens=mat(0x6f8a55,.92),beef=mat(0x865039,.88),mushroom=mat(0xa58a6a,.94),tofu=mat(0xf0e4ca,.92),potato=mat(0xd6ad68,.9),sauce=mat(0x9a603d,.84),noodle=mat(0xe6c77f,.84),cream=mat(0xe9dfc9,.28),golden=mat(0xd5a14f,.82),carrot=mat(0xd98b45,.86);
-  const smooth=new T.SphereGeometry(1,22,16);
+  const porcelain=mat(0xf3eee3,.2,.06),rim=mat(0xb58d5d,.28,.48),rice=mat(0xf1e5c9,.96),egg=mat(0xf2cf72,.88),tomato=mat(0xc85f43,.86),greens=mat(0x6f8a55,.92),beef=mat(0x865039,.88),mushroom=mat(0xa58a6a,.94),tofu=mat(0xf0e4ca,.92),potato=mat(0xd6ad68,.9),sauce=mat(0x9a603d,.84),noodle=mat(0xe6c77f,.84),cream=mat(0xe9dfc9,.28),golden=mat(0xd5a14f,.82),carrot=mat(0xd98b45,.86);
+  const smooth=new T.SphereGeometry(1,32,24);
   const oval=(x,y,z,sx,sy,sz,material,rotation=0)=>{
    const mesh=new T.Mesh(smooth,material);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.rotation.y=rotation;mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;
   };
   const tube=(points,material=noodle,radius=.012)=>{
    const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(p[0],p[1],p[2])));
-   const mesh=new T.Mesh(new T.TubeGeometry(curve,Math.max(20,points.length*9),radius,8,false),material);mesh.castShadow=true;group.add(mesh);return mesh;
+   const mesh=new T.Mesh(new T.TubeGeometry(curve,Math.max(32,points.length*12),radius,10,false),material);mesh.castShadow=true;group.add(mesh);return mesh;
   };
   const ring=(x,y,z,r,t,material)=>{
    const mesh=new T.Mesh(new T.TorusGeometry(r,t,8,40),material);mesh.rotation.x=Math.PI/2;mesh.position.set(x,y,z);group.add(mesh);return mesh;
@@ -143,12 +143,29 @@ window.ArdayFoodModels = (() => {
    oval(0,.15,0,.15,.015,.13,mat(0xe5b96e,.9));
    for(const [x,z] of [[-.11,-.04],[.02,-.1],[.1,.02],[-.04,.09],[.12,.09]]){oval(x,.18,z,.04,.022,.032,mushroom,(x-z)*2);oval(x,.16,z,.012,.014,.012,mat(0xf0e5cf,.9))}
    for(let i=0;i<8;i++){const a=i*2.4,r=.07+(i%3)*.03;leaf(Math.cos(a)*r,Math.sin(a)*r,.65,a)}
+  }else if(dish==='照烧鸡腿饭'){
+   plate();riceMound(24,.12);const chicken=mat(0x9a5735,.72),glaze=mat(0x6f3d27,.28),sesame=mat(0xf0e4c7,.82);
+   for(const [x,z,a] of [[-.09,-.045,-.35],[.045,-.055,.4],[.105,.06,-.2]]){oval(x,.185,z,.075,.032,.052,chicken,a);oval(x,.207,z,.067,.012,.046,glaze,a)}
+   for(let i=0;i<14;i++){const a=i*2.4,r=.04+(i%4)*.026;oval(Math.cos(a)*r,.221,Math.sin(a)*r,.006,.004,.006,sesame)}herbs([[-.13,.09],[.02,.12],[.14,-.08]]);
+  }else if(dish==='奶油玉米浓汤'){
+   bowl(mat(0xe8d9bd,.2));const corn=mat(0xe8c45f,.78),creamSoup=mat(0xf0dfb9,.22);cyl(0,.17,0,.17,.17,.012,creamSoup);
+   for(let i=0;i<24;i++){const a=i*2.399,r=.035+Math.sqrt((i+.5)/24)*.13;oval(Math.cos(a)*r,.205,Math.sin(a)*r,.012,.009,.012,corn)}oval(.015,.218,-.02,.035,.012,.03,mat(0xf5d98b,.42));herbs([[-.12,.07],[.1,-.08]]);
+  }else if(dish==='草莓奶油松饼'){
+   plate(true);const berry=mat(0xc94f5c,.72),creamTop=mat(0xf6eadb,.34),seed=mat(0xf5d9bd,.82);pancake(0,.12,0,.17,mat(0xc58c4d,.88));pancake(0,.17,0,.155,mat(0xe0b36c,.86));oval(0,.205,0,.13,.027,.12,creamTop);
+   for(const [x,z,a] of [[-.07,-.025,-.3],[.055,-.045,.4],[.025,.07,-.2]]){oval(x,.237,z,.035,.025,.028,berry,a);for(let i=0;i<4;i++)oval(x+(i-1.5)*.009,.255,z+.018,.0025,.002,.003,seed)}tube([[-.11,.23,-.07],[-.04,.245,-.02],[.04,.24,.02],[.11,.23,.07]],creamTop,.009);
+  }else if(dish==='奶油鸡肉蘑菇意面'){
+   plate(true);const chicken=mat(0xb9855b,.82),creamSauce=mat(0xe8d9b9,.26);
+   for(let i=0;i<9;i++){const a=i*1.25,r=.055+(i%3)*.018;tube([[Math.cos(a)*r,.13,Math.sin(a)*r],[Math.cos(a+.8)*r*1.35,.16,Math.sin(a+.8)*r*1.35],[Math.cos(a+1.5)*r,.17,Math.sin(a+1.5)*r],[Math.cos(a+2.2)*r*.8,.15,Math.sin(a+2.2)*r*.8]],noodle,.01)}
+   for(const [x,z] of [[-.11,-.04],[.08,-.06],[.03,.1]]){oval(x,.185,z,.047,.026,.036,chicken,(x-z)*2);oval(x,.207,z,.043,.008,.032,creamSauce)}for(const [x,z] of [[-.13,.08],[.12,.1],[-.02,-.11]])oval(x,.194,z,.035,.018,.027,mushroom);herbs([[-.02,.03],[.12,-.08],[.02,.12]]);
+  }else if(dish==='芝士玉米焗饭'){
+   const baking=mat(0xe8dfd1,.26),cheese=mat(0xe9bd58,.48),corn=mat(0xe8c45f,.8),dishware=new T.Mesh(new T.CylinderGeometry(.22,.2,.12,48),baking);dishware.position.y=.105;group.add(dishware);ring(0,.17,0,.205,.012,rim);oval(0,.18,0,.18,.028,.15,rice);
+   for(let i=0;i<28;i++){const a=i*2.399,r=.035+Math.sqrt((i+.5)/28)*.14;oval(Math.cos(a)*r,.213,Math.sin(a)*r,.012,.009,.012,corn)}oval(0,.224,0,.18,.016,.15,cheese);herbs([[-.1,.11],[.1,-.1]]);
   }else{
    plate();riceMound(18,.12);herbs([[-.1,.08],[.08,-.08],[.1,.1]]);
   }
   group.userData.foodDisplay=true;
   group.userData.foodName=dish;
-  group.userData.foodModelVersion=2;
+  group.userData.foodModelVersion=3;group.userData.foodFreshnessHours=6;
   return {width:.74,depth:.74,height:.28,surfaceType:'tabletop',surfaceY:.22};
  }
  return {build};
