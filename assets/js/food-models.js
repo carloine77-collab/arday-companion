@@ -152,6 +152,5 @@ window.ArdayFoodModels = (() => {
   group.userData.foodModelVersion=2;
   return {width:.74,depth:.74,height:.28,surfaceType:'tabletop',surfaceY:.22};
  }
- function carrot{return mat(0xd98b45,.86)}
  return {build};
 })();
