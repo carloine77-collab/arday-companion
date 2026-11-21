@@ -468,7 +468,7 @@ function makeSleepPlan(key,energy=100,bedtime=22){
  const recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(0,Number.isFinite(Number(energyConfig.minimumSleepHours))?Number(energyConfig.minimumSleepHours):0),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),net=Math.max(.1,recovery-decay);
  const current=Math.max(0,Math.min(100,Number(energy)||0)),deficit=Math.max(0,100-current);
  const duration=deficit<=.001?0:Math.min(maxSleep,Math.max(minSleep,Math.ceil(deficit/net)));
- const start=Math.max(18,Math.min(22,Number(bedtime)||22));
+ const start=Math.max(18,Math.min(23,Number(bedtime)||22));
  return {bedtime:start,duration,wake:(start+duration)%24,energyAtPlanning:current,recoveryRate:recovery,decayRate:decay,minimumSleepHours:minSleep,maximumSleepHours:maxSleep,plannedAt:Date.now(),planVersion:3};
 }
 function reserveSleepRange(key,start,end){
@@ -484,14 +484,14 @@ function reserveSleepRange(key,start,end){
 }
 function ensureSleepSchedule(key){
  const plans=s.sleepPlans||(s.sleepPlans={}),today=keyAt(Date.now()),hour=new Date().getHours(),previousDate=plusDays(new Date(key+'T12:00:00'),-1),previousKey=dayKey(previousDate),recovery=Math.max(.01,Number(energyConfig.sleepRecoveryPerHour)||14),decay=Math.max(0,Number(energyConfig.hourlyDecay)||0),minSleep=Math.max(0,Number.isFinite(Number(energyConfig.minimumSleepHours))?Number(energyConfig.minimumSleepHours):0),maxSleep=Math.max(minSleep,Number(energyConfig.maximumSleepHours)||8),energy=Math.max(0,Math.min(100,Number(s.energy)||0));
- const emergencyBedtime=key===today&&hour>=18&&energy<25?hour:22;
- const valid=p=>p&&Number.isFinite(Number(p.duration))&&Number(p.duration)>=minSleep&&Number(p.duration)<=maxSleep&&Number(p.bedtime)>=18&&Number(p.bedtime)<=22&&Number(p.recoveryRate)===recovery&&Number(p.decayRate)===decay&&Number(p.planVersion)===3;
+ const emergencyBedtime=key===today&&hour>=18&&(energy<25||hour>22)?hour:22;
+ const valid=p=>p&&Number.isFinite(Number(p.duration))&&Number(p.duration)>=minSleep&&Number(p.duration)<=maxSleep&&Number(p.bedtime)>=18&&Number(p.bedtime)<=23&&Number(p.recoveryRate)===recovery&&Number(p.decayRate)===decay&&Number(p.planVersion)===3;
  if(!plans[previousKey])plans[previousKey]=makeSleepPlan(previousKey,100);
  if(!plans[key])plans[key]=makeSleepPlan(key,key===today?energy:100,emergencyBedtime);
  let p=plans[key];
  if(!valid(p))p=plans[key]=makeSleepPlan(key,key===today?energy:100,emergencyBedtime);
  else if(key===today&&((hour<22&&Math.abs(energy-(Number(p.energyAtPlanning)||0))>=8)||emergencyBedtime<Number(p.bedtime)))p=plans[key]=makeSleepPlan(key,energy,emergencyBedtime);
- else if(key===today&&hour>=22&&makeSleepPlan(key,energy,22).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy,22);
+ else if(key===today&&hour>=22&&makeSleepPlan(key,energy,emergencyBedtime).duration>Number(p.duration))p=plans[key]=makeSleepPlan(key,energy,emergencyBedtime);
  p=plans[key];const previous=plans[previousKey],previousHours=Math.max(0,Number(previous.duration||0)-(24-Number(previous.bedtime??22))),tonightEnd=Math.min(24,Number(p.bedtime)+Number(p.duration));
  const day=s.calendar.days[key]||(s.calendar.days[key]=[]);s.calendar.days[key]=day.filter(ev=>ev.activity!=='sleep');
  if(previousHours>0)reserveSleepRange(key,0,Math.min(24,previousHours));
