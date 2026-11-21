@@ -1,6 +1,6 @@
 /* Daily commissions: editorial field-order board, using the existing parchment and muted field palette. */
 .drawer .choices.commission-view{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;min-height:0!important;max-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:0 12px 22px!important;box-sizing:border-box!important}
-.commission-tabs{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:5px;padding:0 0 5px}
+.commission-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:0 0 5px}
 .commission-tabs button{min-width:0;min-height:35px;padding:7px 4px;border:0;border-radius:2px;background:#e9dfcf;color:#88765f;font:600 10px "Noto Serif SC",serif;letter-spacing:.03em}
 .commission-tabs button.active{background:#53695a;color:#f8f0df;box-shadow:inset 0 -2px #c7ad7e}
 .commission-masthead{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:112px;padding:17px 19px;background:linear-gradient(125deg,#344b48,#65796d 66%,#9b9a7b);color:#f4ead4;overflow:hidden}
