@@ -1,9 +1,9 @@
 /* Dedicated Three.js food and plated-dish model builders. */
 window.ArdayFoodModels = (() => {
  function build(ctx) {
-  const {T,group,mat,m,cyl,variant}=ctx;
+  const {T,group,mat,cyl,variant}=ctx;
   const dish=String(variant||'');
-  const porcelain=mat(0xf3eee3,.24,.04),rim=mat(0xb58d5d,.34,.38),rice=mat(0xf1e5c9,.96),egg=mat(0xf2cf72,.88),tomato=mat(0xc85f43,.86),greens=mat(0x6f8a55,.92),beef=mat(0x865039,.88),mushroom=mat(0xa58a6a,.94),tofu=mat(0xf0e4ca,.92),potato=mat(0xd6ad68,.9),sauce=mat(0x9a603d,.84),noodle=mat(0xe6c77f,.84),cream=mat(0xe9dfc9,.28),golden=mat(0xd5a14f,.82),herb=mat(0x78905d,.9),carrot=mat(0xd98b45,.86);
+  const porcelain=mat(0xf3eee3,.24,.04),rim=mat(0xb58d5d,.34,.38),rice=mat(0xf1e5c9,.96),egg=mat(0xf2cf72,.88),tomato=mat(0xc85f43,.86),greens=mat(0x6f8a55,.92),beef=mat(0x865039,.88),mushroom=mat(0xa58a6a,.94),tofu=mat(0xf0e4ca,.92),potato=mat(0xd6ad68,.9),sauce=mat(0x9a603d,.84),noodle=mat(0xe6c77f,.84),cream=mat(0xe9dfc9,.28),golden=mat(0xd5a14f,.82),carrot=mat(0xd98b45,.86);
   const smooth=new T.SphereGeometry(1,22,16);
   const oval=(x,y,z,sx,sy,sz,material,rotation=0)=>{
    const mesh=new T.Mesh(smooth,material);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.rotation.y=rotation;mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;
@@ -41,7 +41,6 @@ window.ArdayFoodModels = (() => {
   };
   const herbs=(points)=>points.forEach(([x,z],i)=>leaf(x,z,.8,i*.9));
   const beefSlices=(points)=>points.forEach(([x,z],i)=>oval(x,.205+(i%2)*.012,z,.055,.023,.038,beef,i*.7));
-  const vegetableBits=(points,material=greens)=>points.forEach(([x,z],i)=>oval(x,.19+(i%2)*.012,z,.026,.014,.021,material,i*.8));
   const pancake=(x,y,z,r,material=golden)=>{
    const cake=new T.Mesh(new T.CylinderGeometry(r*.96,r,r*.16,40,1),material);cake.position.set(x,y,z);cake.castShadow=true;group.add(cake);
    const crust=new T.Mesh(new T.TorusGeometry(r*.9,r*.035,8,40),mat(0x9b683c,.9));crust.rotation.x=Math.PI/2;crust.position.set(x,y+r*.08,z);group.add(crust);
