@@ -1264,6 +1264,10 @@ function sharedGoalCatalog(){
    {id:'reading',title:'找个晚上一起读书',detail:'找个不赶时间的晚上，各自拿本书坐一会儿。我想和你待在同一盏灯下面。',condition:'在阿尔的阅读安排上选择「问他能否一起」，共同完成 2 次阅读。',target:2,unit:'次共同阅读',action:'read',icon:'▤'}
   ];
  }
+ s.sharedGoals=s.sharedGoals.map(g=>{
+  const template=sharedGoalCatalog().find(x=>x.id===g.id);
+  return {...(template||{}),...g,condition:g.condition||template?.condition||'按照目标进度完成共同活动。'};
+ });
  function proposeSharedGoal(at=Date.now()){
   const active=s.sharedGoals.filter(g=>g.status==='active');
   const pending=s.events.filter(e=>e.status==='open'&&e.type==='shared-goal-proposal');
