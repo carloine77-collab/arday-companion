@@ -28,7 +28,7 @@
     const seen=new Set();let count=0;
     entries.forEach(entry=>{
      if(entry?.key!==board.day||!task.activities.includes(entry.activity))return;
-     const stamp=entry.at||String(entry.key)+'-'+String(entry.hour)+'-'+String(entry.activity);
+     const stamp=task.distinctActivities?entry.activity:(entry.at||String(entry.key)+'-'+String(entry.hour)+'-'+String(entry.activity));
      if(seen.has(stamp))return;seen.add(stamp);count++;
     });
     return Math.min(Math.max(1,Number(task.target)||1),count);
