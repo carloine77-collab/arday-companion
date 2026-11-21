@@ -148,44 +148,9 @@ window.ArdayFurnitureModels = (() => {
      const diffuser=new T.Mesh(new T.CircleGeometry(.16,24),m.cream);diffuser.position.y=1.35;diffuser.rotation.x=-Math.PI/2;group.add(diffuser);
     }
    }else if(modelName==='成品食物'){
-    width=.74;depth=.74;height=.24;surfaceType='tabletop';
-    const plate=mat(0xf4eee2,.28),plateEdge=mat(0xc9b99e,.32),rice=mat(0xf1e5c9,.92),egg=mat(0xe8bd58,.78),tomato=mat(0xc85e42,.82),green=mat(0x6f8c50,.9),meat=mat(0x8c5237,.86),noodle=mat(0xe6c77f,.84),broth=mat(0xb88a4f,.3),tofu=mat(0xe8d8b8,.9);
-    cyl(0,.045,0,.365,.365,.055,plate,40);cyl(0,.076,0,.34,.34,.018,plateEdge,40);cyl(0,.088,0,.315,.315,.012,plate,40);
-    const rim=new T.Mesh(new T.TorusGeometry(.315,.012,10,48),m.gold);rim.rotation.x=Math.PI/2;rim.position.y=.092;group.add(rim);
-    const grain=(x,z,sx=.025,sz=.045,material=rice)=>sphere(x,.12,z,sx,.018,sz,material);
-    const noodleLine=(pts,material=noodle,r=.018)=>{const curve=new T.CatmullRomCurve3(pts.map(p=>new T.Vector3(p[0],.13,p[1])));group.add(new T.Mesh(new T.TubeGeometry(curve,28,r,8,false),material))};
-    if(variant.includes('蛋炒饭')){
-     for(let n=0;n<38;n++){const a=n*2.399,r=.045+Math.sqrt(n/38)*.225;grain(Math.cos(a)*r,Math.sin(a)*r,.018,.025,n%4===0?egg:n%7===0?green:rice)}
-     for(let n=0;n<8;n++){const a=n*2.4,r=.12+(n%3)*.035;const o=box(Math.cos(a)*r,.145,Math.sin(a)*r,.035,.022,.028,n%3===0?green:egg);o.rotation.y=a}
-    }else if(variant.includes('番茄炒蛋')){
-     for(let n=0;n<5;n++){const a=n*1.25,r=.12+(n%2)*.045;const o=sphere(Math.cos(a)*r,.145,Math.sin(a)*r,.09,.035,.055,tomato);o.rotation.y=-a}
-     for(let n=0;n<6;n++){const a=n*2.1,r=.09+(n%3)*.045;const o=sphere(Math.cos(a)*r,.16,Math.sin(a)*r,.075,.032,.052,egg);o.rotation.y=a}
-    }else if(variant.includes('蔬菜汤')){
-     const bowl=mat(0xe9dfca,.26);cyl(0,.15,0,.27,.31,.12,bowl,40);cyl(0,.205,0,.265,.265,.018,broth,40);
-     const soupRim=new T.Mesh(new T.TorusGeometry(.27,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.22;group.add(soupRim);
-     for(let n=0;n<12;n++){const a=n*2.4,r=.08+(n%3)*.045;sphere(Math.cos(a)*r,.24,Math.sin(a)*r,.045,.022,.04,n%3===0?tomato:n%3===1?green:tofu)}
-    }else if(variant.includes('红烧牛肉面')){
-     const bowl=mat(0xd9d0bf,.24);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
-     const soupRim=new T.Mesh(new T.TorusGeometry(.29,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.245;group.add(soupRim);
-     for(let n=0;n<5;n++){const a=n*1.25,r=.12+(n%2)*.04;noodleLine([[Math.cos(a)*r,Math.sin(a)*r],[Math.cos(a+.6)*r,Math.sin(a+.6)*r],[Math.cos(a+1.2)*r,Math.sin(a+1.2)*r]])}
-     for(let n=0;n<4;n++){const o=sphere(Math.cos(n*1.6)*.13,.275,Math.sin(n*1.6)*.13,.065,.018,.045,meat);o.rotation.y=n*.6}
-    }else if(variant.includes('奶油蘑菇烩饭')){
-     for(let n=0;n<34;n++){const a=n*2.399,r=.04+Math.sqrt(n/34)*.2;grain(Math.cos(a)*r,Math.sin(a)*r,.023,.03,n%6===0?green:rice)}
-     for(let n=0;n<8;n++){const a=n*2.1,r=.08+(n%3)*.045;const o=sphere(Math.cos(a)*r,.16,Math.sin(a)*r,.045,.025,.06,n%2?tofu:meat);o.rotation.y=a}
-    }else if(variant.includes('香煎蛋吐司')){
-     box(0,.125,0,.43,.07,.3,mat(0xc99657,.92));box(0,.16,0,.39,.018,.27,mat(0xf0d9a8,.9));sphere(0,.19,0,.13,.035,.11,egg);sphere(.025,.215,.005,.045,.012,.04,mat(0xf1d58a,.8));
-    }else if(variant.includes('豆腐蔬菜煲')){
-     const bowl=mat(0xd9cbb4,.26);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
-     const soupRim=new T.Mesh(new T.TorusGeometry(.29,.018,10,40),plateEdge);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.245;group.add(soupRim);
-     for(let n=0;n<10;n++){const a=n*2.4,r=.08+(n%3)*.045;sphere(Math.cos(a)*r,.26,Math.sin(a)*r,.045,.03,.04,n%3===0?tomato:n%3===1?green:tofu)}
-    }else if(variant.includes('葱香土豆饼')){
-     const pancake=mat(0xc99a52,.9),crust=mat(0x9a6937,.92);cyl(0,.12,0,.27,.27,.035,plate,36);
-     for(let n=0;n<3;n++){const cake=cyl(0,.15+n*.035,0,.19,.19,.035,n===2?pancake:crust,32);cake.rotation.y=n*.18}
-     for(let n=0;n<12;n++){const a=n*2.4,r=.07+(n%3)*.035;sphere(Math.cos(a)*r,.265,Math.sin(a)*r,.012,.006,.025,green)}
-    }else if(variant.includes('土豆炖牛肉')){
-     const bowl=mat(0xd9cbb4,.26);cyl(0,.15,0,.29,.33,.15,bowl,40);cyl(0,.225,0,.285,.285,.025,broth,40);
-     for(let n=0;n<7;n++){const a=n*2.4,r=.07+(n%3)*.05;const o=box(Math.cos(a)*r,.27,Math.sin(a)*r,.065,.05,.065,n%2?tofu:meat);o.rotation.y=a}
-    }
+    const foodModel=window.ArdayFoodModels?.build({T,group,mat,m,cyl,variant});
+    if(!foodModel){toast('料理模型模块尚未就绪');return null}
+    width=foodModel.width;depth=foodModel.depth;height=foodModel.height;surfaceType=foodModel.surfaceType;surfaceY=foodModel.surfaceY;
    }else if(modelName==='吊灯'){
     width=.78;depth=.78;height=.56;surfaceType='ceiling';cyl(0,.28,0,.07,.07,.12,m.gold,12);cyl(0,.04,0,.025,.025,.42,m.gold,10);if(variant==='藤编圆罩'){const shade=new T.Mesh(new T.SphereGeometry(.38,24,16,0,Math.PI*2,0,Math.PI/2),mat(0xb68d5e,.94));shade.position.y=-.12;shade.scale.set(1,.82,1);group.add(shade);cyl(0,-.31,0,.16,.16,.035,m.cream,24)}else if(variant==='乳白玻璃'){const globe=new T.Mesh(new T.SphereGeometry(.3,20,14),m.cream);globe.position.y=-.22;group.add(globe);cyl(0,-.48,0,.12,.12,.045,m.gold,12)}else{const shade=new T.Mesh(new T.CylinderGeometry(.34,.16,.28,20),m.cream);shade.position.y=-.25;group.add(shade);cyl(0,-.41,0,.18,.18,.035,m.gold,12)}
    }else if(modelName==='衣柜'){
@@ -1469,86 +1434,6 @@ window.ArdayFurnitureModels = (() => {
     const coat=box(.19,1.02,.1,.42,.68,.13,m.fabric);coat.rotation.z=-.08;
     const lapel=box(.19,1.34,.17,.22,.22,.025,m.cream);lapel.rotation.z=-.1;
     const scarf=box(-.2,1.26,.12,.1,.78,.035,mat(0x8a9b91,.96));scarf.rotation.z=.12;
-   }else if(name.startsWith('成品食物·')){
-    const dishName=name.slice('成品食物·'.length);
-    width=.58;depth=.52;height=.22;surfaceType='tabletop';surfaceY=.22;
-    const porcelain=mat(0xf3eee3,.24,.04),rimMat=mat(0xb58d5d,.34,.38),rice=mat(0xf1e5c9,.96),egg=mat(0xf2cf72,.88),tomato=mat(0xc85f43,.86),greens=mat(0x6f8a55,.92),beef=mat(0x865039,.88),mushroom=mat(0xa58a6a,.94),tofu=mat(0xf0e4ca,.92),potato=mat(0xd6ad68,.9),sauce=mat(0x9a603d,.84);
-    // A complete plated meal with a raised ceramic rim; each recipe gets its own silhouette and garnish.
-    cyl(0,.035,0,.255,.225,.055,porcelain,36);
-    const plateRim=new T.Mesh(new T.TorusGeometry(.224,.012,8,40),rimMat);plateRim.rotation.x=Math.PI/2;plateRim.position.y=.064;group.add(plateRim);
-    cyl(0,.068,0,.19,.19,.012,mat(0xe8dfce,.32),32);
-    if(dishName==='蛋炒饭'){
-     sphere(0,.12,-.015,.165,.058,.145,rice);
-     for(const [x,z] of [[-.1,-.04],[-.04,.045],[.055,-.065],[.105,.025]])sphere(x,.153,z,.026,.014,.023,egg);
-     for(const [x,z] of [[-.12,.04],[.02,-.11],[.12,-.045],[-.02,.11]])box(x,.157,z,.022,.018,.022,greens);
-     for(const [x,z] of [[-.06,-.09],[.075,.085]])sphere(x,.16,z,.014,.012,.014,tomato);
-    }else if(dishName==='番茄炒蛋'){
-     for(const [x,z] of [[-.1,-.055],[.025,-.09],[.11,-.025],[-.045,.08],[.075,.09]]){
-      const piece=sphere(x,.13,z,.065,.025,.048,(x+z)>0?egg:tomato);piece.rotation.y=(x-z)*2;
-     }
-     for(const [x,z] of [[-.12,.08],[.02,.02],[.13,.055]])sphere(x,.16,z,.018,.012,.018,greens);
-    }else if(dishName==='蔬菜汤'){
-     // Shallow soup bowl with a glossy broth surface and floating vegetables.
-     cyl(0,.105,0,.195,.155,.105,porcelain,32);
-     cyl(0,.16,0,.168,.168,.012,mat(0xc98f52,.2),32);
-     const soupRim=new T.Mesh(new T.TorusGeometry(.18,.012,8,36),rimMat);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.165;group.add(soupRim);
-     for(const [x,z] of [[-.09,-.045],[.015,-.075],[.085,.035],[-.04,.075]]){
-      sphere(x,.177,z,.035,.014,.028,greens);
-      sphere(x+.025,.179,z+.012,.018,.012,.018,potato);
-     }
-     sphere(-.08,.18,.09,.025,.012,.022,tomato);
-    }else if(dishName==='牛肉面'){
-     cyl(0,.095,0,.19,.16,.1,porcelain,32);
-     cyl(0,.15,0,.165,.165,.012,mat(0xb77b4d,.25),32);
-     const noodleMat=mat(0xf0d28a,.76);
-     for(let i=0;i<5;i++){
-      const ring=new T.Mesh(new T.TorusGeometry(.075+i*.012,.009,6,24),noodleMat);ring.rotation.x=Math.PI/2;ring.position.set((i%2-.5)*.035,.17+(i%2)*.006,(Math.floor(i/2)-.5)*.025);group.add(ring);
-     }
-     for(const [x,z] of [[-.09,-.045],[.07,-.055],[.095,.055]]){
-      const slice=sphere(x,.19,z,.055,.022,.04,beef);slice.rotation.y=x*2;
-     }
-     for(const [x,z] of [[-.02,.08],[.12,-.005]])sphere(x,.198,z,.018,.01,.018,greens);
-    }else if(dishName==='奶油蘑菇饭'){
-     sphere(0,.12,0,.17,.055,.15,mat(0xe8d7ae,.95));
-     for(const [x,z] of [[-.11,-.04],[.02,-.09],[.105,.025],[-.045,.09]]){
-      sphere(x,.175,z,.04,.018,.035,mushroom);
-      cyl(x,.157,z,.018,.02,.035,porcelain,10);
-     }
-     for(const [x,z] of [[-.03,.02],[.11,-.07]])sphere(x,.19,z,.018,.009,.016,greens);
-    }else if(dishName==='香煎蛋吐司'){
-     for(const x of [-.095,.095]){
-      const toastSlice=box(x,.112,0,.16,.045,.22,mat(0xb77a43,.88));toastSlice.rotation.y=x*.6;
-      box(x,.14,0,.135,.018,.19,mat(0xf0d28d,.9));
-     }
-     sphere(0,.17,-.015,.072,.018,.072,egg);
-     sphere(0,.19,-.015,.034,.012,.034,mat(0xe5a83e,.82));
-     for(const [x,z] of [[-.12,.08],[.12,-.08]])sphere(x,.163,z,.016,.01,.016,greens);
-    }else if(dishName==='豆腐煲'){
-     cyl(0,.105,0,.195,.155,.105,porcelain,32);
-     cyl(0,.16,0,.168,.168,.012,sauce,32);
-     const stewRim=new T.Mesh(new T.TorusGeometry(.18,.012,8,36),rimMat);stewRim.rotation.x=Math.PI/2;stewRim.position.y=.165;group.add(stewRim);
-     for(const [x,z] of [[-.09,-.045],[.025,-.075],[.09,.035],[-.035,.07]]){
-      const cube=box(x,.205,z,.065,.045,.065,tofu);cube.rotation.y=(x-z)*1.5;
-     }
-     for(const [x,z] of [[-.11,.075],[.1,-.065]])sphere(x,.22,z,.025,.012,.022,greens);
-     sphere(.02,.218,.105,.026,.012,.024,tomato);
-    }else if(dishName==='土豆牛肉'){
-     for(const [x,z] of [[-.1,-.06],[.02,-.09],[.11,-.025],[-.045,.075],[.075,.09]]){
-      const chunk=box(x,.14,z,.078,.06,.072,(x+z)>0?potato:beef);chunk.rotation.y=(x-z)*1.8;chunk.rotation.z=.12;
-     }
-     for(const [x,z] of [[-.12,.08],[.03,.02],[.13,.055]])sphere(x,.18,z,.018,.012,.018,greens);
-    }else if(dishName==='葱香土豆饼'){
-     const pancake=cyl(0,.115,0,.155,.17,.055,potato,36);
-     const top=sphere(0,.145,0,.145,.018,.13,mat(0xe9c77d,.88));
-     for(let i=0;i<7;i++){
-      const a=i*Math.PI*2/7;
-      const herb=sphere(Math.cos(a)*.09,.166,Math.sin(a)*.08,.014,.008,.012,greens);herb.rotation.z=.3;
-     }
-    }else{
-     sphere(0,.12,0,.15,.055,.14,rice);
-     for(let i=0;i<4;i++)sphere(Math.cos(i*1.57)*.09,.16,Math.sin(i*1.57)*.08,.025,.014,.025,greens);
-    }
-    group.userData.foodDisplay=true;group.userData.foodName=dishName;
    }else if(modelName==='凳子'){
     width=.66;depth=.66;height=.72;action=()=>openFurnitureActions('chair',id);
     const timber=mat(0x76543d,.62),seat=mat(0xc9b89f,.96),brass=mat(0x9b805f,.48,.55);
