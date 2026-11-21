@@ -87,7 +87,7 @@ function refreshDungeonUnlocks(){
  DUNGEON_TIERS.forEach((tier,index)=>{if(index===0)return;const previous=DUNGEON_TIERS[index-1],needed=DUNGEON_CLEAR_REQUIREMENTS[tier]||0;if((Number(s.dungeonProgress[previous])||0)>=needed&&!s.dungeonUnlocks.includes(tier))s.dungeonUnlocks.push(tier)});
 }
 refreshDungeonUnlocks();
-s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event.type!=='life-repair'&&event.type!=='player-action');if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter')).map(event=>({...event,category:'letter'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -199,8 +199,8 @@ function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
 function has(item){const matches=name=>name===item||name.startsWith(item+'·');return s.inventory.some(x=>matches(x.name))||(s.placed||[]).some(x=>typeof x.name==='string'&&matches(x.name))}
-function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(type==='arday-letter')return 'letter';if(type==='autonomous'||type==='system-note'||type==='daily')return 'system';if(type==='shared-goal-proposal'||type==='long')return 'proposal';if(type==='player-action')return 'player';if(type.startsWith('life-'))return 'random';return 'system'}
-function addEvent(title,detail,type='daily',choices=[]){if(type==='player-action')return null;let e={id:Date.now()+Math.random(),title,detail,type,category:eventCategory({type}),choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
+function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(type))return 'letter';if(type==='player-action')return 'player';return 'system'}
+function addEvent(title,detail,type='daily',choices=[]){if(!['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(type))return null;const e={id:Date.now()+Math.random(),title,detail,type,category:'letter',choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,12);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 
 
@@ -365,15 +365,15 @@ function eventChoicesLegacy(e){
 }
 function renderEvents(){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
- const open=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').sort((a,b)=>(b.created||0)-(a.created||0));
+ const open=s.events.filter(e=>e.status==='open'&&e.category==='letter').sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
  const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 张';$('choices').appendChild(count);
  if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无纸条</h3>';$('choices').appendChild(empty);}
  open.forEach(e=>{
-  const isLetter=e.category==='letter';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
+  const isLetter=true;const b=document.createElement('button');b.type='button';b.className='choice event-card letter-card';
   const top=document.createElement('span');top.className='note-card-top';
-  const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=isLetter?'阿尔的留言':'日常记录';
+  const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=e.type==='shared-goal-proposal'?'阿尔的邀约':'阿尔的来信';
   const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});top.append(kindNode,timeNode);
   const titleNode=document.createElement('strong');titleNode.className='note-card-title';titleNode.textContent=e.title;
   const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail;
@@ -1269,7 +1269,7 @@ function proposeSharedGoal(at=Date.now()){
  const g=pool[Math.floor(Math.random()*pool.length)];
  if(!g)return;
  s.lastSharedProposalAt=at;
- const e=addEvent('阿尔提起一件想和你一起做的事',g.detail,'shared-goal-proposal');e.goalId=g.id;say(ardayLine('proposal',g.detail));
+ const e=addEvent('阿尔想和你一起做件事',g.detail,'shared-goal-proposal');if(!e)return;e.goalId=g.id;s.lastArdayLetterAt=at;say(ardayLine('proposal',g.detail));
 }
 if(s.project?.status==='active'&&s.sharedGoal?.status!=='active'){
  const legacy=sharedGoalCatalog().find(x=>x.id==='room');
@@ -1316,16 +1316,23 @@ function createSituationalEvent(at=Date.now()){
  const e=candidates[Math.floor(Math.random()*candidates.length)];
  addEvent(e.title,e.detail,e.type);s.events[0].situationId=e.id;s.lastRandomEventAt=at;say(ardayLine('incident',e.detail));
 }
+function writeArdayLetter(at=Date.now()){
+ const library=window.ArdayLetterCopy;if(!library?.generate)return null;
+ const letter=library.generate({state:s,random:Math.random});if(!letter)return null;
+ const e=addEvent(letter.title,letter.detail,'arday-letter');if(!e)return null;
+ e.letterId=letter.id;e.letterTopic=letter.topic;
+ s.lastArdayLetterAt=at;s.ardayLetterHistory=Array.isArray(s.ardayLetterHistory)?s.ardayLetterHistory:[];
+ s.ardayLetterHistory.unshift(letter.id);s.ardayLetterHistory=s.ardayLetterHistory.slice(0,12);
+ return e;
+}
 function generateDailyEvents(){
  const today=s.calendar?.anchor||dayKey(dayAnchor());
- if(s.dailyEventDate!==today){
-  s.dailyEventDate=today;
-  if(s.events.filter(e=>e.status==='open').length<3){
-   if(s.fun<35&&Math.random()<.45)addEvent('今天有点无聊','我最近做的事情都差不多。想不想一起试试新的活动？','daily');
-  }
-  if(Math.random()<.42)proposeSharedGoal(Date.now());
-  if(Math.random()<.3)createSituationalEvent(Date.now());
- }
+ if(s.dailyEventDate===today)return;
+ s.dailyEventDate=today;
+ const at=Date.now(),dayStart=new Date(at);dayStart.setHours(0,0,0,0);
+ if(Math.random()<.16)proposeSharedGoal(at);
+ const alreadyWroteToday=s.events.some(e=>e.category==='letter'&&Number(e.created||0)>=dayStart.getTime());
+ if(!alreadyWroteToday&&at-(Number(s.lastArdayLetterAt)||0)>=32*3600000&&Math.random()<.72)writeArdayLetter(at);
 }
 const oldEventChoicesForGoals=eventChoices;
 eventChoices=function(e){
