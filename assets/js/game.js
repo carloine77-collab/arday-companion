@@ -334,7 +334,7 @@ function openTab(name,force=false){
   const recycleTab=document.createElement('button');recycleTab.type='button';recycleTab.className='inventory-recycle-entry'+(inventoryRecycleMode?' active':'');recycleTab.textContent='回收';recycleTab.setAttribute('aria-label','进入回收');recycleTab.onclick=()=>{inventoryRecycleMode=true;openTab('物品',true)};
   navigation.append(nav,recycleTab);$('choices').appendChild(navigation);$('choices').appendChild(inventoryGrid);$('choices').classList.toggle('is-recycling',inventoryRecycleMode);
   if(inventoryRecycleMode){tabEntries.splice(0,tabEntries.length,...tabEntries.filter(entry=>{const key=entry[2].startsWith('pantry-inventory-')?entry[2].slice('pantry-inventory-'.length):null;const entity=key?null:s.inventory[Number(entry[2].replace(/^(?:use-inventory-|place-owned-)/,''))];return (key?Number(ingredientUnitPrices[key])||0:inventoryOriginalPrice(entity))>0}))}
-  const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
+  const filtered=tabEntries.filter(entry=>inventoryRecycleMode||inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
@@ -381,7 +381,6 @@ function openTab(name,force=false){
    if(inventoryRecycleMode){
     const pantryKey=id.startsWith('pantry-inventory-')?id.slice('pantry-inventory-'.length):null;
     const entity=pantryKey?null:s.inventory[Number(id.replace(/^(?:use-inventory-|place-owned-)/,''))];
-    const original=pantryKey?ingredientUnitPrices[pantryKey]:inventoryOriginalPrice(entity),refund=Math.round((Number(original)||0)*.3),isDungeonItem=entity?.kind==='dungeon-item';
     b.disabled=true;b.classList.add('recycle-preview');
     const recycle=document.createElement('button');recycle.type='button';recycle.className='inventory-recycle-button';recycle.textContent='回收';
     recycle.onclick=event=>{event.preventDefault();event.stopPropagation();if(pantryKey)recyclePantryIngredient(pantryKey);else recycleInventoryItem(Number(id.replace(/^(?:use-inventory-|place-owned-)/,'')))};
