@@ -12,7 +12,7 @@
 .commission-seal b{font:25px Georgia,serif}.commission-seal small{font:10px Georgia,serif}.commission-seal span{position:absolute;bottom:13px;width:100%;text-align:center;font:6px Arial,sans-serif;letter-spacing:.13em}
 .commission-board-meta{display:flex;justify-content:space-between;gap:8px;padding:0 2px;color:#89775f;font:10px "Noto Serif SC",serif}
 .commission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:stretch}
-.commission-card{position:relative;display:flex;flex-direction:column;min-width:0;min-height:190px;padding:12px 11px 10px;background:linear-gradient(145deg,#f5eddf,#e9deca);box-shadow:1px 3px 0 #c7b99f66;overflow:hidden}
+.commission-card{position:relative;display:flex;flex-direction:column;min-width:0;min-height:216px;padding:12px 11px 10px;background:linear-gradient(145deg,#f5eddf,#e9deca);box-shadow:1px 3px 0 #c7b99f66;overflow:hidden}
 .commission-card:after{content:"";position:absolute;right:-19px;top:42px;width:64px;height:64px;border:1px solid #a18b6a2b;border-radius:50%;pointer-events:none}
 .commission-survival{background:linear-gradient(145deg,#f1eddf,#e4e1cf)}.commission-emotion{background:linear-gradient(145deg,#f3e8df,#e8d9cd)}.commission-combat{background:linear-gradient(145deg,#e8ece4,#dce3d9)}
 .commission-card-top{display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0}
@@ -22,7 +22,23 @@
 .commission-icon{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:#d9dfcf;color:#596c59;font:16px Georgia,serif}
 .commission-emotion .commission-icon{background:#ead5ca;color:#986e63}.commission-combat .commission-icon{background:#d2ded4;color:#4f665a}
 .commission-card-title h3{min-width:0;margin:0;color:#4d4b3d;font:600 14px/1.35 "Noto Serif SC",serif;overflow-wrap:anywhere}
-.commission-detail{position:relative;z-index:1;min-height:34px;margin:0 0 12px;color:#857966;font:10px/1.65 "Noto Serif SC",serif}
+.commission-art{position:relative;display:block;height:76px;min-height:76px;margin:2px -1px 10px;overflow:hidden;background:linear-gradient(135deg,#d9ddcf,#edf0e3)}
+.commission-art:before,.commission-art:after{content:"";position:absolute;border-radius:50%;pointer-events:none}
+.commission-art:before{width:84px;height:84px;right:13%;top:-35px;border:1px solid #ffffff8c;box-shadow:0 0 0 10px #ffffff24,0 0 0 22px #ffffff17}
+.commission-art:after{width:120px;height:1px;right:-8px;bottom:17px;background:#ffffff9c;transform:rotate(-18deg)}
+.commission-art i,.commission-art b,.commission-art span{position:absolute;display:block}
+.commission-art-survival{background:linear-gradient(120deg,#d9dfd0,#aab9a0)}
+.commission-art-survival i{width:42px;height:42px;left:24%;top:16px;border:2px solid #71866b;border-radius:48% 52% 45% 55%;transform:rotate(-28deg);box-shadow:inset 0 0 0 6px #ffffff45}
+.commission-art-survival b{width:18px;height:32px;left:calc(24% + 12px);top:21px;border-radius:80% 0 80% 0;background:#71866b;transform:rotate(38deg)}
+.commission-art-survival span{width:7px;height:7px;left:calc(24% + 43px);top:18px;border-radius:50%;background:#f6eedb;box-shadow:12px 23px 0 #f6eedb,-15px 35px 0 #f6eedb}
+.commission-art-emotion{background:linear-gradient(120deg,#ead8cf,#c99d91)}
+.commission-art-emotion i{width:40px;height:40px;left:25%;top:17px;background:#f4e7dc;transform:rotate(-45deg);border-radius:8px 50% 50% 50%;box-shadow:8px 8px 0 #a97870}
+.commission-art-emotion b{width:28px;height:28px;left:calc(25% + 6px);top:22px;border:1px solid #a97870;border-radius:50%;background:#e4bdb0}
+.commission-art-emotion span{width:7px;height:7px;left:calc(25% + 48px);top:17px;border-radius:50%;background:#f8eee4;box-shadow:12px 25px 0 #f8eee4,-18px 39px 0 #f8eee4}
+.commission-art-combat{background:linear-gradient(120deg,#cddbd2,#879f92)}
+.commission-art-combat i{width:42px;height:48px;left:25%;top:13px;background:linear-gradient(135deg,#e4eadf,#8da597);clip-path:polygon(50% 0,94% 18%,85% 74%,50% 100%,15% 74%,6% 18%);filter:drop-shadow(0 3px 2px #425c4f66)}
+.commission-art-combat b{width:20px;height:26px;left:calc(25% + 11px);top:22px;border:2px solid #607c6d;clip-path:polygon(50% 0,100% 20%,80% 80%,50% 100%,20% 80%,0 20%)}
+.commission-art-combat span{width:4px;height:4px;left:calc(25% + 57px);top:20px;border-radius:50%;background:#f2e8cb;box-shadow:12px 22px 0 #f2e8cb,-12px 42px 0 #f2e8cb}
 .commission-progress{display:flex;align-items:center;gap:7px;margin-top:auto}.commission-progress-track{height:4px;flex:1;overflow:hidden;border-radius:8px;background:#d8d0c0}.commission-progress-track i{display:block;height:100%;border-radius:8px;background:#7d8b70;transition:width .2s}.commission-emotion .commission-progress-track i{background:#b47f72}.commission-combat .commission-progress-track i{background:#647c6d}
 .commission-progress>b{color:#796e5b;font:10px Georgia,serif;white-space:nowrap}
 .commission-card-foot{display:flex;flex-direction:column;gap:8px;margin-top:11px}.commission-card-foot>small{color:#8b7a61;font:9px "Noto Serif SC",serif}
@@ -36,6 +52,6 @@
 .supply-archive-icon{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:#dce3d8;color:#536a5a;font:17px Georgia,serif}
 .supply-archive-entry>div{display:flex;flex-direction:column;gap:4px;min-width:0}.supply-archive-entry small{color:#8b7b62;font:8px "Noto Serif SC",serif}.supply-archive-entry strong{color:#4e4b3e;font:600 11px "Noto Serif SC",serif}.supply-archive-entry p{margin:0;color:#8a7e6b;font:9px/1.5 "Noto Serif SC",serif;overflow-wrap:anywhere}
 .guild-material-grid button:disabled{opacity:.42;cursor:default}
-@media(max-width:520px){.drawer .choices.commission-view{padding-left:9px!important;padding-right:9px!important}.commission-grid{grid-template-columns:1fr;gap:7px}.commission-card{min-height:0;padding:11px 12px 10px}.commission-detail{min-height:0;margin-bottom:9px}.commission-card-title{margin:9px 0 5px}.commission-card-foot{gap:7px;margin-top:9px}.supply-archive-grid{grid-template-columns:1fr}}
-@media(orientation:landscape) and (max-height:560px){.commission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.commission-card{min-height:160px}}
+@media(max-width:520px){.drawer .choices.commission-view{padding-left:9px!important;padding-right:9px!important}.commission-grid{grid-template-columns:1fr;gap:7px}.commission-card{min-height:0;padding:11px 12px 10px}.commission-card-title{margin:9px 0 5px}.commission-art{height:66px;min-height:66px;margin-bottom:8px}.commission-card-foot{gap:7px;margin-top:9px}.supply-archive-grid{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:560px){.commission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.commission-card{min-height:190px}}
 .combat-group-title[role="button"]{cursor:pointer}.combat-group-title[role="button"]:focus-visible{outline:2px solid #8c785c;outline-offset:2px}
