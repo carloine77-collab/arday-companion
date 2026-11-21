@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="assets/css/game-interactions.css?v=20261121-kitchen-menu1">
 <link rel="stylesheet" href="assets/css/game-world.css?v=20261121-modular-css1">
 <link rel="stylesheet" href="assets/css/game-career.css?v=20261121-guild-icon-fit1">
+<link rel="stylesheet" href="assets/css/exchange.css?v=20261122-exchange-terminal1">
 <link rel="stylesheet" href="assets/css/commission.css?v=20261122-terminal1">
 <link rel="stylesheet" href="assets/css/dungeon-board.css?v=20261121-event-depth1">
 </head>
@@ -86,7 +87,8 @@
 <script src="assets/js/character-tap-lines.js?v=20261119a"></script>
 <script src="assets/js/hall/hall-scene.js?v=20261122-exchange-label2"></script>
 <script src="assets/js/dungeon-board.js?v=20261121-global-balance4"></script>
-<script src="assets/js/game.js?v=20261122-terminal1"></script>
+<script src="assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1"></script>
+<script src="assets/js/game.js?v=20261122-exchange-terminal1"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
