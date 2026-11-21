@@ -1594,7 +1594,9 @@ function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();commissio
  $('choices').querySelectorAll('[data-remove-member]').forEach(button=>button.onclick=event=>{event.stopPropagation();const index=s.teamRoster.findIndex(x=>x.id===button.dataset.removeMember);if(index<0)return;const removed=s.teamRoster.splice(index,1)[0];save();toast('已移除队友：'+removed.name);showDungeon()});
 }
 
-const {itemCatalog:DUNGEON_ITEM_CATALOG,typeLabels:DUNGEON_ITEM_TYPE_LABELS,exchangePrices:DUNGEON_EXCHANGE_PRICES}=window.ArdayExchangeData;
+const exchangeData=window.ArdayExchangeData||{itemCatalog:{},typeLabels:{},exchangePrices:{}};
+if(!window.ArdayExchangeData)console.error('[Arday] exchange-data.js 未加载；游戏主体将继续初始化，但副本兑换目录暂不可用。');
+const {itemCatalog:DUNGEON_ITEM_CATALOG,typeLabels:DUNGEON_ITEM_TYPE_LABELS,exchangePrices:DUNGEON_EXCHANGE_PRICES}=exchangeData;
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;item.originalPrice=Number(window.ArdayExchangeData?.exchangePrices?.[id])||0;return item}
 const commissionSystem=window.ArdayCommissionSystem.create({state:s,keyAt,addDungeonItem,grantPoints,save});
 const combatCommissionHeader=document.querySelector('.combat-group-title');
