@@ -1591,7 +1591,7 @@ window.ArdayFurnitureModels = (() => {
     const driver=new T.Mesh(new T.TorusGeometry(.105,.012,8,36),trim);driver.position.set(0,.37,.258);group.add(driver);
     sphere(0,.37,.258,.07,.07,.018,dark);
     for(let i=0;i<4;i++)box(-.09+i*.06,.08,.245,.018,.012,.012,trim);
-   }else if(modelName==='窗'&&variant==='拱形'){
+   }else if(modelName==='拱形落地窗'){
     width=1.9;depth=.18;height=2.25;surfaceType='wall';
     const frame=mat(0x765d43,.58),glass=mat(0x9ebbc0,.18,.12);
     box(0,1.05,0,1.82,2.1,.12,frame);
