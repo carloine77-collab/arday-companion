@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v178";
+const CACHE_NAME = "arday-shell-v179";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,20 +9,20 @@ const APP_SHELL = [
   "./assets/css/game-world.css?v=20261121-modular-css1",
   "./assets/css/game-career.css?v=20261121-modular-css1",
   "./assets/css/dungeon-board.css?v=20261121-event-depth1",
-  "./assets/js/game-config.js?v=20261121-neutral-items1",
+  "./assets/js/game-config.js?v=20261121-survival-balance2",
   "./assets/js/furniture-catalog.js?v=20261121-modular-js1",
-  "./assets/js/game-data/dungeon-data.js?v=20261121-modular-js1",
+  "./assets/js/game-data/dungeon-data.js?v=20261121-long-progression1",
   "./assets/js/game-data/career-data.js?v=20261121-modular-js1",
   "./assets/js/schedule-engine.js?v=20261121-neutral-items1",
   "./assets/js/furniture-models.js?v=20261121-monolithic1",
   "./assets/js/furniture-placement.js",
-  "./assets/js/economy.js",
+  "./assets/js/economy.js?v=20261121-economy-balance1",
   "./assets/js/chat-copy.js",
   "./assets/js/chat-system.js",
   "./assets/js/character-tap-lines.js",
   "./assets/js/hall/hall-scene.js",
   "./assets/js/dungeon-board.js?v=20261121-dice-sync2",
-  "./assets/js/game.js?v=20261121-newgame-balance1",
+  "./assets/js/game.js?v=20261121-system-balance1",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
