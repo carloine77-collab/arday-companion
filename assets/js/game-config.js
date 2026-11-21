@@ -845,7 +845,7 @@ window.ArdayGameConfig = {
 },
   characterStats: {
    energy: {
-    hourlyDecay: 2.5,
+    hourlyDecay: 1.5,
     sleepRecoveryPerHour: 14,
     minimumSleepHours: 0,
     maximumSleepHours: 8,
