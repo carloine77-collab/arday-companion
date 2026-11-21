@@ -1439,26 +1439,26 @@ function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(s.acti
 }
 
 const DUNGEON_ITEM_CATALOG={
- stimulant:{name:'肾上腺素',type:'buff',icon:'✚',effects:{energy:16,agility:1,willpower:1}},
- focus:{name:'清醒剂',type:'buff',icon:'◈',effects:{energy:8,intelligence:2,perception:1}},
- enhancer:{name:'强化剂',type:'buff',icon:'✦',effects:{strength:2,agility:1}},
- resolve:{name:'意志剂',type:'buff',icon:'⌁',effects:{willpower:3,energy:5}},
- standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},
- medkit:{name:'急救包',type:'life',icon:'✚',lifeSave:true},
- ward:{name:'护命符',type:'life',icon:'◇',lifeSave:true},
- soulpin:{name:'回魂针',type:'life',icon:'针',lifeSave:true},
- hex:{name:'诅咒钉',type:'harm',icon:'†',tradeOnly:true},
- weaken:{name:'衰弱符',type:'harm',icon:'▽',tradeOnly:true},
- seal:{name:'封锁令',type:'harm',icon:'▣',tradeOnly:true},
- disrupt:{name:'迷乱剂',type:'harm',icon:'⌁',tradeOnly:true},
- fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},
- lucky:{name:'幸运符',type:'probability',icon:'✧',chance:5},
- reverse:{name:'逆命签',type:'probability',icon:'◉',chance:3},
- misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',chance:-8,tradeOnly:true},
- reprieve:{name:'七日券',type:'extension',icon:'⌛',extendDays:7},
- renewal:{name:'续期符',type:'extension',icon:'↻',extendDays:3},
- grace:{name:'宽限券',type:'extension',icon:'◇',extendDays:1},
- longterm:{name:'长生契',type:'extension',icon:'∞',extendDays:14}
+ stimulant:{name:'能量剂',type:'buff',icon:'✚',effects:{energy:16,agility:1,willpower:1}},
+ focus:{name:'专注剂',type:'buff',icon:'◈',effects:{energy:8,intelligence:2,perception:1}},
+ enhancer:{name:'强化剂',type:'buff',icon:'⬡',effects:{strength:2,agility:1}},
+ resolve:{name:'稳定剂',type:'buff',icon:'▤',effects:{willpower:3,energy:5}},
+ standin:{name:'急救包',type:'life',icon:'✚',lifeSave:true},
+ medkit:{name:'防护盾',type:'life',icon:'⬡',lifeSave:true},
+ ward:{name:'救援器',type:'life',icon:'＋',lifeSave:true},
+ soulpin:{name:'复苏剂',type:'life',icon:'▣',lifeSave:true},
+ hex:{name:'干扰器',type:'harm',icon:'⊘',tradeOnly:true},
+ weaken:{name:'压制器',type:'harm',icon:'▤',tradeOnly:true},
+ seal:{name:'封锁器',type:'harm',icon:'▣',tradeOnly:true},
+ disrupt:{name:'侵蚀剂',type:'harm',icon:'◉',tradeOnly:true},
+ fate:{name:'概率芯片',type:'probability',icon:'▦',chance:8},
+ lucky:{name:'校准模块',type:'probability',icon:'⌗',chance:5},
+ reverse:{name:'增幅模块',type:'probability',icon:'⬡',chance:3},
+ misfortune:{name:'风险模块',type:'probability',icon:'◉',chance:-8,tradeOnly:true},
+ reprieve:{name:'延期许可',type:'extension',icon:'▣',extendDays:7},
+ renewal:{name:'时限模块',type:'extension',icon:'◷',extendDays:3},
+ grace:{name:'期限扩展',type:'extension',icon:'↗',extendDays:1},
+ longterm:{name:'周期补偿',type:'extension',icon:'↻',extendDays:14}
 };
 const DUNGEON_ITEM_TYPE_LABELS={buff:'增益类',life:'保命类',harm:'损益类',probability:'概率类',extension:'延长类'};
 const DUNGEON_EXCHANGE_PRICES={stimulant:80,focus:110,enhancer:130,resolve:100,standin:180,medkit:150,ward:210,soulpin:260,hex:120,weaken:160,seal:190,disrupt:140,fate:150,lucky:100,reverse:125,misfortune:130,reprieve:220,renewal:120,grace:60,longterm:360};
