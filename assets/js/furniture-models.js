@@ -1033,6 +1033,23 @@ window.ArdayFurnitureModels = (() => {
     }
     for(const x of [-.49,.49])for(const y of [.31,.59,.87])cyl(x,y,.315,.012,.012,.018,m.gold,8);
     for(const x of [-.49,.49])box(x,.08,-.2,.09,.16,.09,m.dark);
+    // A visible pair of everyday shoes rests on the cabinet top.
+    const topShoes=[mat(0x5b4638,.9),mat(0x39454a,.88)],topSoles=mat(0xe7dfd1,.96),topLaces=mat(0xe9dfcb,.9);
+    for(let i=0;i<2;i++){
+     const x=i===0?-.265:.265,upper=topShoes[i],z=.025;
+     const soleTop=box(x,1.09,z,.19,.035,.34,topSoles);
+     const shoeBody=sphere(x,1.145,z-.005,.09,.065,.145,upper);
+     shoeBody.rotation.x=-.08;
+     const toe=sphere(x,1.137,z+.105,.088,.052,.105,upper);
+     toe.rotation.x=-.08;
+     box(x,1.153,z-.12,.105,.075,.09,upper);
+     box(x,1.19,z-.005,.035,.075,.12,topLaces);
+     for(let lace=0;lace<3;lace++){
+      const tie=box(x,1.205,z-.045+lace*.038,.066,.008,.012,topLaces);
+      tie.rotation.y=(i===0?-.12:.12);
+     }
+     const heel=box(x,1.13,z-.145,.12,.055,.055,upper);
+    }
    }else if(modelName==='沙发床'){
     width=2.15;depth=1.5;height=.92;action=()=>openFurnitureActions('sofa',id);
     const frame=mat(0x76543a,.64),upholstery=mat(0xc9b9a5,.96),piping=mat(0x9f8972,.9);
@@ -1112,25 +1129,57 @@ window.ArdayFurnitureModels = (() => {
     width=3.0;depth=2.0;height=2.75;action=()=>openFurnitureActions('bed',id);for(const x of [-1.35,1.35]){box(x,1.35,0,.12,2.65,.12,m.wood);box(x,2.63,0,.18,.12,1.9,m.oak)}box(0,2.18,-.72,2.7,.16,.78,m.wood);box(0,2.3,-.72,2.65,.22,.72,m.fabric);box(0,2.55,-1.58,2.7,.5,.12,m.cream);for(const x of [-1.25,1.25])box(x,.82,.35,.1,1.6,.1,m.wood);box(0,.92,0,2.55,.12,.82,m.oak);box(0,.99,0,2.5,.04,.78,m.cream);for(const x of [-1.1,1.1])box(x,.45,0,.08,.88,.72,m.wood);for(let i=0;i<6;i++)box(-.22+i*.09,.18,.18,.045,.012,.3,m.gold);for(let i=0;i<5;i++){const step=box(-1.5,.22+i*.36,.65-i*.28,.38,.06,.24,m.oak);step.rotation.z=.0}
    }else if(modelName==='钢琴'){
     action=()=>openFurnitureActions('piano',id);
-    width=1.62;depth=.92;height=1.42;
-    const caseMat=mat(0x292a2b,.28,.46),wood=mat(0x62452f,.56),ivory=mat(0xf0eadc,.35),ebony=mat(0x18191b,.24);
-    // Upright piano cabinet with fallboard, keyboard cheeks, music desk and pedals.
-    box(0,.68,0,1.56,1.18,.76,caseMat);
-    box(0,1.29,-.02,1.62,.12,.82,wood);
-    box(0,.51,.405,1.42,.16,.12,wood);
-    box(0,.57,.47,1.38,.055,.1,ebony);
+    width=1.68;depth=1.02;height=1.5;
+    const caseMat=mat(0x202326,.22,.5),wood=mat(0x68452f,.48),ivory=mat(0xf4eddd,.32),ebony=mat(0x151719,.2,.12);
+    const brass=mat(0xb59a67,.34,.62),felt=mat(0x596c5c,.94),paper=mat(0xf1ead8,.94);
+    // Upright piano: continuous cabinet, raised crown, inset front panel and a proper keyboard.
+    box(0,.69,0,1.56,1.2,.78,caseMat);
+    box(0,1.315,-.015,1.64,.13,.84,wood);
+    box(0,1.385,-.015,1.57,.035,.79,caseMat);
+    box(0,.91,.397,1.38,.48,.035,wood);
+    box(0,.91,.418,1.28,.39,.012,caseMat);
+    box(0,.91,.428,.34,.13,.012,wood);
+    const crest=sphere(0,.91,.448,.055,.055,.012,brass);
+    for(const x of [-.73,.73]){
+     box(x,.72,.405,.105,1.16,.105,wood);
+     box(x,.72,.462,.035,1.02,.012,brass);
+     box(x,.12,-.22,.105,.22,.12,caseMat);
+    }
+    // Keyboard bed and 52 white keys; black-key placement follows the 2+3 octave pattern.
+    box(0,.515,.43,1.46,.16,.16,wood);
+    box(0,.575,.505,1.42,.045,.1,ebony);
     for(let i=0;i<52;i++){
      const x=-.665+i*.026;
-     box(x,.59,.535,.024,.12,.045,ivory);
-     if(i%7!==2&&i%7!==6&&i%7!==1&&i%7!==4){const black=box(x+.013,.66,.56,.014,.075,.035,ebony)}
+     box(x,.605,.55,.024,.105,.36,ivory);
+     if(i%7!==2&&i%7!==6){
+      box(x+.013,.667,.405,.014,.075,.19,ebony);
+     }
     }
-    box(0,.82,.34,1.36,.035,.08,wood);
-    box(0,1.02,-.24,.96,.42,.06,caseMat);
-    box(0,1.04,-.195,.86,.32,.018,wood);
-    for(let i=0;i<5;i++)box(-.34+i*.17,1.04,-.18,.012,.24,.012,m.gold);
-    for(const x of [-.62,.62])box(x,.08,-.22,.1,.16,.1,caseMat);
-    for(const x of [-.22,0,.22]){const pedal=box(x,.055,.42,.045,.035,.18,m.metal);pedal.rotation.x=-.18}
-    box(0,.16,.22,.62,.055,.22,caseMat);
+    box(0,.79,.39,1.39,.045,.12,wood);
+    box(0,.81,.455,1.34,.018,.018,brass);
+    // Music rest with two angled pages, staff lines and small note marks.
+    const rest=box(0,1.115,-.285,1.02,.035,.12,wood);rest.rotation.x=-.16;
+    const pageLeft=box(-.235,1.16,-.345,.43,.34,.018,paper);pageLeft.rotation.x=-.16;
+    const pageRight=box(.235,1.16,-.345,.43,.34,.018,paper);pageRight.rotation.x=-.16;
+    for(const side of [-1,1]){
+     for(let line=0;line<5;line++){
+      const staff=box(side*.235,1.065+line*.035,-.332,.34,.004,.003,felt);staff.rotation.x=-.16;
+     }
+     for(let note=0;note<4;note++){
+      const mark=sphere(side*.235-.105+note*.07,1.105+(note%2)*.055,-.326,.012,.009,.004,ebony);
+     }
+    }
+    for(const x of [-.47,.47]){
+     cyl(x,1.34,-.03,.018,.018,.035,brass,12);
+     box(x,1.03,-.24,.035,.12,.06,caseMat);
+    }
+    // Three brass pedals on a shaped lyre and a recessed lower kick panel.
+    box(0,.19,.32,.66,.34,.09,caseMat);
+    for(const x of [-.24,0,.24]){
+     const pedalStem=box(x,.105,.42,.035,.16,.035,brass);
+     const pedal=box(x,.035,.48,.105,.025,.13,brass);pedal.rotation.x=-.18;
+    }
+    box(0,.27,.425,.38,.035,.045,wood);
    }else if(modelName==='洗衣机'){
     action=()=>openFurnitureActions('washingMachine',id);
     width=.92;depth=.86;height=1.28;
@@ -1204,6 +1253,20 @@ window.ArdayFurnitureModels = (() => {
      const stem=cyl(x,1.36,.12,.012,.012,.18,glass,10);
      const bowl=sphere(x,1.47,.12,.055,.075,.055,glass);
     }
+    // Three individually modeled bottles stand on the cabinet crown, not inside the cubbies.
+    const bottleGlass=[mat(0x244b3d,.2,.16),mat(0x75402d,.2,.12),mat(0x3a5148,.18,.2)];
+    const bottleFoil=[mat(0xb68b45,.32,.48),mat(0x8e3834,.3,.35),mat(0xb8a16a,.3,.42)];
+    const bottleLabel=mat(0xe6d9bd,.86),bottleInk=mat(0x6b4b35,.72);
+    [-.36,0,.36].forEach((x,i)=>{
+     const z=.045+(i===1?-.035:0),glassMat=bottleGlass[i],foil=bottleFoil[i];
+     cyl(x,1.865,z,.052,.057,.235,glassMat,18);
+     sphere(x,1.982,z,.047,.055,.047,glassMat);
+     cyl(x,2.055,z,.023,.023,.105,glassMat,16);
+     cyl(x,2.112,z,.026,.026,.025,foil,16);
+     cyl(x,2.13,z,.019,.019,.018,bottleInk,12);
+     box(x,1.865,z+.057,.066,.082,.008,bottleLabel);
+     box(x,1.865,z+.062,.036,.009,.004,foil);
+    });
    }else if(modelName==='料理台'){
     width=1.9;depth=.92;height=1.02;surfaceType='table';surfaceY=1.05;
     const island=mat(0x9c8064,.7),stone=mat(0xe5dfd4,.34),wood=mat(0xb18a61,.7);
@@ -1376,6 +1439,86 @@ window.ArdayFurnitureModels = (() => {
     const coat=box(.19,1.02,.1,.42,.68,.13,m.fabric);coat.rotation.z=-.08;
     const lapel=box(.19,1.34,.17,.22,.22,.025,m.cream);lapel.rotation.z=-.1;
     const scarf=box(-.2,1.26,.12,.1,.78,.035,mat(0x8a9b91,.96));scarf.rotation.z=.12;
+   }else if(name.startsWith('成品食物·')){
+    const dishName=name.slice('成品食物·'.length);
+    width=.58;depth=.52;height=.22;surfaceType='tabletop';surfaceY=.22;
+    const porcelain=mat(0xf3eee3,.24,.04),rimMat=mat(0xb58d5d,.34,.38),rice=mat(0xf1e5c9,.96),egg=mat(0xf2cf72,.88),tomato=mat(0xc85f43,.86),greens=mat(0x6f8a55,.92),beef=mat(0x865039,.88),mushroom=mat(0xa58a6a,.94),tofu=mat(0xf0e4ca,.92),potato=mat(0xd6ad68,.9),sauce=mat(0x9a603d,.84);
+    // A complete plated meal with a raised ceramic rim; each recipe gets its own silhouette and garnish.
+    cyl(0,.035,0,.255,.225,.055,porcelain,36);
+    const plateRim=new T.Mesh(new T.TorusGeometry(.224,.012,8,40),rimMat);plateRim.rotation.x=Math.PI/2;plateRim.position.y=.064;group.add(plateRim);
+    cyl(0,.068,0,.19,.19,.012,mat(0xe8dfce,.32),32);
+    if(dishName==='蛋炒饭'){
+     sphere(0,.12,-.015,.165,.058,.145,rice);
+     for(const [x,z] of [[-.1,-.04],[-.04,.045],[.055,-.065],[.105,.025]])sphere(x,.153,z,.026,.014,.023,egg);
+     for(const [x,z] of [[-.12,.04],[.02,-.11],[.12,-.045],[-.02,.11]])box(x,.157,z,.022,.018,.022,greens);
+     for(const [x,z] of [[-.06,-.09],[.075,.085]])sphere(x,.16,z,.014,.012,.014,tomato);
+    }else if(dishName==='番茄炒蛋'){
+     for(const [x,z] of [[-.1,-.055],[.025,-.09],[.11,-.025],[-.045,.08],[.075,.09]]){
+      const piece=sphere(x,.13,z,.065,.025,.048,(x+z)>0?egg:tomato);piece.rotation.y=(x-z)*2;
+     }
+     for(const [x,z] of [[-.12,.08],[.02,.02],[.13,.055]])sphere(x,.16,z,.018,.012,.018,greens);
+    }else if(dishName==='蔬菜汤'){
+     // Shallow soup bowl with a glossy broth surface and floating vegetables.
+     cyl(0,.105,0,.195,.155,.105,porcelain,32);
+     cyl(0,.16,0,.168,.168,.012,mat(0xc98f52,.2),32);
+     const soupRim=new T.Mesh(new T.TorusGeometry(.18,.012,8,36),rimMat);soupRim.rotation.x=Math.PI/2;soupRim.position.y=.165;group.add(soupRim);
+     for(const [x,z] of [[-.09,-.045],[.015,-.075],[.085,.035],[-.04,.075]]){
+      sphere(x,.177,z,.035,.014,.028,greens);
+      sphere(x+.025,.179,z+.012,.018,.012,.018,potato);
+     }
+     sphere(-.08,.18,.09,.025,.012,.022,tomato);
+    }else if(dishName==='牛肉面'){
+     cyl(0,.095,0,.19,.16,.1,porcelain,32);
+     cyl(0,.15,0,.165,.165,.012,mat(0xb77b4d,.25),32);
+     const noodleMat=mat(0xf0d28a,.76);
+     for(let i=0;i<5;i++){
+      const ring=new T.Mesh(new T.TorusGeometry(.075+i*.012,.009,6,24),noodleMat);ring.rotation.x=Math.PI/2;ring.position.set((i%2-.5)*.035,.17+(i%2)*.006,(Math.floor(i/2)-.5)*.025);group.add(ring);
+     }
+     for(const [x,z] of [[-.09,-.045],[.07,-.055],[.095,.055]]){
+      const slice=sphere(x,.19,z,.055,.022,.04,beef);slice.rotation.y=x*2;
+     }
+     for(const [x,z] of [[-.02,.08],[.12,-.005]])sphere(x,.198,z,.018,.01,.018,greens);
+    }else if(dishName==='奶油蘑菇饭'){
+     sphere(0,.12,0,.17,.055,.15,mat(0xe8d7ae,.95));
+     for(const [x,z] of [[-.11,-.04],[.02,-.09],[.105,.025],[-.045,.09]]){
+      sphere(x,.175,z,.04,.018,.035,mushroom);
+      cyl(x,.157,z,.018,.02,.035,porcelain,10);
+     }
+     for(const [x,z] of [[-.03,.02],[.11,-.07]])sphere(x,.19,z,.018,.009,.016,greens);
+    }else if(dishName==='香煎蛋吐司'){
+     for(const x of [-.095,.095]){
+      const toastSlice=box(x,.112,0,.16,.045,.22,mat(0xb77a43,.88));toastSlice.rotation.y=x*.6;
+      box(x,.14,0,.135,.018,.19,mat(0xf0d28d,.9));
+     }
+     sphere(0,.17,-.015,.072,.018,.072,egg);
+     sphere(0,.19,-.015,.034,.012,.034,mat(0xe5a83e,.82));
+     for(const [x,z] of [[-.12,.08],[.12,-.08]])sphere(x,.163,z,.016,.01,.016,greens);
+    }else if(dishName==='豆腐煲'){
+     cyl(0,.105,0,.195,.155,.105,porcelain,32);
+     cyl(0,.16,0,.168,.168,.012,sauce,32);
+     const stewRim=new T.Mesh(new T.TorusGeometry(.18,.012,8,36),rimMat);stewRim.rotation.x=Math.PI/2;stewRim.position.y=.165;group.add(stewRim);
+     for(const [x,z] of [[-.09,-.045],[.025,-.075],[.09,.035],[-.035,.07]]){
+      const cube=box(x,.205,z,.065,.045,.065,tofu);cube.rotation.y=(x-z)*1.5;
+     }
+     for(const [x,z] of [[-.11,.075],[.1,-.065]])sphere(x,.22,z,.025,.012,.022,greens);
+     sphere(.02,.218,.105,.026,.012,.024,tomato);
+    }else if(dishName==='土豆牛肉'){
+     for(const [x,z] of [[-.1,-.06],[.02,-.09],[.11,-.025],[-.045,.075],[.075,.09]]){
+      const chunk=box(x,.14,z,.078,.06,.072,(x+z)>0?potato:beef);chunk.rotation.y=(x-z)*1.8;chunk.rotation.z=.12;
+     }
+     for(const [x,z] of [[-.12,.08],[.03,.02],[.13,.055]])sphere(x,.18,z,.018,.012,.018,greens);
+    }else if(dishName==='葱香土豆饼'){
+     const pancake=cyl(0,.115,0,.155,.17,.055,potato,36);
+     const top=sphere(0,.145,0,.145,.018,.13,mat(0xe9c77d,.88));
+     for(let i=0;i<7;i++){
+      const a=i*Math.PI*2/7;
+      const herb=sphere(Math.cos(a)*.09,.166,Math.sin(a)*.08,.014,.008,.012,greens);herb.rotation.z=.3;
+     }
+    }else{
+     sphere(0,.12,0,.15,.055,.14,rice);
+     for(let i=0;i<4;i++)sphere(Math.cos(i*1.57)*.09,.16,Math.sin(i*1.57)*.08,.025,.014,.025,greens);
+    }
+    group.userData.foodDisplay=true;group.userData.foodName=dishName;
    }else if(modelName==='凳子'){
     width=.66;depth=.66;height=.72;action=()=>openFurnitureActions('chair',id);
     const timber=mat(0x76543d,.62),seat=mat(0xc9b89f,.96),brass=mat(0x9b805f,.48,.55);
