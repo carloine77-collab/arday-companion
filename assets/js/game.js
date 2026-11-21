@@ -243,7 +243,7 @@ function inventoryOriginalPrice(entity){
  return 0;
 }
 function recycleInventoryItem(index){
- const entity=s.inventory[index];if(!entity)return;const original=inventoryOriginalPrice(entity);if(original<=0){toast('该物品没有可核实的原始价格');return}
+ const entity=s.inventory[index];if(!entity)return;const original=inventoryOriginalPrice(entity);if(original<=0){toast('该物品暂时无法回收');return}
  const refund=Math.round(original*.3),name=entity.name,isDungeonItem=entity.kind==='dungeon-item';s.inventory.splice(index,1);
  if(isDungeonItem)s.points=(Number(s.points)||0)+refund;else{s.money=(Number(s.money)||0)+refund;moneyRecord('shared','income',refund,'背包回收：'+name)}
  save();render();openTab('物品',true);toast('已回收：'+name);
