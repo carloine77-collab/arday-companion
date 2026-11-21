@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="assets/css/game-interactions.css?v=20261121-kitchen-menu1">
 <link rel="stylesheet" href="assets/css/game-world.css?v=20261121-modular-css1">
 <link rel="stylesheet" href="assets/css/game-career.css?v=20261121-guild-icon-fit1">
-<link rel="stylesheet" href="assets/css/commission.css?v=20261122-commission2">
+<link rel="stylesheet" href="assets/css/commission.css?v=20261122-commission-hall1">
 <link rel="stylesheet" href="assets/css/dungeon-board.css?v=20261121-event-depth1">
 </head>
 <body>
@@ -62,7 +62,7 @@
   <button class="tool" data-tab="物品"><span class="icon">▣</span>背包</button>
   <button class="tool" data-tab="商店"><span class="icon">♧</span>商店</button>
   <button class="tool" data-tab="日程"><span class="icon">✧</span>日程</button>
-  <button class="tool" data-tab="目标"><span class="icon">◇</span>委托</button>
+  <button class="tool" data-tab="目标"><span class="icon">◇</span>目标</button>
   <button class="tool" data-tab="账户"><span class="icon">◈</span>账户</button>
   <button class="tool" data-tab="职业"><span class="icon">▤</span>职业</button>
  </nav>
@@ -86,7 +86,7 @@
 <script src="assets/js/character-tap-lines.js?v=20261119a"></script>
 <script src="assets/js/hall/hall-scene.js?v=20261122-supply-archive1"></script>
 <script src="assets/js/dungeon-board.js?v=20261121-global-balance4"></script>
-<script src="assets/js/game.js?v=20261122-daily-commissions2"></script>
+<script src="assets/js/game.js?v=20261122-commission-hall1"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
