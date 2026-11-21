@@ -796,18 +796,30 @@ window.ArdayFurnitureModels = (() => {
     const support=box(0,.62,-.13,.055,1.1,.055,rear);support.rotation.x=-.2;
     for(const y of [.34,1.72])for(const side of [-1,1])cyl(side*.405,y,.145,.018,.018,.025,m.gold,10);
    }else if(modelName==='餐边柜'){
-    width=1.92;depth=.64;height=1.22;surfaceType='table';surfaceY=1.26;const carcass=mat(0x76543d,.66),front=mat(0xc5a47e,.72),dark=mat(0x47372d,.78),brass=mat(0xb58d56,.34,.68),stone=mat(0xe5ded1,.42);
+
+    width=1.96;depth=.7;height=1.34;surfaceType='table';surfaceY=1.4;
+    const carcass=mat(0x694a35,.64),stone=mat(0xe4ddd0,.38),brass=mat(0xb58d56,.34,.62),glass=mat(0xb8d0d0,.18,.16),inner=mat(0x302923,.86);
     if(variant==='双门款'){
-     width=1.82;depth=.68;height=1.28;surfaceY=1.32;box(0,.61,0,1.76,1.1,.62,carcass);box(0,1.2,0,1.92,.12,.72,stone);box(0,1.135,0,1.82,.035,.66,front);
-     for(const x of [-.43,.43]){box(x,.62,.33,.82,.88,.055,front);box(x,.62,.365,.74,.78,.018,carcass);box(x,.62,.38,.68,.72,.012,front);for(const y of [.22,1.02])box(x,y,.39,.66,.018,.018,brass);for(const dx of [-.3,.3])box(x+dx,.62,.402,.018,.7,.018,brass);const pull=new T.Mesh(new T.TorusGeometry(.035,.009,8,18),brass);pull.position.set(x+(x<0?.25:-.25),.62,.42);group.add(pull)}
-     box(0,.15,0,1.62,.1,.56,dark);for(const x of [-.72,.72])for(const z of [-.22,.22]){const foot=new T.Mesh(new T.CylinderGeometry(.04,.055,.16,10),carcass);foot.position.set(x,.08,z);group.add(foot)}
+     width=1.9;depth=.72;height=1.42;surfaceY=1.48;
+     box(0,.67,0,1.84,1.26,.64,carcass);box(0,1.34,0,1.98,.12,.72,stone);box(0,.13,0,1.82,.16,.62,inner);box(0,.7,-.32,1.66,1.08,.025,inner);
+     for(const y of [.34,.72,1.1])box(0,y,0,1.66,.035,.58,brass);
+     for(const x of [-.83,.83])box(x,.72,.345,.045,1.18,.045,carcass);
+     for(const x of [-.43,.43]){
+      const pane=new T.Mesh(new T.BoxGeometry(.76,1.12,.025),glass);pane.position.set(x,.72,.36);group.add(pane);
+      for(const dx of [-.37,.37])box(x+dx,.72,.385,.025,1.16,.045,brass);
+      for(const y of [.16,1.28])box(x,y,.385,.75,.025,.045,brass);
+     }
+     box(0,.72,.4,.025,1.16,.05,carcass);for(const x of [-.055,.055]){const pull=new T.Mesh(new T.TorusGeometry(.035,.009,8,20),brass);pull.position.set(x,.7,.43);group.add(pull)}
+     for(const y of [.43,.81,1.19])for(let i=0;i<3;i++){const x=-.53+i*.53,plate=new T.Mesh(new T.TorusGeometry(.09,.012,8,24),mat(0xe8e0d2,.42));plate.rotation.x=Math.PI/2;plate.position.set(x,y+.07,.13);group.add(plate);const bowl=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),m.cream);bowl.scale.set(.12,.055,.12);bowl.position.set(x,y+.09,.13);group.add(bowl)}
+     for(const y of [.47,.85,1.23])for(const x of [-.73,.73]){const cup=new T.Mesh(new T.CylinderGeometry(.04,.035,.08,16),m.cream);cup.position.set(x,y,.13);group.add(cup)}
+     for(const x of [-.72,.72])for(const z of [-.22,.22]){const foot=new T.Mesh(new T.CylinderGeometry(.035,.05,.14,10),carcass);foot.position.set(x,.07,z);group.add(foot)}
     }else{
-     box(0,.58,0,1.86,1.08,.6,carcass);box(0,1.16,0,1.98,.1,.68,stone);box(0,1.105,0,1.9,.035,.64,front);
-     for(const x of [-.62,.62]){box(x,.58,.315,.56,.88,.045,front);box(x,.58,.344,.47,.76,.018,carcass);box(x,.58,.357,.42,.7,.012,front);for(const y of [.25,.9])box(x,y,.37,.38,.012,.012,brass);cyl(x+(x<0?.17:-.17),.58,.39,.024,.024,.04,brass,12);for(const z of [-.2,.2]){const foot=new T.Mesh(new T.CylinderGeometry(.035,.05,.16,10),carcass);foot.position.set(x,.08,z);group.add(foot)}}
-     box(0,.36,.28,.58,.035,.12,dark);box(0,.75,.28,.58,.035,.12,dark);for(const y of [.44,.83]){box(0,y,.16,.55,.025,.25,front);for(let k=0;k<3;k++){cyl(-.17+k*.17,y+.11,.2,.035,.035,.19,k===1?m.leaf:m.clay,12);cyl(-.17+k*.17,y+.22,.2,.022,.022,.045,brass,10)}}
-     box(0,1.22,.34,.48,.035,.025,brass);for(const x of [-.88,.88])for(const z of [-.22,.22]){const foot=new T.Mesh(new T.CylinderGeometry(.04,.055,.17,10),carcass);foot.position.set(x,.085,z);group.add(foot)}
+     box(0,.62,0,1.9,1.14,.64,carcass);box(0,1.22,0,2.02,.12,.74,stone);box(0,.12,0,1.88,.14,.64,inner);
+     for(const x of [-.62,.62]){box(x,.68,.345,.56,.88,.035,mat(0xc8aa83,.76));for(const y of [.29,1.04])box(x,y,.37,.48,.018,.018,brass);const pull=new T.Mesh(new T.TorusGeometry(.028,.008,8,18),brass);pull.position.set(x,.68,.4);group.add(pull)}
+     box(0,.65,.325,.58,.82,.04,inner);for(const y of [.34,.72,1.1]){box(0,y,.28,.52,.035,.24,carcass);const bowl=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),m.cream);bowl.scale.set(.15,.07,.15);bowl.position.set(0,y+.04,.18);group.add(bowl)}
+     for(const x of [-.88,.88])for(const z of [-.22,.22]){const foot=new T.Mesh(new T.CylinderGeometry(.04,.055,.16,10),carcass);foot.position.set(x,.08,z);group.add(foot)}
     }
-   
+
    }else if(modelName==='阅读椅'){
     width=1.08;depth=1.02;height=1.24;action=()=>openFurnitureActions('chair',id);
     const timber=mat(0x76543d,.58),upholstery=mat(0xd8cbb8,.96),shade=mat(0xbcae9e,.98),piping=mat(0x9b8068,.82);
@@ -834,19 +846,21 @@ window.ArdayFurnitureModels = (() => {
     for(const z of [-.27,.27]){const rail=box(0,.18,z,.78,.06,.055,timber)}
     for(const side of [-1,1]){const brace=box(side*.4,.2,0,.045,.06,.5,timber);brace.rotation.z=side*.08}
    }else if(modelName==='花瓶'){
+
     if(variant==='陶艺摆件'){
-     width=.62;depth=.62;height=.9;surfaceType='tabletop';surfaceY=.04;const ceramic=mat(0xb66f54,.34),inner=mat(0x714b3b,.8),accent=mat(0xe0b58b,.3);
-     const body=new T.Mesh(new T.LatheGeometry([new T.Vector2(.08,0),new T.Vector2(.18,.05),new T.Vector2(.28,.2),new T.Vector2(.31,.39),new T.Vector2(.24,.55),new T.Vector2(.12,.7),new T.Vector2(.09,.78)],40),ceramic);body.position.y=.06;body.scale.set(1,.94,1);group.add(body);
-     cyl(0,.84,0,.095,.095,.025,accent,32);cyl(0,.12,0,.2,.2,.035,inner,32);
-     for(const side of [-1,1]){const handle=new T.CatmullRomCurve3([new T.Vector3(side*.22,.58,0),new T.Vector3(side*.42,.7,0),new T.Vector3(side*.48,.49,0),new T.Vector3(side*.27,.32,0)]);group.add(new T.Mesh(new T.TubeGeometry(handle,24,.035,10,false),accent))}
-     for(let i=0;i<9;i++){const a=i*Math.PI*2/9,curve=new T.CatmullRomCurve3([new T.Vector3(Math.cos(a)*.2,.18,Math.sin(a)*.2),new T.Vector3(Math.cos(a)*.29,.4,Math.sin(a)*.29),new T.Vector3(Math.cos(a)*.2,.65,Math.sin(a)*.2)]);group.add(new T.Mesh(new T.TubeGeometry(curve,18,.008,6,false),accent))}
+     width=.68;depth=.68;height=1;surfaceType='tabletop';surfaceY=.04;const glaze=mat(0x9c5944,.22),unglazed=mat(0xd5b28a,.94),gold=mat(0xc49b67,.3,.5);
+     const body=new T.Mesh(new T.LatheGeometry([new T.Vector2(.09,0),new T.Vector2(.16,.035),new T.Vector2(.28,.16),new T.Vector2(.34,.34),new T.Vector2(.31,.5),new T.Vector2(.2,.62),new T.Vector2(.105,.69),new T.Vector2(.09,.82)],48),glaze);body.position.y=.06;group.add(body);
+     const foot=new T.Mesh(new T.TorusGeometry(.14,.025,10,36),unglazed);foot.position.y=.09;group.add(foot);const lip=new T.Mesh(new T.TorusGeometry(.095,.018,10,32),gold);lip.position.y=.88;group.add(lip);
+     const loop=new T.CatmullRomCurve3([new T.Vector3(.22,.59,0),new T.Vector3(.43,.78,.02),new T.Vector3(.53,.59,.02),new T.Vector3(.45,.37,.02),new T.Vector3(.29,.33,.02)]);group.add(new T.Mesh(new T.TubeGeometry(loop,40,.047,12,false),unglazed));
+     const loop2=new T.CatmullRomCurve3([new T.Vector3(-.19,.61,0),new T.Vector3(-.34,.7,.02),new T.Vector3(-.39,.53,.02),new T.Vector3(-.26,.42,.02)]);group.add(new T.Mesh(new T.TubeGeometry(loop2,24,.025,9,false),gold));
+     for(let i=0;i<18;i++){const a=i*Math.PI*2/18,curve=new T.CatmullRomCurve3([new T.Vector3(Math.cos(a)*.25,.19,Math.sin(a)*.25),new T.Vector3(Math.cos(a)*.32,.36,Math.sin(a)*.32),new T.Vector3(Math.cos(a)*.25,.52,Math.sin(a)*.25)]);group.add(new T.Mesh(new T.TubeGeometry(curve,12,.009,6,false),unglazed))}
+     for(let i=0;i<5;i++){const a=i*1.256,p=sphere(Math.cos(a)*.23,.55,Math.sin(a)*.23,.018,.018,.018,gold)}
     }else{
-     width=.5;depth=.5;height=.88;surfaceType='tabletop';surfaceY=.04;const ceramic=mat(0xc58d70,.3),lip=mat(0xe2bda0,.28);
-     const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.12,0),new T.Vector2(.16,.06),new T.Vector2(.23,.2),new T.Vector2(.25,.36),new T.Vector2(.19,.52),new T.Vector2(.105,.66),new T.Vector2(.11,.72)],32),ceramic);vase.position.y=.08;group.add(vase);cyl(0,.805,0,.115,.115,.025,lip,32);
+     width=.5;depth=.5;height=.88;surfaceType='tabletop';surfaceY=.04;const ceramic=mat(0xc58d70,.3),lip=mat(0xe2bda0,.28);const vase=new T.Mesh(new T.LatheGeometry([new T.Vector2(.12,0),new T.Vector2(.16,.06),new T.Vector2(.23,.2),new T.Vector2(.25,.36),new T.Vector2(.19,.52),new T.Vector2(.105,.66),new T.Vector2(.11,.72)],32),ceramic);vase.position.y=.08;group.add(vase);cyl(0,.805,0,.115,.115,.025,lip,32);
      for(let rib=0;rib<12;rib++){const a=rib*Math.PI*2/12,curve=new T.CatmullRomCurve3([new T.Vector3(Math.cos(a)*.16,.19,Math.sin(a)*.16),new T.Vector3(Math.cos(a)*.23,.39,Math.sin(a)*.23),new T.Vector3(Math.cos(a)*.15,.61,Math.sin(a)*.15)]);group.add(new T.Mesh(new T.TubeGeometry(curve,12,.006,5,false),lip))}
-     for(let i=0;i<5;i++){const a=i*1.25,curve=new T.CatmullRomCurve3([new T.Vector3(0,.76,0),new T.Vector3(Math.cos(a)*.12,.95,Math.sin(a)*.12),new T.Vector3(Math.cos(a)*.22,1.12+(i%2)*.08,Math.sin(a)*.22)]);group.add(new T.Mesh(new T.TubeGeometry(curve,14,.012,6,false),m.leaf));for(let n=0;n<3;n++){const p=curve.getPoint(.45+n*.15),leaf=sphere(p.x,p.y,p.z,.09,.025,.035,n%2?m.leaf:m.leaf2);leaf.rotation.y=a}}
+     for(let i=0;i<5;i++){const a=i*1.25,curve=new T.CatmullRomCurve3([new T.Vector3(0,.76,0),new T.Vector3(Math.cos(a)*.12,.95,Math.sin(a)*.12),new T.Vector3(Math.cos(a)*.22,1.12+(i%2)*.08,Math.sin(a)*.22)]);group.add(new T.Mesh(new T.TubeGeometry(curve,14,.012,6,false),m.leaf));for(let n=0;n<3;n++){const p=curve.getPoint(.45+n*.15);sphere(p.x,p.y,p.z,.09,.025,.035,n%2?m.leaf:m.leaf2)}}
     }
-   
+
    }else if(modelName==='挂钟'){
     width=.58;depth=.16;height=.68;wallAxis='x';wallSide='back';anchor=[0,2.0];
     const clockBody=cyl(0,0,.02,.29,.29,.07,m.wood,40);clockBody.rotation.x=Math.PI/2;const clockFace=cyl(0,0,.07,.245,.245,.018,m.cream,40);clockFace.rotation.x=Math.PI/2;
