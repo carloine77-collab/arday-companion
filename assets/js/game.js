@@ -1666,7 +1666,7 @@ function purchaseDungeonExchangeItem(id){
  remember('purchase','积分兑换：'+item.name,2);
  save();render();toast('兑换成功：'+item.name);return true;
 }
-function showExchange(activeType='all',searchTerm=''){
+function showExchange(activeType='all'){
  closeCalendar();
  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');
  $('drawer').classList.add('exchange-drawer');
@@ -1680,21 +1680,17 @@ function showExchange(activeType='all',searchTerm=''){
   const blocked=!!s.activeDungeon,poor=(Number(s.points)||0)<price;
   const detail=exchangeEffectText(item);
   const code='EX-'+String(Object.keys(DUNGEON_ITEM_CATALOG).indexOf(id)+1).padStart(2,'0');
-  return '<article class="exchange-product" data-exchange-search="'+(item.name+' '+DUNGEON_ITEM_TYPE_LABELS[item.type]+' '+detail).toLowerCase()+'"><div class="exchange-product-art"><span>'+item.icon+'</span><small>'+code+'</small></div><div class="exchange-product-main"><div class="exchange-product-kind">'+DUNGEON_ITEM_TYPE_LABELS[item.type]+'</div><h3>'+item.name+'</h3><p>'+detail+'</p><div class="exchange-product-stock">'+(owned?'持有 '+owned+' 件':'尚未持有')+'</div></div><div class="exchange-product-action"><strong>'+price+' <small>PT</small></strong><button type="button" data-exchange-buy="'+id+'" '+(blocked||poor?'disabled':'')+'>'+(blocked?'副本中':poor?'积分不足':'兑换')+'</button></div></article>';
+  return '<article class="exchange-product"><div class="exchange-product-art"><span>'+item.icon+'</span><small>'+code+'</small></div><div class="exchange-product-main"><div class="exchange-product-kind">'+DUNGEON_ITEM_TYPE_LABELS[item.type]+'</div><h3>'+item.name+'</h3><p>'+detail+'</p><div class="exchange-product-stock">'+(owned?'持有 '+owned+' 件':'尚未持有')+'</div></div><div class="exchange-product-action"><strong>'+price+' <small>PT</small></strong><button type="button" data-exchange-buy="'+id+'" '+(blocked||poor?'disabled':'')+'>'+(blocked?'副本中':poor?'积分不足':'兑换')+'</button></div></article>';
  }).join('');
  $('choices').innerHTML=
   '<section class="exchange-masthead"><div class="exchange-orbit"><i></i><b>✦</b></div><div class="exchange-heading"><small>ARDAY / MATERIAL EXCHANGE</small><h2>物资兑换</h2><span>FIELD EQUIPMENT DIVISION</span></div><div class="exchange-balance"><small>AVAILABLE POINTS</small><strong>'+Number(s.points||0).toLocaleString('zh-CN')+'</strong><em>PT</em></div><span class="exchange-index">EXCHANGE<br>DEPOT / 04</span></section>'+
   '<nav class="exchange-filters">'+filters.map(([id,label])=>'<button type="button" data-exchange-filter="'+id+'" class="'+(activeType===id?'active':'')+'">'+label+'</button>').join('')+'</nav>'+
-  '<label class="exchange-search-wrap"><span>⌕</span><input class="exchange-search" type="search" value="" placeholder="检索物资名称或功能" aria-label="检索兑换物资"></label>'+
   '<div class="exchange-results-head"><span>物资目录</span><b>'+items.length.toString().padStart(2,'0')+' / '+Object.keys(DUNGEON_ITEM_CATALOG).length+'</b></div>'+
   '<div class="exchange-product-grid">'+(cards||'<div class="exchange-empty">NO MATCHING EQUIPMENT</div>')+'</div>';
- const search=$('choices').querySelector('.exchange-search');
- search.value=searchTerm;
- search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();$('choices').querySelectorAll('.exchange-product').forEach(card=>{card.hidden=!!q&&!card.dataset.exchangeSearch.includes(q)})});
- $('choices').querySelectorAll('[data-exchange-filter]').forEach(button=>button.onclick=()=>showExchange(button.dataset.exchangeFilter,search.value));
+ $('choices').querySelectorAll('[data-exchange-filter]').forEach(button=>button.onclick=()=>showExchange(button.dataset.exchangeFilter));
  $('choices').querySelectorAll('[data-exchange-buy]').forEach(button=>button.onclick=()=>{
   const scroll=$('choices').scrollTop;
-  if(purchaseDungeonExchangeItem(button.dataset.exchangeBuy)){showExchange(activeType,search.value);$('choices').scrollTop=scroll}
+  if(purchaseDungeonExchangeItem(button.dataset.exchangeBuy)){showExchange(activeType);$('choices').scrollTop=scroll}
  });
  $('drawer').classList.add('open');
 }
