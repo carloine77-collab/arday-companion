@@ -348,3 +348,107 @@
 .status-tags:empty{display:none!important}
 
 
+
+
+/* Career board v3: compact job cards and a stable, scrollable guild dossier. */
+.drawer .choices.career-view{
+ display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:9px!important;
+ min-height:0!important;max-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;
+ overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+ padding:0 12px 18px!important;box-sizing:border-box!important;
+}
+.drawer .choices.career-view>.career-tabs{flex:0 0 auto!important;margin:0 0 2px!important}
+.career-jobs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch;min-width:0}
+.career-job-card{
+ display:flex;flex-direction:column;gap:7px;min-width:0;padding:10px!important;
+ border:1px solid #c5b79f!important;border-radius:7px 10px 6px 9px!important;
+ background:linear-gradient(145deg,#f4eddf,#e5dccb)!important;color:#455047!important;
+ box-shadow:1px 3px 0 #c8bba6!important;
+}
+.career-job-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;min-width:0}
+.career-job-heading h3{min-width:0;margin:0!important;font:600 13px/1.45 "Noto Serif SC",serif!important;color:#3d4c43!important;overflow-wrap:anywhere}
+.career-job-heading>strong{flex:0 0 auto;color:#8d6847;font:italic 19px/1 Georgia,serif!important;white-space:nowrap}
+.career-job-heading>strong small{font:9px "Noto Serif SC",serif;font-style:normal}
+.career-job-time{display:flex;justify-content:space-between;gap:5px;color:#86765e;font:10px Georgia,"Noto Serif SC",serif}
+.career-job-time span{color:#9b8d76}
+.career-job-score{display:flex;justify-content:space-between;gap:5px;padding-top:2px;color:#667464;font:10px "Noto Serif SC",serif}
+.career-job-priority{display:flex;flex-direction:column;gap:3px;padding:7px 8px;border-radius:5px;background:#dce1d4;color:#52644f}
+.career-job-priority>b{font:9px "Noto Serif SC",serif;color:#8b806a}
+.career-job-priority>strong{font:600 11px "Noto Serif SC",serif}
+.career-job-priority>strong small{margin-left:5px;color:#71816c;font:10px Georgia,"Noto Serif SC",serif}
+.career-job-secondary{display:flex;flex-wrap:wrap;gap:4px}
+.career-job-secondary span{padding:3px 5px;border:1px solid #d0c5b1;border-radius:3px;color:#7c715f;font:9px "Noto Serif SC",serif}
+.career-job-secondary b{margin-left:3px;color:#586b5b;font:10px Georgia,serif}
+.career-job-apply{
+ width:100%;min-height:33px;margin-top:auto;padding:6px 8px!important;
+ border:1px solid #7d8c76!important;border-radius:4px!important;
+ background:#586d5c!important;color:#f7f0e2!important;
+ font:600 10px "Noto Serif SC",serif!important;letter-spacing:.08em;
+}
+.career-job-apply:disabled{opacity:.48!important;background:#aaa596!important;border-color:#aaa596!important}
+.career-current{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:13px;border:1px solid #b9aa91;border-radius:8px;background:linear-gradient(140deg,#f2eadb,#ded4c2);box-shadow:2px 3px 0 #c8bba6}
+.career-current-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#566d5d;color:#f4ecd9;font:600 11px "Noto Serif SC",serif}
+.career-current-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.career-current-copy h2{margin:0;font:600 16px "Noto Serif SC",serif;color:#3e5044;overflow-wrap:anywhere}
+.career-current-copy>strong{color:#8d6847;font:italic 17px Georgia,serif}
+.career-current-copy small{color:#857964;font:10px "Noto Serif SC",serif}
+.career-current>button{padding:7px 10px!important;border:1px solid #b59a7d!important;border-radius:4px!important;background:#e9ddc9!important;color:#755c46!important;font:600 10px "Noto Serif SC",serif!important}
+.drawer .choices.career-view>.guild-career-banner{min-height:88px!important;margin:0!important;padding:12px!important;gap:10px!important;border-radius:9px!important}
+.guild-banner-sigil{flex-basis:56px!important;width:56px!important;height:56px!important}
+.guild-banner-sigil i{font-size:29px!important}
+.guild-banner-identity h2{margin:3px 0 5px!important;font-size:16px!important}
+.guild-banner-identity>small{font-size:8px!important}
+.guild-banner-rank{font-size:23px!important}
+.drawer .choices.career-view>.guild-career-section{
+ display:block!important;flex:0 0 auto!important;min-width:0!important;margin:0!important;padding:0!important;
+ overflow:hidden!important;border:1px solid #b8aa90!important;border-radius:8px!important;
+ background:linear-gradient(145deg,#f1eadb,#e2d8c5)!important;box-shadow:1px 2px 0 #c8bba6!important;
+}
+.drawer .choices.career-view>.guild-career-section>summary{
+ display:grid!important;grid-template-columns:54px minmax(0,1fr) 18px!important;
+ align-items:center!important;gap:9px!important;min-height:65px!important;padding:7px 9px!important;
+ list-style:none!important;cursor:pointer!important;
+}
+.drawer .choices.career-view>.guild-career-section>summary::-webkit-details-marker{display:none!important}
+.drawer .choices.career-view>.guild-career-section>summary:after{display:none!important;content:none!important}
+.drawer .choices.career-view .guild-section-art{
+ width:54px!important;height:48px!important;min-width:54px!important;
+ border-radius:4px!important;box-shadow:inset 0 0 0 2px #ffffff20!important;
+}
+.drawer .choices.career-view .guild-section-heading{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important}
+.drawer .choices.career-view .guild-section-heading small{font-size:7px!important;letter-spacing:.12em!important}
+.drawer .choices.career-view .guild-section-heading strong{font-size:13px!important;letter-spacing:.04em!important}
+.drawer .choices.career-view .guild-section-toggle{width:17px!important;height:17px!important}
+.drawer .choices.career-view .guild-section-body{padding:9px 10px 11px!important;border:0!important}
+.drawer .choices.career-view .guild-section-body:before{display:none!important;content:none!important}
+.drawer .choices.career-view .guild-section-body .guild-due{font-size:30px!important}
+.drawer .choices.career-view .guild-applicant-list{display:grid!important;grid-template-columns:1fr!important;gap:6px!important}
+.drawer .choices.career-view .guild-applicant{grid-template-columns:36px minmax(0,1fr) auto!important;gap:7px!important;padding:6px!important}
+.drawer .choices.career-view .guild-applicant-mark{width:34px!important;height:34px!important;font-size:16px!important}
+.drawer .choices.career-view .guild-applicant>div:nth-child(2)>b{font-size:11px!important}
+.drawer .choices.career-view .guild-applicant>div:nth-child(2)>small{font-size:8px!important}
+.drawer .choices.career-view .guild-applicant>button,.drawer .choices.career-view .guild-career-section .recruit-action{min-height:30px!important;padding:5px 9px!important;font-size:10px!important}
+.drawer .choices.career-view .guild-material-count{margin-bottom:7px!important}
+.drawer .choices.career-view .guild-material-grid{gap:6px!important}
+.drawer .choices.career-view .guild-material-grid button{min-height:66px!important;padding:25px 6px 6px!important;font-size:10px!important}
+.drawer .choices.career-view .guild-contract-meta{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;margin:8px 0!important}
+.drawer .choices.career-view .guild-section-body>h3{margin:2px 0 7px!important;font-size:13px!important}
+.guild-career-empty{padding:20px 14px!important;border-radius:9px!important}
+.guild-empty-emblem{margin:0 auto 9px!important}
+.guild-career-empty h2{margin:5px 0 12px!important;font-size:16px!important}
+@media(max-width:520px){
+ .career-jobs-grid{grid-template-columns:minmax(0,1fr)!important;gap:7px!important}
+ .career-job-card{padding:9px!important}
+ .career-job-heading h3{font-size:13px!important}
+ .drawer .choices.career-view>.guild-career-banner{min-height:78px!important;padding:10px!important}
+ .guild-banner-sigil{flex-basis:48px!important;width:48px!important;height:48px!important}
+ .guild-banner-sigil i{font-size:25px!important}
+ .drawer .choices.career-view>.guild-career-section>summary{grid-template-columns:48px minmax(0,1fr) 17px!important;gap:7px!important;min-height:59px!important;padding:6px 8px!important}
+ .drawer .choices.career-view .guild-section-art{width:48px!important;height:43px!important;min-width:48px!important}
+}
+@media(orientation:landscape) and (max-height:560px){
+ .drawer .choices.career-view{padding-bottom:10px!important}
+ .career-jobs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .career-job-card{gap:5px!important;padding:8px!important}
+ .drawer .choices.career-view>.guild-career-section>summary{min-height:54px!important}
+}
