@@ -9,7 +9,7 @@ window.ArdayFurnitureModels = (() => {
   function build(name,record=null) {
    const alias=furnitureModelAliases[name];
    const variant=alias?.variant??(name.includes('·')?name.split('·').slice(1).join('·').trim():'');
-   const modelName=alias?.model??(name.split('·')[0].trim()==='地毯'?'卧室地毯':name.split('·')[0].trim());
+   const modelName=alias?.model??name.split('·')[0].trim();
    const room=record?.room||getRoomMode()||'living',parent=rooms[room]||rooms.living;
    const id=record?.id||('furn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7));
    const group=new T.Group();group.userData.ownedType=name;group.userData.furnitureKey=id;group.userData.roomKey=room;parent.add(group);
@@ -298,7 +298,7 @@ window.ArdayFurnitureModels = (() => {
     box(0,.12,0,1.22,.16,.72,m.dark);
    }else if(modelName==='地毯'){
     width=3.7;depth=2.7;surfaceType='rug';surfaceY=.075;
-    const wool=name==='羊毛地毯',bedroom=name==='卧室地毯';
+    const wool=variant==='羊毛米白'||name==='羊毛地毯',bedroom=variant==='卧室长绒'||name==='卧室地毯';
     if(wool){
      // A continuous padded backing, woven top cloth, bound perimeter and one merged
      // fiber mesh replace the old grid of intersecting spheres and box fringe.
@@ -1121,7 +1121,7 @@ window.ArdayFurnitureModels = (() => {
      const heel=box(x,1.13,z-.145,.12,.055,.055,upper);
     }
    }else if(modelName==='沙发床'){
-    width=2.38;depth=1.82;height=1.04;action=()=>openFurnitureActions('sofa',id);
+    width=2.38;depth=2.55;height=1.04;action=()=>openFurnitureActions('sofa',id);
     const frame=mat(0x604735,.62),upholstery=mat(0xb8a99a,.97),seatMat=mat(0xd8cbb9,.98),pillowMat=mat(0xe8dfd1,.98),piping=mat(0x8c7562,.86),metal=mat(0x786b5d,.48,.4);
     const plush=(x,y,z,sx,sy,sz,material,rz=0)=>{const o=new T.Mesh(new T.SphereGeometry(1,32,22),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.rotation.z=rz;group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
     box(0,.25,-.02,2.22,.22,1.42,frame);box(0,.38,.02,2.16,.12,1.38,metal);
