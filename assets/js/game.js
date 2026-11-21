@@ -241,12 +241,12 @@ function openTab(name,force=false){
  $('drawer').classList.remove('profile-expanded','furniture-drawer');
  $('drawer').querySelector('.furniture-close')?.remove();
  const displayName=name==='物品'?'背包':name;
- $('drawerTitle').textContent=displayName+' · ¥'+s.money;$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
+ $('drawerTitle').textContent=displayName+(name==='商店'&&shopCategory==='积分兑换'?' · ✦ '+s.points+' 积分':' · ¥'+s.money);$('choices').innerHTML='';$('choices').className='choices';$('drawer').classList.toggle('shop-drawer',name==='商店');
  let shopGrid=null;
  if(name==='商店'){
   $('choices').classList.add('shop-content');
   const nav=document.createElement('div');nav.className='shop-categories';
-  ['食物食材','家具','书籍'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  ['食物食材','家具','书籍','积分兑换'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   const shopMasthead=document.createElement('section');shopMasthead.className='shop-masthead';shopMasthead.innerHTML='<div class="shop-kicker">ARDAY JOURNAL <span>HOME & LIVING</span></div><div class="shop-coverline"><span class="shop-cover-number">№ 08</span><span class="shop-cover-season">THE ART OF<br>EVERYDAY LIVING</span></div><div class="shop-cover-title">Objects<br><i>with a story.</i></div><div class="shop-cover-note"></div><div class="shop-cover-stamp">A HOME<br>IN THE<br>MAKING</div>'; 
   $('choices').appendChild(shopMasthead);
   $('choices').appendChild(nav);
@@ -276,7 +276,7 @@ function openTab(name,force=false){
   shopGrid=document.createElement('div');shopGrid.className='shop-product-grid';$('choices').appendChild(shopGrid);
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
- const tabEntries=name==='商店'?(shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ const tabEntries=name==='商店'?(shopCategory==='积分兑换'?Object.entries(DUNGEON_ITEM_CATALOG).map(([id,item])=>[item.name,item.icon,'exchange-dungeon-'+id,DUNGEON_EXCHANGE_PRICES[id],DUNGEON_ITEM_TYPE_LABELS[item.type]+' · '+DUNGEON_ITEM_DESCRIPTIONS[id]]):shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
@@ -290,7 +290,7 @@ function openTab(name,force=false){
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
-  if(isShop){const desc='';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong></span><span class="shop-product-price">'+(Number(cost)===0?'免费':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':'购入')+'</span>';}
+  if(isShop){const desc=description||'';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(desc?'<small>'+desc+'</small>':'')+'</span><span class="shop-product-price">'+(Number(cost)===0?'免费':id.startsWith('exchange-dungeon-')?cost+' 积分':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':id.startsWith('exchange-dungeon-')?'兑换':'购入')+'</span>';}
   else b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
@@ -316,7 +316,8 @@ function openTab(name,force=false){
     addEvent('你摆放了一件家具',item+'已放进当前房间。','player-action');save();saySystem('把'+item+'放进房间吧。');openTab('物品',true);return;
    }
    if(id==='kitchen'){openKitchenPanel(false);return}
-   if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
+   if(id.startsWith('exchange-dungeon-')){purchaseDungeonExchangeItem(id.slice('exchange-dungeon-'.length));return}
+    if(id.startsWith('buy-ingredient-')){buyIngredient(id,label,+cost);return}
    if(id.startsWith('buy-')){purchase(id,label,+cost);return}
    if(id==='events'){renderEvents();return}
    if(id==='profile'){renderProfile();return}
@@ -1414,8 +1415,11 @@ function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(s.acti
 }
 
 const DUNGEON_ITEM_CATALOG={stimulant:{name:'肾上腺素注射剂',type:'buff',icon:'✚',effects:{energy:16,agility:1,willpower:1}},standin:{name:'替身纸人',type:'life',icon:'纸',lifeSave:true},hex:{name:'恶意诅咒钉',type:'harm',icon:'†',tradeOnly:true},fate:{name:'命运筹码',type:'probability',icon:'◎',chance:8},misfortune:{name:'厄运筹码',type:'probability',icon:'⊗',tradeOnly:true},reprieve:{name:'七日豁免令',type:'extension',icon:'⌛',extendDays:7}};
-
+const DUNGEON_ITEM_TYPE_LABELS={buff:'增益',life:'保命',harm:'干扰',probability:'概率',extension:'期限'};
+const DUNGEON_ITEM_DESCRIPTIONS={stimulant:'恢复精力，并提升敏捷与意志',standin:'抵消一次副本失败造成的濒死后果',hex:'干扰类交易物资，暂不支持直接使用',fate:'下次副本通关概率提高 8%',misfortune:'概率类交易物资，暂不支持直接使用',reprieve:'将下一次副本期限延后七天'};
+const DUNGEON_EXCHANGE_PRICES={stimulant:80,standin:180,hex:120,fate:150,misfortune:130,reprieve:220};
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;return item}
+function purchaseDungeonExchangeItem(id){const data=DUNGEON_ITEM_CATALOG[id],price=Number(DUNGEON_EXCHANGE_PRICES[id]);if(!data||!Number.isFinite(price)||price<=0){toast('兑换商品不存在');return}if(s.activeDungeon){toast('副本进行中无法兑换');return}if(s.points<price){toast('积分不足，还差 '+(price-s.points)+' 积分');return}s.points-=price;const item=addDungeonItem(id);if(!item){s.points+=price;toast('兑换失败');return}save();render();toast('已兑换：'+data.name);openTab('商店',true)}
 // Narrow runtime bridge for the separately maintained dungeon-board module.
 window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save(),clamp:value=>clamp(value),addDungeonItem:id=>addDungeonItem(id),settleDungeonIfDue:at=>settleDungeonIfDue(at),pauseBoard:()=>pauseDungeonBoard(),showDungeon:()=>showDungeon()};
 
@@ -1466,10 +1470,10 @@ function dispatchDungeon(tier,energyCost,base){
 }
 function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active'||mission.settling)return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;mission.settling=true;const wasBoard=mission.mode==='board';
- const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.48+(Number(snap.teamPower)||0)*.52,penalty=(100-(Number(snap.energy)||0))*.0011+(100-(Number(snap.hunger)||0))*.00035+(100-(Number(snap.clean)||0))*.00025,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.035,Math.min(.97,.50+(power-mission.difficulty)*.006-(Number(snap.teamMalice)||0)*.0038-penalty+modifier)),success=Math.random()<successChance;
+ const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.65+(Number(snap.teamPower)||0)*.35,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.035,Math.min(.97,.50+(power-mission.difficulty)*.012-(Number(snap.teamMalice)||0)*.0015+modifier)),success=Math.random()<successChance;
  let fatal=false,survived=true;
  if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=false;s.energy=0;s.hunger=0;s.attributes.willpower=clamp(s.attributes.willpower-18-(board.fatalRisk?8:0));s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
- const raw=Math.round(Math.max(0,Math.min(100,50+power*.22-mission.difficulty*.25+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.12+(Number(board.chanceModifier)||0)*.25))),rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):(raw>=55?'C':'D'),earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.12));
+ const successfulNodes=Object.values(board.specialNodes||{}).filter(Boolean).length,nodeScore=successfulNodes*4,raw=Math.round(Math.max(0,Math.min(100,50+power*.22-mission.difficulty*.25+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.12+(Number(board.chanceModifier)||0)*.25+nodeScore))),rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):'D',earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.12));
  s.points+=earned;if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
  const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x)),result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at,unlocked:newly,survived,fatal,boardSteps:Math.max(0,Math.min(108,Number(board.steps)||0))};
  recordDungeonStat(result);const elite=maybeMeetElite(mission.tier,at);if(elite)result.eliteEncounter={name:elite.name,relation:elite.relation};s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
