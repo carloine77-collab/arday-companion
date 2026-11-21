@@ -252,6 +252,7 @@ function openTab(name,force=false){
  if(name==='目标'){closeCalendar();showGoals();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='目标'));return}
  if(name==='账户'){closeCalendar();showCollection();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='账户'));return}
  if(name==='职业'){closeCalendar();showCareer();document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tab==='职业'));return}
+ $('drawer').classList.remove('exchange-drawer');
  $('drawer').classList.remove('profile-expanded','furniture-drawer');
  $('drawer').querySelector('.furniture-close')?.remove();
  const displayName=name==='物品'?'背包':name;
@@ -347,7 +348,7 @@ function openTab(name,force=false){
 }
 
 function eventChoicesLegacy(e){
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices event-detail-view note-detail-view';
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices event-detail-view note-detail-view';
  $('drawerTitle').textContent=e.category==='letter'?'阿尔的来信':'生活记录';
  const date=new Date(e.created||Date.now()).toLocaleString('zh-CN',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
  const type=e.category==='letter'?'阿尔写给你':'生活记录';
@@ -365,7 +366,7 @@ function eventChoicesLegacy(e){
 function renderEvents(){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  const open=s.events.filter(e=>e.status==='open'&&e.category==='letter').sort((a,b)=>(b.created||0)-(a.created||0));
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
  const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 封';$('choices').appendChild(count);
  if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无纸条</h3>';$('choices').appendChild(empty);}
@@ -392,7 +393,7 @@ function renderEvents(){
 function closeCalendar(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(arday3D?.cancelGesture)arday3D.cancelGesture();$('stage').classList.remove('calendar-mode');$('stage').style.touchAction='none';$('drawer').classList.remove('open');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'))}
 function slotClick(di,h){
  ensureSchedule();let d=plusDays(dayAnchor(),di),key=dayKey(d),ev=eventAt(key,h);
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('choices').className='choices schedule-action-view';$('drawer').classList.add('open');
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('choices').className='choices schedule-action-view';$('drawer').classList.add('open');
  if(ev&&!(ev.kind==='autonomous'&&ev.unresolved)){
   $('drawerTitle').textContent=pad(ev.start)+':00 · '+ev.title;
   $('choices').innerHTML='<div class="schedule-action-grid"><button type="button" class="schedule-action-button" id="join"><span>01</span><strong>问他能否一起</strong><i>↗</i></button><button type="button" class="schedule-action-button" id="move"><span>02</span><strong>商量调整时间</strong><i>↗</i></button><button type="button" class="schedule-action-button" id="remove" '+(['routine','sleep','work'].includes(ev.kind)?'disabled':'')+'><span>03</span><strong>'+(['routine','sleep','work'].includes(ev.kind)?'固定安排':ev.kind==='autonomous'?'重新安排':'让他自己安排')+'</strong><i>↗</i></button><button type="button" class="schedule-action-button schedule-action-back" id="return-existing"><span>04</span><strong>返回日程</strong><i>↗</i></button></div>';
@@ -884,7 +885,7 @@ function kitchenRecipeArtwork(id){
  return '<svg viewBox="0 0 100 100" role="img" aria-label="'+(recipes[id]?.name||'料理')+'" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="48" fill="'+item.bg+'"/><circle cx="50" cy="50" r="42" fill="#ffffff" opacity=".22"/>'+item.svg+'</svg>';
 }
 function openKitchenPanel(){
- $('drawer').classList.remove('furniture-drawer','shop-drawer','profile-expanded');
+ $('drawer').classList.remove('exchange-drawer','furniture-drawer','shop-drawer','profile-expanded');
  $('drawer').querySelector('.furniture-close')?.remove();
  kitchenOpen();
  const cards=Object.entries(recipes).filter(([id])=>(s.unlockedRecipes||[]).includes(id)).map(([id,recipe])=>{
@@ -1210,7 +1211,7 @@ buyIngredient=function(id,label,cost){
 function eventChoices(e){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
  if(e.type!=='bill')return eventChoicesLegacy(e);
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices compact-action-view';$('drawerTitle').textContent=e.title;
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices compact-action-view';$('drawerTitle').textContent=e.title;
  $('choices').innerHTML='<div class="calendar-note">'+e.detail+'</div><div class="calendar-actions"><button id="paybill">从共同账户支付 ¥80</button><button id="delaybill">暂时记账</button></div>';
  $('paybill').onclick=()=>{
   if(s.money>=80){s.money-=80;s.unpaidBill=Math.max(0,(s.unpaidBill||0)-80);moneyRecord('shared','expense',80,'水电与日常开销');say('共同账户已经支付本周开销。')}
@@ -1348,7 +1349,7 @@ function generateDailyEvents(){
 }
 const oldEventChoicesForGoals=eventChoices;
 eventChoices=function(e){
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('choices').className='choices';
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices';
  if(e.type==='shared-goal-proposal'){
    const g=sharedGoalCatalog().find(x=>x.id===e.goalId);
    if(!g){completeEvent(e,'计划已过期');save();renderEvents();return}
@@ -1377,7 +1378,7 @@ eventChoices=function(e){
 };
 function showCollection(){
  const log=(s.moneyLog||[]).slice(0,8).map(x=>'<p>'+new Date(x.at).toLocaleDateString('zh-CN')+' · '+(x.account==='shared'?'共同账户':'阿尔个人账户')+' · '+(x.kind==='income'?'+':'−')+'¥'+x.amount+' · '+x.note+'</p>').join('')||'<p>暂时没有账户记录。</p>';
- $('drawer').classList.remove('shop-drawer','profile-expanded');$('drawerTitle').textContent='账户';$('choices').className='choices account-view';
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('drawerTitle').textContent='账户';$('choices').className='choices account-view';
  $('choices').innerHTML=
   '<section class="account-balance"><div><span>SHARED ACCOUNT</span><h2>¥'+s.money+'</h2></div><div class="account-symbol">¥</div><small>未付共同开销 ¥'+(s.unpaidBill||0)+'</small></section>'+
   '<section class="account-personal"><div class="section-kicker">ARDAY · PERSONAL</div><h3>阿尔的个人账户</h3><strong>¥'+s.personalMoney+'</strong></section>'+
@@ -1523,7 +1524,7 @@ function showRecruitment(tab){
  $('choices').querySelectorAll('[data-check-invite]').forEach(b=>b.onclick=()=>{const c=recruitmentCandidates.find(x=>x.id===b.dataset.checkInvite),inv=recruitmentInvites[c?.id];if(!c||!inv||inv.status!=='pending')return;if(s.teamRoster.length>=8){inv.status='declined';inv.reply='队伍名额已经满了，我暂时没法加入。';toast(c.name+'：'+inv.reply)}else if(Math.random()<c.acceptance){inv.status='accepted';if(!s.teamRoster.some(m=>m.id===c.id)&&s.teamRoster.length<8)s.teamRoster.push({id:c.id,name:c.name,role:c.role,combat:c.combat,malice:c.malice,maxTier:c.maxTier,selected:false,recruited:true,portrait:c.portrait});save();addEvent('队友确认加入',c.name+'接受了你的组队邀请。','long');toast(c.name+'：好，我有时间，可以一起行动。')}else{inv.status='declined';inv.reply=['抱歉，这几天有别的安排，抽不开身。','今天临时有事，恐怕去不了了。','我现在接了别的委托，暂时没法组队。','最近状态不太好，想先休息一阵。'][Math.floor(Math.random()*4)];toast(c.name+'：'+inv.reply)}inv.repliedAt=Date.now();showRecruitment('personal')});
 }
 function resumeDungeonMission(){if(!s.activeDungeon)return;$('drawer').classList.add('open');if(settleDungeonIfDue(Date.now()))return;showDungeonPending()}
-function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();commissionSystem.record('dungeon-open');if(s.activeDungeon&&settleDungeonIfDue(Date.now()))return;$('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='组队';$('choices').className='choices party-view';refreshDungeonUnlocks();
+function showDungeon(){window.ArdayDungeonBoardRuntime?.pauseBoard?.();commissionSystem.record('dungeon-open');if(s.activeDungeon&&settleDungeonIfDue(Date.now()))return;$('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='组队';$('choices').className='choices party-view';refreshDungeonUnlocks();
  const tierScenes={F:'forest',E:'fog',D:'crypt',C:'ember',B:'wild',A:'moon',S:'storm',SS:'abyss',SSS:'eclipse'},active=s.activeDungeon;
  const tiers=DUNGEON_TIERS.map((tier,index)=>{const unlocked=dungeonUnlocked(tier),clears=Number(s.dungeonProgress[tier])||0,next=index<DUNGEON_TIERS.length-1?DUNGEON_CLEAR_REQUIREMENTS[DUNGEON_TIERS[index+1]]:null,progress=next?Math.min(1,clears/next):unlocked?1:0;return '<button class="guild-gate '+(unlocked?'available':'sealed')+' scene-'+tierScenes[tier]+'" data-instance-tier="'+tier+'" '+(unlocked&&!active?'':'disabled')+'><span class="guild-gate-scene"><i class="gate-orb"></i><i class="gate-spire"></i><i class="gate-ground"></i></span><span class="guild-gate-code">'+tier+'</span><span class="guild-gate-state">'+(active?'进行中':unlocked?'可进入':'未解锁')+'</span><span class="guild-gate-progress"><i style="width:'+(progress*100)+'%"></i></span></button>'}).join('');
  const members=s.teamRoster.slice(0,8).map((m,index)=>'<article class="guild-member-card"><button class="guild-member '+(m.selected?'is-selected':'')+'" data-member="'+m.id+'"><span class="guild-member-art tone-'+(index%4)+'"><i class="member-hair"></i><i class="member-face"></i><i class="member-neck"></i><i class="member-shoulders"></i><i class="member-cloak"></i><i class="member-light"></i></span><span class="guild-member-info"><strong>'+m.name+'</strong><small>最高副本 '+(m.maxTier||'F')+'</small><span class="guild-member-stats"><b>战力 '+m.combat+'</b></span><span class="guild-member-meter"><i style="width:'+Math.max(0,Math.min(100,m.combat))+'%"></i></span></span><span class="guild-member-check">'+(m.selected?'✓':'＋')+'</span></button><button class="guild-member-remove" data-remove-member="'+m.id+'" aria-label="移除队友">×</button></article>').join('');
@@ -1637,7 +1638,7 @@ function maybeMeetElite(tier,at){
  return contact;
 }
 function showRanking(){
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');
  $('drawerTitle').textContent='积分排行榜';$('choices').className='choices infinite-view ranking-view';
  const board=getLeaderboard(),entries=[...new Map([...board.topTen,...board.neighbors].map(x=>[x.id,x])).values()].sort((a,b)=>board.all.indexOf(a)-board.all.indexOf(b));
  const podium=entries.slice(0,3).map(entry=>{const index=board.all.indexOf(entry);return '<article class="leader-podium leader-place-'+(index+1)+(entry.isPlayer?' is-player':'')+'"><div class="leader-podium-crown">'+(index===0?'✦':index===1?'✧':'◇')+'</div><div class="leader-podium-avatar '+(entry.isPlayer?'leader-avatar-arday':'')+'">'+(entry.isPlayer?'<strong>A</strong>':'<i></i><b></b>')+'</div><strong>'+entry.name+(entry.isPlayer?'<small>ARDAY</small>':'')+'</strong><span class="leader-podium-score">'+entry.points.toLocaleString('zh-CN')+'</span><em>积分</em><div class="leader-podium-step"><b>'+(index+1)+'</b></div></article>'}).join('');
@@ -1667,7 +1668,7 @@ function purchaseDungeonExchangeItem(id){
 }
 function showExchange(activeType='all',searchTerm=''){
  closeCalendar();
- $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');
  $('drawer').classList.add('exchange-drawer');
  $('drawerTitle').textContent='兑换区';
  $('choices').className='choices exchange-view';
@@ -1701,7 +1702,7 @@ function showGoals(tab='personal'){
   ensurePersonalGoal();
   const active=['commission','personal','shared'].includes(tab)?tab:'personal';
   const nav=active==='commission'?'':'<nav class="commission-tabs goal-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人目标 <i>'+s.personalGoals.length+'/2</i></button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同目标 <i>'+s.sharedGoals.length+'/2</i></button></nav>';
-  $('drawer').classList.remove('shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent=active==='commission'?'委托':'目标';$('choices').className='choices commission-view';
+  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent=active==='commission'?'委托':'目标';$('choices').className='choices commission-view';
   let content='';
   if(active==='commission'){
    const board=commissionSystem.getBoard(),claimed=board.tasks.filter(task=>task.claimed).length;
