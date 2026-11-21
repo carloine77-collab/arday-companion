@@ -50,104 +50,52 @@ window.ArdayFurnitureModels = (() => {
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>{};
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
    if(modelName==='床'){
+
     action=()=>openFurnitureActions('bed',id);
-    const isWood=variant==='浅橡木框架',isSoft=variant==='奶油软包',isDouble=name==='双人床';
-    width=isDouble?3.72:3.12;depth=3.48;height=isSoft?1.72:isDouble?1.62:1.42;
-    const oak=mat(0xb98b5d,.58),oakDark=mat(0x765239,.62),upholstery=mat(isSoft?0xe6d9c8:isDouble?0xc9c0b4:0xcfc4b6,.98),duvetMat=mat(isSoft?0xe9e0d3:isDouble?0xd8d0c4:0xd9d0c5,.98),piping=mat(isWood?0x98734f:0xa9957d,.88),shadow=mat(0x887d70,.96);
-    applyPainterMap(oak,woodMap,.012);applyPainterMap(oakDark,woodMap,.012);applyPainterMap(upholstery,fabricMap,.025);applyPainterMap(duvetMat,fabricMap,.022);
+    const isWood=variant==='浅橡木框架',isSoft=variant==='奶油软包',isDouble=name==='双人床',isFabric=name==='布艺床';
+    width=isDouble?3.72:3.12;depth=3.48;height=isSoft?1.72:isDouble?1.62:1.5;
+    const oak=mat(0xb98b5d,.58),oakDark=mat(0x765239,.62),upholstery=mat(isSoft?0xe6d9c8:isDouble?0xc9c0b4:isFabric?0xb9a99a:0xcfc4b6,.98),duvet=mat(isSoft?0xe9e0d3:isDouble?0xd8d0c4:isFabric?0xd6c8b8:0xd9d0c5,.98),piping=mat(isWood?0x98734f:0xa9957d,.88),shadow=mat(0x887d70,.96);
+    applyPainterMap(oak,woodMap,.012);applyPainterMap(oakDark,woodMap,.012);applyPainterMap(upholstery,fabricMap,.025);applyPainterMap(duvet,fabricMap,.022);
     const cushion=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,30,20),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
-    const pillow=(x,y,z,w,d,material,tilt=0)=>{const o=cushion(x,y,z,w*.5,.095,d*.5,material);o.rotation.z=tilt;const pts=[];for(let i=0;i<16;i++){const a=i*Math.PI*2/16;pts.push(new T.Vector3(x+Math.cos(a)*w*.46,y+.055,z+Math.sin(a)*d*.46))}const seam=new T.CatmullRomCurve3(pts,true,'catmullrom',.35);group.add(new T.Mesh(new T.TubeGeometry(seam,40,.006,6,true),piping));const crease=new T.CatmullRomCurve3([new T.Vector3(x-w*.22,y+.082,z),new T.Vector3(x-w*.1,y+.105,z-.015),new T.Vector3(x+w*.08,y+.105,z-.015),new T.Vector3(x+w*.22,y+.082,z)]);group.add(new T.Mesh(new T.TubeGeometry(crease,16,.004,5,false),shadow));return o};
-    const linenPillow=mat(0xf1e9dd,.98),bluePillow=mat(0xaebfc0,.98),oatPillow=mat(0xc7b69e,.98);
-    const foot=(x,z,material,height=.25)=>{const o=new T.Mesh(new T.CylinderGeometry(.065,.045,height,12),material);o.position.set(x,height/2,z);o.rotation.z=x*.035;group.add(o);o.castShadow=true;return o};
+    const pillow=(x,y,z,w,d,material,tilt=0)=>{const o=cushion(x,y,z,w*.5,.095,d*.5,material);o.rotation.z=tilt;const pts=[];for(let i=0;i<16;i++){const a=i*Math.PI*2/16;pts.push(new T.Vector3(x+Math.cos(a)*w*.46,y+.055,z+Math.sin(a)*d*.46))}group.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts,true),40,.006,6,true),piping));return o};
+    const linen=mat(0xf1e9dd,.98),blue=mat(0xaebfc0,.98),oat=mat(0xc7b69e,.98),throwMat=mat(0x8f9c98,.98);
+    const foot=(x,z,material,h=.25)=>{const o=new T.Mesh(new T.CylinderGeometry(.065,.045,h,12),material);o.position.set(x,h/2,z);group.add(o);o.castShadow=true};
     if(isSoft){
-     // Upholstered bed: continuous padded surround, tall segmented headboard and soft rounded corners.
-     width=3.12;depth=3.48;height=1.72;
-     box(0,.25,0,2.94,.38,3.18,upholstery);
-     box(0,.48,.02,2.78,.22,2.96,shadow);
-     box(0,.64,.02,2.82,.28,2.98,duvetMat);
-     box(0,1.18,-1.58,3.08,1.12,.24,upholstery);
-     box(0,1.17,-1.435,2.84,.88,.08,duvetMat);
-     for(const x of [-.94,-.47,0,.47,.94]){
-      const panel=cushion(x,1.19,-1.38,.225,.39,.075,upholstery);
-      panel.rotation.z=x*.018;
-      const seamLine=box(x,1.17,-1.294,.012,.72,.012,piping);
-     }
-     for(const x of [-1.42,1.42]){cushion(x,.54,-.02,.12,.22,1.48,upholstery);cushion(x,.7,-.02,.14,.08,1.36,duvetMat)}
-     box(0,.79,.42,2.55,.14,1.82,duvetMat);
-     pillow(-.64,.94,-.91,.62,.38,linenPillow,-.08);
-     pillow(.64,.94,-.91,.56,.34,bluePillow,.1);
-     box(0,.89,1.02,2.52,.12,.46,oatPillow);
-     for(const x of [-.82,-.41,0,.41,.82])box(x,.958,1.02,.012,.012,.38,piping);
-     box(0,.87,.91,2.54,.16,.38,upholstery);
-     for(const x of [-1.2,1.2])for(const z of [-1.35,1.35])foot(x,z,shadow,.12);
-     for(const x of [-1.38,1.38])box(x,.25,0,.045,.3,2.75,piping);
+     width=3.12;height=1.72;box(0,.25,0,2.94,.38,3.18,upholstery);box(0,.48,.02,2.78,.22,2.96,shadow);box(0,.64,.02,2.82,.28,2.98,duvet);
+     box(0,1.18,-1.58,3.08,1.12,.24,upholstery);box(0,1.17,-1.435,2.84,.88,.08,duvet);
+     for(const x of [-.94,-.47,0,.47,.94]){cushion(x,1.19,-1.38,.225,.39,.075,upholstery);box(x,1.17,-1.294,.012,.72,.012,piping)}
+     for(const x of [-1.42,1.42]){cushion(x,.54,-.02,.12,.22,1.48,upholstery);cushion(x,.7,-.02,.14,.08,1.36,duvet)}
+     box(0,.79,.42,2.55,.14,1.82,duvet);pillow(-.64,.94,-.91,.62,.38,linen,-.08);pillow(.64,.94,-.91,.56,.34,blue,.1);box(0,.89,1.02,2.52,.12,.46,oat);
+     for(const x of [-.82,-.41,0,.41,.82])box(x,.958,1.02,.012,.012,.38,piping);for(const x of [-1.2,1.2])for(const z of [-1.35,1.35])foot(x,z,shadow,.12);
     }else if(isWood){
-     // Solid oak frame: visible timber rails, open slatted headboard and low matching footboard.
-     width=3.12;depth=3.48;height=1.42;
-     box(0,.28,0,2.92,.2,3.18,oak);
-     box(0,.42,0,2.78,.14,3.0,oakDark);
-     box(0,.57,.02,2.78,.18,2.96,duvetMat);
-     for(const x of [-1.38,1.38]){
-      box(x,.38,0,.16,.48,3.18,oak);
-      box(x,.17,0,.14,.34,.14,oakDark);
-     }
-     box(0,.48,1.52,2.96,.42,.16,oak);
-     box(0,.68,1.52,2.76,.06,.05,oakDark);
-     box(0,1.1,-1.58,2.98,.98,.16,oak);
-     box(0,1.57,-1.58,3.04,.12,.2,oakDark);
-     for(let x=-1.34;x<=1.341;x+=.19){
-      box(x,1.1,-1.56,.085,.78,.095,oak);
-      box(x,1.1,-1.49,.025,.68,.018,oakDark);
-     }
-     for(const x of [-1.38,1.38])foot(x,-1.48,oakDark,.42);
-     for(const x of [-1.38,1.38])foot(x,1.48,oakDark,.42);
-     box(0,.73,.38,2.54,.12,1.72,duvetMat);
-     box(0,.83,1.12,2.52,.18,.36,upholstery);
-     pillow(-.65,.94,-.91,.56,.34,linenPillow,-.04);
-     pillow(.65,.94,-.91,.48,.3,oatPillow,.08);
-     for(const x of [-.82,-.41,0,.41,.82])box(x,.82,.96,.012,.012,.34,piping);
-     box(0,.86,1.04,2.48,.09,.38,mat(0x8f9c98,.98));
-     for(const x of [-.95,-.63,-.31,.31,.63,.95])box(x,.91,1.04,.012,.012,.31,linenPillow);
-     for(const x of [-1.12,1.12])box(x,.76,.32,.025,.018,1.52,piping);
+     width=3.12;height=1.42;box(0,.28,0,2.92,.2,3.18,oak);box(0,.42,0,2.78,.14,3,oakDark);box(0,.57,.02,2.78,.18,2.96,duvet);
+     for(const x of [-1.38,1.38]){box(x,.38,0,.16,.48,3.18,oak);box(x,.17,0,.14,.34,.14,oakDark)}
+     box(0,.48,1.52,2.96,.42,.16,oak);box(0,1.1,-1.58,2.98,.98,.16,oak);box(0,1.57,-1.58,3.04,.12,.2,oakDark);
+     for(let x=-1.34;x<=1.341;x+=.19){box(x,1.1,-1.56,.085,.78,.095,oak);box(x,1.1,-1.49,.025,.68,.018,oakDark)}
+     for(const x of [-1.38,1.38]){foot(x,-1.48,oakDark,.42);foot(x,1.48,oakDark,.42)}
+     box(0,.73,.38,2.54,.12,1.72,duvet);pillow(-.65,.94,-.91,.56,.34,linen,-.04);pillow(.65,.94,-.91,.48,.3,oat,.08);box(0,.85,1.05,2.5,.09,.4,throwMat);
+     for(const x of [-.82,-.41,0,.41,.82])box(x,.9,1.05,.012,.012,.34,piping);
     }else if(isDouble){
-     // Double bed: wider wingback headboard, two independent sleeping places and a central upholstered seam.
-     width=3.72;depth=3.48;height=1.62;
-     box(0,.26,0,3.54,.22,3.2,oakDark);
-     box(0,.45,0,3.42,.18,3.12,upholstery);
-     box(0,.62,.04,3.34,.2,3.0,duvetMat);
-     box(0,1.02,-1.58,3.62,1.08,.2,oakDark);
-     box(0,1.02,-1.45,3.48,.96,.12,upholstery);
-     for(const x of [-1.56,1.56]){
-      const wing=cushion(x,1.05,-1.35,.22,.58,.31,upholstery);wing.rotation.y=x<0?-.16:.16;
-      box(x,.5,0,.12,.72,3.02,oak);
-     }
-     box(0,1.52,-1.55,3.62,.12,.24,oak);
-     for(const x of [-1.08,-.54,0,.54,1.08]){const channel=box(x,1.04,-1.372,.018,.78,.018,piping)}
-     for(const x of [-.82,.82]){
-      pillow(x,.94,-.91,.72,.4,x<0?linenPillow:bluePillow,x<0?-.06:.06);
-      box(x,.79,.48,1.48,.13,1.92,duvetMat);
-      for(const z of [-.28,.18,.62,1.06])box(x,.862,z,.62,.012,.012,piping);
-     }
-     box(0,.79,.53,.055,.16,1.82,piping);
-     box(0,.72,1.42,2.94,.18,.42,upholstery);
-     for(const x of [-1.55,1.55])for(const z of [-1.42,1.42])foot(x,z,oakDark,.22);
-     for(const x of [-1.2,1.2])box(x,.9,.72,.018,.012,1.24,piping);
+     width=3.72;height=1.62;box(0,.26,0,3.54,.22,3.2,oakDark);box(0,.45,0,3.42,.18,3.12,upholstery);box(0,.62,.04,3.34,.2,3,duvet);
+     box(0,1.02,-1.58,3.62,1.08,.2,oakDark);box(0,1.02,-1.45,3.48,.96,.12,upholstery);
+     for(const x of [-1.56,1.56]){const wing=cushion(x,1.05,-1.35,.22,.58,.31,upholstery);wing.rotation.y=x<0?-.16:.16;box(x,.5,0,.12,.72,3.02,oak)}
+     box(0,1.52,-1.55,3.62,.12,.24,oak);for(const x of [-1.08,-.54,0,.54,1.08])box(x,1.04,-1.372,.018,.78,.018,piping);
+     for(const x of [-.82,.82]){pillow(x,.94,-.91,.72,.4,x<0?linen:blue,x<0?-.06:.06);box(x,.79,.48,1.48,.13,1.92,duvet);for(const z of [-.28,.18,.62,1.06])box(x,.862,z,.62,.012,.012,piping)}
+     box(0,.79,.53,.055,.16,1.82,piping);box(0,.72,1.42,2.94,.18,.42,upholstery);for(const x of [-1.55,1.55])for(const z of [-1.42,1.42])foot(x,z,oakDark,.22);
+    }else if(isFabric){
+     // Upholstered sleigh bed with a bowed head and foot rail, tufted back and quilted runner.
+     width=3.12;height=1.58;box(0,.3,0,2.9,.3,3.1,upholstery);box(0,.53,0,2.72,.2,2.96,shadow);box(0,.67,.02,2.72,.18,2.92,duvet);
+     const head=new T.CatmullRomCurve3([new T.Vector3(-1.38,.42,-1.55),new T.Vector3(-1.3,1.2,-1.62),new T.Vector3(-.8,1.42,-1.65),new T.Vector3(0,1.48,-1.65),new T.Vector3(.8,1.42,-1.65),new T.Vector3(1.3,1.2,-1.62),new T.Vector3(1.38,.42,-1.55)]);group.add(new T.Mesh(new T.TubeGeometry(head,56,.12,16,false),upholstery));
+     const footboard=new T.CatmullRomCurve3([new T.Vector3(-1.36,.38,1.45),new T.Vector3(-1.1,.72,1.58),new T.Vector3(0,.82,1.62),new T.Vector3(1.1,.72,1.58),new T.Vector3(1.36,.38,1.45)]);group.add(new T.Mesh(new T.TubeGeometry(footboard,48,.09,14,false),upholstery));
+     for(let i=0;i<7;i++){const x=-1.08+i*.36;sphere(x,1.31,-1.56,.035,.035,.025,m.gold);const tuft=new T.CatmullRomCurve3([new T.Vector3(x-.1,1.22,-1.56),new T.Vector3(x,1.17,-1.55),new T.Vector3(x+.1,1.22,-1.56)]);group.add(new T.Mesh(new T.TubeGeometry(tuft,12,.008,5,false),piping))}
+     box(0,.78,.35,2.46,.16,1.88,duvet);pillow(-.64,.94,-.96,.64,.42,linen,-.1);pillow(.64,.94,-.96,.58,.38,oat,.08);box(0,.88,1.05,2.48,.07,.42,throwMat);
+     for(const x of [-1.18,1.18])for(const z of [-1.38,1.38])foot(x,z,oakDark,.2);
     }else{
-     // Classic single bed, retained as a distinct simple upholstered frame.
-     width=3.12;depth=3.48;height=1.42;
-     box(0,.28,0,2.92,.2,3.18,oakDark);
-     box(0,.49,.02,2.78,.22,3.0,duvetMat);
-     box(0,.96,-1.58,2.98,.88,.18,oakDark);
-     box(0,.96,-1.46,2.82,.72,.08,upholstery);
-     for(const x of [-1.2,1.2])foot(x,-1.42,oakDark,.28);
-     for(const x of [-1.2,1.2])foot(x,1.42,oakDark,.28);
-     box(0,.72,.48,2.54,.13,1.82,duvetMat);
-     pillow(-.64,.9,-.91,.58,.34,linenPillow,-.08);
-     pillow(.64,.9,-.91,.5,.32,oatPillow,.08);
-     box(0,.84,1.02,2.5,.1,.42,mat(0xb1a08d,.98));
-     for(const x of [-1,-.66,-.33,0,.33,.66,1])box(x,.9,1.02,.012,.012,.36,mat(0x806b59,.88));
-     box(0,.78,1.38,2.5,.14,.38,upholstery);
+     width=3.12;height=1.42;box(0,.28,0,2.92,.2,3.18,oakDark);box(0,.49,.02,2.78,.22,3,duvet);box(0,.96,-1.58,2.98,.88,.18,oakDark);box(0,.96,-1.46,2.82,.72,.08,upholstery);
+     for(const x of [-1.2,1.2]){foot(x,-1.42,oakDark,.28);foot(x,1.42,oakDark,.28)}
+     box(0,.72,.48,2.54,.13,1.82,duvet);pillow(-.64,.9,-.91,.58,.34,linen,-.08);pillow(.64,.9,-.91,.5,.32,oat,.08);box(0,.84,1.02,2.5,.1,.42,throwMat);
     }
+
    }else if(modelName==='床头柜'){
     const woven=variant==='藤编抽屉';width=.88;depth=.78;height=.92;
     if(woven){
@@ -535,26 +483,26 @@ window.ArdayFurnitureModels = (() => {
      if(panel<2)cyl(x+.405,1.02,.02,.035,.035,1.86,m.gold);
     }
    }else if(modelName==='棕榈树绿植'){
+
     if(variant==='龟背竹'){
-     width=1.42;depth=1.28;height=2.15;const potMat=mat(0x9b6b54,.42),leafMat=mat(0x356d4a,.88),leafLight=mat(0x6f9b65,.9),veinMat=mat(0xa8b77c,.9);
-     const pot=new T.Mesh(new T.CylinderGeometry(.28,.38,.48,28),potMat);pot.position.y=.25;group.add(pot);cyl(0,.5,0,.34,.34,.06,m.gold,24);
-     const stem=new T.CatmullRomCurve3([new T.Vector3(0,.5,0),new T.Vector3(.02,.92,0),new T.Vector3(-.04,1.35,0)]);group.add(new T.Mesh(new T.TubeGeometry(stem,24,.035,10,false),m.wood));
-     for(let i=0;i<7;i++){
-      const a=i*Math.PI*2/7,dx=Math.cos(a),dz=Math.sin(a),h=.92+(i%3)*.17,petiole=new T.CatmullRomCurve3([new T.Vector3(0,.86+(i%2)*.12,0),new T.Vector3(dx*.24,1.05+(i%2)*.14,dz*.24),new T.Vector3(dx*.48,h,dz*.48)]);
-      group.add(new T.Mesh(new T.TubeGeometry(petiole,18,.018,7,false),m.leaf2));
-      const shape=new T.Shape();shape.moveTo(0,0);shape.quadraticCurveTo(-.13,.16,-.27,.23);shape.quadraticCurveTo(-.18,.32,-.28,.43);shape.quadraticCurveTo(-.13,.52,-.17,.64);shape.quadraticCurveTo(0,.82,.17,.64);shape.quadraticCurveTo(.13,.52,.28,.43);shape.quadraticCurveTo(.18,.32,.27,.23);shape.quadraticCurveTo(.13,.16,0,0);
-      for(const [hx,hy] of [[-.09,.42],[.09,.42],[-.065,.57],[.065,.57]]){const hole=new T.Path();hole.absellipse(hx,hy,.025,.045,0,Math.PI*2,true);shape.holes.push(hole)}
-      const leafGroup=new T.Group();leafGroup.position.set(dx*.46,h,dz*.46);leafGroup.rotation.set(-.5,a,0);group.add(leafGroup);
-      const leaf=new T.Mesh(new T.ShapeGeometry(shape,18),i%2?leafMat:leafLight);leaf.material.side=T.DoubleSide;leafGroup.add(leaf);
-      const vein=new T.CatmullRomCurve3([new T.Vector3(0,.03,.012),new T.Vector3(0,.25,.012),new T.Vector3(0,.5,.012),new T.Vector3(0,.78,.012)]);leafGroup.add(new T.Mesh(new T.TubeGeometry(vein,18,.008,5,false),veinMat));
+     width=1.55;depth=1.4;height=2.2;const potMat=mat(0x9b6b54,.42),leafDark=mat(0x28583c,.88),leafLight=mat(0x5f8b52,.9),vein=mat(0xa5b77d,.9);
+     const pot=new T.Mesh(new T.CylinderGeometry(.29,.4,.5,32),potMat);pot.position.y=.25;group.add(pot);cyl(0,.51,0,.35,.35,.06,m.gold,24);const soil=new T.Mesh(new T.CircleGeometry(.31,32),mat(0x342a20,.96));soil.rotation.x=-Math.PI/2;soil.position.y=.54;group.add(soil);
+     const stem=new T.CatmullRomCurve3([new T.Vector3(0,.52,0),new T.Vector3(.02,.9,0),new T.Vector3(-.04,1.38,0)]);group.add(new T.Mesh(new T.TubeGeometry(stem,24,.035,10,false),m.wood));
+     for(let i=0;i<8;i++){
+      const a=i*Math.PI*2/8,dx=Math.cos(a),dz=Math.sin(a),h=1.12+(i%3)*.19,petiole=new T.CatmullRomCurve3([new T.Vector3(0,.86+(i%2)*.1,0),new T.Vector3(dx*.25,1.06+(i%2)*.12,dz*.25),new T.Vector3(dx*.5,h,dz*.5)]);group.add(new T.Mesh(new T.TubeGeometry(petiole,18,.018,7,false),m.leaf2));
+      const shape=new T.Shape();shape.moveTo(0,0);shape.quadraticCurveTo(-.18,.12,-.28,.26);shape.quadraticCurveTo(-.17,.32,-.29,.43);shape.quadraticCurveTo(-.18,.55,-.16,.68);shape.quadraticCurveTo(0,.9,.16,.68);shape.quadraticCurveTo(.18,.55,.29,.43);shape.quadraticCurveTo(.17,.32,.28,.26);shape.quadraticCurveTo(.18,.12,0,0);
+      for(const [hx,hy,rx,ry] of [[-.09,.43,.032,.055],[.09,.43,.032,.055],[-.07,.61,.028,.05],[.07,.61,.028,.05]]){const hole=new T.Path();hole.absellipse(hx,hy,rx,ry,0,Math.PI*2,true);shape.holes.push(hole)}
+      const leafGroup=new T.Group();leafGroup.position.set(dx*.48,h,dz*.48);leafGroup.rotation.set(-.52,a,0);group.add(leafGroup);const leaf=new T.Mesh(new T.ShapeGeometry(shape,24),i%2?leafDark:leafLight);leaf.material.side=T.DoubleSide;leafGroup.add(leaf);
+      const veinCurve=new T.CatmullRomCurve3([new T.Vector3(0,.02,.014),new T.Vector3(0,.24,.014),new T.Vector3(0,.5,.014),new T.Vector3(0,.86,.014)]);leafGroup.add(new T.Mesh(new T.TubeGeometry(veinCurve,20,.009,5,false),vein));
+      for(const side of [-1,1])for(let n=1;n<4;n++){const y=n*.18,branch=new T.CatmullRomCurve3([new T.Vector3(0,y,.014),new T.Vector3(side*.08,y+.035,.014),new T.Vector3(side*.14,y+.08,.014)]);leafGroup.add(new T.Mesh(new T.TubeGeometry(branch,8,.004,4,false),vein))}
      }
-     const newLeaf=sphere(.03,1.58,-.02,.1,.2,.08,leafLight);newLeaf.rotation.z=-.25;
+     for(let i=0;i<4;i++){const a=i*1.57,shoot=new T.CatmullRomCurve3([new T.Vector3(0,.65,0),new T.Vector3(Math.cos(a)*.12,1.1,Math.sin(a)*.12),new T.Vector3(Math.cos(a)*.2,1.45,Math.sin(a)*.2)]);group.add(new T.Mesh(new T.TubeGeometry(shoot,18,.012,6,false),m.leaf2))}
     }else{
      width=1.05;depth=1.05;height=2.3;const pot=new T.Mesh(new T.CylinderGeometry(.23,.34,.48,24,1),m.clay);pot.position.y=.25;group.add(pot);cyl(0,.5,0,.31,.31,.055,m.gold,24);cyl(0,1.16,0,.055,.075,1.28,m.wood,14);
-     for(let i=0;i<9;i++){const a=i*Math.PI*2/9,dx=Math.cos(a),dz=Math.sin(a),curve=new T.CatmullRomCurve3([new T.Vector3(0,1.7,0),new T.Vector3(dx*.24,2.05,dz*.24),new T.Vector3(dx*.52,1.98,dz*.52),new T.Vector3(dx*.72,1.72,dz*.72)]);group.add(new T.Mesh(new T.TubeGeometry(curve,14,.018,6,false),m.leaf2));for(let n=1;n<=5;n++){const t=n/6,p=curve.getPoint(t);for(const side of [-1,1]){const leaflet=sphere(p.x-dz*side*.095,p.y-.025,p.z+dx*side*.095,.11,.025,.045,(n+i)%2?m.leaf:m.leaf2);leaflet.rotation.y=a;leaflet.rotation.z=side*.35}}}
+     for(let i=0;i<9;i++){const a=i*Math.PI*2/9,dx=Math.cos(a),dz=Math.sin(a),curve=new T.CatmullRomCurve3([new T.Vector3(0,1.7,0),new T.Vector3(dx*.24,2.05,dz*.24),new T.Vector3(dx*.52,1.98,dz*.52),new T.Vector3(dx*.72,1.72,dz*.72)]);group.add(new T.Mesh(new T.TubeGeometry(curve,14,.018,6,false),m.leaf2));for(let n=1;n<=5;n++){const p=curve.getPoint(n/6);for(const side of [-1,1]){const leaflet=sphere(p.x-dz*side*.095,p.y-.025,p.z+dx*side*.095,.11,.025,.045,(n+i)%2?m.leaf:m.leaf2);leaflet.rotation.y=a;leaflet.rotation.z=side*.35}}}
      sphere(0,1.77,0,.14,.16,.14,m.leaf);
     }
-   
+
    }else if(modelName==='书架'){
     action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.58;height=2.12;
     const open=variant==='开放格架',woodGrid=variant==='白蜡木开放格';
@@ -804,36 +752,27 @@ window.ArdayFurnitureModels = (() => {
     }
     for(const x of [-.59,.59])box(x,.59,-.12,.035,.9,.035,front);
    }else if(modelName==='梳妆台'){
-    width=1.42;depth=.68;height=1.62;surfaceType='table';surfaceY=.9;
+
+    width=1.52;depth=.7;height=1.78;surfaceType='table';surfaceY=.92;
     if(name==='复古妆台'){
-     const walnut=mat(0x563b2b,.58),trim=mat(0x94704b,.52),ivory=mat(0xe6d7c2,.78);
-     box(0,.86,0,1.48,.12,.66,walnut);box(0,.92,0,1.5,.035,.68,trim);
-     // Three shallow drawers, a shaped apron and cabriole-style legs give the vintage vanity its own silhouette.
+     const walnut=mat(0x563b2b,.58),trim=mat(0x94704b,.52),ivory=mat(0xe6d7c2,.78);box(0,.86,0,1.48,.12,.66,walnut);box(0,.92,0,1.5,.035,.68,trim);
      for(const x of [-.45,0,.45]){box(x,.68,.34,.4,.23,.045,ivory);box(x,.68,.37,.36,.19,.018,walnut);cyl(x,.68,.405,.025,.025,.045,m.gold,12)}
-     const apron=box(0,.48,.04,1.12,.18,.48,walnut);
-     for(const x of [-.58,.58])for(const z of [-.22,.22]){
-      const leg=box(x,.25,z,.075,.48,.075,walnut);leg.rotation.z=x<0?-.12:.12;
-      sphere(x*1.08,.48,z,.075,.055,.075,trim);
-     }
-     box(0,1.18,-.22,.14,.5,.1,walnut);
-     const frame=new T.Mesh(new T.SphereGeometry(.39,28,20),trim);frame.position.set(0,1.65,-.2);frame.scale.set(1,.82,.12);group.add(frame);
-     const glass=new T.Mesh(new T.SphereGeometry(.34,28,20),mat(0x9eafb0,.2,.16));glass.position.set(0,1.65,-.185);glass.scale.set(1,.82,.1);group.add(glass);
-     for(const x of [-.3,.3])sphere(x,1.98,-.18,.045,.07,.045,m.gold);
-     sphere(0,2.02,-.18,.075,.075,.045,m.gold);
-     width=1.55;height=2.12;
+     for(const x of [-.58,.58])for(const z of [-.22,.22]){const leg=box(x,.25,z,.075,.48,.075,walnut);leg.rotation.z=x<0?-.12:.12;sphere(x*1.08,.48,z,.075,.055,.075,trim)}
+     box(0,.48,.04,1.12,.18,.48,walnut);box(0,1.18,-.22,.14,.5,.1,walnut);
+     const frame=new T.Mesh(new T.SphereGeometry(.39,28,20),trim);frame.position.set(0,1.65,-.2);frame.scale.set(1,.82,.12);group.add(frame);const mirror=new T.Mesh(new T.SphereGeometry(.34,28,20),mat(0x9eafb0,.2,.16));mirror.position.set(0,1.65,-.185);mirror.scale.set(1,.82,.1);group.add(mirror);
+     for(const x of [-.3,.3])sphere(x,1.98,-.18,.045,.07,.045,m.gold);sphere(0,2.02,-.18,.075,.075,.045,m.gold);width=1.55;height=2.12;
     }else{
-     const top=mat(0xd9c7ae,.62),body=mat(0xe8ddcc,.8);
-     box(0,.84,0,1.38,.1,.62,top);
-     box(0,.66,.25,.76,.24,.035,body);box(0,.66,.28,.68,.19,.018,m.cream);
-     cyl(0,.66,.31,.025,.025,.045,m.gold,12);
-     for(const x of [-.56,.56]){
-      const leg=box(x,.4,0,.075,.72,.075,m.wood);leg.rotation.z=x*.045;
-      box(x,.4,.28,.16,.28,.035,body);
-     }
-     box(0,1.4,-.23,.08,.92,.08,m.wood);
-     const mirrorFrame=new T.Mesh(new T.SphereGeometry(.32,28,20),m.oak);mirrorFrame.position.set(0,1.62,-.23);mirrorFrame.scale.set(1,.82,.13);group.add(mirrorFrame);
-     const mirror=new T.Mesh(new T.SphereGeometry(.28,28,20),mat(0x9eafb0,.2,.16));mirror.position.set(0,1.62,-.205);mirror.scale.set(1,.82,.1);group.add(mirror);
+     // Floating contemporary vanity: offset rectangular LED mirror, suspended drawer and steel trestle.
+     const porcelain=mat(0xe7dfd2,.34),oak=mat(0xc2a078,.62),steel=mat(0x6f7779,.3,.72),mirrorMat=mat(0xaec0c1,.14,.18);
+     box(0,.94,0,1.42,.1,.62,porcelain);box(0,.78,.24,1.22,.26,.045,oak);box(0,.78,.27,1.14,.2,.018,mat(0xe2d3be,.8));
+     for(const x of [-.43,.43]){box(x,.78,.3,.025,.025,.018,steel);cyl(x,.78,.34,.018,.018,.025,m.gold,10)}
+     for(const x of [-.56,.56]){const leg=box(x,.4,0,.035,.78,.035,steel);leg.rotation.z=x*.09;box(x,.06,.04,.12,.035,.3,steel)}
+     box(0,.2,0,1.08,.025,.035,steel);const frame=new T.Mesh(new T.BoxGeometry(.72,1.08,.075),oak);frame.position.set(.16,1.55,-.24);group.add(frame);const mirror=new T.Mesh(new T.BoxGeometry(.64,1,.025),mirrorMat);mirror.position.set(.16,1.55,-.19);group.add(mirror);
+     const halo=new T.Mesh(new T.TorusGeometry(.38,.018,8,48),mat(0xe6d8b8,.24,.25));halo.position.set(.16,1.55,-.14);group.add(halo);
+     for(const x of [-.48,.78]){box(x,1.25,-.12,.28,.035,.28,oak);const perfume=new T.Mesh(new T.CylinderGeometry(.045,.055,.16,16),mat(0x9b7862,.2,.1));perfume.position.set(x,1.35,-.12);group.add(perfume);cyl(x,1.44,-.12,.025,.025,.035,m.gold,12)}
+     const cup=new T.Mesh(new T.CylinderGeometry(.065,.055,.12,20),porcelain);cup.position.set(-.52,1.08,.02);group.add(cup);
     }
+
    }else if(modelName==='全身镜'){
     width=.92;depth=.3;height=2.12;
     const frame=mat(variant==='黄铜拱形'?0xb89a62:0x77563d,.42,variant==='黄铜拱形'?.62:.08);
