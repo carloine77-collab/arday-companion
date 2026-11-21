@@ -235,16 +235,21 @@ function inventoryOriginalPrice(entity){
  if(entity?.name?.startsWith('成品食物·')){const recipe=Object.values(recipes).find(item=>item.name===entity.name.split('·').slice(1).join('·'));return recipe?Object.entries(recipe.ingredients).reduce((sum,[key,count])=>sum+(ingredientUnitPrices[key]||0)*count,0):0}
  if(entity?.kind==='dungeon-item')return Number(window.ArdayExchangeData?.exchangePrices?.[entity.itemId])||0;
  const exact=entity?.name||'';for(const [label,,id,cost] of shopCatalog['食物食材']||[])if(label.replace(/\s*×\d+$/,'')===exact)return Number(cost)||0;
- for(const groups of Object.values(shopCatalog.furnitureCategories||{}))for(const items of Object.values(groups||{}))for(const [display,,id,cost] of items||[])if(display===exact||furnitureNameById[id]===exact)return Number(cost)||0;return 0;
+ const furnitureItems=Object.values(shopCatalog.furnitureCategories||{}).flatMap(groups=>Object.values(groups||{}).flat());
+ for(const [display,,id,cost] of furnitureItems)if(display===exact||furnitureNameById[id]===exact)return Number(cost)||0;
+ // Older furniture records may store the generated model name (e.g. 地毯·波斯绛红)
+ // rather than the shop's display label (波斯地毯). All catalogued rugs share the same base price.
+ if(exact.includes('地毯')){const rug=furnitureItems.find(([display])=>String(display).includes('地毯'));if(rug)return Number(rug[3])||0}
+ return 0;
 }
 function recycleInventoryItem(index){
  const entity=s.inventory[index];if(!entity)return;const original=inventoryOriginalPrice(entity);if(original<=0){toast('该物品没有可核实的原始价格');return}
  const refund=Math.round(original*.3),name=entity.name,isDungeonItem=entity.kind==='dungeon-item';s.inventory.splice(index,1);
  if(isDungeonItem)s.points=(Number(s.points)||0)+refund;else{s.money=(Number(s.money)||0)+refund;moneyRecord('shared','income',refund,'背包回收：'+name)}
- save();render();openTab('物品',true);toast('已回收 '+name+'，返还 '+(isDungeonItem?refund+' 积分':'¥'+refund));
+ save();render();openTab('物品',true);toast('已回收：'+name);
 }
 function recyclePantryIngredient(key){
- const name=ingredientNames[key],original=ingredientUnitPrices[key];if(!name||!original||pantryCount(key)<=0)return;s.pantry[key]=pantryCount(key)-1;const refund=Math.round(original*.3);s.money=(Number(s.money)||0)+refund;moneyRecord('shared','income',refund,'食材回收：'+name);save();render();openTab('物品',true);toast('已回收 '+name+'，返还 ¥'+refund);
+ const name=ingredientNames[key],original=ingredientUnitPrices[key];if(!name||!original||pantryCount(key)<=0)return;s.pantry[key]=pantryCount(key)-1;const refund=Math.round(original*.3);s.money=(Number(s.money)||0)+refund;moneyRecord('shared','income',refund,'食材回收：'+name);save();render();openTab('物品',true);toast('已回收：'+name);
 }
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
@@ -323,10 +328,11 @@ function openTab(name,force=false){
   s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):item==='点心'?'🥐':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   
+  const navigation=document.createElement('div');navigation.className='inventory-navigation';
   const nav=document.createElement('div');nav.className='inventory-categories';
   ['全部','食物','家具','副本道具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category&&!inventoryRecycleMode?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;inventoryRecycleMode=false;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
-  const recycleTab=document.createElement('button');recycleTab.type='button';recycleTab.className='inventory-category inventory-recycle-tab'+(inventoryRecycleMode?' active':'');recycleTab.textContent='回收';recycleTab.onclick=()=>{inventoryRecycleMode=true;openTab('物品',true)};nav.appendChild(recycleTab);
-  $('choices').appendChild(nav);$('choices').appendChild(inventoryGrid);
+  const recycleTab=document.createElement('button');recycleTab.type='button';recycleTab.className='inventory-recycle-entry'+(inventoryRecycleMode?' active':'');recycleTab.textContent='回收';recycleTab.setAttribute('aria-label','进入回收');recycleTab.onclick=()=>{inventoryRecycleMode=true;openTab('物品',true)};
+  navigation.append(nav,recycleTab);$('choices').appendChild(navigation);$('choices').appendChild(inventoryGrid);$('choices').classList.toggle('is-recycling',inventoryRecycleMode);
   if(inventoryRecycleMode){tabEntries.splice(0,tabEntries.length,...tabEntries.filter(entry=>{const key=entry[2].startsWith('pantry-inventory-')?entry[2].slice('pantry-inventory-'.length):null;const entity=key?null:s.inventory[Number(entry[2].replace(/^(?:use-inventory-|place-owned-)/,''))];return (key?Number(ingredientUnitPrices[key])||0:inventoryOriginalPrice(entity))>0}))}
   const filtered=tabEntries.filter(entry=>inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
@@ -377,8 +383,7 @@ function openTab(name,force=false){
     const entity=pantryKey?null:s.inventory[Number(id.replace(/^(?:use-inventory-|place-owned-)/,''))];
     const original=pantryKey?ingredientUnitPrices[pantryKey]:inventoryOriginalPrice(entity),refund=Math.round((Number(original)||0)*.3),isDungeonItem=entity?.kind==='dungeon-item';
     b.disabled=true;b.classList.add('recycle-preview');
-    const amount=document.createElement('small');amount.className='recycle-value';amount.textContent='原价 '+original+' · 返还 '+(isDungeonItem?refund+' 积分':'¥'+refund);b.appendChild(amount);
-    const recycle=document.createElement('button');recycle.type='button';recycle.className='inventory-recycle-button';recycle.textContent=isDungeonItem?'回收并返还 '+refund+' 积分':'回收并返还 ¥'+refund;
+    const recycle=document.createElement('button');recycle.type='button';recycle.className='inventory-recycle-button';recycle.textContent='回收';
     recycle.onclick=event=>{event.preventDefault();event.stopPropagation();if(pantryKey)recyclePantryIngredient(pantryKey);else recycleInventoryItem(Number(id.replace(/^(?:use-inventory-|place-owned-)/,'')))};
     entry.appendChild(recycle);
    }
