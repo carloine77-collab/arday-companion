@@ -128,7 +128,7 @@ window.ArdayFurnitureModels = (() => {
     if(variant==='玻璃单臂'){
      const curve=new T.CatmullRomCurve3([new T.Vector3(0,-.02,0),new T.Vector3(.12,-.02,.08),new T.Vector3(.28,.02,.12),new T.Vector3(.31,.18,.12)]);group.add(new T.Mesh(new T.TubeGeometry(curve,24,.025,10,false),arm));
      const glass=mat(0xb9d3d8,.12,.16);glass.transparent=true;glass.opacity=.48;
-     const capsule=new T.Mesh(new T.CapsuleGeometry(.105,.34,8,20),glass);capsule.position.set(.31,.37,.13);capsule.rotation.z=-.16;group.add(capsule);
+     const capsule=new T.Mesh(new T.CylinderGeometry(.105,.105,.34,24),glass);capsule.position.set(.31,.37,.13);capsule.rotation.z=-.16;group.add(capsule);for(const y of [.2,.54]){const end=new T.Mesh(new T.SphereGeometry(.105,24,16),glass);end.position.set(.31,y,.13);group.add(end)}
      const bulb=sphere(.31,.37,.14,.055,.19,.055,mat(0xffe7b6,.18));bulb.material.emissive=new T.Color(0xffd58c);bulb.material.emissiveIntensity=.52;
      for(const y of [.18,.56]){const collar=new T.Mesh(new T.TorusGeometry(.105,.012,8,24),arm);collar.position.set(.31,y,.13);collar.rotation.z=Math.PI/2;group.add(collar)}
     }else if(variant==='黄铜双臂'){
@@ -183,7 +183,7 @@ window.ArdayFurnitureModels = (() => {
     if(variant==='藤编高柜'){
      width=1.52;depth=.76;height=2.38;const frame=mat(0x684a35,.66),cane=mat(0xc8a477,.96),shadow=mat(0x463328,.84),brass=mat(0xb58d56,.36,.62);
      box(0,1.15,0,1.44,2.18,.68,frame);box(0,2.3,0,1.58,.12,.78,m.oak);box(0,.1,0,1.48,.18,.74,frame);
-     for(const x of [-.36,.36]){box(x,1.18,.355,.66,1.92,.055,shadow);box(x,1.18,.39,.6,1.82,.035,cane);for(let y=.32;y<2.08;y+=.075)box(x,y,.415,.58,.012,.012,frame);for(let dx=-.27;dx<=.271;dx+=.075)box(x+dx,1.18,.418,.012,1.76,.012,frame);box(x,.22,.43,.58,.045,.035,frame);box(x,2.14,.43,.58,.045,.035,frame);cyl(x+(x<0?.25:-.25),1.18,.45,.024,.024,.065,brass,12)}
+     for(const x of [-.36,.36]){box(x,1.18,.355,.66,1.92,.055,shadow);box(x,1.18,.39,.6,1.82,.035,cane);for(let y=.34;y<=2.041;y+=.1){const a=box(x,y,.418,.59,.014,.014,frame);a.rotation.z=.58;const b=box(x,y+.035,.422,.59,.014,.014,mat(0xd8b88b,.96));b.rotation.z=-.58;}box(x,.22,.43,.58,.045,.035,frame);box(x,2.14,.43,.58,.045,.035,frame);cyl(x+(x<0?.25:-.25),1.18,.45,.024,.024,.065,brass,12)}
      box(0,1.18,.37,.035,1.98,.035,brass);
      for(const x of [-.58,.58])for(const z of [-.23,.23]){const leg=new T.Mesh(new T.CylinderGeometry(.055,.075,.22,12),frame);leg.position.set(x,.11,z);group.add(leg)}
      box(0,.42,.36,1.28,.24,.04,frame);box(0,.42,.39,1.18,.18,.025,cane);
