@@ -1064,7 +1064,7 @@ function processActivityAt(value){
    relation(activity);
    advanceSharedGoal(activity,d.getTime());
   }
-  if(['read','write'].includes(activity))updatePersonalGoal(activity,d.getTime());
+  if(['read','write','tidy'].includes(activity))updatePersonalGoal(activity,d.getTime());
  }
  const workCompleted=settleWorkAt(key,hour,d.getTime());
  if(workCompleted)updatePersonalGoal('work',d.getTime());
@@ -1278,10 +1278,6 @@ function sharedGoalCatalog(){
   s.lastSharedProposalAt=at;
   const e=addEvent('阿尔想和你一起做件事',g.detail,'shared-goal-proposal');if(!e)return;
   e.goalId=g.id;e.goalCondition=g.condition;s.lastArdayLetterAt=at;say(ardayLine('proposal',g.detail));
- }
- if(s.project?.status==='active'&&!s.sharedGoals.length){
-  const legacy=sharedGoalCatalog().find(x=>x.id==='outing');
-  if(legacy)s.sharedGoals.push({...legacy,progress:0,status:'active',startedAt:Date.now(),variant:'migrated'});
  }
  delete s.project;
  Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'||ev.activity==='tidy'){ev.activity='idle';ev.title='自由时间';ev.kind='free'}}));
