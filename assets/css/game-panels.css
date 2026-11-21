@@ -423,3 +423,14 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .inventory-recycle-button:active:not(:disabled){background:#e6d4bd}
 .inventory-recycle-button:disabled{opacity:.35;cursor:not-allowed}
 @media(min-width:600px){.inventory-items>.inventory-item-entry>.choice{min-height:135px!important;font-size:13px!important}}
+
+/* Backpack recycle is a dedicated view entered from the category strip. */
+.inventory-view .inventory-categories{align-items:stretch;gap:4px}
+.inventory-view .inventory-recycle-tab{margin-left:5px;padding-inline:13px;border-radius:8px;background:#e5d6c2;color:#916044;font-weight:800;letter-spacing:.04em}
+.inventory-view .inventory-recycle-tab.active{background:#a65e43;color:#fff7eb;box-shadow:0 2px 8px #6b4b3022}
+.inventory-items>.inventory-item-entry>.choice.recycle-preview{cursor:default;opacity:.96}
+.inventory-items>.inventory-item-entry>.choice.recycle-preview:disabled{opacity:1}
+.inventory-items .recycle-value{display:block;margin-top:5px;color:#947454;font:600 9px/1.4 Arial,"Noto Sans SC",sans-serif}
+.inventory-items .inventory-recycle-button{min-height:34px;border-radius:3px;background:#a65e43;border:0;color:#fff5e8;font-size:11px;letter-spacing:.02em}
+.inventory-items .inventory-recycle-button:active{background:#874a35}
+@media(max-width:380px){.inventory-view .inventory-categories{gap:1px}.inventory-view .inventory-category{font-size:10px;letter-spacing:0}.inventory-view .inventory-recycle-tab{margin-left:2px;padding-inline:8px}}
