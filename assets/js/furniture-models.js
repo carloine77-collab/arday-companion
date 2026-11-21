@@ -1149,6 +1149,7 @@ window.ArdayFurnitureModels = (() => {
 
     action=()=>openFurnitureActions('window',id);width=2.2;depth=.2;height=2.12;wallAxis='x';wallSide='back';anchor=[0,2.65];
     if(variant==='拱顶白橡木窗'){
+     addWindowSun(parent,group,2.65);addWindowView(group,2.6,1.82,1.78);
      const frame=mat(0xd1b990,.58),inner=mat(0x8b704f,.64),glass=mat(0x9ebfc4,.16,.12);glass.transparent=true;glass.opacity=.46;
      const arch=new T.Shape();arch.moveTo(-1.02,-.88);arch.lineTo(-1.02,.48);arch.quadraticCurveTo(-1.02,1.02,0,1.02);arch.quadraticCurveTo(1.02,1.02,1.02,.48);arch.lineTo(1.02,-.88);arch.closePath();
      const geo=new T.ExtrudeGeometry(arch,{depth:.14,bevelEnabled:true,bevelSegments:3,bevelThickness:.025,bevelSize:.025,curveSegments:28});geo.translate(0,1.12,0);group.add(new T.Mesh(geo,frame));
