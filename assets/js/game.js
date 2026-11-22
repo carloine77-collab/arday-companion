@@ -245,7 +245,7 @@ document.addEventListener('click',event=>{
  const advance=bubble._introAdvance;bubble._introAdvance=null;
  event.preventDefault();event.stopPropagation();advance();
 },true);
-function toast(t,tone){const node=$('toast'),message=String(t??'');const inferredTone=tone||(/(?:不足|失败|不存在|无法|不能|尚未|已满|未完成|未解锁|未满足|不支持|不够|已达上限|冷却中|暂不可|错误|重新选择|已损坏|没有合适)/.test(message)?'error':'success');node.textContent=message;node.dataset.tone=inferredTone;node.setAttribute('role',inferredTone==='error'?'alert':'status');node.setAttribute('aria-live',inferredTone==='error'?'assertive':'polite');node.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>node.classList.remove('show'),2200)}
+function toast(t,tone){const node=$('toast'),message=String(t??'');const inferredTone=tone||(/(?:不足|失败|不存在|无法|不能|尚未|已满|未完成|未解锁|未满足|未通过|不支持|不够|已达上限|冷却中|暂不可|错误|重新选择|已损坏|没有合适)/.test(message)?'error':'success');node.textContent=message;node.dataset.tone=inferredTone;node.setAttribute('role',inferredTone==='error'?'alert':'status');node.setAttribute('aria-live',inferredTone==='error'?'assertive':'polite');node.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>node.classList.remove('show'),2200)}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
 function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)+Number(v||0)))})}
 function dayAnchor(){return dayAnchorAt(Date.now())}
