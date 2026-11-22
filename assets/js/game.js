@@ -2780,8 +2780,10 @@ function initArday3D(){
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
-  const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door','default-door-living'];
-  s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id)&&!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
+  // Preserve legacy door furniture records. The old unconditional ID filter
+  // deleted them on every load, even when their replacement had already been
+  // marked as installed by defaultDoorSetupVersion.
+  s.placed=s.placed.filter(record=>!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
   const starterSceneNames=new Set(['吊灯']);
   const obsoleteStarterSceneNames=new Set(['茶几','植物','盆栽','冰箱','灶台','水槽']);
   const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门')||!String(record.id||'').startsWith('scene-default-')||!obsoleteStarterSceneNames.has(record.name)));
