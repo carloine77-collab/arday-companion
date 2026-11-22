@@ -39,7 +39,6 @@ window.ArdayCareerData = {
   {id:'simultaneous-interpreter',title:'同声传译员',category:'国际商务',salary:172,start:9,end:12,minScore:70,selectivity:0.15,weights:{emotion:0.65,combat:0.2,survival:0.15}},
   {id:'management-accountant',title:'管理会计师',category:'财务管理',salary:148,start:13,end:16,minScore:60,selectivity:0.11,weights:{emotion:0.35,combat:0.5,survival:0.15}},
   {id:'procurement-manager',title:'国际采购经理',category:'供应链管理',salary:162,start:10,end:13,minScore:65,selectivity:0.13,weights:{emotion:0.55,combat:0.3,survival:0.15}}
- ,
   {id:'convenience-clerk',title:'便利店店员',category:'零售服务',salary:58,start:7,end:10,minScore:8,selectivity:0.02,weights:{emotion:0.25,combat:0.15,survival:0.60}},
   {id:'cafe-assistant',title:'咖啡店帮工',category:'餐饮服务',salary:62,start:9,end:12,minScore:12,selectivity:0.025,weights:{emotion:0.35,combat:0.10,survival:0.55}},
   {id:'library-assistant',title:'图书馆助理',category:'公共文化',salary:66,start:10,end:13,minScore:14,selectivity:0.025,weights:{emotion:0.30,combat:0.10,survival:0.60}},
