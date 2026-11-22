@@ -1037,7 +1037,7 @@ window.ArdayGameConfig = {
  cushion:{title:'坐垫',activities:{rest:{anchor:'cushion'},read:{anchor:'cushion'}}},
  bookshelf:{title:'书架',activities:{read:{anchor:'shelf'}}},
  desk:{title:'书桌',activities:{read:{anchor:'desk'},write:{anchor:'desk'},computerPlay:{anchor:'desk'}}},
- computer:{title:'电脑',activities:{computerPlay:{anchor:'desk'},write:{anchor:'desk'},browseWeb:{anchor:'desk'},program:{anchor:'desk'},guildTraining:{anchor:'desk}}},
+ computer:{title:'电脑',activities:{computerPlay:{anchor:'desk'},write:{anchor:'desk'},browseWeb:{anchor:'desk'},program:{anchor:'desk'},guildTraining:{anchor:'desk'}}},
  television:{title:'电视',activities:{watchTV:{anchor:'sofa'}}},
  recordPlayer:{title:'唱片机',activities:{listenRecords:{anchor:'sofa'}}},
  gameConsole:{title:'游戏机',activities:{game:{anchor:'gameConsole'}}},
