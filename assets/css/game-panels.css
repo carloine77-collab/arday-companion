@@ -374,6 +374,8 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 .schedule-action-grid-single .schedule-action-button{min-height:43px!important}
 .schedule-time-editor{display:grid;grid-template-columns:1fr;gap:9px;padding:3px 0 0}
 .schedule-time-editor>label{color:#8d7559;font:700 9px Arial,sans-serif;letter-spacing:.12em}
+.schedule-proposal-note{margin:0;color:#887861;font:11px/1.7 "Noto Serif SC",serif}
+.schedule-time-actions button:disabled{opacity:.45;cursor:not-allowed}
 .schedule-time-editor>select{width:100%;min-height:42px;padding:0 12px;border:1px solid #cdbb9f;border-radius:5px;background:#fbf7ef;color:#493f32;font:600 13px "Noto Serif SC",serif}
 .schedule-time-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .schedule-time-actions button{min-height:42px;border-radius:5px;font:600 11px "Noto Serif SC",serif}
