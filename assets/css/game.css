@@ -285,3 +285,5 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 .stage.calendar-mode>#dialogue{display:none!important}
 .stage>#dialogue{pointer-events:none!important}
 
+
+.stage>#dialogue.intro-advance-ready{pointer-events:auto!important;cursor:pointer!important;touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important}
