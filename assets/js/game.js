@@ -2936,7 +2936,7 @@ function persistFurniture(item){
       selectFurniture(item);
       const plane=item.wallAxis?(item.wallSide==='back'||item.wallSide==='front'?new T.Plane(new T.Vector3(0,0,1),-furniture.position.z):new T.Plane(new T.Vector3(1,0,0),-furniture.position.x)):new T.Plane(new T.Vector3(0,1,0),-furniture.position.y);
       if(raycaster.ray.intersectPlane(plane,dragPoint)){
-       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,startX:e.clientX,startY:e.clientY,moved:false,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z,wallOffsetDelta:item.wallAxis?wallOffset(item)-(item.wallSide==='back'||item.wallSide==='front'?dragPoint.x:dragPoint.z):0,wallYOffset:item.wallAxis?furniture.position.y-dragPoint.y:0};
+       dragOffset.copy(furniture.position).sub(dragPoint);furnitureDrag={pointerId:e.pointerId,group:furniture,item,plane,rect:stage.getBoundingClientRect(),startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,lastUpdate:performance.now(),moved:false,initial:furniture.position[item.wallAxis||'x'],offsetX:furniture.position.x-dragPoint.x,offsetZ:furniture.position.z-dragPoint.z,wallOffsetDelta:item.wallAxis?wallOffset(item)-(item.wallSide==='back'||item.wallSide==='front'?dragPoint.x:dragPoint.z):0,wallYOffset:item.wallAxis?furniture.position.y-dragPoint.y:0};
        gestureSurface.setPointerCapture(e.pointerId);e.preventDefault();return;
       }
      }
@@ -2974,8 +2974,11 @@ function persistFurniture(item){
   });
   gestureSurface.addEventListener('pointermove',e=>{
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
+    const now=performance.now(),dragDistance=Math.hypot(e.clientX-furnitureDrag.lastX,e.clientY-furnitureDrag.lastY);
+    if(now-furnitureDrag.lastUpdate<(isTouchDevice?24:16)&&dragDistance<3){e.preventDefault();return}
+    furnitureDrag.lastUpdate=now;furnitureDrag.lastX=e.clientX;furnitureDrag.lastY=e.clientY;
     if(Math.hypot(e.clientX-furnitureDrag.startX,e.clientY-furnitureDrag.startY)>8)furnitureDrag.moved=true;
-    const rect=stage.getBoundingClientRect();pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
+    const rect=furnitureDrag.rect;pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
     if(raycaster.ray.intersectPlane(furnitureDrag.plane,dragPoint)){
      const g=furnitureDrag.group,item=furnitureDrag.item;
      if(item.wallAxis){
