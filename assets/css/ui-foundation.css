@@ -1,5 +1,6 @@
-/* Arday UI foundation: semantic tokens and shared interaction states.
-   Component sheets retain their own visual themes; this file owns cross-system behavior. */
+/* Arday UI foundation — design tokens only.
+   Keep this file free of selectors and component styling.
+   Values mirror the existing game.css palette; aliases must remain visually equivalent. */
 :root {
   --ui-paper: #e8e5df;
   --ui-cream: #f7f5f0;
@@ -23,50 +24,4 @@
   --ui-feedback-success: #526b58;
   --ui-feedback-error: #8a5148;
   --ui-feedback-info: #52616b;
-}
-
-/* Keyboard focus is visible across every themed panel, including generated controls. */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-[role="button"]:focus-visible,
-[role="tab"]:focus-visible {
-  outline: 2px solid var(--ui-focus-ring);
-  outline-offset: var(--ui-focus-offset);
-}
-
-button:disabled,
-[role="button"][aria-disabled="true"] {
-  cursor: not-allowed;
-  filter: saturate(var(--ui-disabled-saturation));
-}
-
-button[aria-busy="true"],
-[role="button"][aria-busy="true"] {
-  cursor: progress;
-  pointer-events: none;
-  filter: saturate(.7);
-}
-
-
-.toast {
-  background: var(--ui-feedback-bg);
-  color: var(--ui-feedback-text);
-  border: 1px solid #ffffff24;
-  box-shadow: 0 5px 18px #29251f30;
-  max-width: min(88vw, 520px);
-  text-align: center;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
-.toast[data-tone="success"] { background: var(--ui-feedback-success); }
-.toast[data-tone="error"] { background: var(--ui-feedback-error); }
-.toast[data-tone="info"] { background: var(--ui-feedback-info); }
-
-@media (prefers-reduced-motion: reduce) {
-  .toast {
-    transition-duration: 0.01ms !important;
-  }
 }
