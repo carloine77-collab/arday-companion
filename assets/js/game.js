@@ -168,7 +168,7 @@ s.placed.forEach((item,index)=>{
  if(!Number.isFinite(Number(item.rotation)))item.rotation=0;if(item.name.startsWith('成品食物·')&&!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}
 });
 // Remove obsolete built-in starter props from existing saves, then install the single ceiling fixture.
-s.placed=(s.placed||[]).filter(item=>!(item?.kind==='scene'&&['茶几','植物','盆栽','冰箱','灶台','水槽','吊灯'].includes(item.name)));
+s.placed=(s.placed||[]).filter(item=>!(item?.kind==='scene'&&String(item.id||'').startsWith('scene-default-')&&['茶几','植物','盆栽','冰箱','灶台','水槽','吊灯'].includes(item.name)));
 if(!s.placed.some(item=>item?.id==='scene-default-ceiling-light'))s.placed.push({id:'scene-default-ceiling-light',name:'吊灯',room:'living',kind:'scene',x:0,y:4.45,z:0,rotation:0});
 s.starterSceneLayoutVersion=3;
 s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
@@ -2746,7 +2746,7 @@ function initArday3D(){
   const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door','default-door-living'];
   s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id)&&!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
   const starterSceneNames=new Set(['吊灯']);
-  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门')));
+  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门')||!String(record.id||'').startsWith('scene-default-')));
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
   // Resolve support relationships after every saved item exists. The old
   // one-pass restore silently detached tabletop objects when their table
