@@ -1,18 +1,18 @@
-const CACHE_NAME = "arday-shell-v296";
+const CACHE_NAME = "arday-shell-v297";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./assets/css/game.css?v=20261123-css-adjacent-clean1",
+  "./assets/css/game.css?v=20261123-css-dedupe1",
   "./assets/css/game-panels.css?v=20261122-recycle-blue-center1",
-  "./assets/css/game-interactions.css?v=20261123-inventory-food-icons1",
+  "./assets/css/game-interactions.css?v=20261123-kitchen-css-dedupe1",
   "./assets/css/game-world.css?v=20261121-modular-css1",
   "./assets/css/game-career.css?v=20261121-guild-icon-fit1",
   "./assets/css/exchange.css?v=20261122-exchange-terminal1",
   "./assets/css/commission.css?v=20261122-special-commissions1",
   "./assets/css/editorial-boards.css?v=20261122-poster3",
-  "./assets/css/dungeon-board.css?v=20261121-event-depth1",
-  "./assets/css/ui-foundation.css?v=20261123-ui-foundation2",
+  "./assets/css/dungeon-board.css?v=20261123-board-css-dedupe1",
+  "./assets/css/ui-foundation.css?v=20261123-tokens-only1",
   "./assets/js/game-config.js?v=20261123-window-outing1",
   "./assets/js/furniture-catalog.js?v=20261123-catalog-dedupe1",
   "./assets/js/game-data/dungeon-data.js?v=20261121-long-progression1",
