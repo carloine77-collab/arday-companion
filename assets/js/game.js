@@ -105,16 +105,16 @@ const isPlaceholderDungeonItem=item=>{
 };
 const legacyEntity=(name,kind,index)=>{const parts=name.split('·');return {id:'inv-'+kind+'-legacy-'+index,name,kind,itemId:kind==='furniture'?parts.shift().trim():name,variant:kind==='furniture'?parts.join('·').trim():''}};
 const migratedInventory=[
- ...legacyItems.filter(name=>typeof name==='string'&&!isPlaceholderDungeonItem(name)&&!['一本旧书','旧书','陶杯','唱片','修理工具'].includes(name)).map((name,index)=>legacyEntity(name,'food',index)),
- ...legacyOwned.filter(name=>typeof name==='string'&&!isPlaceholderDungeonItem(name)).map((name,index)=>legacyEntity(name,name.startsWith('成品食物·')?'food':'furniture',index))
+ ...legacyItems.filter(name=>typeof name==='string'&&!isPlaceholderDungeonItem(name)&&!['一本旧书','旧书','陶杯','唱片','修理工具','点心'].includes(name)).map((name,index)=>legacyEntity(name,'food',index)),
+ ...legacyOwned.filter(name=>typeof name==='string'&&!isPlaceholderDungeonItem(name)&&name!=='点心').map((name,index)=>legacyEntity(name,name.startsWith('成品食物·')?'food':'furniture',index))
 ];
 if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))s.inventory=migratedInventory;
-else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string'&&!isPlaceholderDungeonItem(item));
+else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';if(item.name.startsWith('成品食物·')&&!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}});
-const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&!isPlaceholderDungeonItem(item)).map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
+const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item)).map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
 if(!Array.isArray(s.placed)||(!s.placed.length&&migratedPlaced.length))s.placed=migratedPlaced;
 if(!Array.isArray(s.placed))s.placed=[];
-else s.placed=s.placed.filter(item=>item&&typeof item==='object'&&!isPlaceholderDungeonItem(item));
+else s.placed=s.placed.filter(item=>item&&typeof item==='object'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 // The old furniture list described built-in scene fixtures, not owned inventory.
 const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
 legacySceneFurniture.filter(name=>typeof name==='string'&&name!=='沙发').forEach((name,index)=>{
@@ -268,7 +268,6 @@ function purchase(id,label,cost){
   remember('purchase',label,2);save();render();toast('购入：'+label);return;
  }
  s.money-=cost;
- if(id==='buy-food'){const snack=addItem('点心');snack.originalPrice=Number(cost)||12;}
  
 
  addEvent('你添置了生活用品',label+'已收入物品栏。','player-action');saySystem('买下了'+label+'。这会给我们的生活带来一点变化。');remember('purchase',label,2);save();render();toast('购入：'+label);openTab('商店',true);
@@ -324,8 +323,7 @@ function openTab(name,force=false){
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
-  const itemIcons={'点心':'🥐'};
-  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):item==='点心'?'🥐':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
+  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   
   const navigation=document.createElement('div');navigation.className='inventory-navigation';
@@ -353,7 +351,6 @@ function openTab(name,force=false){
      addEvent('你取出了一份料理',item.split('·').slice(1).join('·')+'已摆放在当前房间。','player-action');
      save();saySystem('把料理摆出来了。');toast('料理已取出');openTab('物品',true);return;
     }
-    if(item==='点心'){s.inventory.splice(index,1);change({hunger:25,fun:2});say('点心正好派上用场。')}
     save();render();openTab('物品',true);return;
    }
    if(id.startsWith('place-owned-')){
@@ -371,7 +368,6 @@ function openTab(name,force=false){
    if(id==='profile'){renderProfile();return}
    if(id==='chat'){perform('chat');}
    else if(id==='collection'){showCollection();return}
-   else if(id==='use-food'){let i=s.inventory.findIndex(x=>x.name==='点心');if(i<0){toast('物品栏里没有点心');return}s.inventory.splice(i,1);change({hunger:25,fun:2});say('点心正好派上用场。');}
    else perform(id);
    save();render();$('drawerTitle').textContent=displayName+' · ¥ '+s.money;
   };
@@ -768,6 +764,11 @@ function ensureScheduleAt(value){
   s.calendar.version=20;
  }
  if((s.calendar.version||0)<21){s.sleepPlans=s.sleepPlans||{};s.calendar.version=21}
+ if((s.calendar.version||0)<22){
+  Object.keys(s.calendar.days||{}).forEach(key=>{s.calendar.days[key]=(s.calendar.days[key]||[]).filter(ev=>!['food','company'].includes(ev.activity));if(!s.calendar.days[key].length)delete s.calendar.days[key]});
+  s.activityLog=(s.activityLog||[]).filter(entry=>!['food','company'].includes(entry.activity));
+  s.calendar.version=22;
+ }
  
  
  
@@ -900,7 +901,7 @@ function relation(action){
  // Repeating an activity is not relationship fatigue. Boredom here means
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
- if(['listen','walk','read','game','music','food','company','chat','computerPlay','browseWeb','program','playPiano','exercise','laundry','hug','admireDecor','admireView','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
+ if(['listen','walk','read','game','music','chat','computerPlay','browseWeb','program','playPiano','exercise','laundry','hug','admireDecor','admireView','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
   s.friend=clamp(s.friend+1);
   remember('shared',action);
  }
@@ -1108,7 +1109,7 @@ function processActivityAt(value){
  const sessionStart=s.lastProcessedSessionKey!==sessionId;
  if(meta&&!s.activeInteraction){
   const effects={...(meta.effect||{})};if(activity==='sleep')effects.energy=Number(energyConfig.sleepRecoveryPerHour)||1;else if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
-  if((activity==='eat'||activity==='food')&&placedMealEaten)delete effects.hunger
+  if(activity==='eat'&&placedMealEaten)delete effects.hunger
   applyActivityEffectsWithFeedback(effects);
   
   recordActivityPreference(activity,d.getTime());
@@ -1243,7 +1244,7 @@ function resolveCharacterAvailability(at=new Date()){
  const activity=normalizeActivity(ev?.activity||(s.lastUnifiedHourKey===key+'-'+hour?s.currentActivity:'idle'));
  if(activity==='sleep')return {status:'sleeping',activity,event:ev,key,hour};
  if(['work','computerWork'].includes(activity)||ev?.kind==='work')return {status:'working',activity,event:ev,key,hour};
- if(['eat','food'].includes(activity))return {status:'eating',activity,event:ev,key,hour};
+ if(activity==='eat')return {status:'eating',activity,event:ev,key,hour};
  if(activity==='walk')return {status:'outside',activity,event:ev,key,hour};
  if(ev&&['busy','unavailable','dungeon'].includes(ev.kind))return {status:'busy',activity,event:ev,key,hour};
  return {status:'available',activity,event:ev,key,hour};
@@ -1621,8 +1622,13 @@ function useDungeonItem(entity,index){
 function dungeonDeadlineCompactText(at=Date.now()){const due=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||Number(s.dungeonCycleStartedAt)||at)+7*86400000),left=due-at;if(left<=0)return '逾期 '+Math.ceil(-left/86400000)+' 天';const days=Math.floor(left/86400000),hours=Math.floor(left%86400000/3600000);return days+'天 '+hours+'小时'}
 function dungeonDeadlineText(at=Date.now()){const due=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||Number(s.dungeonCycleStartedAt)||at)+7*86400000),left=due-at;return left<=0?'已逾期 '+Math.ceil(-left/86400000)+' 天 · 需要立即进入副本':'距离下次强制副本 '+Math.floor(left/86400000)+' 天 '+Math.floor(left%86400000/3600000)+' 小时'}
 function applyDungeonDeadlinePenalty(at=Date.now()){
- const due=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||Number(s.dungeonCycleStartedAt)||at)+7*86400000);if(at<due)return;const today=keyAt(at);if(s.dungeonOverduePenaltyDay===today)return;
- s.dungeonOverduePenaltyDay=today;s.energy=clamp((Number(s.energy)||0)-6);s.hunger=clamp((Number(s.hunger)||0)-5);s.clean=clamp((Number(s.clean)||0)-3);s.fun=clamp((Number(s.fun)||0)-5);s.attributes.willpower=clamp((Number(s.attributes.willpower)||0)-2);s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5);addEvent('副本期限逾期','连续七天未进入副本，异常侵蚀影响了生存状态与意志。','daily');save();
+ const due=Number(s.nextDungeonDueAt)||((Number(s.lastDungeonAt)||Number(s.dungeonCycleStartedAt)||at)+7*86400000);
+ if(at<due||s.dungeonOverdueCollapseApplied)return;
+ s.dungeonOverdueCollapseApplied=true;s.dungeonOverduePenaltyDay=keyAt(at);
+ s.energy=1;s.hunger=1;s.clean=1;s.fun=1;
+ ['agility','strength','intelligence','perception','willpower'].forEach(key=>{s.attributes[key]=1});
+ s.combat=1;
+ addEvent('副本期限逾期','连续七天未进入副本，生存状态与战斗能力已严重衰竭。','daily');save();
 }
 function keepClassicDungeon(){const mission=s.activeDungeon;if(!mission)return;mission.mode='classic';save();showDungeonPending()}
 function showDungeonPending(){
@@ -1649,7 +1655,7 @@ function dispatchDungeon(tier,energyCost,base){
  const now=Date.now(),date=dayAnchorAt(now),key=dayKey(date),hour=new Date(now).getHours(),scheduleStart=new Date(now);scheduleStart.setMinutes(0,0,0);const scheduleEnd=new Date(scheduleStart.getTime()+3600000),selected=s.teamRoster.filter(m=>m.selected);
  const matchedStrangers=Array.from({length:2},(_,i)=>({id:'stranger-'+now+'-'+i,name:'陌生匹配者 '+(i+1),role:'临时队员',combat:Math.round(34+Math.random()*54),malice:Math.round(8+Math.random()*82),anonymous:true}));
  const fullTeam=[...selected,...matchedStrangers],playerPower=Number(s.combat)||0,teamPower=fullTeam.reduce((n,m)=>n+Math.min(Number(m.combat)||0,playerPower+12),0)/fullTeam.length,teamMalice=Math.max(0,fullTeam.reduce((n,m)=>n+(Number(m.malice)||0),0)/fullTeam.length-(Number(s.nextDungeonMaliceReduction)||0)),tierDifficulty=[12,22,34,47,61,77,95,112,132][DUNGEON_TIERS.indexOf(tier)],difficulty=Math.max(1,tierDifficulty-(Number(s.nextDungeonDifficultyReduction)||0)),end=scheduleEnd.getTime();
- s.energy=Math.max(0,s.energy-energyCost);s.lastDungeonAt=now;s.dungeonCycleStartedAt=now;s.nextDungeonDueAt=now+7*86400000;const nextModifier=Number(s.nextDungeonChanceModifier)||0;s.nextDungeonChanceModifier=0;s.nextDungeonDifficultyReduction=0;s.nextDungeonMaliceReduction=0;
+ s.energy=Math.max(0,s.energy-energyCost);s.lastDungeonAt=now;s.dungeonCycleStartedAt=now;s.nextDungeonDueAt=now+7*86400000;s.dungeonOverdueCollapseApplied=false;const nextModifier=Number(s.nextDungeonChanceModifier)||0;s.nextDungeonChanceModifier=0;s.nextDungeonDifficultyReduction=0;s.nextDungeonMaliceReduction=0;
  s.activeDungeon={id:'dungeon-'+now,status:'active',mode:'classic',boardChoiceMade:false,tier,energyCost,baseReward:base,difficulty,startAt:scheduleStart.getTime(),endsAt:end,scheduleKey:key,scheduleStartHour:hour,scheduleEndAt:end,duration:1,successChanceModifier:nextModifier,snapshot:{playerPower,teamPower,teamMalice,energy:s.energy,hunger:s.hunger,clean:s.clean,selected:selected.map(m=>({id:m.id,name:m.name,combat:m.combat,malice:m.malice})),matchedStrangers},board:{version:3,missionId:'dungeon-'+now,steps:0,position:0,chanceModifier:0,pending:null}};
  writeBlockForKey(key,hour,hour+1,{title:'副本',kind:'dungeon',activity:'dungeon',dungeonId:s.activeDungeon.id,priority:'forced'});
  s.activeInteraction=null;s.currentActivity='dungeon';s.currentActivityAnchor=null;s.currentActivityRoom='dungeon';s.currentActivityFurnitureId=null;s.lastUnifiedHourKey=key+'-'+hour;s.lastProcessedSessionKey=key+'-'+hour+'-dungeon';
@@ -1659,7 +1665,7 @@ function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active'||mission.settling)return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;mission.settling=true;const wasBoard=mission.mode==='board';
  const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.72+(Number(snap.teamPower)||0)*.28,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.05,Math.min(.95,.50+(power-mission.difficulty)*.0095-(Number(snap.teamMalice)||0)*.0009+modifier)),success=Math.random()<successChance;
  let fatal=false,survived=true;
- if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=true;s.energy=clamp(s.energy-22);s.hunger=clamp(s.hunger-12);s.clean=clamp(s.clean-5);s.attributes.willpower=Math.max(5,clamp(s.attributes.willpower-5-(board.fatalRisk?2:0)));s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
+ if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=true;s.energy=1;s.hunger=1;s.clean=1;s.fun=1;['agility','strength','intelligence','perception','willpower'].forEach(key=>{s.attributes[key]=clamp((Number(s.attributes[key])||0)-10)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
  const successfulNodes=Object.values(board.specialNodes||{}).filter(Boolean).length,nodeScore=successfulNodes*4,raw=Math.round(Math.max(0,Math.min(100,52+power*.34-mission.difficulty*.17+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.025+(Number(board.chanceModifier)||0)*.25+nodeScore))),rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):'D',earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.08));
  grantPoints(earned);if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
  if(success&&s.guildCommission?.status==='active'&&dungeonTierIndex(mission.tier)>=dungeonTierIndex(s.guildCommission.minTier||'F')){const commissionReward=Math.max(0,Math.floor(Number(s.guildCommission.reward)||0));if(commissionReward){grantPoints(commissionReward);s.guildCommission={...s.guildCommission,status:'completed',completedAt:at};addEvent('特别行动完成','完成组织委托，获得 '+commissionReward+' 积分。','daily')}}
@@ -2943,7 +2949,7 @@ function persistFurniture(item){
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{const hipTarget=pose==='sit'?-1.15:pose==='sleep'?-1.35:pose==='bedRead'?-.16:pose==='bedRest'?-.08:0,kneeTarget=pose==='sit'?1.45:pose==='sleep'?1.5:pose==='bedRead'?.28:pose==='bedRest'?.16:0;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.12;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.12});
     if(activeActivity==='exercise'&&pose==='walk'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.48;l.knee.rotation.x=Math.max(0,stride)*.72})}
-    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',cooking=activeActivity==='cook',weightTraining=activeActivity==='exercise'&&pose!=='walk',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat'||activeActivity==='company',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
+    const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',cooking=activeActivity==='cook',weightTraining=activeActivity==='exercise'&&pose!=='walk',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
      let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
