@@ -2704,7 +2704,6 @@ function persistFurniture(item){
       const colors=['#c39a70','#ad815b','#b58a61','#98704d'];for(let y=-64;y<576;y+=128){for(let x=-64;x<576;x+=128){ctx.save();ctx.translate(x+64,y+64);ctx.rotate(Math.PI/4);ctx.fillStyle=colors[Math.floor(rand()*colors.length)];ctx.fillRect(-39,-76,76,36);ctx.fillStyle=colors[Math.floor(rand()*colors.length)];ctx.fillRect(1,-38,36,76);ctx.restore()}}
      }else{
       const colors=['#c9a77e','#a77d57','#b78e68','#8e694b'];for(let y=0;y<512;y+=128)for(let x=0;x<512;x+=128){ctx.fillStyle=colors[Math.floor(rand()*colors.length)];ctx.fillRect(x+2,y+2,124,124);ctx.strokeStyle='rgba(65,43,28,.34)';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,124,124);ctx.strokeStyle='rgba(238,211,177,.62)';ctx.beginPath();ctx.moveTo(x+6,y+122);ctx.lineTo(x+122,y+6);ctx.moveTo(x+6,y+6);ctx.lineTo(x+122,y+122);ctx.stroke()}}
-     }
     }else if(id==='buy-floor-marble'||id==='buy-floor-slate'||id==='buy-floor-checker'){
      const light=id==='buy-floor-slate'?'#777b78':'#e5dfd3',dark=id==='buy-floor-slate'?'#5f6665':id==='buy-floor-checker'?'#7d7770':'#c9c1b4';
      ctx.fillStyle=light;ctx.fillRect(0,0,512,512);const size=id==='buy-floor-checker'?128:170;
@@ -2733,7 +2732,7 @@ function persistFurniture(item){
      for(let i=0;i<1900;i++){ctx.fillStyle=rand()>.5?'rgba(255,255,255,.035)':'rgba(60,50,40,.025)';ctx.fillRect(rand()*512,rand()*512,1+rand()*2,1+rand()*2)}
     }
    }
-   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=T.RepeatWrapping;texture.wrapT=T.RepeatWrapping;texture.repeat.set(type==='floor'?3.2:2.5,type==='floor'?2.5:1.65);texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy?.()||1);texture.needsUpdate=true;finishTextureCache.set(key,texture);return texture;
+   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=T.RepeatWrapping;texture.wrapT=T.RepeatWrapping;texture.repeat.set(type==='floor'?3.2:2.5,type==='floor'?2.5:1);texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy?.()||1);texture.needsUpdate=true;finishTextureCache.set(key,texture);return texture;
   }
   function finishMaterial(id,type,transparent=false){
    const key=type+':'+id+':'+(transparent?'t':'o');if(finishMaterialCache.has(key))return finishMaterialCache.get(key);
