@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v234";
+const CACHE_NAME = "arday-shell-v235";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -12,15 +12,15 @@ const APP_SHELL = [
   "./assets/css/commission.css?v=20261122-special-commissions1",
   "./assets/css/editorial-boards.css?v=20261122-poster3",
   "./assets/css/dungeon-board.css?v=20261121-event-depth1",
-  "./assets/js/game-config.js?v=20261122-window-styles1",
-  "./assets/js/furniture-catalog.js?v=20261122-window-styles1",
+  "./assets/js/game-config.js?v=20261122-window-styles2",
+  "./assets/js/furniture-catalog.js?v=20261122-window-styles2",
   "./assets/js/game-data/dungeon-data.js?v=20261121-long-progression1",
   "./assets/js/commission-data.js?v=20261122-special1",
   "./assets/js/commission-system.js?v=20261122-special2",
   "./assets/js/game-data/career-data.js?v=20261122-entry-jobs1",
   "./assets/js/schedule-engine.js?v=20261122-guild-training1",
   "./assets/js/food-models.js?v=20261122-food-models2",
-  "./assets/js/furniture-models.js?v=20261122-window-styles1",
+  "./assets/js/furniture-models.js?v=20261122-window-styles2",
   "./assets/js/furniture-placement.js?v=20261118e",
   "./assets/js/economy.js?v=20261122-goals2",
   "./assets/js/chat-copy.js?v=20261119a",
@@ -30,7 +30,7 @@ const APP_SHELL = [
   "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1",
-  "./assets/js/game.js?v=20261122-window-styles1",
+  "./assets/js/game.js?v=20261122-window-styles2",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
