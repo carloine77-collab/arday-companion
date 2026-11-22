@@ -180,7 +180,7 @@ s.roomUnlockReceipts=s.roomUnlockReceipts&&typeof s.roomUnlockReceipts==='object
 // V2 retains rooms already furnished by the player and any recorded paid unlocks,
 // while returning unused private rooms to the locked state.
 if(!s.roomUnlockMigrationV2){
- const previouslyUsedRooms=new Set((s.placed||[]).filter(record=>privateRoomKeys.includes(record?.room)).map(record=>record.room));
+ const previouslyUsedRooms=new Set((s.placed||[]).filter(record=>privateRoomKeys.includes(record?.room)&&!String(record?.name||'').includes('门')&&!String(record?.id||'').startsWith('default-door-')).map(record=>record.room));
  s.roomUnlocks={living:true,bedroom:false,kitchen:false,bathroom:false};
  privateRoomKeys.forEach(key=>{s.roomUnlocks[key]=!!s.roomUnlockReceipts[key]||previouslyUsedRooms.has(key)});
  s.roomUnlockMigrationV2=true;
