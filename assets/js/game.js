@@ -2524,7 +2524,7 @@ function initArday3D(){
     item.button.textContent=id==='desk'?'✎':'▱';stage.appendChild(item.button);
    }
    /* Rebind on every scene rebuild: existing hotspot DOM nodes otherwise retain stale closures or no action. */
-   item.button.onclick=()=>{if(decorating){selectFurniture(item);if(item.isDoor)openDoorWheel(item);return}if(item.isDoor){enterRoomFromDoor(item.doorDestination||'living');return}invokeFurnitureAction(item)};
+   item.button.onclick=()=>{if(decorating){selectFurniture(item);if(item.isDoor&&!item.pendingPlacement)openDoorWheel(item);return}if(item.isDoor){enterRoomFromDoor(item.doorDestination||'living');return}invokeFurnitureAction(item)};
    item.button.dataset.object=name;item.button.dataset.furnitureId=id;item.button.setAttribute('aria-label',name);
    furnitureRegistry.push(item);return item;
   }
