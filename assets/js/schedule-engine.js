@@ -5,7 +5,7 @@ window.ArdayScheduleEngine = (() => {
   if(!s||!furnitureActivities||!activityMeta||typeof normalizeActivity!=='function')throw new Error('ArdayScheduleEngine: missing required dependencies');
 const preferenceCap=10,preferenceGain=.85,preferenceDailyDecay=.4;
 const dailyActivityLimits=activityDailyLimits||{wash:1,rest:2,laundry:1,exercise:1};
-const preferenceActivities=new Set(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','walk','bouquet','admireFlowers','smellFlowers']);
+const preferenceActivities=new Set(['read','write','program','chat','computerPlay','browseWeb','playPiano','exercise','laundry','watchTV','listenRecords','rest','music','wash','bouquet','admireFlowers','smellFlowers']);
 function decayActivityPreferences(at=Date.now()){
  const last=Number(s.preferenceUpdatedAt)||at,days=Math.max(0,(at-last)/86400000);
  const loss=preferenceDailyDecay*days;
@@ -42,6 +42,7 @@ function autonomousFurnitureOptions(){
   if(!set?.activities)continue;
   for(const [activity,context] of Object.entries(set.activities)){
    const meta=activityMeta[activity];
+   if(activity==='walk')continue;
    if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||['eat','cook'].includes(activity))continue;
    if(activity==='guildTraining'&&!['iron-gate','night-heron','cinder-forge','blue-transit'].includes(s.factionMembership))continue;
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
@@ -78,7 +79,7 @@ function chooseAutonomousActivity(recentOverride=null,hour=new Date().getHours()
   const socialBonus=id==='chat'?(Number(s.friend)||0)*.02:0;
   let timeBias=0;
   if(hour>=7&&hour<12&&['wash','cook','laundry'].includes(id))timeBias=1.3;
-  else if(hour>=13&&hour<17&&['read','write','program','playPiano','exercise','walk'].includes(id))timeBias=1.3;
+  else if(hour>=13&&hour<17&&['read','write','program','playPiano','exercise'].includes(id))timeBias=1.3;
   else if(hour>=18&&hour<22&&['chat','watchTV','listenRecords','music','computerPlay','game'].includes(id))timeBias=1.3;
   return {...option,score:needScore+(spec.base||0)+preference+socialBonus+timeBias-repeatPenalty+Math.random()*2};
  }).filter(item=>item&&Number.isFinite(item.score)&&!(normalizeActivity(recent[recent.length-1])===item.activity&&item.activity!=='sleep'));
