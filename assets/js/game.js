@@ -131,7 +131,8 @@ if(!Array.isArray(s.placed))s.placed=[];
 else s.placed=s.placed.filter(item=>item&&typeof item==='object'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 // The old furniture list described built-in scene fixtures, not owned inventory.
 const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
-legacySceneFurniture.filter(name=>typeof name==='string'&&name==='窗户').forEach((name,index)=>{
+legacySceneFurniture.filter(name=>typeof name==='string'&&(name==='窗户'||name.includes('门'))).forEach((legacyName,index)=>{
+ const name=legacyName.includes('门')&&!legacyName.startsWith('门')?'门·'+legacyName:legacyName;
  if(s.placed.some(item=>item?.name===name&&item.kind==='scene'))return;
  const room=['冰箱','灶台','水槽'].includes(name)?'kitchen':'living';
  s.placed.push({id:'scene-default-'+index,name,room,kind:'scene'});
@@ -2745,7 +2746,7 @@ function initArday3D(){
   const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door','default-door-living'];
   s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id)&&!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
   const starterSceneNames=new Set(['吊灯']);
-  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)));
+  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门·')));
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
   // Resolve support relationships after every saved item exists. The old
   // one-pass restore silently detached tabletop objects when their table
