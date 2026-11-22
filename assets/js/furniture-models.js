@@ -1190,7 +1190,7 @@ window.ArdayFurnitureModels = (() => {
      for(const x of [-.43,.43])box(x,1.06,.19,.025,1.55,.035,frame);for(const y of [.62,1.15,1.68])box(0,y,.19,1.68,.025,.035,frame);
      const trim=new T.Mesh(new T.TorusGeometry(.88,.025,8,48,Math.PI),inner);trim.position.set(0,1.58,.2);trim.rotation.z=Math.PI;group.add(trim);
      for(const x of [-.96,.96]){box(x,1.1,.18,.07,1.92,.08,frame);for(const y of [.35,1.85])cyl(x,y,.24,.025,.025,.025,m.gold,10)}
-    }else{addWindowSun(parent,group,2.65);addWindowView(group,2.6,2.1,1.85);const style=variant==='日式障子窗'?'shoji':variant==='工业黑框窗'?'industrial':variant==='横向推拉窗'?'sliding':'casement';const frame=variant==='工业黑框窗'?mat(0x30383d,.38,.72):variant==='日式障子窗'?mat(0x9b7956,.7):m.oak;addOpenCasementWindow(group,frame,style);addWindowDressing(group,2.1,1.85,variant==='日式障子窗'?0xe5d8c1:0xc7b7a4,2.6)}
+    }else{addWindowSun(parent,group,2.65);addWindowView(group,2.6,2.1,1.85);const style=variant==='法式六格窗'?'french':variant==='日式障子窗'?'shoji':variant==='工业黑框窗'?'industrial':variant==='横向推拉窗'?'sliding':'casement';const frame=variant==='工业黑框窗'?mat(0x30383d,.38,.72):variant==='日式障子窗'?mat(0x9b7956,.7):m.oak;addOpenCasementWindow(group,frame,style);addWindowDressing(group,2.1,1.85,variant==='日式障子窗'?0xe5d8c1:0xc7b7a4,2.6)}
 
    }else if(modelName==='上床下桌'){
     // Full loft-bed workstation: four structural posts, guarded upper bunk, ladder,
