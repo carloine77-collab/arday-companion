@@ -55,7 +55,7 @@
 <main class="stage" id="stage">
  <div class="dialogue-pill" id="dialogue" style="display:none"></div><section class="calendar-view" id="calendarView"><div class="calendar-view-head"><div><h2>Arday · 时间安排</h2></div></div><div class="calendar-content" id="calendarContent"></div></section>
 
- <button class="room-label" id="roomLabel" type="button" aria-label="当前房间">起居室</button>
+ <button class="room-label" id="roomLabel" type="button" aria-label="当前房间">客厅</button>
  <section class="drawer" id="drawer"><div class="drawer-head"><strong id="drawerTitle">互动</strong><button class="drawer-close-button" id="drawerClose" type="button" aria-label="关闭界面">×</button></div><div class="choices" id="choices"></div></section>
 </main>
 </div>
@@ -90,7 +90,7 @@
 <script src="assets/js/hall/hall-scene.js?v=20261122-exchange-label2"></script>
 <script src="assets/js/dungeon-board.js?v=20261121-global-balance4"></script>
 <script src="assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1"></script>
-<script src="assets/js/game.js?v=20261123-inventory-food-icons1"></script>
+<script src="assets/js/game.js?v=20261123-room-unlock1"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
