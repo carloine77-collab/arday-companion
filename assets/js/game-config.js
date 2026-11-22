@@ -886,20 +886,14 @@ window.ArdayGameConfig = {
         ]
       ],
       "地板": [
-        [
-          "水磨地板",
-          "▧",
-          "buy-floor-terrazzo",
-          "520",
-          ""
-        ],
-        [
-          "水泥地板",
-          "▧",
-          "buy-floor-concrete",
-          "460",
-          ""
-        ]
+        ["水磨石地板","▧","buy-floor-terrazzo","520",""],
+        ["浅灰水泥地板","▧","buy-floor-concrete","460",""],
+        ["白橡木宽板地板","▧","buy-floor-oak-plank","620",""],
+        ["烟熏橡木鱼骨拼","▧","buy-floor-herringbone","760",""],
+        ["复古几何拼花地板","▧","buy-floor-parquet","820",""],
+        ["奶油大理石地砖","▧","buy-floor-marble","680",""],
+        ["深灰板岩地砖","▧","buy-floor-slate","640",""],
+        ["复古黑白棋盘砖","▧","buy-floor-checker","700",""]
       ],
       "门": [
         [
@@ -946,27 +940,15 @@ window.ArdayGameConfig = {
         ]
       ],
       "墙纸": [
-        [
-          "雾面墙纸",
-          "▧",
-          "buy-wallpaper-mist",
-          "320",
-          ""
-        ],
-        [
-          "深海墙纸",
-          "▧",
-          "buy-wallpaper-deepblue",
-          "380",
-          ""
-        ],
-        [
-          "石膏墙纸",
-          "▧",
-          "buy-wallpaper-warm-white",
-          "0",
-          ""
-        ]
+        ["鼠尾草雾面墙","▧","buy-wallpaper-mist","320",""],
+        ["深海蓝灰墙纸","▧","buy-wallpaper-deepblue","380",""],
+        ["暖白石膏肌理墙","▧","buy-wallpaper-warm-white","0",""],
+        ["复古植物藤叶墙纸","▧","buy-wallpaper-botanical","460",""],
+        ["装饰艺术扇形墙纸","▧","buy-wallpaper-deco","520",""],
+        ["法式木质护墙板","▧","buy-wallpaper-wainscot","680",""],
+        ["暖陶砖纹墙面","▧","buy-wallpaper-brick","480",""],
+        ["手绘小花墙纸","▧","buy-wallpaper-floral","460",""],
+        ["雾蓝竖纹墙纸","▧","buy-wallpaper-stripe","420",""]
       ],
       "隔断": [
         [
