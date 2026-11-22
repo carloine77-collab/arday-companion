@@ -51,5 +51,19 @@
   const offsets=[[0,0],[0,-.95],[0,.95],[-1.05,0],[1.05,0],[-.9,-.72],[.9,-.72],[-.9,.72],[.9,.72],[0,-.55],[0,.55]];
   return offsets.map(([x,z])=>[rug.group.position.x+x,rug.group.position.z+z]);
  }
- global.ArdayFurniturePlacement={corners,rectsOverlap,canPlaceFurniture,rugCandidates};
+ function scanFloorPositions(item,registry,bounds,canPlace,preferredAngle=item.group.rotation.y){
+  const angles=[preferredAngle,preferredAngle+Math.PI/2,preferredAngle+Math.PI,preferredAngle+Math.PI*1.5],step=Math.max(.22,Math.min(.42,Math.min(item.width,item.depth)*.42)),points=[];
+  for(let z=bounds.minZ+item.depth/2;z<=bounds.maxZ-item.depth/2+.001;z+=step)for(let x=bounds.minX+item.width/2;x<=bounds.maxX-item.width/2+.001;x+=step)points.push([x,z]);
+  points.sort((a,b)=>Math.hypot(a[0],a[1])-Math.hypot(b[0],b[1]));
+  for(const angle of angles)for(const [x,z] of points)if(canPlace(item,x,z,angle))return {x,z,angle};
+  return null;
+ }
+ function scanWallPositions(item,sides,canPlaceOnWall,step=.22){
+  for(const side of sides){
+   const limit=(side==='back'||side==='front'?5:3.65)-(Number(item.width)||.35)/2,offsets=[];
+   for(let n=0;n<=Math.ceil(limit/step);n++){const v=n*step;if(v<=limit){offsets.push(v);if(v)offsets.push(-v)}}
+   for(const offset of offsets)if(canPlaceOnWall(item,side,offset))return {side,offset};
+  }return null;
+ }
+ global.ArdayFurniturePlacement={corners,rectsOverlap,canPlaceFurniture,rugCandidates,scanFloorPositions,scanWallPositions};
 })(window);
