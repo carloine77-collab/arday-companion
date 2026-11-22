@@ -2562,12 +2562,12 @@ function initArday3D(){
      const floorSpots=[...window.ArdayFurniturePlacement.rugCandidates(rug),[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
      for(const point of floorSpots){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
     }
-    if(!placed&&!record){item.pendingPlacement=true;item.pendingValid=false;item.supportId=null;group.position.set(0,0,0);group.rotation.y=rotation;}
+    if(!placed&&!restoring){item.pendingPlacement=true;item.pendingValid=false;item.supportId=null;group.position.set(0,0,0);group.rotation.y=rotation;}
     else if(!placed){disposeFurnitureResources(group);parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
    s.placed=s.placed||[];
    if(!record&&!item.pendingPlacement)s.placed.push({id,name,room,kind:name.startsWith('成品食物·')?'food':'furniture',x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null,...(item.expiresAt?{expiresAt:item.expiresAt,createdAt:record?.createdAt||Date.now()}:{}) ,...(item.isDoor?{destination:item.doorDestination||'living'}:{})});
-   applyInkOutlines(group);renderer.shadowMap.needsUpdate=true;persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
+   applyInkOutlines(group);renderer.shadowMap.needsUpdate=true;if(!item.pendingPlacement)persistFurniture(item);console.info('[Arday furniture]',name,'meshes:',modelMeshCount,'children:',group.children.length);return item;
   }
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
