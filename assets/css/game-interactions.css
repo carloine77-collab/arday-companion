@@ -554,3 +554,7 @@ html body .stage .drawer.profile-expanded.open .choices{
 header.top{position:relative}
 .chat{position:relative}
 @media(max-width:430px){.inventory-use-confirm{min-height:190px;padding:18px 12px}.inventory-use-actions button{flex:1;min-width:0}.chat-topic-popover{padding:8px}}
+
+
+/* Distinguish the player's lines during the first-contact story */
+.dialogue-pill[style*="right: 12px"]{font-family:'Noto Serif SC',Georgia,serif;box-shadow:0 5px 16px #493a2918}
