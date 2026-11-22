@@ -524,7 +524,7 @@ html body .stage .drawer.profile-expanded.open .choices{
 
 /* Settings — archival poster composition */
 .settings-entry{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 13px;border:1px solid #b9a27e;border-radius:3px;background:#26343a;color:#f3e7d2;font-size:12px;font-weight:700;box-shadow:0 2px 0 #182329;white-space:nowrap}
-.settings-entry span{font-size:15px;color:#d6b982}
+
 .settings-view{padding:12px 12px 24px!important;background:#26343a!important;background-image:radial-gradient(#d9c49a12 .7px,transparent .7px),linear-gradient(145deg,#33434a,#202d33)!important;background-size:8px 8px,100% 100%!important}
 .settings-poster{position:relative;max-width:620px;margin:0 auto;overflow:hidden;background:#eee3cf;color:#28363a;box-shadow:0 12px 30px #101b2080,0 0 0 1px #d0bc99}
 .settings-poster:before{content:"";position:absolute;inset:8px;pointer-events:none;border:1px solid #b9a27e;opacity:.72}
