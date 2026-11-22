@@ -50,6 +50,24 @@
   ]
  };
  const ACTION_LETTERS={
+  meal:[
+   {id:'meal-player-01',topic:'daily',title:'盘子已经空了',body:'你准备的{item}我吃完了。刚开始还想留一点，结果吃着吃着就忘了。盘子已经洗干净，放回原来的位置了。\n\n下次还可以做这个吗？'},
+   {id:'meal-player-02',topic:'relationship',title:'今天这顿饭',body:'今天的{item}是你准备的吧？我一眼就认出来了。味道很好，连最后一点汤汁都没舍得浪费。\n\n谢谢你想着我。'},
+   {id:'meal-player-03',topic:'daily',title:'厨房里闻到香味',body:'刚才经过桌边，闻到{item}的香味，就决定先吃饭了。你准备得正好，我也确实饿了。\n\n这顿吃得很满足。'},
+   {id:'meal-player-04',topic:'relationship',title:'我有认真吃饭',body:'向你汇报：你准备的{item}已经全部吃掉了。没有挑食，也没有把蔬菜留在盘子边上。\n\n表现不错吧？奖励可以是再做一次。'},
+   {id:'meal-player-05',topic:'daily',title:'最后一口也很好吃',body:'{item}最后一口还是很好吃。我本来想慢慢吃，后来发现自己已经把盘子推到水槽边了。\n\n你下次做饭的时候，我可以在旁边帮忙。'},
+   {id:'meal-player-06',topic:'relationship',title:'你是不是记得我的口味',body:'你准备的{item}很合我的口味。是碰巧，还是你已经记住我喜欢什么了？\n\n如果是后者，我可能会有一点得意。'},
+   {id:'meal-player-07',topic:'daily',title:'饭后收拾好了',body:'我吃了{item}，还顺手把餐具洗了。碗沿有一点酱汁，泡了会儿水就洗干净了。\n\n今天的饭很好吃，厨房也很整齐。'},
+   {id:'meal-player-08',topic:'relationship',title:'想当面谢谢你',body:'{item}很好吃。其实吃饭的时候就想给你发消息了，但手上还拿着筷子。\n\n现在终于腾出手来。谢谢你，想当面说。'},
+   {id:'meal-player-09',topic:'daily',title:'这道菜值得记下来',body:'今天吃到了你准备的{item}。味道搭配得很好，我甚至想记下来，下次自己试着做一遍。\n\n不过可能还是你做的更好吃。'},
+   {id:'meal-player-10',topic:'relationship',title:'给我留一份的感觉',body:'看到{item}放在那里，就觉得今天有人替我留了饭。说起来只是很普通的一顿，但我很喜欢这种感觉。\n\n下次也让我给你准备点什么。'},
+   {id:'meal-player-11',topic:'daily',title:'吃得比计划快',body:'我原本打算吃慢一点，结果{item}太合胃口，没多久就吃完了。连水杯都续了一次。\n\n今天这顿算是吃得很认真。'},
+   {id:'meal-player-12',topic:'relationship',title:'这算不算偏心',body:'你准备的{item}比我平时随便弄的饭好吃多了。这样下去，我会不会越来越挑嘴？\n\n算了，有你偏心我一次也不错。'},
+   {id:'meal-player-13',topic:'daily',title:'饭后有点满足',body:'吃完{item}以后，整个人都舒服了。窗边的光刚好落在桌面上，我坐了一会儿才起来收拾。\n\n谢谢你的这顿饭。'},
+   {id:'meal-player-14',topic:'relationship',title:'我会记住这顿饭',body:'今天的{item}我会记住的。不是因为有什么特别复杂的做法，只是因为是你准备的。\n\n下次换我给你做，好不好？'},
+   {id:'meal-player-15',topic:'daily',title:'没有剩下的了',body:'你准备的{item}已经光盘。刚刚还在想要不要留一点当夜宵，最后还是没忍住。\n\n看来我是真的喜欢这道菜。'},
+   {id:'meal-player-16',topic:'relationship',title:'吃饱了，想你了',body:'{item}很好吃，我已经吃饱了。现在坐在桌边发了会儿呆，突然想起你。\n\n下次吃饭的时候，你也在就好了。'}
+  ],
   cook:[
    {id:'action-cook-1',topic:'daily',title:'厨房里有点香',body:'刚才自己进厨房弄了点吃的。锅边溅了几滴油，洗碗布也被我弄湿了。味道还不错，至少我自己挺满意。\n\n下次想试一道新的。你负责试吃，不能只挑好看的那一块。'},
    {id:'action-cook-2',topic:'daily',title:'今天换个做法',body:'今天没照着以前的做法来。我临时换了个顺序，结果居然还挺成功。灶台收拾干净了，剩下的食材也放回冰箱。\n\n突然觉得，偶尔改改习惯也不错。你想吃的话，我下次再做。'}
