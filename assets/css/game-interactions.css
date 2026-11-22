@@ -617,16 +617,20 @@ header.top{position:relative}
 @media(max-width:430px){.drawer.inventory-confirm-modal{width:min(88%,320px)!important;padding:17px 15px 15px!important}.settings-fullscreen .settings-poster-head{min-height:158px!important}.settings-fullscreen .settings-poster-body{justify-content:flex-start!important;padding:20px 13px!important}.settings-fullscreen .settings-slot{min-height:78px!important}}
 @media(min-width:700px){.settings-fullscreen .settings-poster-head{min-height:210px!important;padding:28px 42px!important}.settings-fullscreen .settings-poster-head h2{font-size:36px!important}.settings-fullscreen .settings-poster-body{padding-top:5vh!important;padding-bottom:5vh!important}}
 
-/* Header settings action: restrained paper control, matching the recent-events palette. */
+/* Header settings action: compact single-line paper control. */
 .identity-meta > #settingsEntry.settings-control{
  display:inline-flex!important;
+ flex-direction:row!important;
  align-items:center!important;
  justify-content:center!important;
- gap:6px!important;
- flex:0 0 auto!important;
- min-width:0!important;
- min-height:34px!important;
- padding:0 11px!important;
+ gap:0!important;
+ flex:0 0 56px!important;
+ width:56px!important;
+ min-width:56px!important;
+ max-width:56px!important;
+ height:32px!important;
+ min-height:32px!important;
+ padding:0!important;
  border:1px solid #e5d2b8!important;
  border-radius:10px!important;
  background:linear-gradient(180deg,#fffaf1 0%,#f7eddf 100%)!important;
@@ -652,22 +656,24 @@ header.top{position:relative}
  outline:2px solid #b98561!important;
  outline-offset:2px!important;
 }
-#settingsEntry .settings-control-icon{
- display:block!important;
- flex:0 0 14px!important;
- width:14px!important;
- height:14px!important;
- fill:none!important;
- stroke:currentColor!important;
- stroke-width:1.55!important;
- stroke-linecap:round!important;
- stroke-linejoin:round!important;
+#settingsEntry > span{
+ display:inline!important;
+ flex:0 0 auto!important;
+ width:auto!important;
+ min-height:0!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ color:inherit!important;
+ font:inherit!important;
+ line-height:1!important;
 }
-#settingsEntry > span{display:inline!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
 @media(max-width:700px){
- .identity-meta > #settingsEntry.settings-control{min-height:32px!important;padding:0 9px!important;font-size:10px!important;gap:5px!important}
- #settingsEntry .settings-control-icon{width:13px!important;height:13px!important;flex-basis:13px!important}
+ .identity-meta > #settingsEntry.settings-control{flex-basis:52px!important;width:52px!important;min-width:52px!important;max-width:52px!important;height:30px!important;min-height:30px!important;font-size:10px!important}
 }
 @media(max-width:390px){
- .identity-meta > #settingsEntry.settings-control{min-height:30px!important;padding:0 8px!important;font-size:9px!important}
+ .identity-meta > #settingsEntry.settings-control{flex-basis:50px!important;width:50px!important;min-width:50px!important;max-width:50px!important;height:29px!important;min-height:29px!important;font-size:9px!important}
 }
