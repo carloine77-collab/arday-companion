@@ -1462,6 +1462,61 @@ window.ArdayFurnitureModels = (() => {
     }
     // Small brass hanging rail unifies the asymmetrical gallery arrangement.
     box(0,.78,.015,1.45,.025,.035,m.gold);
+   }else if(modelName==='抽象几何装饰画'){
+    action=()=>openFurnitureActions('wallArt',id);
+    width=1.18;depth=.16;height=1.02;wallAxis='x';wallSide='back';anchor=[0,2.02];
+    const frame=mat(0x584637,.58),matte=mat(0xe7ddca,.94),terracotta=mat(0xb86e53,.82),ink=mat(0x344b50,.78),ochre=mat(0xc29a57,.58,.18),sage=mat(0x899486,.9);
+    box(0,0,0,1.18,1.02,.1,frame);box(0,0,.058,1.08,.92,.025,ochre);box(0,0,.075,1.02,.86,.018,matte);
+    const circle=new T.Mesh(new T.CircleGeometry(.26,48),terracotta);circle.position.set(-.22,.18,.091);group.add(circle);
+    const arc=new T.Mesh(new T.TorusGeometry(.31,.055,10,56,Math.PI*1.2),ink);arc.position.set(.16,-.04,.1);arc.rotation.z=.42;group.add(arc);
+    const shape=new T.Shape();shape.moveTo(-.42,-.32);shape.lineTo(-.04,.34);shape.lineTo(.18,-.32);shape.closePath();
+    const triangle=new T.Mesh(new T.ShapeGeometry(shape),sage);triangle.position.set(.12,-.05,.096);group.add(triangle);
+    box(0,-.405,.1,.64,.018,.012,ink);
+   }else if(modelName==='植物标本框画'){
+    action=()=>openFurnitureActions('wallArt',id);
+    width=.82;depth=.15;height=1.28;wallAxis='x';wallSide='back';anchor=[0,2.08];
+    const frame=mat(0x76563d,.62),linen=mat(0xe9dfcf,.96),brass=mat(0xb99a68,.4,.55),stem=mat(0x667a58,.92),leafA=mat(0x78916b,.92),leafB=mat(0xa2a77b,.94);
+    box(0,0,0,.82,1.28,.09,frame);box(0,0,.052,.72,1.18,.018,brass);box(0,0,.066,.66,1.12,.012,linen);
+    for(let i=0;i<5;i++){
+     const x=-.2+i*.1,lean=(i-2)*.035;
+     const branch=box(x*.45,.02,.082,.012,.72,.012,stem);branch.rotation.z=lean;
+     for(let j=0;j<4;j++){
+      const side=j%2?1:-1,y=-.22+j*.13,leaf=sphere(x*.45+side*.09+lean*y,y,.09,.055,.13,.014,j%2?leafA:leafB);leaf.rotation.z=side*.62+lean;
+     }
+     sphere(x*.45,.39,.09,.026,.026,.014,mat(0xb98c72,.94));
+    }
+    box(0,.61,.06,.48,.018,.012,brass);
+   }else if(modelName==='手工编织墙饰'){
+    action=()=>openFurnitureActions('wallArt',id);
+    width=1.12;depth=.2;height=1.48;wallAxis='x';wallSide='back';anchor=[0,2.12];
+    const dowel=mat(0x79583c,.62),yarn=mat(0xd8c5a7,.98),yarnDark=mat(0xa98b69,.98),accent=mat(0x9b7467,.96);
+    box(0,.64,0,1.02,.055,.065,dowel);
+    for(let i=0;i<17;i++){
+     const x=-.47+i*.059;
+     const length=.68+(i%5)*.075,material=i%4===0?accent:(i%2?yarn:yarnDark);
+     const strand=box(x,.28-length*.08,.045,.026,length,.024,material);strand.rotation.z=(i-8)*.012;
+     if(i%3===0){const knot=sphere(x,.58,.055,.035,.035,.03,material);knot.rotation.z=.3}
+    }
+    for(let i=0;i<11;i++){
+     const x=-.38+i*.076,drop=.22+(i%4)*.045;
+     const tassel=box(x,-.32-drop*.28,.04,.035,drop,.03,i%2?yarnDark:yarn);tassel.rotation.z=(i-5)*.025;
+     sphere(x,-.32-drop*.58,.04,.045,.055,.035,i%2?yarnDark:yarn);
+    }
+    for(const x of [-.48,.48])sphere(x,.64,.015,.035,.035,.035,dowel);
+   }else if(modelName==='复古黄铜壁饰'){
+    action=()=>openFurnitureActions('wallArt',id);
+    width=1.18;depth=.17;height=.92;wallAxis='x';wallSide='back';anchor=[0,2.02];
+    const brass=mat(0xb28a4f,.32,.72),aged=mat(0x806747,.48,.58),back=mat(0x3e4947,.76);
+    box(0,0,0,1.12,.84,.07,back);
+    const medallion=sphere(0,0,.07,.24,.24,.045,brass);
+    const inner=new T.Mesh(new T.TorusGeometry(.31,.022,8,64),aged);inner.position.set(0,0,.08);group.add(inner);
+    const outer=new T.Mesh(new T.TorusGeometry(.39,.016,8,64),brass);outer.position.set(0,0,.08);group.add(outer);
+    for(let i=0;i<24;i++){
+     const a=i*Math.PI*2/24,len=i%2?.23:.31;
+     const ray=box(Math.cos(a)*(.39+len/2),Math.sin(a)*(.39+len/2),.075,.018,len,.018,i%3?brass:aged);ray.rotation.z=a-Math.PI/2;
+     sphere(Math.cos(a)*.68,Math.sin(a)*.68,.075,.024,.024,.018,brass);
+    }
+    const hub=new T.Mesh(new T.TorusGeometry(.13,.012,7,40),brass);hub.position.set(0,0,.12);group.add(hub);
    }else if(modelName==='跑步机'){
     action=()=>openFurnitureActions('treadmill',id);
     width=.9;depth=1.92;height=1.48;
