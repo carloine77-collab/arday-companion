@@ -157,3 +157,10 @@
 .commission-actions .commission-claim{border-color:#8ca8a5;background:#91aaa5;color:#14232a}
 .commission-actions button:disabled{border-color:#48585d;background:#25323a;color:#718087;opacity:.58}
 @media(max-width:520px){.commission-masthead{min-height:132px;padding:16px 14px}.commission-masthead h2{font-size:22px}.commission-seal{width:60px;height:60px;flex-basis:60px}.commission-card{min-height:0;padding:10px 11px}.commission-art{height:64px;min-height:64px}.commission-card-title{margin:8px 0 6px}}
+
+/* Special commissions discovered through the outing activity. */
+.special-commission-detail{position:relative;z-index:1;margin:0 0 8px;color:#aab8b5;font:9px/1.55 "Noto Sans SC",sans-serif;min-height:38px}
+.commission-special .commission-art-special{background:linear-gradient(135deg,#263b45,#526b6d)}
+.commission-special .commission-art-special i{border-color:#c3d5c7;background:linear-gradient(135deg,#a9c4b2,#425d5b)}
+.commission-special .commission-art-special b{background:#304b4e;border-color:#d3dfcf}
+.special-commission-empty{grid-column:1/-1;display:grid;place-items:center;min-height:150px;padding:22px;color:#7d9295;background:linear-gradient(135deg,#263841,#1d2b33);border:1px solid #566a70;font:11px "Noto Sans SC",sans-serif;letter-spacing:.08em;text-align:center}
