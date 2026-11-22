@@ -1,6 +1,6 @@
 window.ArdayGameConfig = {
   shopCatalog: {
- '食物食材':[['点心','🥐','buy-food','12'],['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6'],['牛奶 ×1','🥛','buy-ingredient-milk','8'],['奶酪 ×1','🧀','buy-ingredient-cheese','12'],['洋葱 ×1','🧅','buy-ingredient-onion','4'],['胡萝卜 ×1','🥕','buy-ingredient-carrot','4'],['大蒜 ×1','🧄','buy-ingredient-garlic','3'],['鸡腿肉 ×1','🍗','buy-ingredient-chicken','18'],['玉米 ×1','🌽','buy-ingredient-corn','6'],['草莓 ×1','🍓','buy-ingredient-strawberry','12'],['黄油 ×1','🧈','buy-ingredient-butter','9']],
+ '食物食材':[['大米 ×1','🍚','buy-ingredient-rice','8'],['鸡蛋 ×1','🥚','buy-ingredient-egg','3'],['蔬菜 ×1','🥬','buy-ingredient-vegetable','6'],['番茄 ×1','🍅','buy-ingredient-tomato','4'],['食用油 ×1','🫒','buy-ingredient-oil','5'],['面粉 ×1','🌾','buy-ingredient-flour','7'],['土豆 ×1','🥔','buy-ingredient-potato','5'],['牛肉 ×1','🥩','buy-ingredient-beef','16'],['面条 ×1','🍜','buy-ingredient-noodles','8'],['鲜蘑菇 ×1','🍄','buy-ingredient-mushroom','9'],['嫩豆腐 ×1','◻️','buy-ingredient-tofu','6'],['吐司面包 ×1','🍞','buy-ingredient-bread','6'],['牛奶 ×1','🥛','buy-ingredient-milk','8'],['奶酪 ×1','🧀','buy-ingredient-cheese','12'],['洋葱 ×1','🧅','buy-ingredient-onion','4'],['胡萝卜 ×1','🥕','buy-ingredient-carrot','4'],['大蒜 ×1','🧄','buy-ingredient-garlic','3'],['鸡腿肉 ×1','🍗','buy-ingredient-chicken','18'],['玉米 ×1','🌽','buy-ingredient-corn','6'],['草莓 ×1','🍓','buy-ingredient-strawberry','12'],['黄油 ×1','🧈','buy-ingredient-butter','9']],
  furnitureCategories:  {
     "坐卧类": {
       "办公椅": [
@@ -990,7 +990,7 @@ window.ArdayGameConfig = {
     activityEffects: {
      rest:8, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
      computerPlay:-3, watchTV:-2, listenRecords:-1, music:-1, walk:-5, game:-3, write:-3, work:-4,
-     sitChair:5, food:0, tea:0, company:0
+     sitChair:5, tea:0
     }
    },
    needs: { hungerHourlyDecay:2.25, cleanHourlyDecay:0.9, funHourlyDecay:1.25 }
@@ -1000,7 +1000,6 @@ window.ArdayGameConfig = {
  rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:72,weight:2.2,base:1.5},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
  eat:{title:'吃东西',duration:'long',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:19}},
- food:{title:'一起吃东西',duration:'long',autonomous:false,menuLabel:'一起吃东西',location:'table',pose:'sit',anchor:'table',effect:{hunger:21,fun:3}},
  wash:{title:'洗漱',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},requires:'sink',menuLabel:'洗漱',location:'kitchen',pose:'stand',anchor:'sink',effect:{clean:22}},
  cook:{title:'烹饪',duration:'long',autonomous:false,requires:'stove',menuLabel:'烹饪',location:'kitchen',pose:'stand',anchor:'stove',effect:{hunger:18}},
  admireView:{title:'欣赏窗外景色',duration:'short',autonomous:false,menuLabel:'室外景观',location:'window',pose:'stand',anchor:'window',effect:{fun:1}},
@@ -1020,7 +1019,6 @@ window.ArdayGameConfig = {
  music:{title:'听音乐',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:64,weight:.9},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10}},
  walk:{title:'散步',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:60,weight:.18,base:2},menuLabel:'外出',location:'outside',pose:'walk',anchor:'default',effect:{fun:9,clean:-1}},
  game:{title:'玩游戏',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:55,weight:1.0},requires:'gameConsole',menuLabel:'玩游戏',location:'rug',pose:'sit',anchor:'gameConsole',effect:{fun:11}},
- company:{title:'自由相处',duration:'long',autonomous:false,menuLabel:'自由相处',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:4}},
  sitChair:{title:'坐在椅子上',duration:'short',autonomous:false,menuLabel:'坐下',location:'chair',pose:'sit',anchor:'chair',effect:{fun:1}},
 
  write:{title:'写作 / 整理资料',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.28,base:10},requires:'desk',menuLabel:'写作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:5}},
