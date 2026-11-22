@@ -49,14 +49,6 @@ button[aria-busy="true"],
   filter: saturate(.7);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  button,
-  input,
-  select,
-  textarea {
-    transition-duration: var(--ui-motion-fast);
-  }
-}
 
 .toast {
   background: var(--ui-feedback-bg);
@@ -74,14 +66,7 @@ button[aria-busy="true"],
 .toast[data-tone="info"] { background: var(--ui-feedback-info); }
 
 @media (prefers-reduced-motion: reduce) {
-  .toast,
-  button,
-  input,
-  select,
-  textarea {
+  .toast {
     transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
   }
 }
