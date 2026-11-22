@@ -16,10 +16,10 @@
 .inventory-items>.choice{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:0!important;min-height:118px!important;padding:13px 7px!important;border:0!important;border-radius:3px!important;background:linear-gradient(145deg,#f0e8da,#e4d8c5)!important;color:#3f4b59!important;box-shadow:3px 4px 0 #b8a88e70,0 7px 14px #5e554514!important;text-align:center!important;font:600 11px/1.45 Georgia,"Noto Serif SC",serif!important}
 .inventory-items>.choice:before{content:"✧";position:absolute;top:7px;right:9px;color:#a9956d;font:11px Georgia,serif}
 .inventory-items>.choice .emoji{display:block!important;margin:0!important;color:#526174!important;font:27px Georgia,serif!important;filter:saturate(.45)}
-.inventory-items>.choice.inventory-food-card{gap:7px!important}
-.inventory-items>.choice .inventory-food-icon{display:flex!important;grid-column:1;grid-row:1/4;align-items:center;justify-content:center;width:42px;height:48px;color:#657386;font:27px Georgia,serif;filter:saturate(.42) sepia(.12)}
-.inventory-items>.choice .inventory-food-name{display:block;max-width:100%;overflow-wrap:anywhere;color:#3f4b59;font:600 11px/1.45 Georgia,"Noto Serif SC",serif}
-@media(min-width:600px){.inventory-items>.choice .inventory-food-icon{width:48px;height:54px;font-size:30px}.inventory-items>.choice .inventory-food-name{font-size:13px}}
+.inventory-items .inventory-food-card{gap:7px!important}
+.inventory-items .inventory-food-icon{display:flex!important;grid-column:1;grid-row:1/4;align-items:center;justify-content:center;width:42px;height:48px;color:#657386;font:27px Georgia,serif;filter:saturate(.42) sepia(.12)}
+.inventory-items .inventory-food-name{display:block;max-width:100%;overflow-wrap:anywhere;color:#3f4b59;font:600 11px/1.45 Georgia,"Noto Serif SC",serif}
+@media(min-width:600px){.inventory-items .inventory-food-icon{width:48px;height:54px;font-size:30px}.inventory-items .inventory-food-name{font-size:13px}}
 .inventory-items>.choice small{color:#8b795e!important;font:italic 10px Georgia,serif!important}
 .inventory-items>.choice:after{content:none!important}
 @media(min-width:600px){.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important;padding:22px 20px 26px!important}.inventory-items>.choice{min-height:140px!important;font-size:13px!important}}
