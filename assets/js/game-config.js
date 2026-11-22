@@ -74,7 +74,7 @@ window.ArdayGameConfig = {
           ""
         ],
         [
-          "弧形休闲长凳",
+          "弧形长凳",
           "▧",
           "buy-furniture-catalog-104",
           "1199",
@@ -577,10 +577,10 @@ window.ArdayGameConfig = {
         ["壁画","▧","buy-furniture-catalog-037","699",""],
         ["海报","▧","buy-furniture-catalog-018","199",""],
         ["照片墙","▧","buy-furniture-catalog-072","999",""],
-        ["抽象几何装饰画","▧","buy-furniture-catalog-126","1299",""],
-        ["植物标本框画","▧","buy-furniture-catalog-127","999",""],
-        ["手工编织墙饰","▧","buy-furniture-catalog-128","899",""],
-        ["复古黄铜壁饰","▧","buy-furniture-catalog-129","1699",""]
+        ["抽象几何画","▧","buy-furniture-catalog-126","1299",""],
+        ["植物标本画","▧","buy-furniture-catalog-127","999",""],
+        ["编织墙饰","▧","buy-furniture-catalog-128","899",""],
+        ["黄铜壁饰","▧","buy-furniture-catalog-129","1699",""]
       ],
       "挂钟": [
         ["木框挂钟","▧","buy-furniture-catalog-050","399",""]
@@ -588,12 +588,12 @@ window.ArdayGameConfig = {
       "花瓶": [
         ["陶土花瓶","▧","buy-furniture-catalog-010","299",""],
         ["陶艺摆件","▧","buy-furniture-catalog-112","599",""],
-        ["落地陶瓷花器","▧","buy-furniture-catalog-122","1299",""]
+        ["落地陶瓷瓶","▧","buy-furniture-catalog-122","1299",""]
       ],
       "摆件": [
         ["黄铜地球仪","▧","buy-furniture-catalog-123","999",""],
-        ["抽象金属雕塑","▧","buy-furniture-catalog-124","1299",""],
-        ["玻璃罩微景观","▧","buy-furniture-catalog-125","899",""]
+        ["金属雕塑","▧","buy-furniture-catalog-124","1299",""],
+        ["玻璃微景观","▧","buy-furniture-catalog-125","899",""]
       ],
       "花束": [
         ["花束","▧","buy-furniture-catalog-074","199",""]
@@ -655,31 +655,31 @@ window.ArdayGameConfig = {
       ],
       "地板": [
         ["水磨石地板","▧","buy-floor-terrazzo","4200",""],
-        ["浅灰水泥地板","▧","buy-floor-concrete","2600",""],
-        ["白橡木宽板地板","▧","buy-floor-oak-plank","4800",""],
-        ["烟熏橡木鱼骨拼","▧","buy-floor-herringbone","6800",""],
-        ["复古几何拼花地板","▧","buy-floor-parquet","7200",""],
-        ["奶油大理石地砖","▧","buy-floor-marble","6500",""],
-        ["深灰板岩地砖","▧","buy-floor-slate","5200",""],
-        ["复古黑白棋盘砖","▧","buy-floor-checker","5600",""]
+        ["浅灰水泥地","▧","buy-floor-concrete","2600",""],
+        ["白橡木地板","▧","buy-floor-oak-plank","4800",""],
+        ["烟熏鱼骨拼","▧","buy-floor-herringbone","6800",""],
+        ["复古拼花砖","▧","buy-floor-parquet","7200",""],
+        ["奶油石砖","▧","buy-floor-marble","6500",""],
+        ["深灰板岩砖","▧","buy-floor-slate","5200",""],
+        ["黑白棋盘砖","▧","buy-floor-checker","5600",""]
       ],
       "门": [
         [
-          "默认室内木门",
+          "室内木门",
           "▧",
           "buy-furniture-catalog-023",
           "1299",
           ""
         ],
         [
-          "白橡木玻璃门",
+          "白橡玻璃门",
           "▧",
           "buy-furniture-door-glass",
           "1899",
           ""
         ],
         [
-          "奶油法式双线门",
+          "法式双线门",
           "▧",
           "buy-furniture-door-cream",
           "2299",
@@ -693,7 +693,7 @@ window.ArdayGameConfig = {
           ""
         ],
         [
-          "深色格栅推拉门",
+          "格栅推拉门",
           "▧",
           "buy-furniture-door-sliding",
           "2699",
@@ -708,22 +708,22 @@ window.ArdayGameConfig = {
         ]
       ],
       "墙纸": [
-        ["鼠尾草雾面墙","▧","buy-wallpaper-mist","1299",""],
-        ["深海蓝灰墙纸","▧","buy-wallpaper-deepblue","1499",""],
-        ["暖白石膏肌理墙","▧","buy-wallpaper-warm-white","0",""],
-        ["复古植物藤叶墙纸","▧","buy-wallpaper-botanical","1899",""],
-        ["装饰艺术扇形墙纸","▧","buy-wallpaper-deco","2299",""],
-        ["法式木质护墙板","▧","buy-wallpaper-wainscot","4999",""],
-        ["暖陶砖纹墙面","▧","buy-wallpaper-brick","2199",""],
-        ["手绘小花墙纸","▧","buy-wallpaper-floral","1999",""],
-        ["雾蓝竖纹墙纸","▧","buy-wallpaper-stripe","1699",""]
+        ["鼠尾草墙面","▧","buy-wallpaper-mist","1299",""],
+        ["深海蓝墙纸","▧","buy-wallpaper-deepblue","1499",""],
+        ["暖白石膏墙","▧","buy-wallpaper-warm-white","0",""],
+        ["藤叶墙纸","▧","buy-wallpaper-botanical","1899",""],
+        ["扇形墙纸","▧","buy-wallpaper-deco","2299",""],
+        ["法式护墙板","▧","buy-wallpaper-wainscot","4999",""],
+        ["暖陶砖墙面","▧","buy-wallpaper-brick","2199",""],
+        ["手绘花墙纸","▧","buy-wallpaper-floral","1999",""],
+        ["雾蓝竖纹纸","▧","buy-wallpaper-stripe","1699",""]
       ],
       "隔断": [
         ["木格栅隔断","▧","buy-furniture-catalog-117","1999",""],
-        ["藤编折叠屏风","▧","buy-furniture-catalog-118","1699",""],
-        ["长虹玻璃屏风","▧","buy-furniture-catalog-119","3299",""],
-        ["双面开放书架隔断","▧","buy-furniture-catalog-120","3999",""],
-        ["拱形镂空隔断","▧","buy-furniture-catalog-121","3599",""]
+        ["藤编屏风","▧","buy-furniture-catalog-118","1699",""],
+        ["长虹屏风","▧","buy-furniture-catalog-119","3299",""],
+        ["双面书架","▧","buy-furniture-catalog-120","3999",""],
+        ["拱形隔断","▧","buy-furniture-catalog-121","3599",""]
       ]
     }
   }
