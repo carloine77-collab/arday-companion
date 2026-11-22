@@ -537,3 +537,20 @@ html body .stage .drawer.profile-expanded.open .choices{
 .settings-option i{font-size:11px;font-style:normal;font-weight:700;color:#927253}
 .settings-new-game{margin-top:18px;border-color:#ddc4b5;background:#f7eee8}.settings-new-game .settings-option-icon{background:#edddd4;color:#a35f4b}
 @media(max-width:430px){.settings-entry{padding:0 9px;min-height:34px}.settings-view{padding:10px 9px 18px}.settings-option{padding:13px 9px;gap:9px}}
+
+
+/* Inventory use confirmation and first-contact conversation */
+.inventory-use-confirm{display:flex;flex-direction:column;justify-content:center;min-height:220px;padding:24px 18px;gap:12px}
+.inventory-use-question{margin:0;color:var(--ink);font:600 16px/1.65 'Noto Serif SC',Georgia,serif;text-align:center}
+.inventory-use-note{margin:0;color:var(--muted);font-size:11px;line-height:1.6;text-align:center}
+.inventory-use-actions{display:flex;justify-content:center;gap:10px;margin-top:12px}
+.inventory-use-actions button{min-width:108px;min-height:40px;padding:0 18px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:700}
+.inventory-use-confirm-button{background:#80664d;color:#fffaf3;border-color:#80664d!important}
+.inventory-use-cancel-button{background:#f7f1e7;color:#786750}
+.chat-topic-popover{position:absolute;z-index:90;top:calc(100% + 7px);left:0;right:0;display:flex;flex-wrap:wrap;gap:7px;padding:10px 12px;border:1px solid #e2d3c0;border-radius:12px;background:#fffaf1;box-shadow:0 8px 24px #493a291c}
+.chat-topic-popover[hidden]{display:none}
+.chat-topic{border:1px solid #e5d5c2;border-radius:999px;padding:8px 12px;background:#f7efe4;color:#765c43;font-size:11px;line-height:1.3}
+.chat-topic:active{background:#eadbc8}
+header.top{position:relative}
+.chat{position:relative}
+@media(max-width:430px){.inventory-use-confirm{min-height:190px;padding:18px 12px}.inventory-use-actions button{flex:1;min-width:0}.chat-topic-popover{padding:8px}}
