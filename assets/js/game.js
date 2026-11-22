@@ -175,6 +175,16 @@ s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 s.roomFinishes=s.roomFinishes&&typeof s.roomFinishes==='object'?s.roomFinishes:{};
 const privateRoomKeys=['bedroom','kitchen','bathroom'];
 if(!s.roomUnlockMigrationV1){s.roomUnlocks=isFreshInstall?{living:true,bedroom:false,kitchen:false,bathroom:false}:{living:true,bedroom:true,kitchen:true,bathroom:true};s.roomUnlockMigrationV1=true}else{s.roomUnlocks=s.roomUnlocks&&typeof s.roomUnlocks==='object'?s.roomUnlocks:{};s.roomUnlocks.living=true;privateRoomKeys.forEach(key=>s.roomUnlocks[key]=!!s.roomUnlocks[key])}
+s.roomUnlockReceipts=s.roomUnlockReceipts&&typeof s.roomUnlockReceipts==='object'?s.roomUnlockReceipts:{};
+// V1 treated every legacy save as fully unlocked, which bypassed the paid-door flow.
+// V2 retains rooms already furnished by the player and any recorded paid unlocks,
+// while returning unused private rooms to the locked state.
+if(!s.roomUnlockMigrationV2){
+ const previouslyUsedRooms=new Set((s.placed||[]).filter(record=>privateRoomKeys.includes(record?.room)).map(record=>record.room));
+ s.roomUnlocks={living:true,bedroom:false,kitchen:false,bathroom:false};
+ privateRoomKeys.forEach(key=>{s.roomUnlocks[key]=!!s.roomUnlockReceipts[key]||previouslyUsedRooms.has(key)});
+ s.roomUnlockMigrationV2=true;
+}
 const legacySharedWallpaper=typeof s.roomFinishes.wallpaper==='string'?s.roomFinishes.wallpaper:null;
 for(const roomName of ['living','bedroom','kitchen','bathroom']){
  const finish=s.roomFinishes[roomName]&&typeof s.roomFinishes[roomName]==='object'?s.roomFinishes[roomName]:{};
@@ -2854,7 +2864,7 @@ function persistFurniture(item){
     const icon=document.createElement('span');icon.className='furniture-wheel-icon';icon.textContent=symbol;
     const textNode=document.createElement('span');textNode.className='furniture-wheel-label';const locked=privateRoomKeys.includes(value)&&!s.roomUnlocks?.[value],unlockCost=roomUnlockCosts[value]||0;textNode.textContent=locked?label+' ¥'+unlockCost:label;
     button.append(icon,textNode);button.setAttribute('aria-pressed',item.doorDestination===value?'true':'false');button.setAttribute('aria-label',locked?'解锁'+label+'，需要'+unlockCost+'元':'将门通往'+label);
-    button.onclick=()=>{if(locked){if((Number(s.money)||0)<unlockCost){toast('¥不足');return}s.money-=unlockCost;s.roomUnlocks[value]=true;moneyRecord('shared','expense',unlockCost,'解锁房间：'+label);addEvent('解锁了一个新房间',label+'已开放。','player-action');save();render()}item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
+    button.onclick=()=>{if(locked){if((Number(s.money)||0)<unlockCost){toast('¥不足');return}s.money-=unlockCost;s.roomUnlocks[value]=true;s.roomUnlockReceipts[value]=true;moneyRecord('shared','expense',unlockCost,'解锁房间：'+label);addEvent('解锁了一个新房间',label+'已开放。','player-action');save();render()}item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
     wheel.appendChild(button);
    });
    stage.appendChild(wheel);
@@ -2868,7 +2878,9 @@ function persistFurniture(item){
    s.placed=s.placed.filter(entry=>entry.id!==item.id);disposeFurnitureResources(item.group);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);
    selectedFurniture=null;rotateFurnitureButton.disabled=true;removeFurnitureButton.disabled=true;refreshDyePalette();save();updateFurnitureHotspots();toast('门已收回背包');
   }
-  function selectFurniture(item){selectedFurniture=item;rotateFurnitureButton.disabled=!!item.wallAxis;removeFurnitureButton.disabled=!item.owned;refreshDyePalette();}
+  const doorDestinationButton=document.createElement('button');doorDestinationButton.type='button';doorDestinationButton.id='doorDestinationButton';doorDestinationButton.textContent='去向';doorDestinationButton.title='设置门的去向';doorDestinationButton.setAttribute('aria-label','设置门的去向');doorDestinationButton.hidden=true;
+  doorDestinationButton.onclick=()=>{if(selectedFurniture?.isDoor&&!selectedFurniture.pendingPlacement)openDoorWheel(selectedFurniture)};
+  function selectFurniture(item){selectedFurniture=item;doorDestinationButton.hidden=!(item?.isDoor&&!item.pendingPlacement);rotateFurnitureButton.disabled=!!item.wallAxis;removeFurnitureButton.disabled=!item.owned;refreshDyePalette();}
   const rotateFurnitureButton=document.createElement('button');
   rotateFurnitureButton.type='button';rotateFurnitureButton.id='rotateFurnitureButton';rotateFurnitureButton.textContent='↻';rotateFurnitureButton.disabled=true;
   const removeFurnitureButton=document.createElement('button');removeFurnitureButton.type='button';removeFurnitureButton.id='removeFurnitureButton';removeFurnitureButton.textContent='⌫';removeFurnitureButton.disabled=true;removeFurnitureButton.setAttribute('aria-label','回收家具');
@@ -3435,12 +3447,12 @@ function persistFurniture(item){
   Object.assign(pendingPlacementTools.style,{position:'static',transform:'none',zIndex:'auto',display:'none',gap:'8px',padding:'0',borderRadius:'0',background:'transparent',boxShadow:'none',alignItems:'center',marginLeft:'auto'});
   [confirmPlacementButton,cancelPlacementButton].forEach(button=>Object.assign(button.style,{border:'0',borderRadius:'10px',padding:'8px 12px',fontFamily:'inherit',fontSize:'12px',fontWeight:'600',background:button===confirmPlacementButton?'#6d806b':'#e4d8c7',color:button===confirmPlacementButton?'#fff':'#554839',cursor:'pointer',touchAction:'manipulation'}));
   pendingPlacementTools.append(confirmPlacementButton,cancelPlacementButton);decorateTools.append(pendingPlacementTools);
-  confirmPlacementButton.onclick=()=>{const item=selectedFurniture;if(!item?.pendingPlacement)return;const valid=item.wallAxis?!!item.pendingValid&&canPlaceOnWall(item,item.wallSide,wallOffset(item)):canPlaceFurniture(item,item.group.position.x,item.group.position.z,item.group.rotation.y);if(!valid){toast('这个位置仍与家具或房间边界冲突');return}item.pendingPlacement=false;item.pendingValid=true;s.inventory=s.inventory.filter(entry=>entry.id!==item.id);persistFurniture(item);pendingPlacementTools.style.display='none';save();updateFurnitureHotspots();toast(item.name+'已摆放')};
+  confirmPlacementButton.onclick=()=>{const item=selectedFurniture;if(!item?.pendingPlacement)return;const valid=item.wallAxis?!!item.pendingValid&&canPlaceOnWall(item,item.wallSide,wallOffset(item)):canPlaceFurniture(item,item.group.position.x,item.group.position.z,item.group.rotation.y);if(!valid){toast('这个位置仍与家具或房间边界冲突');return}item.pendingPlacement=false;item.pendingValid=true;s.inventory=s.inventory.filter(entry=>entry.id!==item.id);selectFurniture(item);persistFurniture(item);pendingPlacementTools.style.display='none';save();updateFurnitureHotspots();toast(item.name+'已摆放')};
   cancelPlacementButton.onclick=()=>{const item=selectedFurniture;if(!item?.pendingPlacement)return;s.placed=s.placed.filter(entry=>entry.id!==item.id);disposeFurnitureResources(item.group);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);selectedFurniture=null;pendingPlacementTools.style.display='none';save();render();toast('已取消摆放，物品已放回背包')};
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
   rotateFurnitureButton.title='旋转 15°';
-  decorateTools.append(dyePalette,rotateFurnitureButton,removeFurnitureButton);stage.appendChild(decorateTools);
+  decorateTools.append(dyePalette,doorDestinationButton,rotateFurnitureButton,removeFurnitureButton);stage.appendChild(decorateTools);
   stage.classList.add('three-ready');resize();setRoom('living');updateActivity(s.currentActivity||'idle');
   if(window.ResizeObserver){arday3D.ro=new ResizeObserver(resize);arday3D.ro.observe(stage)}window.addEventListener('resize',resize);
   arday3D.raf=requestAnimationFrame(frame);return true;
