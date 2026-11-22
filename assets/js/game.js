@@ -1983,7 +1983,7 @@ function maybeMeetElite(tier,at){
  const npc=available[Math.floor(Math.random()*available.length)],friendly=Math.random()<.5;
  const contact={id:npc.id,name:npc.name,role:npc.role,combat:npc.combat,malice:npc.malice,relation:friendly?'ally':'hostile',at};
  s.leaderboardContacts.push(contact);
- if(friendly&&s.teamRoster.length<8&&!s.teamRoster.some(m=>m.id===npc.id)){s.teamRoster.push({id:npc.id,name:npc.name,role:npc.role,combat:Math.min(npc.combat,(Number(s.combat)||15)+15),malice:npc.malice,selected:false,recruited:true,elite:true,portrait:npc.name.slice(0,1)})}
+
  return contact;
 }
 function showRanking(){
