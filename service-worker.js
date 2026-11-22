@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v224";
+const CACHE_NAME = "arday-shell-v225";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,16 +9,16 @@ const APP_SHELL = [
   "./assets/css/game-world.css?v=20261121-modular-css1",
   "./assets/css/game-career.css?v=20261121-guild-icon-fit1",
   "./assets/css/exchange.css?v=20261122-exchange-terminal1",
-  "./assets/css/commission.css?v=20261122-terminal1",
+  "./assets/css/commission.css?v=20261122-special-commissions1",
   "./assets/css/editorial-boards.css?v=20261122-poster3",
   "./assets/css/dungeon-board.css?v=20261121-event-depth1",
-  "./assets/js/game-config.js?v=20261122-food-expiry1",
+  "./assets/js/game-config.js?v=20261122-guild-training1",
   "./assets/js/furniture-catalog.js?v=20261122-furniture-audit3",
   "./assets/js/game-data/dungeon-data.js?v=20261121-long-progression1",
-  "./assets/js/commission-data.js?v=20261122-commission2",
-  "./assets/js/commission-system.js?v=20261122-commission2",
+  "./assets/js/commission-data.js?v=20261122-special1",
+  "./assets/js/commission-system.js?v=20261122-special1",
   "./assets/js/game-data/career-data.js?v=20261121-career-rebuild5",
-  "./assets/js/schedule-engine.js?v=20261121-neutral-items1",
+  "./assets/js/schedule-engine.js?v=20261122-guild-training1",
   "./assets/js/food-models.js?v=20261122-food-models2",
   "./assets/js/furniture-models.js?v=20261122-furniture-audit8",
   "./assets/js/furniture-placement.js",
@@ -30,7 +30,7 @@ const APP_SHELL = [
   "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1",
-  "./assets/js/game.js?v=20261122-exchange-guard1",
+  "./assets/js/game.js?v=20261122-outing-guild-training1",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
