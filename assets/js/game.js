@@ -38,6 +38,7 @@ s.attributes=s.attributes&&typeof s.attributes==='object'?s.attributes:{agility:
 ['agility','strength','intelligence','perception','willpower'].forEach(k=>s.attributes[k]=clamp(Number(s.attributes[k]??15)));
 s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.intelligence+s.attributes.perception+s.attributes.willpower)/5);
 if(isFreshInstall){Object.keys(s.attributes).forEach(key=>s.attributes[key]=1);s.combat=1;s.friend=0;s.bored=0;s.hate=0;s.love=0;}
+s.firstPlayedAt=Number(s.firstPlayedAt)||Date.now();
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[{id:'lin',name:'林澈',role:'前锋',combat:34,malice:8,selected:true,portrait:'⚔'},{id:'mori',name:'森',role:'侦察',combat:30,malice:6,selected:true,portrait:'⌕'},{id:'qiao',name:'乔',role:'支援',combat:26,malice:12,selected:false,portrait:'✦'}];
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});if(s.teamRoster.length>8)s.teamRoster=s.teamRoster.slice(0,8);
 s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object'?s.recruitmentInvites:{};s.factionApplications=s.factionApplications&&typeof s.factionApplications==='object'?s.factionApplications:{};s.factionMembership=s.factionMembership||null;s.factionClues=Array.isArray(s.factionClues)?s.factionClues:[];
@@ -286,6 +287,7 @@ function purchase(id,label,cost){
 }
 function openTab(name,force=false){
  window.ArdayDungeonBoardRuntime?.pauseBoard?.();
+ $('drawer').classList.remove('settings-fullscreen','inventory-confirm-modal');$('stage').classList.remove('inventory-confirm-active');
  const active=document.querySelector('.tool.active')?.dataset.tab;
  if(!force&&active===name&&((name==='日程'&&$('stage').classList.contains('calendar-mode'))||(name!=='日程'&&$('drawer').classList.contains('open')))){if(arday3D?.cancelGesture)arday3D.cancelGesture();closeCalendar();$('drawer').classList.remove('open','profile-expanded');document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));return}
  if(name==='日程'){openCalendar();return}
@@ -405,7 +407,7 @@ function eventChoicesLegacy(e){
  $('drawerTitle').textContent=e.category==='letter'?'阿尔的来信':'系统提示';
  const date=new Date(e.created||Date.now()).toLocaleString('zh-CN',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
  const type=e.category==='letter'?'阿尔写给你':'系统提示';
- const paper=document.createElement('article');paper.className='note-paper '+(e.category==='letter'?'personal-note':'system-note');
+ const paper=document.createElement('article');paper.className='note-paper '+(e.category==='letter'?'personal-note':'system-note')+(e.rewardBundle?' supply-letter':'');
  const meta=document.createElement('div');meta.className='note-paper-meta';meta.textContent=type+'　·　'+date;
  const heading=document.createElement('h2');heading.className='note-paper-title';heading.textContent=e.title;
  const body=document.createElement('p');body.className='note-paper-body';body.textContent=e.detail;
@@ -426,21 +428,24 @@ function eventChoicesLegacy(e){
  actions.prepend(back);actions.appendChild(ack);$('choices').replaceChildren(paper,actions);$('drawer').classList.add('open');
 }
 function renderEvents(){
- $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
- const open=s.events.filter(e=>e.status==='open'&&['letter','system'].includes(e.category)).sort((a,b)=>(b.created||0)-(a.created||0));
+ $('drawer').classList.remove('furniture-drawer','settings-fullscreen','inventory-confirm-modal');$('stage').classList.remove('inventory-confirm-active');$('drawer').querySelector('.furniture-close')?.remove();
+ const open=s.events.filter(e=>(e.status==='open'||(e.favorite&&e.category==='letter'))&&['letter','system'].includes(e.category)).sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
  const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 条';$('choices').appendChild(count);
  if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无消息</h3>';$('choices').appendChild(empty);}
  open.forEach(e=>{
-  const isLetter=e.category==='letter';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
+  const isLetter=e.category==='letter';const wrap=document.createElement('div');wrap.className='event-card-wrap';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
   const top=document.createElement('span');top.className='note-card-top';
   const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=e.type==='shared-goal-proposal'?'阿尔的邀约':e.type==='relationship-conflict'?'关系事件':isLetter?'阿尔的来信':'系统提示';
   const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});top.append(kindNode,timeNode);
   const titleNode=document.createElement('strong');titleNode.className='note-card-title';titleNode.textContent=e.title;
   const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail+(e.goalCondition?' 完成条件：'+e.goalCondition:'');
   const arrow=document.createElement('span');arrow.className='event-arrow';arrow.textContent='↗';b.append(top,titleNode,detailNode,arrow);
-  b.onclick=()=>eventChoices(e);$('choices').appendChild(b);
+  b.onclick=()=>eventChoices(e);
+  wrap.appendChild(b);
+  if(isLetter){const star=document.createElement('button');star.type='button';star.className='mail-favorite '+(e.favorite?'is-favorite':'');star.textContent=e.favorite?'★':'☆';star.setAttribute('aria-label',e.favorite?'取消收藏':'收藏信件');star.onclick=event=>{event.stopPropagation();e.favorite=!e.favorite;save();renderEvents()};wrap.appendChild(star)}
+  $('choices').appendChild(wrap);
  });
  $('drawer').classList.add('open');
 }
@@ -697,7 +702,9 @@ function openCalendar(){selectedCalendarDay=0;ensureSchedule();$('drawer').class
 function refreshTopActions(){let n=s.events.filter(e=>e.status==='open'&&e.type!=='player-action').length;let c=$('eventCount');if(c)c.textContent=n?'· '+n:''}
 function renderSettings(){
  window.ArdayDungeonBoardRuntime?.pauseBoard?.();
- $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer','inventory-confirm-modal');
+ $('stage').classList.remove('inventory-confirm-active');
+ $('drawer').classList.add('settings-fullscreen');
  $('drawer').querySelector('.furniture-close')?.remove();
  $('drawerTitle').textContent='设置';
  $('choices').className='choices settings-view';
@@ -1482,6 +1489,7 @@ function sharedGoalCatalog(){
   return {...(template||{}),...g,condition:g.condition||template?.condition||'按照目标进度完成共同活动。'};
  });
  function proposeSharedGoal(at=Date.now()){
+  if(keyAt(at)<=keyAt(s.firstPlayedAt))return;
   const active=s.sharedGoals.filter(g=>g.status==='active');
   const pending=s.events.filter(e=>e.status==='open'&&e.type==='shared-goal-proposal');
   if(active.length+pending.length>=2)return;
@@ -1806,14 +1814,18 @@ window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save
 
 function showInventoryUseConfirm(entity){
  if(!entity||!['consumable','dungeon-item'].includes(entity.kind))return;
- $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='使用道具';$('choices').className='choices inventory-use-confirm';
+ const drawer=$('drawer'),stage=$('stage');
+ drawer.classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer','settings-fullscreen');
+ drawer.classList.add('inventory-confirm-modal');stage.classList.add('inventory-confirm-active');
+ $('drawerTitle').textContent='使用道具';$('choices').className='choices inventory-use-confirm';
  const question=document.createElement('p');question.className='inventory-use-question';question.textContent='确认向 Arday 使用「'+entity.name+'」吗？';
  const note=document.createElement('p');note.className='inventory-use-note';note.textContent=entity.itemId==='first-aid-kit'?'使用后会消耗一个急救包。':'确认后将立即消耗该道具并应用效果。';
  const actions=document.createElement('div');actions.className='inventory-use-actions';
+ const close=()=>{drawer.classList.remove('open','inventory-confirm-modal');stage.classList.remove('inventory-confirm-active')};
  const confirm=document.createElement('button');confirm.type='button';confirm.className='inventory-use-confirm-button';confirm.textContent='确认';
  const cancel=document.createElement('button');cancel.type='button';cancel.className='inventory-use-cancel-button';cancel.textContent='取消';
- confirm.onclick=()=>{const index=s.inventory.findIndex(item=>item.id===entity.id);if(index<0){toast('这件道具已不在背包中');openTab('物品',true);return}if(entity.kind==='consumable')useConsumableItem(s.inventory[index],index);else useDungeonItem(s.inventory[index],index)};
- cancel.onclick=()=>openTab('物品',true);actions.append(confirm,cancel);$('choices').replaceChildren(question,note,actions);$('drawer').classList.add('open');
+ confirm.onclick=()=>{const index=s.inventory.findIndex(item=>item.id===entity.id);if(index<0){close();toast('这件道具已不在背包中');openTab('物品',true);return}close();if(entity.kind==='consumable')useConsumableItem(s.inventory[index],index);else useDungeonItem(s.inventory[index],index)};
+ cancel.onclick=()=>{close();openTab('物品',true)};actions.append(confirm,cancel);$('choices').replaceChildren(question,note,actions);drawer.classList.add('open');
 }
 function startArdayAwakening(){
  s.introStage='awakening';s.introWakePending=true;save();updateArday3D('wake',null,'living',null);
@@ -3401,8 +3413,22 @@ initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activit
 if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「消耗品」分类中，将急救包用于 Arday。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
-function playIntroSequence(){s.introNarrationShown=true;s.introStage='awaiting-first-aid';save();const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','新手补给已经寄到信箱。请先领取急救包，再到背包里确认是否要对 Arday 使用。'];let index=0;const next=()=>{if(index>=lines.length){s.introNarrationCompleted=true;save();return}saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200);else{ s.introNarrationCompleted=true;save(); }};next();}
-if(!s.introNarrationShown&&s.introStage==='awaiting-first-aid')playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation'||s.introStage==='awaiting-settle-in')renderChatTopics();else if(s.introStage==='settling-in')resumeSettleInDialogue();else showCurrentScheduleBubble();
+function playIntroSequence(){
+ if(s.introNarrationCompleted)return;
+ s.introNarrationShown=true;s.introStage='awaiting-first-aid';
+ const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','新手补给已经寄到信箱。请先领取急救包，再到背包里确认是否要对 Arday 使用。'];
+ let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introNarrationIndex)||0)));
+ const bubble=$('dialogue');
+ const advance=()=>{
+  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;save();bubble.style.display='none';bubble.onclick=null;bubble.style.pointerEvents='none';return}
+  saySystem(lines[index]);index++;s.introNarrationIndex=index;save();
+  clearTimeout(dialogueTimer);
+  bubble.style.pointerEvents='auto';bubble.style.cursor='pointer';bubble.setAttribute('role','button');bubble.setAttribute('aria-label','点击继续');
+  bubble.onclick=advance;
+ };
+ advance();
+}
+if(!s.introNarrationCompleted&&s.introStage==='awaiting-first-aid')playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation'||s.introStage==='awaiting-settle-in')renderChatTopics();else if(s.introStage==='settling-in')resumeSettleInDialogue();else showCurrentScheduleBubble();
  // Catch up immediately when Safari restores a backgrounded or suspended tab.
  function dismissRestoredDungeonBoard(){
   if(s.activeDungeon?.mode!=='board')return;
