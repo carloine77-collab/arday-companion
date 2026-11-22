@@ -22,7 +22,7 @@
 <title>Arday · 阿尔</title>
 <link rel="stylesheet" href="assets/css/game.css?v=20261121-modular-css1">
 <link rel="stylesheet" href="assets/css/game-panels.css?v=20261122-recycle-blue-center1">
-<link rel="stylesheet" href="assets/css/game-interactions.css?v=20261122-settings1">
+<link rel="stylesheet" href="assets/css/game-interactions.css?v=20261122-awakening1">
 <link rel="stylesheet" href="assets/css/game-world.css?v=20261121-modular-css1">
 <link rel="stylesheet" href="assets/css/game-career.css?v=20261121-guild-icon-fit1">
 <link rel="stylesheet" href="assets/css/exchange.css?v=20261122-exchange-terminal1">
@@ -37,7 +37,7 @@
   <button class="identity" id="profileEntry" aria-label="打开人物档案"><div class="mark">A</div><div class="identity-copy"><div class="name">Arday · 阿尔</div><div class="date" id="date">—</div></div></button>
   <div class="identity-meta"><button class="settings-entry" id="settingsEntry" type="button" aria-label="打开设置"><span aria-hidden="true">⚙</span> 设置</button></div>
  </div>
- <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="消息" autocomplete="off"><button class="send">发送</button></form>
+ <form class="chat" id="chatForm"><input id="message" maxlength="160" placeholder="消息" autocomplete="off"><button class="send">发送</button></form><div class="chat-topic-popover" id="chatTopics" hidden></div>
 </header>
 <div class="play-area">
 <aside class="stats" aria-label="角色状态"><div class="stat-group"><div class="stat-group-title">情感 <span class="status-tags" id="emotionStatuses"></span></div>
@@ -90,7 +90,7 @@
 <script src="assets/js/hall/hall-scene.js?v=20261122-exchange-label2"></script>
 <script src="assets/js/dungeon-board.js?v=20261121-global-balance4"></script>
 <script src="assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1"></script>
-<script src="assets/js/game.js?v=20261122-settings1"></script>
+<script src="assets/js/game.js?v=20261122-awakening1"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
