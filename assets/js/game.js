@@ -28,7 +28,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:3000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
+const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0,isFreshInstall=false;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.testFundsV3=true;}}else isFreshInstall=true;}catch(e){isFreshInstall=true} delete s.coins;
 s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
@@ -89,7 +89,8 @@ function refreshDungeonUnlocks(){
  DUNGEON_TIERS.forEach((tier,index)=>{if(index===0)return;const previous=DUNGEON_TIERS[index-1],needed=DUNGEON_CLEAR_REQUIREMENTS[tier]||0;if((Number(s.dungeonProgress[previous])||0)>=needed&&!s.dungeonUnlocks.includes(tier))s.dungeonUnlocks.push(tier)});
 }
 refreshDungeonUnlocks();
-s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};s.introStage='awaiting-first-aid';}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};s.introStage='awaiting-first-aid';}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));
+s.events=s.events.filter(event=>!(event.type==='shared-goal-proposal'&&event.goalId==='outing'));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -153,6 +154,21 @@ s.placed.forEach((item,index)=>{
  if(!Number.isFinite(Number(item.z)))item.z=0;
  if(!Number.isFinite(Number(item.rotation)))item.rotation=0;if(item.name.startsWith('成品食物·')&&!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}
 });
+if(!s.starterSceneLayoutVersion){
+ const starterLayout={
+  '茶几':{x:0,z:1.15},
+  '植物':{x:-3.05,z:1.45},
+  '冰箱':{x:-3.55,z:-2.78},
+  '灶台':{x:-1.65,z:-2.78},
+  '水槽':{x:.15,z:-2.78}
+ };
+ (s.placed||[]).forEach(item=>{
+  if(item?.kind!=='scene'||!String(item.id||'').startsWith('scene-default-'))return;
+  const position=starterLayout[item.name];if(!position)return;
+  item.x=position.x;item.y=0;item.z=position.z;item.rotation=0;
+ });
+ s.starterSceneLayoutVersion=1;
+}
 s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
 s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 // Room finishes are independent per room. Migrate the former shared wallpaper
@@ -183,7 +199,7 @@ function applyBureauDailyGrant(at=Date.now()){
  if(amount>0){grantPoints(amount);addEvent('管理局每日拨款','根据上一次副本结算，管理局发放 '+amount+' 积分（结算积分的 40%）。','daily')}
  save();return amount;
 }
-function render(){applyDungeonDeadlinePenalty();applyBureauDailyGrant();statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(Math.round(Number(s.combat)||0));const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');renderStatusTags();renderCurrentSchedulePeek();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});if(typeof refreshTopActions==='function')refreshTopActions();}
+function render(){applyDungeonDeadlinePenalty();applyBureauDailyGrant();statKeys.forEach(k=>{let v=$(k+'V'),b=$(k+'B');if(v)v.textContent=['friend','bored','hate','love'].includes(k)?Math.floor(Number(s[k])||0):Math.round(Number(s[k])||0);if(b)b.style.width=(Number(s[k])||0)+'%'});const cp=$('combatPowerV');if(cp)cp.textContent=String(Math.round(Number(s.combat)||0));const ca=$('combatAttributes');if(ca)ca.innerHTML=[['agility','敏捷'],['strength','力量'],['intelligence','智力'],['perception','感知'],['willpower','意志']].map(([k,n])=>{const value=Math.max(0,Math.min(100,Number(s.attributes[k])||0));return '<div class="stat combat-attribute"><label>'+n+'</label><b>'+Math.round(value)+'</b><div class="meter"><i style="width:'+value+'%"></i></div></div>'}).join('');updateStatusBuffs(Date.now());renderStatusTags();renderCurrentSchedulePeek();updateDungeonCountdown();let d=$('date');if(d)d.textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'})+' · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});if(typeof refreshTopActions==='function')refreshTopActions();}
 function renderCurrentSchedulePeek(){
  const node=$('currentSchedulePeek');if(!node)return;
  const now=new Date();ensureScheduleAt(now);
@@ -1215,6 +1231,7 @@ function updateStatusBuffs(at=Date.now()){
   else if(!rule.active&&state.active){state.active=false;state.since=0;state.nextEffectAt=0}
   if(rule.active&&state.active){if(!Number(state.nextEffectAt)){state.since=at;state.nextEffectAt=at+period}if(at>=state.nextEffectAt){const periods=Math.floor((at-state.nextEffectAt)/period)+1;rule.apply(periods);state.nextEffectAt+=periods*period}}
  }
+ renderStatusTags();
 }
 function applyFatalCondition(at=Date.now(),startingValue=18){const previous=s.statusBuffs?.fatal,wasActive=!!previous?.active;s.statusBuffs=s.statusBuffs||{};s.statusBuffs.fatal={active:true,since:wasActive?Number(previous.since)||at:at,nextEffectAt:wasActive&&Number(previous.nextEffectAt)>at?Number(previous.nextEffectAt):at+12*3600000};['energy','hunger','clean','fun'].forEach(key=>{s[key]=wasActive?Math.min(Number(s[key])||0,startingValue):clamp(startingValue)});}
 function applyActivityEffectsWithFeedback(effects){
@@ -1445,9 +1462,9 @@ function eventChoices(e){
 /* === Shared goals and situational events === */
 s.sharedGoals=Array.isArray(s.sharedGoals)?s.sharedGoals:[];
  if(!s.sharedGoals.length&&s.sharedGoal?.status==='active'&&!['room','meal'].includes(s.sharedGoal.id))s.sharedGoals.push(s.sharedGoal);
- s.sharedGoals=s.sharedGoals.filter(g=>g&&g.status==='active').slice(0,2);
+ s.sharedGoals=s.sharedGoals.filter(g=>g&&g.status==='active'&&g.id!=='outing').slice(0,2);
  delete s.sharedGoal;
- s.sharedGoalHistory=Array.isArray(s.sharedGoalHistory)?s.sharedGoalHistory:[];
+ s.sharedGoalHistory=(Array.isArray(s.sharedGoalHistory)?s.sharedGoalHistory:[]).filter(g=>g?.id!=='outing');
  s.lastRandomEventAt=Number(s.lastRandomEventAt||0);
  s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);s.lastSharedProposalAt=Number(s.lastSharedProposalAt||0);
 
@@ -1480,7 +1497,6 @@ function ardayLine(kind, fallback){
 }
 function sharedGoalCatalog(){
   return [
-   {id:'outing',title:'找一天出门走走',detail:'我想和你一起出门散步。天气合适的话，就沿着熟悉的街道慢慢走。',condition:'在日程中选择一次散步并邀请阿尔同行，实际完成 2 次。',target:2,unit:'次共同散步',action:'walk',icon:'⌁'},
    {id:'reading',title:'找个晚上一起读书',detail:'找个不赶时间的晚上，各自拿本书坐一会儿。我想和你待在同一盏灯下面。',condition:'在阿尔的阅读安排上选择「问他能否一起」，共同完成 2 次阅读。',target:2,unit:'次共同阅读',action:'read',icon:'▤'}
   ];
  }
@@ -2550,7 +2566,7 @@ function initArday3D(){
    if(modelName==='台灯'||modelName==='壁灯'||modelName==='吊灯'||modelName==='落地灯'){const isCeiling=modelName==='吊灯',isFloor=modelName==='落地灯',lampPoint=new T.PointLight(0xffd39a,isCeiling?2.5:isFloor?1.8:1.05,isCeiling?8.5:isFloor?7:4.8,1.8);lampPoint.position.set(isFloor&&variant==='黄铜弧形'?.47:0,isCeiling?-.56:isFloor?1.48:modelName==='台灯'?.72:-.02,isCeiling?0:modelName==='壁灯'?.24:0);lampPoint.castShadow=false;group.add(lampPoint);const enabled=record?.lightOn!==false,bulb=new T.Mesh(new T.SphereGeometry(isCeiling?.105:.075,16,12),new T.MeshStandardMaterial({color:enabled?0xffe4b5:0x786f63,emissive:enabled?0x8d5422:0x000000,emissiveIntensity:enabled?.55:0,roughness:.28,metalness:.05}));bulb.position.copy(lampPoint.position);group.add(bulb);const glow=new T.Sprite(new T.SpriteMaterial({map:lampGlowTexture,color:0xffdfae,transparent:true,opacity:enabled?.30:0,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));glow.position.copy(lampPoint.position);glow.scale.set(isCeiling?1.15:.82,isCeiling?1.15:.82,1);glow.visible=enabled;group.add(glow);practicalLights.push({light:lampPoint,base:lampPoint.intensity,enabled,bulb,glow,group,room});group.userData.lampLight=lampPoint;group.userData.lampBulb=bulb;action=()=>{const item=furnitureRegistry.find(x=>x.group===group);if(!item)return;item.lightOn=!item.lightOn;const light=practicalLights.find(x=>x.light===lampPoint);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}updateDaylight(true);persistFurniture(item);toast(item.name+(item.lightOn?'已开启':'已关闭'))}}
    group.position.set(x,y,z);group.rotation.y=rotation;
    const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:anchor,action,wallAxis,wallSide,wallRange:4.5,record});
-   item.owned=true;item.kind=record?.kind||(name.startsWith('成品食物·')?'food':'furniture');item.expiresAt=Number(record?.expiresAt)||null;if(group.userData.lampLight){item.lightOn=record?.lightOn!==false;const light=practicalLights.find(x=>x.light===group.userData.lampLight);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}}item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
+   item.kind=record?.kind||(name.startsWith('成品食物·')?'food':'furniture');item.owned=item.kind!=='scene';item.expiresAt=Number(record?.expiresAt)||null;if(group.userData.lampLight){item.lightOn=record?.lightOn!==false;const light=practicalLights.find(x=>x.light===group.userData.lampLight);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}}item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    item.dyeMaterials=[];group.traverse(object=>{if(object.isMesh&&!object.userData.inkOutline&&object.material){const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(material=>{if(material?.userData?.dyeable&&!item.dyeMaterials.includes(material))item.dyeMaterials.push(material)})}});
    if(record?.dyeColor)item.dyeMaterials.forEach(material=>material.color.setHex(record.dyeColor));item.dyeColor=record?.dyeColor||null;
    if(restoring){
@@ -2664,7 +2680,7 @@ function initArday3D(){
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
   const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door'];
   s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id));
-  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.kind!=='scene');
+  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.kind!=='scene'&&record.name!=='窗户');
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
   // Resolve support relationships after every saved item exists. The old
   // one-pass restore silently detached tabletop objects when their table
@@ -2691,15 +2707,21 @@ function initArday3D(){
    {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
   ];
-  if(!s.defaultDoorSetupVersion){
+  if((Number(s.defaultDoorSetupVersion)||0)<2){
   defaultDoorRecords.forEach(def=>{
    let record=s.placed.find(entry=>entry.id===def.id);
-   if(!record){record={...def};s.placed.push(record)}
-   record.name='默认室内木门';record.kind='furniture';record.destination=record.destination||def.destination;
+   if(!record){
+    const existingDoor=s.placed.find(entry=>entry.room===def.room&&typeof entry.name==='string'&&/门/.test(entry.name));
+    if(existingDoor)return;
+    record={...def};s.placed.push(record);
+   }
+   record.name=def.name;record.kind='furniture';record.destination=record.destination||def.destination;
+   record.wallSide=record.wallSide||def.wallSide;record.wallOffset=Number.isFinite(Number(record.wallOffset))?Number(record.wallOffset):def.wallOffset;
+   record.x=Number.isFinite(Number(record.x))?Number(record.x):def.x;record.y=Number.isFinite(Number(record.y))?Number(record.y):def.y;record.z=Number.isFinite(Number(record.z))?Number(record.z):def.z;
    const existing=furnitureRegistry.find(entry=>entry.id===record.id);
    if(!existing)createOwnedFurniture(record.name,record);
   });
-   s.defaultDoorSetupVersion=1;save();
+   s.defaultDoorSetupVersion=2;save();
   }
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
