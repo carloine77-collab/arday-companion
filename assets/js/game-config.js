@@ -995,7 +995,7 @@ window.ArdayGameConfig = {
    },
    needs: { hungerHourlyDecay:2.25, cleanHourlyDecay:0.9, funHourlyDecay:1.25 }
   },
-  activityDailyLimits: {wash:1,rest:2,laundry:1,exercise:1},
+  activityDailyLimits: {wash:1,rest:2,laundry:1,exercise:1,guildTraining:1},
   activityMeta: {
  rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:72,weight:2.2,base:1.5},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
@@ -1022,6 +1022,7 @@ window.ArdayGameConfig = {
  sitChair:{title:'坐在椅子上',duration:'short',autonomous:false,menuLabel:'坐下',location:'chair',pose:'sit',anchor:'chair',effect:{fun:1}},
 
  write:{title:'写作 / 整理资料',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:58,weight:.28,base:10},requires:'desk',menuLabel:'写作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:5}},
+ guildTraining:{title:'公会训练',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:68,weight:.18,base:.35},requires:'computer',menuLabel:'公会训练',location:'desk',pose:'sit',anchor:'desk',effect:{fun:-2,energy:-3}},
  work:{title:'工作',duration:'long',autonomous:false,menuLabel:'工作',location:'desk',pose:'sit',anchor:'desk',effect:{fun:-1}}
 },
   furnitureActivities: {
@@ -1036,7 +1037,7 @@ window.ArdayGameConfig = {
  cushion:{title:'坐垫',activities:{rest:{anchor:'cushion'},read:{anchor:'cushion'}}},
  bookshelf:{title:'书架',activities:{read:{anchor:'shelf'}}},
  desk:{title:'书桌',activities:{read:{anchor:'desk'},write:{anchor:'desk'},computerPlay:{anchor:'desk'}}},
- computer:{title:'电脑',activities:{computerPlay:{anchor:'desk'},write:{anchor:'desk'},browseWeb:{anchor:'desk'},program:{anchor:'desk'}}},
+ computer:{title:'电脑',activities:{computerPlay:{anchor:'desk'},write:{anchor:'desk'},browseWeb:{anchor:'desk'},program:{anchor:'desk'},guildTraining:{anchor:'desk}}},
  television:{title:'电视',activities:{watchTV:{anchor:'sofa'}}},
  recordPlayer:{title:'唱片机',activities:{listenRecords:{anchor:'sofa'}}},
  gameConsole:{title:'游戏机',activities:{game:{anchor:'gameConsole'}}},
@@ -1045,7 +1046,7 @@ window.ArdayGameConfig = {
  treadmill:{title:'跑步机',activities:{exercise:{anchor:'treadmill'}}},
  dumbbellRack:{title:'哑铃架',activities:{exercise:{anchor:'dumbbellRack'}}},
  wallArt:{title:'装饰画',activities:{admireDecor:{anchor:'wallArt'}}},
- window:{title:'窗户',activities:{admireView:{anchor:'window'}}},
+ window:{title:'窗户',activities:{admireView:{anchor:'window'},walk:{anchor:'window'}}},
 
  },
    recipes: {
