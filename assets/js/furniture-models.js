@@ -49,7 +49,12 @@ window.ArdayFurnitureModels = (() => {
    const restoring=!!record&&['x','y','z','rotation','wallSide','wallOffset'].some(key=>Object.prototype.hasOwnProperty.call(record,key));
    let width=1,depth=1,height=.8,surfaceType='floor',surfaceY=.04,supportId=record?.supportId||null,wallAxis=null,wallSide=null,anchor=[0,.5],action=()=>{};
    const legs=(w,d,h,t)=>{for(const x of [-w/2+t,w/2-t])for(const z of [-d/2+t,d/2-t])box(x,h/2,z,t,h,t,m.wood)};
-   if(modelName==='床'){
+   const modularBuilder=modelName!=='成品食物'?window.ArdayFurnitureModelCategories?.[modelName]:null;
+   if(modularBuilder){
+    const ctx={T,group,mat,m,fabricMap,woodMap,ceramicMap,applyPainterMap,variant,modelName,name,id,room,parent,openFurnitureActions,openKitchenPanel,document,addWindowSun,addWindowView,addOpenCasementWindow,addWindowDressing,box,cyl,sphere,legs,restoring,toast,width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action};
+    if(modularBuilder(ctx)!==true){group.traverse(o=>{o.geometry?.dispose?.();const materials=Array.isArray(o.material)?o.material:[o.material];materials.forEach(material=>material?.dispose?.())});parent.remove(group);return null;}
+    ({width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx);
+   }else if(modelName==='床'){
 
     action=()=>openFurnitureActions('bed',id);
     const isWood=variant==='浅橡木框架',isSoft=variant==='奶油软包',isDouble=name==='双人床',isFabric=name==='布艺床';
