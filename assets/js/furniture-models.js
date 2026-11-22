@@ -1215,7 +1215,7 @@ window.ArdayFurnitureModels = (() => {
     box(0,2.34,-.02,2.52,.22,1.66,bedding);
     box(0,2.48,-.02,2.42,.08,1.58,sheet);
     box(0,2.56,.38,2.35,.12,.76,bedding);
-    const pillow=new T.Mesh(new T.SphereGeometry(1,24,16),sheet);pillow.position.set(0,2.59,-.62);pillow.scale.set(.48,.1,.25);group.add(pillow);pillow.castShadow=true;
+    const pillow=new T.Mesh(new T.SphereGeometry(1,24,16),sheet);pillow.position.set(-.78,2.59,0);pillow.scale.set(.25,.1,.48);group.add(pillow);pillow.castShadow=true;
     // Guardrails with vertical balusters; a deliberate opening remains beside the ladder.
     box(0,2.65,-.91,2.62,.22,.1,frameEdge);
     for(const x of [-1.25,-.98,-.71,-.44,-.17,.1,.37,.64,.91,1.18])box(x,2.55,-.91,.045,.36,.045,frame);
