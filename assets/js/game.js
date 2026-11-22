@@ -2642,7 +2642,7 @@ function initArday3D(){
     let support=null;
     let placed=false;
     if(surfaceType==='ceiling'){group.position.set(0,4.45,0);placed=true;}
-    else if(surfaceType==='tabletop'&&supports.length&&!isPreparedFood){
+    else if(surfaceType==='tabletop'&&supports.length){
      // Validate against the usable top and objects already resting on that same
      // support. Nearby chairs and cabinet fronts must not block tabletop placement.
      for(const candidate of supports){
