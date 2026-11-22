@@ -849,7 +849,7 @@ function ensureScheduleAt(value){
  if(!s.calendar.days[requestedKey])ensureDay(requestedKey);
  [currentKey,dayKey(plusDays(dayAnchor(),1)),dayKey(plusDays(dayAnchor(),2)),requestedKey].filter((key,index,array)=>array.indexOf(key)===index&&s.calendar.days[key]).forEach(ensureSleepSchedule);
  // Replan only future autonomous slots when the set or placement of home furniture changes.
- const furnitureSignature=JSON.stringify((s.placed||[]).filter(item=>item&&item.id).map(item=>({id:String(item.id),name:String(item.name||''),room:String(item.room||''),supportId:String(item.supportId||''),kind:furnitureKindForPlaced(item)})).sort((a,b)=>a.id.localeCompare(b.id)));
+ const furnitureSignature=JSON.stringify({activityCatalogVersion:2,furniture:(s.placed||[]).filter(item=>item&&item.id).map(item=>({id:String(item.id),name:String(item.name||''),room:String(item.room||''),supportId:String(item.supportId||''),kind:furnitureKindForPlaced(item)})).sort((a,b)=>a.id.localeCompare(b.id))});
  if(s.calendar.autonomyFurnitureSignature!==furnitureSignature){
   const currentHour=new Date().getHours();
   Object.keys(s.calendar.days||{}).filter(key=>key>=currentKey).sort().forEach(key=>{
