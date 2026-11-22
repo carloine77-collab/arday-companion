@@ -1,3 +1,5 @@
+/* Ownership: drawer shells, panel sizing, scroll containment and panel-level layout. */
+/* Inventory/shop visual states are specialized in game-interactions.css; shared selectors remain a documented migration boundary. */
 /* Shop redesign: touch-first hierarchy and product cards. */
 .stage .drawer.shop-drawer{top:8px!important;bottom:8px!important;left:50%!important;transform:translate(-50%,14px)!important;width:min(96%,760px)!important;max-height:none!important;height:auto!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:0!important}
 .stage .drawer.shop-drawer.open{transform:translate(-50%,0)!important}
