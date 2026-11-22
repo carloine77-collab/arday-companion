@@ -547,7 +547,7 @@ $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('e
 function respondToChat(text){
  if(s.introStage==='awaiting-first-contact'){
   s.introFirstQuestion=String(text||'').slice(0,160);s.introStage='awaiting-void-explanation';
-  say('……你是谁？刚才这里明明只有我一个人。你是从哪里冒出来的？');save();renderChatTopics();return {status:'intro-replied',stage:s.introStage};
+  say('我？……我叫 Arday。等等，你是谁？你刚才是从哪里冒出来的？');save();renderChatTopics();return {status:'intro-replied',stage:s.introStage};
  }
  if(s.introStage==='awaiting-void-explanation'){
   s.introVoidAnswer=String(text||'').slice(0,160);s.introStage='complete';
@@ -3377,8 +3377,8 @@ initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activit
 if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「消耗品」分类中，将急救包用于 Arday。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
-function playIntroSequence(){const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','新手补给已经寄到信箱。请先领取急救包，再到背包里确认是否要对 Arday 使用。'];let index=0;const next=()=>{if(index>=lines.length)return;s.introStage=s.introStage||'awaiting-first-aid';save();return}saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200)};next();}
-if(isFreshInstall||s.introStage==='awaiting-first-aid')playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation')renderChatTopics();else showCurrentScheduleBubble();
+function playIntroSequence(){s.introNarrationShown=true;s.introStage=s.introStage||'awaiting-first-aid';save();const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','新手补给已经寄到信箱。请先领取急救包，再到背包里确认是否要对 Arday 使用。'];let index=0;const next=()=>{if(index>=lines.length)return;s.introStage=s.introStage||'awaiting-first-aid';save();return}saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200)};next();}
+if(isFreshInstall||(!s.introNarrationShown&&s.introStage==='awaiting-first-aid'))playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation')renderChatTopics();else showCurrentScheduleBubble();
  // Catch up immediately when Safari restores a backgrounded or suspended tab.
  function dismissRestoredDungeonBoard(){
   if(s.activeDungeon?.mode!=='board')return;
