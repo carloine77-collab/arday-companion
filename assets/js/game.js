@@ -2687,16 +2687,69 @@ function persistFurniture(item){
     }
    }
   }
-  const wallpaperColors={'buy-wallpaper-warm-white':0xd5d1c9,'buy-wallpaper-deepblue':0x243b59,'buy-wallpaper-mist':0x8b929c};
+  const finishTextureCache=new Map(),finishMaterialCache=new Map();
+  function finishTexture(id,type){
+   const key=type+':'+id;if(finishTextureCache.has(key))return finishTextureCache.get(key);
+   const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
+   const ctx=canvas.getContext('2d');
+   let seed=0;for(const ch of id)seed=(seed*31+ch.charCodeAt(0))>>>0;
+   const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+   const line=(x1,y1,x2,y2,color,width=1)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()};
+   if(type==='floor'){
+    if(id==='buy-floor-oak-plank'||id==='buy-floor-herringbone'||id==='buy-floor-parquet'){
+     const base=id==='buy-floor-oak-plank'?'#b58b62':'#a77b52';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+     if(id==='buy-floor-oak-plank'){
+      const rows=8,h=512/rows;for(let r=0;r<rows;r++){const offset=(r%2)*83;for(let x=-100;x<620;x+=166){const xx=x+offset;ctx.fillStyle=['#c49a70','#ad8058','#bd9166','#a77b54'][Math.floor(rand()*4)];ctx.fillRect(xx,r*h,164,h-2);line(xx+5,r*h+3,xx+160,r*h+3,'rgba(70,43,24,.25)',2);for(let g=0;g<5;g++){const gy=r*h+12+rand()*(h-24);ctx.beginPath();ctx.ellipse(xx+rand()*164,gy,12+rand()*25,1+rand()*2,0,0,Math.PI*2);ctx.strokeStyle='rgba(75,47,27,.16)';ctx.stroke()}}}
+     }else if(id==='buy-floor-herringbone'){
+      const colors=['#c39a70','#ad815b','#b58a61','#98704d'];for(let y=-64;y<576;y+=128){for(let x=-64;x<576;x+=128){ctx.save();ctx.translate(x+64,y+64);ctx.rotate(Math.PI/4);ctx.fillStyle=colors[Math.floor(rand()*colors.length)];ctx.fillRect(-39,-76,76,36);ctx.fillStyle=colors[Math.floor(rand()*colors.length)];ctx.fillRect(1,-38,36,76);ctx.restore()}}
+     }else{
+      const colors=['#c9a77e','#a77d57','#b78e68','#8e694b'];for(let y=0;y<512;y+=128)for(let x=0;x<512;x+=128){ctx.fillStyle=colors[Math.floor(rand()*colors.length)];ctx.fillRect(x+2,y+2,124,124);ctx.strokeStyle='rgba(65,43,28,.34)';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,124,124);ctx.strokeStyle='rgba(238,211,177,.62)';ctx.beginPath();ctx.moveTo(x+6,y+122);ctx.lineTo(x+122,y+6);ctx.moveTo(x+6,y+6);ctx.lineTo(x+122,y+122);ctx.stroke()}}
+     }
+    }else if(id==='buy-floor-marble'||id==='buy-floor-slate'||id==='buy-floor-checker'){
+     const light=id==='buy-floor-slate'?'#777b78':'#e5dfd3',dark=id==='buy-floor-slate'?'#5f6665':id==='buy-floor-checker'?'#7d7770':'#c9c1b4';
+     ctx.fillStyle=light;ctx.fillRect(0,0,512,512);const size=id==='buy-floor-checker'?128:170;
+     for(let y=0;y<512;y+=size)for(let x=0;x<512;x+=size){ctx.fillStyle=id==='buy-floor-checker'?((x/size+y/size)%2?'#e8dfd0':'#77736e'):dark;ctx.fillRect(x+2,y+2,size-4,size-4);ctx.strokeStyle='rgba(70,66,60,.32)';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,size-4,size-4);
+      if(id==='buy-floor-marble'){ctx.strokeStyle='rgba(142,133,120,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+18,y+size*.2);ctx.bezierCurveTo(x+size*.4,y+size*.35,x+size*.55,y+size*.1,x+size-16,y+size*.7);ctx.stroke()}
+     }
+    }else{
+     const base=id==='buy-floor-concrete'?'#8b8b84':'#d8d0c2';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+     if(id==='buy-floor-terrazzo'){for(let i=0;i<520;i++){const x=rand()*512,y=rand()*512,r=1+rand()*5;ctx.fillStyle=['#8d9a98','#b47d63','#e9dfcf','#6f7f86','#c5aa82'][Math.floor(rand()*5)];ctx.beginPath();ctx.ellipse(x,y,r*1.3,r*.7,rand()*Math.PI,0,Math.PI*2);ctx.fill()}}
+     else{for(let i=0;i<2400;i++){ctx.fillStyle=rand()>.5?'rgba(255,255,255,.035)':'rgba(30,30,30,.035)';ctx.fillRect(rand()*512,rand()*512,1+rand()*3,1+rand()*3)}}
+    }
+   }else{
+    const backgrounds={'buy-wallpaper-warm-white':'#e9e2d7','buy-wallpaper-deepblue':'#34485b','buy-wallpaper-mist':'#aab2a7','buy-wallpaper-botanical':'#e6dfcf','buy-wallpaper-deco':'#d7c5aa','buy-wallpaper-wainscot':'#e8dfd0','buy-wallpaper-brick':'#b77f69','buy-wallpaper-floral':'#eee5d8','buy-wallpaper-stripe':'#e9e0d3'};
+    ctx.fillStyle=backgrounds[id]||'#e9e2d7';ctx.fillRect(0,0,512,512);
+    if(id==='buy-wallpaper-botanical'||id==='buy-wallpaper-floral'){
+     const floral=id==='buy-wallpaper-floral';for(let y=-20;y<560;y+=floral?86:112)for(let x=-20;x<560;x+=floral?86:112){const cx=x+(Math.floor(y/86)%2)*42,cy=y;ctx.strokeStyle=floral?'#9a8974':'#71816b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy+35);ctx.quadraticCurveTo(cx+12,cy+5,cx+4,cy-24);ctx.stroke();for(let a=0;a<4;a++){ctx.save();ctx.translate(cx+(a%2?12:-10),cy+24-a*13);ctx.rotate((a%2?1:-1)*.55);ctx.fillStyle=floral?'#bd9a91':'#8e9c7b';ctx.beginPath();ctx.ellipse(0,0,8,17,.3,0,Math.PI*2);ctx.fill();ctx.restore()}if(floral){ctx.fillStyle='#b68b59';ctx.beginPath();ctx.arc(cx+4,cy-24,5,0,Math.PI*2);ctx.fill()}}
+    }else if(id==='buy-wallpaper-deco'){
+     for(let y=0;y<512;y+=64){for(let x=0;x<512;x+=64){ctx.strokeStyle='rgba(118,85,55,.48)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y+64);ctx.quadraticCurveTo(x+32,y-8,x+64,y+64);ctx.stroke();ctx.fillStyle='rgba(184,145,95,.22)';ctx.fillRect(x+29,y+26,6,6)}}
+    }else if(id==='buy-wallpaper-wainscot'){
+     ctx.fillStyle='#b7a38a';ctx.fillRect(0,310,512,202);ctx.fillStyle='#d7c5ad';ctx.fillRect(0,300,512,12);for(let x=0;x<512;x+=128){ctx.strokeStyle='#8e7a63';ctx.lineWidth=5;ctx.strokeRect(x+8,328,112,164);ctx.strokeStyle='rgba(245,233,214,.7)';ctx.lineWidth=2;ctx.strokeRect(x+14,334,100,152)}ctx.fillStyle='#f0e6d7';ctx.fillRect(0,294,512,7);
+    }else if(id==='buy-wallpaper-brick'){
+     for(let y=0;y<512;y+=52){const off=(Math.floor(y/52)%2)*64;for(let x=-64;x<576;x+=128){ctx.fillStyle='rgba(245,224,205,.25)';ctx.fillRect(x+off+2,y+2,124,48);ctx.strokeStyle='rgba(91,58,48,.34)';ctx.lineWidth=3;ctx.strokeRect(x+off+2,y+2,124,48)}}
+    }else if(id==='buy-wallpaper-stripe'){
+     for(let x=0;x<512;x+=48){ctx.fillStyle='rgba(110,128,139,.18)';ctx.fillRect(x,0,18,512)}
+    }else{
+     for(let i=0;i<1900;i++){ctx.fillStyle=rand()>.5?'rgba(255,255,255,.035)':'rgba(60,50,40,.025)';ctx.fillRect(rand()*512,rand()*512,1+rand()*2,1+rand()*2)}
+    }
+   }
+   const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.wrapS=T.RepeatWrapping;texture.wrapT=T.RepeatWrapping;texture.repeat.set(type==='floor'?3.2:2.5,type==='floor'?2.5:1.65);texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy?.()||1);texture.needsUpdate=true;finishTextureCache.set(key,texture);return texture;
+  }
+  function finishMaterial(id,type,transparent=false){
+   const key=type+':'+id+':'+(transparent?'t':'o');if(finishMaterialCache.has(key))return finishMaterialCache.get(key);
+   const material=new T.MeshStandardMaterial({color:0xffffff,map:finishTexture(id,type),roughness:type==='floor'?.86:.96,side:T.DoubleSide,transparent,opacity:transparent?.22:1,depthWrite:!transparent});
+   finishMaterialCache.set(key,material);return material;
+  }
+  function applyFloorToRoom(root,id){
+   if(!root?.userData?.floorMesh)return;
+   root.userData.floorMesh.material=finishMaterial(id||'buy-floor-oak-plank','floor');root.userData.floorMesh.material.needsUpdate=true;
+   root.userData.floorMesh.userData.floorFinish=id||'buy-floor-oak-plank';
+  }
   function applyWallpaperToRoom(root,id){
    const wallpaper=id||'buy-wallpaper-warm-white';
-   const tint=wallpaper==='buy-wallpaper-deepblue'?0x9eafc4:wallpaper==='buy-wallpaper-mist'?0xc4c8cb:0xffffff;
    (root.userData.wallMeshes||[]).forEach(mesh=>{
-    const previous=mesh.material;
-    const material=new T.MeshStandardMaterial({color:tint,map:roomWallMap,roughness:.96,side:T.DoubleSide});
-    material.map=roomWallMap;material.bumpMap=null;material.needsUpdate=true;
-    if(previous?.transparent){material.transparent=true;material.opacity=previous.opacity??1;material.depthWrite=false}
-    mesh.material=material;mesh.userData.wallpaperSurface=true;
+    const previous=mesh.material,transparent=!!previous?.transparent;
+    mesh.material=finishMaterial(wallpaper,'wall',transparent);mesh.userData.wallpaperSurface=true;mesh.userData.wallpaperFinish=wallpaper;
    });
   }
   function setRoom(mode){
@@ -2708,7 +2761,7 @@ function persistFurniture(item){
    }
    const root=roomMode==='bedroom'?bedroom:roomMode==='kitchen'?kitchen:roomMode==='bathroom'?bathroom:living,finish=s.roomFinishes?.[roomMode],wallpaper=s.roomFinishes?.wallpaper||finish?.wallpaper||'buy-wallpaper-warm-white';
    applyWallpaperToRoom(root,wallpaper);
-   if(finish?.floor){root.userData.floorMesh.material=M(finish.floor==='buy-floor-concrete'?0x69727b:0x424d5b)}
+   applyFloorToRoom(root,finish?.floor||'buy-floor-oak-plank');
    const colors={living:0x343b46,bedroom:0x3b4654,kitchen:0x343b46,bathroom:0x3b4546};scene.background.set(colors[roomMode]);
    cameraTarget.set(0,1,roomMode==='kitchen'?-1:roomMode==='bathroom'?-.35:0);updateDaylight(true);
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:roomMode==='bathroom'?.72:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:roomMode==='bathroom'?13.1:13.4;applyCamera();
@@ -3133,7 +3186,7 @@ function persistFurniture(item){
   scene.traverse(o=>{if(o.isMesh&&!o.userData.hallIllustration){const mats=Array.isArray(o.material)?o.material:[o.material],opaque=mats.every(m=>m&&!m.transparent&&(m.opacity??1)>=.98);o.castShadow=opaque&&!o.userData.furnitureContactShadow;o.receiveShadow=opaque&&!o.userData.furnitureContactShadow}});
   updateDaylight(true);applyInkOutlines(scene);
   function cancelGesture(){pointers.forEach((_,id)=>{try{if(gestureSurface.hasPointerCapture(id))gestureSurface.releasePointerCapture(id)}catch(_){}});pointers.clear();drag=null;doorTap=null;pinchStart=0;inertiaTheta=0;inertiaPhi=0;dragVelocityTheta=0;dragVelocityPhi=0}
-  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,showCharacterTap,showStatGain,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;if(selectedFurniture===item){selectedFurniture=null;rotateFurnitureButton.disabled=true;removeFurnitureButton.disabled=true;refreshDyePalette()}disposeFurnitureResources(item.group);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':roomMode==='bathroom'?'bathroom':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen].forEach(root=>applyWallpaperToRoom(root,id))}else{finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:living;root.userData.floorMesh.material=M(id==='buy-floor-concrete'?0x69727b:0x424d5b)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
+  arday3D={scene,camera,renderer,host,kitchen,bedroom,living,updateActivity,resize,setRoom,showCharacterTap,showStatGain,consumePlacedMeal:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(!item)return false;if(selectedFurniture===item){selectedFurniture=null;rotateFurnitureButton.disabled=true;removeFurnitureButton.disabled=true;refreshDyePalette()}disposeFurnitureResources(item.group);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);s.placed=s.placed.filter(x=>x.id!==id);save();updateFurnitureHotspots();return true},applyRoomFinish:(id)=>{const finishes=s.roomFinishes||(s.roomFinishes={});const room=roomMode==='bedroom'?'bedroom':roomMode==='kitchen'?'kitchen':roomMode==='bathroom'?'bathroom':'living';if(id.startsWith('buy-wallpaper-')){finishes.wallpaper=id;[living,bedroom,kitchen,bathroom].forEach(root=>applyWallpaperToRoom(root,id))}else if(id.startsWith('buy-floor-')){finishes[room]=finishes[room]||{};finishes[room].floor=id;const root=room==='bedroom'?bedroom:room==='kitchen'?kitchen:room==='bathroom'?bathroom:living;applyFloorToRoom(root,id)}} ,getRoom:()=>roomMode,getFurnitureById:id=>furnitureRegistry.find(item=>String(item.id)===String(id))||null,selectFurnitureById:id=>{const item=furnitureRegistry.find(x=>x.id===id);if(item)selectFurniture(item)},placeOwnedFurniture:entity=>{if(!entity||typeof entity!=='object'||!entity.id||!entity.name)return false;const item=createOwnedFurniture(entity.name,{...entity,room:roomMode});if(!item)return false;selectFurniture(item);updateFurnitureHotspots();return true},raf:0};
   const decorateTools=document.createElement('div');decorateTools.className='decorate-tools';
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
