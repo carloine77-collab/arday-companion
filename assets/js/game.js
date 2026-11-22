@@ -1021,6 +1021,8 @@ function finishImmediateInteraction(at=Date.now()){
  if(s.lastUnifiedHourKey!==currentKey+'-'+currentHour)processActivityAt(at);
  s.activeInteraction=null;
  const activity=normalizeActivity(interaction.activity),meta=activityMeta[activity];
+ if(activity==='guildTraining')grantGuildTrainingAttribute(at);
+ if(activity==='walk')commissionSystem.discoverSpecial(at);
  if(meta){
   const effects={...(meta.effect||{})};
   if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
@@ -1056,6 +1058,7 @@ function beginImmediateInteraction(action,options={}){
  if(!meta||activity==='idle'||!['short','long'].includes(meta.duration))return false;
  if(meta.duration==='short'&&!['furniture','window'].includes(options.source))return false;
  const now=Date.now(),hourKey=keyAt(now)+'-'+new Date(now).getHours();
+ if(activity==='guildTraining'&&(!isGuildMember()||s.guildTrainingDate===keyAt(now))){saySystem(!isGuildMember()?'只有公会成员才能参加公会训练。':'今天已经完成过公会训练了。');return false}
  if(s.lastUnifiedHourKey!==hourKey)processActivityAt(now);
  const availability=resolveCharacterAvailability(new Date(now));
  if(availability.status!=='available'){
@@ -1065,13 +1068,17 @@ function beginImmediateInteraction(action,options={}){
  if(s.activeInteraction&&now<Number(s.activeInteraction.endsAt||0)){say('这么贪心？三心二意可不好。');return false}
  const requiredFurniture=meta.requires;
  const sourceFurniture=(s.placed||[]).find(item=>String(item.id)===String(options.furnitureId));
- if(options.source==='furniture'){
-  if(!sourceFurniture){saySystem('这件家具暂时无法执行该互动。');return false}
-  const sourceKind=furnitureKindForPlaced(sourceFurniture),sourceSet=sourceKind&&furnitureActivities[sourceKind];
-  if(!sourceSet?.activities?.[activity]){saySystem('这件家具没有配置这项互动。');return false}
-  if(!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){saySystem('这件家具附近还没有适合进行这项活动的设备。');return false}
-  if(activity==='computerPlay'&&sourceKind==='desk'&&!((s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(sourceFurniture.id)))){saySystem('这张书桌上还没有放置电脑。');return false}
-  if(['computerPlay','write','browseWeb','program'].includes(activity)&&sourceKind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(sourceFurniture.supportId)&&furnitureKindForPlaced(entry)==='desk'))){saySystem('这台电脑需要放在书桌上才能使用。');return false}
+ if(options.source==='furniture'||options.source==='window'){
+  if(options.source==='window'){
+   if(!furnitureActivities.window?.activities?.[activity]){saySystem('这扇窗户没有配置这项互动。');return false}
+  }else{
+   if(!sourceFurniture){saySystem('这件家具暂时无法执行该互动。');return false}
+   const sourceKind=furnitureKindForPlaced(sourceFurniture),sourceSet=sourceKind&&furnitureActivities[sourceKind];
+   if(!sourceSet?.activities?.[activity]){saySystem('这件家具没有配置这项互动。');return false}
+   if(!furnitureRequirementAvailable(requiredFurniture,sourceFurniture.room)){saySystem('这件家具附近还没有适合进行这项活动的设备。');return false}
+   if(activity==='computerPlay'&&sourceKind==='desk'&&!((s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(sourceFurniture.id)))){saySystem('这张书桌上还没有放置电脑。');return false}
+   if(['computerPlay','write','browseWeb','program','guildTraining'].includes(activity)&&sourceKind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(sourceFurniture.supportId)&&furnitureKindForPlaced(entry)==='desk'))){saySystem('这台电脑需要放在书桌上才能使用。');return false}
+  }
  }else if(requiredFurniture&&!hasAutonomyFurniture(requiredFurniture,options.room||null)){saySystem('家里还没有适合进行这项活动的家具。');return false}
  const furnitureId=String(options.furnitureId||options.furnitureKind||'unspecified');
  const attemptKey=hourKey,attemptId=furnitureId+'|'+activity,attempts=s.interactionAttempts[attemptKey]||[];
@@ -1169,6 +1176,8 @@ function processActivityAt(value){
   // Scene presentation is applied once after the authoritative state is committed.
  }
  if(sessionStart&&!s.activeInteraction){
+  if(activity==='guildTraining')grantGuildTrainingAttribute(d.getTime());
+  if(activity==='walk')commissionSystem.discoverSpecial(d.getTime());
   if(ev?.kind==='autonomous'){
    const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。'};
    if(notes[activity])addEvent('阿尔的日常记录',notes[activity],'autonomous');
@@ -1242,7 +1251,7 @@ function openFurnitureActions(kind,furnitureId=null){
  drawer.classList.remove('open','furniture-drawer','shop-drawer','profile-expanded');
  const targetItem=window.ArdayGetFurnitureHotspot?.(furnitureId)?.__furnitureItem||null;
  const room=targetItem?.room||(s.placed||[]).find(item=>String(item.id)===String(furnitureId))?.room||(stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('bedroom-mode')?'bedroom':stage.classList.contains('kitchen-mode')?'kitchen':'living');
- const actions=Object.entries(set.activities||{}).filter(([activity,meta])=>activityMeta[activity]&&furnitureRequirementAvailable(activityMeta[activity].requires,room));
+ const actions=Object.entries(set.activities||{}).filter(([activity,meta])=>activityMeta[activity]&&furnitureRequirementAvailable(activityMeta[activity].requires,room)&&(activity!=='guildTraining'||(isGuildMember()&&s.guildTrainingDate!==keyAt(Date.now()))));
  const blockedReason=furnitureInteractionBlockReason();
  const stageRect=stage.getBoundingClientRect();
  const hotspot=window.ArdayGetFurnitureHotspot?.(furnitureId)||Array.from(stage.querySelectorAll('.furniture-hotspot')).find(button=>button.dataset.furnitureId===String(furnitureId||''));
@@ -1263,7 +1272,7 @@ function openFurnitureActions(kind,furnitureId=null){
  center.setAttribute('role','button');center.setAttribute('tabindex','0');center.setAttribute('aria-label','关闭'+set.title+'互动菜单');center.title='点击关闭';
  center.onclick=closeFurnitureActions;center.onkeydown=(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();closeFurnitureActions()}};
  center.append(title,subtitle);wheel.appendChild(center);
- const symbols={read:'▤',write:'✎',chat:'♡',computerPlay:'⌘',browseWeb:'⌕',program:'⌘',playPiano:'♫',exercise:'↗',laundry:'◌',hug:'♡',admireDecor:'◇',admireView:'☼',watchTV:'▣',listenRecords:'♫',rest:'☾',music:'♫',wash:'◌',bouquet:'✿',admireFlowers:'✿',smellFlowers:'❀',sleep:'☾',cook:'♨'};
+ const symbols={read:'▤',write:'✎',chat:'♡',computerPlay:'⌘',browseWeb:'⌕',program:'⌘',guildTraining:'⚑',walk:'↗',playPiano:'♫',exercise:'↗',laundry:'◌',hug:'♡',admireDecor:'◇',admireView:'☼',watchTV:'▣',listenRecords:'♫',rest:'☾',music:'♫',wash:'◌',bouquet:'✿',admireFlowers:'✿',smellFlowers:'❀',sleep:'☾',cook:'♨'};
  if(actions.length){
   actions.forEach(([activity,context],index)=>{
    const angle=(-90+index*(360/actions.length))*Math.PI/180;
@@ -1277,7 +1286,7 @@ function openFurnitureActions(kind,furnitureId=null){
    button.setAttribute('aria-label',activityLabel(activity)+(blockedReason?'。'+blockedReason:''));
    button.onclick=()=>{
     if(button.disabled)return;
-    const started=perform(activity,true,{anchor:context?.anchor||null,source:'furniture',furnitureId,furnitureKind:kind});
+    const started=perform(activity,true,{anchor:context?.anchor||null,source:kind==='window'?'window':'furniture',furnitureId,furnitureKind:kind,room});
     if(started)closeFurnitureActions();
    };
    wheel.appendChild(button);
@@ -1556,6 +1565,17 @@ function showCareer(tab='real'){
  $('drawer').classList.add('open');
 }
 const {ARDAY_SOCIAL_JOBS,ARDAY_FACTIONS,ARDAY_CANDIDATE_POOL,ARDAY_ELITE_RANKERS}=window.ArdayCareerData;
+function isGuildMember(){return ARDAY_FACTIONS.some(f=>f.id===s.factionMembership&&f.type==='工会')}
+function grantGuildTrainingAttribute(at=Date.now()){
+ if(!isGuildMember())return {ok:false,reason:'只有公会成员才能训练'};
+ const day=keyAt(at);if(s.guildTrainingDate===day)return {ok:false,reason:'今天已经完成过公会训练'};
+ const keys=['agility','strength','intelligence','perception','willpower'],eligible=keys.filter(key=>clamp(s.attributes[key])<100);
+ s.guildTrainingDate=day;
+ if(!eligible.length){save();return {ok:false,reason:'战斗属性已达到上限'};}
+ const key=eligible[Math.floor(Math.random()*eligible.length)];s.attributes[key]=clamp(s.attributes[key])+1;s.combat=Math.round(keys.reduce((sum,name)=>sum+(Number(s.attributes[name])||0),0)/keys.length);
+ remember('guild-training','完成公会训练：'+({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'}[key])+' +1',1);
+ say('训练结束了。今天的状态还不错，'+({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'}[key])+'有了些进步。');save();render();return {ok:true,key};
+}
 function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function createGuildMaterialStock(guildId,week){
  const basicIds=['stimulant','focus','enhancer','resolve','reprieve','renewal','grace','hex'];
@@ -1815,8 +1835,8 @@ function showExchange(activeType='all'){
 }
 function showGoals(tab='personal'){
   ensurePersonalGoal();
-  const active=['commission','personal','shared'].includes(tab)?tab:'personal';
-  const nav=active==='commission'?'':'<nav class="commission-tabs goal-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人目标 <i>'+s.personalGoals.length+'/2</i></button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同目标 <i>'+s.sharedGoals.length+'/2</i></button></nav>';
+  const active=['commission','special','personal','shared'].includes(tab)?tab:'personal';
+  const nav=['commission','special'].includes(active)?'<nav class="commission-tabs goal-tabs"><button data-goal-tab="commission" class="'+(active==='commission'?'active':'')+'">日常委托</button><button data-goal-tab="special" class="'+(active==='special'?'active':'')+'">特殊委托</button></nav>':'<nav class="commission-tabs goal-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人目标 <i>'+s.personalGoals.length+'/2</i></button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同目标 <i>'+s.sharedGoals.length+'/2</i></button></nav>';
   $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent=active==='commission'?'委托':'目标';$('choices').className='choices commission-view';
   let content='';
   if(active==='commission'){
@@ -1828,6 +1848,12 @@ function showGoals(tab='personal'){
     return '<article class="commission-card commission-'+task.module+'"><div class="commission-card-top"><span class="commission-module"><i>'+task.moduleMark+'</i>'+task.moduleLabel+'</span><span class="commission-card-code">TASK / '+String(index+1).padStart(2,'0')+'</span></div><div class="commission-card-title"><h3>'+task.title+'</h3><span class="commission-slot">'+(task.slot==='bonus'?'随机事务':'日常事务')+'</span></div><div class="commission-art commission-art-'+task.module+'" aria-hidden="true"><i></i><b></b><span></span><em></em></div><div class="commission-progress"><div class="commission-progress-track"><i style="width:'+Math.round(progress/task.target*100)+'%"></i></div><b>'+String(progress).padStart(2,'0')+' / '+String(task.target).padStart(2,'0')+'</b></div><div class="commission-card-foot"><small><span>REWARD</span>'+reward+'</small><div class="commission-actions"><button type="button" data-commission-reroll="'+task.id+'" '+(canReroll?'':'disabled')+'>更换</button><button type="button" class="commission-claim" data-commission-claim="'+task.id+'" '+(ready&&!task.claimed?'':'disabled')+'>'+action+'</button></div></div></article>';
    }).join('');
    content='<section class="commission-masthead"><div class="commission-masthead-copy"><span class="commission-kicker">ARDAY / FIELD OPERATIONS</span><h2>委托终端</h2><p>'+board.day.replace(/-/g,'.')+' <i>·</i> DAILY TASK REGISTER</p></div><div class="commission-seal"><span>完成进度</span><b>'+String(claimed).padStart(2,'0')+'</b><small>/ '+String(board.tasks.length).padStart(2,'0')+'</small><i></i></div><div class="commission-masthead-index">AO—04 / SYS.ONLINE</div></section><div class="commission-board-meta"><span><i></i>'+claimed+' / 4 已归档</span><span>刷新额度 '+(board.rerolls<1?'01':'00')+' / 01</span></div><div class="commission-grid">'+cards+'</div>';
+  }else if(active==='special'){
+   const tasks=commissionSystem.getSpecialBoard(),cards=tasks.map((task,index)=>{
+    const progress=commissionSystem.getSpecialProgress(task),ready=progress>=task.target,done=task.status==='completed';
+    return '<article class="commission-card commission-special"><div class="commission-card-top"><span class="commission-module"><i>✦</i>探索发现</span><span class="commission-card-code">FIELD / '+String(index+1).padStart(2,'0')+'</span></div><div class="commission-card-title"><h3>'+task.title+'</h3><span class="commission-slot">'+(done?'已结案':'特殊委托')+'</span></div><div class="commission-art commission-art-special" aria-hidden="true"><i></i><b></b><span></span><em></em></div><p class="special-commission-detail">'+task.detail+'</p><div class="commission-progress"><div class="commission-progress-track"><i style="width:'+Math.round(progress/task.target*100)+'%"></i></div><b>'+String(progress).padStart(2,'0')+' / '+String(task.target).padStart(2,'0')+'</b></div><div class="commission-card-foot"><small><span>REWARD</span>随机战斗属性 +1 · 积分 +'+(task.rewardPoints||20)+'</small><div class="commission-actions"><button type="button" class="commission-claim" data-special-claim="'+task.id+'" '+(ready&&!done?'':'disabled')+'>'+(done?'已结案':ready?'领取奖励':'进行中')+'</button></div></div></article>';
+   }).join('');
+   content='<section class="commission-masthead"><div class="commission-masthead-copy"><span class="commission-kicker">ARDAY / FIELD DISCOVERY</span><h2>特殊委托</h2><p>FIELD TASKS <i>·</i> FOUND DURING OUTINGS</p></div><div class="commission-seal"><span>已发现</span><b>'+String(tasks.length).padStart(2,'0')+'</b><small>项</small><i></i></div><div class="commission-masthead-index">AO—05 / FIELD.LOG</div></section><div class="commission-grid">'+(cards||'<div class="special-commission-empty">尚未发现特殊委托</div>')+'</div>';
   }else if(active==='personal'){
    const cards=s.personalGoals.map((g,index)=>{
     const progress=Math.min(g.target,Math.max(0,Number(g.progress)||0)),pct=Math.round(progress/g.target*100);
@@ -1848,6 +1874,11 @@ function showGoals(tab='personal'){
    const result=commissionSystem.reroll(button.dataset.commissionReroll);
    if(!result.ok){toast(result.reason||'暂时无法更换');return}
    save();showGoals('commission');toast('已更换一项委托');
+  });
+  $('choices').querySelectorAll('[data-special-claim]').forEach(button=>button.onclick=()=>{
+   const result=commissionSystem.claimSpecial(button.dataset.specialClaim);
+   if(!result.ok){toast(result.reason||'特殊委托尚未完成');return}
+   save();render();showGoals('special');toast('特殊委托完成：'+(result.statLabel?result.statLabel+' +1 · ':'')+'积分 +'+result.points);
   });
   $('choices').querySelectorAll('[data-commission-claim]').forEach(button=>button.onclick=()=>{
    const result=commissionSystem.claim(button.dataset.commissionClaim);
@@ -2271,9 +2302,9 @@ function initArday3D(){
   // The outdoor view is part of each movable window assembly.
   // The back wall remains solid behind it; no dynamic wall cut-outs are used.
   const wallObjects=[
-   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'living-window',room:'living',anchor:'window'})}),
-   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'bedroom-window',room:'bedroom',anchor:'window'})}),
-   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>perform('admireView',false,{source:'window',furnitureId:'kitchen-window',room:'kitchen',anchor:'window'})}),
+   registerWallObject({id:'living-window',name:'客厅窗户',room:'living',group:livingWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>openFurnitureActions('window','living-window')}),
+   registerWallObject({id:'bedroom-window',name:'卧室窗户',room:'bedroom',group:bedroomWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>openFurnitureActions('window','bedroom-window')}),
+   registerWallObject({id:'kitchen-window',name:'厨房窗户',room:'kitchen',group:kitchenWindow,axis:'x',side:'back',range:2.8,anchor:[0,2.65],action:()=>openFurnitureActions('window','kitchen-window')}),
   ];
   const furnitureModelAliases=window.ArdayFurnitureCatalog.modelAliases;
   const furnitureModelBuilder=window.ArdayFurnitureModels.create({
