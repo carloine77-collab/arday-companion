@@ -72,6 +72,37 @@
     board.tasks[taskIndex]=createTask(next,old.slot,old.source);board.rerolls++;
     return {ok:true,task:board.tasks[taskIndex]};
    }
+   function getSpecialProgress(task){
+    if(!task)return 0;
+    const entries=Array.isArray(state.activityLog)?state.activityLog:[],seen=new Set();let count=0;
+    entries.forEach(entry=>{
+     if(!entry||Number(entry.at)<Number(task.foundAt)||!task.activities?.includes(entry.activity))return;
+     const stamp=task.distinctActivities?entry.activity:(entry.at||String(entry.key)+'-'+String(entry.hour)+'-'+String(entry.activity));
+     if(seen.has(stamp))return;seen.add(stamp);count++;
+    });
+    return Math.min(Math.max(1,Number(task.target)||1),count);
+   }
+   function discoverSpecial(at=Date.now()){
+    const day=keyAt(at);state.specialCommissions=Array.isArray(state.specialCommissions)?state.specialCommissions:[];
+    if(state.specialCommissionFoundDay===day)return null;
+    const active=state.specialCommissions.filter(task=>task.status==='active');if(active.length>=2)return null;
+    const used=new Set(active.map(task=>task.id.split('@')[0]));const candidates=(data.specialTasks||[]).filter(task=>!used.has(task.id));
+    const definition=pick(candidates);if(!definition)return null;
+    const task={...definition,id:definition.id+'@'+at,foundAt:at,foundDay:day,status:'active',claimedAt:0};
+    state.specialCommissions.unshift(task);state.specialCommissions=state.specialCommissions.slice(0,12);state.specialCommissionFoundDay=day;
+    if(typeof save==='function')save();return task;
+   }
+   function claimSpecial(id,at=Date.now()){
+    state.specialCommissions=Array.isArray(state.specialCommissions)?state.specialCommissions:[];
+    const task=state.specialCommissions.find(item=>item.id===id);
+    if(!task||task.status!=='active')return {ok:false,reason:'特殊委托不存在或已结案'};
+    if(getSpecialProgress(task)<Math.max(1,Number(task.target)||1))return {ok:false,reason:'委托尚未完成'};
+    const pool=(data.moduleStats?.combat||[]).filter(key=>clamp(state.attributes?.[key])<100);
+    const statKey=pick(pool);if(statKey){state.attributes[statKey]=clamp(state.attributes[statKey])+1;state.combat=Math.round(Object.values(state.attributes||{}).reduce((sum,value)=>sum+(Number(value)||0),0)/5)}
+    const points=Math.max(0,Math.floor(Number(task.rewardPoints)||20));if(points&&typeof grantPoints==='function')grantPoints(points);
+    task.status='completed';task.claimedAt=at;task.reward={statKey,points};if(typeof save==='function')save();
+    return {ok:true,statKey,statLabel:statKey?data.statLabels[statKey]:'',points};
+   }
    function record(signal,at=Date.now()){
     if(!signal)return false;
     const board=ensureBoard(at);
@@ -81,7 +112,7 @@
     if(typeof save==='function')save();
     return true;
    }
-   return {ensureBoard,getBoard:()=>ensureBoard(),getProgress,claim,reroll,record};
+   return {ensureBoard,getBoard:()=>ensureBoard(),getProgress,claim,reroll,record,getSpecialBoard:()=>{state.specialCommissions=Array.isArray(state.specialCommissions)?state.specialCommissions:[];return state.specialCommissions},getSpecialProgress,discoverSpecial,claimSpecial};
   }
  };
 })();
