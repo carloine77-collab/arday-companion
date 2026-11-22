@@ -2166,27 +2166,54 @@ function initArday3D(){
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0xc4a783);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
   const addWindowView=(windowGroup,centerY,width=2.1,height=1.85)=>{const view=new T.Mesh(new T.PlaneGeometry(width,height),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false,side:T.DoubleSide}));view.position.set(0,centerY,.012);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;view.userData.windowScenery=true;windowGroup.add(view);};
-  const addOpenCasementWindow=(windowGroup,frameMaterial)=>{
+  const addOpenCasementWindow=(windowGroup,frameMaterial,style='casement')=>{
    const width=2.2,height=1.95,cy=2.6,halfW=width/2,halfH=height/2;
    const trim=M(0x9a7655,.48),inner=M(0x806b55,.72);
    const glass=new T.MeshPhysicalMaterial({color:0xb9d2d4,roughness:.12,metalness:.08,transparent:true,opacity:.34,side:T.DoubleSide,depthWrite:false});
-   // Closed rectangular double-sash window with aligned glazing and straight muntins.
-   box(windowGroup,0,cy-halfH,0,width+.12,.14,.14,frameMaterial);
-   box(windowGroup,0,cy+halfH,0,width+.12,.14,.14,frameMaterial);
-   for(const x of [-halfW-.01,halfW+.01])box(windowGroup,x,cy,0,.14,height+.12,.14,frameMaterial);
-   box(windowGroup,0,cy,-.012,width-.24,height-.24,.035,inner);
-   const paneW=(width-.32)/2,paneH=height-.32;
-   for(const side of [-1,1]){
-    const pane=new T.Mesh(new T.PlaneGeometry(paneW,paneH),glass);
-    pane.position.set(side*(paneW/2+.025),cy,.025);pane.renderOrder=2;pane.castShadow=false;pane.receiveShadow=false;windowGroup.add(pane);
-    for(const x of [-1,1])box(windowGroup,side*(paneW/2+.025)+x*(paneW/2),cy,.052,.035,paneH+.035,.035,frameMaterial);
-    for(const y of [-1,1])box(windowGroup,side*(paneW/2+.025),cy+y*(paneH/2),.052,paneW+.035,.035,.035,frameMaterial);
+   const pane=(x,y,w,h,z=.035,material=glass)=>{const mesh=new T.Mesh(new T.PlaneGeometry(w,h),material);mesh.position.set(x,y,z);mesh.renderOrder=2;mesh.castShadow=false;mesh.receiveShadow=false;windowGroup.add(mesh);return mesh};
+   if(style==='shoji'){
+    const paper=new T.MeshStandardMaterial({color:0xf0e8d5,roughness:1,side:T.DoubleSide});
+    box(windowGroup,0,cy-halfH,0,width+.12,.13,.15,frameMaterial);box(windowGroup,0,cy+halfH,0,width+.12,.13,.15,frameMaterial);
+    for(const x of [-halfW-.02,halfW+.02])box(windowGroup,x,cy,0,.13,height+.12,.15,frameMaterial);
+    pane(0,cy,width-.24,height-.24,.045,paper);
+    for(let x=-.84;x<=.841;x+=.28)box(windowGroup,x,cy,.105,.045,height-.28,.075,frameMaterial);
+    for(let y=cy-.72;y<=cy+.721;y+=.36)box(windowGroup,0,y,.105,width-.25,.045,.075,frameMaterial);
+    box(windowGroup,0,cy-halfH-.045,.12,width+.2,.07,.23,trim);
+   }else if(style==='industrial'){
+    const steel=M(0x30383d,.38,.72);
+    box(windowGroup,0,cy-halfH,0,width+.14,.13,.16,steel);box(windowGroup,0,cy+halfH,0,width+.14,.13,.16,steel);
+    for(const x of [-halfW-.02,halfW+.02])box(windowGroup,x,cy,0,.13,height+.12,.16,steel);
+    pane(0,cy,width-.28,height-.28,.035);
+    for(const x of [-.72,0,.72])box(windowGroup,x,cy,.09,.055,height-.25,.11,steel);
+    box(windowGroup,0,cy+.22,.09,width-.22,.045,.11,steel);
+    box(windowGroup,0,cy-halfH-.055,.12,width+.22,.075,.25,steel);
+    for(const x of [-.22,.22])box(windowGroup,x,cy,.15,.025,.13,.035,trim);
+   }else if(style==='sliding'){
+    const slim=matWindowFrame();
+    box(windowGroup,0,cy-halfH,0,width+.12,.14,.19,frameMaterial);box(windowGroup,0,cy+halfH,0,width+.12,.12,.17,frameMaterial);
+    for(const x of [-halfW-.02,halfW+.02])box(windowGroup,x,cy,0,.13,height+.12,.17,frameMaterial);
+    pane(-.48,cy,.94,height-.3,.045);pane(.48,cy,.94,height-.3,.065);
+    for(const x of [-.96,0,.96])box(windowGroup,x,cy,.11,.045,height-.24,.1,frameMaterial);
+    box(windowGroup,0,cy-halfH+.08,.13,width-.2,.045,.12,trim);
+    for(const x of [-.08,.08])box(windowGroup,x,cy,.17,.025,.12,.035,trim);
+   }else{
+    box(windowGroup,0,cy-halfH,0,width+.12,.14,.14,frameMaterial);
+    box(windowGroup,0,cy+halfH,0,width+.12,.14,.14,frameMaterial);
+    for(const x of [-halfW-.01,halfW+.01])box(windowGroup,x,cy,0,.14,height+.12,.14,frameMaterial);
+    box(windowGroup,0,cy,-.012,width-.24,height-.24,.035,inner);
+    const paneW=(width-.32)/2,paneH=height-.32;
+    for(const side of [-1,1]){
+     pane(side*(paneW/2+.025),cy,paneW,paneH,.025);
+     for(const x of [-1,1])box(windowGroup,side*(paneW/2+.025)+x*(paneW/2),cy,.052,.035,paneH+.035,.035,frameMaterial);
+     for(const y of [-1,1])box(windowGroup,side*(paneW/2+.025),cy+y*(paneH/2),.052,paneW+.035,.035,.035,frameMaterial);
+    }
+    box(windowGroup,0,cy,.065,.075,height-.22,.07,frameMaterial);
+    box(windowGroup,0,cy,.066,width-.22,.075,.07,frameMaterial);
+    box(windowGroup,0,cy-halfH-.055,.105,width+.22,.09,.25,trim);
+    box(windowGroup,0,cy+halfH+.055,.045,width+.16,.07,.17,frameMaterial);
+    for(const x of [-.18,.18]){const latch=box(windowGroup,x,cy,.105,.025,.11,.035,M(0xb18b58,.42));latch.castShadow=false;}
    }
-   box(windowGroup,0,cy,.065,.075,height-.22,.07,frameMaterial);
-   box(windowGroup,0,cy,.066,width-.22,.075,.07,frameMaterial);
-   box(windowGroup,0,cy-halfH-.055,.105,width+.22,.09,.25,trim);
-   box(windowGroup,0,cy+halfH+.055,.045,width+.16,.07,.17,frameMaterial);
-   for(const x of [-.18,.18]){const latch=box(windowGroup,x,cy,.105,.025,.11,.035,M(0xb18b58,.42));latch.castShadow=false;}
+   function matWindowFrame(){return frameMaterial}
   };
   addWindowView(livingWindow,2.6);addOpenCasementWindow(livingWindow,m.oak);
   addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4,2.6);
@@ -2194,12 +2221,12 @@ function initArday3D(){
   // Bedroom shell is intentionally empty; all movable furnishings are shop items.
   const bedroom=new T.Group();scene.add(bedroom);roomShell(bedroom,0xd0d1d0,0xb99b83);
   const bedroomWindow=new T.Group();bedroomWindow.position.set(-2.8,0,-3.88);bedroom.add(bedroomWindow);addWindowSun(bedroom,bedroomWindow);
-  addWindowView(bedroomWindow,2.6);addOpenCasementWindow(bedroomWindow,M(0x8a6e68));
+  addWindowView(bedroomWindow,2.6);addOpenCasementWindow(bedroomWindow,M(0x8a6e68),'shoji');
   addWindowDressing(bedroomWindow,2.1,1.85,0xb9a9a0,2.6);
   // Kitchen shell keeps its tiled backsplash; cabinets and appliances are purchased separately.
   const kitchen=new T.Group();scene.add(kitchen);roomShell(kitchen,0xd8d5ce,0xc0a487);
   const kitchenWindow=new T.Group();kitchenWindow.position.set(-2.8,0,-3.87);kitchen.add(kitchenWindow);addWindowSun(kitchen,kitchenWindow);
-  addWindowView(kitchenWindow,2.6);addOpenCasementWindow(kitchenWindow,M(0x9a7655));
+  addWindowView(kitchenWindow,2.6);addOpenCasementWindow(kitchenWindow,M(0x9a7655),'sliding');
   addWindowDressing(kitchenWindow,2.1,1.85,0xd0c4b1,2.6);
   box(kitchen,0,1.12,-3.91,7.7,.55,.08,M(0xc98d6d));
   for(let x=-3.4;x<=3.4;x+=.48)for(let y=.88;y<=1.35;y+=.42)box(kitchen,x,y,-3.84,.43,.37,.035,M((Math.round((x+3.4)/.48)+Math.round(y*10))%3===0?0xe7b89b:0xd9a184));
