@@ -564,93 +564,30 @@ window.ArdayGameConfig = {
     },
     "装饰类": {
       "窗帘": [
-        [
-          "亚麻窗帘",
-          "▧",
-          "buy-furniture-catalog-053",
-          "420",
-          ""
-        ]
+        ["亚麻窗帘","▧","buy-furniture-catalog-053","420",""]
       ],
       "地毯": [
-        [
-          "几何地毯",
-          "▧",
-          "buy-furniture-catalog-039",
-          "460",
-          ""
-        ],
-        [
-          "卧室地毯",
-          "▧",
-          "buy-furniture-catalog-048",
-          "460",
-          ""
-        ],
-        [
-          "波斯地毯",
-          "▧",
-          "buy-furniture-catalog-051",
-          "460",
-          ""
-        ],
-        [
-          "羊毛地毯",
-          "▧",
-          "buy-furniture-catalog-082",
-          "460",
-          ""
-        ],
-        [
-          "格纹地毯",
-          "▧",
-          "buy-furniture-catalog-093",
-          "460",
-          ""
-        ]
+        ["几何地毯","▧","buy-furniture-catalog-039","460",""],
+        ["卧室地毯","▧","buy-furniture-catalog-048","460",""],
+        ["波斯地毯","▧","buy-furniture-catalog-051","460",""],
+        ["羊毛地毯","▧","buy-furniture-catalog-082","460",""],
+        ["格纹地毯","▧","buy-furniture-catalog-093","460",""]
       ],
-      "挂画": [
-        [
-          "壁画",
-          "▧",
-          "buy-furniture-catalog-037",
-          "180",
-          ""
-        ]
+      "挂画与装饰画": [
+        ["壁画","▧","buy-furniture-catalog-037","180",""],
+        ["海报","▧","buy-furniture-catalog-018","120",""],
+        ["照片墙","▧","buy-furniture-catalog-072","360",""],
+        ["抽象几何装饰画","▧","buy-furniture-catalog-126","520",""],
+        ["植物标本框画","▧","buy-furniture-catalog-127","480",""],
+        ["手工编织墙饰","▧","buy-furniture-catalog-128","560",""],
+        ["复古黄铜壁饰","▧","buy-furniture-catalog-129","620",""]
       ],
       "挂钟": [
-        [
-          "木框挂钟",
-          "▧",
-          "buy-furniture-catalog-050",
-          "260",
-          ""
-        ]
-      ],
-      "海报": [
-        [
-          "海报",
-          "▧",
-          "buy-furniture-catalog-018",
-          "120",
-          ""
-        ]
+        ["木框挂钟","▧","buy-furniture-catalog-050","260",""]
       ],
       "花瓶": [
-        [
-          "陶土花瓶",
-          "▧",
-          "buy-furniture-catalog-010",
-          "190",
-          ""
-        ],
-        [
-          "陶艺摆件",
-          "▧",
-          "buy-furniture-catalog-112",
-          "260",
-          ""
-        ],
+        ["陶土花瓶","▧","buy-furniture-catalog-010","190",""],
+        ["陶艺摆件","▧","buy-furniture-catalog-112","260",""],
         ["落地陶瓷花器","▧","buy-furniture-catalog-122","520",""]
       ],
       "摆件": [
@@ -659,219 +596,46 @@ window.ArdayGameConfig = {
         ["玻璃罩微景观","▧","buy-furniture-catalog-125","460",""]
       ],
       "花束": [
-        [
-          "花束",
-          "▧",
-          "buy-furniture-catalog-074",
-          "120",
-          ""
-        ]
+        ["花束","▧","buy-furniture-catalog-074","120",""]
       ],
       "镜子": [
-        [
-          "拱形镜",
-          "▧",
-          "buy-furniture-catalog-085",
-          "480",
-          ""
-        ]
+        ["拱形镜","▧","buy-furniture-catalog-085","480",""]
       ],
       "绿植": [
-        [
-          "棕榈树",
-          "▧",
-          "buy-furniture-catalog-020",
-          "150",
-          ""
-        ],
-        [
-          "龟背竹盆栽",
-          "▧",
-          "buy-furniture-catalog-113",
-          "320",
-          ""
-        ]
+        ["棕榈树","▧","buy-furniture-catalog-020","150",""],
+        ["龟背竹盆栽","▧","buy-furniture-catalog-113","320",""]
       ],
       "屏风": [
-        [
-          "屏风",
-          "▧",
-          "buy-furniture-catalog-005",
-          "360",
-          ""
-        ]
-      ],
-      "照片墙": [
-        [
-          "照片墙",
-          "▧",
-          "buy-furniture-catalog-072",
-          "360",
-          ""
-        ]
+        ["屏风","▧","buy-furniture-catalog-005","360",""]
       ]
     },
     "功能类": {
-      "冰箱": [
-        [
-          "冰箱",
-          "▧",
-          "buy-furniture-catalog-062",
-          "1500",
-          ""
-        ]
+      "生活电器": [
+        ["冰箱","▧","buy-furniture-catalog-062","1500",""],
+        ["洗衣机","▧","buy-furniture-catalog-058","1180",""],
+        ["空气净化器","▧","buy-furniture-catalog-114","1280",""],
+        ["智能音响","▧","buy-furniture-catalog-115","860",""]
       ],
-      "唱片机": [
-        [
-          "唱片机",
-          "▧",
-          "buy-furniture-catalog-073",
-          "980",
-          ""
-        ]
+      "影音娱乐": [
+        ["唱片机","▧","buy-furniture-catalog-073","980",""],
+        ["电视","▧","buy-furniture-catalog-097","1680",""],
+        ["游戏机","▧","buy-furniture-catalog-083","760",""],
+        ["钢琴","▧","buy-furniture-catalog-056","2200",""]
       ],
-      "电脑": [
-        [
-          "电脑",
-          "▧",
-          "buy-furniture-catalog-094",
-          "1200",
-          ""
-        ]
+      "厨卫设备": [
+        ["水槽","▧","buy-furniture-catalog-081","580",""],
+        ["陶瓷灶","▧","buy-furniture-catalog-006","780",""],
+        ["珐琅灶","▧","buy-furniture-catalog-036","780",""],
+        ["不锈钢灶","▧","buy-furniture-catalog-063","780",""],
+        ["马桶","▧","buy-furniture-catalog-100","780",""],
+        ["淋浴间","▧","buy-furniture-catalog-102","1180",""],
+        ["浴缸","▧","buy-furniture-catalog-103","1380",""]
       ],
-      "电视": [
-        [
-          "电视",
-          "▧",
-          "buy-furniture-catalog-097",
-          "1680",
-          ""
-        ]
-      ],
-      "钢琴": [
-        [
-          "钢琴",
-          "▧",
-          "buy-furniture-catalog-056",
-          "2200",
-          ""
-        ]
-      ],
-      "跑步机": [
-        [
-          "跑步机",
-          "▧",
-          "buy-furniture-catalog-077",
-          "1600",
-          ""
-        ]
-      ],
-      "任务板": [
-        [
-          "任务板",
-          "▧",
-          "buy-furniture-catalog-071",
-          "260",
-          ""
-        ]
-      ],
-      "水槽": [
-        [
-          "水槽",
-          "▧",
-          "buy-furniture-catalog-081",
-          "580",
-          ""
-        ]
-      ],
-      "洗衣机": [
-        [
-          "洗衣机",
-          "▧",
-          "buy-furniture-catalog-058",
-          "1180",
-          ""
-        ]
-      ],
-      "哑铃架": [
-        [
-          "哑铃架",
-          "▧",
-          "buy-furniture-catalog-034",
-          "520",
-          ""
-        ]
-      ],
-      "游戏机": [
-        [
-          "游戏机",
-          "▧",
-          "buy-furniture-catalog-083",
-          "760",
-          ""
-        ]
-      ],
-      "灶台": [
-        [
-          "陶瓷灶",
-          "▧",
-          "buy-furniture-catalog-006",
-          "780",
-          ""
-        ],
-        [
-          "珐琅灶",
-          "▧",
-          "buy-furniture-catalog-036",
-          "780",
-          ""
-        ],
-        [
-          "不锈钢灶",
-          "▧",
-          "buy-furniture-catalog-063",
-          "780",
-          ""
-        ]
-      ],
-      "卫浴设备": [
-        [
-          "马桶",
-          "▧",
-          "buy-furniture-catalog-100",
-          "780",
-          ""
-        ],
-        [
-          "淋浴间",
-          "▧",
-          "buy-furniture-catalog-102",
-          "1180",
-          ""
-        ],
-        [
-          "浴缸",
-          "▧",
-          "buy-furniture-catalog-103",
-          "1380",
-          ""
-        ]
-      ],
-      "家电": [
-        [
-          "空气净化器",
-          "▧",
-          "buy-furniture-catalog-114",
-          "1280",
-          ""
-        ],
-        [
-          "智能音响",
-          "▧",
-          "buy-furniture-catalog-115",
-          "860",
-          ""
-        ]
+      "工作健身": [
+        ["电脑","▧","buy-furniture-catalog-094","1200",""],
+        ["任务板","▧","buy-furniture-catalog-071","260",""],
+        ["跑步机","▧","buy-furniture-catalog-077","1600",""],
+        ["哑铃架","▧","buy-furniture-catalog-034","520",""]
       ]
     },
     "建筑类": {
