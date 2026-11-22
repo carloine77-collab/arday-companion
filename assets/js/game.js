@@ -365,8 +365,11 @@ function openTab(name,force=false){
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
-  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':entity.kind==='consumable'?'消耗品':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):entity.kind==='consumable'?'✚':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
-  Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
+  const shopFoodIcons=new Map((shopCatalog['食物食材']||[]).map(([label,icon])=>[String(label).replace(/\s*×\s*1$/,''),icon]));
+  const cookedFoodIcons=[['蛋炒饭','🍚'],['番茄炒蛋','🍳'],['蔬菜汤','🥣'],['牛肉面','🍜'],['奶油蘑菇饭','🍄'],['吐司','🍞'],['豆腐煲','🍲'],['土豆','🥔'],['意面','🍝'],['浓汤','🥣'],['焗','🧀'],['蒸蛋','🥚'],['烩饭','🍛'],['煎饼','🥞'],['照烧','🍗'],['松饼','🥞']];
+  const inventoryFoodIcon=name=>{const clean=String(name||'').replace(/^成品食物·/,'').replace(/\s*×\s*\d+$/,'');if(shopFoodIcons.has(clean))return shopFoodIcons.get(clean);const match=cookedFoodIcons.find(([keyword])=>clean.includes(keyword));return match?match[1]:'🍽️'};
+  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':entity.kind==='consumable'?'消耗品':'食物';const icon=category==='食物'?inventoryFoodIcon(item):entity.kind==='dungeon-item'?(entity.icon||'✦'):entity.kind==='consumable'?'✚':'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category,category==='食物'?'food':''])});
+  Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,inventoryFoodIcon(label),'pantry-inventory-'+key,0,'','食物','food'])});
   
   const navigation=document.createElement('div');navigation.className='inventory-navigation';
   const nav=document.createElement('div');nav.className='inventory-categories';
@@ -376,10 +379,10 @@ function openTab(name,force=false){
   if(inventoryRecycleMode){tabEntries.splice(0,tabEntries.length,...tabEntries.filter(entry=>{const key=entry[2].startsWith('pantry-inventory-')?entry[2].slice('pantry-inventory-'.length):null;const entity=key?null:s.inventory[Number(entry[2].replace(/^(?:use-inventory-|place-owned-)/,''))];return (key?Number(ingredientUnitPrices[key])||0:inventoryOriginalPrice(entity))>0}))}
   const filtered=tabEntries.filter(entry=>inventoryRecycleMode||inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
- tabEntries.forEach(([label,emoji,id,cost,description])=>{
-  let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
+ tabEntries.forEach(([label,emoji,id,cost,description,category,visualType])=>{
+  let b=document.createElement('button');const isShop=name==='商店',isInventoryFood=name==='物品'&&visualType==='food';b.className=isShop?'choice shop-product-card':isInventoryFood?'choice inventory-food-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
   if(isShop){const desc=description||'';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(desc?'<small>'+desc+'</small>':'')+'</span><span class="shop-product-price">'+(Number(cost)===0?'免费':id.startsWith('exchange-dungeon-')?cost+' 积分':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':id.startsWith('exchange-dungeon-')?'兑换':'购入')+'</span>';}
-  else b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
+  else b.innerHTML=isInventoryFood?'<span class="inventory-food-icon">'+emoji+'</span><span class="inventory-food-name">'+label+'</span>':'<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
    if(id.startsWith('use-inventory-')){
