@@ -1,0 +1,87 @@
+/* Arday UI foundation: semantic tokens and shared interaction states.
+   Component sheets retain their own visual themes; this file owns cross-system behavior. */
+:root {
+  --ui-paper: #e8e5df;
+  --ui-cream: #f7f5f0;
+  --ui-ink: #343434;
+  --ui-muted: #77736c;
+  --ui-line: #d2cec6;
+  --ui-accent: #8b7763;
+  --ui-green: #788477;
+  --ui-rose: #a77d75;
+  --ui-shadow: 0 8px 24px #29251f18;
+
+  --ui-radius-control: 10px;
+  --ui-radius-panel: 15px;
+  --ui-motion-fast: 140ms;
+  --ui-motion-standard: 190ms;
+  --ui-focus-ring: #b47b43;
+  --ui-focus-offset: 2px;
+  --ui-disabled-saturation: .55;
+  --ui-feedback-bg: #493f34;
+  --ui-feedback-text: #fffaf0;
+  --ui-feedback-success: #526b58;
+  --ui-feedback-error: #8a5148;
+  --ui-feedback-info: #52616b;
+}
+
+/* Keyboard focus is visible across every themed panel, including generated controls. */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 2px solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-offset);
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+  filter: saturate(var(--ui-disabled-saturation));
+}
+
+button[aria-busy="true"],
+[role="button"][aria-busy="true"] {
+  cursor: progress;
+  pointer-events: none;
+  filter: saturate(.7);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  input,
+  select,
+  textarea {
+    transition-duration: var(--ui-motion-fast);
+  }
+}
+
+.toast {
+  background: var(--ui-feedback-bg);
+  color: var(--ui-feedback-text);
+  border: 1px solid #ffffff24;
+  box-shadow: 0 5px 18px #29251f30;
+  max-width: min(88vw, 520px);
+  text-align: center;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.toast[data-tone="success"] { background: var(--ui-feedback-success); }
+.toast[data-tone="error"] { background: var(--ui-feedback-error); }
+.toast[data-tone="info"] { background: var(--ui-feedback-info); }
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  button,
+  input,
+  select,
+  textarea {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
