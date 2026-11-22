@@ -212,7 +212,7 @@ function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('e
 
 const tabs={'物品':[],'商店':[]};
 
-let shopCategory='食物食材';let shopBookType='菜谱';let shopDungeonType='增益类';
+let shopCategory='食物食材';let shopBookType='菜谱';let shopDungeonType='增益类';let shopFinishType='窗';
 let inventoryCategory='全部';
 let inventoryRecycleMode=false;
 let inventoryGrid=null;
@@ -289,10 +289,18 @@ function openTab(name,force=false){
  if(name==='商店'){
   $('choices').classList.add('shop-content');
   const nav=document.createElement('div');nav.className='shop-categories';
-  ['食物食材','家具','书籍'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
+  ['食物食材','家具','装修材料','书籍'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='shop-category'+(shopCategory===category?' active':'');button.textContent=category;button.onclick=()=>{shopCategory=category;openTab('商店',true)};nav.appendChild(button)});
   const shopMasthead=document.createElement('section');shopMasthead.className='shop-masthead';shopMasthead.innerHTML='<div class="shop-kicker">ARDAY JOURNAL <span>HOME & LIVING</span></div><div class="shop-coverline"><span class="shop-cover-number">№ 08</span><span class="shop-cover-season">THE ART OF<br>EVERYDAY LIVING</span></div><div class="shop-cover-title">Objects<br><i>with a story.</i></div><div class="shop-cover-note"></div><div class="shop-cover-stamp">A HOME<br>IN THE<br>MAKING</div>'; 
   $('choices').appendChild(shopMasthead);
   $('choices').appendChild(nav);
+  if(shopCategory==='装修材料'){
+   const groups=shopCatalog.furnitureCategories?.['建筑类']||{};
+   const finishTypes=['窗','地板','墙纸'];
+   if(!finishTypes.includes(shopFinishType))shopFinishType='窗';
+   const typeNav=document.createElement('div');typeNav.className='shop-level-two shop-finish-types';
+   finishTypes.forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFinishType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFinishType=type;openTab('商店',true)};typeNav.appendChild(button)});
+   $('choices').appendChild(typeNav);
+  }
   if(shopCategory==='书籍'){
    const groups=bookCategories||{};
    if(!groups[shopBookType])shopBookType=Object.keys(groups)[0]||'';
@@ -315,11 +323,11 @@ function openTab(name,force=false){
    Object.keys(typeGroups).forEach(type=>{const button=document.createElement('button');button.type='button';button.className='shop-furniture-type'+(shopFurnitureType===type?' active':'');button.textContent=type;button.onclick=()=>{shopFurnitureType=type;openTab('商店',true)};typeNav.appendChild(button)});
    $('choices').appendChild(typeNav);
   }
-  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
+  const search=document.createElement('input');search.type='search';search.className='shop-search';search.placeholder=shopCategory==='书籍'?'搜索菜谱或料理名称':shopCategory==='食物食材'?'搜索食材或食品':shopCategory==='装修材料'?'搜索窗户、地板或墙纸':'搜索家具、类别或风格';search.setAttribute('aria-label','搜索商店商品');$('choices').appendChild(search);
   shopGrid=document.createElement('div');shopGrid.className='shop-product-grid';$('choices').appendChild(shopGrid);
   search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();shopGrid.querySelectorAll('.shop-product-card').forEach(card=>{card.hidden=!!q&&!card.dataset.search.includes(q)})});
  }
- const tabEntries=name==='商店'?(shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
+ const tabEntries=name==='商店'?(shopCategory==='装修材料'?[...(shopCatalog.furnitureCategories?.['建筑类']?.[shopFinishType]||[])]:shopCategory==='家具'?[...(Object.entries(shopCatalog.furnitureCategories?.[shopFurnitureGroup]||{}).filter(([type])=>({'书架':'书柜','书柜':'书柜','餐椅':'椅子','椅子':'椅子','壁画':'装饰画','海报':'装饰画','照片墙':'装饰画'}[type]||type)===shopFurnitureType).flatMap(([,items])=>items||[]))]:shopCategory==='书籍'?[...(bookCategories?.[shopBookType]||[])]:[...(shopCatalog[shopCategory]||[])]):[...(tabs[name]||[])];
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
@@ -336,7 +344,7 @@ function openTab(name,force=false){
  }
  tabEntries.forEach(([label,emoji,id,cost,description])=>{
   let b=document.createElement('button');const isShop=name==='商店';b.className=isShop?'choice shop-product-card':'choice';let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
-  if(isShop){const desc=description||'';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(desc?'<small>'+desc+'</small>':'')+'</span><span class="shop-product-price">'+(Number(cost)===0?'免费':id.startsWith('exchange-dungeon-')?cost+' 积分':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':id.startsWith('exchange-dungeon-')?'兑换':'购入')+'</span>';}
+  if(isShop){const desc=description||'';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')+' '+(shopFinishType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(desc?'<small>'+desc+'</small>':'')+'</span><span class="shop-product-price">'+(Number(cost)===0?'免费':id.startsWith('exchange-dungeon-')?cost+' 积分':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':id.startsWith('exchange-dungeon-')?'兑换':'购入')+'</span>';}
   else b.innerHTML='<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
