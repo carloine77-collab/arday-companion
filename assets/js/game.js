@@ -1213,10 +1213,10 @@ function processActivityAt(value){
  s.activityLog=s.activityLog||[];
  s.activityLog.push({activity,key,hour,at:d.getTime(),withPlayer:!!ev?.withPlayer});
  if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
- const moneyLogLength=(s.moneyLog||[]).length;
+ const previousPersonalExpense=(s.moneyLog||[]).find(entry=>entry.account==='personal'&&entry.kind==='expense');
  reviewPersonalSpending(d.getTime());
  const latestPersonalExpense=(s.moneyLog||[]).find(entry=>entry.account==='personal'&&entry.kind==='expense');
- if((s.moneyLog||[]).length!==moneyLogLength&&latestPersonalExpense&&/^购买/.test(latestPersonalExpense.note||'')&&s.lastLetteredPersonalPurchaseAt!==latestPersonalExpense.at){
+ if(latestPersonalExpense&&latestPersonalExpense.at!==previousPersonalExpense?.at&&/^购买/.test(latestPersonalExpense.note||'')&&s.lastLetteredPersonalPurchaseAt!==latestPersonalExpense.at){
   s.lastLetteredPersonalPurchaseAt=latestPersonalExpense.at;
   const dayStart=new Date(d.getTime());dayStart.setHours(0,0,0,0);
   const todaysLetters=s.events.filter(item=>item.category==='letter'&&Number(item.created||0)>=dayStart.getTime()).length;
