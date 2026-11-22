@@ -677,3 +677,24 @@ header.top{position:relative}
 @media(max-width:390px){
  .identity-meta > #settingsEntry.settings-control{flex-basis:50px!important;width:50px!important;min-width:50px!important;max-width:50px!important;height:29px!important;min-height:29px!important;font-size:9px!important}
 }
+
+
+/* Inventory use confirmation: viewport-level modal, independent of the room drawer stacking context. */
+.inventory-use-backdrop{
+ position:fixed!important;inset:0!important;z-index:10000!important;
+ display:grid!important;place-items:center!important;padding:20px!important;
+ box-sizing:border-box!important;background:rgba(31,27,23,.58)!important;
+ backdrop-filter:blur(3px)!important;
+}
+.inventory-use-dialog{
+ width:min(100%,360px)!important;box-sizing:border-box!important;
+ padding:22px 20px 18px!important;border:1px solid #d7c2a5!important;
+ border-radius:16px!important;background:#f7f0e4!important;
+ box-shadow:0 18px 55px rgba(20,16,12,.3)!important;
+}
+.inventory-use-title{margin:0 0 15px!important;color:#805345!important;text-align:center!important;font:600 16px 'Noto Serif SC',Georgia,serif!important}
+.inventory-use-dialog .inventory-use-question{margin:0!important;color:var(--ink,#40382f)!important;font-size:14px!important;line-height:1.65!important;text-align:center!important}
+.inventory-use-dialog .inventory-use-note{margin:9px 0 0!important;color:var(--muted,#887968)!important;font-size:11px!important;line-height:1.6!important;text-align:center!important}
+.inventory-use-dialog .inventory-use-actions{display:flex!important;justify-content:center!important;gap:10px!important;margin-top:20px!important}
+.inventory-use-dialog .inventory-use-actions button{min-width:104px!important;min-height:40px!important;padding:0 18px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important}
+@media(max-width:430px){.inventory-use-dialog{width:min(100%,330px)!important;padding:19px 16px 16px!important}.inventory-use-dialog .inventory-use-actions button{flex:1;min-width:0!important}}
