@@ -877,13 +877,11 @@ window.ArdayGameConfig = {
           "780",
           ""
         ],
-        [
-          "拱形落地窗",
-          "▧",
-          "buy-furniture-catalog-116",
-          "980",
-          ""
-        ]
+        ["拱形落地窗","▧","buy-furniture-catalog-116","980",""],
+        ["法式六格窗","▧","buy-furniture-window-french","1080",""],
+        ["日式障子窗","▧","buy-furniture-window-shoji","980",""],
+        ["工业黑框窗","▧","buy-furniture-window-industrial","1120",""],
+        ["横向推拉窗","▧","buy-furniture-window-sliding","1060",""]
       ],
       "地板": [
         ["水磨石地板","▧","buy-floor-terrazzo","520",""],
