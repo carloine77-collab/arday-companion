@@ -90,7 +90,17 @@ function refreshDungeonUnlocks(){
 }
 refreshDungeonUnlocks();
 s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};s.introStage='awaiting-first-aid';}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));
-s.events=s.events.filter(event=>!(event.type==='shared-goal-proposal'&&event.goalId==='outing'));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.events=s.events.filter(event=>!(event.type==='shared-goal-proposal'&&event.goalId==='outing'));
+if(!s.windowOnlyOutingMigrationV1){
+ Object.values(s.calendar?.days||{}).forEach(day=>(Array.isArray(day)?day:[]).forEach(event=>{
+  if(event?.activity!=='walk')return;
+  event.activity='idle';event.title='自由时间';event.kind='free';event.withPlayer=false;
+  delete event.furnitureId;delete event.anchor;delete event.room;
+ }));
+ if(s.currentActivity==='walk'){s.currentActivity='idle';s.currentActivityAnchor=null;s.currentActivityRoom='living';s.currentActivityFurnitureId=null}
+ if(s.preferences&&typeof s.preferences==='object')delete s.preferences.walk;
+ s.windowOnlyOutingMigrationV1=true;
+}if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
