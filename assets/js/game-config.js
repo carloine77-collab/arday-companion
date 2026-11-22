@@ -173,7 +173,7 @@ window.ArdayGameConfig = {
           "坐垫",
           "▧",
           "buy-furniture-catalog-002",
-          "70",
+          "25",
           ""
         ]
       ]
