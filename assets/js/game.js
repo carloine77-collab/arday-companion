@@ -28,7 +28,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['窗户'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
+const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['窗户'],pantry:{},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0,isFreshInstall=false;const forceNewGameKey='arday-force-new-game-v1';try{if(localStorage.getItem(forceNewGameKey)==='1'){localStorage.removeItem('arday-save-v2');localStorage.removeItem(forceNewGameKey);isFreshInstall=true;}else{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.testFundsV3=true;}}else isFreshInstall=true;}}catch(e){isFreshInstall=true} delete s.coins;
 s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
@@ -173,6 +173,8 @@ s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 // Room finishes are independent per room. Migrate the former shared wallpaper
 // once, preserving each room's existing floor selection.
 s.roomFinishes=s.roomFinishes&&typeof s.roomFinishes==='object'?s.roomFinishes:{};
+const privateRoomKeys=['bedroom','kitchen','bathroom'];
+if(!s.roomUnlockMigrationV1){s.roomUnlocks=isFreshInstall?{living:true,bedroom:false,kitchen:false,bathroom:false}:{living:true,bedroom:true,kitchen:true,bathroom:true};s.roomUnlockMigrationV1=true}else{s.roomUnlocks=s.roomUnlocks&&typeof s.roomUnlocks==='object'?s.roomUnlocks:{};s.roomUnlocks.living=true;privateRoomKeys.forEach(key=>s.roomUnlocks[key]=!!s.roomUnlocks[key])}
 const legacySharedWallpaper=typeof s.roomFinishes.wallpaper==='string'?s.roomFinishes.wallpaper:null;
 for(const roomName of ['living','bedroom','kitchen','bathroom']){
  const finish=s.roomFinishes[roomName]&&typeof s.roomFinishes[roomName]==='object'?s.roomFinishes[roomName]:{};
@@ -181,7 +183,7 @@ for(const roomName of ['living','bedroom','kitchen','bathroom']){
  s.roomFinishes[roomName]=finish;
 }
 delete s.roomFinishes.wallpaper;
-s.pantry=s.pantry||{rice:1,egg:2,vegetable:2,tomato:1};Object.keys(ingredientNames).forEach(key=>{if(!Number.isFinite(Number(s.pantry[key])))s.pantry[key]=0});s.unlockedRecipes=Array.isArray(s.unlockedRecipes)?s.unlockedRecipes:['eggRice','tomatoEgg','vegetableSoup'];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
+s.pantry=s.pantry&&typeof s.pantry==='object'?s.pantry:{};if(isFreshInstall)s.pantry={};Object.keys(ingredientNames).forEach(key=>{if(!Number.isFinite(Number(s.pantry[key])))s.pantry[key]=0});s.unlockedRecipes=Array.isArray(s.unlockedRecipes)?s.unlockedRecipes:['eggRice','tomatoEgg','vegetableSoup'];s.room=s.room||{sofa:0,window:0,table:0};s.activityLog=s.activityLog||[];s.revealedTraits=s.revealedTraits||[];
 s.jobApplications=s.jobApplications||{};
 s.interactionAttempts=s.interactionAttempts&&typeof s.interactionAttempts==='object'?s.interactionAttempts:{};
 s.activeInteraction=s.activeInteraction&&typeof s.activeInteraction==='object'?s.activeInteraction:null;
@@ -294,7 +296,7 @@ function recyclePantryIngredient(key){
 }
 function purchase(id,label,cost){
  if(s.money<cost){toast('¥不足');return}
- if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}const room=arday3D.applyRoomFinish(id);if(!room){toast('请先进入需要装修的房间');return}s.money-=cost;const roomLabel={living:'起居室',bedroom:'卧室',kitchen:'厨房',bathroom:'浴室'}[room]||'当前房间';const surface=id.startsWith('buy-wallpaper-')?'墙面':'地面';addEvent('你更换了房间饰面',roomLabel+'的'+surface+'已更换为'+label+'，其他房间保持原样。','player-action');remember('purchase','房间装修：'+roomLabel+' / '+label,2);saySystem('已经把'+roomLabel+'的'+surface+'换好了。');save();render();toast(roomLabel+surface+'装修完成：'+label);openTab('商店',true);return}
+ if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}const room=arday3D.applyRoomFinish(id);if(!room){toast('请先进入需要装修的房间');return}s.money-=cost;const roomLabel={living:'客厅',bedroom:'卧室',kitchen:'厨房',bathroom:'浴室'}[room]||'当前房间';const surface=id.startsWith('buy-wallpaper-')?'墙面':'地面';addEvent('你更换了房间饰面',roomLabel+'的'+surface+'已更换为'+label+'，其他房间保持原样。','player-action');remember('purchase','房间装修：'+roomLabel+' / '+label,2);saySystem('已经把'+roomLabel+'的'+surface+'换好了。');save();render();toast(roomLabel+surface+'装修完成：'+label);openTab('商店',true);return}
  if(id.startsWith('buy-recipe-')){
   const recipeId=id.slice('buy-recipe-'.length);
   if(!recipes[recipeId]){toast('菜谱信息不存在');return}
@@ -1080,7 +1082,7 @@ function canCook(id){const r=recipes[id];return !!r&&Object.entries(r.ingredient
 function hasCookableRecipe(){return (s.unlockedRecipes||[]).some(id=>canCook(id))}
 
 function buyIngredient(id,label,cost){const k=id.replace('buy-ingredient-','');if(!(k in ingredientNames))return;if(s.money<cost){toast('¥不足');return}s.money-=cost;s.pantry[k]=pantryCount(k)+1;addEvent('你补充了食材',label+'已放入冰箱。','player-action');remember('purchase','购买食材：'+label,1);saySystem('食材放进冰箱了。');save();render();openTab('商店',true)}
-function kitchenOpen(){$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode','bathroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
+function kitchenOpen(){if(!s.roomUnlocks?.kitchen){toast('厨房尚未解锁');return}$('stage').classList.add('kitchen-mode');$('stage').classList.remove('bedroom-mode','bathroom-mode');$('roomLabel').textContent='厨房';updateArday3D()}
 function kitchenClose(){$('stage').classList.remove('kitchen-mode','bedroom-mode','bathroom-mode');const m=activityMeta[s.currentActivity]||{title:'自己的时间'};$('roomLabel').textContent=''+m.title;updateArday3D()}
 function kitchenRecipeArtwork(id){
  const art={
@@ -2538,6 +2540,7 @@ function initArday3D(){
   }
   const furnitureHotspots=[];
   function enterRoomFromDoor(mode){
+   if(mode!=='hall'&&mode!=='living'&&privateRoomKeys.includes(mode)&&!s.roomUnlocks?.[mode]){toast('房间尚未解锁');return}
    stage.classList.remove('calendar-mode','kitchen-mode','bedroom-mode','bathroom-mode','hall-mode');
    if(mode==='hall'){stage.classList.add('hall-mode');person.position.set(hallScene.spawn.x,0,hallScene.spawn.z);target.copy(person.position);hallCameraOffset.set(0,0,0);activeActivity='idle';}else if(roomMode==='hall'){person.position.set(-4.25,0,0);target.copy(person.position);}
    else{
@@ -2823,7 +2826,7 @@ function persistFurniture(item){
   function updateDoorDestinationLabel(group,destination){
    const canvas=group?.userData?.doorDestinationCanvas,texture=group?.userData?.doorDestinationTexture;
    if(!canvas||!texture)return;
-   const labels={living:'起居室',kitchen:'厨房',bedroom:'卧室',bathroom:'卫生间',hall:'公共大厅'},label=labels[destination]||'起居室',ctx=canvas.getContext('2d');
+   const labels={living:'客厅',kitchen:'厨房',bedroom:'卧室',bathroom:'卫生间',hall:'公共大厅'},label=labels[destination]||'客厅',ctx=canvas.getContext('2d');
    ctx.clearRect(0,0,canvas.width,canvas.height);
    ctx.fillStyle='rgba(247,239,224,.97)';ctx.beginPath();ctx.roundRect(6,6,628,180,28);ctx.fill();
    ctx.strokeStyle='#967657';ctx.lineWidth=8;ctx.stroke();
@@ -2844,13 +2847,14 @@ function persistFurniture(item){
    const center=document.createElement('div');center.className='furniture-wheel-center';center.style.left=radius+'px';center.style.top=radius+'px';
    const title=document.createElement('span');title.className='furniture-wheel-title';title.textContent='门的去向';
    const subtitle=document.createElement('span');subtitle.className='furniture-wheel-subtitle';subtitle.textContent='选择目的地';center.append(title,subtitle);center.onclick=closeFurnitureActions;wheel.appendChild(center);
-   const destinations=[['living','起居室','⌂'],['kitchen','厨房','♨'],['bedroom','卧室','☾'],['bathroom','卫生间','◌'],['hall','公共大厅','◇']];
+   const roomUnlockCosts={bedroom:1000,kitchen:1000,bathroom:1000};
+   const destinations=[['living','客厅','⌂'],['kitchen','厨房','♨'],['bedroom','卧室','☾'],['bathroom','卫生间','◌'],['hall','公共大厅','◇']];
    destinations.forEach(([value,label,symbol],index)=>{
     const angle=(-90+index*360/destinations.length)*Math.PI/180,button=document.createElement('button');button.type='button';button.className='furniture-wheel-action';button.style.left=(radius+Math.cos(angle)*radius*.76)+'px';button.style.top=(radius+Math.sin(angle)*radius*.76)+'px';button.setAttribute('aria-label','将门通往'+label);
     const icon=document.createElement('span');icon.className='furniture-wheel-icon';icon.textContent=symbol;
-    const textNode=document.createElement('span');textNode.className='furniture-wheel-label';textNode.textContent=label;
-    button.append(icon,textNode);button.setAttribute('aria-pressed',item.doorDestination===value?'true':'false');
-    button.onclick=()=>{item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
+    const textNode=document.createElement('span');textNode.className='furniture-wheel-label';const locked=privateRoomKeys.includes(value)&&!s.roomUnlocks?.[value],unlockCost=roomUnlockCosts[value]||0;textNode.textContent=locked?label+' ¥'+unlockCost:label;
+    button.append(icon,textNode);button.setAttribute('aria-pressed',item.doorDestination===value?'true':'false');button.setAttribute('aria-label',locked?'解锁'+label+'，需要'+unlockCost+'元':'将门通往'+label);
+    button.onclick=()=>{if(locked){if((Number(s.money)||0)<unlockCost){toast('¥不足');return}s.money-=unlockCost;s.roomUnlocks[value]=true;moneyRecord('shared','expense',unlockCost,'解锁房间：'+label);addEvent('解锁了一个新房间',label+'已开放。','player-action');save();render()}item.doorDestination=value;item.group.userData.roomTarget=value;updateDoorDestinationLabel(item.group,value);persistFurniture(item);closeFurnitureActions();toast('门已通往'+label)};
     wheel.appendChild(button);
    });
    stage.appendChild(wheel);
@@ -2969,7 +2973,8 @@ function persistFurniture(item){
    });
   }
   function setRoom(mode){
-   roomMode=mode==='hall'?'hall':['kitchen','bedroom','bathroom'].includes(mode)?mode:'living';
+   const requestedRoom=mode==='hall'?'hall':privateRoomKeys.includes(mode)?mode:'living';
+   roomMode=privateRoomKeys.includes(requestedRoom)&&!s.roomUnlocks?.[requestedRoom]?'living':requestedRoom;
    living.visible=roomMode==='living';bedroom.visible=roomMode==='bedroom';kitchen.visible=roomMode==='kitchen';bathroom.visible=roomMode==='bathroom';hall.visible=roomMode==='hall';
    if(roomMode==='hall'){
     furnitureRegistry.forEach(item=>{if(item.button)item.button.style.visibility='hidden'});
@@ -2986,7 +2991,7 @@ function persistFurniture(item){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave',anchor:'default'};
    activeActivity=act;
    if(roomMode==='hall'){person.visible=true;pose='idle';basePose='idle';walkRoute=[];walkIndex=0;walkPauseUntil=0;rig.rotation.set(0,0,0);rig.position.set(0,0,0);eyeGroups.forEach(g=>g.scale.y=1);return;}
-   const characterRoom=['bedroom','kitchen','bathroom'].includes(roomOverride)?roomOverride:(act==='sleep'?'bedroom':'living');person.visible=characterRoom===roomMode;
+   const requestedCharacterRoom=privateRoomKeys.includes(roomOverride)?roomOverride:null;const characterRoom=requestedCharacterRoom&&s.roomUnlocks?.[requestedCharacterRoom]?requestedCharacterRoom:(act==='sleep'&&s.roomUnlocks?.bedroom?'bedroom':'living');person.visible=characterRoom===roomMode;
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y,poseOverride=null,sleepingOnLoftBed=false;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
@@ -3026,7 +3031,7 @@ function persistFurniture(item){
     if(item){const seat=nearestSeat(item.group.position);if(seat&&Math.hypot(seat.group.position.x-item.group.position.x,seat.group.position.z-item.group.position.z)<2.6){p=[seat.group.position.x,0,seat.group.position.z];faceAngle=faceToward(seat.group.position,item.group.position)}else{standInFront(item,.58);poseOverride='stand'}}
    }else if(anchor==='bed'){
     if(act==='read')poseOverride='bedRead';else if(act==='rest')poseOverride='bedRest';
-    const bed=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&['bed','loftBed'].includes(furnitureKindForPlaced({name:it.name})),'bedroom')[0]:nearest(furniture(it=>['bed','loftBed'].includes(furnitureKindForPlaced({name:it.name})),'bedroom'),person.position);
+    const bed=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&['bed','loftBed'].includes(furnitureKindForPlaced({name:it.name})),characterRoom)[0]:nearest(furniture(it=>['bed','loftBed'].includes(furnitureKindForPlaced({name:it.name})),characterRoom),person.position);
     if(bed){
      const loftBed=String(bed.name||'').includes('上床下桌');sleepingOnLoftBed=loftBed;
      if(loftBed){
@@ -3446,13 +3451,13 @@ function persistFurniture(item){
  }
 }
 function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity||'idle',anchor=s.activeInteraction?.anchor||s.currentActivityAnchor||null,room=s.activeInteraction?.room||s.currentActivityRoom||null,furnitureId=s.activeInteraction?.furnitureId||s.currentActivityFurnitureId||null){
- const stage=$('stage'),mode=stage.classList.contains('hall-mode')?'hall':stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
+ const stage=$('stage');let mode=stage.classList.contains('hall-mode')?'hall':stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';if(privateRoomKeys.includes(mode)&&!s.roomUnlocks?.[mode]){stage.classList.remove('bedroom-mode','kitchen-mode','bathroom-mode');mode='living'}
  if(arday3D){arday3D.setRoom(mode);if(s.introWakePending){s.introWakePending=false;arday3D.updateActivity('wake',null,'living',null)}else arday3D.updateActivity(activity,anchor,room,furnitureId)}
  else{
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
  }
- const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='hall'?'公共大厅':mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':mode==='bathroom'?'卫生间':'起居室';}
+ const label=$('roomLabel');if(label){label.dataset.room=mode;label.textContent=mode==='hall'?'公共大厅':mode==='bedroom'?'卧室':mode==='kitchen'?'厨房':mode==='bathroom'?'卫生间':'客厅';}
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;render();renderCalendar();generateDailyEvents();save();
