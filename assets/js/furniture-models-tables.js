@@ -48,6 +48,7 @@ const {T,group,mat,m,variant,modelName,id,openFurnitureActions,box,cyl,sphere,le
     for(const z of [-depth/2,depth/2])box(0,height-.012,z,width*.94,.018,.018,m.oak);
    
 Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
 
 };
 const buildChairDiningChair = function(ctx) {
@@ -97,6 +98,7 @@ const {T,group,mat,m,variant,modelName,id,openFurnitureActions,box,cyl,sphere,le
     }
    
 Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
+  return true;
 
 };
 Object.assign(window.ArdayFurnitureModelCategories,{
