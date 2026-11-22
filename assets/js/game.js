@@ -2780,10 +2780,7 @@ function initArday3D(){
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
-  // Preserve legacy door furniture records. The old unconditional ID filter
-  // deleted them on every load, even when their replacement had already been
-  // marked as installed by defaultDoorSetupVersion.
-  s.placed=s.placed.filter(record=>!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
+  // Keep saved door records intact; the canonical door setup below repairs missing defaults.
   const starterSceneNames=new Set(['吊灯']);
   const obsoleteStarterSceneNames=new Set(['茶几','植物','盆栽','冰箱','灶台','水槽']);
   const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门')||!String(record.id||'').startsWith('scene-default-')||!obsoleteStarterSceneNames.has(record.name)));
@@ -2808,6 +2805,7 @@ function initArday3D(){
 
   // One matching default door per room: living opens to the public hall; private rooms return to the living room.
   const defaultDoorRecords=[
+   {id:'default-door-living',name:'默认室内木门',room:'living',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'hall'},
    {id:'default-door-bedroom',name:'默认室内木门',room:'bedroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
@@ -2818,9 +2816,8 @@ function initArday3D(){
   let defaultDoorsChanged=(Number(s.defaultDoorSetupVersion)||0)<3;
   defaultDoorRecords.forEach(def=>{
    let record=s.placed.find(entry=>entry.id===def.id);
+   if(!record)record=s.placed.find(entry=>entry.room===def.room&&entry.destination===def.destination&&typeof entry.name==='string'&&/门/.test(entry.name));
    if(!record){
-    const existingDoor=s.placed.find(entry=>entry.room===def.room&&typeof entry.name==='string'&&/门/.test(entry.name));
-    if(existingDoor)return;
     record={...def};s.placed.push(record);defaultDoorsChanged=true;
    }
    const before=JSON.stringify(record);
