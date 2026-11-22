@@ -87,7 +87,7 @@ function refreshDungeonUnlocks(){
  DUNGEON_TIERS.forEach((tier,index)=>{if(index===0)return;const previous=DUNGEON_TIERS[index-1],needed=DUNGEON_CLEAR_REQUIREMENTS[tier]||0;if((Number(s.dungeonProgress[previous])||0)>=needed&&!s.dungeonUnlocks.includes(tier))s.dungeonUnlocks.push(tier)});
 }
 refreshDungeonUnlocks();
-s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -199,8 +199,8 @@ function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
 function has(item){const matches=name=>name===item||name.startsWith(item+'·');return s.inventory.some(x=>matches(x.name))||(s.placed||[]).some(x=>typeof x.name==='string'&&matches(x.name))}
-function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(type))return 'letter';if(type==='player-action')return 'player';return 'system'}
-function addEvent(title,detail,type='daily',choices=[]){const letterType=['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(type),systemType=['daily','autonomous','long','system-action'].includes(type);if(!letterType&&!systemType)return null;const e={id:Date.now()+Math.random(),title,detail,type,category:letterType?'letter':'system',choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,30);return e}
+function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict'].includes(type))return 'letter';if(type==='player-action')return 'player';return 'system'}
+function addEvent(title,detail,type='daily',choices=[]){const letterType=['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict'].includes(type),systemType=['daily','autonomous','long','system-action'].includes(type);if(!letterType&&!systemType)return null;const e={id:Date.now()+Math.random(),title,detail,type,category:letterType?'letter':'system',choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,30);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
 
 
@@ -414,7 +414,7 @@ function renderEvents(){
  open.forEach(e=>{
   const isLetter=e.category==='letter';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
   const top=document.createElement('span');top.className='note-card-top';
-  const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=e.type==='shared-goal-proposal'?'阿尔的邀约':isLetter?'阿尔的来信':'系统提示';
+  const kindNode=document.createElement('em');kindNode.className='event-kind '+(isLetter?'letter':'system');kindNode.textContent=e.type==='shared-goal-proposal'?'阿尔的邀约':e.type==='relationship-conflict'?'关系事件':isLetter?'阿尔的来信':'系统提示';
   const timeNode=document.createElement('time');timeNode.textContent=new Date(e.created||Date.now()).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});top.append(kindNode,timeNode);
   const titleNode=document.createElement('strong');titleNode.className='note-card-title';titleNode.textContent=e.title;
   const detailNode=document.createElement('small');detailNode.className='note-card-preview';detailNode.textContent=e.detail+(e.goalCondition?' 完成条件：'+e.goalCondition:'');
@@ -956,6 +956,7 @@ function relation(action){
  // or relational conflict, not through repeated music, reading or games.
  if(['listen','walk','read','game','music','chat','computerPlay','browseWeb','program','playPiano','exercise','laundry','hug','admireDecor','admireView','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
   s.friend=clamp(s.friend+1);
+  if(['hug','bouquet','admireFlowers'].includes(action))s.love=clamp(s.love+1);
   remember('shared',action);
  }
 }
@@ -1127,7 +1128,7 @@ function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'i
 function updateStatusBuffs(at=Date.now()){
  const hourMs=3600000,period=12*hourMs;s.statusBuffs=s.statusBuffs||{};
  const rules=[
-  {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n);s.love=Math.max(0,(Number(s.love)||0)-n)}},
+  {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n)}},
   {id:'starving',active:Number(s.hunger)<15,apply:n=>{s.energy=clamp(s.energy-2*n);s.fun=clamp(s.fun-n)}},
   {id:'sick',active:Number(s.clean)<25,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+n);s.energy=clamp(s.energy-n)}},
   {id:'fatigued',active:Number(s.energy)<25,apply:n=>{s.fun=clamp(s.fun-n);s.bored=Math.min(100,(Number(s.bored)||0)+n)}}
@@ -1422,7 +1423,7 @@ function sharedGoalCatalog(){
   if(!g)return;
   s.lastSharedProposalAt=at;
   const e=addEvent('阿尔想和你一起做件事',g.detail,'shared-goal-proposal');if(!e)return;
-  e.goalId=g.id;e.goalCondition=g.condition;s.lastArdayLetterAt=at;say(ardayLine('proposal',g.detail));
+  e.goalId=g.id;e.goalCondition=g.condition;e.expiresAt=at+72*3600000;s.lastArdayLetterAt=at;say(ardayLine('proposal',g.detail));
  }
  delete s.project;
  Object.values(s.calendar?.days||{}).forEach(day=>day.forEach(ev=>{if(ev.activity==='project'||ev.activity==='tidy'){ev.activity='idle';ev.title='自由时间';ev.kind='free'}}));
@@ -1433,6 +1434,7 @@ function sharedGoalCatalog(){
   const target=variant==='slow'?Math.max(1,g.target-1):g.target;
   s.sharedGoals.push({...g,target,progress:0,status:'active',startedAt:Date.now(),variant});
   say(ardayLine('accept','好。那就把这件事记下来。'));
+  change({love:1});
   remember('shared-goal','你们决定一起做：'+g.title,2);
   return true;
  }
@@ -1444,7 +1446,7 @@ function sharedGoalCatalog(){
     g.status='completed';g.completedAt=at;
     s.sharedGoalHistory.unshift({id:g.id,title:g.title,completedAt:at});
     s.sharedGoalHistory=s.sharedGoalHistory.slice(0,10);
-    change({friend:2,fun:3});
+    change({friend:2,fun:3,love:2});
     addEvent('你们完成了一件共同计划','「'+g.title+'」已经完成。那些零碎的时间，最后真的拼成了一件事。','daily');
     remember('shared-goal','共同完成：'+g.title,3);
     say('原来一起做一件事，最后会留下这样的感觉。');
@@ -1478,12 +1480,29 @@ function writeArdayLetter(at=Date.now(),trigger='daily',context={}){
  s.ardayLetterHistory.unshift(letter.id);s.ardayLetterHistory=s.ardayLetterHistory.slice(0,12);
  return e;
 }
+function expireSharedGoalProposals(at=Date.now()){
+ const expired=(s.events||[]).filter(e=>e.type==='shared-goal-proposal'&&e.status==='open'&&Number(e.expiresAt)>0&&Number(e.expiresAt)<=at);
+ if(!expired.length)return;
+ expired.forEach(e=>{e.status='resolved';e.choice='逾期未回复';e.resolvedAt=at;});
+ change({love:-1});
+ remember('relationship-distance','阿尔的共同计划邀约一直没有得到回应。',2);
+}
+function maybeGenerateRelationshipConflict(at=Date.now()){
+ if((Number(s.friend)||0)<18&&(Number(s.love)||0)<5)return;
+ if(at-(Number(s.lastRelationshipConflictAt)||0)<5*86400000)return;
+ if((s.events||[]).some(e=>e.type==='relationship-conflict'&&e.status==='open'))return;
+ if((s.events||[]).filter(e=>e.status==='open').length>=4||Math.random()>=.08)return;
+ const e=addEvent('有件小事想和你谈谈','今天有件日常安排让我有点在意。事情不大，但我不想装作完全没发生过。你愿意听我说说吗？','relationship-conflict');
+ if(e)s.lastRelationshipConflictAt=at;
+}
 function generateDailyEvents(){
  const today=s.calendar?.anchor||dayKey(dayAnchor());
  if(s.dailyEventDate===today)return;
  s.dailyEventDate=today;
  const at=Date.now();
+ expireSharedGoalProposals(at);
  proposeSharedGoal(at);
+ maybeGenerateRelationshipConflict(at);
  // 每个游戏日保留一次自主联系机会；不再检查距上次写信的小时数。
  if(Math.random()<.72)writeArdayLetter(at,'daily');
 }
@@ -1500,7 +1519,15 @@ eventChoices=function(e){
    $('sg-decline').onclick=()=>{say(ardayLine('decline'));completeEvent(e,'暂不安排');save();renderEvents()};
    $('drawer').classList.add('open');return;
   }
-  if(e.type==='life-memory'){
+  if(e.type==='relationship-conflict'){
+  $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
+  $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="conflict-listen">听他把话说完</button><button id="conflict-explain">解释自己的想法</button><button id="conflict-dismiss">敷衍地结束话题</button></div>';
+  $('conflict-listen').onclick=()=>{change({hate:-2,love:1,friend:1});say('谢谢你愿意听我说。其实我只是希望你能把这件事放在心上。');remember('relationship-repair','你认真听完了阿尔的想法。',2);completeEvent(e,'认真倾听');save();render();renderEvents()};
+  $('conflict-explain').onclick=()=>{change({hate:-1,friend:1});say('我明白你的意思。我们不必完全一样，但至少可以把话说清楚。');remember('relationship-repair','你们把各自的想法说开了。',2);completeEvent(e,'解释并沟通');save();render();renderEvents()};
+  $('conflict-dismiss').onclick=()=>{change({hate:2,love:-1});say('算了。既然你不想谈，那我也不勉强。');remember('relationship-conflict','你没有回应阿尔想认真讨论的事情。',2);completeEvent(e,'敷衍结束');save();render();renderEvents()};
+  $('drawer').classList.add('open');return;
+ }
+ if(e.type==='life-memory'){
   $('drawerTitle').textContent=e.title;$('choices').className='choices compact-action-view';
   $('choices').innerHTML='<div class="event-detail">'+e.detail+'</div><div class="calendar-actions"><button id="memory-ask">问问纸条的来历</button><button id="memory-keep">替他收起来</button></div>';
   $('memory-ask').onclick=()=>{say('你倒是很会挑时候。只是这件事，我还没想好要从哪里说起。');remember('old-memory','你问起那张旧纸条，阿尔没有立刻回答。',2);change({friend:1});completeEvent(e,'询问纸条来历');save();renderEvents()};
