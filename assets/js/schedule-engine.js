@@ -27,7 +27,7 @@ function activityPreferenceScore(activity){
 function furnitureSatisfiesRequirement(item,requirement){
  if(!requirement)return true;
  const kind=furnitureKindForPlaced(item);
- const allowed={desk:['desk'],computer:['computer'],television:['television'],recordPlayer:['recordPlayer'],gameConsole:['gameConsole'],bouquet:['bouquet'],bookshelf:['bookshelf'],readingSpot:['bookshelf','desk','bed'],sink:['sink'],seat:['sofa','chair','cushion','bed','loftBed'],desk:['desk','loftBed'],stove:['stove'],piano:['piano'],washingMachine:['washingMachine'],treadmill:['treadmill','dumbbellRack']};
+ const allowed={computer:['computer'],television:['television'],recordPlayer:['recordPlayer'],gameConsole:['gameConsole'],bouquet:['bouquet'],bookshelf:['bookshelf'],readingSpot:['bookshelf','desk','bed'],sink:['sink'],seat:['sofa','chair','cushion','bed','loftBed'],desk:['desk','loftBed'],stove:['stove'],piano:['piano'],washingMachine:['washingMachine'],treadmill:['treadmill','dumbbellRack']};
  return !allowed[requirement]||allowed[requirement].includes(kind);
 }
 function hasAutonomyFurniture(requirement,room=null){
@@ -48,7 +48,6 @@ function autonomousFurnitureOptions(){
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
    if(['computerPlay','guildTraining'].includes(activity)&&kind==='desk')continue;
    if(['computerPlay','guildTraining'].includes(activity)&&kind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk')))continue;
-   if(activity==='cook'&&!hasCookableRecipe())continue;
    options.push({activity,meta,room:item.room,anchor:context?.anchor||meta.anchor||'default',furnitureId:item.id,furnitureKind:kind});
   }
  }
