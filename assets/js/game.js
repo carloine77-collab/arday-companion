@@ -126,9 +126,18 @@ if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))
 else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';if(item.name.startsWith('成品食物·')){if(!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}if(!item.preparedBy)item.preparedBy='player'}});
 const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item)).map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
-if(!Array.isArray(s.placed)||(!s.placed.length&&migratedPlaced.length))s.placed=migratedPlaced;
-if(!Array.isArray(s.placed))s.placed=[];
-else s.placed=s.placed.filter(item=>item&&typeof item==='object'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
+const currentPlaced=Array.isArray(s.placed)?s.placed:[];
+// Merge every legacy placed-furniture record into the canonical collection.
+// The previous empty-array-only migration silently discarded legacy desks,
+// tables and doors whenever even one newer placed record already existed.
+const mergedPlacedById=new Map();
+[...migratedPlaced,...currentPlaced].forEach((item,index)=>{
+ if(!item||typeof item!=='object')return;
+ const id=String(item.id||'legacy-placed-merged-'+index);
+ const previous=mergedPlacedById.get(id)||{};
+ mergedPlacedById.set(id,{...item,...previous,...item,id});
+});
+s.placed=Array.from(mergedPlacedById.values()).filter(item=>item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 // The old furniture list described built-in scene fixtures, not owned inventory.
 const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
 legacySceneFurniture.filter(name=>typeof name==='string'&&(name==='窗户'||name.includes('门'))).forEach((legacyName,index)=>{
@@ -2746,7 +2755,8 @@ function initArday3D(){
   const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door','default-door-living'];
   s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id)&&!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
   const starterSceneNames=new Set(['吊灯']);
-  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门')||!String(record.id||'').startsWith('scene-default-')));
+  const obsoleteStarterSceneNames=new Set(['茶几','植物','盆栽','冰箱','灶台','水槽']);
+  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)||record.name.startsWith('门')||!String(record.id||'').startsWith('scene-default-')||!obsoleteStarterSceneNames.has(record.name)));
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
   // Resolve support relationships after every saved item exists. The old
   // one-pass restore silently detached tabletop objects when their table
