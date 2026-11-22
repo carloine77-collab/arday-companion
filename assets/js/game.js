@@ -764,10 +764,12 @@ function ensureScheduleAt(value){
   s.calendar.version=20;
  }
  if((s.calendar.version||0)<21){s.sleepPlans=s.sleepPlans||{};s.calendar.version=21}
- if((s.calendar.version||0)<22){
+ if((s.calendar.version||0)<23){
   Object.keys(s.calendar.days||{}).forEach(key=>{s.calendar.days[key]=(s.calendar.days[key]||[]).filter(ev=>!['food','company'].includes(ev.activity));if(!s.calendar.days[key].length)delete s.calendar.days[key]});
   s.activityLog=(s.activityLog||[]).filter(entry=>!['food','company'].includes(entry.activity));
-  s.calendar.version=22;
+  if(['food','company'].includes(s.activeInteraction?.activity))s.activeInteraction=null;
+  if(['food','company'].includes(s.currentActivity)){s.currentActivity='idle';s.currentActivityAnchor=null;s.currentActivityFurnitureId=null}
+  s.calendar.version=23;
  }
  
  
