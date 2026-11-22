@@ -87,7 +87,7 @@ function refreshDungeonUnlocks(){
  DUNGEON_TIERS.forEach((tier,index)=>{if(index===0)return;const previous=DUNGEON_TIERS[index-1],needed=DUNGEON_CLEAR_REQUIREMENTS[tier]||0;if((Number(s.dungeonProgress[previous])||0)>=needed&&!s.dungeonUnlocks.includes(tier))s.dungeonUnlocks.push(tier)});
 }
 refreshDungeonUnlocks();
-s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};s.introStage='awaiting-first-aid';}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -353,8 +353,7 @@ function openTab(name,force=false){
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
    if(id.startsWith('use-inventory-')){
     const index=Number(id.slice('use-inventory-'.length)),entity=s.inventory[index],item=entity?.name;
-    if(entity?.kind==='consumable'){useConsumableItem(entity,index);return}
-    if(entity?.kind==='dungeon-item'){useDungeonItem(entity,index);return}
+    if(entity?.kind==='consumable'||entity?.kind==='dungeon-item'){showInventoryUseConfirm(entity);return}
     if(!item){openTab('物品',true);return}
     if(item.startsWith('成品食物·')){
      if(!arday3D?.placeOwnedFurniture){toast('场景尚未就绪，暂时无法取出料理');return}
@@ -527,7 +526,11 @@ function slotClick(di,h){
 
 $('backRoom')?.remove();
 // Navigation listeners are installed before simulation initialization.
-$('chatForm').addEventListener('submit',e=>{e.preventDefault();let v=$('message').value.trim();if(!v)return;respondToChat(v);$('message').value='';});
+$('chatForm').addEventListener('submit',e=>{e.preventDefault();let v=$('message').value.trim();if(!v)return;respondToChat(v);$('message').value='';renderChatTopics()});
+const chatInput=$('message'),chatTopics=$('chatTopics');
+function renderChatTopics(){if(!chatTopics)return;const stage=s.introStage;let topics=[];if(stage==='awaiting-first-contact')topics=[{label:'主动向 Arday 搭话',message:'你是谁？'}];else if(stage==='awaiting-void-explanation')topics=[{label:'解释自己从虚空中来',message:'我可能从虚空中来，是我救了你。'}];chatTopics.replaceChildren();topics.forEach(topic=>{const button=document.createElement('button');button.type='button';button.className='chat-topic';button.textContent=topic.label;button.addEventListener('click',()=>{chatInput.value=topic.message;chatTopics.hidden=true;respondToChat(topic.message);chatInput.value='';renderChatTopics()});chatTopics.appendChild(button)});chatTopics.hidden=!topics.length;chatInput.placeholder=topics.length?'输入消息，或选择一个话题':'消息';}
+chatInput.addEventListener('focus',renderChatTopics);chatInput.addEventListener('click',renderChatTopics);
+document.addEventListener('click',event=>{if(chatTopics&&!event.target.closest('.chat,.chat-topic-popover'))chatTopics.hidden=true});
 let decorating=false;
 $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('editing',decorating);$('decorate').textContent=decorating?'完成装修':'✦ 装修';if(decorating){$('drawer').classList.remove('open')}else say('好了。')};
 /* Initialization is deliberately deferred until all simulation constants and handlers are defined. */
@@ -542,6 +545,14 @@ $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('e
 
 
 function respondToChat(text){
+ if(s.introStage==='awaiting-first-contact'){
+  s.introFirstQuestion=String(text||'').slice(0,160);s.introStage='awaiting-void-explanation';
+  say('……你是谁？刚才这里明明只有我一个人。你是从哪里冒出来的？');save();renderChatTopics();return {status:'intro-replied',stage:s.introStage};
+ }
+ if(s.introStage==='awaiting-void-explanation'){
+  s.introVoidAnswer=String(text||'').slice(0,160);s.introStage='complete';
+  say('虚空？……我听不懂。不过，你说是你救了我。');save();renderChatTopics();return {status:'intro-complete',stage:s.introStage};
+ }
  const chatSystem=window.ArdayChatSystem;
  if(!chatSystem||typeof chatSystem.respond!=='function'){
   console.error('Arday chat system failed to load.');
@@ -1770,7 +1781,24 @@ if(combatCommissionHeader&&!combatCommissionHeader.dataset.commissionBound){
 // Narrow runtime bridge for the separately maintained dungeon-board module.
 window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save(),clamp:value=>clamp(value),addDungeonItem:id=>addDungeonItem(id),settleDungeonIfDue:at=>settleDungeonIfDue(at),pauseBoard:()=>pauseDungeonBoard(),showDungeon:()=>showDungeon()};
 
-function useConsumableItem(entity,index){if(entity?.itemId!=='first-aid-kit'){toast('该消耗品暂不可使用');return}if(!s.statusBuffs?.fatal?.active){toast('Arday目前不需要急救');return}const state=s.statusBuffs.fatal;s.statusBuffs.fatal={...state,active:false,since:0,nextEffectAt:0,clearedAt:Date.now()};['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)+35)});s.inventory.splice(index,1);addEvent('急救包已使用','Arday的濒死状态已解除，四项生存指标得到紧急恢复。','system-action');save();render();saySystem('急救包已经生效。Arday的状态稳定下来了。先让他休息一会儿吧。');toast('濒死状态已解除');openTab('物品',true)}
+function showInventoryUseConfirm(entity){
+ if(!entity||!['consumable','dungeon-item'].includes(entity.kind))return;
+ $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='使用道具';$('choices').className='choices inventory-use-confirm';
+ const question=document.createElement('p');question.className='inventory-use-question';question.textContent='确认向 Arday 使用「'+entity.name+'」吗？';
+ const note=document.createElement('p');note.className='inventory-use-note';note.textContent=entity.itemId==='first-aid-kit'?'使用后会消耗一个急救包。':'确认后将立即消耗该道具并应用效果。';
+ const actions=document.createElement('div');actions.className='inventory-use-actions';
+ const confirm=document.createElement('button');confirm.type='button';confirm.className='inventory-use-confirm-button';confirm.textContent='确认';
+ const cancel=document.createElement('button');cancel.type='button';cancel.className='inventory-use-cancel-button';cancel.textContent='取消';
+ confirm.onclick=()=>{const index=s.inventory.findIndex(item=>item.id===entity.id);if(index<0){toast('这件道具已不在背包中');openTab('物品',true);return}if(entity.kind==='consumable')useConsumableItem(s.inventory[index],index);else useDungeonItem(s.inventory[index],index)};
+ cancel.onclick=()=>openTab('物品',true);actions.append(confirm,cancel);$('choices').replaceChildren(question,note,actions);$('drawer').classList.add('open');
+}
+function startArdayAwakening(){
+ s.introStage='awakening';s.introWakePending=true;save();updateArday3D('wake',null,'living',null);
+ const lines=['……咳。','好冷……我刚才，是躺在地上吗？','这里是哪儿？','我为什么会在这里？','头好痛。什么都想不起来……'];let index=0;
+ const next=()=>{if(index>=lines.length){s.introStage='awaiting-first-contact';save();renderChatTopics();return}say(lines[index++]);setTimeout(next,3600)};
+ setTimeout(next,900);
+}
+function useConsumableItem(entity,index){if(entity?.itemId!=='first-aid-kit'){toast('该消耗品暂不可使用');return}if(!s.statusBuffs?.fatal?.active){toast('Arday目前不需要急救');return}const state=s.statusBuffs.fatal;s.statusBuffs.fatal={...state,active:false,since:0,nextEffectAt:0,clearedAt:Date.now()};['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)+35)});s.inventory.splice(index,1);addEvent('急救包已使用','Arday的濒死状态已解除，四项生存指标得到紧急恢复。','system-action');save();render();toast('濒死状态已解除');openTab('物品',true);if(s.introStage==='awaiting-first-aid')startArdayAwakening()}
 function useDungeonItem(entity,index){
  const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
  const applyEffects=effects=>{const today=keyAt(Date.now());if(s.dungeonItemStatGainDay!==today){s.dungeonItemStatGainDay=today;s.dungeonItemStatGains={}}s.dungeonItemStatGains=s.dungeonItemStatGains||{};Object.entries(effects||{}).forEach(([key,value])=>{const amount=Number(value)||0;if(key in s.attributes){if(amount>0){const used=Number(s.dungeonItemStatGains[key])||0,allowed=Math.min(amount,Math.max(0,2-used));s.attributes[key]=clamp((Number(s.attributes[key])||0)+allowed);s.dungeonItemStatGains[key]=used+allowed}else s.attributes[key]=clamp((Number(s.attributes[key])||0)+amount)}else if(key in s)s[key]=clamp((Number(s[key])||0)+amount)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)};
@@ -2353,7 +2381,7 @@ function initArday3D(){
   const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
   const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0,lastHotspotUpdate=0;
-  let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600;
+  let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600,wakeStartedAt=0;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0),hallCameraOffset=new T.Vector3();
   function applyCamera(){targetPhi=Math.max(roomMode==='hall'?.78:.48,Math.min(roomMode==='hall'?1.48:1.42,targetPhi));targetRadius=roomMode==='hall'?Math.max(28,Math.min(175,targetRadius)):Math.max(7.2,Math.min(21,targetRadius))}
   function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
@@ -2945,11 +2973,11 @@ function persistFurniture(item){
     const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='window')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='window',characterRoom),person.position);
     if(item)standInFront(item,.72);else{p=[...positions.window];faceAngle=Math.PI}
    }
-   target.set(...p);pose=poseOverride||meta.pose||'wave';activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','cushion','bouquet','bed','loftDesk','sink','piano','washingMachine','treadmill','gameConsole','wallArt','window'].includes(anchor))person.rotation.y=faceAngle;
+   if(act==='wake'){person.position.set(...p);target.set(...p);wakeStartedAt=performance.now()}else target.set(...p);pose=act==='wake'?'wake':(poseOverride||meta.pose||'wave');activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','cushion','bouquet','bed','loftDesk','sink','piano','washingMachine','treadmill','gameConsole','wallArt','window'].includes(anchor))person.rotation.y=faceAngle;
    basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
-   rig.rotation.set(0,0,0);rig.position.set(0,0,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
+   rig.rotation.set(act==='wake'?-Math.PI/2:0,0,0);rig.position.set(0,0,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||act==='wake'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
    body.position.y=pose==='sit'?-.32:0;legs.forEach(l=>{l.hip.position.y=pose==='sit'?.51:.83;l.hip.rotation.x=pose==='sit'?-1.15:0;l.knee.rotation.x=pose==='sit'?1.45:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
@@ -3245,11 +3273,11 @@ function persistFurniture(item){
    if(moving){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.82;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.9});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.58;a.shoulder.rotation.z=a.side*Math.sin(phase+i*Math.PI)*.045;a.elbow.rotation.x=-.1+Math.max(0,Math.sin(phase+i*Math.PI))*.08});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
-    legs.forEach(l=>{const hipTarget=pose==='sit'?-1.15:pose==='bedRead'?-.16:pose==='bedRest'?-.08:0,kneeTarget=pose==='sit'?1.45:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='sit'?.51:.83;l.hip.position.y+=(hipY-l.hip.position.y)*.12;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.12;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.12});
+    legs.forEach(l=>{const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/3400)):1,hipTarget=pose==='wake'?-.72*(1-wakeProgress):pose==='sit'?-1.15:pose==='bedRead'?- .16:pose==='bedRest'?-.08:0,kneeTarget=pose==='wake'?.95*(1-wakeProgress):pose==='sit'?1.45:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='wake'?.83-.2*(1-wakeProgress):pose==='sit'?.51:.83;l.hip.position.y+=(hipY-l.hip.position.y)*.12;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.12;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.12});
     if(activeActivity==='exercise'&&pose==='walk'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.48;l.knee.rotation.x=Math.max(0,stride)*.72})}
     const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',cooking=activeActivity==='cook',weightTraining=activeActivity==='exercise'&&pose!=='walk',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
-     let shoulderX=pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
+     let shoulderX=pose==='wake'?.32*(1-Math.min(1,(t-wakeStartedAt)/3400)):pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
      let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
      let shoulderZ=pose==='sit'?.15:0;
      if(reading){shoulderX=.12+Math.sin(t*.003+i*2.2)*.075;elbowX=-.58+Math.sin(t*.004+i*2.8)*.12;shoulderZ=(i===0?.23:-.18)+Math.sin(t*.002+i)*.025}
@@ -3274,6 +3302,8 @@ function persistFurniture(item){
      a.shoulder.rotation.z+=(shoulderZ-a.shoulder.rotation.z)*.08;
      a.elbow.rotation.x+=(elbowX-a.elbow.rotation.x)*.09;
     });
+    if(pose==='wake'){const progress=Math.max(0,Math.min(1,(t-wakeStartedAt)/3400));rig.rotation.x+=(0-rig.rotation.x)*(1-Math.exp(-dt*1.65));body.position.y+=(-.18*(1-progress)-body.position.y)*.08;body.rotation.x+=(-.12*(1-progress)-body.rotation.x)*.06;if(progress>=1){pose='idle';basePose='idle';activeActivity='idle';body.position.y=0;body.rotation.x=0;idleNextMove=t+5000;idleNextGesture=t+7000;}}
+
     if(writing){head.rotation.x+=(-.13+Math.sin(t*.0018)*.025-head.rotation.x)*.035}
      if(reading&&Math.sin(t*.0011)>.985){head.rotation.y+=(.42-head.rotation.y)*.12;head.rotation.x+=((pose==='bedRead'?.04:-.08)-head.rotation.x)*.12}
      if(gaming){head.rotation.x+=(-.08+Math.sin(t*.002)*.025-head.rotation.x)*.035}
@@ -3331,7 +3361,7 @@ function persistFurniture(item){
 }
 function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity||'idle',anchor=s.activeInteraction?.anchor||s.currentActivityAnchor||null,room=s.activeInteraction?.room||s.currentActivityRoom||null,furnitureId=s.activeInteraction?.furnitureId||s.currentActivityFurnitureId||null){
  const stage=$('stage'),mode=stage.classList.contains('hall-mode')?'hall':stage.classList.contains('bathroom-mode')?'bathroom':stage.classList.contains('kitchen-mode')?'kitchen':stage.classList.contains('bedroom-mode')?'bedroom':'living';
- if(arday3D){arday3D.setRoom(mode);arday3D.updateActivity(activity,anchor,room,furnitureId)}
+ if(arday3D){arday3D.setRoom(mode);if(s.introWakePending){s.introWakePending=false;arday3D.updateActivity('wake',null,'living',null)}else arday3D.updateActivity(activity,anchor,room,furnitureId)}
  else{
   const status=stage.querySelector('.three-status');
   if(status)status.textContent='3D 场景尚未就绪，当前活动将在场景恢复后显示。';
@@ -3340,15 +3370,15 @@ function updateArday3D(activity=s.activeInteraction?.activity||s.currentActivity
 }
 
 ensurePersonalGoal(Date.now());applyOffline();ensureSchedule();s.visits++;render();renderCalendar();generateDailyEvents();save();
-initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activity,s.activeInteraction.anchor||null,s.activeInteraction.room||null,s.activeInteraction.furnitureId||null);else updateArday3D();
+initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activity,s.activeInteraction.anchor||null,s.activeInteraction.room||null,s.activeInteraction.furnitureId||null);else if(s.introStage==='awakening'){s.introWakePending=true;updateArday3D('wake',null,'living',null)}else updateArday3D();
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
 
 if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「消耗品」分类中，将急救包用于 Arday。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
-function playIntroSequence(){const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','别担心，我已经把新手礼包寄到你的信箱了。里面有两个急救包，还有一千元人民币。先给 Arday 用一个急救包，让他从濒死状态里缓过来。','他得先活下来。至于你一直在找的东西，也许就在某个副本的尽头。'];let index=0;const next=()=>{if(index>=lines.length)return;saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200)};next();}
-if(isFreshInstall)playIntroSequence();else showCurrentScheduleBubble();
+function playIntroSequence(){const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','新手补给已经寄到信箱。请先领取急救包，再到背包里确认是否要对 Arday 使用。'];let index=0;const next=()=>{if(index>=lines.length)return;s.introStage=s.introStage||'awaiting-first-aid';save();return}saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200)};next();}
+if(isFreshInstall||s.introStage==='awaiting-first-aid')playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation')renderChatTopics();else showCurrentScheduleBubble();
  // Catch up immediately when Safari restores a backgrounded or suspended tab.
  function dismissRestoredDungeonBoard(){
   if(s.activeDungeon?.mode!=='board')return;
