@@ -522,23 +522,44 @@ html body .stage .drawer.profile-expanded.open .choices{
 .note-claim{border:1px solid #9a795c;background:#80664d;color:#fffaf3}
 
 
-/* Settings entry and save management */
-.settings-entry{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 13px;border:1px solid var(--line);border-radius:11px;background:var(--cream);color:var(--ink);font-size:12px;font-weight:700;box-shadow:0 2px 0 #d9c7ad;white-space:nowrap}
-.settings-entry span{font-size:15px;color:var(--muted)}
-.settings-view{padding:14px 14px 22px}
-.settings-panel{max-width:620px;margin:0 auto}
-.settings-heading{padding:8px 2px 20px}
-.settings-heading>span{font:700 9px Georgia,serif;letter-spacing:.17em;color:var(--muted)}
-.settings-heading h2{margin:7px 0 0;font:600 25px Georgia,serif;color:var(--ink)}
-.settings-option{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;padding:15px 12px;margin:0 0 9px;border:1px solid var(--line);border-radius:13px;background:var(--cream);color:var(--ink);text-align:left;box-shadow:0 2px 0 #e1d3c0}
-.settings-option:disabled{opacity:.48;cursor:not-allowed}
-.settings-option-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#eee4d5;color:#8a6b4e;font-size:19px}
-.settings-option b,.settings-option small{display:block}.settings-option b{font-size:13px}.settings-option small{margin-top:4px;color:var(--muted);font-size:10px;line-height:1.45}
-.settings-option i{font-size:11px;font-style:normal;font-weight:700;color:#927253}
-.settings-new-game{margin-top:18px;border-color:#ddc4b5;background:#f7eee8}.settings-new-game .settings-option-icon{background:#edddd4;color:#a35f4b}
-@media(max-width:430px){.settings-entry{padding:0 9px;min-height:34px}.settings-view{padding:10px 9px 18px}.settings-option{padding:13px 9px;gap:9px}}
-
-
+/* Settings — archival poster composition */
+.settings-entry{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 13px;border:1px solid #b9a27e;border-radius:3px;background:#26343a;color:#f3e7d2;font-size:12px;font-weight:700;box-shadow:0 2px 0 #182329;white-space:nowrap}
+.settings-entry span{font-size:15px;color:#d6b982}
+.settings-view{padding:12px 12px 24px!important;background:#26343a!important;background-image:radial-gradient(#d9c49a12 .7px,transparent .7px),linear-gradient(145deg,#33434a,#202d33)!important;background-size:8px 8px,100% 100%!important}
+.settings-poster{position:relative;max-width:620px;margin:0 auto;overflow:hidden;background:#eee3cf;color:#28363a;box-shadow:0 12px 30px #101b2080,0 0 0 1px #d0bc99}
+.settings-poster:before{content:"";position:absolute;inset:8px;pointer-events:none;border:1px solid #b9a27e;opacity:.72}
+.settings-poster-head{position:relative;min-height:176px;padding:20px 25px 19px;overflow:hidden;background:#26383e;color:#f2e5ce}
+.settings-poster-head:after{content:"";position:absolute;right:-28px;top:14px;width:170px;height:170px;border:1px solid #c5a87866;border-radius:50%;box-shadow:0 0 0 13px #c5a87812,0 0 0 28px #c5a8780c}
+.settings-poster-mark{position:absolute;right:31px;top:24px;color:#d5bd91;font:italic 700 30px/1 Georgia,serif;letter-spacing:-.08em}
+.settings-poster-mark span{color:#a96e52}
+.settings-poster-kicker{position:relative;z-index:1;color:#cbb58c;font:700 8px/1.2 Arial,sans-serif;letter-spacing:.22em}
+.settings-poster-head h2{position:relative;z-index:1;margin:21px 0 6px;color:#f5ead7;font:600 30px/1.15 'Noto Serif SC',Georgia,serif;letter-spacing:.1em}
+.settings-poster-sub{position:relative;z-index:1;color:#b8b09c;font:500 8px/1.4 Arial,sans-serif;letter-spacing:.19em}
+.settings-poster-body{position:relative;padding:20px 20px 22px}
+.settings-section-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 12px;color:#39464a;font:700 12px 'Noto Serif SC',Georgia,serif;letter-spacing:.1em}
+.settings-section-label em{color:#9b896d;font:700 8px Arial,sans-serif;letter-spacing:.14em;font-style:normal}
+.settings-slots{display:grid;gap:9px}
+.settings-slot{position:relative;display:grid;grid-template-columns:54px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:78px;padding:10px 12px;background:#f6efdf;border:1px solid #d8c9ad;box-shadow:0 2px 0 #d5c4a6}
+.settings-slot.is-occupied{background:#f2e7d2;border-color:#c4ad88}
+.slot-index{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;background:#304249;color:#f1e3c9}
+.slot-index small{font:700 7px Arial,sans-serif;letter-spacing:.16em;color:#cbb58c}
+.slot-index b{margin-top:3px;font:600 22px/1 Georgia,serif}
+.slot-content{min-width:0}
+.slot-content strong,.slot-content span{display:block}
+.slot-content strong{color:#344247;font:600 13px 'Noto Serif SC',Georgia,serif}
+.slot-status{margin-top:5px;overflow:hidden;color:#93836b;font:500 10px/1.3 Arial,'Noto Sans SC',sans-serif;text-overflow:ellipsis;white-space:nowrap}
+.slot-actions{display:flex;gap:5px}
+.slot-actions button{min-width:43px;min-height:31px;padding:0 8px;border:1px solid #a88d67;border-radius:2px;background:#304249;color:#f4e8d2;font:700 10px 'Noto Sans SC',sans-serif}
+.slot-actions .slot-load{background:transparent;color:#59645e;border-color:#c4b69d}
+.slot-actions button:disabled{opacity:.3;cursor:not-allowed}
+.slot-actions button:active{transform:translateY(1px)}
+.settings-poster-foot{display:flex;justify-content:space-between;margin:17px 2px 14px;color:#9c896b;font:700 7px Arial,sans-serif;letter-spacing:.17em}
+.settings-restart{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:9px;width:100%;min-height:48px;padding:7px 12px;border:1px solid #b98570;background:#ead8ca;color:#754d42;text-align:left}
+.settings-restart>span{display:grid;place-items:center;width:28px;height:28px;background:#8b5e50;color:#fff0df;font-size:17px}
+.settings-restart b{font:600 12px 'Noto Serif SC',Georgia,serif}
+.settings-restart small{color:#a17667;font:700 7px Arial,sans-serif;letter-spacing:.12em}
+@media(max-width:430px){.settings-entry{padding:0 9px;min-height:34px}.settings-view{padding:9px 8px 18px!important}.settings-poster-head{min-height:158px;padding:18px 20px}.settings-poster-head h2{font-size:26px}.settings-poster-body{padding:17px 13px 18px}.settings-slot{grid-template-columns:46px minmax(0,1fr) auto;gap:8px;padding:9px 8px}.slot-actions{gap:4px}.slot-actions button{min-width:37px;padding:0 6px}.slot-status{font-size:9px}}
+@media(max-width:350px){.settings-slot{grid-template-columns:40px minmax(0,1fr);}.slot-index{grid-row:1/3;grid-column:1}.slot-content{grid-column:2}.slot-actions{grid-column:2;justify-content:flex-start}.settings-poster-mark{right:24px}}
 /* Inventory use confirmation and first-contact conversation */
 .inventory-use-confirm{display:flex;flex-direction:column;justify-content:center;min-height:220px;padding:24px 18px;gap:12px}
 .inventory-use-question{margin:0;color:var(--ink);font:600 16px/1.65 'Noto Serif SC',Georgia,serif;text-align:center}
