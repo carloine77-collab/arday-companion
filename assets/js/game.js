@@ -416,9 +416,9 @@ function eventChoicesLegacy(e){
  if(e.rewardBundle){
   const bundle=e.rewardBundle,rewards=document.createElement('section');rewards.className='mail-reward-contents';
   const caption=document.createElement('div');caption.className='mail-reward-heading';caption.textContent='SUPPLY DROP · 新手补给';rewards.appendChild(caption);
-  const kits=document.createElement('div');kits.className='mail-reward-row';kits.innerHTML='<span class="mail-reward-icon">✚</span><span><b>急救包</b><small>用于解除 Arday 的濒死状态</small></span><strong>×'+Math.max(0,Number(bundle.firstAid)||0)+'</strong>';
-  const cash=document.createElement('div');cash.className='mail-reward-row';cash.innerHTML='<span class="mail-reward-icon">¥</span><span><b>人民币</b><small>已存入共同账户</small></span><strong>¥'+Math.max(0,Number(bundle.money)||0).toLocaleString('zh-CN')+'</strong>';
-  rewards.append(kits,cash);paper.appendChild(rewards);
+  const kits=document.createElement('div');kits.className='mail-reward-row';kits.innerHTML='<span class="mail-reward-icon">✚</span><span><b>急救包</b><small>领取后放入背包，用于解除 Arday 的濒死状态</small></span><strong>×'+Math.max(0,Number(bundle.firstAid)||0)+'</strong>';
+  const cash=document.createElement('div');cash.className='mail-reward-row';cash.innerHTML='<span class="mail-reward-icon">¥</span><span><b>人民币</b><small>领取后存入共同账户</small></span><strong>¥'+Math.max(0,Number(bundle.money)||0).toLocaleString('zh-CN')+'</strong>';
+  rewards.append(kits,cash);paper.insertBefore(rewards,signature);
   if(e.rewardClaimed){const claimed=document.createElement('div');claimed.className='mail-reward-claimed';claimed.textContent='礼包已领取';paper.appendChild(claimed)}
   else{const claim=document.createElement('button');claim.type='button';claim.className='note-claim';claim.textContent='领取新手礼包';claim.onclick=()=>{if(e.rewardClaimed)return;const count=Math.max(0,Math.min(10,Math.floor(Number(bundle.firstAid)||0)));for(let i=0;i<count;i++){const item=addInventoryItem('急救包','consumable');item.itemId='first-aid-kit'}const cashAmount=Math.max(0,Math.floor(Number(bundle.money)||0));s.money=(Number(s.money)||0)+cashAmount;if(cashAmount&&typeof moneyRecord==='function')moneyRecord('shared','income',cashAmount,'新手礼包');e.rewardClaimed=true;e.rewardClaimedAt=Date.now();save();render();eventChoicesLegacy(e)};actions.appendChild(claim)}
  }
