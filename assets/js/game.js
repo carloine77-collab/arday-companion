@@ -1849,18 +1849,21 @@ window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save
 
 function showInventoryUseConfirm(entity){
  if(!entity||!['consumable','dungeon-item'].includes(entity.kind))return;
- const drawer=$('drawer'),stage=$('stage');
- drawer.classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer','settings-fullscreen');
- drawer.classList.add('inventory-confirm-modal');stage.classList.add('inventory-confirm-active');
- $('drawerTitle').textContent='使用道具';$('choices').className='choices inventory-use-confirm';
+ document.querySelector('.inventory-use-backdrop')?.remove();
+ const overlay=document.createElement('div');overlay.className='inventory-use-backdrop';overlay.setAttribute('role','presentation');
+ const dialog=document.createElement('section');dialog.className='inventory-use-dialog';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','inventoryUseTitle');
+ const heading=document.createElement('h2');heading.id='inventoryUseTitle';heading.className='inventory-use-title';heading.textContent='使用道具';
  const question=document.createElement('p');question.className='inventory-use-question';question.textContent='确认向 Arday 使用「'+entity.name+'」吗？';
  const note=document.createElement('p');note.className='inventory-use-note';note.textContent=entity.itemId==='first-aid-kit'?'使用后会消耗一个急救包。':'确认后将立即消耗该道具并应用效果。';
  const actions=document.createElement('div');actions.className='inventory-use-actions';
- const close=()=>{drawer.classList.remove('open','inventory-confirm-modal');stage.classList.remove('inventory-confirm-active')};
+ const close=()=>{overlay.remove();document.removeEventListener('keydown',onKeyDown)};
+ const onKeyDown=event=>{if(event.key==='Escape')close()};
  const confirm=document.createElement('button');confirm.type='button';confirm.className='inventory-use-confirm-button';confirm.textContent='确认';
  const cancel=document.createElement('button');cancel.type='button';cancel.className='inventory-use-cancel-button';cancel.textContent='取消';
  confirm.onclick=()=>{const index=s.inventory.findIndex(item=>item.id===entity.id);if(index<0){close();toast('这件道具已不在背包中');openTab('物品',true);return}close();if(entity.kind==='consumable')useConsumableItem(s.inventory[index],index);else useDungeonItem(s.inventory[index],index)};
- cancel.onclick=()=>{close();openTab('物品',true)};actions.append(confirm,cancel);$('choices').replaceChildren(question,note,actions);drawer.classList.add('open');
+ cancel.onclick=close;overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
+ actions.append(confirm,cancel);dialog.append(heading,question,note,actions);overlay.appendChild(dialog);document.body.appendChild(overlay);
+ document.addEventListener('keydown',onKeyDown);confirm.focus();
 }
 function startArdayAwakening(){
  s.introStage='awakening';s.introWakePending=true;save();updateArday3D('wake',null,'living',null);
