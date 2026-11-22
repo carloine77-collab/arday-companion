@@ -125,7 +125,13 @@ const migratedInventory=[
 if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))s.inventory=migratedInventory;
 else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';if(item.name.startsWith('成品食物·')){if(!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}if(!item.preparedBy)item.preparedBy='player'}});
-const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item)).map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
+const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&(typeof item.name==='string'||typeof item.itemId==='string'||typeof item.furnitureId==='string')&&!isPlaceholderDungeonItem(item)).map((item,index)=>{
+ const kind=item.kind||(String(item.name||'').startsWith('成品食物·')?'food':'furniture');
+ const baseName=String(item.name||item.itemId||item.furnitureId||'').trim();
+ const name=kind==='furniture'&&item.variant&&!baseName.includes('·')?baseName+'·'+String(item.variant):baseName;
+ const parts=name.split('·');
+ return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,name,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')};
+});
 const currentPlaced=Array.isArray(s.placed)?s.placed:[];
 // Merge every legacy placed-furniture record into the canonical collection.
 // The previous empty-array-only migration silently discarded legacy desks,
@@ -167,6 +173,10 @@ delete s.furnitureLayout;delete s.roomPositions;
 s.placed.forEach((item,index)=>{
  if(!item||typeof item!=='object')return;
  if(item.name?.startsWith('成品食物·')&&!item.preparedBy)item.preparedBy='player';
+ if(typeof item.name!=='string'||!item.name.trim()){
+  const legacyName=String(item.itemId||item.furnitureId||'').trim();
+  if(legacyName)item.name=item.kind==='furniture'&&item.variant?legacyName+'·'+String(item.variant):legacyName;
+ }
  if(typeof item.name!=='string'||!item.name.trim())return;
  if(!item.id)item.id='legacy-placed-'+(item.room||'unknown')+'-'+index;
  const parts=item.name.split('·');if(!item.kind)item.kind=item.name.startsWith('成品食物·')?'food':'furniture';if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';
