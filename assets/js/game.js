@@ -123,7 +123,7 @@ const migratedInventory=[
 ];
 if(!Array.isArray(s.inventory)||(!s.inventory.length&&migratedInventory.length))s.inventory=migratedInventory;
 else s.inventory=s.inventory.filter(item=>item&&typeof item==='object'&&typeof item.id==='string'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
-s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';if(item.name.startsWith('成品食物·')&&!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}});
+s.inventory.forEach(item=>{if(!item||typeof item!=='object')return;const parts=item.name.split('·');if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';if(item.name.startsWith('成品食物·')){if(!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}if(!item.preparedBy)item.preparedBy='player'}});
 const migratedPlaced=legacyPlaced.filter(item=>item&&typeof item==='object'&&typeof item.name==='string'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item)).map((item,index)=>{const kind=item.kind||(item.name.startsWith('成品食物·')?'food':'furniture'),parts=item.name.split('·');return {...item,id:item.id||'legacy-placed-'+(item.room||'unknown')+'-'+index,kind,itemId:item.itemId||(kind==='furniture'?parts.shift().trim():item.name),variant:item.variant??(kind==='furniture'?parts.join('·').trim():'')}});
 if(!Array.isArray(s.placed)||(!s.placed.length&&migratedPlaced.length))s.placed=migratedPlaced;
 if(!Array.isArray(s.placed))s.placed=[];
@@ -155,6 +155,7 @@ for(const roomName of ['living','bedroom','kitchen']){
 delete s.furnitureLayout;delete s.roomPositions;
 s.placed.forEach((item,index)=>{
  if(!item||typeof item!=='object')return;
+ if(item.name?.startsWith('成品食物·')&&!item.preparedBy)item.preparedBy='player';
  if(typeof item.name!=='string'||!item.name.trim())return;
  if(!item.id)item.id='legacy-placed-'+(item.room||'unknown')+'-'+index;
  const parts=item.name.split('·');if(!item.kind)item.kind=item.name.startsWith('成品食物·')?'food':'furniture';if(!item.itemId)item.itemId=item.kind==='furniture'?parts.shift().trim():item.name;if(item.variant==null)item.variant=item.kind==='furniture'?parts.join('·').trim():'';
@@ -1136,7 +1137,7 @@ function openKitchenPanel(){
  $('kitchen-close').onclick=()=>{ $('drawer').classList.remove('open');kitchenClose(); };
  $('drawer').classList.add('open');
 }
-function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe||(s.unlockedRecipes||[]).indexOf(id)<0){toast('请先购买这道菜的菜谱');return}if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name,meal=addInventoryItem(itemName,'food');meal.expiresAt=Date.now()+6*3600000;meal.originalPrice=Object.entries(recipe.ingredients).reduce((sum,[key,count])=>sum+(ingredientUnitPrices[key]||0)*count,0);addEvent('完成了一道料理',recipe.name+'已放入物品栏，保鲜时间为六小时。','system-action');remember('cooking','亲手制作：'+recipe.name,2);saySystem(recipe.name+'做好了。六小时内记得吃掉。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
+function cookRecipeForPlayer(id){const recipe=recipes[id];if(!recipe||(s.unlockedRecipes||[]).indexOf(id)<0){toast('请先购买这道菜的菜谱');return}if(!canCook(id)){toast('食材不足');return}Object.entries(recipe.ingredients).forEach(([key,count])=>s.pantry[key]=pantryCount(key)-count);const itemName='成品食物·'+recipe.name,meal=addInventoryItem(itemName,'food');meal.preparedBy='player';meal.expiresAt=Date.now()+6*3600000;meal.originalPrice=Object.entries(recipe.ingredients).reduce((sum,[key,count])=>sum+(ingredientUnitPrices[key]||0)*count,0);addEvent('完成了一道料理',recipe.name+'已放入物品栏，保鲜时间为六小时。','system-action');remember('cooking','亲手制作：'+recipe.name,2);saySystem(recipe.name+'做好了。六小时内记得吃掉。');save();render();openKitchenPanel();toast('已制作：'+recipe.name)}
 // Presentation only. The schedule processor is the sole writer of currentActivity.
 const immediateInteractionDuration=120000;
 const immediateInteractionRefusalRate=.3;
@@ -1288,7 +1289,7 @@ function processActivityAt(value){
  let placedMealEaten=false;
  if([7,12,18].includes(hour)){
   const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·')&&['living','bedroom','kitchen','bathroom'].includes(item.room));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);applyActivityEffectsWithFeedback({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);}
+  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);applyActivityEffectsWithFeedback({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);if(meal.preparedBy==='player')writeArdayLetter(d.getTime(),'meal',{item:dishName});}
   else{
    // The scheduled meal is self-served when no prepared dish is placed; cooking upgrades its recovery.
   }
@@ -2607,7 +2608,7 @@ function initArday3D(){
    if(modelName==='台灯'||modelName==='壁灯'||modelName==='吊灯'||modelName==='落地灯'){const isCeiling=modelName==='吊灯',isFloor=modelName==='落地灯',lampPoint=new T.PointLight(0xffd39a,isCeiling?2.5:isFloor?1.8:1.05,isCeiling?8.5:isFloor?7:4.8,1.8);lampPoint.position.set(isFloor&&variant==='黄铜弧形'?.47:0,isCeiling?-.56:isFloor?1.48:modelName==='台灯'?.72:-.02,isCeiling?0:modelName==='壁灯'?.24:0);lampPoint.castShadow=false;group.add(lampPoint);const enabled=record?.lightOn!==false,bulb=new T.Mesh(new T.SphereGeometry(isCeiling?.105:.075,16,12),new T.MeshStandardMaterial({color:enabled?0xffe4b5:0x786f63,emissive:enabled?0x8d5422:0x000000,emissiveIntensity:enabled?.55:0,roughness:.28,metalness:.05}));bulb.position.copy(lampPoint.position);group.add(bulb);const glow=new T.Sprite(new T.SpriteMaterial({map:lampGlowTexture,color:0xffdfae,transparent:true,opacity:enabled?.30:0,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));glow.position.copy(lampPoint.position);glow.scale.set(isCeiling?1.15:.82,isCeiling?1.15:.82,1);glow.visible=enabled;group.add(glow);practicalLights.push({light:lampPoint,base:lampPoint.intensity,enabled,bulb,glow,group,room});group.userData.lampLight=lampPoint;group.userData.lampBulb=bulb;action=()=>{const item=furnitureRegistry.find(x=>x.group===group);if(!item)return;item.lightOn=!item.lightOn;const light=practicalLights.find(x=>x.light===lampPoint);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}updateDaylight(true);persistFurniture(item);toast(item.name+(item.lightOn?'已开启':'已关闭'))}}
    group.position.set(x,y,z);group.rotation.y=rotation;
    const item=registerFurniture({id,name,room,group,width,depth,anchor:wallAxis?[0,anchor[1]]:anchor,action,wallAxis,wallSide,wallRange:4.5,record});
-   item.kind=record?.kind||(name.startsWith('成品食物·')?'food':'furniture');item.owned=item.kind!=='scene';item.expiresAt=Number(record?.expiresAt)||null;if(group.userData.lampLight){item.lightOn=record?.lightOn!==false;const light=practicalLights.find(x=>x.light===group.userData.lampLight);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}}item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
+   item.kind=record?.kind||(name.startsWith('成品食物·')?'food':'furniture');item.owned=item.kind!=='scene';item.expiresAt=Number(record?.expiresAt)||null;item.preparedBy=record?.preparedBy||null;if(group.userData.lampLight){item.lightOn=record?.lightOn!==false;const light=practicalLights.find(x=>x.light===group.userData.lampLight);if(light){light.enabled=item.lightOn;if(light.glow)light.glow.visible=item.lightOn}}item.wallAxis=wallAxis;item.wallSide=wallSide;item.wallRange=4.5;item.surfaceType=surfaceType;item.surfaceY=surfaceY;item.supportId=supportId;
    item.dyeMaterials=[];group.traverse(object=>{if(object.isMesh&&!object.userData.inkOutline&&object.material){const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(material=>{if(material?.userData?.dyeable&&!item.dyeMaterials.includes(material))item.dyeMaterials.push(material)})}});
    if(record?.dyeColor)item.dyeMaterials.forEach(material=>material.color.setHex(record.dyeColor));item.dyeColor=record?.dyeColor||null;
    if(restoring){
@@ -2825,7 +2826,7 @@ function persistFurniture(item){
    s.placed=s.placed||[];
    let saved=s.placed.find(x=>x.id===item.id);
    if(!saved){saved={id:item.id,name:item.name,room:item.room,kind:item.kind||(item.owned?'furniture':'scene'),itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():''};s.placed.push(saved)}
-   Object.assign(saved,{name:item.name,room:item.room,...(item.expiresAt?{expiresAt:item.expiresAt}:{}),itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,scale:item.footprintScale||1,supportId:item.supportId||null});
+   Object.assign(saved,{name:item.name,room:item.room,...(item.expiresAt?{expiresAt:item.expiresAt}:{}),...(item.preparedBy?{preparedBy:item.preparedBy}:{}),itemId:item.kind==='furniture'?item.name.split('·')[0].trim():item.name,variant:item.kind==='furniture'?item.name.split('·').slice(1).join('·').trim():'',x:item.group.position.x,y:item.group.position.y,z:item.group.position.z,rotation:item.group.rotation.y,scale:item.footprintScale||1,supportId:item.supportId||null});
    if(item.dyeColor)saved.dyeColor=item.dyeColor;
    if(typeof item.lightOn==='boolean')saved.lightOn=item.lightOn;
    if(item.isDoor)saved.destination=item.doorDestination||'living';
