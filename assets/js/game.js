@@ -227,8 +227,20 @@ function renderCurrentSchedulePeek(){
 }
 function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});if(s.statusBuffs?.fatigued?.active)tags.push({group:'survival',label:'疲惫',kind:'fatigued'});if(s.statusBuffs?.fatal?.active)tags.push({group:'survival',label:'濒死',kind:'fatal'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join('')};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
-function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:type==='player'?'你：'+raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:type==='player'?'auto':'50%',right:type==='player'?'12px':'auto',top:'12px',zIndex:'45',transform:type==='player'?'none':'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:type==='player'?'#f0e6d8':'#fff9edee',border:'1px solid #e0ceb3',borderRadius:type==='player'?'15px 15px 5px 15px':'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.55',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
+function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:type==='player'?'你：'+raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:type==='player'?'auto':'50%',right:type==='player'?'12px':'auto',top:'12px',zIndex:'45',transform:type==='player'?'none':'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:type==='player'?'#f0e6d8':'#fff9edee',border:'1px solid #e0ceb3',borderRadius:type==='player'?'15px 15px 5px 15px':'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.55',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);if(s.introStage&&s.introStage!=='complete'){dialogueTimer=null}else{dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}}
 function saySystem(t){say(t,'system')}
+function armIntroDialogueAdvance(callback){
+ const bubble=$('dialogue');if(!bubble)return;
+ bubble._introAdvance=callback;
+ bubble.style.pointerEvents='auto';bubble.style.cursor='pointer';bubble.style.touchAction='manipulation';
+ bubble.setAttribute('role','button');bubble.setAttribute('aria-label','点击继续');
+}
+document.addEventListener('click',event=>{
+ const bubble=event.target?.closest?.('#dialogue');
+ if(!bubble||!bubble._introAdvance)return;
+ const advance=bubble._introAdvance;bubble._introAdvance=null;
+ event.preventDefault();event.stopPropagation();advance();
+},true);
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
 function change(delta){Object.entries(delta).forEach(([k,v])=>{if(k in s)s[k]=Math.max(0,Math.min(100,(Number(s[k])||0)+Number(v||0)))})}
@@ -583,8 +595,13 @@ function finishIntroFriendship(){
 }
 function resumeSettleInDialogue(){
  if(s.introStage!=='settling-in')return;
- say('……听起来，你也没有什么确定的答案。');
- setTimeout(()=>{if(s.introStage!=='settling-in')return;say('不过，我现在好像也没有别的地方可去。那就先试试看吧。');setTimeout(()=>{if(s.introStage==='settling-in')finishIntroFriendship()},2200)},1000);
+ const lines=['……听起来，你也没有什么确定的答案。','不过，我现在好像也没有别的地方可去。那就先试试看吧。'];
+ let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introSettleDialogueIndex)||0)));
+ const next=()=>{
+  if(index>=lines.length){const bubble=$('dialogue');if(bubble){bubble._introAdvance=null;bubble.style.display='none'}finishIntroFriendship();return}
+  say(lines[index++]);s.introSettleDialogueIndex=index;save();armIntroDialogueAdvance(next);
+ };
+ next();
 }
 function respondToChat(text){
  const message=String(text||'').trim().slice(0,160);
@@ -1577,6 +1594,8 @@ function sharedGoalCatalog(){
  addEvent(e.title,e.detail,e.type);s.events[0].situationId=e.id;s.lastRandomEventAt=at;say(ardayLine('incident',e.detail));
 }
 function writeArdayLetter(at=Date.now(),trigger='daily',context={}){
+ if(s.introStage&&s.introStage!=='complete')return null;
+ if(s.introStage==='complete'&&!s.introFriendshipAwarded)return null;
  const library=window.ArdayLetterCopy;if(!library?.generate)return null;
  const letter=library.generate({state:s,random:Math.random,trigger,context});if(!letter)return null;
  const e=addEvent(letter.title,letter.detail,'arday-letter');if(!e)return null;
@@ -1855,9 +1874,13 @@ function showInventoryUseConfirm(entity){
 }
 function startArdayAwakening(){
  s.introStage='awakening';s.introWakePending=true;save();updateArday3D('wake',null,'living',null);
- const lines=['……咳。','好冷……我刚才，是躺在地上吗？','这里是哪儿？','我为什么会在这里？','头好痛。什么都想不起来……'];let index=0;
- const next=()=>{if(index>=lines.length){s.introStage='awaiting-first-contact';save();renderChatTopics();return}say(lines[index++]);setTimeout(next,3600)};
- setTimeout(next,900);
+ const lines=['……咳。','好冷……我刚才，是躺在地上吗？','这里是哪儿？','我为什么会在这里？','头好痛。什么都想不起来……'];
+ let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introWakeDialogueIndex)||0)));
+ const next=()=>{
+  if(index>=lines.length){s.introStage='awaiting-first-contact';save();const bubble=$('dialogue');if(bubble){bubble._introAdvance=null;bubble.style.display='none'}renderChatTopics();return}
+  say(lines[index++]);s.introWakeDialogueIndex=index;save();armIntroDialogueAdvance(next);
+ };
+ next();
 }
 function useConsumableItem(entity,index){if(entity?.itemId!=='first-aid-kit'){toast('该消耗品暂不可使用');return}if(!s.statusBuffs?.fatal?.active){toast('Arday目前不需要急救');return}const state=s.statusBuffs.fatal;s.statusBuffs.fatal={...state,active:false,since:0,nextEffectAt:0,clearedAt:Date.now()};['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)+35)});s.inventory.splice(index,1);addEvent('急救包已使用','Arday的濒死状态已解除，四项生存指标得到紧急恢复。','system-action');save();render();toast('濒死状态已解除');openTab('物品',true);if(s.introStage==='awaiting-first-aid')startArdayAwakening()}
 function useDungeonItem(entity,index){
@@ -3453,11 +3476,10 @@ function playIntroSequence(){
  let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introNarrationIndex)||0)));
  const bubble=$('dialogue');
  const advance=()=>{
-  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;save();bubble.style.display='none';bubble.onclick=null;bubble.style.pointerEvents='none';return}
+  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;save();bubble._introAdvance=null;bubble.style.display='none';bubble.style.pointerEvents='none';return}
   saySystem(lines[index]);index++;s.introNarrationIndex=index;save();
   clearTimeout(dialogueTimer);
-  bubble.style.pointerEvents='auto';bubble.style.cursor='pointer';bubble.setAttribute('role','button');bubble.setAttribute('aria-label','点击继续');
-  bubble.onclick=advance;
+  armIntroDialogueAdvance(advance);
  };
  advance();
 }
