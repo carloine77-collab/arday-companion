@@ -39,7 +39,15 @@ window.ArdayCareerData = {
   {id:'simultaneous-interpreter',title:'同声传译员',category:'国际商务',salary:172,start:9,end:12,minScore:70,selectivity:0.15,weights:{emotion:0.65,combat:0.2,survival:0.15}},
   {id:'management-accountant',title:'管理会计师',category:'财务管理',salary:148,start:13,end:16,minScore:60,selectivity:0.11,weights:{emotion:0.35,combat:0.5,survival:0.15}},
   {id:'procurement-manager',title:'国际采购经理',category:'供应链管理',salary:162,start:10,end:13,minScore:65,selectivity:0.13,weights:{emotion:0.55,combat:0.3,survival:0.15}}
- ],
+ ,
+  {id:'convenience-clerk',title:'便利店店员',category:'零售服务',salary:58,start:7,end:10,minScore:8,selectivity:0.02,weights:{emotion:0.25,combat:0.15,survival:0.60}},
+  {id:'cafe-assistant',title:'咖啡店帮工',category:'餐饮服务',salary:62,start:9,end:12,minScore:12,selectivity:0.025,weights:{emotion:0.35,combat:0.10,survival:0.55}},
+  {id:'library-assistant',title:'图书馆助理',category:'公共文化',salary:66,start:10,end:13,minScore:14,selectivity:0.025,weights:{emotion:0.30,combat:0.10,survival:0.60}},
+  {id:'flower-shop-clerk',title:'花店店员',category:'零售服务',salary:60,start:13,end:16,minScore:16,selectivity:0.03,weights:{emotion:0.40,combat:0.10,survival:0.50}},
+  {id:'parcel-sorter',title:'快递分拣员',category:'物流配送',salary:78,start:15,end:18,minScore:18,selectivity:0.035,weights:{emotion:0.15,combat:0.25,survival:0.60}},
+  {id:'community-receptionist',title:'社区前台',category:'行政服务',salary:70,start:17,end:20,minScore:20,selectivity:0.03,weights:{emotion:0.40,combat:0.10,survival:0.50}},
+  {id:'laundry-assistant',title:'洗衣店助理',category:'生活服务',salary:64,start:18,end:21,minScore:22,selectivity:0.035,weights:{emotion:0.25,combat:0.15,survival:0.60}},
+  {id:'secondhand-book-clerk',title:'旧书店店员',category:'零售服务',salary:68,start:20,end:23,minScore:24,selectivity:0.04,weights:{emotion:0.35,combat:0.10,survival:0.55}} ],
  ARDAY_CANDIDATE_POOL: [
 {name:'闻野',role:'近战突入',combat:78,malice:18,portrait:'野',acceptance:.76},{name:'苏弥',role:'环境侦察',combat:64,malice:9,portrait:'弥',acceptance:.82},{name:'周既白',role:'战术支援',combat:71,malice:27,portrait:'白',acceptance:.68},{name:'罗缇',role:'异常研究',combat:52,malice:6,portrait:'缇',acceptance:.88},{name:'严朔',role:'重装防御',combat:86,malice:42,portrait:'朔',acceptance:.55},{name:'祁雾',role:'远程压制',combat:74,malice:61,portrait:'雾',acceptance:.48},{name:'程照',role:'火力压制',combat:82,malice:33,portrait:'照',acceptance:.63},{name:'白榆',role:'医疗支援',combat:59,malice:11,portrait:'榆',acceptance:.84},{name:'沈砚',role:'近距格斗',combat:69,malice:24,portrait:'砚',acceptance:.72},{name:'唐梨',role:'异常感知',combat:67,malice:15,portrait:'梨',acceptance:.79},{name:'顾临',role:'机动侦察',combat:75,malice:49,portrait:'临',acceptance:.52},{name:'叶澄',role:'远程狙击',combat:88,malice:37,portrait:'澄',acceptance:.57}],
  ARDAY_ELITE_RANKERS: [
