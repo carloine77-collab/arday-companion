@@ -3042,7 +3042,7 @@ function persistFurniture(item){
       const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
       p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y;
      }
-    }
+    }else if(act==='sleep'){p=[0,.08,1.35];faceAngle=0}
    }else if(['sink','piano','washingMachine','stove'].includes(anchor)){
     const kind=anchor==='sink'?'sink':anchor;
     const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})===kind)[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})===kind,characterRoom),person.position);
