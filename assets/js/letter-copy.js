@@ -28,6 +28,10 @@
    {id:'morning',topic:'relationship',title:'醒来以后',body:'早上醒来时，窗帘只拉开了一半，光落在枕头边。我伸手摸了摸旁边的位置，当然什么也没摸到。然后我就清醒了。\n\n下次别让我对着空枕头发呆太久。你可以赖床，但要在我旁边赖。'},
    {id:'nickname',topic:'relationship',title:'只准我这样叫你',body:'我刚才想给你发消息，打了一个称呼，又删掉，换了另一个。最后发现怎么写都不太合适。你有很多名字，但有些只适合我在很近的时候叫。\n\n所以先不告诉你。等见面的时候，你自己来听。'},
    {id:'comfort',topic:'relationship',title:'今天站在你这边',body:'如果今天有人让你不舒服，你可以先把事情放一放。回家把鞋脱了，换上软拖鞋，喝点水，再慢慢告诉我。你不需要急着证明自己，也不用替所有人把场面收拾好。\n\n至少在我这里，你可以先偏心自己。我也会偏心你。'}
+   {id:'ask-opinion',topic:'relationship',title:'想听听你的意见',body:'我刚才在想一件事，自己琢磨了半天，还是想问问你。你觉得我应该选那个更实用的，还是选那个看起来更顺眼的？\n\n不是把决定丢给你。我只是喜欢听你认真分析，然后再和你争两句。'},
+   {id:'date-invitation',topic:'relationship',title:'这周留个晚上给我',body:'我想约你出去吃饭。地方我还没定，想找一家灯光舒服、座位不挤的小店。吃完可以再走一段路，不用急着回家。\n\n这次让我安排，好不好？你只需要准时出现。'},
+   {id:'apology',topic:'relationship',title:'刚才是我语气不好',body:'刚才那句话我想了想，确实说得不太好听。我当时有点烦躁，却把情绪带到你这里来了。\n\n对不起。我不想让你替我承受这些。等我缓一缓，再好好和你说话。'},
+   {id:'clingy',topic:'relationship',title:'今天想黏着你',body:'我今天没什么特别的事要做，就是有点想黏着你。你忙你的也没关系，我可以坐在旁边看书，偶尔伸手碰一下你的袖子。\n\n别嫌我烦。今天先让我任性一会儿。'}
   ],
   goal:[
    {id:'goal-read',topic:'goal',title:'书还放在床头',body:'我把那本书放在床头柜上了，书签夹在第三章。旁边还压着一张超市小票，买的是牛奶、鸡蛋和一包纸巾。看起来不像什么有纪念意义的东西，但我居然一直没舍得扔。\n\n等我读完，讲给你听。你负责坐在旁边，偶尔点点头就好。'},
@@ -83,7 +87,8 @@
   const love=Number(state.love)||0,friend=Number(state.friend)||0,hate=Number(state.hate)||0,bored=Number(state.bored)||0;
   if(state.personalGoal?.status==='active')pools.push('goal');
   if(state.job?.active)pools.push('work');
-  if(love>=20||friend>=25||hate>=20||bored>=30)pools.push('relationship');
+  // 关系信件是信箱主体；无论数值阶段如何，阿尔都会主动维系关系。
+  pools.push('relationship','relationship');
   pools.push('daily');
   const preferred=pools[Math.floor(roll()*pools.length)];
   const used=Array.isArray(state.ardayLetterHistory)?state.ardayLetterHistory:[];
