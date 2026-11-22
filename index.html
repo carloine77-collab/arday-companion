@@ -85,14 +85,36 @@
 <script src="assets/js/economy.js?v=20261122-goals2"></script>
 <script src="assets/js/chat-copy.js?v=20261119a"></script>
 <script src="assets/js/chat-system.js?v=20261119a"></script>
-<script src="assets/js/letter-copy.js?v=20261122-relationship-letters3"></script>
+<script src="assets/js/letter-copy.js?v=20261123-player-meal-letters1"></script>
 <script src="assets/js/character-tap-lines.js?v=20261119a"></script>
 <script src="assets/js/hall/hall-scene.js?v=20261122-exchange-label2"></script>
 <script src="assets/js/dungeon-board.js?v=20261121-global-balance4"></script>
 <script src="assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1"></script>
-<script src="assets/js/game.js?v=20261123-room-unlock-access2"></script>
+<script src="assets/js/game.js?v=20261123-player-meal-letters1"></script>
 <script>
 document.body.classList.toggle("standalone",window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true);
-if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Offline support unavailable:",error)));}
+if("serviceWorker" in navigator){
+ let hasControlledPage=!!navigator.serviceWorker.controller,reloadingForUpdate=false,activeRegistration=null;
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{
+  if(!hasControlledPage){hasControlledPage=true;return}
+  if(reloadingForUpdate)return;
+  reloadingForUpdate=true;
+  window.location.reload();
+ });
+ const checkForAppUpdate=()=>{
+  if(document.visibilityState!=="visible"||!activeRegistration)return;
+  activeRegistration.update().catch(error=>console.warn("Arday update check failed:",error));
+ };
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./service-worker.js",{scope:"./",updateViaCache:"none"}).then(registration=>{
+   activeRegistration=registration;
+   checkForAppUpdate();
+   window.addEventListener("pageshow",checkForAppUpdate);
+   document.addEventListener("visibilitychange",checkForAppUpdate);
+   window.setInterval(checkForAppUpdate,15*60*1000);
+   if(registration.waiting&&navigator.serviceWorker.controller)registration.waiting.postMessage({type:"SKIP_WAITING"});
+  }).catch(error=>console.warn("Offline support unavailable:",error));
+ });
+}
 </script>
 </body></html>
