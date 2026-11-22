@@ -1001,7 +1001,7 @@ window.ArdayGameConfig = {
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
  eat:{title:'吃东西',duration:'long',autonomous:false,menuLabel:'用餐',location:'table',pose:'sit',anchor:'table',effect:{hunger:19}},
  wash:{title:'洗漱',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},requires:'sink',menuLabel:'洗漱',location:'kitchen',pose:'stand',anchor:'sink',effect:{clean:22}},
- cook:{title:'烹饪',duration:'long',autonomous:true,autonomy:{need:'hunger',threshold:48,weight:1.25,base:1.1},requires:'stove',menuLabel:'烹饪',location:'kitchen',pose:'stand',anchor:'stove',effect:{hunger:18}},
+ cook:{title:'烹饪',duration:'long',autonomous:false,requires:'stove',menuLabel:'烹饪',location:'kitchen',pose:'stand',anchor:'stove',effect:{hunger:18}},
   tidy:{title:'整理房间',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:42,weight:.32,base:.25},menuLabel:'整理房间',location:'center',pose:'stand',anchor:'default',effect:{fun:2}},
  admireView:{title:'欣赏窗外景色',duration:'short',autonomous:false,menuLabel:'室外景观',location:'window',pose:'stand',anchor:'window',effect:{fun:1}},
  admireDecor:{title:'欣赏与回忆',duration:'short',autonomous:false,menuLabel:'欣赏与回忆',location:'center',pose:'stand',anchor:'wallArt',effect:{fun:1}},
