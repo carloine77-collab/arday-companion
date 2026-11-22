@@ -42,7 +42,7 @@ function autonomousFurnitureOptions(){
   if(!set?.activities)continue;
   for(const [activity,context] of Object.entries(set.activities)){
    const meta=activityMeta[activity];
-   if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||activity==='eat')continue;
+   if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||['eat','cook'].includes(activity))continue;
    if(activity==='guildTraining'&&!['iron-gate','night-heron','cinder-forge','blue-transit'].includes(s.factionMembership))continue;
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
    if(['computerPlay','guildTraining'].includes(activity)&&kind==='desk')continue;
