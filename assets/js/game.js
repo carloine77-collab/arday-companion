@@ -37,6 +37,7 @@ s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferen
 s.attributes=s.attributes&&typeof s.attributes==='object'?s.attributes:{agility:15,strength:15,intelligence:15,perception:15,willpower:15};
 ['agility','strength','intelligence','perception','willpower'].forEach(k=>s.attributes[k]=clamp(Number(s.attributes[k]??15)));
 s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.intelligence+s.attributes.perception+s.attributes.willpower)/5);
+if(isFreshInstall){Object.keys(s.attributes).forEach(key=>s.attributes[key]=1);s.combat=1;s.friend=0;s.bored=0;s.hate=0;s.love=0;}
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[{id:'lin',name:'林澈',role:'前锋',combat:34,malice:8,selected:true,portrait:'⚔'},{id:'mori',name:'森',role:'侦察',combat:30,malice:6,selected:true,portrait:'⌕'},{id:'qiao',name:'乔',role:'支援',combat:26,malice:12,selected:false,portrait:'✦'}];
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});if(s.teamRoster.length>8)s.teamRoster=s.teamRoster.slice(0,8);
 s.recruitmentInvites=s.recruitmentInvites&&typeof s.recruitmentInvites==='object'?s.recruitmentInvites:{};s.factionApplications=s.factionApplications&&typeof s.factionApplications==='object'?s.factionApplications:{};s.factionMembership=s.factionMembership||null;s.factionClues=Array.isArray(s.factionClues)?s.factionClues:[];
@@ -199,7 +200,7 @@ function renderCurrentSchedulePeek(){
 }
 function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});if(s.statusBuffs?.fatigued?.active)tags.push({group:'survival',label:'疲惫',kind:'fatigued'});if(s.statusBuffs?.fatal?.active)tags.push({group:'survival',label:'濒死',kind:'fatal'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join('')};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
-function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
+function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:type==='player'?'你：'+raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:type==='player'?'auto':'50%',right:type==='player'?'12px':'auto',top:'12px',zIndex:'45',transform:type==='player'?'none':'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:type==='player'?'#f0e6d8':'#fff9edee',border:'1px solid #e0ceb3',borderRadius:type==='player'?'15px 15px 5px 15px':'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.55',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
 function saySystem(t){say(t,'system')}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1900)}
 function remember(type,text,weight=1){s.memories.push({type,text,at:Date.now(),weight});if(s.memories.length>40)s.memories.shift()}
@@ -528,7 +529,7 @@ $('backRoom')?.remove();
 // Navigation listeners are installed before simulation initialization.
 $('chatForm').addEventListener('submit',e=>{e.preventDefault();let v=$('message').value.trim();if(!v)return;respondToChat(v);$('message').value='';renderChatTopics()});
 const chatInput=$('message'),chatTopics=$('chatTopics');
-function renderChatTopics(){if(!chatTopics)return;const stage=s.introStage;let topics=[];if(stage==='awaiting-first-contact')topics=[{label:'主动向 Arday 搭话',message:'你是谁？'}];else if(stage==='awaiting-void-explanation')topics=[{label:'解释自己从虚空中来',message:'我可能从虚空中来，是我救了你。'}];chatTopics.replaceChildren();topics.forEach(topic=>{const button=document.createElement('button');button.type='button';button.className='chat-topic';button.textContent=topic.label;button.addEventListener('click',()=>{chatInput.value=topic.message;chatTopics.hidden=true;respondToChat(topic.message);chatInput.value='';renderChatTopics()});chatTopics.appendChild(button)});chatTopics.hidden=!topics.length;chatInput.placeholder=topics.length?'输入消息，或选择一个话题':'消息';}
+function renderChatTopics(){if(!chatTopics)return;const stage=s.introStage;let topics=[];if(stage==='awaiting-first-contact')topics=[{label:'主动向 Arday 搭话',message:'你是谁？'}];else if(stage==='awaiting-void-explanation')topics=[{label:'解释自己从虚空中来',message:'我可能从虚空中来，是我救了你。'}];else if(stage==='awaiting-settle-in')topics=[{label:'邀请他先在这里生活',message:'虽然我们都不知道你自己是谁，但你可以在这里生活试试。走一步看一步吧。'}];chatTopics.replaceChildren();topics.forEach(topic=>{const button=document.createElement('button');button.type='button';button.className='chat-topic';button.textContent=topic.label;button.addEventListener('click',()=>{chatInput.value=topic.message;chatTopics.hidden=true;respondToChat(topic.message);chatInput.value='';renderChatTopics()});chatTopics.appendChild(button)});chatTopics.hidden=!topics.length;chatInput.placeholder=topics.length?'输入消息，或选择一个话题':'消息';}
 chatInput.addEventListener('focus',renderChatTopics);chatInput.addEventListener('click',renderChatTopics);
 document.addEventListener('click',event=>{if(chatTopics&&!event.target.closest('.chat,.chat-topic-popover'))chatTopics.hidden=true});
 let decorating=false;
@@ -544,14 +545,31 @@ $('decorate').onclick=()=>{decorating=!decorating;$('stage').classList.toggle('e
 
 
 
+function finishIntroFriendship(){
+ if(s.introFriendshipAwarded)return;
+ s.friend=clamp((Number(s.friend)||0)+5);s.introFriendshipAwarded=true;s.introStage='complete';
+ remember('relationship','第一次结识：Arday决定暂时留在这里生活。',2);save();render();renderChatTopics();toast('友谊 +5');
+}
+function resumeSettleInDialogue(){
+ if(s.introStage!=='settling-in')return;
+ say('……听起来，你也没有什么确定的答案。');
+ setTimeout(()=>{if(s.introStage!=='settling-in')return;say('不过，我现在好像也没有别的地方可去。那就先试试看吧。');setTimeout(()=>{if(s.introStage==='settling-in')finishIntroFriendship()},2200)},1000);
+}
 function respondToChat(text){
+ const message=String(text||'').trim().slice(0,160);
  if(s.introStage==='awaiting-first-contact'){
-  s.introFirstQuestion=String(text||'').slice(0,160);s.introStage='awaiting-void-explanation';
-  say('我？……我叫 Arday。等等，你是谁？你刚才是从哪里冒出来的？');save();renderChatTopics();return {status:'intro-replied',stage:s.introStage};
+  s.introFirstQuestion=message;s.introStage='awaiting-void-explanation';say(message,'player');save();
+  setTimeout(()=>{if(s.introStage==='awaiting-void-explanation')say('我？……我叫 Arday。等等，你是谁？你刚才是从哪里冒出来的？')},850);
+  renderChatTopics();return {status:'intro-replied',stage:s.introStage};
  }
  if(s.introStage==='awaiting-void-explanation'){
-  s.introVoidAnswer=String(text||'').slice(0,160);s.introStage='complete';
-  say('虚空？……我听不懂。不过，你说是你救了我。');save();renderChatTopics();return {status:'intro-complete',stage:s.introStage};
+  s.introVoidAnswer=message;s.introStage='awaiting-settle-in';say(message,'player');save();
+  setTimeout(()=>{if(s.introStage==='awaiting-settle-in')say('虚空？……我听不懂。不过，你说是你救了我。')},850);
+  renderChatTopics();return {status:'intro-replied',stage:s.introStage};
+ }
+ if(s.introStage==='awaiting-settle-in'){
+  s.introSettleInAnswer=message;s.introStage='settling-in';say(message,'player');save();resumeSettleInDialogue();renderChatTopics();
+  return {status:'intro-settling-in',stage:s.introStage};
  }
  const chatSystem=window.ArdayChatSystem;
  if(!chatSystem||typeof chatSystem.respond!=='function'){
@@ -2381,7 +2399,7 @@ function initArday3D(){
   const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
   const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0,lastHotspotUpdate=0;
-  let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600,wakeStartedAt=0;
+  let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600,wakeStartedAt=0,wakeLookAt=0;
   let roomMode='living',theta=.68,phi=1.08,radius=13.4,targetTheta=.68,targetPhi=1.08,targetRadius=13.4,cameraTarget=new T.Vector3(0,1,0),hallCameraOffset=new T.Vector3();
   function applyCamera(){targetPhi=Math.max(roomMode==='hall'?.78:.48,Math.min(roomMode==='hall'?1.48:1.42,targetPhi));targetRadius=roomMode==='hall'?Math.max(28,Math.min(175,targetRadius)):Math.max(7.2,Math.min(21,targetRadius))}
   function syncCamera(dt=1){const ease=1-Math.exp(-dt*13);theta+=(targetTheta-theta)*ease;phi+=(targetPhi-phi)*ease;radius+=(targetRadius-radius)*ease;camera.position.set(cameraTarget.x+radius*Math.sin(phi)*Math.sin(theta),cameraTarget.y+radius*Math.cos(phi),cameraTarget.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(cameraTarget);
@@ -2973,7 +2991,7 @@ function persistFurniture(item){
     const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='window')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='window',characterRoom),person.position);
     if(item)standInFront(item,.72);else{p=[...positions.window];faceAngle=Math.PI}
    }
-   if(act==='wake'){person.position.set(...p);target.set(...p);wakeStartedAt=performance.now()}else target.set(...p);pose=act==='wake'?'wake':(poseOverride||meta.pose||'wave');activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','cushion','bouquet','bed','loftDesk','sink','piano','washingMachine','treadmill','gameConsole','wallArt','window'].includes(anchor))person.rotation.y=faceAngle;
+   if(act==='wake'){person.position.set(...p);target.set(...p);wakeStartedAt=performance.now();wakeLookAt=wakeStartedAt+1550} else target.set(...p);pose=act==='wake'?'wake':(poseOverride||meta.pose||'wave');activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','cushion','bouquet','bed','loftDesk','sink','piano','washingMachine','treadmill','gameConsole','wallArt','window'].includes(anchor))person.rotation.y=faceAngle;
    basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
@@ -3273,13 +3291,14 @@ function persistFurniture(item){
    if(moving){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.82;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.9});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.58;a.shoulder.rotation.z=a.side*Math.sin(phase+i*Math.PI)*.045;a.elbow.rotation.x=-.1+Math.max(0,Math.sin(phase+i*Math.PI))*.08});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
-    legs.forEach(l=>{const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/3400)):1,hipTarget=pose==='wake'?-.72*(1-wakeProgress):pose==='sit'?-1.15:pose==='bedRead'?- .16:pose==='bedRest'?-.08:0,kneeTarget=pose==='wake'?.95*(1-wakeProgress):pose==='sit'?1.45:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='wake'?.83-.2*(1-wakeProgress):pose==='sit'?.51:.83;l.hip.position.y+=(hipY-l.hip.position.y)*.12;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.12;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.12});
+    legs.forEach(l=>{const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)):1,wakeEase=wakeProgress*wakeProgress*(3-2*wakeProgress),hipTarget=pose==='wake'?-.86*(1-wakeEase):pose==='sit'?-1.15:pose==='bedRead'?- .16:pose==='bedRest'?-.08:0,kneeTarget=pose==='wake'?1.12*(1-wakeEase):pose==='sit'?1.45:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='wake'?.83-.18*(1-wakeEase):pose==='sit'?.51:.83;l.hip.position.y+=(hipY-l.hip.position.y)*.1;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.1;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.1});
     if(activeActivity==='exercise'&&pose==='walk'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.48;l.knee.rotation.x=Math.max(0,stride)*.72})}
     const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',cooking=activeActivity==='cook',weightTraining=activeActivity==='exercise'&&pose!=='walk',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
-     let shoulderX=pose==='wake'?.32*(1-Math.min(1,(t-wakeStartedAt)/3400)):pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
-     let elbowX=pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
-     let shoulderZ=pose==='sit'?.15:0;
+     const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)):1,wakeBrace=pose==='wake'?(1-wakeProgress):0;
+     let shoulderX=pose==='wake'?.48*wakeBrace:pose==='sit'?.04:Math.sin(phase*.55+i*1.7)*.055;
+     let elbowX=pose==='wake'?-.92*wakeBrace:pose==='sit'?-.18:Math.sin(phase*.45+i)*.045;
+     let shoulderZ=pose==='wake'?(i===0?.42:-.42)*wakeBrace:pose==='sit'?.15:0;
      if(reading){shoulderX=.12+Math.sin(t*.003+i*2.2)*.075;elbowX=-.58+Math.sin(t*.004+i*2.8)*.12;shoulderZ=(i===0?.23:-.18)+Math.sin(t*.002+i)*.025}
      if(typing){shoulderX=.18+Math.sin(t*.012+i*2.5)*.025;elbowX=-.72+Math.sin(t*.01+i)*.035;shoulderZ=i===0?.16:-.16}
      if(cooking){shoulderX=.38+Math.sin(t*.008+i*1.8)*.08;elbowX=-.82+Math.sin(t*.009+i*2)*.08;shoulderZ=i===0?.28:-.24}
@@ -3302,7 +3321,7 @@ function persistFurniture(item){
      a.shoulder.rotation.z+=(shoulderZ-a.shoulder.rotation.z)*.08;
      a.elbow.rotation.x+=(elbowX-a.elbow.rotation.x)*.09;
     });
-    if(pose==='wake'){const progress=Math.max(0,Math.min(1,(t-wakeStartedAt)/3400));rig.rotation.x+=(0-rig.rotation.x)*(1-Math.exp(-dt*1.65));body.position.y+=(-.18*(1-progress)-body.position.y)*.08;body.rotation.x+=(-.12*(1-progress)-body.rotation.x)*.06;if(progress>=1){pose='idle';basePose='idle';activeActivity='idle';body.position.y=0;body.rotation.x=0;idleNextMove=t+5000;idleNextGesture=t+7000;}}
+    if(pose==='wake'){const progress=Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)),turnSpeed=progress<.28?.85:progress<.72?1.35:2.1;rig.rotation.x+=(0-rig.rotation.x)*(1-Math.exp(-dt*turnSpeed));body.position.y+=(-.16*(1-progress)-body.position.y)*.075;body.rotation.x+=(-.18*(1-progress)-body.rotation.x)*.055;head.rotation.x+=((t>=wakeLookAt?-.08:-.22)-head.rotation.x)*.035;head.rotation.y+=((t>=wakeLookAt?.12:0)-head.rotation.y)*.025;if(progress>=1){pose='idle';basePose='idle';activeActivity='idle';rig.rotation.x=0;body.position.y=0;body.rotation.x=0;idleNextMove=t+6500;idleNextGesture=t+8500;}}
 
     if(writing){head.rotation.x+=(-.13+Math.sin(t*.0018)*.025-head.rotation.x)*.035}
      if(reading&&Math.sin(t*.0011)>.985){head.rotation.y+=(.42-head.rotation.y)*.12;head.rotation.x+=((pose==='bedRead'?.04:-.08)-head.rotation.x)*.12}
@@ -3378,7 +3397,7 @@ if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
 function playIntroSequence(){s.introNarrationShown=true;s.introStage=s.introStage||'awaiting-first-aid';save();const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','新手补给已经寄到信箱。请先领取急救包，再到背包里确认是否要对 Arday 使用。'];let index=0;const next=()=>{if(index>=lines.length)return;s.introStage=s.introStage||'awaiting-first-aid';save();return}saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200)};next();}
-if(isFreshInstall||(!s.introNarrationShown&&s.introStage==='awaiting-first-aid'))playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation')renderChatTopics();else showCurrentScheduleBubble();
+if(isFreshInstall||(!s.introNarrationShown&&s.introStage==='awaiting-first-aid'))playIntroSequence();else if(s.introStage==='awakening'){startArdayAwakening()}else if(s.introStage==='awaiting-first-contact'||s.introStage==='awaiting-void-explanation'||s.introStage==='awaiting-settle-in')renderChatTopics();else if(s.introStage==='settling-in')resumeSettleInDialogue();else showCurrentScheduleBubble();
  // Catch up immediately when Safari restores a backgrounded or suspended tab.
  function dismissRestoredDungeonBoard(){
   if(s.activeDungeon?.mode!=='board')return;
