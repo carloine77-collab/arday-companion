@@ -2877,7 +2877,7 @@ function persistFurniture(item){
      const loftBed=String(bed.name||'').includes('上床下桌');sleepingOnLoftBed=loftBed;
      if(loftBed){
       // The loft mattress is elevated; its long axis follows local X rather than local Z.
-      const offset=new T.Vector3(.75,2.68,-.62).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
+      const offset=new T.Vector3(.88,2.68,0).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
       p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y+Math.PI/2;
      }else{
       const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
@@ -2908,7 +2908,7 @@ function persistFurniture(item){
    basePose=pose;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
-   rig.rotation.set(0,0,0);rig.position.set(0,0,0);rig.scale.set(1,sleepingOnLoftBed?.88:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
+   rig.rotation.set(0,0,0);rig.position.set(0,0,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
    body.position.y=pose==='sit'?-.32:0;legs.forEach(l=>{l.hip.position.y=pose==='sit'?.51:.83;l.hip.rotation.x=pose==='sit'?-1.15:0;l.knee.rotation.x=pose==='sit'?1.45:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
   }
