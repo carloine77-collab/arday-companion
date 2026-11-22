@@ -520,3 +520,20 @@ html body .stage .drawer.profile-expanded.open .choices{
 .mail-reward-row b,.mail-reward-row small{display:block}.mail-reward-row b{font-size:12px}.mail-reward-row small{margin-top:3px;color:#a08f7d;font-size:10px}.mail-reward-row>strong{font:600 13px Georgia,serif;color:#87664b}
 .mail-reward-claimed{margin-top:16px;color:#72816a;font-size:11px;font-weight:700;letter-spacing:.08em}
 .note-claim{border:1px solid #9a795c;background:#80664d;color:#fffaf3}
+
+
+/* Settings entry and save management */
+.settings-entry{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 13px;border:1px solid var(--line);border-radius:11px;background:var(--cream);color:var(--ink);font-size:12px;font-weight:700;box-shadow:0 2px 0 #d9c7ad;white-space:nowrap}
+.settings-entry span{font-size:15px;color:var(--muted)}
+.settings-view{padding:14px 14px 22px}
+.settings-panel{max-width:620px;margin:0 auto}
+.settings-heading{padding:8px 2px 20px}
+.settings-heading>span{font:700 9px Georgia,serif;letter-spacing:.17em;color:var(--muted)}
+.settings-heading h2{margin:7px 0 0;font:600 25px Georgia,serif;color:var(--ink)}
+.settings-option{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;padding:15px 12px;margin:0 0 9px;border:1px solid var(--line);border-radius:13px;background:var(--cream);color:var(--ink);text-align:left;box-shadow:0 2px 0 #e1d3c0}
+.settings-option:disabled{opacity:.48;cursor:not-allowed}
+.settings-option-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#eee4d5;color:#8a6b4e;font-size:19px}
+.settings-option b,.settings-option small{display:block}.settings-option b{font-size:13px}.settings-option small{margin-top:4px;color:var(--muted);font-size:10px;line-height:1.45}
+.settings-option i{font-size:11px;font-style:normal;font-weight:700;color:#927253}
+.settings-new-game{margin-top:18px;border-color:#ddc4b5;background:#f7eee8}.settings-new-game .settings-option-icon{background:#edddd4;color:#a35f4b}
+@media(max-width:430px){.settings-entry{padding:0 9px;min-height:34px}.settings-view{padding:10px 9px 18px}.settings-option{padding:13px 9px;gap:9px}}
