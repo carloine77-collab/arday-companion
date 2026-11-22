@@ -43,9 +43,10 @@ function autonomousFurnitureOptions(){
   for(const [activity,context] of Object.entries(set.activities)){
    const meta=activityMeta[activity];
    if(meta?.duration!=='long'||!meta.autonomous||!meta.autonomy||activity==='eat')continue;
+   if(activity==='guildTraining'&&!['iron-gate','night-heron','cinder-forge','blue-transit'].includes(s.factionMembership))continue;
    if(!furnitureRequirementAvailable(meta.requires,item.room))continue;
-   if(activity==='computerPlay'&&kind==='desk')continue;
-   if(activity==='computerPlay'&&kind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk')))continue;
+   if(['computerPlay','guildTraining'].includes(activity)&&kind==='desk')continue;
+   if(['computerPlay','guildTraining'].includes(activity)&&kind==='computer'&&!((s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk')))continue;
    if(activity==='cook'&&!hasCookableRecipe())continue;
    options.push({activity,meta,room:item.room,anchor:context?.anchor||meta.anchor||'default',furnitureId:item.id,furnitureKind:kind});
   }
@@ -94,9 +95,10 @@ function scheduledFurnitureIsValid(ev){
  const item=(s.placed||[]).find(entry=>String(entry.id)===String(ev.furnitureId));
  if(!item)return false;
  const kind=furnitureKindForPlaced(item),set=kind&&furnitureActivities[kind],activity=normalizeActivity(ev.activity),meta=activityMeta[activity];
- const linkedComputer=activity!=='computerPlay'||(kind==='desk'&&(s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id)))||(kind==='computer'&&(s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk'));
+ const linkedComputer=!['computerPlay','guildTraining'].includes(activity)||(kind==='desk'&&(s.placed||[]).some(entry=>entry.name==='电脑'&&String(entry.supportId)===String(item.id)))||(kind==='computer'&&(s.placed||[]).some(entry=>String(entry.id)===String(item.supportId)&&furnitureKindForPlaced(entry)==='desk'));
+ const guildEligible=activity!=='guildTraining'||['iron-gate','night-heron','cinder-forge','blue-transit'].includes(s.factionMembership);
  const ingredientsAvailable=activity!=='cook'||hasCookableRecipe();
- const valid=!!set?.activities?.[activity]&&meta?.duration==='long'&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room)&&linkedComputer&&ingredientsAvailable;
+ const valid=!!set?.activities?.[activity]&&meta?.duration==='long'&&!!meta?.autonomous&&furnitureRequirementAvailable(meta.requires,item.room)&&linkedComputer&&ingredientsAvailable&&guildEligible;
  if(valid&&ev.room!==item.room)ev.room=item.room;
  return valid;
 }
