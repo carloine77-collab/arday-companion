@@ -2680,7 +2680,8 @@ function initArday3D(){
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
   const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door'];
   s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id));
-  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.kind!=='scene'&&record.name!=='窗户');
+  const starterSceneNames=new Set(['茶几','植物','冰箱','灶台','水槽']);
+  const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)));
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
   // Resolve support relationships after every saved item exists. The old
   // one-pass restore silently detached tabletop objects when their table
