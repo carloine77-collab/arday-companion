@@ -75,7 +75,7 @@
    const candidates=ACTION_LETTERS[trigger].filter(item=>!(Array.isArray(state.ardayLetterHistory)&&state.ardayLetterHistory.includes(item.id)));
    if(candidates.length){
     const item=candidates[Math.floor(Math.max(0,Math.min(.999999,Number(random())||0))*candidates.length)];
-    return {id:item.id,topic:item.topic,title:item.title,detail:item.body.replace(/\\{item\\}/g,String(context.item||'一件小东西'))};
+    return {id:item.id,topic:item.topic,title:item.title,detail:item.body.replace(/\{item\}/g,String(context.item||'一件小东西'))};
    }
   }
   const roll=()=>Math.max(0,Math.min(.999999,Number(random())||0));
