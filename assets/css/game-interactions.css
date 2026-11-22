@@ -1,3 +1,5 @@
+/* Ownership: this file owns furniture actions, cooking, inventory/shop interaction states and specialized controls. */
+/* Inventory/shop base panel geometry remains in game-panels.css; overlapping legacy declarations are transitional. */
 /* ARDAY — lived-in editorial direction. No divider rules: use ornament, spacing and typography. */
 .drawer .choices.inventory-view,
 .drawer .choices.shop-content,
@@ -162,7 +164,7 @@
 .inventory-items>.choice .emoji{display:block!important;margin:0!important;color:#586b7e!important;font:30px Georgia,serif!important;filter:grayscale(.25)!important}
 .inventory-items>.choice small{margin:0!important;color:#8b7b67!important;font:italic 10px Georgia,serif!important}
 @media(min-width:600px){.drawer .choices.inventory-view{padding-left:22px!important;padding-right:22px!important}.inventory-view:before{margin-left:-22px!important;margin-right:-22px!important;padding-left:30px!important;min-height:178px!important}.inventory-items{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:15px!important;padding:22px 17px 26px!important}.inventory-items>.choice{min-height:130px!important;font-size:13px!important}.shop-content .shop-level-one{padding-left:18px!important}.shop-content .shop-level-two{padding-left:27px!important}}
-@media(max-width:430px){.inventory-items{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:430px){.inventory-items}
 
 
 /* 2026-11-19l — iPad mini touch layout: no horizontal drawer scrolling, spacious shop taxonomy */
@@ -291,8 +293,8 @@
  border:1px solid #b9ad98!important;border-radius:5px!important;
 }
 .shop-content .shop-level-two{margin-top:0!important;margin-bottom:17px!important;padding-left:25px!important;background:rgba(185,190,194,.24)!important}
-.shop-content .shop-group.active{background:#34465a!important;border-color:#34465a!important;color:#f4eadb!important}
-.shop-content .shop-furniture-type.active{background:#788697!important;border-color:#788697!important;color:#fff!important}
+.shop-content .shop-group.active
+.shop-content .shop-furniture-type.active
 .shop-content .shop-search{display:block!important;position:relative!important;clear:both!important;width:100%!important;max-width:100%!important;margin:0 0 14px!important;box-sizing:border-box!important}
 .shop-content .shop-product-grid{position:relative!important;clear:both!important;width:100%!important;min-width:0!important}
 @media(min-width:600px) and (max-width:900px){
