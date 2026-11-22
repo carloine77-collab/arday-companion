@@ -30,7 +30,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
 const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:3000,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
 let s={...base};
-let selectedCalendarDay=0;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.testFundsV3=true;}}}catch(e){} delete s.coins;
+let selectedCalendarDay=0,isFreshInstall=false;try{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.testFundsV3=true;}}else isFreshInstall=true;}catch(e){isFreshInstall=true} delete s.coins;
 s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
 
 // Infinite-instance progression: one currency (points) powers both ranking and exchange.
@@ -87,7 +87,7 @@ function refreshDungeonUnlocks(){
  DUNGEON_TIERS.forEach((tier,index)=>{if(index===0)return;const previous=DUNGEON_TIERS[index-1],needed=DUNGEON_CLEAR_REQUIREMENTS[tier]||0;if((Number(s.dungeonProgress[previous])||0)>=needed&&!s.dungeonUnlocks.includes(tier))s.dungeonUnlocks.push(tier)});
 }
 refreshDungeonUnlocks();
-s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'}));if(s.sharedGoal?.id==='room')s.sharedGoal=null;
 // Preserve legacy furniture data during schema upgrades. These version flags
 // must never be used as a reason to clear player-owned or placed objects.
 
@@ -197,7 +197,7 @@ function renderCurrentSchedulePeek(){
  }).join('');
  node.innerHTML=rows;
 }
-function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});if(s.statusBuffs?.fatigued?.active)tags.push({group:'survival',label:'疲惫',kind:'fatigued'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join('')};draw(emotion,'emotion');draw(survival,'survival');}
+function renderStatusTags(){const emotion=$('emotionStatuses'),survival=$('survivalStatuses');const tags=[];if(s.statusBuffs?.depressed?.active)tags.push({group:'emotion',label:'沮丧',kind:'depressed'});if(s.statusBuffs?.sick?.active)tags.push({group:'survival',label:'生病',kind:'sick'});if(s.statusBuffs?.fatigued?.active)tags.push({group:'survival',label:'疲惫',kind:'fatigued'});if(s.statusBuffs?.fatal?.active)tags.push({group:'survival',label:'濒死',kind:'fatal'});const draw=(node,group)=>{if(!node)return;const items=tags.filter(tag=>tag.group===group);node.innerHTML=items.map(tag=>'<span class="status-tag '+tag.kind+'">'+tag.label+'</span>').join('')};draw(emotion,'emotion');draw(survival,'survival');}
 let dialogueTimer=null;
 function say(t,type='character'){const b=$('dialogue');if(!b)return;document.querySelectorAll('.bubble,.dialogue-pill').forEach(node=>{if(node!==b)node.remove()});const raw=String(t||'');const message=type==='system'?raw:'“'+raw+'”';b.textContent=message;Object.assign(b.style,{display:'block',position:'absolute',left:'50%',top:'12px',zIndex:'45',transform:'translateX(-50%)',maxWidth:'min(72%,380px)',padding:'8px 14px',background:'#fff9edee',border:'1px solid #e0ceb3',borderRadius:'15px 15px 15px 5px',color:'#514334',fontSize:'12px',lineHeight:'1.45',textAlign:'center',boxShadow:'0 5px 16px #493a2926',pointerEvents:'none',opacity:'1',animation:'none'});clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>{if(b.textContent===message)b.style.display='none'},20000)}
 function saySystem(t){say(t,'system')}
@@ -334,12 +334,12 @@ function openTab(name,force=false){
  
  if(name==='物品'){
   $('choices').className='choices inventory-view';inventoryGrid=document.createElement('div');inventoryGrid.className='inventory-items';
-  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
+  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':entity.kind==='consumable'?'消耗品':'食物';const icon=entity.kind==='dungeon-item'?(entity.icon||'✦'):entity.kind==='consumable'?'✚':item.startsWith('成品食物·')?(item.includes('蛋炒饭')?'🍚':item.includes('番茄')?'🍳':'🥣'):'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,'🥬','pantry-inventory-'+key,0,'','食物'])});
   
   const navigation=document.createElement('div');navigation.className='inventory-navigation';
   const nav=document.createElement('div');nav.className='inventory-categories';
-  ['全部','食物','家具','副本道具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category&&!inventoryRecycleMode?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;inventoryRecycleMode=false;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
+  ['全部','食物','家具','副本道具','消耗品'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category&&!inventoryRecycleMode?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;inventoryRecycleMode=false;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
   const recycleTab=document.createElement('button');recycleTab.type='button';recycleTab.className='inventory-recycle-entry'+(inventoryRecycleMode?' active':'');recycleTab.textContent='回收';recycleTab.setAttribute('aria-label','进入回收');recycleTab.onclick=()=>{inventoryRecycleMode=true;openTab('物品',true)};
   navigation.append(nav,recycleTab);$('choices').appendChild(navigation);$('choices').appendChild(inventoryGrid);$('choices').classList.toggle('is-recycling',inventoryRecycleMode);
   if(inventoryRecycleMode){tabEntries.splice(0,tabEntries.length,...tabEntries.filter(entry=>{const key=entry[2].startsWith('pantry-inventory-')?entry[2].slice('pantry-inventory-'.length):null;const entity=key?null:s.inventory[Number(entry[2].replace(/^(?:use-inventory-|place-owned-)/,''))];return (key?Number(ingredientUnitPrices[key])||0:inventoryOriginalPrice(entity))>0}))}
@@ -353,6 +353,7 @@ function openTab(name,force=false){
    if(id.startsWith('pantry-inventory-')){openKitchenPanel(false);return}
    if(id.startsWith('use-inventory-')){
     const index=Number(id.slice('use-inventory-'.length)),entity=s.inventory[index],item=entity?.name;
+    if(entity?.kind==='consumable'){useConsumableItem(entity,index);return}
     if(entity?.kind==='dungeon-item'){useDungeonItem(entity,index);return}
     if(!item){openTab('物品',true);return}
     if(item.startsWith('成品食物·')){
@@ -412,8 +413,17 @@ function eventChoicesLegacy(e){
  paper.append(meta,heading,body,signature);
  const actions=document.createElement('div');actions.className='note-detail-actions';
  const back=document.createElement('button');back.type='button';back.className='note-back';back.textContent='返回信箱';back.onclick=renderEvents;
+ if(e.rewardBundle){
+  const bundle=e.rewardBundle,rewards=document.createElement('section');rewards.className='mail-reward-contents';
+  const caption=document.createElement('div');caption.className='mail-reward-heading';caption.textContent='SUPPLY DROP · 新手补给';rewards.appendChild(caption);
+  const kits=document.createElement('div');kits.className='mail-reward-row';kits.innerHTML='<span class="mail-reward-icon">✚</span><span><b>急救包</b><small>用于解除 Arday 的濒死状态</small></span><strong>×'+Math.max(0,Number(bundle.firstAid)||0)+'</strong>';
+  const cash=document.createElement('div');cash.className='mail-reward-row';cash.innerHTML='<span class="mail-reward-icon">¥</span><span><b>人民币</b><small>已存入共同账户</small></span><strong>¥'+Math.max(0,Number(bundle.money)||0).toLocaleString('zh-CN')+'</strong>';
+  rewards.append(kits,cash);paper.appendChild(rewards);
+  if(e.rewardClaimed){const claimed=document.createElement('div');claimed.className='mail-reward-claimed';claimed.textContent='礼包已领取';paper.appendChild(claimed)}
+  else{const claim=document.createElement('button');claim.type='button';claim.className='note-claim';claim.textContent='领取新手礼包';claim.onclick=()=>{if(e.rewardClaimed)return;const count=Math.max(0,Math.min(10,Math.floor(Number(bundle.firstAid)||0)));for(let i=0;i<count;i++){const item=addInventoryItem('急救包','consumable');item.itemId='first-aid-kit'}const cashAmount=Math.max(0,Math.floor(Number(bundle.money)||0));s.money=(Number(s.money)||0)+cashAmount;if(cashAmount&&typeof moneyRecord==='function')moneyRecord('shared','income',cashAmount,'新手礼包');e.rewardClaimed=true;e.rewardClaimedAt=Date.now();save();render();eventChoicesLegacy(e)};actions.appendChild(claim)}
+ }
  const ack=document.createElement('button');ack.type='button';ack.className='note-ack';ack.textContent='收好这张纸条';ack.onclick=()=>{completeEvent(e,'已阅');save();renderEvents()};
- actions.append(back,ack);$('choices').replaceChildren(paper,actions);$('drawer').classList.add('open');
+ actions.prepend(back);actions.appendChild(ack);$('choices').replaceChildren(paper,actions);$('drawer').classList.add('open');
 }
 function renderEvents(){
  $('drawer').classList.remove('furniture-drawer');$('drawer').querySelector('.furniture-close')?.remove();
@@ -1139,6 +1149,7 @@ function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'i
 function updateStatusBuffs(at=Date.now()){
  const hourMs=3600000,period=12*hourMs;s.statusBuffs=s.statusBuffs||{};
  const rules=[
+  {id:'fatal',active:!!s.statusBuffs.fatal?.active,apply:n=>{['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)-3*n)})}},
   {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n)}},
   {id:'starving',active:Number(s.hunger)<15,apply:n=>{s.energy=clamp(s.energy-2*n);s.fun=clamp(s.fun-n)}},
   {id:'sick',active:Number(s.clean)<25,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+n);s.energy=clamp(s.energy-n)}},
@@ -1150,6 +1161,7 @@ function updateStatusBuffs(at=Date.now()){
   if(rule.active&&state.active){if(!Number(state.nextEffectAt)){state.since=at;state.nextEffectAt=at+period}if(at>=state.nextEffectAt){const periods=Math.floor((at-state.nextEffectAt)/period)+1;rule.apply(periods);state.nextEffectAt+=periods*period}}
  }
 }
+function applyFatalCondition(at=Date.now(),startingValue=1){const previous=s.statusBuffs?.fatal;s.statusBuffs=s.statusBuffs||{};s.statusBuffs.fatal={active:true,since:previous?.active?Number(previous.since)||at:at,nextEffectAt:previous?.active&&Number(previous.nextEffectAt)>at?Number(previous.nextEffectAt):at+12*3600000};['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp(startingValue)});}
 function applyActivityEffectsWithFeedback(effects){
  const before={};for(const key of Object.keys(effects||{}))before[key]=Number(s[key])||0;
  change(effects);
@@ -1744,6 +1756,7 @@ if(combatCommissionHeader&&!combatCommissionHeader.dataset.commissionBound){
 // Narrow runtime bridge for the separately maintained dungeon-board module.
 window.ArdayDungeonBoardRuntime={get state(){return s},$:id=>$(id),save:()=>save(),clamp:value=>clamp(value),addDungeonItem:id=>addDungeonItem(id),settleDungeonIfDue:at=>settleDungeonIfDue(at),pauseBoard:()=>pauseDungeonBoard(),showDungeon:()=>showDungeon()};
 
+function useConsumableItem(entity,index){if(entity?.itemId!=='first-aid-kit'){toast('该消耗品暂不可使用');return}if(!s.statusBuffs?.fatal?.active){toast('Arday目前不需要急救');return}const state=s.statusBuffs.fatal;s.statusBuffs.fatal={...state,active:false,since:0,nextEffectAt:0,clearedAt:Date.now()};['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)+35)});s.inventory.splice(index,1);addEvent('急救包已使用','Arday的濒死状态已解除，四项生存指标得到紧急恢复。','system-action');save();render();saySystem('急救包已经生效。Arday的状态稳定下来了。先让他休息一会儿吧。');toast('濒死状态已解除');openTab('物品',true)}
 function useDungeonItem(entity,index){
  const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
  const applyEffects=effects=>{const today=keyAt(Date.now());if(s.dungeonItemStatGainDay!==today){s.dungeonItemStatGainDay=today;s.dungeonItemStatGains={}}s.dungeonItemStatGains=s.dungeonItemStatGains||{};Object.entries(effects||{}).forEach(([key,value])=>{const amount=Number(value)||0;if(key in s.attributes){if(amount>0){const used=Number(s.dungeonItemStatGains[key])||0,allowed=Math.min(amount,Math.max(0,2-used));s.attributes[key]=clamp((Number(s.attributes[key])||0)+allowed);s.dungeonItemStatGains[key]=used+allowed}else s.attributes[key]=clamp((Number(s.attributes[key])||0)+amount)}else if(key in s)s[key]=clamp((Number(s[key])||0)+amount)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)};
@@ -1799,18 +1812,18 @@ function dispatchDungeon(tier,energyCost,base){
 function settleDungeonIfDue(at=Date.now()){
  const mission=s.activeDungeon;if(!mission||mission.status!=='active'||mission.settling)return false;const deadline=Number(mission.scheduleEndAt||mission.endsAt||0);if(!deadline||at<deadline)return false;mission.settling=true;const wasBoard=mission.mode==='board';
  const snap=mission.snapshot||{},board=mission.board||{},power=(Number(snap.playerPower)||0)*.72+(Number(snap.teamPower)||0)*.28,modifier=((Number(board.chanceModifier)||0)+(Number(mission.successChanceModifier)||0))/100,successChance=Math.max(.05,Math.min(.95,.50+(power-mission.difficulty)*.0095-(Number(snap.teamMalice)||0)*.0009+modifier)),success=Math.random()<successChance;
- let fatal=false,survived=true;
- if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0)s.dungeonProtection--;else if(protection>=0)s.inventory.splice(protection,1);else{fatal=true;survived=true;s.energy=1;s.hunger=1;s.clean=1;s.fun=1;['agility','strength','intelligence','perception','willpower'].forEach(key=>{s.attributes[key]=clamp((Number(s.attributes[key])||0)-10)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}}
+ let fatal=false,survived=true,protectionUsed=false;
+ if(!success){const protection=s.inventory.findIndex(item=>item.kind==='dungeon-item'&&item.itemId==='standin');if(Number(s.dungeonProtection)>0){s.dungeonProtection--;protectionUsed=true}else if(protection>=0){s.inventory.splice(protection,1);protectionUsed=true}fatal=true;survived=true;applyFatalCondition(at,1);['agility','strength','intelligence','perception','willpower'].forEach(key=>{s.attributes[key]=clamp((Number(s.attributes[key])||0)-10)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)}
  const successfulNodes=Object.values(board.specialNodes||{}).filter(Boolean).length,nodeScore=successfulNodes*4,raw=Math.round(Math.max(0,Math.min(100,52+power*.34-mission.difficulty*.17+(Math.random()*20-10)-(Number(snap.teamMalice)||0)*.025+(Number(board.chanceModifier)||0)*.25+nodeScore))),rating=success?(raw>=94?'SS':raw>=84?'S':raw>=72?'A':raw>=59?'B':'C'):'D',earned=success?Math.max(5,Math.round(mission.baseReward*(.65+raw/150))):Math.max(2,Math.round(mission.baseReward*.08));
  grantPoints(earned);if(success)s.dungeonProgress[mission.tier]=(Number(s.dungeonProgress[mission.tier])||0)+1;
  if(success&&s.guildCommission?.status==='active'&&dungeonTierIndex(mission.tier)>=dungeonTierIndex(s.guildCommission.minTier||'F')){const commissionReward=Math.max(0,Math.floor(Number(s.guildCommission.reward)||0));if(commissionReward){grantPoints(commissionReward);s.guildCommission={...s.guildCommission,status:'completed',completedAt:at};addEvent('特别行动完成','完成组织委托，获得 '+commissionReward+' 积分。','daily')}}
- const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x)),result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at,unlocked:newly,survived,fatal,boardSteps:Math.max(0,Math.min(108,Number(board.steps)||0))};
+ const before=[...s.dungeonUnlocks];refreshDungeonUnlocks();const newly=s.dungeonUnlocks.filter(x=>!before.includes(x)),result={tier:mission.tier,success,rating,score:raw,points:earned,successChance:Math.round(successChance*100),teamPower:Math.round(snap.teamPower||0),teamMalice:Math.round(snap.teamMalice||0),matchedCount:(snap.matchedStrangers||[]).length,at,unlocked:newly,survived,fatal,protectionUsed,boardSteps:Math.max(0,Math.min(108,Number(board.steps)||0))};
  recordDungeonStat(result);const elite=maybeMeetElite(mission.tier,at);if(elite)result.eliteEncounter={name:elite.name,relation:elite.relation};s.dungeonHistory.unshift(result);s.dungeonHistory=s.dungeonHistory.slice(0,80);s.activeDungeon=null;s.lastDungeonResult=result;
- addEvent('副本结算报告 · '+result.tier,'校园灵异副本已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(success?'':fatal?'未触发保命道具，角色带伤撤离。':survived?'保命道具生效，失败后成功生还。':'角色遭受濒死重创。'),'daily');save();render();if($('drawer').classList.contains('open')&&($('drawerTitle').textContent.includes('副本')||wasBoard))showDungeonResult(result);return true;
+ addEvent('副本结算报告 · '+result.tier,'校园灵异副本已结束。'+(success?'成功通关':'未能通关')+'，评级 '+rating+'，获得 '+earned+' 积分。'+(success?'':protectionUsed?'保命储备已消耗，但角色仍陷入濒死状态。':'角色陷入濒死状态，四项生存指标将持续衰减。'),'daily');save();render();if($('drawer').classList.contains('open')&&($('drawerTitle').textContent.includes('副本')||wasBoard))showDungeonResult(result);return true;
 }
 function showDungeonResult(result){
  $('drawerTitle').textContent='副本结算';$('choices').className='choices infinite-view';
- $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级 · 校园灵异</div><p>通关概率 '+result.successChance+'% · 完成 '+result.boardSteps+' 格</p></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>可用余额 '+s.points.toLocaleString('zh-CN')+' · 排名积分 '+s.rankPoints.toLocaleString('zh-CN')+'</small></div><div class="instance-result-detail"><span>生还状态</span><b>'+(result.fatal?'重伤撤离':result.survived?'已生还':'濒死重创')+'</b><span>完成圈数</span><b>'+Math.floor(Math.max(0,Number(result.boardSteps)||0)/36)+' / 3</b></div><button class="instance-primary" id="instanceAgain">返回组队</button>';
+ $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级 · 校园灵异</div><p>通关概率 '+result.successChance+'% · 完成 '+result.boardSteps+' 格</p></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>可用余额 '+s.points.toLocaleString('zh-CN')+' · 排名积分 '+s.rankPoints.toLocaleString('zh-CN')+'</small></div><div class="instance-result-detail"><span>生还状态</span><b>'+(result.fatal?'濒死状态':result.survived?'已生还':'濒死重创')+'</b><span>完成圈数</span><b>'+Math.floor(Math.max(0,Number(result.boardSteps)||0)/36)+' / 3</b></div><button class="instance-primary" id="instanceAgain">返回组队</button>';
  $('instanceAgain').onclick=showDungeon;
 }
 function showEntertainment(){ $('drawerTitle').textContent='娱乐';$('choices').className='choices infinite-view';$('choices').innerHTML='<div class="illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 300 100"><path d="M15 82 Q60 10 108 72 T205 38 T285 65" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="90" cy="38" r="20" fill="none" stroke="currentColor"/><path d="M80 38h20M90 28v20" stroke="currentColor"/></svg></div><h2>娱乐</h2></div><div class="illustrated-choice-grid"><button class="instance-strategy" onclick="toast(\'即将开放\')">🎴<strong>牌局</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">🎮<strong>街机</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">♟<strong>棋室</strong></button></div>';$('drawer').classList.add('open');}
@@ -3317,9 +3330,11 @@ initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activit
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
 
+if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「消耗品」分类中，将急救包用于 Arday。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
-showCurrentScheduleBubble();
+function playIntroSequence(){const lines=['你是在一个下雨的晚上，偶然遇见这款 App 的。','它藏在一个冷门论坛的下载链接里，名字叫 ARDAY。页面没有宣传图，只有一行介绍：无限流生存模拟。','评论区却很热闹。有人说，副本深处藏着现实里找不到的东西；有人说，那可能是一个答案，也可能是一个人。','你一直在寻找某样东西。你没有告诉任何人具体是什么，但那条评论让你停了很久。','于是你下载了它。安装完成后，没有注册界面，也没有权限申请。屏幕暗了几秒，再亮起时，只剩下一行字：正在匹配初始角色……','匹配完成。角色：Arday。当前生存状态：濒死。','你愣了一下。你甚至还没开始游戏，他怎么就快要活不下去了？','别担心，我已经把新手礼包寄到你的信箱了。里面有两个急救包，还有一千元人民币。先给 Arday 用一个急救包，让他从濒死状态里缓过来。','他得先活下来。至于你一直在找的东西，也许就在某个副本的尽头。'];let index=0;const next=()=>{if(index>=lines.length)return;saySystem(lines[index++]);if(index<lines.length)setTimeout(next,6200)};next();}
+if(isFreshInstall)playIntroSequence();else showCurrentScheduleBubble();
  // Catch up immediately when Safari restores a backgrounded or suspended tab.
  function dismissRestoredDungeonBoard(){
   if(s.activeDungeon?.mode!=='board')return;
