@@ -28,7 +28,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['茶几','窗户','植物','冰箱','灶台','水槽'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
+const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['窗户'],pantry:{rice:1,egg:2,vegetable:2,tomato:1},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0,isFreshInstall=false;const forceNewGameKey='arday-force-new-game-v1';try{if(localStorage.getItem(forceNewGameKey)==='1'){localStorage.removeItem('arday-save-v2');localStorage.removeItem(forceNewGameKey);isFreshInstall=true;}else{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.testFundsV3=true;}}else isFreshInstall=true;}}catch(e){isFreshInstall=true} delete s.coins;
 s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
@@ -130,7 +130,7 @@ if(!Array.isArray(s.placed))s.placed=[];
 else s.placed=s.placed.filter(item=>item&&typeof item==='object'&&item.name!=='点心'&&!isPlaceholderDungeonItem(item));
 // The old furniture list described built-in scene fixtures, not owned inventory.
 const legacySceneFurniture=Array.isArray(s.furniture)?s.furniture:base.furniture.slice();
-legacySceneFurniture.filter(name=>typeof name==='string'&&name!=='沙发').forEach((name,index)=>{
+legacySceneFurniture.filter(name=>typeof name==='string'&&name==='窗户').forEach((name,index)=>{
  if(s.placed.some(item=>item?.name===name&&item.kind==='scene'))return;
  const room=['冰箱','灶台','水槽'].includes(name)?'kitchen':'living';
  s.placed.push({id:'scene-default-'+index,name,room,kind:'scene'});
@@ -164,21 +164,9 @@ s.placed.forEach((item,index)=>{
  if(!Number.isFinite(Number(item.z)))item.z=0;
  if(!Number.isFinite(Number(item.rotation)))item.rotation=0;if(item.name.startsWith('成品食物·')&&!Number.isFinite(Number(item.expiresAt))){item.createdAt=Number(item.createdAt)||Date.now();item.expiresAt=item.createdAt+6*3600000}
 });
-if(!s.starterSceneLayoutVersion){
- const starterLayout={
-  '茶几':{x:0,z:1.15},
-  '植物':{x:-3.05,z:1.45},
-  '冰箱':{x:-3.55,z:-2.78},
-  '灶台':{x:-1.65,z:-2.78},
-  '水槽':{x:.15,z:-2.78}
- };
- (s.placed||[]).forEach(item=>{
-  if(item?.kind!=='scene'||!String(item.id||'').startsWith('scene-default-'))return;
-  const position=starterLayout[item.name];if(!position)return;
-  item.x=position.x;item.y=0;item.z=position.z;item.rotation=0;
- });
- s.starterSceneLayoutVersion=1;
-}
+// Remove obsolete built-in starter props from existing saves.
+s.placed=(s.placed||[]).filter(item=>!(item?.kind==='scene'&&['茶几','植物','盆栽','冰箱','灶台','水槽'].includes(item.name)));
+s.starterSceneLayoutVersion=2;
 s.furnitureCatalogVersion=Math.max(2,Number(s.furnitureCatalogVersion)||0);
 s.roomFurnishingMigration=Math.max(1,Number(s.roomFurnishingMigration)||0);
 // Room finishes are independent per room. Migrate the former shared wallpaper
@@ -231,6 +219,7 @@ function say(t,type='character'){const b=$('dialogue');if(!b)return;document.que
 function saySystem(t){say(t,'system')}
 function armIntroDialogueAdvance(callback){
  const bubble=$('dialogue');if(!bubble)return;
+ bubble.classList.add('intro-advance-ready');
  bubble._introAdvance=callback;
  bubble.style.pointerEvents='auto';bubble.style.cursor='pointer';bubble.style.touchAction='manipulation';
  bubble.setAttribute('role','button');bubble.setAttribute('aria-label','点击继续');
@@ -598,7 +587,7 @@ function resumeSettleInDialogue(){
  const lines=['……听起来，你也没有什么确定的答案。','不过，我现在好像也没有别的地方可去。那就先试试看吧。'];
  let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introSettleDialogueIndex)||0)));
  const next=()=>{
-  if(index>=lines.length){const bubble=$('dialogue');if(bubble){bubble._introAdvance=null;bubble.style.display='none'}finishIntroFriendship();return}
+  if(index>=lines.length){const bubble=$('dialogue');if(bubble){bubble._introAdvance=null;bubble.classList.remove('intro-advance-ready');bubble.style.display='none'}finishIntroFriendship();return}
   say(lines[index++]);s.introSettleDialogueIndex=index;save();armIntroDialogueAdvance(next);
  };
  next();
@@ -2711,8 +2700,8 @@ function initArday3D(){
   const hotspotWorld=new T.Vector3();
   s.placed=s.placed||[];
   s.placed=s.placed.filter(item=>item?.id!=='arday-cream-walnut-sofa');
-  const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door'];
-  s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id));
+  const legacyDoorIds=['living-bedroom-door','living-kitchen-door','bedroom-living-door','kitchen-living-door','living-bathroom-door','bathroom-living-door','default-door-living'];
+  s.placed=s.placed.filter(record=>!legacyDoorIds.includes(record?.id)&&!(record?.room==='living'&&record?.name==='默认室内木门'&&record?.destination==='hall'));
   const starterSceneNames=new Set(['茶几','植物','冰箱','灶台','水槽']);
   const restoredFurnitureRecords=(s.placed||[]).filter(record=>record&&typeof record==='object'&&typeof record.name==='string'&&record.name!=='窗户'&&(record.kind!=='scene'||starterSceneNames.has(record.name)));
   restoredFurnitureRecords.forEach(record=>createOwnedFurniture(record.name,record));
@@ -2736,12 +2725,11 @@ function initArday3D(){
 
   // One matching default door per room: living opens to the public hall; private rooms return to the living room.
   const defaultDoorRecords=[
-   {id:'default-door-living',name:'默认室内木门',room:'living',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'left',wallOffset:0,x:-5.16,y:0,z:0,destination:'hall'},
    {id:'default-door-bedroom',name:'默认室内木门',room:'bedroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
   ];
-  if((Number(s.defaultDoorSetupVersion)||0)<2){
+  if((Number(s.defaultDoorSetupVersion)||0)<3){
   defaultDoorRecords.forEach(def=>{
    let record=s.placed.find(entry=>entry.id===def.id);
    if(!record){
@@ -2755,7 +2743,7 @@ function initArday3D(){
    const existing=furnitureRegistry.find(entry=>entry.id===record.id);
    if(!existing)createOwnedFurniture(record.name,record);
   });
-   s.defaultDoorSetupVersion=2;save();
+   s.defaultDoorSetupVersion=3;save();
   }
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
@@ -3476,7 +3464,7 @@ function playIntroSequence(){
  let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introNarrationIndex)||0)));
  const bubble=$('dialogue');
  const advance=()=>{
-  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;save();bubble._introAdvance=null;bubble.style.display='none';bubble.style.pointerEvents='none';return}
+  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;save();bubble._introAdvance=null;bubble.classList.remove('intro-advance-ready');bubble.style.display='none';bubble.style.pointerEvents='none';return}
   saySystem(lines[index]);index++;s.introNarrationIndex=index;save();
   clearTimeout(dialogueTimer);
   armIntroDialogueAdvance(advance);
