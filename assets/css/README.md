@@ -31,7 +31,7 @@ The order in `index.html` is intentional:
 
 - `game-panels.css` owns drawer shells, panel geometry, scroll containers, safe-area spacing and panel-level layout.
 - `game-interactions.css` owns furniture action controls, cooking interactions, inventory/shop specialized controls, selection states and action feedback.
-- Inventory/shop currently share 38 selectors across the two files. Several declarations overlap because older visual variants and later panel-layout corrections were layered over time. This is a known transitional boundary, not permission to add more overrides.
+- The two files currently share 38 selectors: 34 inventory/shop selectors and four broader panel/interaction selectors. Several declarations overlap because older visual variants and later panel-layout corrections were layered over time. This is a known transitional boundary, not permission to add more overrides. Three exact duplicate declarations in the interaction stylesheet have been removed; non-identical variants remain.
 - Do not move these shared selectors mechanically. Consolidate one component at a time only after preserving the current winning declarations, media-query order and specificity. The browser-rendered result must be compared at desktop, tablet and narrow mobile widths before removing the old rules.
 
 ## Maintenance rules
