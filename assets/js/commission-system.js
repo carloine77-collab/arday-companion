@@ -83,13 +83,13 @@
     return Math.min(Math.max(1,Number(task.target)||1),count);
    }
    function discoverSpecial(at=Date.now()){
-    const day=keyAt(at);state.specialCommissions=Array.isArray(state.specialCommissions)?state.specialCommissions:[];
-    if(state.specialCommissionFoundDay===day)return null;
-    const active=state.specialCommissions.filter(task=>task.status==='active');if(active.length>=2)return null;
+    const date=new Date(at),sessionKey=keyAt(at)+'-'+date.getHours();state.specialCommissions=Array.isArray(state.specialCommissions)?state.specialCommissions:[];
+    if(state.specialCommissionFoundSession===sessionKey)return null;
+    const active=state.specialCommissions.filter(task=>task.status==='active');if(active.length>=3)return null;
     const used=new Set(active.map(task=>task.id.split('@')[0]));const candidates=(data.specialTasks||[]).filter(task=>!used.has(task.id));
     const definition=pick(candidates);if(!definition)return null;
     const task={...definition,id:definition.id+'@'+at,foundAt:at,foundDay:day,status:'active',claimedAt:0};
-    state.specialCommissions.unshift(task);state.specialCommissions=state.specialCommissions.slice(0,12);state.specialCommissionFoundDay=day;
+    state.specialCommissions.unshift(task);state.specialCommissions=state.specialCommissions.slice(0,12);state.specialCommissionFoundSession=sessionKey;
     if(typeof save==='function')save();return task;
    }
    function claimSpecial(id,at=Date.now()){
