@@ -563,7 +563,6 @@ html body .stage .drawer.profile-expanded.open .choices{
 /* Inventory use confirmation and first-contact conversation */
 .inventory-use-confirm{display:flex;flex-direction:column;justify-content:center;min-height:220px;padding:24px 18px;gap:12px}
 .inventory-use-question{margin:0;color:var(--ink);font:600 16px/1.65 'Noto Serif SC',Georgia,serif;text-align:center}
-.inventory-use-note{margin:0;color:var(--muted);font-size:11px;line-height:1.6;text-align:center}
 .inventory-use-actions{display:flex;justify-content:center;gap:10px;margin-top:12px}
 .inventory-use-actions button{min-width:108px;min-height:40px;padding:0 18px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:700}
 .inventory-use-confirm-button{background:#80664d;color:#fffaf3;border-color:#80664d!important}
@@ -605,7 +604,6 @@ header.top{position:relative}
 .drawer.inventory-confirm-modal .drawer-close-button{display:none!important}
 .drawer.inventory-confirm-modal .choices.inventory-use-confirm{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-height:0!important;padding:4px 0 0!important;gap:8px!important;background:transparent!important}
 .drawer.inventory-confirm-modal .inventory-use-question{font-size:14px!important;line-height:1.55!important}
-.drawer.inventory-confirm-modal .inventory-use-note{font-size:10px!important}
 .drawer.inventory-confirm-modal .inventory-use-actions{display:flex!important;justify-content:flex-end!important;gap:8px!important;margin-top:8px!important}
 .drawer.inventory-confirm-modal .inventory-use-actions button{min-width:76px!important;min-height:34px!important;border-radius:7px!important;font-size:11px!important}
 .event-card-wrap{position:relative;width:100%;min-width:0}
@@ -694,7 +692,6 @@ header.top{position:relative}
 }
 .inventory-use-title{margin:0 0 15px!important;color:#805345!important;text-align:center!important;font:600 16px 'Noto Serif SC',Georgia,serif!important}
 .inventory-use-dialog .inventory-use-question{margin:0!important;color:var(--ink,#40382f)!important;font-size:14px!important;line-height:1.65!important;text-align:center!important}
-.inventory-use-dialog .inventory-use-note{margin:9px 0 0!important;color:var(--muted,#887968)!important;font-size:11px!important;line-height:1.6!important;text-align:center!important}
 .inventory-use-dialog .inventory-use-actions{display:flex!important;justify-content:center!important;gap:10px!important;margin-top:20px!important}
 .inventory-use-dialog .inventory-use-actions button{min-width:104px!important;min-height:40px!important;padding:0 18px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important}
 @media(max-width:430px){.inventory-use-dialog{width:min(100%,330px)!important;padding:19px 16px 16px!important}.inventory-use-dialog .inventory-use-actions button{flex:1;min-width:0!important}}
