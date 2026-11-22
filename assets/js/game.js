@@ -2171,7 +2171,16 @@ function initArday3D(){
    const trim=M(0x9a7655,.48),inner=M(0x806b55,.72);
    const glass=new T.MeshPhysicalMaterial({color:0xb9d2d4,roughness:.12,metalness:.08,transparent:true,opacity:.34,side:T.DoubleSide,depthWrite:false});
    const pane=(x,y,w,h,z=.035,material=glass)=>{const mesh=new T.Mesh(new T.PlaneGeometry(w,h),material);mesh.position.set(x,y,z);mesh.renderOrder=2;mesh.castShadow=false;mesh.receiveShadow=false;windowGroup.add(mesh);return mesh};
-   if(style==='shoji'){
+   if(style==='french'){
+    const frame=frameMaterial;
+    box(windowGroup,0,cy-halfH,0,width+.14,.15,.17,frame);box(windowGroup,0,cy+halfH,0,width+.14,.15,.17,frame);
+    for(const x of [-halfW-.02,halfW+.02])box(windowGroup,x,cy,0,.15,height+.14,.17,frame);
+    pane(0,cy,width-.3,height-.3,.035);
+    for(const x of [-.48,0,.48])box(windowGroup,x,cy,.09,.055,height-.25,.11,frame);
+    for(const y of [cy-.57,cy,cy+.57])box(windowGroup,0,y,.09,width-.25,.055,.11,frame);
+    box(windowGroup,0,cy-halfH-.055,.12,width+.22,.085,.24,trim);
+    for(const x of [-.12,.12]){const handle=box(windowGroup,x,cy,.16,.025,.13,.035,M(0xb18b58,.42));handle.castShadow=false}
+   }else if(style==='shoji'){
     const paper=new T.MeshStandardMaterial({color:0xf0e8d5,roughness:1,side:T.DoubleSide});
     box(windowGroup,0,cy-halfH,0,width+.12,.13,.15,frameMaterial);box(windowGroup,0,cy+halfH,0,width+.12,.13,.15,frameMaterial);
     for(const x of [-halfW-.02,halfW+.02])box(windowGroup,x,cy,0,.13,height+.12,.15,frameMaterial);
