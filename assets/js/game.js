@@ -2147,7 +2147,28 @@ function initArday3D(){
   const living=new T.Group();scene.add(living);roomShell(living,0xd5d1c9,0xc4a783);
   const livingWindow=new T.Group();livingWindow.position.set(-2.75,0,-3.88);living.add(livingWindow);addWindowSun(living,livingWindow);
   const addWindowView=(windowGroup,centerY,width=2.1,height=1.85)=>{const view=new T.Mesh(new T.PlaneGeometry(width,height),new T.MeshBasicMaterial({map:outdoorTexture,toneMapped:false,side:T.DoubleSide}));view.position.set(0,centerY,.012);view.renderOrder=1;view.castShadow=false;view.receiveShadow=false;view.userData.windowScenery=true;windowGroup.add(view);};
-  const addOpenCasementWindow=(windowGroup,frameMaterial)=>{const width=2.2,height=1.95,cy=2.6;box(windowGroup,-1.07,cy,0,.12,height,.12,frameMaterial);box(windowGroup,1.07,cy,0,.12,height,.12,frameMaterial);box(windowGroup,0,cy+height/2,0,width,.12,.12,frameMaterial);box(windowGroup,0,cy-height/2,0,width,.12,.12,frameMaterial);for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(side*1.01,cy,.055);leaf.rotation.y=side*.43;windowGroup.add(leaf);const cx=-side*.49,glass=new T.Mesh(new T.PlaneGeometry(.94,1.76),m.glass);glass.position.set(cx,0,.018);glass.renderOrder=2;glass.castShadow=false;glass.receiveShadow=false;leaf.add(glass);for(const x of [-.49,.49])box(leaf,cx+x,0,.04,.065,1.86,.075,frameMaterial);for(const y of [-.9,.9])box(leaf,cx,y,.04,.98,.065,.075,frameMaterial);box(leaf,cx,0,.045,.045,1.72,.045,frameMaterial);for(const y of [-.55,.55])box(leaf,-side*.91,y,.07,.035,.12,.035,M(0xb18b58,.42));const handle=box(leaf,cx-side*.4,0,.09,.035,.22,.035,M(0xb18b58,.42));handle.castShadow=false;}};
+  const addOpenCasementWindow=(windowGroup,frameMaterial)=>{
+   const width=2.2,height=1.95,cy=2.6,halfW=width/2,halfH=height/2;
+   const trim=M(0x9a7655,.48),inner=M(0x806b55,.72);
+   const glass=new T.MeshPhysicalMaterial({color:0xb9d2d4,roughness:.12,metalness:.08,transparent:true,opacity:.34,side:T.DoubleSide,depthWrite:false});
+   // Closed rectangular double-sash window with aligned glazing and straight muntins.
+   box(windowGroup,0,cy-halfH,0,width+.12,.14,.14,frameMaterial);
+   box(windowGroup,0,cy+halfH,0,width+.12,.14,.14,frameMaterial);
+   for(const x of [-halfW-.01,halfW+.01])box(windowGroup,x,cy,0,.14,height+.12,.14,frameMaterial);
+   box(windowGroup,0,cy,-.012,width-.24,height-.24,.035,inner);
+   const paneW=(width-.32)/2,paneH=height-.32;
+   for(const side of [-1,1]){
+    const pane=new T.Mesh(new T.PlaneGeometry(paneW,paneH),glass);
+    pane.position.set(side*(paneW/2+.025),cy,.025);pane.renderOrder=2;pane.castShadow=false;pane.receiveShadow=false;windowGroup.add(pane);
+    for(const x of [-1,1])box(windowGroup,side*(paneW/2+.025)+x*(paneW/2),cy,.052,.035,paneH+.035,.035,frameMaterial);
+    for(const y of [-1,1])box(windowGroup,side*(paneW/2+.025),cy+y*(paneH/2),.052,paneW+.035,.035,.035,frameMaterial);
+   }
+   box(windowGroup,0,cy,.065,.075,height-.22,.07,frameMaterial);
+   box(windowGroup,0,cy,.066,width-.22,.075,.07,frameMaterial);
+   box(windowGroup,0,cy-halfH-.055,.105,width+.22,.09,.25,trim);
+   box(windowGroup,0,cy+halfH+.055,.045,width+.16,.07,.17,frameMaterial);
+   for(const x of [-.18,.18]){const latch=box(windowGroup,x,cy,.105,.025,.11,.035,M(0xb18b58,.42));latch.castShadow=false;}
+  };
   addWindowView(livingWindow,2.6);addOpenCasementWindow(livingWindow,m.oak);
   addWindowDressing(livingWindow,2.1,1.85,0xc7b7a4,2.6);
   const sofa=new T.Group(),table=new T.Group(),desk=new T.Group();living.add(sofa,table,desk);
