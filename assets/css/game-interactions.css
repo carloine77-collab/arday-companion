@@ -616,3 +616,30 @@ header.top{position:relative}
 .note-paper.supply-letter .mail-reward-contents{border:0!important;padding:10px 0!important}
 @media(max-width:430px){.drawer.inventory-confirm-modal{width:min(88%,320px)!important;padding:17px 15px 15px!important}.settings-fullscreen .settings-poster-head{min-height:158px!important}.settings-fullscreen .settings-poster-body{justify-content:flex-start!important;padding:20px 13px!important}.settings-fullscreen .settings-slot{min-height:78px!important}}
 @media(min-width:700px){.settings-fullscreen .settings-poster-head{min-height:210px!important;padding:28px 42px!important}.settings-fullscreen .settings-poster-head h2{font-size:36px!important}.settings-fullscreen .settings-poster-body{padding-top:5vh!important;padding-bottom:5vh!important}}
+
+/* Settings is a plain text action: no icon, frame, fill, or button chrome. */
+.identity-meta .settings-entry,
+.identity-meta .settings-entry:hover,
+.identity-meta .settings-entry:active{
+ display:inline!important;
+ appearance:none!important;
+ -webkit-appearance:none!important;
+ min-height:0!important;
+ height:auto!important;
+ padding:0!important;
+ margin:0!important;
+ border:0!important;
+ border-radius:0!important;
+ outline-offset:3px;
+ background:transparent!important;
+ box-shadow:none!important;
+ color:#f0cdb5!important;
+ font:inherit!important;
+ font-size:12px!important;
+ font-weight:700!important;
+ letter-spacing:0!important;
+ line-height:1.4!important;
+ gap:0!important;
+}
+.identity-meta .settings-entry::before,
+.identity-meta .settings-entry::after{content:none!important;display:none!important}
