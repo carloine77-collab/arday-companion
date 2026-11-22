@@ -2752,8 +2752,26 @@ function initArday3D(){
      const floorSpots=[...window.ArdayFurniturePlacement.rugCandidates(rug),[0,0],[-2.3,.2],[2.2,.2],[0,2.2],[0,-2.1],[-2,-2],[2,2]];
      for(const point of floorSpots){if(canPlaceFurniture(item,point[0],point[1],rotation)){group.position.x=point[0];group.position.z=point[1];placed=true;break}}
     }
+    if(!placed&&record){
+     // A saved furniture record must never be discarded merely because current
+     // collision rules cannot find a free slot. Legacy records often lack a
+     // transform; use a deterministic fallback so the object remains visible.
+     if(wallAxis){
+      const side=record.wallSide||wallSide||'back';
+      const offset=Number.isFinite(Number(record.wallOffset))?Number(record.wallOffset):0;
+      wallTransform(group,side,offset,Number.isFinite(Number(record.y))?Number(record.y):defaultWallY);
+      item.wallSide=side;item.wallAxis=side==='back'||side==='front'?'x':'z';
+     }else{
+      const fallbackSpots=[[-3.25,-2.75],[0,-2.75],[3.25,-2.75],[-3.25,0],[3.25,0],[-3.25,2.75],[0,2.75],[3.25,2.75],[0,0]];
+      const available=fallbackSpots.find(point=>canPlaceFurniture(item,point[0],point[1],rotation));
+      const chosen=available||fallbackSpots[0];
+      group.position.set(chosen[0],group.position.y,chosen[1]);group.rotation.y=rotation;
+     }
+     placed=true;
+     console.warn('[Arday furniture restore fallback]',{id,name,room});
+    }
     if(!placed&&!restoring){item.pendingPlacement=true;item.pendingValid=false;item.supportId=null;group.position.set(0,0,0);group.rotation.y=rotation;}
-    else if(!placed){disposeFurnitureResources(group);parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
+    else if(!placed){console.error('[Arday furniture restore failed]',{id,name,room,record});disposeFurnitureResources(group);parent.remove(group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);return null}
    }
    s.placed=s.placed||[];
    if(!record&&!item.pendingPlacement)s.placed.push({id,name,room,kind:name.startsWith('成品食物·')?'food':'furniture',...(item.preparedBy?{preparedBy:item.preparedBy}:{}),x:group.position.x,y:group.position.y,z:group.position.z,rotation:group.rotation.y,supportId:item.supportId||null,...(item.expiresAt?{expiresAt:item.expiresAt,createdAt:record?.createdAt||Date.now()}:{}) ,...(item.isDoor?{destination:item.doorDestination||'living'}:{})});
@@ -2792,22 +2810,26 @@ function initArday3D(){
    {id:'default-door-kitchen',name:'默认室内木门',room:'kitchen',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'},
    {id:'default-door-bathroom',name:'默认室内木门',room:'bathroom',kind:'furniture',itemId:'默认室内木门',variant:'标准胡桃木',wallSide:'right',wallOffset:.45,x:5.16,y:0,z:.45,destination:'living'}
   ];
-  if((Number(s.defaultDoorSetupVersion)||0)<3){
+  // Keep the canonical interior doors present on every load. The previous
+  // version gated creation behind a migration number while deleting legacy
+  // door IDs unconditionally, leaving rooms without doors on later versions.
+  let defaultDoorsChanged=(Number(s.defaultDoorSetupVersion)||0)<3;
   defaultDoorRecords.forEach(def=>{
    let record=s.placed.find(entry=>entry.id===def.id);
    if(!record){
     const existingDoor=s.placed.find(entry=>entry.room===def.room&&typeof entry.name==='string'&&/门/.test(entry.name));
     if(existingDoor)return;
-    record={...def};s.placed.push(record);
+    record={...def};s.placed.push(record);defaultDoorsChanged=true;
    }
+   const before=JSON.stringify(record);
    record.name=def.name;record.kind='furniture';record.destination=record.destination||def.destination;
    record.wallSide=record.wallSide||def.wallSide;record.wallOffset=Number.isFinite(Number(record.wallOffset))?Number(record.wallOffset):def.wallOffset;
    record.x=Number.isFinite(Number(record.x))?Number(record.x):def.x;record.y=Number.isFinite(Number(record.y))?Number(record.y):def.y;record.z=Number.isFinite(Number(record.z))?Number(record.z):def.z;
+   if(JSON.stringify(record)!==before)defaultDoorsChanged=true;
    const existing=furnitureRegistry.find(entry=>entry.id===record.id);
    if(!existing)createOwnedFurniture(record.name,record);
   });
-   s.defaultDoorSetupVersion=3;save();
-  }
+  if(defaultDoorsChanged){s.defaultDoorSetupVersion=3;save();}
   const furnitureCorners=(...args)=>window.ArdayFurniturePlacement.corners(...args);
   const rectsOverlap=(...args)=>window.ArdayFurniturePlacement.rectsOverlap(...args);
   const canPlaceFurniture=(item,x,z,angle=item.group.rotation.y)=>window.ArdayFurniturePlacement.canPlaceFurniture(item,x,z,angle,furnitureRegistry,roomBounds,canPlaceOnWall);
