@@ -1179,8 +1179,19 @@ function processActivityAt(value){
   if(activity==='guildTraining')grantGuildTrainingAttribute(d.getTime());
   if(activity==='walk')discoverSpecialCommission(d.getTime());
   if(ev?.kind==='autonomous'){
-   const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。'};
+   const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。',read:'阿尔读了一会儿书。',music:'阿尔听了一阵音乐。',listenRecords:'阿尔听了一阵唱片。',cook:'阿尔自己做了一顿饭。'};
    if(notes[activity])addEvent('阿尔的日常记录',notes[activity],'autonomous');
+   const letterTriggers={cook:'cook',read:'read',music:'music',listenRecords:'music',laundry:'laundry',walk:'walk',tidy:'tidy',playPiano:'music'};
+   const trigger=letterTriggers[activity];
+   const dayStart=new Date(d.getTime());dayStart.setHours(0,0,0,0);
+   const todaysLetters=s.events.filter(item=>item.category==='letter'&&Number(item.created||0)>=dayStart.getTime()).length;
+   const sessionKey=key+'-'+(ev?.start??hour)+'-'+activity;
+   s.ardayLetterSessionHistory=Array.isArray(s.ardayLetterSessionHistory)?s.ardayLetterSessionHistory:[];
+   if(trigger&&todaysLetters<2&&!s.ardayLetterSessionHistory.includes(sessionKey)&&Math.random()<.28){
+    writeArdayLetter(d.getTime(),trigger);
+    s.ardayLetterSessionHistory.unshift(sessionKey);
+    s.ardayLetterSessionHistory=s.ardayLetterSessionHistory.slice(0,40);
+   }
   }
   if(ev?.withPlayer){
    relation(activity);
@@ -1202,7 +1213,15 @@ function processActivityAt(value){
  s.activityLog=s.activityLog||[];
  s.activityLog.push({activity,key,hour,at:d.getTime(),withPlayer:!!ev?.withPlayer});
  if(s.activityLog.length>100)s.activityLog.splice(0,s.activityLog.length-100);
+ const moneyLogLength=(s.moneyLog||[]).length;
  reviewPersonalSpending(d.getTime());
+ const latestPersonalExpense=(s.moneyLog||[]).find(entry=>entry.account==='personal'&&entry.kind==='expense');
+ if((s.moneyLog||[]).length!==moneyLogLength&&latestPersonalExpense&&/^购买/.test(latestPersonalExpense.note||'')&&s.lastLetteredPersonalPurchaseAt!==latestPersonalExpense.at){
+  s.lastLetteredPersonalPurchaseAt=latestPersonalExpense.at;
+  const dayStart=new Date(d.getTime());dayStart.setHours(0,0,0,0);
+  const todaysLetters=s.events.filter(item=>item.category==='letter'&&Number(item.created||0)>=dayStart.getTime()).length;
+  if(todaysLetters<3)writeArdayLetter(d.getTime(),'purchase',{item:(latestPersonalExpense.note||'').replace(/^购买/,''),cost:latestPersonalExpense.amount});
+ }
  settleDungeonIfDue(d.getTime());
  return true;
 }
@@ -1450,9 +1469,9 @@ function sharedGoalCatalog(){
  const e=candidates[Math.floor(Math.random()*candidates.length)];
  addEvent(e.title,e.detail,e.type);s.events[0].situationId=e.id;s.lastRandomEventAt=at;say(ardayLine('incident',e.detail));
 }
-function writeArdayLetter(at=Date.now()){
+function writeArdayLetter(at=Date.now(),trigger='daily',context={}){
  const library=window.ArdayLetterCopy;if(!library?.generate)return null;
- const letter=library.generate({state:s,random:Math.random});if(!letter)return null;
+ const letter=library.generate({state:s,random:Math.random,trigger,context});if(!letter)return null;
  const e=addEvent(letter.title,letter.detail,'arday-letter');if(!e)return null;
  e.letterId=letter.id;e.letterTopic=letter.topic;
  s.lastArdayLetterAt=at;s.ardayLetterHistory=Array.isArray(s.ardayLetterHistory)?s.ardayLetterHistory:[];
@@ -1463,10 +1482,10 @@ function generateDailyEvents(){
  const today=s.calendar?.anchor||dayKey(dayAnchor());
  if(s.dailyEventDate===today)return;
  s.dailyEventDate=today;
- const at=Date.now(),dayStart=new Date(at);dayStart.setHours(0,0,0,0);
+ const at=Date.now();
  proposeSharedGoal(at);
- const alreadyWroteToday=s.events.some(e=>e.category==='letter'&&Number(e.created||0)>=dayStart.getTime());
- if(!alreadyWroteToday&&at-(Number(s.lastArdayLetterAt)||0)>=32*3600000&&Math.random()<.72)writeArdayLetter(at);
+ // 每个游戏日保留一次自主联系机会；不再检查距上次写信的小时数。
+ if(Math.random()<.72)writeArdayLetter(at,'daily');
 }
 const oldEventChoicesForGoals=eventChoices;
 eventChoices=function(e){
