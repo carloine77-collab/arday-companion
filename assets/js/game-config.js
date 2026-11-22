@@ -766,7 +766,7 @@ window.ArdayGameConfig = {
  watchTV:{title:'看电视',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:66,weight:1.05},requires:'television',menuLabel:'看电视',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:14}},
  listenRecords:{title:'听唱片',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:62,weight:.95},requires:'recordPlayer',menuLabel:'听唱片',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:12}},
  music:{title:'听音乐',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:64,weight:.9},menuLabel:'听音乐',location:'table',pose:'sit',anchor:'table',effect:{fun:10}},
- walk:{title:'散步',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:60,weight:.18,base:2},menuLabel:'外出',location:'outside',pose:'walk',anchor:'default',effect:{fun:9,clean:-1}},
+ walk:{title:'外出',duration:'long',autonomous:false,menuLabel:'外出',location:'outside',pose:'walk',anchor:'default',effect:{fun:9,clean:-1}},
  game:{title:'玩游戏',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:55,weight:1.0},requires:'gameConsole',menuLabel:'玩游戏',location:'rug',pose:'sit',anchor:'gameConsole',effect:{fun:11}},
  sitChair:{title:'坐在椅子上',duration:'short',autonomous:false,menuLabel:'坐下',location:'chair',pose:'sit',anchor:'chair',effect:{fun:1}},
 
