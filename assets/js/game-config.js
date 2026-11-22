@@ -573,7 +573,7 @@ window.ArdayGameConfig = {
         ["羊毛地毯","▧","buy-furniture-catalog-082","460",""],
         ["格纹地毯","▧","buy-furniture-catalog-093","460",""]
       ],
-      "挂画与装饰画": [
+      "墙面艺术": [
         ["壁画","▧","buy-furniture-catalog-037","180",""],
         ["海报","▧","buy-furniture-catalog-018","120",""],
         ["照片墙","▧","buy-furniture-catalog-072","360",""],
