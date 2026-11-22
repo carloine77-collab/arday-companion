@@ -2974,8 +2974,8 @@ function persistFurniture(item){
   });
   gestureSurface.addEventListener('pointermove',e=>{
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
-    const now=performance.now(),dragDistance=Math.hypot(e.clientX-furnitureDrag.lastX,e.clientY-furnitureDrag.lastY);
-    if(now-furnitureDrag.lastUpdate<(isTouchDevice?24:16)&&dragDistance<3){e.preventDefault();return}
+    const now=performance.now();
+    if(now-furnitureDrag.lastUpdate<(isTouchDevice?24:16)){e.preventDefault();return}
     furnitureDrag.lastUpdate=now;furnitureDrag.lastX=e.clientX;furnitureDrag.lastY=e.clientY;
     if(Math.hypot(e.clientX-furnitureDrag.startX,e.clientY-furnitureDrag.startY)>8)furnitureDrag.moved=true;
     const rect=furnitureDrag.rect;pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
