@@ -2588,7 +2588,7 @@ function initArday3D(){
    if(modelMeshCount<2){disposeFurnitureResources(group);parent.remove(group);toast(name+'的3D模型没有正确生成，请重试');console.error('Furniture model incomplete',name,modelMeshCount);return null}
    applyInkOutlines(group);
    group.visible=true;group.updateMatrixWorld(true);
-   const isPreparedFood=name.startsWith('成品食物·');let x=record?.x??0,z=record?.z??0,y=record?.y??(wallAxis?2.65:0),rotation=record?.rotation||0;
+   const isPreparedFood=name.startsWith('成品食物·'),defaultWallY=wallAxis?(modelName==='门'?.05:2.65):0;let x=record?.x??0,z=record?.z??0,y=record?.y??defaultWallY,rotation=record?.rotation||0;
    // Wall cabinets are modeled around their local origin; legacy saves stored them at floor height.
    if(modelName==='吊柜'&&(!Number.isFinite(y)||y<1.6))y=2.65;if(modelName==='壁灯'&&(!Number.isFinite(y)||y<2.5))y=3.15;if(modelName==='吊灯'&&(!Number.isFinite(y)||y<4))y=4.45;
    if(record?.supportId&&!isPreparedFood){const savedSupport=s.placed?.find(it=>it.id===record.supportId),support=furnitureRegistry.find(it=>it.id===record.supportId);if(savedSupport?.modelName==='地毯'||support?.surfaceType==='rug'){supportId=null;y=0}else if(support&&support.surfaceType==='table'){supportId=support.id;y=record.y??(support.group.position.y+support.surfaceY)}else{supportId=null;y=0}}
