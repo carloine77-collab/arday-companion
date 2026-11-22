@@ -650,7 +650,13 @@ window.ArdayGameConfig = {
           "buy-furniture-catalog-112",
           "260",
           ""
-        ]
+        ],
+        ["落地陶瓷花器","▧","buy-furniture-catalog-122","520",""]
+      ],
+      "摆件": [
+        ["黄铜地球仪","▧","buy-furniture-catalog-123","420",""],
+        ["抽象金属雕塑","▧","buy-furniture-catalog-124","380",""],
+        ["玻璃罩微景观","▧","buy-furniture-catalog-125","460",""]
       ],
       "花束": [
         [
@@ -949,13 +955,11 @@ window.ArdayGameConfig = {
         ["雾蓝竖纹墙纸","▧","buy-wallpaper-stripe","420",""]
       ],
       "隔断": [
-        [
-          "木格栅隔断",
-          "▧",
-          "buy-furniture-catalog-117",
-          "620",
-          ""
-        ]
+        ["木格栅隔断","▧","buy-furniture-catalog-117","620",""],
+        ["藤编折叠屏风","▧","buy-furniture-catalog-118","760",""],
+        ["长虹玻璃屏风","▧","buy-furniture-catalog-119","980",""],
+        ["双面开放书架隔断","▧","buy-furniture-catalog-120","1180",""],
+        ["拱形镂空隔断","▧","buy-furniture-catalog-121","1080",""]
       ]
     }
   }
