@@ -45,7 +45,39 @@
    {id:'work-lunch',topic:'work',title:'午饭吃了什么',body:'中午吃了番茄鸡蛋面。店里纸巾放得很远，我差点把袖口蹭上汤汁。老板还送了一小碟泡菜，我本来想留到最后，结果一口气吃完了。\n\n你今天吃了什么？别又拿饼干当午饭。我会检查的，真的会。'}
   ]
  };
- function generate({state={},random=Math.random}={}){
+ const ACTION_LETTERS={
+  cook:[
+   {id:'action-cook-1',topic:'daily',title:'厨房里有点香',body:'刚才自己进厨房弄了点吃的。锅边溅了几滴油，洗碗布也被我弄湿了。味道还不错，至少我自己挺满意。\n\n下次想试一道新的。你负责试吃，不能只挑好看的那一块。'},
+   {id:'action-cook-2',topic:'daily',title:'今天换个做法',body:'今天没照着以前的做法来。我临时换了个顺序，结果居然还挺成功。灶台收拾干净了，剩下的食材也放回冰箱。\n\n突然觉得，偶尔改改习惯也不错。你想吃的话，我下次再做。'}
+  ],
+  read:[
+   {id:'action-read-1',topic:'daily',title:'读到一半的那一页',body:'今天读书读到一半，窗外有人经过，脚步声停了一下又走远了。我把书签夹回原处，打算明天接着看。\n\n有一段话我觉得你会喜欢。等你有空，我念给你听。'}
+  ],
+  music:[
+   {id:'action-music-1',topic:'daily',title:'把那首歌又听了一遍',body:'刚才听了几首歌，有一首没舍得跳过去，干脆又放了一遍。房间里只有音箱和空调的声音，倒也挺舒服。\n\n如果你在，我大概会把音量调低一点，免得你嫌吵。'}
+  ],
+  laundry:[
+   {id:'action-laundry-1',topic:'daily',title:'衣服晒好了',body:'洗衣机今天总算没把袜子卷成一团。我把衣服一件件晾好，洗衣液的味道还留在袖口。\n\n你的那件衣服我单独放着了。下次记得自己来收，别想让我一直替你保管。'}
+  ],
+  walk:[
+   {id:'action-walk-1',topic:'daily',title:'回来时买了瓶水',body:'刚才出去走了一圈。路口的树叶掉了不少，便利店门口摆着一排新饮料。我买了瓶水，绕远路走回来，脑子清醒了不少。\n\n下次想和你一起走。你走慢一点，我不赶时间。'}
+  ],
+  tidy:[
+   {id:'action-tidy-1',topic:'daily',title:'桌面终于清爽了',body:'我把桌面收拾了一遍。几张旧便签扔掉了，充电线绕好，杯垫也放回原位。抽屉里还找到一支能用的笔。\n\n现在看着顺眼多了。你下次别把东西随手塞进最里面，我会发现的。'}
+  ],
+  purchase:[
+   {id:'action-purchase-1',topic:'daily',title:'我给自己买了件小东西',body:'今天花了点自己的钱，买了{item}。不是什么贵重东西，就是刚好想要，也觉得用得上。钱已经记到账上了，没动共同账户。\n\n我想偶尔也给自己一点小奖励。你不会反对吧？'},
+   {id:'action-purchase-2',topic:'relationship',title:'猜猜我买了什么',body:'我今天自己出门买了{item}。本来只打算看看，最后还是带回来了。放心，价格很普通，没有乱花钱。\n\n等你回来我给你看。你可以夸我眼光好，最好再顺便亲一下。'}
+  ]
+ };
+ function generate({state={},random=Math.random,trigger='daily',context={}}={}){
+  if(ACTION_LETTERS[trigger]?.length){
+   const candidates=ACTION_LETTERS[trigger].filter(item=>!(Array.isArray(state.ardayLetterHistory)&&state.ardayLetterHistory.includes(item.id)));
+   if(candidates.length){
+    const item=candidates[Math.floor(Math.max(0,Math.min(.999999,Number(random())||0))*candidates.length)];
+    return {id:item.id,topic:item.topic,title:item.title,detail:item.body.replace(/\\{item\\}/g,String(context.item||'一件小东西'))};
+   }
+  }
   const roll=()=>Math.max(0,Math.min(.999999,Number(random())||0));
   const pools=[];
   const love=Number(state.love)||0,friend=Number(state.friend)||0,hate=Number(state.hate)||0,bored=Number(state.bored)||0;
