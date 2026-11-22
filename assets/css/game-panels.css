@@ -436,19 +436,19 @@ body.standalone .app{padding-top:calc(12px + env(safe-area-inset-top))}
 @media(max-width:380px){.inventory-view .inventory-categories{gap:1px}.inventory-view .inventory-category{font-size:10px;letter-spacing:0}.inventory-view .inventory-recycle-tab{margin-left:2px;padding-inline:8px}}
 
 
-/* Recycle controls follow the backpack's parchment-and-terracotta poster palette. */
-.inventory-navigation{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:7px;min-width:0;width:100%;margin:0 0 10px}
+/* Recycle controls reuse the backpack poster's deep slate-blue palette. */
+.inventory-navigation{display:flex;flex-wrap:nowrap;align-items:center;gap:7px;min-width:0;width:100%;margin:0 0 10px}
 .inventory-navigation .inventory-categories{display:flex;flex:1 1 0;width:auto;min-width:0;margin:0;padding:0;border:0;gap:0;overflow:hidden}
 .inventory-navigation .inventory-category{flex:1 1 0;min-width:0;min-height:35px;padding:0 2px;font-size:11px;letter-spacing:0;white-space:nowrap}
 .inventory-navigation .inventory-category+.inventory-category{border-left:1px solid #d1c2ad!important}
-.inventory-recycle-entry{position:relative;display:inline-flex;align-self:flex-start;flex:0 0 auto;align-items:center;justify-content:center;gap:7px;min-height:35px;margin:0 0 0 auto;padding:0 12px;border:1px solid #c6a98b;border-radius:3px;background:linear-gradient(145deg,#f4eadb,#e5d6c1);color:#86583f;box-shadow:2px 2px 0 #c7ad91,0 3px 8px #5e493012;font:700 11px Georgia,"Noto Serif SC",serif;letter-spacing:.08em;touch-action:manipulation}
+.inventory-recycle-entry{position:relative;display:inline-flex;align-self:center;flex:0 0 auto;align-items:center;justify-content:center;gap:7px;min-height:35px;margin:0 0 0 auto;padding:0 12px;border:1px solid #34465a;border-radius:3px;background:linear-gradient(145deg,#52677f,#34465a);color:#f2eadb;box-shadow:2px 2px 0 #a99b83,0 3px 8px #34465a24;font:700 11px Georgia,"Noto Serif SC",serif;letter-spacing:.08em;touch-action:manipulation}
 .inventory-recycle-entry:before{content:"↻";font:700 14px Arial,sans-serif;line-height:1}
-.inventory-recycle-entry.active{border-color:#98634a;background:linear-gradient(145deg,#b87858,#985d45);color:#fff5e8;box-shadow:inset 0 1px 0 #ffffff35,0 2px 5px #5e49301c}
-.inventory-recycle-entry:active{transform:translateY(1px);box-shadow:1px 1px 0 #c7ad91}
+.inventory-recycle-entry.active{border-color:#26384c;background:linear-gradient(145deg,#40566f,#293d54);color:#f2eadb;box-shadow:inset 0 1px 0 #ffffff35,0 2px 5px #34465a30}
+.inventory-recycle-entry:active{transform:translateY(1px);box-shadow:1px 1px 0 #a99b83}
 .inventory-view.is-recycling .inventory-items{background:#fffaf2;border-color:#e7d9c7;box-shadow:none}
 .inventory-view.is-recycling .inventory-items>.inventory-item-entry>.choice{background:linear-gradient(145deg,#f4eadb,#e5d6c1)!important;border-color:transparent!important;color:#514333!important;box-shadow:2px 3px 0 #b9a487,4px 6px 12px #5e493019!important}
 .inventory-view.is-recycling .inventory-items>.inventory-item-entry>.choice:before{border-color:#b9a48680}
-.inventory-view.is-recycling .inventory-recycle-button{min-height:32px;border:1px solid #c6a98b;border-radius:3px;background:linear-gradient(145deg,#b87858,#985d45);color:#fff5e8;box-shadow:2px 2px 0 #c4a187,0 3px 7px #5e493012;font-size:10px;letter-spacing:.08em}
-.inventory-view.is-recycling .inventory-recycle-button:active{background:#87523e}
+.inventory-view.is-recycling .inventory-recycle-button{min-height:32px;border:1px solid #34465a;border-radius:3px;background:linear-gradient(145deg,#52677f,#34465a);color:#f2eadb;box-shadow:2px 2px 0 #a99b83,0 3px 7px #34465a24;font-size:10px;letter-spacing:.08em}
+.inventory-view.is-recycling .inventory-recycle-button:active{background:#293d54}
 @media(max-width:430px){.inventory-navigation{gap:5px}.inventory-recycle-entry{min-height:33px;padding:0 9px;font-size:10px}.inventory-navigation .inventory-category{min-height:34px;font-size:10px}}
 @media(max-width:380px){.inventory-navigation{gap:4px}.inventory-recycle-entry{min-height:31px;padding:0 7px;font-size:9px}.inventory-navigation .inventory-category{min-height:32px;font-size:9px;letter-spacing:0}}
