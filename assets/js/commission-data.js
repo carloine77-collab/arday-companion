@@ -13,6 +13,13 @@ window.ArdayCommissionData = {
     friend:'友谊', love:'爱意',
     agility:'敏捷', strength:'力量', intelligence:'智力', perception:'感知', willpower:'意志'
   },
+  specialTasks: [
+    {id:'field-report',title:'街区资料核对',detail:'有人委托整理一份街区资料。阅读资料并通过网络补齐信息。',activities:['read','browseWeb'],target:2,distinctActivities:true,rewardPoints:20},
+    {id:'neighborhood-supply',title:'邻里物资协助',detail:'附近有人需要帮忙整理生活物资。完成一次烹饪和一次洗衣安排。',activities:['cook','laundry'],target:2,distinctActivities:true,rewardPoints:20},
+    {id:'signal-analysis',title:'异常信号分析',detail:'一段异常信号需要进一步整理。完成编程与资料写作。',activities:['program','write'],target:2,distinctActivities:true,rewardPoints:20},
+    {id:'local-contact',title:'街区联络记录',detail:'协助记录街区联络情况。与人交谈，并完成一次外出活动。',activities:['chat','walk'],target:2,distinctActivities:true,rewardPoints:20},
+    {id:'equipment-check',title:'设备状态检查',detail:'检查训练设备与个人终端，完成一次锻炼和一次电脑活动。',activities:['exercise','computerPlay'],target:2,distinctActivities:true,rewardPoints:20}
+  ],
   modules: [
     {id:'survival',label:'生存',mark:'◌',icon:'⌂',tasks:[
       {id:'survival-routine',title:'日常维护',detail:'完成两种不同的日常生活活动。',activities:['eat','food','rest','sleep','wash','cook'],target:2,distinctActivities:true},
