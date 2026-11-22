@@ -1022,7 +1022,7 @@ function finishImmediateInteraction(at=Date.now()){
  s.activeInteraction=null;
  const activity=normalizeActivity(interaction.activity),meta=activityMeta[activity];
  if(activity==='guildTraining')grantGuildTrainingAttribute(at);
- if(activity==='walk')commissionSystem.discoverSpecial(at);
+ if(activity==='walk')discoverSpecialCommission(at);
  if(meta){
   const effects={...(meta.effect||{})};
   if(Object.prototype.hasOwnProperty.call(energyEffects,activity))effects.energy=Number(energyEffects[activity])||0;
@@ -1177,7 +1177,7 @@ function processActivityAt(value){
  }
  if(sessionStart&&!s.activeInteraction){
   if(activity==='guildTraining')grantGuildTrainingAttribute(d.getTime());
-  if(activity==='walk')commissionSystem.discoverSpecial(d.getTime());
+  if(activity==='walk')discoverSpecialCommission(d.getTime());
   if(ev?.kind==='autonomous'){
    const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。'};
    if(notes[activity])addEvent('阿尔的日常记录',notes[activity],'autonomous');
@@ -1574,7 +1574,7 @@ function grantGuildTrainingAttribute(at=Date.now()){
  if(!eligible.length){save();return {ok:false,reason:'战斗属性已达到上限'};}
  const key=eligible[Math.floor(Math.random()*eligible.length)];s.attributes[key]=clamp(s.attributes[key])+1;s.combat=Math.round(keys.reduce((sum,name)=>sum+(Number(s.attributes[name])||0),0)/keys.length);
  remember('guild-training','完成公会训练：'+({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'}[key])+' +1',1);
- say('训练结束了。今天的状态还不错，'+({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'}[key])+'有了些进步。');save();render();return {ok:true,key};
+ say('训练结束了。今天的状态还不错，'+({agility:'敏捷',strength:'力量',intelligence:'智力',perception:'感知',willpower:'意志'}[key])+'有了些进步。');save();return {ok:true,key};
 }
 function guildWeekKey(date=new Date()){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function createGuildMaterialStock(guildId,week){
@@ -1673,6 +1673,11 @@ if(!window.ArdayExchangeData)console.error('[Arday] exchange-data.js 未加载�
 const {itemCatalog:DUNGEON_ITEM_CATALOG,typeLabels:DUNGEON_ITEM_TYPE_LABELS,exchangePrices:DUNGEON_EXCHANGE_PRICES}=exchangeData;
 function addDungeonItem(id){const data=DUNGEON_ITEM_CATALOG[id];if(!data)return null;const item=addInventoryItem(data.name,'dungeon-item');item.itemId=id;item.icon=data.icon;item.originalPrice=Number(window.ArdayExchangeData?.exchangePrices?.[id])||0;return item}
 const commissionSystem=window.ArdayCommissionSystem.create({state:s,keyAt,addDungeonItem,grantPoints,save});
+function discoverSpecialCommission(at=Date.now()){
+ const task=commissionSystem.discoverSpecial(at);if(!task)return null;
+ addEvent('发现特殊委托',task.title+'：'+task.detail,'long');
+ say('刚才外出时发现了一份特别委托。你看看，似乎挺有意思。');save();return task;
+}
 const combatCommissionHeader=document.querySelector('.combat-group-title');
 if(combatCommissionHeader&&!combatCommissionHeader.dataset.commissionBound){
  combatCommissionHeader.dataset.commissionBound='1';
@@ -1837,7 +1842,7 @@ function showGoals(tab='personal'){
   ensurePersonalGoal();
   const active=['commission','special','personal','shared'].includes(tab)?tab:'personal';
   const nav=['commission','special'].includes(active)?'<nav class="commission-tabs goal-tabs"><button data-goal-tab="commission" class="'+(active==='commission'?'active':'')+'">日常委托</button><button data-goal-tab="special" class="'+(active==='special'?'active':'')+'">特殊委托</button></nav>':'<nav class="commission-tabs goal-tabs"><button data-goal-tab="personal" class="'+(active==='personal'?'active':'')+'">个人目标 <i>'+s.personalGoals.length+'/2</i></button><button data-goal-tab="shared" class="'+(active==='shared'?'active':'')+'">共同目标 <i>'+s.sharedGoals.length+'/2</i></button></nav>';
-  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent=active==='commission'?'委托':'目标';$('choices').className='choices commission-view';
+  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent=['commission','special'].includes(active)?'委托':'目标';$('choices').className='choices commission-view';
   let content='';
   if(active==='commission'){
    const board=commissionSystem.getBoard(),claimed=board.tasks.filter(task=>task.claimed).length;
