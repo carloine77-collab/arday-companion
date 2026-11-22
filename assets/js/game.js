@@ -3175,9 +3175,8 @@ function persistFurniture(item){
     furnitureDrag.lastUpdate=now;furnitureDrag.lastX=e.clientX;furnitureDrag.lastY=e.clientY;
     if(Math.hypot(e.clientX-furnitureDrag.startX,e.clientY-furnitureDrag.startY)>8)furnitureDrag.moved=true;
     const rect=furnitureDrag.rect;pointerNdc.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);raycaster.setFromCamera(pointerNdc,camera);
-    if(raycaster.ray.intersectPlane(furnitureDrag.plane,dragPoint)){
-     const g=furnitureDrag.group,item=furnitureDrag.item;
-     if(item.wallAxis){
+    const g=furnitureDrag.group,item=furnitureDrag.item;
+    if(item.wallAxis){
       const roomGroup=item.room==='bedroom'?bedroom:item.room==='kitchen'?kitchen:item.room==='bathroom'?bathroom:living;
       const candidates=[
        {side:'back',plane:new T.Plane(new T.Vector3(0,0,1),3.89),visible:()=>roomGroup.userData.backWall?.visible!==false},
@@ -3189,17 +3188,22 @@ function persistFurniture(item){
       for(const candidate of candidates){
        if(!candidate.visible())continue;
        const point=raycaster.ray.intersectPlane(candidate.plane,new T.Vector3());if(!point)continue;
-       const offset=(candidate.side==='back'||candidate.side==='front'?point.x:point.z)+furnitureDrag.wallOffsetDelta;
-       if(Math.abs(offset)>(candidate.side==='back'||candidate.side==='front'?4.5:3.25))continue;
+       const alongX=candidate.side==='back'||candidate.side==='front';
+       const offset=(alongX?point.x:point.z)+furnitureDrag.wallOffsetDelta;
+       if(Math.abs(offset)>(alongX?4.5:3.25))continue;
        if(point.y<.1||point.y>4.7)continue;
-       const distance=point.distanceTo(raycaster.ray.origin);if(!best||distance<best.distance)best={side:candidate.side,point,offset,distance};
+       // Filter blocked candidates before distance ranking, so a blocked near wall
+       // cannot prevent the pointer from reaching another available wall.
+       if(!canPlaceOnWall(item,candidate.side,offset))continue;
+       const distance=point.distanceTo(raycaster.ray.origin);
+       if(!best||distance<best.distance)best={side:candidate.side,point,offset,distance};
       }
-      if(best&&canPlaceOnWall(item,best.side,best.offset)){
+      if(best){
        wallTransform(g,best.side,best.offset,Math.max(.05,Math.min(4.5,best.point.y+furnitureDrag.wallYOffset)));
-
        item.wallSide=best.side;item.wallAxis=best.side==='back'||best.side==='front'?'x':'z';
+       if(item.pendingPlacement)item.pendingValid=true;
       }
-     }else{
+     }else if(raycaster.ray.intersectPlane(furnitureDrag.plane,dragPoint)){
       const rawX=dragPoint.x+furnitureDrag.offsetX,rawZ=dragPoint.z+furnitureDrag.offsetZ;
       if(item){
        const previousSupport=item.supportId,previousAllowSupportOverlap=item.allowSupportOverlap,previousAngle=g.rotation.y;
@@ -3221,7 +3225,7 @@ function persistFurniture(item){
        }else{item.supportId=previousSupport;item.allowSupportOverlap=previousAllowSupportOverlap;g.rotation.y=previousAngle;if(item.pendingPlacement)item.pendingValid=false;}
       }
      }
-    }e.preventDefault();return;
+    e.preventDefault();return;
    }
    if(!pointers.has(e.pointerId))return;
    const old=pointers.get(e.pointerId),dx=e.clientX-old.x,dy=e.clientY-old.y,elapsed=Math.max(8,e.timeStamp-lastPointerTime||16);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -3252,7 +3256,7 @@ function persistFurniture(item){
   function endPointer(e){
    if(furnitureDrag&&furnitureDrag.pointerId===e.pointerId){
     const dragState=furnitureDrag,g=dragState.group,item=furnitureRegistry.find(x=>x.group===g);furnitureDrag=null;
-    if(item){if(item.pendingPlacement){item.pendingValid=item.wallAxis?canPlaceOnWall(item,item.wallSide,wallOffset(item)):canPlaceFurniture(item,item.group.position.x,item.group.position.z,item.group.rotation.y);pendingPlacementTools.style.display='flex';toast(item.pendingValid?'位置可用，请确认摆放':'位置无效，请继续移动家具');}else{persistFurniture(item);persistSupportedChildren(item);if(item.isDoor&&!dragState.moved)openDoorWheel(item);else toast(item.name+'位置已保存');}}
+    if(item){if(item.pendingPlacement){item.pendingValid=item.wallAxis?!!item.pendingValid&&canPlaceOnWall(item,item.wallSide,wallOffset(item)):canPlaceFurniture(item,item.group.position.x,item.group.position.z,item.group.rotation.y);pendingPlacementTools.style.display='flex';toast(item.pendingValid?'位置可用，请确认摆放':'位置无效，请继续移动家具');}else{persistFurniture(item);persistSupportedChildren(item);if(item.isDoor&&!dragState.moved)openDoorWheel(item);else toast(item.name+'位置已保存');}}
     pointers.delete(e.pointerId);drag=null;pinchCenter=null;inertiaTheta=0;inertiaPhi=0;
     return;
    }
@@ -3431,7 +3435,7 @@ function persistFurniture(item){
   Object.assign(pendingPlacementTools.style,{position:'static',transform:'none',zIndex:'auto',display:'none',gap:'8px',padding:'0',borderRadius:'0',background:'transparent',boxShadow:'none',alignItems:'center',marginLeft:'auto'});
   [confirmPlacementButton,cancelPlacementButton].forEach(button=>Object.assign(button.style,{border:'0',borderRadius:'10px',padding:'8px 12px',fontFamily:'inherit',fontSize:'12px',fontWeight:'600',background:button===confirmPlacementButton?'#6d806b':'#e4d8c7',color:button===confirmPlacementButton?'#fff':'#554839',cursor:'pointer',touchAction:'manipulation'}));
   pendingPlacementTools.append(confirmPlacementButton,cancelPlacementButton);decorateTools.append(pendingPlacementTools);
-  confirmPlacementButton.onclick=()=>{const item=selectedFurniture;if(!item?.pendingPlacement)return;const valid=item.wallAxis?canPlaceOnWall(item,item.wallSide,wallOffset(item)):canPlaceFurniture(item,item.group.position.x,item.group.position.z,item.group.rotation.y);if(!valid){toast('这个位置仍与家具或房间边界冲突');return}item.pendingPlacement=false;item.pendingValid=true;s.inventory=s.inventory.filter(entry=>entry.id!==item.id);persistFurniture(item);pendingPlacementTools.style.display='none';save();updateFurnitureHotspots();toast(item.name+'已摆放')};
+  confirmPlacementButton.onclick=()=>{const item=selectedFurniture;if(!item?.pendingPlacement)return;const valid=item.wallAxis?!!item.pendingValid&&canPlaceOnWall(item,item.wallSide,wallOffset(item)):canPlaceFurniture(item,item.group.position.x,item.group.position.z,item.group.rotation.y);if(!valid){toast('这个位置仍与家具或房间边界冲突');return}item.pendingPlacement=false;item.pendingValid=true;s.inventory=s.inventory.filter(entry=>entry.id!==item.id);persistFurniture(item);pendingPlacementTools.style.display='none';save();updateFurnitureHotspots();toast(item.name+'已摆放')};
   cancelPlacementButton.onclick=()=>{const item=selectedFurniture;if(!item?.pendingPlacement)return;s.placed=s.placed.filter(entry=>entry.id!==item.id);disposeFurnitureResources(item.group);item.group.parent?.remove(item.group);item.button?.remove();furnitureRegistry.splice(furnitureRegistry.indexOf(item),1);selectedFurniture=null;pendingPlacementTools.style.display='none';save();render();toast('已取消摆放，物品已放回背包')};
   rotateFurnitureButton.textContent='↻';
   rotateFurnitureButton.setAttribute('aria-label','旋转家具 15 度');
