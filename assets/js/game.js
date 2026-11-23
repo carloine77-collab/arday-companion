@@ -2447,7 +2447,7 @@ function initArday3D(){
   hallInkOutlineMaterial.uniforms.outlineColor.value.setHex(0x303640);
   function applyInkOutlines(root){
    root.traverse(object=>{
-    if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal)return;
+    if(!object.isMesh||object.userData.inkOutline||!object.geometry||!object.geometry.attributes?.normal||(object.userData.characterSurface&&!object.userData.characterOutline))return;
     if(!object.geometry.boundingSphere)object.geometry.computeBoundingSphere();
     if(isTouchDevice&&object.userData.hallIllustration)return;if((object.geometry.boundingSphere?.radius||0)<.23)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
