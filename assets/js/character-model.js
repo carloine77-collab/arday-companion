@@ -30,7 +30,7 @@
           const a=j/radial*Math.PI*2,ca=Math.cos(a),sa=Math.sin(a);
           positions.push(p.x+n.x*ca*r[0]+b.x*sa*r[1],p.y+n.y*ca*r[0]+b.y*sa*r[1],p.z+n.z*ca*r[0]+b.z*sa*r[1]);
           uvs.push(j/radial,t);
-          if(i<segments){const v=i*radial+j,vn=i*radial+(j+1)%radial,nn=(i+1)*radial+j,nnn=(i+1)*radial+(j+1)%radial;indices.push(v,nn,vn,vn,nn,nnn);}
+          if(i<segments){const v=i*radial+j,vn=i*radial+(j+1)%radial,nn=(i+1)*radial+j,nnn=(i+1)*radial+(j+1)%radial;indices.push(v,vn,nn,vn,nnn,nn);}
         }
       }
       const geo=new T.BufferGeometry();
@@ -77,7 +77,8 @@
       eyeGroups.push(eye);
     }
     // Layered hair cap and tapered locks replace the old spherical helmet silhouette.
-    lathe(head,[[0,.31],[.09,.32],[.18,.36],[.235,.43],[.25,.53],[.22,.61],[.15,.66],[0,.67]],hair,36,.94).position.z=-.035;
+    const hairCap=lathe(head,[[0,.31],[.09,.32],[.18,.36],[.235,.43],[.25,.53],[.22,.61],[.15,.66],[0,.67]],hair,36,.94);
+    hairCap.position.z=-.035;hairCap.userData.characterOutline=true;
     lathe(head,[[0,-.06],[.12,-.055],[.205,-.02],[.238,.06],[.22,.19],[.14,.27],[0,.29]],hair,32,.52).position.z=-.205;
     for(const side of [-1,1]){
       const lock=tube(head,[[side*.19,.39,.06],[side*.235,.22,.09],[side*.23,.015,.055],[side*.205,-.17,.075]],.043,hair,24,10);
