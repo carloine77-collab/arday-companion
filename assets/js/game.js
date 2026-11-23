@@ -1278,6 +1278,14 @@ function normalizeActivity(a){return ({reading:'read',listen:'music'})[a]||a||'i
 // fixed routines and player proposals already exist as calendar events and take precedence.
 function updateStatusBuffs(at=Date.now()){
  const hourMs=3600000,period=12*hourMs;s.statusBuffs=s.statusBuffs||{};
+ const fatalState=s.statusBuffs.fatal;
+ if(fatalState?.active){
+  const fatalSince=Number(fatalState.since)||at;
+  if(at-fatalSince>=3*24*hourMs){
+   s.statusBuffs.fatal={...fatalState,active:false,since:0,nextEffectAt:0,clearedAt:at,clearReason:'auto-expired'};
+   addEvent('濒死状态自然解除','Arday的濒死状态持续满三天，已自动解除。请及时恢复精力、食欲、卫生与娱乐指标。','system-action');
+  }
+ }
  const rules=[
   {id:'fatal',active:!!s.statusBuffs.fatal?.active,apply:n=>{['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)-3*n)})}},
   {id:'depressed',active:Number(s.hunger)<40,apply:n=>{s.friend=Math.max(0,(Number(s.friend)||0)-n)}},
@@ -1943,7 +1951,18 @@ function useConsumableItem(entity,index){if(entity?.itemId!=='first-aid-kit'){to
 function useDungeonItem(entity,index){
  const data=DUNGEON_ITEM_CATALOG[entity.itemId];if(!data){toast('道具数据不存在');return}
  const applyEffects=effects=>{const today=keyAt(Date.now());if(s.dungeonItemStatGainDay!==today){s.dungeonItemStatGainDay=today;s.dungeonItemStatGains={}}s.dungeonItemStatGains=s.dungeonItemStatGains||{};Object.entries(effects||{}).forEach(([key,value])=>{const amount=Number(value)||0;if(key in s.attributes){if(amount>0){const used=Number(s.dungeonItemStatGains[key])||0,allowed=Math.min(amount,Math.max(0,2-used));s.attributes[key]=clamp((Number(s.attributes[key])||0)+allowed);s.dungeonItemStatGains[key]=used+allowed}else s.attributes[key]=clamp((Number(s.attributes[key])||0)+amount)}else if(key in s)s[key]=clamp((Number(s[key])||0)+amount)});s.combat=Math.round(Object.values(s.attributes).reduce((n,v)=>n+Number(v||0),0)/5)};
- if(data.lifeSave){const current=Math.max(0,Number(s.dungeonProtection)||0);if(current>=2){toast('保命储备已达上限');return}s.dungeonProtection=Math.min(2,current+Math.max(1,Number(data.protectionCharges)||1));applyEffects(data.effects);s.inventory.splice(index,1);toast(data.name+'已生效')}
+ if(data.lifeSave){
+  const current=Math.max(0,Number(s.dungeonProtection)||0),isFatal=!!s.statusBuffs?.fatal?.active;
+  if(current>=2&&!isFatal){toast('保命储备已达上限');return}
+  if(isFatal){
+   const state=s.statusBuffs.fatal;
+   s.statusBuffs.fatal={...state,active:false,since:0,nextEffectAt:0,clearedAt:Date.now(),clearReason:'life-saving-item'};
+   ['energy','hunger','clean','fun'].forEach(key=>{s[key]=clamp((Number(s[key])||0)+35)});
+   addEvent('保命道具已用于急救',data.name+'解除濒死状态，四项生存指标各恢复 35 点。','system-action');
+  }
+  if(current<2)s.dungeonProtection=Math.min(2,current+Math.max(1,Number(data.protectionCharges)||1));
+  applyEffects(data.effects);s.inventory.splice(index,1);toast(isFatal?data.name+'已解除濒死状态':data.name+'已生效')
+ }
  else if(data.type==='probability'){const current=Number(s.nextDungeonChanceModifier)||0,addition=Math.max(0,Number(data.chance)||0)/100;s.nextDungeonChanceModifier=Math.min(.08,current+Math.min(.04,addition));s.inventory.splice(index,1);toast('下次副本概率加成已调整')}
  else if(data.type==='tactical'){s.nextDungeonDifficultyReduction=Math.min(6,(Number(s.nextDungeonDifficultyReduction)||0)+Math.min(4,Number(data.difficultyReduction)||0));s.nextDungeonMaliceReduction=Math.min(10,(Number(s.nextDungeonMaliceReduction)||0)+Math.min(6,Number(data.maliceReduction)||0));s.inventory.splice(index,1);toast(data.name+'已部署')}
  else if(data.type==='buff'){applyEffects(data.effects);s.inventory.splice(index,1);toast(data.name+'已使用')}
