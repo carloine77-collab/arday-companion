@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v328";
+const CACHE_NAME = "arday-shell-v329";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -35,11 +35,11 @@ const APP_SHELL = [
   "./assets/js/chat-system.js?v=20261119a",
   "./assets/js/letter-copy.js?v=20261123-player-meal-letters1",
   "./assets/js/character-tap-lines.js?v=20261119a",
-  "./assets/js/character-model.js?v=20261123-chibi7",
+  "./assets/js/character-model.js?v=20261123-chibi8",
   "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1",
-  "./assets/js/game.js?v=20261123-chibi7",
+  "./assets/js/game.js?v=20261123-chibi8",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
