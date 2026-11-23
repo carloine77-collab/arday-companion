@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v311";
+const CACHE_NAME = "arday-shell-v312";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -21,14 +21,14 @@ const APP_SHELL = [
   "./assets/js/game-data/career-data.js?v=20261123-infinite-org-team1",
   "./assets/js/schedule-engine.js?v=20261123-org-schedule1",
   "./assets/js/food-models.js?v=20261122-food-models2",
-  "./assets/js/furniture-models-bathroom.js?v=20261123-furniture-modules1",
-  "./assets/js/furniture-models-bedroom.js?v=20261123-furniture-modules1",
-  "./assets/js/furniture-models-kitchen.js?v=20261123-furniture-modules1",
-  "./assets/js/furniture-models-lighting.js?v=20261123-furniture-modules1",
-  "./assets/js/furniture-models-living.js?v=20261123-furniture-modules1",
-  "./assets/js/furniture-models-office.js?v=20261123-furniture-modules1",
+  "./assets/js/furniture-models-bathroom.js?v=20261123-cabinet-top-surfaces2",
+  "./assets/js/furniture-models-bedroom.js?v=20261123-cabinet-top-surfaces2",
+  "./assets/js/furniture-models-kitchen.js?v=20261123-cabinet-top-surfaces2",
+  "./assets/js/furniture-models-lighting.js?v=20261123-cabinet-top-surfaces2",
+  "./assets/js/furniture-models-living.js?v=20261123-cabinet-top-surfaces2",
+  "./assets/js/furniture-models-office.js?v=20261123-cabinet-top-surfaces2",
   "./assets/js/furniture-models-tables.js?v=20261123-table-builder-fix1",
-  "./assets/js/furniture-models.js?v=20261123-furniture-modules1",
+  "./assets/js/furniture-models.js?v=20261123-cabinet-top-surfaces2",
   "./assets/js/furniture-placement.js?v=20261122-full-room-scan1",
   "./assets/js/economy.js?v=20261123-schedule-goals1",
   "./assets/js/chat-copy.js?v=20261119a",
