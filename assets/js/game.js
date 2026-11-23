@@ -274,6 +274,7 @@ function plusDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dayLabel(d){return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'})}
 function eventAt(key,h){return (s.calendar?.days?.[key]||[]).find(e=>h>=e.start&&h<e.end)}
 function has(item){const matches=name=>name===item||name.startsWith(item+'·');return s.inventory.some(x=>matches(x.name))||(s.placed||[]).some(x=>typeof x.name==='string'&&matches(x.name))}
+function hasPlaced(item){const matches=name=>name===item||name.startsWith(item+'·');return (s.placed||[]).some(x=>typeof x.name==='string'&&matches(x.name))}
 function eventCategory(e){if(e?.category)return e.category;const type=e?.type||'daily';if(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict'].includes(type))return 'letter';if(type==='player-action')return 'player';return 'system'}
 function addEvent(title,detail,type='daily',choices=[]){const letterType=['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict'].includes(type),systemType=['daily','autonomous','long','system-action'].includes(type);if(!letterType&&!systemType)return null;const e={id:Date.now()+Math.random(),title,detail,type,category:letterType?'letter':'system',choices,created:Date.now(),status:'open'};s.events.unshift(e);s.events=s.events.slice(0,30);return e}
 function completeEvent(e,choice){e.status='resolved';e.choice=choice;remember('event',e.title+'：'+choice,2)}
@@ -1485,7 +1486,7 @@ function busyBubble(){say('等Arday回家后和他商量吧。')}
 function perform(action,force=false,options={}){if(options.source==='furniture'||options.source==='window')return beginImmediateInteraction(action,options);return false}
 // The old sceneSwitch control was removed from the interface; kitchen access is contextual now.
 
-const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,remember,addEvent,say});
+const {moneyRecord,ensurePersonalGoal,updatePersonalGoal,reviewPersonalSpending}=window.ArdayEconomy.create({state:s,has,hasPlaced,remember,addEvent,say});
 const originalPurchase=purchase;
 purchase=function(id,label,cost){
  const before=s.money;originalPurchase(id,label,cost);
