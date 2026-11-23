@@ -58,10 +58,10 @@
         [1.09,.205,.145],[1.14,.185,.13],[1.18,.125,.09],[1.205,.075,.065]
       ];
       const headProfile=[
-        [1.26,.018,.018],[1.285,.075,.065],[1.32,.14,.12],
-        [1.38,.22,.185],[1.45,.29,.24],[1.53,.33,.265],
-        [1.61,.31,.25],[1.68,.24,.20],[1.73,.14,.12],
-        [1.765,.055,.05],[1.78,.012,.012]
+        [1.265,.105,.09],[1.29,.155,.132],[1.33,.215,.18],
+        [1.38,.265,.22],[1.445,.305,.25],[1.52,.325,.265],
+        [1.595,.315,.258],[1.665,.275,.23],[1.72,.205,.18],
+        [1.76,.12,.105],[1.785,.045,.04],[1.792,.008,.008]
       ];
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
       const headSdf=(x,y,z)=>loftSdf(headProfile,x,y,z);
@@ -166,15 +166,23 @@
       }
       const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.026,-.112,.137),new T.Vector3(0,-.122,.145),new T.Vector3(.026,-.112,.137)]);
       mesh(head,new T.TubeGeometry(mouthCurve,10,.0032,6,false),blush,"mouth");
-      const hairCap=lathe(head,[[0,-.025],[.16,-.025],[.25,-.005],[.30,.035],[.325,.09],[.30,.145],[.255,.20],[.18,.25],[.09,.285],[0,.30]],hair,40,.94,"hair-cap");hairCap.position.z=-.012;hairCap.userData.characterOutline=true;
-      const backHair=lathe(head,[[0,-.17],[.12,-.16],[.21,-.11],[.25,-.02],[.24,.15],[.16,.25],[0,.29]],hair,32,.62,"back-hair");backHair.position.z=-.17;backHair.userData.characterOutline=true;
+      // Hair is built as two coherent masses with restrained side pieces.
+      // Avoid intersecting tube strands: they caused the previous fragmented, tangled look.
+      const hairCap=lathe(head,[[0,-.012],[.13,-.012],[.235,.002],[.295,.035],[.325,.085],[.322,.135],[.29,.185],[.235,.235],[.16,.275],[.075,.298],[0,.305]],hair,48,.96,"hair-cap");
+      hairCap.position.z=-.012;hairCap.userData.characterOutline=true;
+      const backHair=lathe(head,[[0,-.205],[.10,-.20],[.19,-.17],[.245,-.11],[.265,-.015],[.255,.10],[.205,.205],[.12,.26],[0,.275]],hair,40,.76,"back-hair");
+      backHair.position.z=-.155;backHair.userData.characterOutline=true;
       for(const side of [-1,1]){
-        const curve=new T.CatmullRomCurve3([new T.Vector3(side*.23,.29,.065),new T.Vector3(side*.27,.12,.08),new T.Vector3(side*.245,-.04,.075),new T.Vector3(side*.21,-.18,.055)]);
-        const lock=mesh(head,new T.TubeGeometry(curve,24,.038,10,false),hair,"side-lock");lock.userData.characterOutline=true;
+        const sideHair=ellipsoid(head,side*.267,-.065,-.035,.068,.155,.075,hair,"side-hair");
+        sideHair.rotation.z=side*-.12;sideHair.userData.characterOutline=true;
       }
-      const fringe1=new T.CatmullRomCurve3([new T.Vector3(-.25,.10,.17),new T.Vector3(-.15,.22,.22),new T.Vector3(-.045,.20,.255),new T.Vector3(.015,.11,.265)]);
-      const fringe2=new T.CatmullRomCurve3([new T.Vector3(.005,.20,.255),new T.Vector3(.12,.23,.23),new T.Vector3(.23,.12,.16),new T.Vector3(.235,.06,.12)]);
-      [fringe1,fringe2].forEach((c,i)=>{const h=mesh(head,new T.TubeGeometry(c,22,.036,10,false),i?hair:hairLight,"fringe");h.userData.characterOutline=true});
+      // Three broad, shallow fringe locks sit on the forehead as one orderly fringe.
+      const fringeLeft=ellipsoid(head,-.105,.174,.205,.112,.075,.043,hairLight,"fringe-left");
+      fringeLeft.rotation.z=-.24;
+      const fringeCenter=ellipsoid(head,.005,.145,.222,.105,.083,.045,hair,"fringe-center");
+      fringeCenter.rotation.z=.04;
+      const fringeRight=ellipsoid(head,.112,.174,.202,.105,.072,.042,hair,"fringe-right");
+      fringeRight.rotation.z=.28;
       for(const l of legs){
         const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
         const upper=lathe(foot,[[0,-.09],[.055,-.085],[.09,-.05],[.105,.005],[.095,.06],[.065,.105],[.025,.115],[0,.115]],shoe,28,.78,"shoe-upper");upper.rotation.x=Math.PI/2;upper.scale.z=.78;upper.position.z=.025;upper.userData.characterOutline=true;
