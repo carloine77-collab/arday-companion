@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arday · 人物造型方案对比</title>
+<style>
+:root{color-scheme:light;--ink:#4e473f;--muted:#8b8175;--paper:#f5f0e7;--card:#fffdf8;--line:#e7dfd2;--accent:#a8b99a}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{max-width:1240px;margin:auto;padding:28px 24px 14px}h1{font-size:24px;font-weight:650;margin:0 0 5px}header p{margin:0;color:var(--muted)}
+main{max-width:1240px;margin:auto;padding:12px 24px 40px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:4px 0 16px}.views,.select{display:flex;gap:7px;flex-wrap:wrap}
+button{border:1px solid var(--line);background:#fffdf8;color:var(--ink);padding:8px 14px;border-radius:999px;font:inherit;cursor:pointer}
+button.active{background:#e5eadf;border-color:#b8c7aa}button:hover{border-color:#a9b79c}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;min-width:0;box-shadow:0 5px 18px #65543b0a}
+.canvas-wrap{height:430px;position:relative;background:linear-gradient(180deg,#f5f2e9,#eeeadf);cursor:grab}.canvas-wrap:active{cursor:grabbing}.canvas-wrap canvas{display:block;width:100%;height:100%}
+.hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#8e877b;font-size:12px;pointer-events:none}
+.info{padding:15px 17px 18px}.topline{display:flex;align-items:center;justify-content:space-between;gap:8px}.topline h2{font-size:18px;margin:0;font-weight:650}.tag{font-size:11px;color:#68775f;background:#edf1e8;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.info p{color:var(--muted);font-size:13px;margin:8px 0 12px;min-height:40px}.traits{display:flex;gap:6px;flex-wrap:wrap}.traits span{font-size:12px;border:1px solid var(--line);border-radius:7px;padding:3px 7px;color:#71685d}
+.card footer{padding:0 17px 16px}.choose{width:100%;border-radius:10px;background:#f1eee6}
+.note{margin:18px 2px 0;color:#857b6e;font-size:13px}
+@media(max-width:850px){.cards{grid-template-columns:1fr}.canvas-wrap{height:390px}.info p{min-height:0}header{padding-top:20px}}
+</style>
+</head>
+<body>
+<header><h1>Arday · 人物造型方案对比</h1><p>三个独立建模方向。拖动模型旋转，或切换正面、侧面和背面视角。当前页面不修改游戏人物。</p></header>
+<main>
+<div class="toolbar"><div class="views" id="views"><button data-view="front" class="active">正面</button><button data-view="side">侧面</button><button data-view="back">背面</button></div><div class="select"><button id="reset">重置视角</button></div></div>
+<section class="cards">
+<article class="card" data-model="a"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>A · 圆脸短发</h2><span class="tag">圆润 / 经典</span></div><p>短椭圆脸型，宽下颌和饱满脸颊；整齐的短波波头，刘海与侧发连成完整轮廓。</p><div class="traits"><span>短脖子可见</span><span>低重心</span><span>圆下巴</span></div></div><footer><button class="choose">选择方案 A</button></footer></article>
+<article class="card" data-model="b"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>B · 宽额蓬松发</h2><span class="tag">饱满 / 活泼</span></div><p>头部更宽、更矮，脸颊轮廓接近圆形；顶部蓬松但不拔高，侧面保持完整发量。</p><div class="traits"><span>宽圆脸</span><span>短躯干</span><span>蓬松发顶</span></div></div><footer><button class="choose">选择方案 B</button></footer></article>
+<article class="card" data-model="c"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>C · 柔和中长发</h2><span class="tag">柔和 / 稍成熟</span></div><p>脸型仍然圆钝，但头身比例略收敛；中长发沿头部两侧自然垂落，不使用交叉发束。</p><div class="traits"><span>圆钝下颌</span><span>中长侧发</span><span>清晰颈部</span></div></div><footer><button class="choose">选择方案 C</button></footer></article>
+</section>
+<p class="note" id="selection">尚未选择方案。选定后再把对应结构迁移到游戏模型。</p>
+</main>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const TAU=Math.PI*2;
+const palette=[
+ {skin:0xf2c9a8,blush:0xe9a99a,hair:0x665044,shirt:0x91ad9a,pants:0x6d7888,shoe:0x66594f},
+ {skin:0xf0c5a1,blush:0xe6a296,hair:0x8b6245,shirt:0xd4a56f,pants:0x77816f,shoe:0x66594f},
+ {skin:0xf1c9ad,blush:0xe7a69b,hair:0x493f3b,shirt:0x9da9c3,pants:0x77758c,shoe:0x5e514d}
+];
+function mat(color,roughness=.82){return new THREE.MeshStandardMaterial({color,roughness})}
+function lathe(profile,material,segments=48){return new THREE.Mesh(new THREE.LatheGeometry(profile.map(p=>new THREE.Vector2(p[0],p[1])),segments),material)}
+function ellipsoid(parent,material,pos,scale,segments=32){const m=new THREE.Mesh(new THREE.SphereGeometry(1,segments,24),material);m.position.set(...pos);m.scale.set(...scale);parent.add(m);return m}
+function tube(parent,points,radius,material){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,32,radius,10,false),material);parent.add(mesh);return mesh}
+function makeCharacter(kind){
+ const p=palette[kind],root=new THREE.Group();
+ const skin=mat(p.skin),hair=mat(p.hair),shirt=mat(p.shirt),pants=mat(p.pants),shoe=mat(p.shoe),white=mat(0xfffaf1),iris=mat(0x51443e),blush=new THREE.MeshBasicMaterial({color:p.blush,transparent:true,opacity:.38,depthWrite:false});
+ const dims=[
+  {headX:.405,headY:.48,headZ:.335,headYpos:2.13,bodyH:.67,bodyW:.32,neck:.105,hair:0},
+  {headX:.435,headY:.435,headZ:.35,headYpos:2.13,bodyH:.64,bodyW:.34,neck:.105,hair:1},
+  {headX:.385,headY:.475,headZ:.325,headYpos:2.15,bodyH:.69,bodyW:.32,neck:.10,hair:2}
+ ][kind];
+ // Short legs and broad shoes; proportions intentionally squat.
+ for(const s of [-1,1]){
+  const leg=ellipsoid(root,pants,[s*.135,.43,0],[.105,.28,.12]);
+  ellipsoid(root,shoe,[s*.14,.17,.085],[.135,.105,.205]);
+ }
+ // Single softly lofted torso.
+ const torso=lathe([[0,0],[.19,.02],[.265,.10],[.29,.25],[.275,.48],[.23,.62],[.16,.68],[0,.69]],shirt,56);
+ torso.position.y=.66;root.add(torso);
+ // arms sit slightly forward and end above hips.
+ for(const s of [-1,1]){
+  const arm=lathe([[0,-.23],[.075,-.21],[.09,-.12],[.085,.02],[.09,.16],[.065,.24],[0,.25]],skin,32);
+  arm.position.set(s*.285,1.06,.015);arm.rotation.z=-s*.10;root.add(arm);
+  ellipsoid(root,skin,[s*.30,.82,.03],[.082,.09,.085]);
+ }
+ // Neck is deliberately visible between torso and head.
+ const neck=lathe([[0,0],[dims.neck*.72,0],[dims.neck*.82,.08],[dims.neck*.76,.19],[dims.neck*.58,.23],[0,.23]],skin,40);
+ neck.position.y=1.27;root.add(neck);
+ // Head profile: broad lower face, full cheeks, rounded chin; no pointed jaw.
+ const hx=dims.headX,hy=dims.headY,hz=dims.headZ;
+ const face=lathe([[0,-hy],[hx*.48,-hy*.985],[hx*.78,-hy*.90],[hx*.94,-hy*.69],[hx,-hy*.36],[hx*.99,hy*.05],[hx*.88,hy*.52],[hx*.62,hy*.84],[hx*.30,hy*.98],[0,hy]],skin,64);
+ face.scale.z=hz/hx;face.position.set(0,dims.headYpos,0);root.add(face);
+ // Ears, set back enough to read as attached.
+ for(const s of [-1,1])ellipsoid(root,skin,[s*hx*.96,dims.headYpos-.015,-.005],[.075,.105,.075]);
+ // Face features on forward-facing surface.
+ const eyeY=dims.headYpos+.025,eyeX=hx*.43,eyeZ=hz*.90;
+ for(const s of [-1,1]){
+  ellipsoid(root,blush,[s*hx*.66,dims.headYpos-.115,hz*.88],[.085,.045,.012]);
+  ellipsoid(root,white,[s*eyeX,eyeY,eyeZ],[.052,.073,.026]);
+  ellipsoid(root,iris,[s*eyeX,eyeY-.006,eyeZ+.022],[.026,.045,.014]);
+  ellipsoid(root,mat(0xffffff),[s*eyeX-.009,eyeY+.019,eyeZ+.035],[.009,.014,.006],16);
+  // Eyebrows are short and calm, not sharply angled.
+  tube(root,[[s*eyeX-.052,eyeY+.105,hz*.90],[s*eyeX,eyeY+.119,hz*.93],[s*eyeX+.052,eyeY+.105,hz*.90]],.009,hair);
+ }
+ tube(root,[[0,dims.headYpos-.105,hz*.99],[0,dims.headYpos-.13,hz*1.015],[.012,dims.headYpos-.145,hz*.99]],.012,skin);
+ tube(root,[[-.045,dims.headYpos-.205,hz*.96],[0,dims.headYpos-.222,hz*.98],[.045,dims.headYpos-.205,hz*.96]],.009,iris);
+ // Hair cap is one continuous dome. A simple fringe sits on its front edge.
+ const cap=new THREE.Mesh(new THREE.SphereGeometry(1,64,40,0,TAU,0,Math.PI*.56),hair);
+ cap.scale.set(hx*1.055,hy*.91,hz*1.08);cap.position.set(0,dims.headYpos+hy*.20,-.005);root.add(cap);
+ if(kind===0){
+  // Rounded bob: one back volume and two broad side panels.
+  ellipsoid(root,hair,[0,dims.headYpos-.10,-.19],[hx*1.04,hy*.84,.19]);
+  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.88,dims.headYpos-.20,-.005],[.105,.30,.25]);
+  ellipsoid(root,hair,[0,dims.headYpos+hy*.28,hz*.76],[hx*.90,.115,.105]);
+ }else if(kind===1){
+  ellipsoid(root,hair,[0,dims.headYpos-.13,-.18],[hx*1.04,hy*.78,.18]);
+  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.92,dims.headYpos-.18,-.015],[.095,.24,.22]);
+  // broad swept fringe, no separate intersecting strands
+  const fringe=ellipsoid(root,hair,[-.055,dims.headYpos+hy*.35,hz*.78],[hx*.91,.145,.105]);fringe.rotation.z=-.16;
+ }else{
+  ellipsoid(root,hair,[0,dims.headYpos-.12,-.18],[hx*1.05,hy*.85,.20]);
+  for(const s of [-1,1]){
+   const side=lathe([[0,-.48],[.075,-.46],[.12,-.30],[.13,-.05],[.12,.20],[.08,.34],[0,.36]],hair,40);
+   side.position.set(s*hx*.78,dims.headYpos-.20,.005);side.rotation.z=s*.04;root.add(side);
+  }
+  ellipsoid(root,hair,[.045,dims.headYpos+hy*.30,hz*.76],[hx*.95,.12,.11]).rotation.z=.08;
+ }
+ // Collar gives the neck/body transition a clean readable edge.
+ const collar=lathe([[0,0],[.12,0],[.135,.035],[.12,.06],[0,.06]],shirt,40);collar.position.y=1.30;root.add(collar);
+ root.position.y=0;
+ root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+ return root;
+}
+const entries=[];
+document.querySelectorAll('.card').forEach((card,i)=>{
+ const wrap=card.querySelector('.canvas-wrap'),scene=new THREE.Scene();scene.background=new THREE.Color(0xf1eee5);
+ const camera=new THREE.PerspectiveCamera(32,1,.1,100);camera.position.set(0,2.15,6.8);
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;wrap.prepend(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xffffff,0xb8ad9c,2.0));
+ const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(-3,6,5);key.castShadow=true;scene.add(key);
+ const fill=new THREE.DirectionalLight(0xffe7cf,.75);fill.position.set(4,3,-3);scene.add(fill);
+ const floor=new THREE.Mesh(new THREE.CircleGeometry(3,64),new THREE.MeshStandardMaterial({color:0xe4dfd3,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=.035;floor.receiveShadow=true;scene.add(floor);
+ const character=makeCharacter(i);scene.add(character);
+ const target=new THREE.Vector3(0,1.55,0);camera.lookAt(target);
+ const state={scene,camera,renderer,character,target,rotation:0,drag:false,lastX:0,zoom:6.8,wrap};entries.push(state);
+ const resize=()=>{const w=wrap.clientWidth,h=wrap.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(wrap);resize();
+ let down=false,last=0;
+ renderer.domElement.addEventListener('pointerdown',e=>{down=true;last=e.clientX;renderer.domElement.setPointerCapture(e.pointerId)});
+ renderer.domElement.addEventListener('pointermove',e=>{if(!down)return;state.rotation+=(e.clientX-last)*.009;last=e.clientX;character.rotation.y=state.rotation});
+ renderer.domElement.addEventListener('pointerup',()=>down=false);renderer.domElement.addEventListener('pointercancel',()=>down=false);
+ renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();state.zoom=THREE.MathUtils.clamp(state.zoom+e.deltaY*.004,4.8,9);camera.position.set(Math.sin(state.rotation)*state.zoom,2.15,Math.cos(state.rotation)*state.zoom);camera.lookAt(target)},{passive:false});
+ card.querySelector('.choose').addEventListener('click',()=>{document.querySelectorAll('.choose').forEach(b=>{b.classList.remove('active');b.textContent='选择方案 '+b.textContent.slice(-1)});card.querySelector('.choose').classList.add('active');card.querySelector('.choose').textContent='已选择方案 '+String.fromCharCode(65+i);document.querySelector('#selection').textContent='当前选择：方案 '+String.fromCharCode(65+i)+'。确认后可将该方案作为游戏人物重建基准。'});
+});
+function setView(view){entries.forEach(s=>{const a={front:0,side:Math.PI/2,back:Math.PI}[view];s.rotation=a;s.character.rotation.y=a;s.camera.position.set(Math.sin(a)*s.zoom,2.15,Math.cos(a)*s.zoom);s.camera.lookAt(s.target)});document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view))}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+document.querySelector('#reset').addEventListener('click',()=>{entries.forEach(s=>{s.zoom=6.8});setView('front')});
+function animate(){requestAnimationFrame(animate);for(const s of entries)s.renderer.render(s.scene,s.camera)}animate();
+</script>
+</body></html>
