@@ -1347,7 +1347,7 @@ function processActivityAt(value){
    relation(activity);
    advanceSharedGoal(activity,d.getTime());
   }
-  if(['read','write','tidy'].includes(activity))updatePersonalGoal(activity,d.getTime());
+  if(activity!=='work'&&activity!=='computerWork'&&activity!=='sleep'&&activity!=='eat')updatePersonalGoal(activity,d.getTime());
  }
  const workCompleted=settleWorkAt(key,hour,d.getTime());
  if(workCompleted)updatePersonalGoal('work',d.getTime());
