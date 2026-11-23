@@ -18,14 +18,21 @@
    return [
     {type:'read',title:'读完一本书',condition:'累计完成 5 次阅读活动。',target:5,unit:'次阅读',icon:'▤'},
     {type:'write',title:'整理一份自己的文字',condition:'在书桌前完成 4 次写作或资料整理。',target:4,unit:'次写作',icon:'✎',requires:'书桌'},
-    {type:'tidy',title:'把生活空间整理得更顺手',condition:'累计完成 4 次房间整理。',target:4,unit:'次整理',icon:'⌂'},
+    {type:'chat',title:'和人好好聊一聊',condition:'累计完成 4 次聊天活动。',target:4,unit:'次聊天',icon:'☏',requires:'沙发'},
+    {type:'listenRecords',title:'听完几张喜欢的唱片',condition:'累计安排 4 次听唱片。',target:4,unit:'次听唱片',icon:'♫',requires:'唱片机'},
+    {type:'laundry',title:'把衣物打理妥当',condition:'累计安排 3 次洗衣活动。',target:3,unit:'次洗衣',icon:'⌁',requires:'洗衣机'},
+    {type:'exercise',title:'保持规律锻炼',condition:'累计安排 3 次锻炼活动。',target:3,unit:'次锻炼',icon:'↗',requires:'跑步机'},
+    {type:'playPiano',title:'练习一首喜欢的曲子',condition:'累计安排 4 次钢琴练习。',target:4,unit:'次练习',icon:'♫',requires:'钢琴'},
+    {type:'computerPlay',title:'完成一段游戏时间',condition:'累计安排 4 次电脑游戏。',target:4,unit:'次游戏',icon:'▣',requires:'电脑'},
+    {type:'watchTV',title:'找几部喜欢的节目',condition:'累计安排 4 次看电视。',target:4,unit:'次观看',icon:'▤',requires:'电视'},
+    {type:'browseWeb',title:'探索一些新内容',condition:'累计安排 4 次浏览网站。',target:4,unit:'次浏览',icon:'⌕',requires:'电脑'},
     {type:'jobs',title:'完成两份工作委托',condition:'成功完成 2 份工作并结算报酬。',target:2,unit:'份工作',icon:'▧'},
     {type:'save',title:'存下 ¥500',condition:'阿尔个人账户余额达到 ¥500。',target:500,unit:'元',icon:'◉'}
    ].filter(x=>(!x.requires||has(x.requires))&&(x.type!=='save'||s.personalMoney<500));
   }
   function ensurePersonalGoal(at=Date.now()){
    const catalog=personalGoalCatalog();
-   s.personalGoals=s.personalGoals.filter(g=>g&&g.status==='active').map(g=>{
+   s.personalGoals=s.personalGoals.filter(g=>g&&g.status==='active'&&g.type!=='tidy').map(g=>{
     const template=catalog.find(x=>x.type===g.type);
     return {...(template||{}),...g,condition:g.condition||template?.condition||'按照目标进度完成对应活动。',unit:g.unit||(template&&template.unit)||'次',icon:g.icon||(template&&template.icon)||'◇'};
    }).slice(0,2);
@@ -47,7 +54,7 @@
     if(g.status!=='active')return;
     if(g.type==='save')g.progress=Math.min(g.target,Math.max(0,Number(s.personalMoney)||0));
     else if(g.type==='jobs'&&activity==='work')g.progress=(g.progress||0)+1;
-    else if(g.type===activity&&['read','write','tidy'].includes(activity))g.progress=(g.progress||0)+1;
+    else if(g.type===activity&&g.type!=='tidy')g.progress=(g.progress||0)+1;
     if(g.progress>=g.target){
      g.progress=g.target;g.status='completed';g.completedAt=at;
      s.personalGoalHistory.unshift({type:g.type,title:g.title,completedAt:at});s.personalGoalHistory=s.personalGoalHistory.slice(0,12);
