@@ -208,8 +208,9 @@ Object.assign(window.ArdayFurnitureModelCategories, {
   let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
 
 
-    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.58;height=2.12;if(!open){surfaceType='table';surfaceY=variant==='深胡桃木书柜'?2.18:2.12;}
+    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.58;height=2.12;
     const open=variant==='开放格架',woodGrid=variant==='白蜡木开放格';
+    if(!open){surfaceType='table';surfaceY=variant==='深胡桃木书柜'?2.18:2.12;}
     const frame=variant==='深胡桃木书柜'?mat(0x503a2d,.62):woodGrid?mat(0xc4a77f,.7):m.wood;
     const shelf=woodGrid?mat(0xe0cba7,.68):variant==='深胡桃木书柜'?mat(0x74543a,.62):m.oak;
     if(open){
