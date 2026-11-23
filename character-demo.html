@@ -46,71 +46,67 @@ function ellipsoid(parent,material,pos,scale,segments=32){const m=new THREE.Mesh
 function tube(parent,points,radius,material){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,32,radius,10,false),material);parent.add(mesh);return mesh}
 function makeCharacter(kind){
  const p=palette[kind],root=new THREE.Group();
- const skin=mat(p.skin),hair=mat(p.hair),shirt=mat(p.shirt),pants=mat(p.pants),shoe=mat(p.shoe),white=mat(0xfffaf1),iris=mat(0x51443e),blush=new THREE.MeshBasicMaterial({color:p.blush,transparent:true,opacity:.38,depthWrite:false});
+ const skin=mat(p.skin),hair=mat(p.hair),shirt=mat(p.shirt),pants=mat(p.pants),shoe=mat(p.shoe),white=mat(0xfffaf1),iris=mat(0x51443e),blush=new THREE.MeshBasicMaterial({color:p.blush,transparent:true,opacity:.34,depthWrite:false});
  const dims=[
-  {headX:.405,headY:.48,headZ:.335,headYpos:2.13,bodyH:.67,bodyW:.32,neck:.105,hair:0},
-  {headX:.435,headY:.435,headZ:.35,headYpos:2.13,bodyH:.64,bodyW:.34,neck:.105,hair:1},
-  {headX:.385,headY:.475,headZ:.325,headYpos:2.15,bodyH:.69,bodyW:.32,neck:.10,hair:2}
+  {headX:.405,headY:.445,headZ:.345,headYpos:1.94,neckR:.105},
+  {headX:.425,headY:.425,headZ:.355,headYpos:1.94,neckR:.108},
+  {headX:.395,headY:.445,headZ:.335,headYpos:1.95,neckR:.102}
  ][kind];
- // Short legs and broad shoes; proportions intentionally squat.
+ const hx=dims.headX,hy=dims.headY,hz=dims.headZ,headY=dims.headYpos;
+ // Short legs, large feet and a low, compact center of gravity.
  for(const s of [-1,1]){
-  const leg=ellipsoid(root,pants,[s*.135,.43,0],[.105,.28,.12]);
-  ellipsoid(root,shoe,[s*.14,.17,.085],[.135,.105,.205]);
+  ellipsoid(root,pants,[s*.135,.405,0],[.112,.245,.125]);
+  ellipsoid(root,shoe,[s*.14,.16,.085],[.14,.105,.205]);
  }
- // Single softly lofted torso.
- const torso=lathe([[0,0],[.19,.02],[.265,.10],[.29,.25],[.275,.48],[.23,.62],[.16,.68],[0,.69]],shirt,56);
+ // Broad, rounded shoulder line flows into a compact torso.
+ const torso=lathe([[0,0],[.20,.015],[.275,.075],[.315,.18],[.31,.32],[.285,.49],[.245,.62],[.19,.69],[0,.70]],shirt,64);
  torso.position.y=.66;root.add(torso);
- // arms sit slightly forward and end above hips.
+ // Short softly rounded arms, attached at the shoulder rather than hanging as thin rods.
  for(const s of [-1,1]){
-  const arm=lathe([[0,-.23],[.075,-.21],[.09,-.12],[.085,.02],[.09,.16],[.065,.24],[0,.25]],skin,32);
-  arm.position.set(s*.285,1.06,.015);arm.rotation.z=-s*.10;root.add(arm);
-  ellipsoid(root,skin,[s*.30,.82,.03],[.082,.09,.085]);
+  const upper=ellipsoid(root,shirt,[s*.292,1.205,.005],[.105,.19,.12]);
+  upper.rotation.z=-s*.10;
+  const fore=lathe([[0,-.19],[.075,-.18],[.092,-.10],[.095,.035],[.085,.15],[.055,.20],[0,.205]],skin,40);
+  fore.position.set(s*.315,.99,.025);fore.rotation.z=-s*.08;root.add(fore);
+  ellipsoid(root,skin,[s*.33,.80,.045],[.082,.085,.085]);
  }
- // Neck is deliberately visible between torso and head.
- const neck=lathe([[0,0],[dims.neck*.72,0],[dims.neck*.82,.10],[dims.neck*.80,.24],[dims.neck*.68,.34],[dims.neck*.48,.40],[0,.40]],skin,40);
- neck.position.y=1.27;root.add(neck);
- // Head profile: broad lower face, full cheeks, rounded chin; no pointed jaw.
- const hx=dims.headX,hy=dims.headY,hz=dims.headZ;
- const face=lathe([[0,-hy],[hx*.48,-hy*.985],[hx*.78,-hy*.90],[hx*.94,-hy*.69],[hx,-hy*.36],[hx*.99,hy*.05],[hx*.88,hy*.52],[hx*.62,hy*.84],[hx*.30,hy*.98],[0,hy]],skin,64);
- face.scale.z=hz/hx;face.position.set(0,dims.headYpos,0);root.add(face);
- // Ears, set back enough to read as attached.
- for(const s of [-1,1])ellipsoid(root,skin,[s*hx*.96,dims.headYpos-.015,-.005],[.075,.105,.075]);
- // Face features on forward-facing surface.
- const eyeY=dims.headYpos+.025,eyeX=hx*.43,eyeZ=hz*.90;
+ // Neck is a short, blunt column with rounded ends, mostly seated inside the shoulder mass.
+ const nr=dims.neckR;
+ const neck=lathe([[0,0],[nr*.72,0],[nr*.94,.025],[nr,.075],[nr*.94,.15],[nr*.76,.205],[0,.21]],skin,48);
+ neck.position.y=1.285;root.add(neck);
+ // Rounded head profile: a broad, softly flattened chin and full lower cheeks.
+ const face=lathe([[hx*.34,-hy],[hx*.58,-hy*.985],[hx*.78,-hy*.91],[hx*.91,-hy*.73],[hx*.99,-hy*.42],[hx,hy*.02],[hx*.91,hy*.48],[hx*.66,hy*.82],[hx*.34,hy*.97],[0,hy]],skin,72);
+ face.scale.z=hz/hx;face.position.set(0,headY,0);root.add(face);
+ for(const s of [-1,1])ellipsoid(root,skin,[s*hx*.96,headY-.005,-.005],[.068,.095,.068]);
+ // Features are small and calm, placed close to the face surface.
+ const eyeY=headY+.005,eyeX=hx*.42,eyeZ=hz*.91;
  for(const s of [-1,1]){
-  ellipsoid(root,blush,[s*hx*.66,dims.headYpos-.115,hz*.88],[.085,.045,.012]);
-  ellipsoid(root,white,[s*eyeX,eyeY,eyeZ],[.052,.073,.026]);
-  ellipsoid(root,iris,[s*eyeX,eyeY-.006,eyeZ+.022],[.026,.045,.014]);
-  ellipsoid(root,mat(0xffffff),[s*eyeX-.009,eyeY+.019,eyeZ+.035],[.009,.014,.006],16);
-  // Eyebrows are short and calm, not sharply angled.
-  tube(root,[[s*eyeX-.052,eyeY+.105,hz*.90],[s*eyeX,eyeY+.119,hz*.93],[s*eyeX+.052,eyeY+.105,hz*.90]],.009,hair);
+  ellipsoid(root,blush,[s*hx*.66,headY-.13,hz*.865],[.072,.038,.009]);
+  ellipsoid(root,white,[s*eyeX,eyeY,eyeZ],[.047,.065,.022]);
+  ellipsoid(root,iris,[s*eyeX,eyeY-.006,eyeZ+.018],[.023,.039,.012]);
+  ellipsoid(root,mat(0xffffff),[s*eyeX-.008,eyeY+.017,eyeZ+.028],[.008,.012,.005],16);
+  tube(root,[[s*eyeX-.046,eyeY+.092,hz*.91],[s*eyeX,eyeY+.103,hz*.94],[s*eyeX+.046,eyeY+.092,hz*.91]],.0075,hair);
  }
- tube(root,[[0,dims.headYpos-.105,hz*.99],[0,dims.headYpos-.13,hz*1.015],[.012,dims.headYpos-.145,hz*.99]],.012,skin);
- tube(root,[[-.045,dims.headYpos-.205,hz*.96],[0,dims.headYpos-.222,hz*.98],[.045,dims.headYpos-.205,hz*.96]],.009,iris);
- // Hair cap is one continuous dome. A simple fringe sits on its front edge.
- const cap=new THREE.Mesh(new THREE.SphereGeometry(1,64,40,0,TAU,0,Math.PI*.56),hair);
- cap.scale.set(hx*1.055,hy*.91,hz*1.08);cap.position.set(0,dims.headYpos+hy*.20,-.005);root.add(cap);
+ tube(root,[[0,headY-.09,hz*.98],[0,headY-.115,hz*1.005],[.009,headY-.13,hz*.98]],.009,skin);
+ tube(root,[[-.038,headY-.19,hz*.95],[0,headY-.202,hz*.97],[.038,headY-.19,hz*.95]],.008,iris);
+ // One clean scalp shell and simple attached hair masses; no intersecting decorative strands.
+ const cap=new THREE.Mesh(new THREE.SphereGeometry(1,64,40,0,TAU,0,Math.PI*.54),hair);
+ cap.scale.set(hx*1.055,hy*.88,hz*1.075);cap.position.set(0,headY+hy*.22,-.008);root.add(cap);
  if(kind===0){
-  // Rounded bob: one back volume and two broad side panels.
-  ellipsoid(root,hair,[0,dims.headYpos-.10,-.19],[hx*1.04,hy*.84,.19]);
-  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.88,dims.headYpos-.20,-.005],[.105,.30,.25]);
-  ellipsoid(root,hair,[0,dims.headYpos+hy*.28,hz*.76],[hx*.90,.115,.105]);
+  ellipsoid(root,hair,[0,headY-.12,-.19],[hx*1.035,hy*.82,.19]);
+  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.88,headY-.19,-.012],[.09,.245,.205]);
+  ellipsoid(root,hair,[0,headY+hy*.25,hz*.73],[hx*.88,.09,.095]);
  }else if(kind===1){
-  ellipsoid(root,hair,[0,dims.headYpos-.13,-.18],[hx*1.04,hy*.78,.18]);
-  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.92,dims.headYpos-.18,-.015],[.095,.24,.22]);
-  // broad swept fringe, no separate intersecting strands
-  const fringe=ellipsoid(root,hair,[-.055,dims.headYpos+hy*.35,hz*.78],[hx*.91,.145,.105]);fringe.rotation.z=-.16;
+  ellipsoid(root,hair,[0,headY-.12,-.19],[hx*1.04,hy*.78,.19]);
+  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.91,headY-.17,-.01],[.085,.205,.19]);
+  const fringe=ellipsoid(root,hair,[-.045,headY+hy*.31,hz*.75],[hx*.88,.115,.09]);fringe.rotation.z=-.12;
  }else{
-  ellipsoid(root,hair,[0,dims.headYpos-.12,-.18],[hx*1.05,hy*.85,.20]);
+  ellipsoid(root,hair,[0,headY-.12,-.19],[hx*1.04,hy*.82,.19]);
   for(const s of [-1,1]){
-   const side=lathe([[0,-.48],[.075,-.46],[.12,-.30],[.13,-.05],[.12,.20],[.08,.34],[0,.36]],hair,40);
-   side.position.set(s*hx*.78,dims.headYpos-.20,.005);side.rotation.z=s*.04;root.add(side);
+   const side=lathe([[0,-.34],[.07,-.33],[.105,-.22],[.115,-.04],[.10,.15],[.065,.25],[0,.27]],hair,40);
+   side.position.set(s*hx*.78,headY-.22,.005);root.add(side);
   }
-  ellipsoid(root,hair,[.045,dims.headYpos+hy*.30,hz*.76],[hx*.95,.12,.11]).rotation.z=.08;
+  ellipsoid(root,hair,[.035,headY+hy*.25,hz*.73],[hx*.91,.095,.09]).rotation.z=.06;
  }
- // Collar gives the neck/body transition a clean readable edge.
- const collar=lathe([[0,0],[.12,0],[.135,.035],[.12,.06],[0,.06]],shirt,40);collar.position.y=1.30;root.add(collar);
- root.position.y=0;
  root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
  return root;
 }
