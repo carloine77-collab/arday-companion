@@ -1,8 +1,10 @@
 (()=>{
   const create=(T,scene,stylizeMaterial)=>{
+    let person=null;
+    try{
     const CM=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color,roughness,metalness:0,flatShading:false}));
     const skin=CM(0xe8b99d,.9),skinWarm=CM(0xd99c87,.9),hair=CM(0xc99a42,.78),hairLight=CM(0xe8bf70,.72),shirt=CM(0xeee4d6,.94),shirtShade=CM(0xcdbba7,.94),pants=CM(0x55515a,.96),shoe=CM(0x51443f,.88),sole=CM(0x342e30,.9),eyeWhite=CM(0xfff8ef,.7),iris=CM(0x806d61,.55),pupil=CM(0x302827,.5),brow=CM(0x9a7040,.9);
-    const person=new T.Group();scene.add(person);
+    person=new T.Group();person.name="ArdayChibiCharacter";scene.add(person);
     const rig=new T.Group();person.add(rig);
     const body=new T.Group();rig.add(body);
     const mesh=(parent,geometry,material)=>{const o=new T.Mesh(geometry,material);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
@@ -140,7 +142,22 @@
     }
     const shadow=new T.Mesh(new T.CircleGeometry(.62,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.2,depthWrite:false}));
     shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
+    let meshCount=0;person.traverse(o=>{if(o.isMesh)meshCount++});
+    if(meshCount<20||arms.length!==2||legs.length!==2)throw new Error("Character model is incomplete");
     return {person,rig,body,head,eyeGroups,arms,legs,shadow};
+    }catch(error){
+      if(person){
+        const geometries=new Set(),materials=new Set();
+        person.traverse(o=>{
+          if(o.geometry&&!geometries.has(o.geometry)){geometries.add(o.geometry);o.geometry.dispose?.()}
+          const list=Array.isArray(o.material)?o.material:[o.material];
+          list.forEach(mat=>{if(mat&&!materials.has(mat)){materials.add(mat);mat.dispose?.()}});
+        });
+        person.parent?.remove(person);
+      }
+      console.error("Arday chibi character model build failed",error);
+      return null;
+    }
   };
   window.ArdayCharacterModel={create};
 })();
