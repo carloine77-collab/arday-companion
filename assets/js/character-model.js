@@ -51,20 +51,23 @@
       const values=new Float32Array((nx+1)*(ny+1)*(nz+1));
       const index=(i,j,k)=>(i*(ny+1)+j)*(nz+1)+k;
       for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)for(let k=0;k<=nz;k++)values[index(i,j,k)]=field(x0+i*dx,y0+j*dy,z0+k*dz);
-      const positions=[],skinIndices=[],skinWeights=[],materialIndices=[],triangles=[[],[],[]];
+      const positions=[],skinIndices=[],skinWeights=[],triangles=[[],[],[]],vertexMap=new Map();
       const corner=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
       const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
       const edgePairs=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
       const interp=(a,b,va,vb)=>{const t=Math.max(0,Math.min(1,va/(va-vb)));return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]};
+      const vertexId=p=>{
+        const key=p.map(v=>v.toFixed(5)).join(",");
+        if(vertexMap.has(key))return vertexMap.get(key);
+        const id=positions.length/3;vertexMap.set(key,id);positions.push(...p);
+        const v=new T.Vector3(...p),near=bonePoints.map((entry,i)=>({i,d:v.distanceToSquared(entry.point)})).sort((u,w)=>u.d-w.d).slice(0,4);
+        let sum=0;const ws=near.map(n=>{const w=1/Math.pow(n.d+.002,1.25);sum+=w;return w});
+        for(let q=0;q<4;q++){skinIndices.push(near[q].i);skinWeights.push(ws[q]/sum)}
+        return id;
+      };
       const emit=(a,b,c)=>{
-        const tri=[a,b,c],cy=(a[1]+b[1]+c[1])/3,group=cy<.77?2:cy<1.25?1:0;
-        for(const p of tri){
-          positions.push(...p);
-          const v=new T.Vector3(...p),near=bonePoints.map((entry,i)=>({i,d:v.distanceToSquared(entry.point)})).sort((u,w)=>u.d-w.d).slice(0,4);
-          let sum=0;const ws=near.map(n=>{const w=1/Math.pow(n.d+.002,1.25);sum+=w;return w});
-          for(let q=0;q<4;q++){skinIndices.push(near[q].i);skinWeights.push(ws[q]/sum)}
-        }
-        const base=positions.length/3-3;triangles[group].push(base,base+1,base+2);
+        const cy=(a[1]+b[1]+c[1])/3,group=cy<.77?2:cy<1.25?1:0;
+        triangles[group].push(vertexId(a),vertexId(b),vertexId(c));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
         const cp=corner.map(([a,b,c])=>[x0+(i+a)*dx,y0+(j+b)*dy,z0+(k+c)*dz]);
