@@ -188,9 +188,9 @@
         return lock;
       };
       // Three overlapping rear layers create the characteristic long nape.
-      makeWolfLock("wolfcut-nape-center",0,.205,-.205,.105,.66,.105,.015);
-      makeWolfLock("wolfcut-nape-left",-.145,.245,-.19,.105,.59,.10,-.10,hairLight);
-      makeWolfLock("wolfcut-nape-right",.145,.245,-.19,.105,.59,.10,.10,hairLight);
+      makeWolfLock("wolfcut-nape-center",0,-.08,-.235,.115,1.02,.115,.015);
+      makeWolfLock("wolfcut-nape-left",-.145,-.035,-.225,.108,.91,.105,-.10,hairLight);
+      makeWolfLock("wolfcut-nape-right",.145,-.035,-.225,.108,.91,.105,.10,hairLight);
       // Shorter side layers frame the cheeks without covering the eyes.
       makeWolfLock("wolfcut-face-left",-.325,.245,.115,.082,.43,.075,-.13);
       makeWolfLock("wolfcut-face-right",.325,.245,.115,.082,.43,.075,.13);
