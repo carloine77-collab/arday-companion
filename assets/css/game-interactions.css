@@ -749,3 +749,12 @@ header.top{position:relative}
 .entertainment-card-hero{gap:20px;font-family:Georgia,serif}.entertainment-card-hero span,.entertainment-card-hero i{display:grid;place-items:center;width:64px;height:88px;border-radius:6px;background:#f8f0df;color:#a34e48;font-size:44px;font-style:normal;box-shadow:0 5px 12px #17292c70;transform:rotate(-10deg)}.entertainment-card-hero i{transform:rotate(10deg)}.entertainment-card-hero b{font-size:38px}
 .entertainment-back{margin-left:8px;background:#897e70!important}
 @media(max-width:420px){.entertainment-view{padding:10px 11px 24px!important}.entertainment-poster{padding:15px 14px 12px}.entertainment-poster h2{font-size:22px}.entertainment-prize-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.entertainment-game-grid{gap:8px}.entertainment-game-grid button{min-height:136px}.entertainment-stake-control{gap:4px}.entertainment-stake-control button{min-width:30px!important;padding:7px 3px!important}}
+
+
+/* Decorative divider: ornamental flourish instead of a horizontal rule. */
+.entertainment-ornament-divider{display:flex;justify-content:center;align-items:center;height:42px;margin:2px 0 8px;color:#a58a64}
+.entertainment-ornament-divider svg{display:block;width:min(100%,320px);height:44px;overflow:visible}
+.entertainment-spin-entry,.entertainment-game-grid,.entertainment-game-panel,.entertainment-draw{border-top:0!important;border-bottom:0!important}
+.entertainment-view hr,.entertainment-view .separator,.entertainment-view [role="separator"]{display:none!important}
+.entertainment-currency-picker select{min-width:142px}
+.entertainment-stake-control input{font-variant-numeric:tabular-nums}
