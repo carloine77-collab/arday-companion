@@ -33,6 +33,12 @@
         const k0=Math.hypot(qx,qy,qz),k1=Math.hypot(qx/(rx/Math.min(rx,ry,rz)),qy/(ry/Math.min(rx,ry,rz)),qz/(rz/Math.min(rx,ry,rz)));
         return k0*(k0-1)/(Math.max(k1,1e-5))*Math.min(rx,ry,rz);
       };
+      const taperedLimbSdf=(x,y,z,a,b,rA,rB,depth=.88)=>{
+        const vx=b[0]-a[0],vy=b[1]-a[1],vz=b[2]-a[2],lengthSq=vx*vx+vy*vy+vz*vz;
+        const t=Math.max(0,Math.min(1,((x-a[0])*vx+(y-a[1])*vy+(z-a[2])*vz)/Math.max(lengthSq,1e-8)));
+        const dx=x-a[0]-vx*t,dy=y-a[1]-vy*t,dz=(z-a[2]-vz*t)/depth;
+        return Math.hypot(dx,dy,dz)-(rA+(rB-rA)*t);
+      };
       // One lofted SDF trunk gives the chest, waist and pelvis a continuous silhouette.
       // The torso, visible neck and shaped head are designed as one continuous silhouette.
       // A tapered chin keeps the neck readable instead of letting an ellipsoid head swallow it.
@@ -59,18 +65,18 @@
         [1.36,.078,.07],[1.385,.035,.032]
       ];
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
-      const forms=[
-        [-.245,1.055,0,.09,.15,.10],[.245,1.055,0,.09,.15,.10],
-        [-.345,.82,0,.075,.17,.07],[.345,.82,0,.075,.17,.07],
-        [-.38,.625,0,.065,.095,.062],[.38,.625,0,.065,.095,.062],
-        [-.125,.56,0,.096,.225,.09],[.125,.56,0,.096,.225,.09],
-        [-.125,.29,0,.078,.185,.078],[.125,.29,0,.078,.185,.078],
-        [-.125,.105,.065,.105,.068,.17],[.125,.105,.065,.105,.068,.17],
-        [-.425,.59,.04,.045,.065,.05],[.425,.59,.04,.045,.065,.05]
-      ];
+      // Each arm and leg is one tapered, continuous volume. This avoids the
+      // separate biceps/forearm and thigh/calf bulges that read as muscle segments.
+      const limbs=[];
+      for(const side of [-1,1]){
+        limbs.push({a:[side*.245,1.075,0],b:[side*.405,.585,.015],rA:.078,rB:.052,blend:.082});
+        limbs.push({a:[side*.125,.675,0],b:[side*.13,.205,.015],rA:.087,rB:.073,blend:.075});
+      }
+      const hands=[[-.414,.575,.025],[.414,.575,.025]];
       const field=(x,y,z)=>{
         let d=torsoSdf(x,y,z);
-        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.042);
+        for(const limb of limbs)d=smoothMin(d,taperedLimbSdf(x,y,z,limb.a,limb.b,limb.rA,limb.rB),limb.blend);
+        for(const hand of hands)d=smoothMin(d,ellipsoidSdf(x,y,z,...hand,.046,.052,.043),.045);
         return d;
       };
       const nx=53,ny=65,nz=33,x0=-.58,y0=.015,z0=-.36,dx=.022,dy=.022,dz=.022;
@@ -93,7 +99,7 @@
         for(const segment of boneSegments){
           const axis=new T.Vector3().subVectors(segment.b,segment.a),offset=new T.Vector3().subVectors(v,segment.a);
           const t=Math.max(0,Math.min(1,offset.dot(axis)/Math.max(axis.lengthSq(),1e-8)));
-          const nearest=segment.a.clone().addScaledVector(axis,t),distanceSq=v.distanceToSquared(nearest),weight=1/Math.pow(distanceSq+.002,1.25);
+          const nearest=segment.a.clone().addScaledVector(axis,t),distanceSq=v.distanceToSquared(nearest),weight=1/Math.pow(distanceSq+.009,1.0);
           influences.set(segment.parentIndex,(influences.get(segment.parentIndex)||0)+weight*(1-t));
           influences.set(segment.childIndex,(influences.get(segment.childIndex)||0)+weight*t);
         }
@@ -173,8 +179,10 @@
       const fringe=mesh(head,fringeGeometry,hair,"C-polygonal-fringe");fringe.material.side=T.DoubleSide;
       for(const l of legs){
         const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
-        const upper=lathe(foot,[[0,-.09],[.055,-.085],[.09,-.05],[.105,.005],[.095,.06],[.065,.105],[.025,.115],[0,.115]],shoe,28,.78,"shoe-upper");upper.rotation.x=Math.PI/2;upper.scale.z=.78;upper.position.z=.025;upper.userData.characterOutline=true;
-        const base=lathe(foot,[[0,-.098],[.06,-.095],[.095,-.075],[.105,-.05],[.08,-.032],[0,-.03]],sole,28,.8,"shoe-sole");base.rotation.x=Math.PI/2;base.scale.z=.78;base.position.z=.025;base.userData.characterOutline=true;
+        // One rounded shoe shell plus a very thin outsole; the old full-size
+        // overlapping lathe pair looked like two stacked shoes.
+        const upper=ellipsoid(foot,0,-.17,.015,.103,.071,.165,shoe,"shoe-upper");upper.userData.characterOutline=true;
+        const base=ellipsoid(foot,0,-.237,.025,.101,.016,.16,sole,"shoe-sole");base.userData.characterOutline=true;
       }
       const shadow=new T.Mesh(new T.CircleGeometry(.48,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
       bodyMesh.updateMatrixWorld(true);skeleton.update();
