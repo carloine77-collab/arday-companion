@@ -2009,7 +2009,65 @@ function showDungeonResult(result){
  $('choices').innerHTML='<section class="instance-result '+(result.success?'cleared':'failed')+'"><div class="result-emblem">'+(result.success?'✦':'✕')+'</div><div class="instance-result-status">'+(result.success?'通关':'失败')+'</div><div class="instance-rating">'+result.rating+'</div><div class="result-tier">'+result.tier+'级 · 校园灵异</div><p>通关概率 '+result.successChance+'% · 完成 '+result.boardSteps+' 格</p></section><div class="instance-reward"><span>获得积分</span><strong>+'+result.points+'</strong><small>可用余额 '+s.points.toLocaleString('zh-CN')+' · 排名积分 '+s.rankPoints.toLocaleString('zh-CN')+'</small></div><div class="instance-result-detail"><span>生还状态</span><b>'+(result.fatal?'濒死状态':result.survived?'已生还':'濒死重创')+'</b><span>完成圈数</span><b>'+Math.floor(Math.max(0,Number(result.boardSteps)||0)/36)+' / 3</b></div><button class="instance-primary" id="instanceAgain">返回组队</button>';
  $('instanceAgain').onclick=showDungeon;
 }
-function showEntertainment(){ $('drawerTitle').textContent='娱乐';$('choices').className='choices infinite-view';$('choices').innerHTML='<div class="illustrated-masthead"><div class="ink-illustration"><svg viewBox="0 0 300 100"><path d="M15 82 Q60 10 108 72 T205 38 T285 65" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="90" cy="38" r="20" fill="none" stroke="currentColor"/><path d="M80 38h20M90 28v20" stroke="currentColor"/></svg></div><h2>娱乐</h2></div><div class="illustrated-choice-grid"><button class="instance-strategy" onclick="toast(\'即将开放\')">🎴<strong>牌局</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">🎮<strong>街机</strong></button><button class="instance-strategy" onclick="toast(\'即将开放\')">♟<strong>棋室</strong></button></div>';$('drawer').classList.add('open');}
+function entertainmentBalance(){s.entertainmentChips=Math.max(0,Math.floor(Number(s.entertainmentChips)||0));return s.entertainmentChips}
+function entertainmentDay(){return keyAt(Date.now())}
+function entertainmentCard(){return {rank:1+Math.floor(Math.random()*13),suit:['♠','♥','♣','♦'][Math.floor(Math.random()*4)]}}
+function entertainmentValue(cards){let total=0,aces=0;cards.forEach(c=>{if(c.rank===1){total+=11;aces++}else total+=Math.min(10,c.rank)});while(total>21&&aces){total-=10;aces--}return total}
+function entertainmentHead(title){return '<section class="entertainment-head"><div><small>ARDAY / SIMULATION DECK</small><h2>'+title+'</h2></div><div class="entertainment-wallet"><small>游戏筹码</small><strong>'+entertainmentBalance().toLocaleString('zh-CN')+'</strong><span>仅限游戏内使用</span></div></section>'}
+function showEntertainment(){$('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='娱乐区';$('choices').className='choices infinite-view entertainment-view';renderEntertainmentHome();$('drawer').classList.add('open')}
+function renderEntertainmentHome(){
+ const used=s.entertainmentDailySpinDay===entertainmentDay();
+ $('choices').innerHTML=entertainmentHead('娱乐区')+'<section class="entertainment-spin-entry"><div><small>DAILY LUCKY DRAW</small><h3>每日幸运抽取</h3><p>每天免费抽取一次游戏筹码。奖励不能兑换或提现。</p></div><button type="button" data-ent="spin" '+(used?'disabled':'')+'>'+(used?'今日已抽取':'免费抽取')+'</button></section><div class="entertainment-games-title"><span>博弈游戏</span><small>使用游戏筹码参与</small></div><div class="entertainment-game-grid"><button type="button" data-ent="dice"><span>⚄</span><strong>骰子猜大小</strong><small>选择区间，判断点数</small></button><button type="button" data-ent="blackjack"><span>♠</span><strong>二十一点</strong><small>计算点数，与庄家对局</small></button></div><p class="entertainment-rules">筹码为不可提现的虚拟道具，不出售、不与人民币兑换。所有游戏均不涉及真实货币。</p>';
+ $('choices').querySelectorAll('[data-ent]').forEach(b=>b.onclick=()=>({spin:runEntertainmentSpin,dice:showEntertainmentDice,blackjack:showEntertainmentBlackjack}[b.dataset.ent])());
+}
+function runEntertainmentSpin(){
+ const today=entertainmentDay();if(s.entertainmentDailySpinDay===today){toast('今天已经抽取过了');return}
+ const prizes=[6,12,30,68,128,328,628],weights=[400,270,160,90,55,22,3];let roll=Math.random()*weights.reduce((a,b)=>a+b,0),index=0;
+ while(index<6&&roll>=weights[index]){roll-=weights[index];index++}
+ const prize=prizes[index];s.entertainmentDailySpinDay=today;save();
+ const choices=$('choices');choices.innerHTML=entertainmentHead('每日幸运抽取')+'<section class="entertainment-draw"><p>灯光正在逐格停下……</p><div class="entertainment-prize-grid">'+prizes.map((v,i)=>'<div class="entertainment-prize-tile" data-prize-index="'+i+'"><small>PRIZE '+String(i+1).padStart(2,'0')+'</small><strong>'+v+'</strong><span>筹码</span></div>').join('')+'</div><div class="entertainment-draw-result" aria-live="polite">抽取中</div></section>';
+ const nodes=[...choices.querySelectorAll('[data-prize-index]')];let step=0;const total=24+index;
+ const timer=setInterval(()=>{nodes.forEach(n=>n.classList.remove('is-lit'));nodes[step%7].classList.add('is-lit');step++;if(step>=total){clearInterval(timer);nodes.forEach(n=>n.classList.remove('is-lit'));nodes[index].classList.add('is-winner');s.entertainmentChips=entertainmentBalance()+prize;save();const result=choices.querySelector('.entertainment-draw-result');if(result)result.innerHTML='获得 <strong>'+prize+'</strong> 枚游戏筹码';const p=choices.querySelector('.entertainment-draw p');if(p)p.textContent='本次抽取已完成'}},75);
+}
+function entertainmentBet(){return Math.floor(Number($('entertainmentBet')?.value)||0)}
+function showEntertainmentDice(message=''){
+ $('choices').innerHTML=entertainmentHead('骰子猜大小')+'<section class="entertainment-game-panel"><p>投入筹码，猜测两颗骰子的总点数。猜小（2–6）或猜大（8–12），猜中返还本金并额外获得等额奖励；掷出 7 时庄家胜。</p><label>投入筹码 <input id="entertainmentBet" type="number" min="1" max="'+entertainmentBalance()+'" value="'+Math.min(10,entertainmentBalance())+'"></label><div class="entertainment-actions"><button type="button" data-dice="low" '+(entertainmentBalance()<1?'disabled':'')+'>猜小 · 2–6</button><button type="button" data-dice="high" '+(entertainmentBalance()<1?'disabled':'')+'>猜大 · 8–12</button></div><div class="entertainment-game-result">'+message+'</div><button class="entertainment-back" type="button" data-back>返回娱乐区</button></section>';
+ $('choices').querySelectorAll('[data-dice]').forEach(b=>b.onclick=()=>playEntertainmentDice(b.dataset.dice));$('choices').querySelector('[data-back]').onclick=renderEntertainmentHome;
+}
+function playEntertainmentDice(choice){
+ const bet=entertainmentBet();if(bet<1||bet>entertainmentBalance()){toast('筹码数量无效');return}
+ s.entertainmentChips=entertainmentBalance()-bet;const a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6),sum=a+b,win=choice==='high'?sum>=8:sum<=6;
+ let message='掷出 '+a+' 点与 '+b+' 点，总点数 '+sum+'。'+(sum===7?'庄家胜。':win?'猜中，赢得 '+(bet*2)+' 枚筹码。':'未猜中，投入筹码已扣除。');if(win)s.entertainmentChips+=bet*2;save();showEntertainmentDice(message);
+}
+function showEntertainmentBlackjack(){
+ const game=s.entertainmentBlackjack;
+ if(game?.status==='active'){
+  const face=c=>c.suit+['','A','2','3','4','5','6','7','8','9','10','J','Q','K'][c.rank];
+  $('choices').innerHTML=entertainmentHead('二十一点')+'<section class="entertainment-game-panel"><p>你的手牌</p><div class="entertainment-cards">'+game.player.map(face).join('　')+'</div><strong>点数：'+entertainmentValue(game.player)+'</strong><p>庄家明牌</p><div class="entertainment-cards">'+face(game.dealer[0])+'　？</div><div class="entertainment-actions"><button type="button" data-bj="hit">要牌</button><button type="button" data-bj="stand">停牌</button></div></section>';
+  $('choices').querySelectorAll('[data-bj]').forEach(b=>b.onclick=()=>blackjackAction(b.dataset.bj));return;
+ }
+ $('choices').innerHTML=entertainmentHead('二十一点')+'<section class="entertainment-game-panel"><p>与庄家进行二十一点。A 可计 1 或 11，J/Q/K 计 10。普通胜利返还 2 倍筹码，黑杰克返还 2.5 倍，平局退回本金。</p><label>投入筹码 <input id="entertainmentBet" type="number" min="1" max="'+entertainmentBalance()+'" value="'+Math.min(10,entertainmentBalance())+'"></label><button type="button" data-bj-start '+(entertainmentBalance()<1?'disabled':'')+'>开始牌局</button><div class="entertainment-game-result"></div><button class="entertainment-back" type="button" data-back>返回娱乐区</button></section>';
+ $('choices').querySelector('[data-bj-start]').onclick=startEntertainmentBlackjack;$('choices').querySelector('[data-back]').onclick=renderEntertainmentHome;
+}
+function startEntertainmentBlackjack(){
+ const bet=entertainmentBet();if(bet<1||bet>entertainmentBalance()){toast('筹码数量无效');return}
+ s.entertainmentChips=entertainmentBalance()-bet;s.entertainmentBlackjack={bet,player:[entertainmentCard(),entertainmentCard()],dealer:[entertainmentCard(),entertainmentCard()],status:'active'};save();
+ if(entertainmentValue(s.entertainmentBlackjack.player)===21)finishEntertainmentBlackjack();else showEntertainmentBlackjack();
+}
+function blackjackAction(action){
+ const game=s.entertainmentBlackjack;if(!game||game.status!=='active')return;
+ if(action==='hit'){game.player.push(entertainmentCard());if(entertainmentValue(game.player)>21)finishEntertainmentBlackjack('爆牌，庄家获胜。');else if(entertainmentValue(game.player)===21)finishEntertainmentBlackjack();else{save();showEntertainmentBlackjack()}}
+ else finishEntertainmentBlackjack();
+}
+function finishEntertainmentBlackjack(message=''){
+ const game=s.entertainmentBlackjack;if(!game||game.status!=='active')return;
+ const player=entertainmentValue(game.player);let dealer=entertainmentValue(game.dealer);if(player<=21)while(dealer<17){game.dealer.push(entertainmentCard());dealer=entertainmentValue(game.dealer)}
+ let payout=0,result=message;if(!message){if(player>21)result='爆牌，庄家获胜。';else if(dealer>21||player>dealer){payout=game.bet*(player===21&&game.player.length===2?2.5:2);result='你赢了，获得 '+payout+' 枚筹码。'}else if(player===dealer){payout=game.bet;result='平局，退回本金。'}else result='庄家获胜，本局未获得筹码。'}
+ s.entertainmentChips=entertainmentBalance()+payout;game.status='settled';game.result=result;game.payout=payout;save();
+ const face=c=>c.suit+['','A','2','3','4','5','6','7','8','9','10','J','Q','K'][c.rank];
+ $('choices').innerHTML=entertainmentHead('二十一点')+'<section class="entertainment-game-panel"><p>你的手牌：'+game.player.map(face).join('　')+'（'+player+' 点）</p><p>庄家手牌：'+game.dealer.map(face).join('　')+'（'+dealer+' 点）</p><div class="entertainment-game-result">'+result+'</div><button type="button" data-bj-again>再开一局</button><button class="entertainment-back" type="button" data-back>返回娱乐区</button></section>';
+ $('choices').querySelector('[data-bj-again]').onclick=()=>{s.entertainmentBlackjack=null;showEntertainmentBlackjack()};$('choices').querySelector('[data-back]').onclick=renderEntertainmentHome;
+}
 function leaderboardNPCs(){
  const surnames='沈顾裴陆温谢岑江许周林秦苏程叶白唐祁陈宋',given='星河照临川月深远知秋砚宁',roles=['探索者','战斗员','侦察员','支援者','研究员'];
  if(!Number.isFinite(Number(s.leaderboardSeasonStartAt)))s.leaderboardSeasonStartAt=Date.now();
