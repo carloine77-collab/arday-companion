@@ -46,11 +46,11 @@ h2{font-size:19px;margin:6px 0 7px}
 </header>
 <main>
 <div class="grid">
-<section class="card"><div class="canvas"><canvas id="view-a"></canvas></div><div class="cardbody"><div class="kicker">BODY A · SMOOTH SCULPT</div><h2>软陶连续雕塑</h2><p>以高密度连续等值面塑造身体，肩、腹、胯连成一体；腰线弱化，腹部和臀部形成完整的柔和体积。四肢短而饱满，表面不出现肌肉分段。</p><div class="spec"><span>高密度连续网格</span><span>柔和曲面</span><span>整体圆润</span></div></div></section>
+<section class="card"><div class="canvas"><canvas id="view-a"></canvas></div><div class="cardbody"><div class="kicker">BODY A · CLAY × ANGULAR SILHOUETTE</div><h2>软陶质感 × 斜切体型</h2><p>采用 A 的细腻哑光软陶表面，结合 B 的肩部斜切、腰部收束与胯部外扩。轮廓转折清楚，但表面仍保持柔和连续，不做塑料感或肌肉分块。</p><div class="spec"><span>哑光软陶材质</span><span>斜肩收腰</span><span>胯部外扩</span></div></div></section>
 <section class="card"><div class="canvas"><canvas id="view-b"></canvas></div><div class="cardbody"><div class="kicker">BODY B · FACETED</div><h2>低多边形几何体</h2><p>改用稀疏采样和硬朗法线，身体呈现清晰的平面转折。肩部采用斜切结构，腰部收束、胯部外扩，四肢也保留明确的几何截面，整体更接近手工制作的低模游戏角色。</p><div class="spec"><span>低密度网格</span><span>平面折角</span><span>梯形躯干</span></div></div></section>
-<section class="card"><div class="canvas"><div class="canvas"><canvas id="view-c"></canvas></div></div><div class="cardbody"><div class="kicker">BODY C · SOFT TOY</div><h2>布偶式短桶体</h2><p>以超椭圆截面构成宽厚、近似方圆形的躯干，胸腹不做明显收腰，肩胯形成稳定的玩偶轮廓。头身比更夸张，手脚短粗，强调软质布偶般的体块感。</p><div class="spec"><span>超椭圆截面</span><span>短桶躯干</span><span>短粗四肢</span></div></div></section>
+<section class="card"><div class="canvas"><div class="canvas"><canvas id="view-c"></canvas></div></div><div class="cardbody"><div class="kicker">BODY C · TALL PROPORTION</div><h2>纵向舒展型</h2><p>保留软陶表面和斜切肩胯结构，但增加躯干纵向长度、腿部长度与腰胯之间的距离。体态更舒展，避免头大身短、腿短和整体矮胖。</p><div class="spec"><span>躯干纵向延伸</span><span>腿部加长</span><span>低重心但不矮胖</span></div></div></section>
 </div>
-<p class="note">说明：A、B、C 不再是同一套身体的轻微尺寸变化，而是三种不同的造型与网格方案。头部几何保持一致，身体均为独立评审模型，不会写入正式游戏。坐姿、睡姿按钮用于初步观察体块变化，尚不代表最终动作验收。</p>
+<p class="note">说明：A 是当前重点候选：软陶哑光表面 + B 的斜切肩线、收腰和外扩胯部；B 保留清晰低多边形折面作为对照；C 用来检查纵向拉长后的身材比例。三个方案都避免短腿、短躯干的矮胖比例。头部保持一致，尚未写入正式游戏。</p>
 </main>
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
@@ -61,7 +61,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     try{
       const mat=(color,roughness=.84)=>{const m=stylizeMaterial(new T.MeshStandardMaterial({color,roughness,metalness:0,flatShading:false}));madeMaterials.add(m);return m};
       const skin=mat(0xe8b99d,.9),hair=mat(0xc99a42,.78),hairLight=mat(0xe8bf70,.72),shirt=mat(0xeee4d6,.94),pants=mat(0x55515a,.96),shoe=mat(0x51443f,.88),sole=mat(0x342e30,.9),eyeWhite=mat(0xfff8ef,.7),iris=mat(0x806d61,.55),pupil=mat(0x302827,.5),blush=mat(0xd99c87,.9);
-      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.90,1);scene.add(person);
+      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.96,1);scene.add(person);
       const rig=new T.Group();rig.name="character-rig";person.add(rig);
       const body=new T.Group();body.name="character-body";rig.add(body);
       const boneRoot=new T.Bone();boneRoot.name="pelvis-root";boneRoot.position.y=.70;body.add(boneRoot);
@@ -105,6 +105,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
         else for(let q=0;q<profile.length-1;q++)if(y>=profile[q][0]&&y<=profile[q+1][0]){i=q;break}
         const a=profile[i],b=profile[i+1],span=Math.max(1e-5,b[0]-a[0]),t=Math.max(0,Math.min(1,(y-a[0])/span)),t2=t*t,t3=t2*t;
         const interpolate=axis=>{
+          if(selectedBody.linearProfile)return a[axis]+(b[axis]-a[axis])*t;
           const p0=profile[Math.max(0,i-1)],p3=profile[Math.min(profile.length-1,i+2)];
           const m1=(b[axis]-p0[axis])/Math.max(1e-5,b[0]-p0[0])*span;
           const m2=(p3[axis]-a[axis])/Math.max(1e-5,p3[0]-a[0])*span;
@@ -117,11 +118,11 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       const bodyProfiles={
         rounded:{
           profile:[
-            [.48,.225,.17],[.55,.285,.205],[.66,.345,.225],
-            [.79,.365,.225],[.91,.36,.215],[1.02,.345,.20],
-            [1.12,.305,.175],[1.20,.18,.115],[1.27,.09,.08],
+            [.48,.205,.15],[.55,.245,.17],[.66,.285,.18],
+            [.79,.295,.175],[.91,.265,.15],[1.02,.235,.135],
+            [1.12,.225,.13],[1.20,.17,.105],[1.27,.09,.08],
             [1.34,.078,.07],[1.37,.035,.032]
-          ],arm:[.125,.105],leg:[.135,.118],step:.019,radialPower:2,flat:false
+          ],arm:[.086,.064],leg:[.105,.09],step:.018,radialPower:2,flat:false,linearProfile:true
         },
         pear:{
           profile:[
@@ -133,11 +134,11 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
         },
         barrel:{
           profile:[
-            [.48,.235,.195],[.55,.30,.235],[.66,.345,.255],
-            [.79,.36,.26],[.91,.36,.255],[1.02,.35,.245],
-            [1.12,.315,.21],[1.20,.185,.13],[1.27,.09,.08],
-            [1.34,.078,.07],[1.37,.035,.032]
-          ],arm:[.135,.112],leg:[.145,.125],step:.022,radialPower:3.1,flat:false
+            [.42,.19,.14],[.50,.225,.16],[.64,.265,.175],
+            [.79,.285,.175],[.94,.265,.155],[1.08,.245,.14],
+            [1.20,.22,.13],[1.30,.17,.105],[1.39,.09,.08],
+            [1.46,.078,.07],[1.49,.035,.032]
+          ],arm:[.09,.066],leg:[.10,.086],step:.019,radialPower:2,flat:false,linearProfile:true
         }
       };
       const selectedBody=bodyProfiles[variant]||bodyProfiles.rounded;
