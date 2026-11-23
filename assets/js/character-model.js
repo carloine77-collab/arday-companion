@@ -53,19 +53,12 @@
         return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
       };
       const torsoProfile=[
-        [.59,.17,.12],[.66,.185,.132],[.75,.182,.13],
-        [.84,.174,.122],[.92,.174,.122],[1.00,.19,.135],
-        [1.09,.205,.145],[1.14,.185,.13],[1.18,.125,.09],[1.205,.075,.065]
-      ];
-      const headProfile=[
-        [1.265,.105,.09],[1.29,.155,.132],[1.33,.215,.18],
-        [1.38,.265,.22],[1.445,.305,.25],[1.52,.325,.265],
-        [1.595,.315,.258],[1.665,.275,.23],[1.72,.205,.18],
-        [1.76,.12,.105],[1.785,.045,.04],[1.792,.008,.008]
+        [.53,.155,.112],[.60,.205,.142],[.70,.245,.16],
+        [.82,.278,.165],[.95,.292,.155],[1.06,.282,.148],
+        [1.15,.252,.135],[1.22,.175,.108],[1.29,.088,.078],
+        [1.36,.078,.07],[1.385,.035,.032]
       ];
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
-      const headSdf=(x,y,z)=>loftSdf(headProfile,x,y,z);
-      const neckSdf=(x,y,z)=>ellipsoidSdf(x,y,z,0,1.265,0,.046,.12,.048);
       const forms=[
         [-.245,1.055,0,.075,.145,.072],[.245,1.055,0,.075,.145,.072],
         [-.345,.82,0,.066,.17,.064],[.345,.82,0,.066,.17,.064],
@@ -77,12 +70,10 @@
       ];
       const field=(x,y,z)=>{
         let d=torsoSdf(x,y,z);
-        d=smoothMin(d,neckSdf(x,y,z),.018);
-        d=smoothMin(d,headSdf(x,y,z),.022);
         for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.042);
         return d;
       };
-      const nx=78,ny=116,nz=48,x0=-.58,y0=.015,z0=-.36,dx=.015,dy=.015,dz=.015;
+      const nx=53,ny=65,nz=33,x0=-.58,y0=.015,z0=-.36,dx=.022,dy=.022,dz=.022;
       const values=new Float32Array((nx+1)*(ny+1)*(nz+1));
       const index=(i,j,k)=>(i*(ny+1)+j)*(nz+1)+k;
       for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)for(let k=0;k<=nz;k++)values[index(i,j,k)]=field(x0+i*dx,y0+j*dy,z0+k*dz);
@@ -121,7 +112,7 @@
         });
         const normal=new T.Vector3().crossVectors(new T.Vector3(polygon[1][0]-polygon[0][0],polygon[1][1]-polygon[0][1],polygon[1][2]-polygon[0][2]),new T.Vector3(polygon[2][0]-polygon[0][0],polygon[2][1]-polygon[0][1],polygon[2][2]-polygon[0][2]));
         if(normal.dot(grad)<0)polygon.reverse();
-        const group=center[1]<.70?2:center[1]<1.18?1:0,root=polygon[0];
+        const group=center[1]<.70?2:center[1]<1.24?1:0,root=polygon[0];
         for(let i=1;i<polygon.length-1;i++)triangles[group].push(vertexId(root),vertexId(polygon[i]),vertexId(polygon[i+1]));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
@@ -140,7 +131,7 @@
       geo.setAttribute("skinWeight",new T.Float32BufferAttribute(skinWeights,4));
       let offset=0;for(let m=0;m<3;m++){geo.addGroup(offset,triangles[m].length,m);offset+=triangles[m].length}
       geo.setIndex(triangles.flat());geo.computeVertexNormals();geo.computeBoundingSphere();
-      const bodyMaterials=[skin,shirt,pants];bodyMaterials.forEach(material=>{material.transparent=false;material.opacity=1;material.depthWrite=true;material.wireframe=false;material.side=T.FrontSide});
+      const bodyMaterials=[skin,shirt,pants];bodyMaterials.forEach(material=>{material.transparent=false;material.opacity=1;material.depthWrite=true;material.wireframe=false;material.side=T.FrontSide;material.flatShading=true;material.needsUpdate=true});
       const bodyMesh=new T.SkinnedMesh(geo,bodyMaterials);bodyMesh.name="unified-skinned-body";bodyMesh.userData.characterSurface=true;bodyMesh.castShadow=true;bodyMesh.receiveShadow=false;body.add(bodyMesh);
       body.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones);bodyMesh.bind(skeleton,bodyMesh.matrixWorld);bodyMesh.normalizeSkinWeights();
       const mesh=(parent,g,m,name)=>{madeGeometries.add(g);const o=new T.Mesh(g,m);o.name=name||"";o.castShadow=true;o.receiveShadow=false;parent.add(o);return o};
@@ -150,39 +141,36 @@
       const lathe=(parent,profile,material,segments=32,scaleZ=1,name="")=>{
         const g=new T.LatheGeometry(profile.map(p=>new T.Vector2(p[0],p[1])),segments);g.computeVertexNormals();const o=mesh(parent,g,material,name);o.scale.z=scaleZ;return o;
       };
+      // C prototype head: retain its faceted icosphere silhouette and facial spacing.
+      const headGeometry=new T.IcosahedronGeometry(1,2);madeGeometries.add(headGeometry);
+      const headSurface=mesh(head,headGeometry,skin,"C-faceted-head");
+      headSurface.position.set(0,.35,0);headSurface.scale.set(.39,.43,.34);
       const eyeGroups=[];
       for(const side of [-1,1]){
-        const ear=ellipsoid(head,side*.292,-.005,.006,.062,.073,.046,skin,"ear");ear.rotation.z=side*-.10;
-        const innerEar=ellipsoid(head,side*.326,-.008,.035,.019,.041,.009,blush,"inner-ear");innerEar.rotation.z=side*-.10;
-        const eye=new T.Group();eye.position.set(side*.12,.035,.245);head.add(eye);
-        ellipsoid(eye,0,0,0,.049,.038,.018,eyeWhite,"eye-white");
-        ellipsoid(eye,side*.002,-.002,.016,.024,.029,.011,iris,"iris");
-        ellipsoid(eye,side*.002,-.003,.025,.012,.021,.007,pupil,"pupil");
-        ellipsoid(eye,side*.009,.010,.031,.005,.007,.003,eyeWhite,"eye-glint");
+        const eye=new T.Group();eye.position.set(side*.152,.355,.302);head.add(eye);
+        ellipsoid(eye,0,0,0,.043,.058,.018,eyeWhite,"eye-white");
+        ellipsoid(eye,side*.002,-.006,.016,.021,.034,.011,iris,"iris");
+        ellipsoid(eye,side*.002,-.008,.025,.012,.021,.007,pupil,"pupil");
+        ellipsoid(eye,side*.009,.015,.031,.007,.010,.004,eyeWhite,"eye-glint");
         eyeGroups.push(eye);
-        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.17,.13,.225),new T.Vector3(side*.125,.145,.242),new T.Vector3(side*.075,.13,.25)]);
-        mesh(head,new T.TubeGeometry(browCurve,12,.0045,6,false),hair,"eyebrow");
-        const cheek=ellipsoid(head,side*.155,-.075,.145,.032,.014,.006,blush,"cheek");cheek.material.transparent=true;cheek.material.opacity=.25;
+        const cheek=ellipsoid(head,side*.253,.22,.292,.052,.024,.008,blush,"cheek");
+        cheek.material.transparent=true;cheek.material.opacity=.3;
       }
-      const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.026,-.112,.137),new T.Vector3(0,-.122,.145),new T.Vector3(.026,-.112,.137)]);
-      mesh(head,new T.TubeGeometry(mouthCurve,10,.0032,6,false),blush,"mouth");
-      // Hair is built as two coherent masses with restrained side pieces.
-      // Avoid intersecting tube strands: they caused the previous fragmented, tangled look.
-      const hairCap=lathe(head,[[0,-.012],[.13,-.012],[.235,.002],[.295,.035],[.325,.085],[.322,.135],[.29,.185],[.235,.235],[.16,.275],[.075,.298],[0,.305]],hair,48,.96,"hair-cap");
-      hairCap.position.z=-.012;hairCap.userData.characterOutline=true;
-      const backHair=lathe(head,[[0,-.205],[.10,-.20],[.19,-.17],[.245,-.11],[.265,-.015],[.255,.10],[.205,.205],[.12,.26],[0,.275]],hair,40,.76,"back-hair");
-      backHair.position.z=-.155;backHair.userData.characterOutline=true;
-      for(const side of [-1,1]){
-        const sideHair=ellipsoid(head,side*.267,-.065,-.035,.068,.155,.075,hair,"side-hair");
-        sideHair.rotation.z=side*-.12;sideHair.userData.characterOutline=true;
-      }
-      // Three broad, shallow fringe locks sit on the forehead as one orderly fringe.
-      const fringeLeft=ellipsoid(head,-.105,.174,.205,.112,.075,.043,hairLight,"fringe-left");
-      fringeLeft.rotation.z=-.24;
-      const fringeCenter=ellipsoid(head,.005,.145,.222,.105,.083,.045,hair,"fringe-center");
-      fringeCenter.rotation.z=.04;
-      const fringeRight=ellipsoid(head,.112,.174,.202,.105,.072,.042,hair,"fringe-right");
-      fringeRight.rotation.z=.28;
+      ellipsoid(head,0,.245,.336,.018,.018,.012,skin,"nose");
+      const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.038,.165,.321),new T.Vector3(0,.153,.333),new T.Vector3(.038,.165,.321)]);
+      mesh(head,new T.TubeGeometry(mouthCurve,10,.004,6,false),iris,"mouth");
+      // C prototype hair: one faceted cap and a single clean polygonal fringe.
+      const hairCapGeometry=new T.IcosahedronGeometry(1,1);madeGeometries.add(hairCapGeometry);
+      const hairCap=mesh(head,hairCapGeometry,hair,"C-faceted-hair-cap");
+      hairCap.position.set(0,.57,-.015);hairCap.scale.set(.405,.29,.35);hairCap.userData.characterOutline=true;
+      const fringeGeometry=new T.BufferGeometry();madeGeometries.add(fringeGeometry);
+      fringeGeometry.setAttribute("position",new T.Float32BufferAttribute([
+        -.30,.60,.265, .27,.58,.265, -.04,.46,.31,
+         .27,.58,.265, .35,.54,.18, .10,.43,.30,
+        -.04,.46,.31, .10,.43,.30, -.24,.46,.27
+      ],3));
+      fringeGeometry.setIndex([0,1,2,3,4,5,6,7,8]);fringeGeometry.computeVertexNormals();
+      const fringe=mesh(head,fringeGeometry,hair,"C-polygonal-fringe");fringe.material.side=T.DoubleSide;
       for(const l of legs){
         const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
         const upper=lathe(foot,[[0,-.09],[.055,-.085],[.09,-.05],[.105,.005],[.095,.06],[.065,.105],[.025,.115],[0,.115]],shoe,28,.78,"shoe-upper");upper.rotation.x=Math.PI/2;upper.scale.z=.78;upper.position.z=.025;upper.userData.characterOutline=true;
