@@ -3633,6 +3633,8 @@ function persistFurniture(item){
    if(pose!=='sleep'){
     head.rotation.y+=(Math.sin(phase*.31)*.085-head.rotation.y)*.045;
     head.rotation.x+=(Math.sin(phase*.22)*.025-head.rotation.x)*.04;
+   }else{
+    head.rotation.x*=.94;head.rotation.y*=.94;head.rotation.z*=.94;
    }
    if(pose!=='wake')body.position.y+=((pose==='sit'?-.48:0)+Math.sin(t*.0015)*.026-body.position.y)*.08;
    if(t>lastBlink&&activeActivity!=='sleep'){eyeGroups.forEach(g=>{g.scale.y=.12});setTimeout(()=>{if(activeActivity!=='sleep')eyeGroups.forEach(g=>{g.scale.y=1})},90);lastBlink=t+2400+Math.random()*2600;}
