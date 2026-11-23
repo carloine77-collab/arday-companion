@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v320";
+const CACHE_NAME = "arday-shell-v321";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,7 +6,7 @@ const APP_SHELL = [
   "./assets/css/game.css?v=20261123-css-dedupe1",
   "./assets/css/game-panels.css?v=20261122-recycle-blue-center1",
   "./assets/css/game-interactions.css?v=20261123-balloon-poster1",
-  "./assets/css/game-world.css?v=20261121-modular-css1",
+  "./assets/css/game-world.css?v=20261123-recruit-reply2",
   "./assets/css/game-career.css?v=20261121-guild-icon-fit1",
   "./assets/css/exchange.css?v=20261123-exchange-owned1",
   "./assets/css/commission.css?v=20261123-commission-owned1",
@@ -38,7 +38,7 @@ const APP_SHELL = [
   "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1",
-  "./assets/js/game.js?v=20261123-recruit-reply1",
+  "./assets/js/game.js?v=20261123-recruit-reply2",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
