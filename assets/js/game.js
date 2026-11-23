@@ -3279,8 +3279,8 @@ function persistFurniture(item){
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
    rig.rotation.set(act==='wake'?-Math.PI/2:0,0,0);rig.position.set(0,seatedHeight,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||act==='wake'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
-   body.position.y=pose==='sit'?-.53:0;legs.forEach(l=>{l.hip.position.y=pose==='sit'?-.17:.13;l.hip.rotation.x=pose==='sit'?-1.15:0;l.knee.rotation.x=pose==='sit'?1.45:0});
-   arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-1.05:pose==='sleep'?-1.25:0});
+   body.position.y=pose==='sit'?-.48:0;legs.forEach(l=>{l.hip.position.y=pose==='sit'?-.17:.13;l.hip.rotation.x=pose==='sit'?-.98:0;l.knee.rotation.x=pose==='sit'?1.22:0});
+   arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-.84:pose==='sleep'?-.98:0});
   }
   function activateHallZone(id){
    const zone=hallScene.zones.find(item=>item.id===id);if(!zone)return;
@@ -3575,11 +3575,11 @@ function persistFurniture(item){
    }
    if(pose==='idleWalk'&&!moving&&distance<.075&&t>idleWalkStartedAt+350){pose=basePose;idleNextMove=t+1800+Math.random()*2600;}
    phase+=dt*(moving?9:2);
-   if(moving){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.82;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.9});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.72;a.shoulder.rotation.z=a.side*(.075+Math.sin(phase+i*Math.PI)*.055);a.elbow.rotation.x=-.16+Math.max(0,Math.sin(phase+i*Math.PI))*.18;a.wrist.rotation.x=Math.sin(phase+i*Math.PI)*.12});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
+   if(moving){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.62;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.68});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.48;a.shoulder.rotation.z=a.side*(.075+Math.sin(phase+i*Math.PI)*.055);a.elbow.rotation.x=-.16+Math.max(0,Math.sin(phase+i*Math.PI))*.12;a.wrist.rotation.x=Math.sin(phase+i*Math.PI)*.12});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
-    legs.forEach(l=>{const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)):1,wakeEase=wakeProgress*wakeProgress*(3-2*wakeProgress),hipTarget=pose==='wake'?-.86*(1-wakeEase):pose==='sit'?-1.15:pose==='bedRead'?- .16:pose==='bedRest'?-.08:0,kneeTarget=pose==='wake'?1.12*(1-wakeEase):pose==='sit'?1.45:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='wake'?.13-.18*(1-wakeEase):pose==='sit'?-.735:.13;l.hip.position.y+=(hipY-l.hip.position.y)*.1;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.1;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.1});
-    if(activeActivity==='exercise'&&pose==='walk'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.48;l.knee.rotation.x=Math.max(0,stride)*.72})}
+    legs.forEach(l=>{const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)):1,wakeEase=wakeProgress*wakeProgress*(3-2*wakeProgress),hipTarget=pose==='wake'?-.86*(1-wakeEase):pose==='sit'?-.98:pose==='bedRead'?- .16:pose==='bedRest'?-.08:0,kneeTarget=pose==='wake'?1.12*(1-wakeEase):pose==='sit'?1.22:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='wake'?.13-.18*(1-wakeEase):pose==='sit'?-.66:.13;l.hip.position.y+=(hipY-l.hip.position.y)*.1;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.1;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.1});
+    if(activeActivity==='exercise'&&pose==='walk'&&distance<.075){legs.forEach((l,i)=>{const stride=Math.sin(t*.014+i*Math.PI);l.hip.rotation.x=stride*.40;l.knee.rotation.x=Math.max(0,stride)*.58})}
     const reading=activeActivity==='read',writing=activeActivity==='write',eating=activeActivity==='eat'||activeActivity==='food',cooking=activeActivity==='cook',weightTraining=activeActivity==='exercise'&&pose!=='walk',typing=['work','computerWork','program'].includes(activeActivity),gaming=['computerPlay','game'].includes(activeActivity),browsing=activeActivity==='browseWeb',pianoPlaying=activeActivity==='playPiano',hugging=activeActivity==='hug',watching=activeActivity==='watchTV',listening=activeActivity==='listenRecords'||activeActivity==='music',conversing=activeActivity==='chat',drinkingTea=false,inspecting=activeActivity==='bouquet'||activeActivity==='admireFlowers'||activeActivity==='admireDecor'||activeActivity==='admireView',smelling=activeActivity==='smellFlowers',washing=activeActivity==='wash'||activeActivity==='laundry',resting=activeActivity==='rest'||activeActivity==='sitChair';
     arms.forEach((a,i)=>{
      const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)):1,wakeBrace=pose==='wake'?(1-wakeProgress):0;
@@ -3631,7 +3631,7 @@ function persistFurniture(item){
    body.rotation.y+=(Math.sin(phase*.24)*.018-body.rotation.y)*.04;
    head.rotation.y+=(Math.sin(phase*.31)*.085-head.rotation.y)*.045;
    head.rotation.x+=(Math.sin(phase*.22)*.025-head.rotation.x)*.04;
-   if(pose!=='wake')body.position.y+=((pose==='sit'?-.53:0)+Math.sin(t*.0015)*.026-body.position.y)*.08;
+   if(pose!=='wake')body.position.y+=((pose==='sit'?-.48:0)+Math.sin(t*.0015)*.026-body.position.y)*.08;
    if(t>lastBlink&&activeActivity!=='sleep'){eyeGroups.forEach(g=>{g.scale.y=.12});setTimeout(()=>{if(activeActivity!=='sleep')eyeGroups.forEach(g=>{g.scale.y=1})},90);lastBlink=t+2400+Math.random()*2600;}
    updateFurnitureHotspots();
    renderer.render(scene,camera);lastDraw=t
