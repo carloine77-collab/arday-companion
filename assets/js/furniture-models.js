@@ -1763,8 +1763,12 @@ window.ArdayFurnitureModels = (() => {
    if(modelName==='床头柜'){for(const x of [-.31,.31])cyl(x,.075,-.27,.035,.035,.11,m.gold,12);box(0,.49,.414,.24,.025,.018,m.gold)}
    if(modelName==='椅子'||modelName==='餐桌椅'){const seatEdge=mat(0x9c8064,.9);for(const x of [-.29,.29]){box(x,.565,.34,.025,.025,.025,m.gold)}if(variant==='软包扶手椅'){for(const x of [-.3,.3]){const piping= new T.Mesh(new T.TorusGeometry(.27,.008,6,24,Math.PI),seatEdge);piping.position.set(x,.66,-.19);piping.rotation.y=Math.PI/2;group.add(piping)}}}
    if(modelName==='电脑'){const screenGlow=box(0,.49,-.112,.62,.012,.006,mat(0x6b9eb1,.28));screenGlow.material.emissive=new T.Color(0x23485b);screenGlow.material.emissiveIntensity=.28;for(let row=0;row<3;row++)for(let col=0;col<10;col++)box(-.27+col*.06,.104+row*.002,.105+row*.047,.035,.006,.025,m.metal)}
-   const cabinetTopHeights={'床头柜':.94,'衣柜':2.52,'书架':2.16,'展示柜':2.08,'斗柜':1.22,'电视柜':.78,'橱柜':1.1,'鞋柜':1.08,'置物架':1.96,'酒柜':1.75,'餐边柜':1.26,'料理台':1.05,'吊柜':.55};
+   const cabinetTopHeights={'床头柜':.94,'衣柜':2.52,'书架':2.16,'展示柜':2.08,'斗柜':1.22,'电视柜':.78,'橱柜':1.1,'鞋柜':1.18,'置物架':1.96,'酒柜':1.75,'餐边柜':1.26,'料理台':1.05,'吊柜':.55};
+   // Any cabinet with a usable horizontal top can support dishes and decorations.
+   // Explicit model heights take priority; newly added cabinet models fall back
+   // to their modeled height instead of remaining non-supporting furniture.
    if(Object.prototype.hasOwnProperty.call(cabinetTopHeights,modelName)){surfaceType='table';surfaceY=cabinetTopHeights[modelName]}
+   else if(modelName.endsWith('柜')){surfaceType='table';surfaceY=Number(surfaceY)>0?surfaceY:Number(height)||.8}
    return {variant,modelName,room,parent,id,group,restoring,width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action};
   }
   return {build};
