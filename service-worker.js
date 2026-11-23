@@ -5,7 +5,7 @@ const APP_SHELL = [
   "./manifest.json",
   "./assets/css/game.css?v=20261123-css-dedupe1",
   "./assets/css/game-panels.css?v=20261122-recycle-blue-center1",
-  "./assets/css/game-interactions.css?v=20261123-interaction-ownership1",
+  "./assets/css/game-interactions.css?v=20261123-entertainment-poster1",
   "./assets/css/game-world.css?v=20261121-modular-css1",
   "./assets/css/game-career.css?v=20261121-guild-icon-fit1",
   "./assets/css/exchange.css?v=20261123-exchange-owned1",
