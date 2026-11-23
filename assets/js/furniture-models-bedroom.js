@@ -254,7 +254,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     }
     // Separate seat pan, rounded cushion and adjustable arm supports.
     box(0,.57,.025,.68,.14,.66,frame);
-    const cushion=new T.Mesh(new T.CapsuleGeometry(.29,.09,5,12),fabric);cushion.rotation.x=Math.PI/2;cushion.position.set(0,.67,.035);cushion.scale.set(1,.9,1);group.add(cushion);
+    const cushion=new T.Mesh(new T.SphereGeometry(1,28,18),fabric);cushion.position.set(0,.67,.035);cushion.scale.set(.29,.13,.33);group.add(cushion);
     box(0,.75,-.245,.12,.12,.12,frame);
     for(const x of [-.37,.37]){
      box(x,.79,-.015,.065,.38,.065,frame);
