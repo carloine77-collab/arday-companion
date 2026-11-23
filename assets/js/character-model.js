@@ -5,7 +5,7 @@
     try{
       const mat=(color,roughness=.84)=>{const m=stylizeMaterial(new T.MeshStandardMaterial({color,roughness,metalness:0,flatShading:false}));madeMaterials.add(m);return m};
       const skin=mat(0xe8b99d,.9),hair=mat(0xc99a42,.78),hairLight=mat(0xe8bf70,.72),shirt=mat(0xeee4d6,.94),pants=mat(0x55515a,.96),shoe=mat(0x51443f,.88),sole=mat(0x342e30,.9),eyeWhite=mat(0xfff8ef,.7),iris=mat(0x806d61,.55),pupil=mat(0x302827,.5),blush=mat(0xd99c87,.9);
-      person=new T.Group();person.name="ArdayChibiCharacter";scene.add(person);
+      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(.92,.88,.92);scene.add(person);
       const rig=new T.Group();rig.name="character-rig";person.add(rig);
       const body=new T.Group();body.name="character-body";rig.add(body);
       const boneRoot=new T.Bone();boneRoot.name="pelvis-root";body.add(boneRoot);
@@ -125,6 +125,7 @@
       }
       const shadow=new T.Mesh(new T.CircleGeometry(.48,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
       bodyMesh.updateMatrixWorld(true);skeleton.update();
+      const weightArray=geo.attributes.skinWeight.array;let invalidWeights=0;for(let i=0;i<weightArray.length;i+=4){const total=weightArray[i]+weightArray[i+1]+weightArray[i+2]+weightArray[i+3];if(!Number.isFinite(total)||Math.abs(total-1)>.001)invalidWeights++}if(invalidWeights)throw new Error("Invalid skin weights: "+invalidWeights);
       const report={vertices:geo.attributes.position.count,triangles:geo.index.count/3,bones:bones.length,skinned:bodyMesh.isSkinnedMesh,materials:geo.groups.length};
       if(!report.skinned||report.vertices<1000||report.bones<12||report.triangles<1000)throw new Error("Unified skinned character validation failed: "+JSON.stringify(report));
       return {person,rig,body,head,eyeGroups,arms,legs,shadow,skeleton,bodyMesh,report};
