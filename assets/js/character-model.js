@@ -47,9 +47,11 @@
     // Its silhouette is sculpted by the radial profile rather than assembled primitives.
     const torso=lathe(body,[
       [.13,.72],[.18,.75],[.225,.82],[.235,.94],[.225,1.08],[.25,1.22],
-      [.295,1.39],[.345,1.53],[.355,1.61],[.31,1.68],[.205,1.72],
-      [.125,1.77],[.112,1.9],[.13,1.94],[0,1.95]
+      [.295,1.39],[.345,1.53],[.355,1.61],[.31,1.66],[.235,1.70],
+      [.15,1.73],[0,1.74]
     ],shirt,40,.78);
+    // Exposed neck surface bridges the collar and jaw; it is buried at both ends to avoid a hard seam.
+    lathe(body,[[0,1.63],[.075,1.65],[.095,1.7],[.10,1.82],[.095,1.94],[.075,2.0],[0,2.01]],skin,32,.86);
     // Soft tailored panels follow the torso surface; they are details, not structural blocks.
     tube(body,[[0,1.67,.238],[0,1.47,.272],[0,1.22,.205],[0,.96,.19]],.006,shirtShade,28,6);
     for(const side of [-1,1]){
