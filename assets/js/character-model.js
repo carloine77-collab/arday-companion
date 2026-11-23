@@ -40,7 +40,8 @@
         [-.405,.625,0,.067,.105,.07],[.405,.625,0,.067,.105,.07],
         [-.13,.56,0,.118,.255,.12],[.13,.56,0,.118,.255,.12],
         [-.13,.29,0,.092,.205,.098],[.13,.29,0,.092,.205,.098],
-        [-.13,.105,.065,.12,.075,.19],[.13,.105,.065,.12,.075,.19]
+        [-.13,.105,.065,.12,.075,.19],[.13,.105,.065,.12,.075,.19],
+        [-.455,.59,.045,.04,.065,.052],[.455,.59,.045,.04,.065,.052]
       ];
       const field=(x,y,z)=>{
         let d=1e4;
@@ -66,7 +67,11 @@
         return id;
       };
       const emit=(a,b,c)=>{
-        const cy=(a[1]+b[1]+c[1])/3,group=cy<.77?2:cy<1.25?1:0;
+        const center=[(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3,(a[2]+b[2]+c[2])/3],eps=.0025;
+        const grad=new T.Vector3(field(center[0]+eps,center[1],center[2])-field(center[0]-eps,center[1],center[2]),field(center[0],center[1]+eps,center[2])-field(center[0],center[1]-eps,center[2]),field(center[0],center[1],center[2]+eps)-field(center[0],center[1],center[2]-eps));
+        const normal=new T.Vector3().crossVectors(new T.Vector3(b[0]-a[0],b[1]-a[1],b[2]-a[2]),new T.Vector3(c[0]-a[0],c[1]-a[1],c[2]-a[2]));
+        if(normal.dot(grad)<0)[b,c]=[c,b];
+        const cy=center[1],group=cy<.77?2:cy<1.25?1:0;
         triangles[group].push(vertexId(a),vertexId(b),vertexId(c));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
