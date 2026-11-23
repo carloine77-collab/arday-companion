@@ -37,11 +37,18 @@
       // The torso, visible neck and shaped head are designed as one continuous silhouette.
       // A tapered chin keeps the neck readable instead of letting an ellipsoid head swallow it.
       const loftSdf=(profile,x,y,z)=>{
-        let a=profile[0],b=profile[profile.length-1];
-        for(let i=0;i<profile.length-1;i++)if(y>=profile[i][0]&&y<=profile[i+1][0]){a=profile[i];b=profile[i+1];break}
-        const t=Math.max(0,Math.min(1,(y-a[0])/Math.max(1e-5,b[0]-a[0])));
-        const smooth=t*t*(3-2*t),rx=Math.max(.012,a[1]+(b[1]-a[1])*smooth),rz=Math.max(.012,a[2]+(b[2]-a[2])*smooth);
-        const radial=(Math.hypot(x/rx,z/rz)-1)*Math.min(rx,rz);
+        let i=0;
+        if(y<=profile[0][0])i=0;
+        else if(y>=profile[profile.length-1][0])i=profile.length-2;
+        else for(let q=0;q<profile.length-1;q++)if(y>=profile[q][0]&&y<=profile[q+1][0]){i=q;break}
+        const a=profile[i],b=profile[i+1],span=Math.max(1e-5,b[0]-a[0]),t=Math.max(0,Math.min(1,(y-a[0])/span)),t2=t*t,t3=t2*t;
+        const interpolate=axis=>{
+          const p0=profile[Math.max(0,i-1)],p3=profile[Math.min(profile.length-1,i+2)];
+          const m1=(b[axis]-p0[axis])/Math.max(1e-5,b[0]-p0[0])*span;
+          const m2=(p3[axis]-a[axis])/Math.max(1e-5,p3[0]-a[0])*span;
+          return Math.max(.012,(2*t3-3*t2+1)*a[axis]+(t3-2*t2+t)*m1+(-2*t3+3*t2)*b[axis]+(t3-t2)*m2);
+        };
+        const rx=interpolate(1),rz=interpolate(2),radial=(Math.hypot(x/rx,z/rz)-1)*Math.min(rx,rz);
         const vertical=Math.max(profile[0][0]-y,y-profile[profile.length-1][0]);
         return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
       };
@@ -51,15 +58,16 @@
         [1.09,.205,.145],[1.14,.185,.13],[1.18,.125,.09],[1.205,.075,.065]
       ];
       const headProfile=[
-        [1.285,.072,.064],[1.315,.12,.105],[1.36,.19,.16],
-        [1.415,.255,.215],[1.48,.30,.245],[1.545,.315,.255],
-        [1.615,.29,.235],[1.68,.22,.18],[1.725,.12,.105],[1.745,.02,.02]
+        [1.26,.018,.018],[1.285,.075,.065],[1.32,.14,.12],
+        [1.38,.22,.185],[1.45,.29,.24],[1.53,.33,.265],
+        [1.61,.31,.25],[1.68,.24,.20],[1.73,.14,.12],
+        [1.765,.055,.05],[1.78,.012,.012]
       ];
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
       const headSdf=(x,y,z)=>loftSdf(headProfile,x,y,z);
-      const neckSdf=(x,y,z)=>ellipsoidSdf(x,y,z,0,1.265,0,.047,.115,.05);
+      const neckSdf=(x,y,z)=>ellipsoidSdf(x,y,z,0,1.265,0,.046,.12,.048);
       const forms=[
-        [-.27,1.055,0,.086,.145,.078],[.27,1.055,0,.086,.145,.078],
+        [-.245,1.055,0,.075,.145,.072],[.245,1.055,0,.075,.145,.072],
         [-.345,.82,0,.066,.17,.064],[.345,.82,0,.066,.17,.064],
         [-.38,.625,0,.057,.095,.058],[.38,.625,0,.057,.095,.058],
         [-.125,.56,0,.096,.225,.09],[.125,.56,0,.096,.225,.09],
@@ -113,7 +121,7 @@
         });
         const normal=new T.Vector3().crossVectors(new T.Vector3(polygon[1][0]-polygon[0][0],polygon[1][1]-polygon[0][1],polygon[1][2]-polygon[0][2]),new T.Vector3(polygon[2][0]-polygon[0][0],polygon[2][1]-polygon[0][1],polygon[2][2]-polygon[0][2]));
         if(normal.dot(grad)<0)polygon.reverse();
-        const group=center[1]<.70?2:center[1]<1.30?1:0,root=polygon[0];
+        const group=center[1]<.70?2:center[1]<1.18?1:0,root=polygon[0];
         for(let i=1;i<polygon.length-1;i++)triangles[group].push(vertexId(root),vertexId(polygon[i]),vertexId(polygon[i+1]));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
@@ -144,27 +152,29 @@
       };
       const eyeGroups=[];
       for(const side of [-1,1]){
-        const eye=new T.Group();eye.position.set(side*.115,.035,.242);head.add(eye);
-        ellipsoid(eye,0,0,0,.052,.039,.019,eyeWhite,"eye-white");
-        ellipsoid(eye,side*.002,-.002,.017,.026,.030,.012,iris,"iris");
-        ellipsoid(eye,side*.002,-.003,.027,.013,.022,.008,pupil,"pupil");
-        ellipsoid(eye,side*.009,.011,.034,.0055,.0075,.0035,eyeWhite,"eye-glint");
+        const ear=ellipsoid(head,side*.292,-.005,.006,.062,.073,.046,skin,"ear");ear.rotation.z=side*-.10;
+        const innerEar=ellipsoid(head,side*.326,-.008,.035,.019,.041,.009,blush,"inner-ear");innerEar.rotation.z=side*-.10;
+        const eye=new T.Group();eye.position.set(side*.12,.035,.245);head.add(eye);
+        ellipsoid(eye,0,0,0,.049,.038,.018,eyeWhite,"eye-white");
+        ellipsoid(eye,side*.002,-.002,.016,.024,.029,.011,iris,"iris");
+        ellipsoid(eye,side*.002,-.003,.025,.012,.021,.007,pupil,"pupil");
+        ellipsoid(eye,side*.009,.010,.031,.005,.007,.003,eyeWhite,"eye-glint");
         eyeGroups.push(eye);
-        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.17,.13,.205),new T.Vector3(side*.125,.145,.212),new T.Vector3(side*.075,.13,.212)]);
-        mesh(head,new T.TubeGeometry(browCurve,12,.005,6,false),hair,"eyebrow");
-        const cheek=ellipsoid(head,side*.17,-.105,.215,.038,.016,.007,blush,"cheek");cheek.material.transparent=true;cheek.material.opacity=.28;
+        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.17,.13,.225),new T.Vector3(side*.125,.145,.242),new T.Vector3(side*.075,.13,.25)]);
+        mesh(head,new T.TubeGeometry(browCurve,12,.0045,6,false),hair,"eyebrow");
+        const cheek=ellipsoid(head,side*.155,-.075,.145,.032,.014,.006,blush,"cheek");cheek.material.transparent=true;cheek.material.opacity=.25;
       }
-      const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.028,-.145,.245),new T.Vector3(0,-.154,.25),new T.Vector3(.028,-.145,.245)]);
-      mesh(head,new T.TubeGeometry(mouthCurve,10,.0035,6,false),blush,"mouth");
-      const hairCap=lathe(head,[[0,.19],[.09,.205],[.18,.24],[.245,.29],[.27,.34],[.23,.39],[.15,.425],[0,.44]],hair,36,.94,"hair-cap");hairCap.position.z=-.025;hairCap.userData.characterOutline=true;
+      const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.026,-.112,.137),new T.Vector3(0,-.122,.145),new T.Vector3(.026,-.112,.137)]);
+      mesh(head,new T.TubeGeometry(mouthCurve,10,.0032,6,false),blush,"mouth");
+      const hairCap=lathe(head,[[0,-.025],[.16,-.025],[.25,-.005],[.30,.035],[.325,.09],[.30,.145],[.255,.20],[.18,.25],[.09,.285],[0,.30]],hair,40,.94,"hair-cap");hairCap.position.z=-.012;hairCap.userData.characterOutline=true;
       const backHair=lathe(head,[[0,-.17],[.12,-.16],[.21,-.11],[.25,-.02],[.24,.15],[.16,.25],[0,.29]],hair,32,.62,"back-hair");backHair.position.z=-.17;backHair.userData.characterOutline=true;
       for(const side of [-1,1]){
         const curve=new T.CatmullRomCurve3([new T.Vector3(side*.23,.29,.065),new T.Vector3(side*.27,.12,.08),new T.Vector3(side*.245,-.04,.075),new T.Vector3(side*.21,-.18,.055)]);
         const lock=mesh(head,new T.TubeGeometry(curve,24,.038,10,false),hair,"side-lock");lock.userData.characterOutline=true;
       }
-      const fringe1=new T.CatmullRomCurve3([new T.Vector3(-.23,.27,.15),new T.Vector3(-.14,.36,.205),new T.Vector3(-.045,.33,.235),new T.Vector3(.015,.25,.24)]);
-      const fringe2=new T.CatmullRomCurve3([new T.Vector3(.005,.33,.23),new T.Vector3(.12,.36,.205),new T.Vector3(.22,.27,.15),new T.Vector3(.235,.20,.12)]);
-      [fringe1,fringe2].forEach((c,i)=>{const h=mesh(head,new T.TubeGeometry(c,22,.047,10,false),i?hair:hairLight,"fringe");h.userData.characterOutline=true});
+      const fringe1=new T.CatmullRomCurve3([new T.Vector3(-.25,.10,.17),new T.Vector3(-.15,.22,.22),new T.Vector3(-.045,.20,.255),new T.Vector3(.015,.11,.265)]);
+      const fringe2=new T.CatmullRomCurve3([new T.Vector3(.005,.20,.255),new T.Vector3(.12,.23,.23),new T.Vector3(.23,.12,.16),new T.Vector3(.235,.06,.12)]);
+      [fringe1,fringe2].forEach((c,i)=>{const h=mesh(head,new T.TubeGeometry(c,22,.036,10,false),i?hair:hairLight,"fringe");h.userData.characterOutline=true});
       for(const l of legs){
         const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
         const upper=lathe(foot,[[0,-.09],[.055,-.085],[.09,-.05],[.105,.005],[.095,.06],[.065,.105],[.025,.115],[0,.115]],shoe,28,.78,"shoe-upper");upper.rotation.x=Math.PI/2;upper.scale.z=.78;upper.position.z=.025;upper.userData.characterOutline=true;
