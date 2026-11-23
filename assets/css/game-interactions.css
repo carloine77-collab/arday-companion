@@ -822,3 +822,64 @@ header.top{position:relative}
 .balloon-result-amount{text-align:center;color:#587566;font:36px Georgia,serif}
 .balloon-round-panel>p{text-align:center;font-size:11px;color:#88775e}
 @media(max-width:420px){.balloon-type-grid{gap:5px}.balloon-type{padding:8px 3px}.balloon-type small{font-size:8px}.balloon-type-art{width:31px;height:39px}.balloon-start-actions button{padding:8px 10px}}
+
+
+/* Balloon risk: full-page illustrated poster composition. */
+#choices.balloon-fullscreen{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;overflow-y:auto!important;padding:0 2px 10px!important;min-height:0!important}
+.balloon-fullscreen .entertainment-poster{flex:0 0 auto!important;width:100%;box-sizing:border-box;margin:0 0 7px!important;padding:10px 14px 7px!important}
+.balloon-fullscreen .entertainment-poster h2{font-size:clamp(20px,3.8vh,29px)!important;letter-spacing:.16em!important}
+.balloon-fullscreen .entertainment-poster-foot{margin-top:0!important}
+.balloon-poster-mark{display:flex;min-height:54px;align-items:center;justify-content:center;gap:16px;color:#e8d6b5}
+.balloon-poster-mark span{font:italic 12px Georgia,serif;letter-spacing:.22em;color:#d2b17b}
+.balloon-poster-mark b{font:600 15px/1.25 Georgia,serif;letter-spacing:.13em;text-align:center}
+.balloon-poster-mark i{font:normal 28px Georgia,serif;color:#d2b17b}
+.balloon-playfield{display:flex;flex:1 0 auto;min-height:300px;flex-direction:column;justify-content:space-between;gap:8px;padding:8px 10px 7px;border:1px solid #c9b48e;background:radial-gradient(ellipse at 50% 30%,#fff9ec 0,#f1e5d2 56%,#e4d4bc 100%);position:relative;overflow:hidden}
+.balloon-playfield:before{content:"";position:absolute;inset:8px;border:1px solid #c5ad87;pointer-events:none}
+.balloon-stage{position:relative;display:flex;flex:1 1 auto;min-height:185px;flex-direction:column;justify-content:center;align-items:center;overflow:hidden}
+.balloon-stage:before,.balloon-stage:after{content:"";position:absolute;width:min(48vw,220px);aspect-ratio:1;border:1px solid #b99c704d;border-radius:50%;pointer-events:none}
+.balloon-stage:after{width:min(36vw,164px)}
+.balloon-stage .balloon-illustration{position:relative;z-index:1;display:flex;flex:1;min-height:180px;width:100%;align-items:center;justify-content:center}
+.balloon-stage .balloon-illustration svg{width:clamp(150px,27vh,245px);height:clamp(160px,29vh,260px);max-width:75%;max-height:100%;filter:drop-shadow(0 13px 8px #35291e30)}
+.balloon-stage .balloon-illustration svg ellipse:first-of-type{fill:var(--balloon-color)}
+.balloon-stage.balloon-mint{--balloon-color:#8cae9f}.balloon-stage.balloon-rose{--balloon-color:#c98183}.balloon-stage.balloon-gold{--balloon-color:#d0ad69}
+.balloon-stage-caption{position:absolute;z-index:2;left:8px;right:8px;bottom:2px;display:flex;justify-content:space-between;align-items:center;color:#8d7656;font:10px Georgia,serif;letter-spacing:.15em}
+.balloon-stage-caption b{font:600 12px "Noto Serif SC",serif;letter-spacing:.08em}
+.balloon-dashboard{position:relative;z-index:1;flex:0 0 auto;padding:4px 2px 0}
+.balloon-dashboard .balloon-round-stats{margin:0 0 9px;gap:9px}
+.balloon-dashboard .balloon-round-stats>div{background:#f8f0e3;border-color:#d4c09d;padding:7px 11px}
+.balloon-dashboard .balloon-round-stats strong{font-size:clamp(21px,4vh,29px)}
+.balloon-dashboard .balloon-risk-track{height:8px}
+.balloon-dashboard .balloon-risk-labels{margin:5px 0 8px;font-size:10px}
+.balloon-dashboard .balloon-round-actions{margin:7px 0 9px;gap:9px}
+.balloon-dashboard .balloon-round-actions button{min-height:43px;font-size:12px;letter-spacing:.04em}
+.balloon-dashboard .balloon-round-actions button i{font-style:normal;margin-left:5px;font-size:16px}
+.balloon-footer-mark{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 2px 0;border-top:1px solid #cbb795;color:#8c7758;font:9px Georgia,serif;letter-spacing:.12em}
+.balloon-footer-mark b{font:italic 18px Georgia,serif;color:#536d64}
+.balloon-finish{display:flex;flex:1 0 auto;min-height:280px;flex-direction:column;align-items:center;justify-content:center;padding:8px 12px;background:radial-gradient(ellipse at center,#fff8eb 0,#ecdfca 78%);border:1px solid #c9b48e}
+.balloon-finish-art{width:100%;max-height:160px;overflow:hidden}
+.balloon-finish-art .balloon-illustration{min-height:135px}
+.balloon-finish-art .balloon-illustration svg{width:130px;height:140px}
+.balloon-finish .balloon-result-title{margin:3px 0 4px}
+.balloon-finish .balloon-result-amount{font-size:clamp(34px,7vh,48px)}
+.balloon-finish p,.balloon-unavailable p{margin:5px 0 12px;color:#88775e;font-size:11px;text-align:center}
+.balloon-finish-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 15px}
+.balloon-finish-actions button,.balloon-unavailable button{min-width:116px;min-height:40px;border:1px solid #a98b61;border-radius:3px;padding:8px 14px;background:#536a6a;color:#fff8e9;font-size:12px}
+.balloon-finish-actions .entertainment-back,.balloon-unavailable .entertainment-back{background:#897e70!important}
+.balloon-unavailable{display:flex;flex:1 0 auto;min-height:270px;flex-direction:column;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at center,#fff8eb 0,#ecdfca 78%);border:1px solid #c9b48e}
+.balloon-unavailable-art{display:flex;min-height:80px;align-items:center;justify-content:center;gap:12px;color:#a27a4e}
+.balloon-unavailable-art span{font:48px Georgia,serif}.balloon-unavailable-art b{font:600 13px Georgia,serif;letter-spacing:.16em}
+.balloon-unavailable .balloon-result-title{margin:12px 0 5px}
+.balloon-remaining-mark{margin:8px 0 17px;color:#9b815f;font:italic 18px Georgia,serif;letter-spacing:.12em}
+@media(max-width:430px){
+ #choices.balloon-fullscreen{padding:0 0 calc(4px + env(safe-area-inset-bottom))!important}
+ .balloon-playfield{min-height:calc(100% - 2px);padding:6px 7px 6px;gap:5px}
+ .balloon-stage{min-height:165px}
+ .balloon-stage .balloon-illustration{min-height:165px}
+ .balloon-stage .balloon-illustration svg{width:clamp(145px,25vh,205px);height:clamp(155px,27vh,220px)}
+ .balloon-dashboard .balloon-round-actions button{min-height:42px;padding:8px 6px}
+ .balloon-footer-mark{font-size:8px}
+}
+@media(min-height:760px){
+ .balloon-playfield{min-height:440px}
+ .balloon-stage{min-height:260px}
+}
