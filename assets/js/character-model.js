@@ -5,10 +5,10 @@
     try{
       const mat=(color,roughness=.84)=>{const m=stylizeMaterial(new T.MeshStandardMaterial({color,roughness,metalness:0,flatShading:false}));madeMaterials.add(m);return m};
       const skin=mat(0xe8b99d,.9),hair=mat(0xc99a42,.78),hairLight=mat(0xe8bf70,.72),shirt=mat(0xeee4d6,.94),pants=mat(0x55515a,.96),shoe=mat(0x51443f,.88),sole=mat(0x342e30,.9),eyeWhite=mat(0xfff8ef,.7),iris=mat(0x806d61,.55),pupil=mat(0x302827,.5),blush=mat(0xd99c87,.9);
-      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(.92,.88,.92);scene.add(person);
+      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.84,1);scene.add(person);
       const rig=new T.Group();rig.name="character-rig";person.add(rig);
       const body=new T.Group();body.name="character-body";rig.add(body);
-      const boneRoot=new T.Bone();boneRoot.name="pelvis-root";body.add(boneRoot);
+      const boneRoot=new T.Bone();boneRoot.name="pelvis-root";boneRoot.position.y=.70;body.add(boneRoot);
       const bones=[],bonePoints=[];
       const addBone=(name,parent,local,world)=>{const b=new T.Bone();b.name=name;b.position.set(...local);parent.add(b);bones.push(b);bonePoints.push({bone:b,point:new T.Vector3(...world)});return b};
       const pelvis=boneRoot;
@@ -34,14 +34,14 @@
         return k0*(k0-1)/(Math.max(k1,1e-5))*Math.min(rx,ry,rz);
       };
       const forms=[
-        [0,.98,0,.255,.34,.17],[0,.72,0,.235,.19,.17],[0,1.43,0,.285,.30,.245],[0,1.235,0,.105,.17,.105],
-        [-.29,1.015,0,.12,.205,.115],[.29,1.015,0,.12,.205,.115],
-        [-.365,.82,0,.083,.19,.085],[.365,.82,0,.083,.19,.085],
-        [-.405,.625,0,.067,.105,.07],[.405,.625,0,.067,.105,.07],
-        [-.13,.56,0,.118,.255,.12],[.13,.56,0,.118,.255,.12],
-        [-.13,.29,0,.092,.205,.098],[.13,.29,0,.092,.205,.098],
+        [0,.98,0,.27,.31,.18],[0,.72,0,.25,.20,.18],[0,1.43,0,.33,.34,.265],[0,1.235,0,.105,.15,.105],
+        [-.29,1.015,0,.13,.20,.12],[.29,1.015,0,.13,.20,.12],
+        [-.365,.82,0,.09,.19,.09],[.365,.82,0,.09,.19,.09],
+        [-.405,.625,0,.075,.105,.075],[.405,.625,0,.075,.105,.075],
+        [-.13,.56,0,.13,.255,.13],[.13,.56,0,.13,.255,.13],
+        [-.13,.29,0,.105,.205,.105],[.13,.29,0,.105,.205,.105],
         [-.13,.105,.065,.12,.075,.19],[.13,.105,.065,.12,.075,.19],
-        [-.455,.59,.045,.04,.065,.052],[.455,.59,.045,.04,.065,.052]
+        [-.455,.59,.045,.045,.065,.055],[.455,.59,.045,.045,.065,.055]
       ];
       const field=(x,y,z)=>{
         let d=1e4;
@@ -56,14 +56,24 @@
       const corner=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
       const tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]];
       const edgePairs=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+      const boneIndexByObject=new Map(bones.map((bone,index)=>[bone,index]));
+      const bonePointByObject=new Map(bonePoints.map(entry=>[entry.bone,entry.point]));
+      const boneSegments=bones.slice(1).map(bone=>({a:bonePointByObject.get(bone.parent),b:bonePointByObject.get(bone),parentIndex:boneIndexByObject.get(bone.parent),childIndex:boneIndexByObject.get(bone)})).filter(segment=>segment.a&&segment.b);
       const interp=(a,b,va,vb)=>{const t=Math.max(0,Math.min(1,va/(va-vb)));return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]};
       const vertexId=p=>{
         const key=p.map(v=>v.toFixed(5)).join(",");
         if(vertexMap.has(key))return vertexMap.get(key);
         const id=positions.length/3;vertexMap.set(key,id);positions.push(...p);
-        const v=new T.Vector3(...p),near=bonePoints.map((entry,i)=>({i,d:v.distanceToSquared(entry.point)})).sort((u,w)=>u.d-w.d).slice(0,4);
-        let sum=0;const ws=near.map(n=>{const w=1/Math.pow(n.d+.002,1.25);sum+=w;return w});
-        for(let q=0;q<4;q++){skinIndices.push(near[q].i);skinWeights.push(ws[q]/sum)}
+        const v=new T.Vector3(...p),influences=new Map();
+        for(const segment of boneSegments){
+          const axis=new T.Vector3().subVectors(segment.b,segment.a),offset=new T.Vector3().subVectors(v,segment.a);
+          const t=Math.max(0,Math.min(1,offset.dot(axis)/Math.max(axis.lengthSq(),1e-8)));
+          const nearest=segment.a.clone().addScaledVector(axis,t),distanceSq=v.distanceToSquared(nearest),weight=1/Math.pow(distanceSq+.002,1.25);
+          influences.set(segment.parentIndex,(influences.get(segment.parentIndex)||0)+weight*(1-t));
+          influences.set(segment.childIndex,(influences.get(segment.childIndex)||0)+weight*t);
+        }
+        const near=[...influences.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4),sum=near.reduce((total,item)=>total+item[1],0);
+        for(let q=0;q<4;q++){const influence=near[q];skinIndices.push(influence?influence[0]:0);skinWeights.push(influence?influence[1]/sum:0)}
         return id;
       };
       const emit=(a,b,c)=>{
@@ -92,7 +102,7 @@
       let offset=0;for(let m=0;m<3;m++){geo.addGroup(offset,triangles[m].length,m);offset+=triangles[m].length}
       geo.setIndex(triangles.flat());geo.computeVertexNormals();geo.computeBoundingSphere();
       const bodyMesh=new T.SkinnedMesh(geo,[skin,shirt,pants]);bodyMesh.name="unified-skinned-body";bodyMesh.userData.characterSurface=true;bodyMesh.castShadow=true;bodyMesh.receiveShadow=false;body.add(bodyMesh);
-      const skeleton=new T.Skeleton(bones);body.updateMatrixWorld(true);bodyMesh.bind(skeleton);bodyMesh.normalizeSkinWeights();
+      body.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones);bodyMesh.bind(skeleton,bodyMesh.matrixWorld);bodyMesh.normalizeSkinWeights();
       const mesh=(parent,g,m,name)=>{madeGeometries.add(g);const o=new T.Mesh(g,m);o.name=name||"";o.castShadow=true;o.receiveShadow=false;parent.add(o);return o};
       const ellipsoid=(parent,x,y,z,sx,sy,sz,material,name)=>{
         const g=new T.SphereGeometry(1,24,16);const o=mesh(parent,g,material,name);o.position.set(x,y,z);o.scale.set(sx,sy,sz);return o;
@@ -102,26 +112,26 @@
       };
       const eyeGroups=[];
       for(const side of [-1,1]){
-        const eye=new T.Group();eye.position.set(side*.105,.015,.221);head.add(eye);
-        ellipsoid(eye,0,0,0,.047,.035,.018,eyeWhite,"eye-white");
-        ellipsoid(eye,side*.002,-.002,.016,.024,.028,.011,iris,"iris");
-        ellipsoid(eye,side*.002,-.003,.025,.012,.021,.007,pupil,"pupil");
-        ellipsoid(eye,side*.009,.009,.031,.005,.007,.003,eyeWhite,"eye-glint");
+        const eye=new T.Group();eye.position.set(side*.115,.035,.242);head.add(eye);
+        ellipsoid(eye,0,0,0,.052,.039,.019,eyeWhite,"eye-white");
+        ellipsoid(eye,side*.002,-.002,.017,.026,.030,.012,iris,"iris");
+        ellipsoid(eye,side*.002,-.003,.027,.013,.022,.008,pupil,"pupil");
+        ellipsoid(eye,side*.009,.011,.034,.0055,.0075,.0035,eyeWhite,"eye-glint");
         eyeGroups.push(eye);
-        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.16,.095,.19),new T.Vector3(side*.12,.115,.22),new T.Vector3(side*.075,.105,.22)]);
+        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.17,.13,.225),new T.Vector3(side*.125,.145,.245),new T.Vector3(side*.075,.13,.245)]);
         mesh(head,new T.TubeGeometry(browCurve,12,.005,6,false),hair,"eyebrow");
-        const cheek=ellipsoid(head,side*.15,-.085,.19,.035,.014,.006,blush,"cheek");cheek.material.transparent=true;cheek.material.opacity=.28;
+        const cheek=ellipsoid(head,side*.17,-.105,.215,.038,.016,.007,blush,"cheek");cheek.material.transparent=true;cheek.material.opacity=.28;
       }
-      const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.025,-.115,.226),new T.Vector3(0,-.124,.23),new T.Vector3(.025,-.115,.226)]);
+      const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.028,-.145,.245),new T.Vector3(0,-.154,.25),new T.Vector3(.028,-.145,.245)]);
       mesh(head,new T.TubeGeometry(mouthCurve,10,.0035,6,false),blush,"mouth");
-      const hairCap=lathe(head,[[0,.19],[.09,.205],[.18,.24],[.245,.31],[.27,.40],[.23,.49],[.15,.535],[0,.55]],hair,36,.94,"hair-cap");hairCap.position.z=-.025;hairCap.userData.characterOutline=true;
+      const hairCap=lathe(head,[[0,.19],[.09,.205],[.18,.24],[.245,.29],[.27,.34],[.23,.39],[.15,.425],[0,.44]],hair,36,.94,"hair-cap");hairCap.position.z=-.025;hairCap.userData.characterOutline=true;
       const backHair=lathe(head,[[0,-.17],[.12,-.16],[.21,-.11],[.25,-.02],[.24,.15],[.16,.25],[0,.29]],hair,32,.62,"back-hair");backHair.position.z=-.17;backHair.userData.characterOutline=true;
       for(const side of [-1,1]){
-        const curve=new T.CatmullRomCurve3([new T.Vector3(side*.21,.30,.055),new T.Vector3(side*.255,.13,.075),new T.Vector3(side*.235,-.04,.07),new T.Vector3(side*.20,-.18,.05)]);
+        const curve=new T.CatmullRomCurve3([new T.Vector3(side*.23,.29,.065),new T.Vector3(side*.27,.12,.08),new T.Vector3(side*.245,-.04,.075),new T.Vector3(side*.21,-.18,.055)]);
         const lock=mesh(head,new T.TubeGeometry(curve,24,.038,10,false),hair,"side-lock");lock.userData.characterOutline=true;
       }
-      const fringe1=new T.CatmullRomCurve3([new T.Vector3(-.21,.30,.12),new T.Vector3(-.13,.39,.17),new T.Vector3(-.045,.35,.20),new T.Vector3(.015,.27,.21)]);
-      const fringe2=new T.CatmullRomCurve3([new T.Vector3(.005,.35,.19),new T.Vector3(.11,.39,.16),new T.Vector3(.205,.31,.12),new T.Vector3(.22,.22,.11)]);
+      const fringe1=new T.CatmullRomCurve3([new T.Vector3(-.23,.27,.15),new T.Vector3(-.14,.36,.205),new T.Vector3(-.045,.33,.235),new T.Vector3(.015,.25,.24)]);
+      const fringe2=new T.CatmullRomCurve3([new T.Vector3(.005,.33,.23),new T.Vector3(.12,.36,.205),new T.Vector3(.22,.27,.15),new T.Vector3(.235,.20,.12)]);
       [fringe1,fringe2].forEach((c,i)=>{const h=mesh(head,new T.TubeGeometry(c,22,.047,10,false),i?hair:hairLight,"fringe");h.userData.characterOutline=true});
       for(const l of legs){
         const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
