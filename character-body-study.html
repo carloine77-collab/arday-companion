@@ -142,6 +142,16 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
         }
       };
       const selectedBody=bodyProfiles[variant]||bodyProfiles.rounded;
+      if(variant==="barrel"){
+        for(const leg of legs){
+          leg.knee.position.y=-.34;
+          leg.ankle.position.y=-.32;
+          const kneePoint=bonePoints.find(entry=>entry.bone===leg.knee)?.point;
+          const anklePoint=bonePoints.find(entry=>entry.bone===leg.ankle)?.point;
+          if(kneePoint)kneePoint.y=.49;
+          if(anklePoint)anklePoint.y=.17;
+        }
+      }
       const torsoProfile=selectedBody.profile;
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
       // Continuous, softly tapered limbs; proportions vary with the selected body study.
