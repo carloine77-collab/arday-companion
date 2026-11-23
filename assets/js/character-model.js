@@ -94,11 +94,11 @@
       ellipsoid(knee,0,0,0,.083,.07,.075,pants);
       lathe(knee,[[0,-.39],[.04,-.38],[.067,-.31],[.075,-.2],[.071,-.1],[.075,-.025],[.06,.045],[0,.05]],pants,24,.92);
       // Foot shape is a short sculpted shoe with a distinct curved sole, not a box.
-      const foot=new T.Group();foot.position.set(0,-.39,.065);knee.add(foot);
+      const foot=new T.Group();foot.position.set(0,-.34,.065);knee.add(foot);
       const shoeMesh=lathe(foot,[[0,-.085],[.055,-.083],[.095,-.055],[.11,-.005],[.105,.055],[.075,.105],[.035,.12],[0,.12]],shoe,24,.72);
-      shoeMesh.rotation.x=Math.PI/2;shoeMesh.position.z=.035;
+      shoeMesh.rotation.x=Math.PI/2;shoeMesh.scale.z=.72;shoeMesh.position.z=.035;
       const soleMesh=lathe(foot,[[0,-.092],[.06,-.09],[.098,-.07],[.105,-.048],[.08,-.034],[0,-.032]],sole,24,.75);
-      soleMesh.rotation.x=Math.PI/2;soleMesh.position.z=.035;
+      soleMesh.rotation.x=Math.PI/2;soleMesh.scale.z=.72;soleMesh.position.z=.035;
       legs.push({hip,knee,side});
     }
     const shadow=new T.Mesh(new T.CircleGeometry(.62,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.2,depthWrite:false}));
