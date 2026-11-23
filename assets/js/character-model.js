@@ -34,21 +34,21 @@
         return k0*(k0-1)/(Math.max(k1,1e-5))*Math.min(rx,ry,rz);
       };
       const forms=[
-        [0,.98,0,.27,.31,.18],[0,.72,0,.25,.20,.18],[0,1.43,0,.33,.34,.265],[0,1.235,0,.105,.15,.105],
-        [-.29,1.015,0,.13,.20,.12],[.29,1.015,0,.13,.20,.12],
-        [-.365,.82,0,.09,.19,.09],[.365,.82,0,.09,.19,.09],
-        [-.405,.625,0,.075,.105,.075],[.405,.625,0,.075,.105,.075],
-        [-.13,.56,0,.13,.255,.13],[.13,.56,0,.13,.255,.13],
-        [-.13,.29,0,.105,.205,.105],[.13,.29,0,.105,.205,.105],
-        [-.13,.105,.065,.12,.075,.19],[.13,.105,.065,.12,.075,.19],
-        [-.455,.59,.045,.045,.065,.055],[.455,.59,.045,.045,.065,.055]
+        [0,.98,0,.245,.30,.155],[0,.72,0,.225,.18,.15],[0,1.43,0,.315,.33,.25],[0,1.235,0,.095,.15,.09],
+        [-.27,1.015,0,.105,.18,.095],[.27,1.015,0,.105,.18,.095],
+        [-.345,.82,0,.075,.18,.072],[.345,.82,0,.075,.18,.072],
+        [-.38,.625,0,.064,.10,.064],[.38,.625,0,.064,.10,.064],
+        [-.125,.56,0,.105,.235,.10],[.125,.56,0,.105,.235,.10],
+        [-.125,.29,0,.082,.19,.082],[.125,.29,0,.082,.19,.082],
+        [-.125,.105,.065,.105,.068,.17],[.125,.105,.065,.105,.068,.17],
+        [-.425,.59,.04,.038,.06,.045],[.425,.59,.04,.038,.06,.045]
       ];
       const field=(x,y,z)=>{
         let d=1e4;
         for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.105);
         return d;
       };
-      const nx=47,ny=70,nz=31,x0=-.62,y0=.015,z0=-.39,dx=.026,dy=.026,dz=.026;
+      const nx=58,ny=91,nz=36,x0=-.58,y0=.015,z0=-.36,dx=.02,dy=.02,dz=.02;
       const values=new Float32Array((nx+1)*(ny+1)*(nz+1));
       const index=(i,j,k)=>(i*(ny+1)+j)*(nz+1)+k;
       for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)for(let k=0;k<=nz;k++)values[index(i,j,k)]=field(x0+i*dx,y0+j*dy,z0+k*dz);
@@ -76,13 +76,19 @@
         for(let q=0;q<4;q++){const influence=near[q];skinIndices.push(influence?influence[0]:0);skinWeights.push(influence?influence[1]/sum:0)}
         return id;
       };
-      const emit=(a,b,c)=>{
-        const center=[(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3,(a[2]+b[2]+c[2])/3],eps=.0025;
-        const grad=new T.Vector3(field(center[0]+eps,center[1],center[2])-field(center[0]-eps,center[1],center[2]),field(center[0],center[1]+eps,center[2])-field(center[0],center[1]-eps,center[2]),field(center[0],center[1],center[2]+eps)-field(center[0],center[1],center[2]-eps));
-        const normal=new T.Vector3().crossVectors(new T.Vector3(b[0]-a[0],b[1]-a[1],b[2]-a[2]),new T.Vector3(c[0]-a[0],c[1]-a[1],c[2]-a[2]));
-        if(normal.dot(grad)<0)[b,c]=[c,b];
-        const cy=center[1],group=cy<.77?2:cy<1.25?1:0;
-        triangles[group].push(vertexId(a),vertexId(b),vertexId(c));
+      const emit=(polygon)=>{
+        const center=[polygon.reduce((sum,p)=>sum+p[0],0)/polygon.length,polygon.reduce((sum,p)=>sum+p[1],0)/polygon.length,polygon.reduce((sum,p)=>sum+p[2],0)/polygon.length],eps=.002;
+        const grad=new T.Vector3(field(center[0]+eps,center[1],center[2])-field(center[0]-eps,center[1],center[2]),field(center[0],center[1]+eps,center[2])-field(center[0],center[1]-eps,center[2]),field(center[0],center[1],center[2]+eps)-field(center[0],center[1],center[2]-eps)).normalize();
+        const reference=Math.abs(grad.y)<.9?new T.Vector3(0,1,0):new T.Vector3(1,0,0);
+        const u=new T.Vector3().crossVectors(reference,grad).normalize(),v=new T.Vector3().crossVectors(grad,u).normalize();
+        polygon.sort((a,b)=>{
+          const ax=a[0]-center[0],ay=a[1]-center[1],az=a[2]-center[2],bx=b[0]-center[0],by=b[1]-center[1],bz=b[2]-center[2];
+          return Math.atan2(ax*v.x+ay*v.y+az*v.z,ax*u.x+ay*u.y+az*u.z)-Math.atan2(bx*v.x+by*v.y+bz*v.z,bx*u.x+by*u.y+bz*u.z);
+        });
+        const normal=new T.Vector3().crossVectors(new T.Vector3(polygon[1][0]-polygon[0][0],polygon[1][1]-polygon[0][1],polygon[1][2]-polygon[0][2]),new T.Vector3(polygon[2][0]-polygon[0][0],polygon[2][1]-polygon[0][1],polygon[2][2]-polygon[0][2]));
+        if(normal.dot(grad)<0)polygon.reverse();
+        const group=center[1]<.77?2:center[1]<1.25?1:0,root=polygon[0];
+        for(let i=1;i<polygon.length-1;i++)triangles[group].push(vertexId(root),vertexId(polygon[i]),vertexId(polygon[i+1]));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
         const cp=corner.map(([a,b,c])=>[x0+(i+a)*dx,y0+(j+b)*dy,z0+(k+c)*dz]);
@@ -91,8 +97,7 @@
         for(const tet of tetra){
           const points=tet.map(n=>cp[n]),vals=tet.map(n=>cv[n]),cross=[];
           for(const [a,b] of edgePairs)if((vals[a]<0)!==(vals[b]<0))cross.push(interp(points[a],points[b],vals[a],vals[b]));
-          if(cross.length===3)emit(cross[0],cross[1],cross[2]);
-          else if(cross.length===4){emit(cross[0],cross[1],cross[2]);emit(cross[0],cross[2],cross[3]);}
+          if(cross.length>=3)emit(cross);
         }
       }
       const geo=new T.BufferGeometry();madeGeometries.add(geo);
@@ -101,7 +106,8 @@
       geo.setAttribute("skinWeight",new T.Float32BufferAttribute(skinWeights,4));
       let offset=0;for(let m=0;m<3;m++){geo.addGroup(offset,triangles[m].length,m);offset+=triangles[m].length}
       geo.setIndex(triangles.flat());geo.computeVertexNormals();geo.computeBoundingSphere();
-      const bodyMesh=new T.SkinnedMesh(geo,[skin,shirt,pants]);bodyMesh.name="unified-skinned-body";bodyMesh.userData.characterSurface=true;bodyMesh.castShadow=true;bodyMesh.receiveShadow=false;body.add(bodyMesh);
+      const bodyMaterials=[skin,shirt,pants];bodyMaterials.forEach(material=>{material.transparent=false;material.opacity=1;material.depthWrite=true;material.wireframe=false;material.side=T.FrontSide});
+      const bodyMesh=new T.SkinnedMesh(geo,bodyMaterials);bodyMesh.name="unified-skinned-body";bodyMesh.userData.characterSurface=true;bodyMesh.castShadow=true;bodyMesh.receiveShadow=false;body.add(bodyMesh);
       body.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones);bodyMesh.bind(skeleton,bodyMesh.matrixWorld);bodyMesh.normalizeSkinWeights();
       const mesh=(parent,g,m,name)=>{madeGeometries.add(g);const o=new T.Mesh(g,m);o.name=name||"";o.castShadow=true;o.receiveShadow=false;parent.add(o);return o};
       const ellipsoid=(parent,x,y,z,sx,sy,sz,material,name)=>{
