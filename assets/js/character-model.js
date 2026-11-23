@@ -165,9 +165,10 @@
       ellipsoid(head,0,.245,.336,.018,.018,.012,skin,"nose");
       const mouthCurve=new T.CatmullRomCurve3([new T.Vector3(-.038,.165,.321),new T.Vector3(0,.153,.333),new T.Vector3(.038,.165,.321)]);
       mesh(head,new T.TubeGeometry(mouthCurve,10,.004,6,false),iris,"mouth");
-      // C prototype hair: one faceted cap and a single clean polygonal fringe.
+      // Low-poly wolf cut: preserve the selected C crown and fringe, then
+      // build a layered nape and two cheek-framing side locks.
       const hairCapGeometry=new T.IcosahedronGeometry(1,1);madeGeometries.add(hairCapGeometry);
-      const hairCap=mesh(head,hairCapGeometry,hair,"C-faceted-hair-cap");
+      const hairCap=mesh(head,hairCapGeometry,hair,"wolfcut-faceted-crown");
       hairCap.position.set(0,.57,-.015);hairCap.scale.set(.405,.29,.35);hairCap.userData.characterOutline=true;
       const fringeGeometry=new T.BufferGeometry();madeGeometries.add(fringeGeometry);
       fringeGeometry.setAttribute("position",new T.Float32BufferAttribute([
@@ -176,7 +177,26 @@
         -.04,.46,.31, .10,.43,.30, -.24,.46,.27
       ],3));
       fringeGeometry.setIndex([0,1,2,3,4,5,6,7,8]);fringeGeometry.computeVertexNormals();
-      const fringe=mesh(head,fringeGeometry,hair,"C-polygonal-fringe");fringe.material.side=T.DoubleSide;
+      const fringe=mesh(head,fringeGeometry,hair,"wolfcut-choppy-fringe");fringe.material.side=T.DoubleSide;
+      const makeWolfLock=(name,x,y,z,width,length,depth,lean,material=hair)=>{
+        const geometry=new T.ConeGeometry(width,length,5,1, false);madeGeometries.add(geometry);
+        const lock=mesh(head,geometry,material,name);
+        // Cone tip points down, producing a tapered, separated hair end.
+        lock.rotation.set(0,0,Math.PI+lean);
+        lock.position.set(x,y,z);lock.scale.z=depth/width;
+        lock.userData.characterOutline=true;
+        return lock;
+      };
+      // Three overlapping rear layers create the characteristic long nape.
+      makeWolfLock("wolfcut-nape-center",0,.205,-.205,.105,.66,.105,.015);
+      makeWolfLock("wolfcut-nape-left",-.145,.245,-.19,.105,.59,.10,-.10,hairLight);
+      makeWolfLock("wolfcut-nape-right",.145,.245,-.19,.105,.59,.10,.10,hairLight);
+      // Shorter side layers frame the cheeks without covering the eyes.
+      makeWolfLock("wolfcut-face-left",-.325,.245,.115,.082,.43,.075,-.13);
+      makeWolfLock("wolfcut-face-right",.325,.245,.115,.082,.43,.075,.13);
+      // Small upper side panels connect the crown to the longer locks.
+      makeWolfLock("wolfcut-side-left",-.305,.385,-.075,.095,.36,.09,-.08,hairLight);
+      makeWolfLock("wolfcut-side-right",.305,.385,-.075,.095,.36,.09,.08,hairLight);
       for(const l of legs){
         const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
         // One rounded shoe shell plus a very thin outsole; the old full-size
