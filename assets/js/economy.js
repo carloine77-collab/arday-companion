@@ -1,6 +1,6 @@
 (function(global){
  'use strict';
- function create({state,has,remember,addEvent,say}){
+ function create({state,has,hasPlaced,remember,addEvent,say}){
   const s=state;
   s.personalMoney=Number.isFinite(s.personalMoney)?Math.max(0,s.personalMoney):0;
   s.personalItems=s.personalItems||[];
@@ -28,7 +28,7 @@
     {type:'browseWeb',title:'探索一些新内容',condition:'累计安排 4 次浏览网站。',target:4,unit:'次浏览',icon:'⌕',requires:'电脑'},
     {type:'jobs',title:'完成两份工作委托',condition:'成功完成 2 份工作并结算报酬。',target:2,unit:'份工作',icon:'▧'},
     {type:'save',title:'存下 ¥500',condition:'阿尔个人账户余额达到 ¥500。',target:500,unit:'元',icon:'◉'}
-   ].filter(x=>(!x.requires||has(x.requires))&&(x.type!=='save'||s.personalMoney<500));
+   ].filter(x=>(!x.requires||(hasPlaced?hasPlaced(x.requires):has(x.requires)))&&(x.type!=='save'||s.personalMoney<500));
   }
   function ensurePersonalGoal(at=Date.now()){
    const catalog=personalGoalCatalog();
