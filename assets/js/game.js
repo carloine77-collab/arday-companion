@@ -2617,43 +2617,10 @@ function initArday3D(){
   for(let z=-3.8;z<=3.81;z+=.34){box(bathroom,-5.165,.66,z,.025,1.18,.31,bathroomTile);box(bathroom,5.165,.66,z,.025,1.18,.31,bathroomTile)}
   const bathroomAccent=M(0xb4b9b1,.9);box(bathroom,0,1.28,-3.94,10.3,.035,.035,bathroomAccent);box(bathroom,0,1.28,3.94,10.3,.035,.035,bathroomAccent);
   kitchen.visible=false;bedroom.visible=false;bathroom.visible=false;
-  // Detailed stylized character with articulated shoulders, elbows, hips and knees.
-  const person=new T.Group();scene.add(person);const rig=new T.Group();person.add(rig);const body=new T.Group();rig.add(body);
-  // Character v2: fully rebuilt silhouette, facial topology, hair and outfit.
-  const CM=(color,roughness=.82)=>stylizeMaterial(new T.MeshStandardMaterial({color,roughness,flatShading:true}));
-  const skinMat=CM(0xe8b99d,.88),skinShadow=CM(0xc98e79),hairMat=CM(0xc99a42,.72),hairHi=CM(0xf0cf79,.62),shirtMat=CM(0xeee4d6),shirtLight=CM(0xc9b6a0),trouserMat=CM(0x4a4c55),shoeMat=CM(0x393337),eyeMat=CM(0x302827),whiteMat=CM(0xf7eee5);
-  const ell=(p,x,y,z,sx,sy,sz,mat,seg=16)=>{const o=new T.Mesh(new T.SphereGeometry(1,seg,Math.max(6,Math.floor(seg*.65)),0,Math.PI*2,0,Math.PI),mat);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;p.add(o);return o};
-  const limb=(p,x,y,z,r1,r2,len,mat)=>{const o=new T.Mesh(new T.CylinderGeometry(r1,r2,len,9,1),mat);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o};
-  const torsoPts=[new T.Vector2(.22,0),new T.Vector2(.285,.1),new T.Vector2(.285,.57),new T.Vector2(.21,.78),new T.Vector2(0,.78)];
-  const torsoGeo=new T.LatheGeometry(torsoPts,10);const torso=new T.Mesh(torsoGeo,shirtMat);torso.position.set(0,.94,0);torso.scale.z=.78;torso.castShadow=true;body.add(torso);
-  box(body,0,1.31,.208,.018,.55,.018,shirtLight);
-  const lapelShape=new T.Shape();lapelShape.moveTo(-.19,1.68);lapelShape.lineTo(-.025,1.46);lapelShape.lineTo(-.105,1.34);lapelShape.lineTo(-.25,1.61);lapelShape.closePath();const lapelGeo=new T.ShapeGeometry(lapelShape);lapelGeo.translate(0,0,.225);const lapel=new T.Mesh(lapelGeo,shirtLight);body.add(lapel);const lapel2=lapel.clone();lapel2.scale.x=-1;body.add(lapel2);
-  for(const side of [-1,1]){const collar=new T.Shape();collar.moveTo(0,1.76);collar.lineTo(side*.12,1.65);collar.lineTo(side*.055,1.48);collar.lineTo(0,1.55);collar.closePath();const piece=new T.Mesh(new T.ShapeGeometry(collar),shirtLight);piece.position.z=.232;body.add(piece);}
-  const jacketSeam=new T.CatmullRomCurve3([new T.Vector3(0,1.38,.226),new T.Vector3(0,1.16,.228),new T.Vector3(0,.98,.205)]);body.add(new T.Mesh(new T.TubeGeometry(jacketSeam,12,.004,5,false),CM(0xb39f8b)));
-  for(const y of [1.38,1.2,1.02])ell(body,.025,y,.239,.018,.018,.012,CM(0x9e8069),8);box(body,0,.91,.03,.39,.09,.4,trouserMat);limb(body,0,1.78,0,.105,.12,.25,skinMat);
-  const head=new T.Group();head.position.set(0,2.18,.015);body.add(head);
-  // Softer oval face: fuller cheeks and a rounded chin replace the pinched old jaw.
-  const facePts=[new T.Vector2(.035,-.385),new T.Vector2(.09,-.36),new T.Vector2(.145,-.305),new T.Vector2(.195,-.215),new T.Vector2(.225,-.09),new T.Vector2(.238,.065),new T.Vector2(.228,.205),new T.Vector2(.185,.325),new T.Vector2(.105,.39),new T.Vector2(0,.405)];
-  const faceGeo=new T.LatheGeometry(facePts,32);faceGeo.scale(1,1,.91);const face=new T.Mesh(faceGeo,skinMat);face.position.z=.005;face.castShadow=true;head.add(face);
-  for(const side of [-1,1]){const ear=ell(head,side*.247,-.005,-.005,.048,.078,.052,skinMat,12);ear.rotation.z=side*.12;ell(head,side*.145,-.115,.165,.095,.085,.052,CM(0xe7aa98),14)}
-  const eyeGroups=[];for(const side of [-1,1]){
-   const eye=new T.Group();eye.position.set(side*.108,.065,.208);head.add(eye);
-   ell(eye,0,0,0,.056,.035,.022,whiteMat,18);ell(eye,side*.003,-.002,.018,.026,.03,.012,CM(0x806d61),16);ell(eye,side*.003,-.002,.028,.013,.022,.008,eyeMat,14);ell(eye,side*.011,.011,.035,.006,.008,.005,CM(0xffffff),8);
-   const lidCurve=new T.CatmullRomCurve3([new T.Vector3(side*.16,.079,.222),new T.Vector3(side*.132,.103,.236),new T.Vector3(side*.105,.108,.241),new T.Vector3(side*.078,.087,.229)]);head.add(new T.Mesh(new T.TubeGeometry(lidCurve,12,.006,6,false),skinShadow));
-   const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.178,.145,.177),new T.Vector3(side*.15,.169,.205),new T.Vector3(side*.108,.177,.218),new T.Vector3(side*.068,.158,.205)]);
-   const brow=new T.Mesh(new T.TubeGeometry(browCurve,14,.005,6,false),hairMat);head.add(brow);eyeGroups.push(eye);
-  }
-  ell(head,0,.315,-.055,.282,.19,.245,hairMat,24);ell(head,0,.005,-.205,.235,.31,.095,hairMat,20);
-  for(const side of [-1,1]){const panel=ell(head,side*.226,-.035,.005,.058,.285,.105,hairMat,20);panel.rotation.z=side*-.08}
-  // Swept-back crown ridges: keep the forehead and eyebrows completely visible.
-  for(let i=0;i<5;i++){const ridge=ell(head,-.16+i*.08,.405,-.005,.12,.045,.19,i%2?hairHi:hairMat,16);ridge.rotation.z=-.12+(i*.055)}
-  const sidePart=ell(head,-.105,.39,.105,.13,.035,.11,hairHi,16);sidePart.rotation.z=-.18;
-  ell(head,0,-.075,.218,.032,.024,.022,skinShadow,12);
-  const mouth=new T.QuadraticBezierCurve3(new T.Vector3(-.038,-.19,.194),new T.Vector3(0,-.205,.205),new T.Vector3(.038,-.19,.194));head.add(new T.Mesh(new T.TubeGeometry(mouth,14,.004,6,false),CM(0x985e5a)));
-  for(const side of [-1,1]){const blush=ell(head,side*.17,-.12,.184,.045,.018,.009,CM(0xd98e87),12);blush.material.transparent=true;blush.material.opacity=.28;}
-  const arms=[];for(const side of [-1,1]){const shoulder=new T.Group();shoulder.position.set(side*.265,1.57,0);body.add(shoulder);ell(shoulder,0,-.035,0,.105,.13,.11,shirtMat,12);limb(shoulder,0,-.235,0,.075,.095,.39,shirtMat);const elbow=new T.Group();elbow.position.set(0,-.43,0);shoulder.add(elbow);ell(elbow,0,0,0,.068,.07,.068,shirtLight,10);limb(elbow,0,-.19,.008,.047,.06,.34,skinMat);ell(elbow,0,-.39,.025,.055,.07,.055,skinMat,10);for(let f=0;f<4;f++){const finger=limb(elbow,-.033+f*.022,-.455,.055,.009,.012,.075,skinMat);finger.rotation.z=(f-1.5)*-.08}const thumb=limb(elbow,side*.065,-.405,.065,.014,.018,.085,skinMat);thumb.rotation.z=side*.62;arms.push({shoulder,elbow,side})}
-  const legs=[];for(const side of [-1,1]){const hip=new T.Group();hip.position.set(side*.14,.83,0);rig.add(hip);limb(hip,0,-.22,0,.105,.12,.43,trouserMat);const knee=new T.Group();knee.position.set(0,-.43,0);hip.add(knee);ell(knee,0,0,0,.083,.09,.08,trouserMat,10);limb(knee,0,-.19,.005,.067,.078,.36,trouserMat);ell(knee,0,-.395,.075,.09,.07,.18,shoeMat,12);box(knee,0,-.445,.13,.15,.025,.16,CM(0x242126));box(knee,0,-.425,.125,.155,.018,.17,CM(0x65534d));legs.push({hip,knee,side})}
-  const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.022;person.add(shadow);
+  // Chibi life-sim character: sculpted organic surfaces with the existing animation pivots.
+  const characterModel=window.ArdayCharacterModel?.create(T,scene,stylizeMaterial);
+  if(!characterModel)throw new Error('Arday character model failed to initialize');
+  const {person,rig,body,head,eyeGroups,arms,legs,shadow}=characterModel;
   const positions={sofa:[-2.55,0,.32],table:[2.4,0,1],window:[-2.3,0,-1.5],outside:[3.8,0,2],rug:[0,0,1.5],shelf:[3.8,0,-2.3],desk:[3.1,0,-1.3],center:[0,0,1.7],kitchen:[.65,0,-.05],bed:[-.55,.86,-1.07]};
   let target=new T.Vector3(0,0,1.7),pose='wave',phase=0,last=performance.now(),lastDraw=0,lastHotspotUpdate=0;
   let activeActivity='idle',activityFacing=person.rotation.y,idleNextMove=performance.now()+900,idleWalkStartedAt=0,idleNextGesture=performance.now()+4200,idleGestureUntil=0,basePose='idle',walkRoute=[],walkIndex=0,walkPauseUntil=0,lastBlink=performance.now()+2600,wakeStartedAt=0,wakeLookAt=0,seatedHeight=0;
