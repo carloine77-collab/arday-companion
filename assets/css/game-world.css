@@ -92,3 +92,8 @@
 .exchange-item button:disabled{opacity:.4}
 @media(min-width:600px){.drawer .choices.infinite-view{padding-left:22px!important;padding-right:22px!important}.infinite-masthead,.instance-brief,.instance-result{margin-left:-22px;margin-right:-22px;padding-left:28px;padding-right:28px}}
 
+
+
+/* Keep recruitment replies readable in the candidate card at every viewport size. */
+.drawer .choices.recruitment-view .candidate-copy{min-width:0;overflow:visible}
+.drawer .choices.recruitment-view .candidate-reply{display:block!important;position:relative;margin:8px 0;padding:8px 10px;border-left:3px solid #8b7861;background:#ddd2bf;color:#303b40;font:12px/1.65 "Noto Serif SC",serif;white-space:normal;overflow-wrap:anywhere;opacity:1;visibility:visible}
