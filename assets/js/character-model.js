@@ -60,13 +60,13 @@
       ];
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
       const forms=[
-        [-.245,1.055,0,.075,.145,.072],[.245,1.055,0,.075,.145,.072],
-        [-.345,.82,0,.066,.17,.064],[.345,.82,0,.066,.17,.064],
-        [-.38,.625,0,.057,.095,.058],[.38,.625,0,.057,.095,.058],
+        [-.245,1.055,0,.09,.15,.10],[.245,1.055,0,.09,.15,.10],
+        [-.345,.82,0,.075,.17,.07],[.345,.82,0,.075,.17,.07],
+        [-.38,.625,0,.065,.095,.062],[.38,.625,0,.065,.095,.062],
         [-.125,.56,0,.096,.225,.09],[.125,.56,0,.096,.225,.09],
         [-.125,.29,0,.078,.185,.078],[.125,.29,0,.078,.185,.078],
         [-.125,.105,.065,.105,.068,.17],[.125,.105,.065,.105,.068,.17],
-        [-.425,.59,.04,.038,.06,.045],[.425,.59,.04,.038,.06,.045]
+        [-.425,.59,.04,.045,.065,.05],[.425,.59,.04,.045,.065,.05]
       ];
       const field=(x,y,z)=>{
         let d=torsoSdf(x,y,z);
@@ -112,7 +112,7 @@
         });
         const normal=new T.Vector3().crossVectors(new T.Vector3(polygon[1][0]-polygon[0][0],polygon[1][1]-polygon[0][1],polygon[1][2]-polygon[0][2]),new T.Vector3(polygon[2][0]-polygon[0][0],polygon[2][1]-polygon[0][1],polygon[2][2]-polygon[0][2]));
         if(normal.dot(grad)<0)polygon.reverse();
-        const group=center[1]<.70?2:center[1]<1.24?1:0,root=polygon[0];
+        const ax=Math.abs(center[0]);const group=ax>.29&&center[1]<.79?0:center[1]<.70?2:center[1]<1.24?1:0,root=polygon[0];
         for(let i=1;i<polygon.length-1;i++)triangles[group].push(vertexId(root),vertexId(polygon[i]),vertexId(polygon[i+1]));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
