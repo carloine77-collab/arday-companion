@@ -5,7 +5,7 @@
     try{
       const mat=(color,roughness=.84)=>{const m=stylizeMaterial(new T.MeshStandardMaterial({color,roughness,metalness:0,flatShading:false}));madeMaterials.add(m);return m};
       const skin=mat(0xe8b99d,.9),hair=mat(0xc99a42,.78),hairLight=mat(0xe8bf70,.72),shirt=mat(0xeee4d6,.94),pants=mat(0x55515a,.96),shoe=mat(0x51443f,.88),sole=mat(0x342e30,.9),eyeWhite=mat(0xfff8ef,.7),iris=mat(0x806d61,.55),pupil=mat(0x302827,.5),blush=mat(0xd99c87,.9);
-      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.90,1);scene.add(person);
+      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.96,1);scene.add(person);
       const rig=new T.Group();rig.name="character-rig";person.add(rig);
       const body=new T.Group();body.name="character-body";rig.add(body);
       const boneRoot=new T.Bone();boneRoot.name="pelvis-root";boneRoot.position.y=.70;body.add(boneRoot);
@@ -48,29 +48,26 @@
         else if(y>=profile[profile.length-1][0])i=profile.length-2;
         else for(let q=0;q<profile.length-1;q++)if(y>=profile[q][0]&&y<=profile[q+1][0]){i=q;break}
         const a=profile[i],b=profile[i+1],span=Math.max(1e-5,b[0]-a[0]),t=Math.max(0,Math.min(1,(y-a[0])/span)),t2=t*t,t3=t2*t;
-        const interpolate=axis=>{
-          const p0=profile[Math.max(0,i-1)],p3=profile[Math.min(profile.length-1,i+2)];
-          const m1=(b[axis]-p0[axis])/Math.max(1e-5,b[0]-p0[0])*span;
-          const m2=(p3[axis]-a[axis])/Math.max(1e-5,p3[0]-a[0])*span;
-          return Math.max(.012,(2*t3-3*t2+1)*a[axis]+(t3-2*t2+t)*m1+(-2*t3+3*t2)*b[axis]+(t3-t2)*m2);
-        };
+        const interpolate=axis=>a[axis]+(b[axis]-a[axis])*t;
         const rx=interpolate(1),rz=interpolate(2),radial=(Math.hypot(x/rx,z/rz)-1)*Math.min(rx,rz);
         const vertical=Math.max(profile[0][0]-y,y-profile[profile.length-1][0]);
         return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
       };
+      // Approved body-study A: matte clay surface with B's slanted shoulder,
+      // narrowed waist and expanded pelvis silhouette.
       const torsoProfile=[
-        [.53,.155,.112],[.60,.205,.142],[.70,.245,.16],
-        [.82,.278,.165],[.95,.292,.155],[1.06,.282,.148],
-        [1.15,.252,.135],[1.22,.175,.108],[1.29,.088,.078],
-        [1.36,.078,.07],[1.385,.035,.032]
+        [.48,.205,.15],[.55,.245,.17],[.66,.285,.18],
+        [.79,.295,.175],[.91,.265,.15],[1.02,.235,.135],
+        [1.12,.225,.13],[1.20,.17,.105],[1.27,.09,.08],
+        [1.34,.078,.07],[1.37,.035,.032]
       ];
       const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
       // Each arm and leg is one tapered, continuous volume. This avoids the
       // separate biceps/forearm and thigh/calf bulges that read as muscle segments.
       const limbs=[];
       for(const side of [-1,1]){
-        limbs.push({a:[side*.245,1.075,0],b:[side*.405,.585,.015],rA:.078,rB:.052,blend:.082});
-        limbs.push({a:[side*.125,.675,0],b:[side*.13,.205,.015],rA:.087,rB:.073,blend:.075});
+        limbs.push({a:[side*.245,1.075,0],b:[side*.405,.585,.015],rA:.086,rB:.064,blend:.105});
+        limbs.push({a:[side*.125,.675,0],b:[side*.13,.205,.015],rA:.105,rB:.09,blend:.10});
       }
       const hands=[[-.414,.575,.025],[.414,.575,.025]];
       const field=(x,y,z)=>{
@@ -79,7 +76,7 @@
         for(const hand of hands)d=smoothMin(d,ellipsoidSdf(x,y,z,...hand,.046,.052,.043),.045);
         return d;
       };
-      const nx=53,ny=65,nz=33,x0=-.58,y0=.015,z0=-.36,dx=.022,dy=.022,dz=.022;
+      const dx=.018,dy=dx,dz=dx,nx=Math.ceil(1.16/dx),ny=Math.ceil(1.43/dy),nz=Math.ceil(.72/dz),x0=-nx*dx/2,y0=.015,z0=-nz*dz/2;
       const values=new Float32Array((nx+1)*(ny+1)*(nz+1));
       const index=(i,j,k)=>(i*(ny+1)+j)*(nz+1)+k;
       for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)for(let k=0;k<=nz;k++)values[index(i,j,k)]=field(x0+i*dx,y0+j*dy,z0+k*dz);
@@ -137,7 +134,7 @@
       geo.setAttribute("skinWeight",new T.Float32BufferAttribute(skinWeights,4));
       let offset=0;for(let m=0;m<3;m++){geo.addGroup(offset,triangles[m].length,m);offset+=triangles[m].length}
       geo.setIndex(triangles.flat());geo.computeVertexNormals();geo.computeBoundingSphere();
-      const bodyMaterials=[skin,shirt,pants];bodyMaterials.forEach(material=>{material.transparent=false;material.opacity=1;material.depthWrite=true;material.wireframe=false;material.side=T.FrontSide;material.flatShading=true;material.needsUpdate=true});
+      const bodyMaterials=[skin,shirt,pants];bodyMaterials.forEach(material=>{material.transparent=false;material.opacity=1;material.depthWrite=true;material.wireframe=false;material.side=T.FrontSide;material.flatShading=false;material.needsUpdate=true});
       const bodyMesh=new T.SkinnedMesh(geo,bodyMaterials);bodyMesh.name="unified-skinned-body";bodyMesh.userData.characterSurface=true;bodyMesh.castShadow=true;bodyMesh.receiveShadow=false;body.add(bodyMesh);
       body.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones);bodyMesh.bind(skeleton,bodyMesh.matrixWorld);bodyMesh.normalizeSkinWeights();
       const mesh=(parent,g,m,name)=>{madeGeometries.add(g);const o=new T.Mesh(g,m);o.name=name||"";o.castShadow=true;o.receiveShadow=false;parent.add(o);return o};
