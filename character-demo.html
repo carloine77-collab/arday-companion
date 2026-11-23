@@ -26,9 +26,9 @@ button.active{background:#e5eadf;border-color:#b8c7aa}button:hover{border-color:
 <main>
 <div class="toolbar"><div class="views" id="views"><button data-view="front" class="active">正面</button><button data-view="side">侧面</button><button data-view="back">背面</button></div><div class="select"><button id="reset">重置视角</button></div></div>
 <section class="cards">
-<article class="card" data-model="a"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>A · 圆脸短发</h2><span class="tag">圆润 / 经典</span></div><p>短椭圆脸型，宽下颌和饱满脸颊；整齐的短波波头，刘海与侧发连成完整轮廓。</p><div class="traits"><span>短脖子可见</span><span>低重心</span><span>圆下巴</span></div></div><footer><button class="choose">选择方案 A</button></footer></article>
-<article class="card" data-model="b"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>B · 宽额蓬松发</h2><span class="tag">饱满 / 活泼</span></div><p>头部更宽、更矮，脸颊轮廓接近圆形；顶部蓬松但不拔高，侧面保持完整发量。</p><div class="traits"><span>宽圆脸</span><span>短躯干</span><span>蓬松发顶</span></div></div><footer><button class="choose">选择方案 B</button></footer></article>
-<article class="card" data-model="c"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>C · 柔和中长发</h2><span class="tag">柔和 / 稍成熟</span></div><p>脸型仍然圆钝，但头身比例略收敛；中长发沿头部两侧自然垂落，不使用交叉发束。</p><div class="traits"><span>圆钝下颌</span><span>中长侧发</span><span>清晰颈部</span></div></div><footer><button class="choose">选择方案 C</button></footer></article>
+<article class="card" data-model="a"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>A · 连续曲面</h2><span class="tag">柔和 / 动森比例</span></div><p>以连续环形曲面构成人体上半身、肩部和颈部，头身比例偏《动森》式圆润短萌；额头完整露出，短发不做眉毛状刘海。</p><div class="traits"><span>连续人体曲面</span><span>极短颈部</span><span>圆钝脸型</span></div></div><footer><button class="choose">选择方案 A</button></footer></article>
+<article class="card" data-model="b"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>B · 融合雕塑</h2><span class="tag">软雕塑 / 玩偶感</span></div><p>用隐式曲面融合头部、躯干、颈部和四肢，再以衣物覆盖身体；整体像一件完整捏塑的软质玩偶，避免脖子成为独立长柱。</p><div class="traits"><span>隐式曲面融合</span><span>短颈并入肩部</span><span>软雕塑体块</span></div></div><footer><button class="choose">选择方案 B</button></footer></article>
+<article class="card" data-model="c"><div class="canvas-wrap"><div class="hint">拖动旋转 · 滚轮缩放</div></div><div class="info"><div class="topline"><h2>C · 低多边形</h2><span class="tag">几何 / 手办感</span></div><p>使用低面数多边形网格和清晰折面，头部、躯干、四肢采用不同拓扑构造；比例更像几何风格手办，轮廓与前刘海边界明确。</p><div class="traits"><span>低多边形网格</span><span>折面轮廓</span><span>几何发型</div></div><footer><button class="choose">选择方案 C</button></footer></article>
 </section>
 <p class="note" id="selection">尚未选择方案。选定后再把对应结构迁移到游戏模型。</p>
 </main>
@@ -158,6 +158,8 @@ function makeCharacter(kind){
   const sculpt=add(geo,skin);sculpt.material=skin;
   // Clothes are fitted over the lower torso; the sculpted neck remains visible as a short band.
   ell(shirt,[0,.91,.006],[.318,.32,.208],48);
+  // A raised shoulder yoke hides most of the neck root; only a short skin segment remains visible.
+  ell(shirt,[0,1.17,.002],[.285,.18,.175],48);
   // broad short sleeves, with hands fused visually into the body silhouette
   for(const s of [-1,1]){const sleeve=ell(shirt,[s*.30,1.08,0],[.13,.20,.145]);sleeve.rotation.z=-s*.12}
   for(const s of [-1,1])ell(shoe,[s*.14,.15,.075],[.14,.09,.19]);
