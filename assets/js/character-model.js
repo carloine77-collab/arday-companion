@@ -34,22 +34,31 @@
         return k0*(k0-1)/(Math.max(k1,1e-5))*Math.min(rx,ry,rz);
       };
       // One lofted SDF trunk gives the chest, waist and pelvis a continuous silhouette.
+      // The torso, visible neck and shaped head are designed as one continuous silhouette.
+      // A tapered chin keeps the neck readable instead of letting an ellipsoid head swallow it.
+      const loftSdf=(profile,x,y,z)=>{
+        let a=profile[0],b=profile[profile.length-1];
+        for(let i=0;i<profile.length-1;i++)if(y>=profile[i][0]&&y<=profile[i+1][0]){a=profile[i];b=profile[i+1];break}
+        const t=Math.max(0,Math.min(1,(y-a[0])/Math.max(1e-5,b[0]-a[0])));
+        const smooth=t*t*(3-2*t),rx=Math.max(.012,a[1]+(b[1]-a[1])*smooth),rz=Math.max(.012,a[2]+(b[2]-a[2])*smooth);
+        const radial=(Math.hypot(x/rx,z/rz)-1)*Math.min(rx,rz);
+        const vertical=Math.max(profile[0][0]-y,y-profile[profile.length-1][0]);
+        return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
+      };
       const torsoProfile=[
         [.59,.17,.12],[.66,.185,.132],[.75,.182,.13],
         [.84,.174,.122],[.92,.174,.122],[1.00,.19,.135],
-        [1.09,.205,.145],[1.17,.19,.132],[1.235,.095,.078],[1.285,.052,.052]
+        [1.09,.205,.145],[1.14,.185,.13],[1.18,.125,.09],[1.205,.075,.065]
       ];
-      const torsoSdf=(x,y,z)=>{
-        let a=torsoProfile[0],b=torsoProfile[torsoProfile.length-1];
-        for(let i=0;i<torsoProfile.length-1;i++)if(y>=torsoProfile[i][0]&&y<=torsoProfile[i+1][0]){a=torsoProfile[i];b=torsoProfile[i+1];break}
-        const t=Math.max(0,Math.min(1,(y-a[0])/Math.max(1e-5,b[0]-a[0])));
-        const smooth=t*t*(3-2*t),rx=a[1]+(b[1]-a[1])*smooth,rz=a[2]+(b[2]-a[2])*smooth;
-        const radial=(Math.hypot(x/rx,z/rz)-1)*Math.min(rx,rz);
-        const vertical=Math.max(torsoProfile[0][0]-y,y-torsoProfile[torsoProfile.length-1][0]);
-        return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
-      };
+      const headProfile=[
+        [1.285,.072,.064],[1.315,.12,.105],[1.36,.19,.16],
+        [1.415,.255,.215],[1.48,.30,.245],[1.545,.315,.255],
+        [1.615,.29,.235],[1.68,.22,.18],[1.725,.12,.105],[1.745,.02,.02]
+      ];
+      const torsoSdf=(x,y,z)=>loftSdf(torsoProfile,x,y,z);
+      const headSdf=(x,y,z)=>loftSdf(headProfile,x,y,z);
+      const neckSdf=(x,y,z)=>ellipsoidSdf(x,y,z,0,1.265,0,.047,.115,.05);
       const forms=[
-        [0,1.46,0,.32,.29,.255],[0,1.265,0,.047,.09,.05],
         [-.27,1.055,0,.086,.145,.078],[.27,1.055,0,.086,.145,.078],
         [-.345,.82,0,.066,.17,.064],[.345,.82,0,.066,.17,.064],
         [-.38,.625,0,.057,.095,.058],[.38,.625,0,.057,.095,.058],
@@ -60,10 +69,12 @@
       ];
       const field=(x,y,z)=>{
         let d=torsoSdf(x,y,z);
-        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.065);
+        d=smoothMin(d,neckSdf(x,y,z),.018);
+        d=smoothMin(d,headSdf(x,y,z),.022);
+        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.042);
         return d;
       };
-      const nx=58,ny=91,nz=36,x0=-.58,y0=.015,z0=-.36,dx=.02,dy=.02,dz=.02;
+      const nx=78,ny=116,nz=48,x0=-.58,y0=.015,z0=-.36,dx=.015,dy=.015,dz=.015;
       const values=new Float32Array((nx+1)*(ny+1)*(nz+1));
       const index=(i,j,k)=>(i*(ny+1)+j)*(nz+1)+k;
       for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)for(let k=0;k<=nz;k++)values[index(i,j,k)]=field(x0+i*dx,y0+j*dy,z0+k*dz);
