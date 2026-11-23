@@ -2021,8 +2021,8 @@ function entertainmentPosterArt(){return '<svg class="entertainment-poster-art" 
 function showEntertainment(){if(Object.prototype.hasOwnProperty.call(s,'entertainmentChips')){delete s.entertainmentChips;save()}$('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded','furniture-drawer');$('drawerTitle').textContent='娱乐区';$('choices').className='choices infinite-view entertainment-view';renderEntertainmentHome();$('drawer').classList.add('open')}
 function renderEntertainmentHome(){
  const used=s.entertainmentDailySpinDay===entertainmentDay();
- $('choices').innerHTML=entertainmentPoster('夜场俱乐部','NO. 01 — LUCKY DRAW',entertainmentPosterArt())+'<section class="entertainment-spin-entry"><div class="entertainment-spin-title"><small>DAILY LUCKY DRAW</small><h3>每日幸运抽取</h3><span>¥6 · ¥12 · ¥30 · ¥68 · ¥128 · ¥328 · ¥628</span></div><button type="button" data-ent="spin" '+(used?'disabled':'')+'>'+(used?'今日已抽取':'开始抽取')+'</button></section><div class="entertainment-ornament-divider" aria-hidden="true"><svg viewBox="0 0 320 44"><path d="M160 22c-18-18-35-18-47-4 12 0 18 5 21 12-14-7-28-6-39 4 20-2 34 1 48 7M160 22c18-18 35-18 47-4-12 0-18 5-21 12 14-7 28-6 39 4-20-2-34 1-48 7" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M160 5l5 12 12 5-12 5-5 12-5-12-12-5 12-5z" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="160" cy="22" r="3" fill="currentColor"/><circle cx="69" cy="22" r="2" fill="currentColor"/><circle cx="251" cy="22" r="2" fill="currentColor"/><path d="M48 22h-20m244 0h-20" stroke="currentColor" stroke-width="1" stroke-dasharray="1 4"/></svg></div><div class="entertainment-game-grid"><button type="button" data-ent="dice"><span class="entertainment-game-art">⚄</span><strong>骰子猜大小</strong><small>GUESS THE DICE</small></button><button type="button" data-ent="blackjack"><span class="entertainment-game-art card-art">♠</span><strong>二十一点</strong><small>BLACKJACK</small></button></div>';
- $('choices').querySelectorAll('[data-ent]').forEach(b=>b.onclick=()=>({spin:runEntertainmentSpin,dice:showEntertainmentDice,blackjack:showEntertainmentBlackjack}[b.dataset.ent])());
+ $('choices').innerHTML=entertainmentPoster('夜场俱乐部','NO. 01 — LUCKY DRAW',entertainmentPosterArt())+'<section class="entertainment-spin-entry"><div class="entertainment-spin-title"><small>DAILY LUCKY DRAW</small><h3>每日幸运抽取</h3><span>¥6 · ¥12 · ¥30 · ¥68 · ¥128 · ¥328 · ¥628</span></div><button type="button" data-ent="spin" '+(used?'disabled':'')+'>'+(used?'今日已抽取':'开始抽取')+'</button></section><div class="entertainment-ornament-divider" aria-hidden="true"><svg viewBox="0 0 320 44"><path d="M160 22c-18-18-35-18-47-4 12 0 18 5 21 12-14-7-28-6-39 4 20-2 34 1 48 7M160 22c18-18 35-18 47-4-12 0-18 5-21 12 14-7 28-6 39 4-20-2-34 1-48 7" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M160 5l5 12 12 5-12 5-5 12-5-12-12-5 12-5z" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="160" cy="22" r="3" fill="currentColor"/><circle cx="69" cy="22" r="2" fill="currentColor"/><circle cx="251" cy="22" r="2" fill="currentColor"/><path d="M48 22h-20m244 0h-20" stroke="currentColor" stroke-width="1" stroke-dasharray="1 4"/></svg></div><div class="entertainment-game-grid"><button type="button" data-ent="dice"><span class="entertainment-game-art">⚄</span><strong>骰子猜大小</strong><small>GUESS THE DICE</small></button><button type="button" data-ent="blackjack"><span class="entertainment-game-art card-art">♠</span><strong>二十一点</strong><small>BLACKJACK</small></button><button type="button" data-ent="balloon"><span class="entertainment-game-art balloon-art">♧</span><strong>吹气球</strong><small>BALLOON RISK</small></button></div>';
+ $('choices').querySelectorAll('[data-ent]').forEach(b=>b.onclick=()=>({spin:runEntertainmentSpin,dice:showEntertainmentDice,blackjack:showEntertainmentBlackjack,balloon:showEntertainmentBalloon}[b.dataset.ent])());
 }
 function runEntertainmentSpin(){
  const today=entertainmentDay();if(s.entertainmentDailySpinDay===today){toast('今天已经抽取过了');return}
@@ -2032,6 +2032,60 @@ function runEntertainmentSpin(){
  const choices=$('choices');choices.innerHTML=entertainmentPoster('幸运抽取','DAILY PRIZE','<div class="entertainment-prize-poster"><span>¥</span><strong>6　12　30</strong><b>68　128</b><small>328　/　628</small></div>')+'<section class="entertainment-draw"><div class="entertainment-prize-grid">'+prizes.map((v,i)=>'<div class="entertainment-prize-tile" data-prize-index="'+i+'"><small>NO. '+String(i+1).padStart(2,'0')+'</small><strong>'+v+'</strong><span>¥</span></div>').join('')+'</div><div class="entertainment-draw-result" aria-live="polite">抽取中</div></section>';
  const nodes=[...choices.querySelectorAll('[data-prize-index]')];let step=0;const total=25+index;
  const timer=setInterval(()=>{nodes.forEach(n=>n.classList.remove('is-lit'));nodes[step%7].classList.add('is-lit');step++;if(step>=total){clearInterval(timer);nodes.forEach(n=>n.classList.remove('is-lit'));nodes[index].classList.add('is-winner');const result=choices.querySelector('.entertainment-draw-result');if(result)result.innerHTML='本次获得 <strong>¥'+prize+'</strong>'; }},75);
+}
+const entertainmentBalloonTypes=[
+ {id:'small',name:'轻盈气球',base:8,step:4,burst:8,rise:5,empty:10,color:'mint',shape:'round'},
+ {id:'medium',name:'标准气球',base:20,step:9,burst:14,rise:7,empty:16,color:'rose',shape:'oval'},
+ {id:'large',name:'巨型气球',base:45,step:18,burst:22,rise:9,empty:24,color:'gold',shape:'large'}
+];
+function entertainmentBalloonArt(type,blows=0){
+ const scale=Math.min(1.55,1+blows*.045);
+ return '<div class="balloon-illustration balloon-'+type.color+'" style="--balloon-scale:'+scale+'"><svg viewBox="0 0 180 190" role="img" aria-label="'+type.name+'"><defs><radialGradient id="balloonGloss" cx="32%" cy="24%"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".28" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><ellipse cx="90" cy="78" rx="55" ry="67" fill="currentColor"/><ellipse cx="90" cy="78" rx="55" ry="67" fill="url(#balloonGloss)"/><path d="M83 143l7 12 7-12" fill="currentColor"/><path d="M90 155q-15 15 1 28" fill="none" stroke="#8b7866" stroke-width="1.5"/></svg></div>';
+}
+function showEntertainmentBalloon(){
+ const active=s.entertainmentBalloonRound?.status==='active'?s.entertainmentBalloonRound:null;
+ if(active){renderEntertainmentBalloonRound();return}
+ const art='<div class="entertainment-balloon-hero"><span>01</span><strong>INFLATE<br>OR CASH OUT</strong><i>✳</i></div>';
+ $('choices').innerHTML=entertainmentPoster('吹气球','BALLOON RISK',art)+'<div class="balloon-type-grid">'+entertainmentBalloonTypes.map(t=>'<button type="button" class="balloon-type balloon-'+t.color+'" data-balloon-type="'+t.id+'"><span class="balloon-type-art"><i></i></span><strong>'+t.name+'</strong><b>¥'+t.base+' 起</b><small>每吹一次 +¥'+t.step+'</small><small>初始爆炸率 '+t.burst+'% · 每次 +'+t.rise+'%</small><small>停止后空奖率 '+t.empty+'%</small></button>').join('')+'</div><div class="balloon-start-actions"><button type="button" data-balloon-start disabled>选择气球开始</button><button type="button" class="entertainment-back" data-balloon-back>返回娱乐区</button></div>';
+ let selected=entertainmentBalloonTypes[0];
+ const cards=[...$('choices').querySelectorAll('[data-balloon-type]')];
+ cards.forEach(card=>card.onclick=()=>{selected=entertainmentBalloonTypes.find(t=>t.id===card.dataset.balloonType);cards.forEach(x=>x.classList.toggle('is-selected',x===card));const button=$('choices').querySelector('[data-balloon-start]');button.disabled=false;button.textContent='开始吹 '+selected.name});
+ cards[0]?.click();
+ $('choices').querySelector('[data-balloon-start]').onclick=()=>startEntertainmentBalloon(selected.id);
+ $('choices').querySelector('[data-balloon-back]').onclick=renderEntertainmentHome;
+}
+function startEntertainmentBalloon(id){
+ const type=entertainmentBalloonTypes.find(t=>t.id===id);if(!type)return;
+ s.entertainmentBalloonRound={type:id,blows:0,status:'active',startedAt:Date.now()};
+ save();renderEntertainmentBalloonRound();
+}
+function renderEntertainmentBalloonRound(message=''){
+ const round=s.entertainmentBalloonRound;if(!round)return;
+ const type=entertainmentBalloonTypes.find(t=>t.id===round.type);if(!type)return;
+ const blows=round.blows||0,amount=type.base+type.step*blows,risk=Math.min(90,type.burst+type.rise*blows);
+ if(round.status==='active'){
+  $('choices').innerHTML=entertainmentPoster('吹气球','BALLOON RISK / '+type.name,entertainmentBalloonArt(type,blows))+'<section class="balloon-round-panel"><div class="balloon-round-stats"><div><small>当前可得</small><strong>¥'+amount+'</strong></div><div><small>已吹次数</small><strong>'+blows+'</strong></div></div><div class="balloon-risk-track"><span style="width:'+risk+'%"></span></div><div class="balloon-risk-labels"><span>下一次爆炸概率</span><strong>'+risk+'%</strong></div><div class="balloon-rules-inline"><span>停止后空奖率 <b>'+type.empty+'%</b></span><span>本次吹气增加 <b>¥'+type.step+'</b></span></div><div class="balloon-round-actions"><button type="button" data-balloon-pump>再吹一次</button><button type="button" class="balloon-cashout" data-balloon-stop>停止并结算</button></div><div class="entertainment-game-result">'+message+'</div></section>';
+  $('choices').querySelector('[data-balloon-pump]').onclick=pumpEntertainmentBalloon;
+  $('choices').querySelector('[data-balloon-stop]').onclick=stopEntertainmentBalloon;
+ }else{
+  const popped=round.status==='popped';
+  $('choices').innerHTML=entertainmentPoster(popped?'气球爆炸':'气球结算',popped?'BALLOON POPPED':'CASH OUT',entertainmentBalloonArt(type,blows))+'<section class="balloon-round-panel"><div class="balloon-result-title">'+(popped?'气球爆炸，本轮未获得金钱':round.payout>0?'成功结算':'本轮空奖')+'</div><div class="balloon-result-amount">¥'+(round.payout||0)+'</div><p>吹气 '+blows+' 次 · '+type.name+'</p><button type="button" data-balloon-again>再玩一次</button><button type="button" class="entertainment-back" data-balloon-back>返回娱乐区</button></section>';
+  $('choices').querySelector('[data-balloon-again]').onclick=()=>{s.entertainmentBalloonRound=null;showEntertainmentBalloon()};
+  $('choices').querySelector('[data-balloon-back]').onclick=renderEntertainmentHome;
+ }
+}
+function pumpEntertainmentBalloon(){
+ const round=s.entertainmentBalloonRound;if(!round||round.status!=='active')return;
+ const type=entertainmentBalloonTypes.find(t=>t.id===round.type),risk=Math.min(90,type.burst+type.rise*round.blows);
+ if(Math.random()*100<risk){round.status='popped';round.payout=0;save();renderEntertainmentBalloonRound();return}
+ round.blows++;save();renderEntertainmentBalloonRound();
+}
+function stopEntertainmentBalloon(){
+ const round=s.entertainmentBalloonRound;if(!round||round.status!=='active')return;
+ const type=entertainmentBalloonTypes.find(t=>t.id===round.type),amount=type.base+type.step*round.blows;
+ round.status='settled';round.payout=Math.random()*100<type.empty?0:amount;
+ if(round.payout>0)s.money=(Number(s.money)||0)+round.payout;
+ save();renderEntertainmentBalloonRound();
 }
 function entertainmentBetCurrency(){return $('entertainmentCurrency')?.value==='money'?'money':'points'}
 function entertainmentBet(){return Math.max(0,Math.floor(Number($('entertainmentBet')?.value)||0))}
