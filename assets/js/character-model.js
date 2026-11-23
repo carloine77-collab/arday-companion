@@ -5,7 +5,7 @@
     try{
       const mat=(color,roughness=.84)=>{const m=stylizeMaterial(new T.MeshStandardMaterial({color,roughness,metalness:0,flatShading:false}));madeMaterials.add(m);return m};
       const skin=mat(0xe8b99d,.9),hair=mat(0xc99a42,.78),hairLight=mat(0xe8bf70,.72),shirt=mat(0xeee4d6,.94),pants=mat(0x55515a,.96),shoe=mat(0x51443f,.88),sole=mat(0x342e30,.9),eyeWhite=mat(0xfff8ef,.7),iris=mat(0x806d61,.55),pupil=mat(0x302827,.5),blush=mat(0xd99c87,.9);
-      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.84,1);scene.add(person);
+      person=new T.Group();person.name="ArdayChibiCharacter";person.scale.set(1,.90,1);scene.add(person);
       const rig=new T.Group();rig.name="character-rig";person.add(rig);
       const body=new T.Group();body.name="character-body";rig.add(body);
       const boneRoot=new T.Bone();boneRoot.name="pelvis-root";boneRoot.position.y=.70;body.add(boneRoot);
@@ -33,19 +33,34 @@
         const k0=Math.hypot(qx,qy,qz),k1=Math.hypot(qx/(rx/Math.min(rx,ry,rz)),qy/(ry/Math.min(rx,ry,rz)),qz/(rz/Math.min(rx,ry,rz)));
         return k0*(k0-1)/(Math.max(k1,1e-5))*Math.min(rx,ry,rz);
       };
+      // One lofted SDF trunk gives the chest, waist and pelvis a continuous silhouette.
+      const torsoProfile=[
+        [.59,.158,.116],[.66,.178,.128],[.75,.166,.12],
+        [.84,.143,.105],[.92,.15,.108],[1.00,.185,.132],
+        [1.09,.205,.145],[1.17,.184,.128],[1.235,.132,.096],[1.285,.075,.065]
+      ];
+      const torsoSdf=(x,y,z)=>{
+        let a=torsoProfile[0],b=torsoProfile[torsoProfile.length-1];
+        for(let i=0;i<torsoProfile.length-1;i++)if(y>=torsoProfile[i][0]&&y<=torsoProfile[i+1][0]){a=torsoProfile[i];b=torsoProfile[i+1];break}
+        const t=Math.max(0,Math.min(1,(y-a[0])/Math.max(1e-5,b[0]-a[0])));
+        const smooth=t*t*(3-2*t),rx=a[1]+(b[1]-a[1])*smooth,rz=a[2]+(b[2]-a[2])*smooth;
+        const radial=(Math.hypot(x/rx,z/rz)-1)*Math.min(rx,rz);
+        const vertical=Math.max(torsoProfile[0][0]-y,y-torsoProfile[torsoProfile.length-1][0]);
+        return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
+      };
       const forms=[
-        [0,.98,0,.245,.30,.155],[0,.72,0,.225,.18,.15],[0,1.43,0,.315,.33,.25],[0,1.235,0,.095,.15,.09],
-        [-.27,1.015,0,.105,.18,.095],[.27,1.015,0,.105,.18,.095],
-        [-.345,.82,0,.075,.18,.072],[.345,.82,0,.075,.18,.072],
-        [-.38,.625,0,.064,.10,.064],[.38,.625,0,.064,.10,.064],
-        [-.125,.56,0,.105,.235,.10],[.125,.56,0,.105,.235,.10],
-        [-.125,.29,0,.082,.19,.082],[.125,.29,0,.082,.19,.082],
+        [0,1.43,0,.315,.33,.25],[0,1.235,0,.065,.105,.065],
+        [-.27,1.055,0,.086,.145,.078],[.27,1.055,0,.086,.145,.078],
+        [-.345,.82,0,.066,.17,.064],[.345,.82,0,.066,.17,.064],
+        [-.38,.625,0,.057,.095,.058],[.38,.625,0,.057,.095,.058],
+        [-.125,.56,0,.096,.225,.09],[.125,.56,0,.096,.225,.09],
+        [-.125,.29,0,.078,.185,.078],[.125,.29,0,.078,.185,.078],
         [-.125,.105,.065,.105,.068,.17],[.125,.105,.065,.105,.068,.17],
         [-.425,.59,.04,.038,.06,.045],[.425,.59,.04,.038,.06,.045]
       ];
       const field=(x,y,z)=>{
-        let d=1e4;
-        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.105);
+        let d=torsoSdf(x,y,z);
+        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.078);
         return d;
       };
       const nx=58,ny=91,nz=36,x0=-.58,y0=.015,z0=-.36,dx=.02,dy=.02,dz=.02;
@@ -87,7 +102,7 @@
         });
         const normal=new T.Vector3().crossVectors(new T.Vector3(polygon[1][0]-polygon[0][0],polygon[1][1]-polygon[0][1],polygon[1][2]-polygon[0][2]),new T.Vector3(polygon[2][0]-polygon[0][0],polygon[2][1]-polygon[0][1],polygon[2][2]-polygon[0][2]));
         if(normal.dot(grad)<0)polygon.reverse();
-        const group=center[1]<.77?2:center[1]<1.25?1:0,root=polygon[0];
+        const group=center[1]<.70?2:center[1]<1.30?1:0,root=polygon[0];
         for(let i=1;i<polygon.length-1;i++)triangles[group].push(vertexId(root),vertexId(polygon[i]),vertexId(polygon[i+1]));
       };
       for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
