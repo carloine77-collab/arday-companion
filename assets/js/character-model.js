@@ -118,7 +118,7 @@
         ellipsoid(eye,side*.002,-.003,.027,.013,.022,.008,pupil,"pupil");
         ellipsoid(eye,side*.009,.011,.034,.0055,.0075,.0035,eyeWhite,"eye-glint");
         eyeGroups.push(eye);
-        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.17,.13,.225),new T.Vector3(side*.125,.145,.245),new T.Vector3(side*.075,.13,.245)]);
+        const browCurve=new T.CatmullRomCurve3([new T.Vector3(side*.17,.13,.205),new T.Vector3(side*.125,.145,.212),new T.Vector3(side*.075,.13,.212)]);
         mesh(head,new T.TubeGeometry(browCurve,12,.005,6,false),hair,"eyebrow");
         const cheek=ellipsoid(head,side*.17,-.105,.215,.038,.016,.007,blush,"cheek");cheek.material.transparent=true;cheek.material.opacity=.28;
       }
