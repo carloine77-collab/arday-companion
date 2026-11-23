@@ -71,7 +71,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
   let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
 
 
-    const woven=variant==='藤编抽屉';width=.88;depth=.78;height=.92;
+    const woven=variant==='藤编抽屉';width=.88;depth=.78;height=.92;surfaceType='table';surfaceY=.92;
     if(woven){
      const cane=mat(0xc5a47a,.94),frame=mat(0x76543d,.66),shadow=mat(0x4e3829,.82);
      box(0,.48,0,.82,.72,.68,frame);box(0,.87,0,.94,.1,.78,m.oak);
@@ -101,7 +101,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
   let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
 
 
-    width=1.85;depth=.78;height=2.45;
+    width=1.85;depth=.78;height=2.45;surfaceType='table';surfaceY=2.5;
     const body=mat(0x76543d,.68),front=mat(0xd8c8b3,.76),inner=mat(0x4c382c,.82);
     box(0,1.2,0,1.78,2.3,.68,body);box(0,2.38,0,1.92,.12,.78,m.oak);box(0,.08,0,1.86,.16,.76,m.dark);
     // Two full-height doors with recessed framed panels and separate handles.
