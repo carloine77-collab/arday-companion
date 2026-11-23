@@ -758,3 +758,67 @@ header.top{position:relative}
 .entertainment-view hr,.entertainment-view .separator,.entertainment-view [role="separator"]{display:none!important}
 .entertainment-currency-picker select{min-width:142px}
 .entertainment-stake-control input{font-variant-numeric:tabular-nums}
+
+
+/* Compact entertainment layout and balloon-risk game. */
+.entertainment-view{padding:10px 12px 18px!important}
+.entertainment-poster{padding:12px 15px 9px!important;margin:0 0 9px!important}
+.entertainment-poster-top{font-size:9px!important}
+.entertainment-poster h2{margin:4px 0!important;font-size:21px!important}
+.entertainment-poster-art{max-height:104px!important}
+.entertainment-poster-foot{margin-top:2px!important;font-size:8px!important}
+.entertainment-ornament-divider{height:28px!important;margin:0 0 4px!important}
+.entertainment-ornament-divider svg{height:30px!important}
+.entertainment-spin-entry{padding:2px 2px 10px!important}
+.entertainment-spin-title h3{font-size:15px!important}
+.entertainment-game-grid{gap:8px!important;margin-top:4px!important}
+.entertainment-game-grid button{min-height:108px!important;padding:9px 6px!important;gap:5px!important}
+.entertainment-game-art{width:48px!important;height:48px!important;font-size:32px!important}
+.entertainment-game-art.card-art{font-size:36px!important}
+.entertainment-game-grid strong{font-size:13px!important}
+.entertainment-game-grid small{font-size:8px!important}
+.entertainment-game-panel{padding:6px 2px 12px!important}
+.entertainment-game-panel>p{margin:5px 0 9px!important;font-size:12px!important;line-height:1.55!important}
+.entertainment-currency-picker{margin:9px 0 5px!important}
+.entertainment-stake{padding:7px 0 5px!important}
+.entertainment-actions{margin:9px 0!important}
+.entertainment-game-result{min-height:30px!important;margin:9px 0!important;padding:8px 10px!important}
+.entertainment-dice-hero,.entertainment-card-hero{min-height:88px!important}
+.entertainment-dice-hero span{width:58px!important;height:58px!important;font-size:43px!important}
+.entertainment-card-hero span,.entertainment-card-hero i{width:50px!important;height:70px!important;font-size:34px!important}
+.balloon-type-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:8px 0}
+.balloon-type{display:flex;min-width:0;flex-direction:column;align-items:center;gap:4px;padding:9px 5px;border:1px solid #cbb58f;border-radius:4px;background:#f8f0e2;color:#51483d;text-align:center}
+.balloon-type.is-selected{outline:2px solid #647d74;background:#e8eee4}
+.balloon-type strong{font:600 12px "Noto Serif SC",serif}
+.balloon-type b{font:15px Georgia,serif}
+.balloon-type small{font-size:9px;line-height:1.35;color:#85745d}
+.balloon-type-art{position:relative;display:block;width:36px;height:44px;margin:0 auto 3px;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 32% 24%,#ffffffd9 0 5%,#ffffff60 17%,transparent 36%),var(--balloon-color);box-shadow:inset -5px -7px 10px #0002,0 3px 6px #0001}
+.balloon-type-art:after{content:"";position:absolute;left:15px;bottom:-5px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--balloon-color)}
+.balloon-mint{--balloon-color:#8cae9f}.balloon-rose{--balloon-color:#c98183}.balloon-gold{--balloon-color:#d0ad69}
+.balloon-start-actions{display:flex;justify-content:center;gap:8px;margin:8px 0 12px}
+.balloon-start-actions button,.balloon-round-actions button,.balloon-round-panel>button{border:1px solid #a98b61;border-radius:3px;padding:9px 13px;background:#536a6a;color:#fff8e9;font-size:12px}
+.balloon-start-actions button:disabled{opacity:.4}
+.entertainment-balloon-hero{display:flex;min-height:86px;align-items:center;justify-content:center;gap:18px;color:#e8d6b5}
+.entertainment-balloon-hero span{font:italic 42px Georgia,serif;color:#cda978}
+.entertainment-balloon-hero strong{font:600 17px/1.15 Georgia,serif;letter-spacing:.08em}
+.entertainment-balloon-hero i{font-size:42px;color:#cda978;font-style:normal}
+.balloon-illustration{display:grid;place-items:center;min-height:116px;overflow:hidden}
+.balloon-illustration svg{width:112px;height:116px;transform:scale(var(--balloon-scale,1));transition:transform .25s ease;filter:drop-shadow(0 6px 4px #17292c35)}
+.balloon-round-panel{padding:6px 2px 12px}
+.balloon-round-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:5px 0 10px}
+.balloon-round-stats>div{padding:8px 10px;background:#f3ead9;border:1px solid #d7c5a5}
+.balloon-round-stats small{display:block;font-size:10px;color:#8a795f}
+.balloon-round-stats strong{font:22px Georgia,serif;color:#536d64}
+.balloon-risk-track{height:7px;overflow:hidden;border-radius:10px;background:#e5dac8}
+.balloon-risk-track span{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,#8da98e,#c08b64,#b65d55);transition:width .2s}
+.balloon-risk-labels,.balloon-rules-inline{display:flex;justify-content:space-between;gap:8px;margin:6px 0;color:#76664f;font-size:11px}
+.balloon-risk-labels strong{font-size:12px;color:#a45d4e}
+.balloon-rules-inline{padding:8px 0;color:#8a795f}
+.balloon-rules-inline b{color:#55483b}
+.balloon-round-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:11px 0}
+.balloon-round-actions button{min-height:39px}
+.balloon-round-actions .balloon-cashout{background:#a27a4e}
+.balloon-result-title{text-align:center;margin:8px 0;color:#61513e;font:600 16px "Noto Serif SC",serif}
+.balloon-result-amount{text-align:center;color:#587566;font:36px Georgia,serif}
+.balloon-round-panel>p{text-align:center;font-size:11px;color:#88775e}
+@media(max-width:420px){.balloon-type-grid{gap:5px}.balloon-type{padding:8px 3px}.balloon-type small{font-size:8px}.balloon-type-art{width:31px;height:39px}.balloon-start-actions button{padding:8px 10px}}
