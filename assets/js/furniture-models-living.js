@@ -208,7 +208,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
   let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
 
 
-    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.58;height=2.12;
+    action=()=>openFurnitureActions('bookshelf',id);width=1.45;depth=.58;height=2.12;if(!open){surfaceType='table';surfaceY=variant==='深胡桃木书柜'?2.18:2.12;}
     const open=variant==='开放格架',woodGrid=variant==='白蜡木开放格';
     const frame=variant==='深胡桃木书柜'?mat(0x503a2d,.62):woodGrid?mat(0xc4a77f,.7):m.wood;
     const shelf=woodGrid?mat(0xe0cba7,.68):variant==='深胡桃木书柜'?mat(0x74543a,.62):m.oak;
@@ -397,7 +397,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
   let {width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action}=ctx;
 
 
-    const cream=variant==='奶油三抽';width=1.28;depth=.68;height=1.18;
+    const cream=variant==='奶油三抽';width=1.28;depth=.68;height=1.18;surfaceType='table';surfaceY=1.22;
     const body=cream?mat(0xe4d8c7,.82):mat(0x60432f,.62),front=cream?mat(0xf0e8dc,.9):mat(0x806044,.64),edge=mat(cream?0xbca88e:0x3d2d23,.68),brass=mat(0xb58d56,.35,.68);
     box(0,.57,0,1.22,1.08,.61,body);
     box(0,1.13,0,1.32,.1,.69,front);
