@@ -2013,6 +2013,26 @@ function showDungeonResult(result){
 function entertainmentCurrencyBalance(c){return Math.max(0,Math.floor(Number(c==='money'?s.money:s.points)||0))}
 function entertainmentSetBalance(c,v){if(c==='money')s.money=Math.max(0,Math.floor(v));else s.points=Math.max(0,Math.floor(v))}
 function entertainmentDay(){return keyAt(Date.now())}
+function entertainmentBalloonAccess(){
+ const today=entertainmentDay();
+ if(!s.entertainmentBalloonAccess||s.entertainmentBalloonAccess.day!==today)s.entertainmentBalloonAccess={day:today,freeUsed:false,commissionEarned:0,commissionUsed:0};
+ const a=s.entertainmentBalloonAccess;
+ a.freeUsed=!!a.freeUsed;a.commissionEarned=Math.max(0,Math.floor(Number(a.commissionEarned)||0));a.commissionUsed=Math.max(0,Math.min(a.commissionEarned,Math.floor(Number(a.commissionUsed)||0)));
+ return a;
+}
+function entertainmentBalloonRemaining(){
+ const a=entertainmentBalloonAccess();
+ return (a.freeUsed?0:1)+Math.max(0,a.commissionEarned-a.commissionUsed);
+}
+function grantEntertainmentBalloonCommissionChance(){
+ const a=entertainmentBalloonAccess();a.commissionEarned++;save();return entertainmentBalloonRemaining();
+}
+function consumeEntertainmentBalloonChance(){
+ const a=entertainmentBalloonAccess();
+ if(!a.freeUsed){a.freeUsed=true;return true}
+ if(a.commissionUsed<a.commissionEarned){a.commissionUsed++;return true}
+ return false;
+}
 function entertainmentCard(){return{rank:1+Math.floor(Math.random()*13),suit:['♠','♥','♣','♦'][Math.floor(Math.random()*4)]}}
 function entertainmentValue(cards){let t=0,a=0;cards.forEach(c=>{if(c.rank===1){t+=11;a++}else t+=Math.min(10,c.rank)});while(t>21&&a){t-=10;a--}return t}
 function entertainmentCurrencyLabel(c){return c==='money'?'游戏金钱（¥）':'积分'}
@@ -2044,34 +2064,37 @@ function entertainmentBalloonArt(type,blows=0){
 }
 function showEntertainmentBalloon(){
  const active=s.entertainmentBalloonRound?.status==='active'?s.entertainmentBalloonRound:null;
- if(active){renderEntertainmentBalloonRound();return}
- const art='<div class="entertainment-balloon-hero"><span>01</span><strong>INFLATE<br>OR CASH OUT</strong><i>✳</i></div>';
- $('choices').innerHTML=entertainmentPoster('吹气球','BALLOON RISK',art)+'<div class="balloon-type-grid">'+entertainmentBalloonTypes.map(t=>'<button type="button" class="balloon-type balloon-'+t.color+'" data-balloon-type="'+t.id+'"><span class="balloon-type-art"><i></i></span><strong>'+t.name+'</strong><b>¥'+t.base+' 起</b><small>每吹一次 +¥'+t.step+'</small><small>初始爆炸率 '+t.burst+'% · 每次 +'+t.rise+'%</small><small>停止后空奖率 '+t.empty+'%</small></button>').join('')+'</div><div class="balloon-start-actions"><button type="button" data-balloon-start disabled>选择气球开始</button><button type="button" class="entertainment-back" data-balloon-back>返回娱乐区</button></div>';
- let selected=entertainmentBalloonTypes[0];
- const cards=[...$('choices').querySelectorAll('[data-balloon-type]')];
- cards.forEach(card=>card.onclick=()=>{selected=entertainmentBalloonTypes.find(t=>t.id===card.dataset.balloonType);cards.forEach(x=>x.classList.toggle('is-selected',x===card));const button=$('choices').querySelector('[data-balloon-start]');button.disabled=false;button.textContent='开始吹 '+selected.name});
- cards[0]?.click();
- $('choices').querySelector('[data-balloon-start]').onclick=()=>startEntertainmentBalloon(selected.id);
- $('choices').querySelector('[data-balloon-back]').onclick=renderEntertainmentHome;
+ if(active){$('choices').classList.add('balloon-fullscreen');renderEntertainmentBalloonRound();return}
+ startEntertainmentBalloon();
 }
-function startEntertainmentBalloon(id){
- const type=entertainmentBalloonTypes.find(t=>t.id===id);if(!type)return;
- s.entertainmentBalloonRound={type:id,blows:0,status:'active',startedAt:Date.now()};
- save();renderEntertainmentBalloonRound();
+function startEntertainmentBalloon(){
+ if(!consumeEntertainmentBalloonChance()){renderEntertainmentBalloonUnavailable();return}
+ const type=entertainmentBalloonTypes[Math.floor(Math.random()*entertainmentBalloonTypes.length)];
+ s.entertainmentBalloonRound={type:type.id,blows:0,status:'active',startedAt:Date.now()};
+ $('choices').classList.add('balloon-fullscreen');save();renderEntertainmentBalloonRound();
+}
+function renderEntertainmentBalloonUnavailable(){
+ const remaining=entertainmentBalloonRemaining();
+ $('choices').classList.add('balloon-fullscreen');
+ $('choices').innerHTML=entertainmentPoster('吹气球','BALLOON RISK','<div class="balloon-unavailable-art"><span>✳</span><b>THE NEXT ROUND</b></div>')+'<section class="balloon-unavailable"><div class="balloon-result-title">今日机会已用完</div><p>每天可免费游玩一次。领取一项日程委托奖励，可再获得一次机会。</p><div class="balloon-remaining-mark">NEXT / 00</div><button type="button" class="entertainment-back" data-balloon-back>返回娱乐区</button></section>';
+ $('choices').querySelector('[data-balloon-back]').onclick=renderEntertainmentHome;
 }
 function renderEntertainmentBalloonRound(message=''){
  const round=s.entertainmentBalloonRound;if(!round)return;
  const type=entertainmentBalloonTypes.find(t=>t.id===round.type);if(!type)return;
  const blows=round.blows||0,amount=type.base+type.step*blows,risk=Math.min(90,type.burst+type.rise*blows);
+ const remaining=entertainmentBalloonRemaining();
  if(round.status==='active'){
-  $('choices').innerHTML=entertainmentPoster('吹气球','BALLOON RISK / '+type.name,entertainmentBalloonArt(type,blows))+'<section class="balloon-round-panel"><div class="balloon-round-stats"><div><small>当前可得</small><strong>¥'+amount+'</strong></div><div><small>已吹次数</small><strong>'+blows+'</strong></div></div><div class="balloon-risk-track"><span style="width:'+risk+'%"></span></div><div class="balloon-risk-labels"><span>下一次爆炸概率</span><strong>'+risk+'%</strong></div><div class="balloon-rules-inline"><span>停止后空奖率 <b>'+type.empty+'%</b></span><span>本次吹气增加 <b>¥'+type.step+'</b></span></div><div class="balloon-round-actions"><button type="button" data-balloon-pump>再吹一次</button><button type="button" class="balloon-cashout" data-balloon-stop>停止并结算</button></div><div class="entertainment-game-result">'+message+'</div></section>';
+  $('choices').classList.add('balloon-fullscreen');
+  $('choices').innerHTML=entertainmentPoster('吹气球','BALLOON RISK / '+type.name,'<div class="balloon-poster-mark"><span>ARDAY</span><b>INFLATE<br>OR CASH OUT</b><i>✳</i></div>')+'<section class="balloon-playfield"><div class="balloon-stage balloon-'+type.color+'">'+entertainmentBalloonArt(type,blows)+'<div class="balloon-stage-caption"><span>NO. 0'+(entertainmentBalloonTypes.findIndex(t=>t.id===type.id)+1)+'</span><b>'+type.name+'</b></div></div><div class="balloon-dashboard"><div class="balloon-round-stats"><div><small>当前奖金</small><strong>¥'+amount+'</strong></div><div><small>吹气次数</small><strong>'+blows+'</strong></div></div><div class="balloon-risk-track"><span style="width:'+risk+'%"></span></div><div class="balloon-risk-labels"><span>下一次爆炸风险</span><strong>'+risk+'%</strong></div><div class="balloon-round-actions"><button type="button" data-balloon-pump>继续充气 <i>＋</i></button><button type="button" class="balloon-cashout" data-balloon-stop>停止并领取</button></div><div class="balloon-footer-mark"><span>今日剩余机会</span><b>'+remaining+'</b><span>ARDAY / CLUB ROOM</span></div></div></section>';
   $('choices').querySelector('[data-balloon-pump]').onclick=pumpEntertainmentBalloon;
   $('choices').querySelector('[data-balloon-stop]').onclick=stopEntertainmentBalloon;
  }else{
   const popped=round.status==='popped';
-  $('choices').innerHTML=entertainmentPoster(popped?'气球爆炸':'气球结算',popped?'BALLOON POPPED':'CASH OUT',entertainmentBalloonArt(type,blows))+'<section class="balloon-round-panel"><div class="balloon-result-title">'+(popped?'气球爆炸，本轮未获得金钱':round.payout>0?'成功结算':'本轮空奖')+'</div><div class="balloon-result-amount">¥'+(round.payout||0)+'</div><p>吹气 '+blows+' 次 · '+type.name+'</p><button type="button" data-balloon-again>再玩一次</button><button type="button" class="entertainment-back" data-balloon-back>返回娱乐区</button></section>';
-  $('choices').querySelector('[data-balloon-again]').onclick=()=>{s.entertainmentBalloonRound=null;showEntertainmentBalloon()};
-  $('choices').querySelector('[data-balloon-back]').onclick=renderEntertainmentHome;
+  $('choices').classList.add('balloon-fullscreen');
+  $('choices').innerHTML=entertainmentPoster(popped?'气球爆炸':'气球结算',popped?'BALLOON POPPED':'CASH OUT','<div class="balloon-poster-mark"><span>ARDAY</span><b>'+ (popped?'ONE MORE BREATH':'WELL PLAYED') +'</b><i>✳</i></div>')+'<section class="balloon-finish"><div class="balloon-finish-art">'+entertainmentBalloonArt(type,blows)+'</div><div class="balloon-result-title">'+(popped?'气球爆炸，本轮未获得金钱':round.payout>0?'成功结算':'本轮空奖')+'</div><div class="balloon-result-amount">¥'+(round.payout||0)+'</div><p>吹气 '+blows+' 次 · '+type.name+'</p><div class="balloon-finish-actions">'+(remaining>0?'<button type="button" data-balloon-again>再来一局</button>':'')+'<button type="button" class="entertainment-back" data-balloon-back>返回娱乐区</button></div><div class="balloon-footer-mark"><span>今日剩余机会</span><b>'+remaining+'</b><span>ARDAY / CLUB ROOM</span></div></section>';
+  const again=$('choices').querySelector('[data-balloon-again]');if(again)again.onclick=()=>{s.entertainmentBalloonRound=null;startEntertainmentBalloon()};
+  $('choices').querySelector('[data-balloon-back]').onclick=()=>{s.entertainmentBalloonRound=null;renderEntertainmentHome()};
  }
 }
 function pumpEntertainmentBalloon(){
@@ -2251,9 +2274,10 @@ function showGoals(tab='personal'){
   $('choices').querySelectorAll('[data-commission-claim]').forEach(button=>button.onclick=()=>{
    const result=commissionSystem.claim(button.dataset.commissionClaim);
    if(!result.ok){toast(result.reason||'委托尚未完成');return}
+   const balloonChances=grantEntertainmentBalloonCommissionChance();
    save();render();showGoals('commission');
    const reward=result.statLabel+' +'+result.amount+(result.itemName?' · '+result.itemName:'')+(result.fallbackPoints?' · 积分 +'+result.fallbackPoints:'');
-   toast('委托完成：'+reward);
+   toast('委托完成：'+reward+' · 吹气球机会 +1（今日剩余 '+balloonChances+' 次）');
   });
   $('drawer').classList.add('open');
  }
