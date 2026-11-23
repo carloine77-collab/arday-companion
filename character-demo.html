@@ -46,66 +46,137 @@ function ellipsoid(parent,material,pos,scale,segments=32){const m=new THREE.Mesh
 function tube(parent,points,radius,material){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,32,radius,10,false),material);parent.add(mesh);return mesh}
 function makeCharacter(kind){
  const p=palette[kind],root=new THREE.Group();
- const skin=mat(p.skin),hair=mat(p.hair),shirt=mat(p.shirt),pants=mat(p.pants),shoe=mat(p.shoe),white=mat(0xfffaf1),iris=mat(0x51443e),blush=new THREE.MeshBasicMaterial({color:p.blush,transparent:true,opacity:.34,depthWrite:false});
- const dims=[
-  {headX:.405,headY:.445,headZ:.345,headYpos:1.94,neckR:.105},
-  {headX:.425,headY:.425,headZ:.355,headYpos:1.94,neckR:.108},
-  {headX:.395,headY:.445,headZ:.335,headYpos:1.95,neckR:.102}
- ][kind];
- const hx=dims.headX,hy=dims.headY,hz=dims.headZ,headY=dims.headYpos;
- // Short legs, large feet and a low, compact center of gravity.
- for(const s of [-1,1]){
-  ellipsoid(root,pants,[s*.135,.405,0],[.112,.245,.125]);
-  ellipsoid(root,shoe,[s*.14,.16,.085],[.14,.105,.205]);
- }
- // Broad, rounded shoulder line flows into a compact torso.
- const torso=lathe([[0,0],[.20,.015],[.275,.075],[.315,.18],[.31,.32],[.285,.49],[.245,.62],[.19,.69],[0,.70]],shirt,64);
- torso.position.y=.66;root.add(torso);
- // Short softly rounded arms, attached at the shoulder rather than hanging as thin rods.
- for(const s of [-1,1]){
-  const upper=ellipsoid(root,shirt,[s*.292,1.205,.005],[.105,.19,.12]);
-  upper.rotation.z=-s*.10;
-  const fore=lathe([[0,-.19],[.075,-.18],[.092,-.10],[.095,.035],[.085,.15],[.055,.20],[0,.205]],skin,40);
-  fore.position.set(s*.315,.99,.025);fore.rotation.z=-s*.08;root.add(fore);
-  ellipsoid(root,skin,[s*.33,.80,.045],[.082,.085,.085]);
- }
- // Neck is a short, blunt column with rounded ends, mostly seated inside the shoulder mass.
- const nr=dims.neckR;
- const neck=lathe([[0,0],[nr*.72,0],[nr*.94,.025],[nr,.075],[nr*.94,.15],[nr*.76,.205],[0,.21]],skin,48);
- neck.position.y=1.285;root.add(neck);
- // Rounded head profile: a broad, softly flattened chin and full lower cheeks.
- const face=lathe([[hx*.34,-hy],[hx*.58,-hy*.985],[hx*.78,-hy*.91],[hx*.91,-hy*.73],[hx*.99,-hy*.42],[hx,hy*.02],[hx*.91,hy*.48],[hx*.66,hy*.82],[hx*.34,hy*.97],[0,hy]],skin,72);
- face.scale.z=hz/hx;face.position.set(0,headY,0);root.add(face);
- for(const s of [-1,1])ellipsoid(root,skin,[s*hx*.96,headY-.005,-.005],[.068,.095,.068]);
- // Features are small and calm, placed close to the face surface.
- const eyeY=headY+.005,eyeX=hx*.42,eyeZ=hz*.91;
- for(const s of [-1,1]){
-  ellipsoid(root,blush,[s*hx*.66,headY-.13,hz*.865],[.072,.038,.009]);
-  ellipsoid(root,white,[s*eyeX,eyeY,eyeZ],[.047,.065,.022]);
-  ellipsoid(root,iris,[s*eyeX,eyeY-.006,eyeZ+.018],[.023,.039,.012]);
-  ellipsoid(root,mat(0xffffff),[s*eyeX-.008,eyeY+.017,eyeZ+.028],[.008,.012,.005],16);
-  tube(root,[[s*eyeX-.046,eyeY+.092,hz*.91],[s*eyeX,eyeY+.103,hz*.94],[s*eyeX+.046,eyeY+.092,hz*.91]],.0075,hair);
- }
- tube(root,[[0,headY-.09,hz*.98],[0,headY-.115,hz*1.005],[.009,headY-.13,hz*.98]],.009,skin);
- tube(root,[[-.038,headY-.19,hz*.95],[0,headY-.202,hz*.97],[.038,headY-.19,hz*.95]],.008,iris);
- // One clean scalp shell and simple attached hair masses; no intersecting decorative strands.
- const cap=new THREE.Mesh(new THREE.SphereGeometry(1,64,40,0,TAU,0,Math.PI*.54),hair);
- cap.scale.set(hx*1.055,hy*.88,hz*1.075);cap.position.set(0,headY+hy*.22,-.008);root.add(cap);
- if(kind===0){
-  ellipsoid(root,hair,[0,headY-.12,-.19],[hx*1.035,hy*.82,.19]);
-  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.88,headY-.19,-.012],[.09,.245,.205]);
-  ellipsoid(root,hair,[0,headY+hy*.25,hz*.73],[hx*.88,.09,.095]);
- }else if(kind===1){
-  ellipsoid(root,hair,[0,headY-.12,-.19],[hx*1.04,hy*.78,.19]);
-  for(const s of [-1,1])ellipsoid(root,hair,[s*hx*.91,headY-.17,-.01],[.085,.205,.19]);
-  const fringe=ellipsoid(root,hair,[-.045,headY+hy*.31,hz*.75],[hx*.88,.115,.09]);fringe.rotation.z=-.12;
- }else{
-  ellipsoid(root,hair,[0,headY-.12,-.19],[hx*1.04,hy*.82,.19]);
-  for(const s of [-1,1]){
-   const side=lathe([[0,-.34],[.07,-.33],[.105,-.22],[.115,-.04],[.10,.15],[.065,.25],[0,.27]],hair,40);
-   side.position.set(s*hx*.78,headY-.22,.005);root.add(side);
+ const skin=mat(p.skin),hair=mat(p.hair),shirt=mat(p.shirt),pants=mat(p.pants),shoe=mat(p.shoe);
+ const white=mat(0xfffaf1),iris=mat(0x51443e);
+ const blush=new THREE.MeshBasicMaterial({color:p.blush,transparent:true,opacity:.3,depthWrite:false});
+ const add=(geo,material,pos=[0,0,0])=>{const m=new THREE.Mesh(geo,material);m.position.set(...pos);root.add(m);return m};
+ const ell=(material,pos,scale,seg=32)=>{const m=add(new THREE.SphereGeometry(1,seg,Math.max(12,Math.floor(seg*.65))),material,pos);m.scale.set(...scale);return m};
+ const loft=(rings,material,segments=48,flat=false)=>{
+  const verts=[],indices=[];
+  for(let j=0;j<rings.length;j++){
+   const r=rings[j];
+   for(let i=0;i<=segments;i++){
+    const a=i/segments*Math.PI*2;
+    verts.push(Math.cos(a)*r[1],r[0],Math.sin(a)*r[2]);
+   }
   }
-  ellipsoid(root,hair,[.035,headY+hy*.25,hz*.73],[hx*.91,.095,.09]).rotation.z=.06;
+  for(let j=0;j<rings.length-1;j++)for(let i=0;i<segments;i++){
+   const a=j*(segments+1)+i,b=a+segments+1;
+   indices.push(a,b,a+1,b,b+1,a+1);
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();
+  const mesh=add(g,material);if(flat)mesh.material=material.clone();return mesh;
+ };
+ const latheHead=(rx,ry,rz,material,y,segments=64)=>{
+  const profile=[[rx*.32,-ry],[rx*.62,-ry*.99],[rx*.83,-ry*.88],[rx*.96,-ry*.62],[rx,-ry*.25],[rx*.99,ry*.18],[rx*.87,ry*.58],[rx*.62,ry*.86],[rx*.3,ry*.98],[0,ry]];
+  const m=new THREE.Mesh(new THREE.LatheGeometry(profile.map(v=>new THREE.Vector2(v[0],v[1])),segments),material);
+  m.scale.z=rz/rx;m.position.y=y;root.add(m);return m;
+ };
+ const face=(rx,ry,rz,y)=>{
+  const ex=rx*.39,ez=rz*.91,ey=y+.005;
+  for(const s of [-1,1]){
+   ell(blush,[s*rx*.65,y-.13,rz*.86],[.068,.035,.008],24);
+   ell(white,[s*ex,ey,ez],[.043,.058,.018],24);
+   ell(iris,[s*ex,ey-.006,ez+.016],[.021,.034,.01],20);
+   ell(mat(0xffffff),[s*ex-.007,ey+.015,ez+.025],[.007,.01,.004],12);
+  }
+  // Small nose and a quiet curved mouth; deliberately no heavy eyebrow-like strokes.
+  ell(skin,[0,y-.105,rz*.99],[.018,.018,.012],16);
+  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.031,.005,6,20,Math.PI),iris);
+  mouth.position.set(0,y-.185,rz*.955);mouth.rotation.z=Math.PI;root.add(mouth);
+ };
+ const hairCap=(rx,ry,rz,y,style)=>{
+  // Back shell and crown are one clear mass. The front edge is kept above the eyes.
+  ell(hair,[0,y+.09,-.105],[rx*1.045,ry*.86,rz*.92],48);
+  if(style===0){
+   // Neat short bob: open forehead, rounded side panels, no dangling fringe.
+   ell(hair,[0,y-.18,-.18],[rx*1.01,ry*.66,.16],40);
+   for(const s of [-1,1])ell(hair,[s*rx*.9,y-.17,-.005],[.075,.22,.16],32);
+   ell(hair,[0,y+ry*.55,rz*.73],[rx*.78,.045,.045],32);
+  }else if(style===1){
+   // A broad cap with one thick, clearly separated side-swept bang.
+   ell(hair,[0,y-.17,-.18],[rx*1.02,ry*.68,.16],40);
+   const bang=ell(hair,[.11,y+ry*.32,rz*.86],[rx*.68,.13,.075],40);bang.rotation.z=-.2;
+   for(const s of [-1,1])ell(hair,[s*rx*.91,y-.12,-.01],[.09,.19,.17],32);
+  }else{
+   // Long, continuous side curtains with a clean center part.
+   for(const s of [-1,1]){
+    const side=loft([[y-.48,.075,.12],[y-.36,.105,.15],[y-.12,.12,.16],[y+.12,.11,.14],[y+.32,.075,.10]],hair,32);
+    side.position.x=s*rx*.83;side.position.z=-.005;
+   }
+   ell(hair,[0,y+ry*.62,rz*.70],[rx*.86,.05,.05],32);
+   // Hairline part is a subtle seam, not a raised tube or eyebrow.
+   const seam=new THREE.Mesh(new THREE.BoxGeometry(.008,.15,.008),mat(0x382f2b));
+   seam.position.set(0,y+ry*.68,.02);root.add(seam);
+  }
+ };
+ if(kind===0){
+  // METHOD A — continuous ring-loft surface: torso, shoulders and short neck form one mesh.
+  loft([[.53,.13,.105],[.61,.23,.15],[.78,.29,.17],[.98,.31,.16],[1.13,.29,.145],[1.23,.23,.12],[1.29,.135,.105],[1.34,.105,.095],[1.40,.105,.095]],shirt,64);
+  // The neck is only the exposed upper 4–6 cm; it is not a separate long column.
+  loft([[1.325,.091,.084],[1.37,.092,.084],[1.415,.10,.09]],skin,48);
+  latheHead(.405,.425,.35,skin,1.79);
+  // short legs and broad shoes
+  for(const s of [-1,1]){ell(pants,[s*.125,.39,0],[.105,.22,.12]);ell(shoe,[s*.13,.15,.07],[.135,.09,.19])}
+  for(const s of [-1,1]){const arm=ell(shirt,[s*.30,1.02,0],[.105,.20,.12]);arm.rotation.z=-s*.13;ell(skin,[s*.34,.82,.035],[.075,.10,.08])}
+  face(.405,.425,.35,1.79);hairCap(.405,.425,.35,1.79,0);
+ }else if(kind===1){
+  // METHOD B — implicit smooth-union sculpt. Marching tetrahedra fuse the anatomy into one skin mesh.
+  const smoothMin=(a,b,k)=>{const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25};
+  const sdEll=(x,y,z,c,s)=>{const qx=(x-c[0])/s[0],qy=(y-c[1])/s[1],qz=(z-c[2])/s[2];return (Math.sqrt(qx*qx+qy*qy+qz*qz)-1)*Math.min(...s)};
+  const sdf=(x,y,z)=>{
+   let d=sdEll(x,y,z,[0,.86,0],[.32,.43,.205]);
+   d=smoothMin(d,sdEll(x,y,z,[0,1.23,0],[.245,.17,.16]),.12);
+   d=smoothMin(d,sdEll(x,y,z,[0,1.39,0],[.105,.115,.105]),.09);
+   d=smoothMin(d,sdEll(x,y,z,[0,1.79,0],[.405,.405,.35]),.12);
+   for(const s of [-1,1]){
+    d=smoothMin(d,sdEll(x,y,z,[s*.30,1.05,0],[.13,.23,.14]),.10);
+    d=smoothMin(d,sdEll(x,y,z,[s*.34,.82,.035],[.085,.105,.09]),.07);
+    d=smoothMin(d,sdEll(x,y,z,[s*.13,.40,0],[.105,.22,.12]),.045);
+   }
+   return d;
+  };
+  const bounds={xmin:-.62,xmax:.62,ymin:.08,ymax:2.25,zmin:-.48,zmax:.48},step=.035;
+  const nx=Math.ceil((bounds.xmax-bounds.xmin)/step),ny=Math.ceil((bounds.ymax-bounds.ymin)/step),nz=Math.ceil((bounds.zmax-bounds.zmin)/step);
+  const vals=new Float32Array((nx+1)*(ny+1)*(nz+1)),idx=(i,j,k)=>(i*(ny+1)+j)*(nz+1)+k;
+  for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)for(let k=0;k<=nz;k++)vals[idx(i,j,k)]=sdf(bounds.xmin+i*step,bounds.ymin+j*step,bounds.zmin+k*step);
+  const verts=[],tetra=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]],corners=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
+  const interp=(a,b,va,vb)=>{const t=va/(va-vb);return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]};
+  const emit=(a,b,c)=>verts.push(...a,...b,...c);
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){
+   const pts=corners.map(v=>[bounds.xmin+(i+v[0])*step,bounds.ymin+(j+v[1])*step,bounds.zmin+(k+v[2])*step]);
+   const vs=corners.map(v=>vals[idx(i+v[0],j+v[1],k+v[2])]);
+   if(Math.min(...vs)>0||Math.max(...vs)<0)continue;
+   for(const t of tetra){
+    const inside=t.filter(n=>vs[n]<0),outside=t.filter(n=>vs[n]>=0);if(!inside.length||!outside.length)continue;
+    if(inside.length===1){const a=inside[0];emit(interp(pts[a],pts[outside[0]],vs[a],vs[outside[0]]),interp(pts[a],pts[outside[1]],vs[a],vs[outside[1]]),interp(pts[a],pts[outside[2]],vs[a],vs[outside[2]]))}
+    else if(inside.length===3){const a=outside[0];emit(interp(pts[a],pts[inside[0]],vs[a],vs[inside[0]]),interp(pts[a],pts[inside[2]],vs[a],vs[inside[2]]),interp(pts[a],pts[inside[1]],vs[a],vs[inside[1]]))}
+    else{const a=inside[0],b=inside[1],c=outside[0],d=outside[1],ac=interp(pts[a],pts[c],vs[a],vs[c]),ad=interp(pts[a],pts[d],vs[a],vs[d]),bc=interp(pts[b],pts[c],vs[b],vs[c]),bd=interp(pts[b],pts[d],vs[b],vs[d]);emit(ac,ad,bc);emit(ad,bd,bc)}
+   }
+  }
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.computeVertexNormals();
+  const sculpt=add(geo,skin);sculpt.material=skin;
+  // Clothes are fitted over the lower torso; the sculpted neck remains visible as a short band.
+  ell(shirt,[0,.91,.006],[.318,.32,.208],48);
+  // broad short sleeves, with hands fused visually into the body silhouette
+  for(const s of [-1,1]){const sleeve=ell(shirt,[s*.30,1.08,0],[.13,.20,.145]);sleeve.rotation.z=-s*.12}
+  for(const s of [-1,1])ell(shoe,[s*.14,.15,.075],[.14,.09,.19]);
+  face(.405,.405,.35,1.79);hairCap(.405,.405,.35,1.79,1);
+ }else{
+  // METHOD C — deliberately faceted low-poly construction with an angular silhouette and flat normals.
+  const poly=(rings,material,segments=12)=>loft(rings,material,segments,true);
+  poly([[.56,.12,.10],[.66,.22,.14],[.83,.275,.15],[1.02,.29,.14],[1.17,.245,.12],[1.25,.15,.095],[1.30,.095,.08],[1.35,.095,.08]],shirt,12);
+  poly([[1.32,.084,.073],[1.38,.087,.075],[1.415,.09,.078]],skin,10);
+  const headGeo=new THREE.IcosahedronGeometry(1,2);const head=add(headGeo,skin,[0,1.80,0]);head.scale.set(.39,.43,.34);
+  for(const s of [-1,1]){poly([[.22,.09,.09],[.39,.105,.105],[.56,.09,.09],[.72,.065,.07]],pants,8).position.x=s*.13;ell(shoe,[s*.14,.15,.07],[.14,.09,.19],12)}
+  for(const s of [-1,1]){const arm=poly([[.82,.09,.085],[.96,.105,.10],[1.10,.09,.085],[1.22,.065,.065]],shirt,8);arm.position.x=s*.25;arm.rotation.z=-s*.1}
+  // Flat polygonal face plates and inset eyes.
+  face(.39,.43,.34,1.80);
+  // Angular hair helmet, with a distinct side-swept plane rather than a brow-like strip.
+  const cap=add(new THREE.IcosahedronGeometry(1,1),hair,[0,2.02,-.015]);cap.scale.set(.405,.29,.35);
+  const fringe=add(new THREE.BufferGeometry(),hair); 
+  const v=[-.30,2.05,.265,.27,2.03,.265,-.04,1.91,.31,.27,2.03,.265,.35,1.99,.18,.10,1.88,.30,-.04,1.91,.31,.10,1.88,.30,-.24,1.91,.27];
+  fringe.geometry.setAttribute('position',new THREE.Float32BufferAttribute(v,3));fringe.geometry.setIndex([0,1,2,3,4,5,6,7,8]);fringe.geometry.computeVertexNormals();fringe.material.side=THREE.DoubleSide;
  }
  root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
  return root;
