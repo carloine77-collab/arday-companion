@@ -2024,10 +2024,10 @@ function runEntertainmentSpin(){
  const today=entertainmentDay();if(s.entertainmentDailySpinDay===today){toast('今天已经抽取过了');return}
  const prizes=[6,12,30,68,128,328,628],weights=[400,270,160,90,55,22,3];let roll=Math.random()*weights.reduce((a,b)=>a+b,0),index=0;
  while(index<6&&roll>=weights[index]){roll-=weights[index];index++}
- const prize=prizes[index];s.entertainmentDailySpinDay=today;save();
+ const prize=prizes[index];s.entertainmentDailySpinDay=today;s.entertainmentChips=entertainmentBalance()+prize;save();
  const choices=$('choices');choices.innerHTML=entertainmentHead('每日幸运抽取')+'<section class="entertainment-draw"><p>灯光正在逐格停下……</p><div class="entertainment-prize-grid">'+prizes.map((v,i)=>'<div class="entertainment-prize-tile" data-prize-index="'+i+'"><small>PRIZE '+String(i+1).padStart(2,'0')+'</small><strong>'+v+'</strong><span>筹码</span></div>').join('')+'</div><div class="entertainment-draw-result" aria-live="polite">抽取中</div></section>';
  const nodes=[...choices.querySelectorAll('[data-prize-index]')];let step=0;const total=24+index;
- const timer=setInterval(()=>{nodes.forEach(n=>n.classList.remove('is-lit'));nodes[step%7].classList.add('is-lit');step++;if(step>=total){clearInterval(timer);nodes.forEach(n=>n.classList.remove('is-lit'));nodes[index].classList.add('is-winner');s.entertainmentChips=entertainmentBalance()+prize;save();const result=choices.querySelector('.entertainment-draw-result');if(result)result.innerHTML='获得 <strong>'+prize+'</strong> 枚游戏筹码';const p=choices.querySelector('.entertainment-draw p');if(p)p.textContent='本次抽取已完成'}},75);
+ const timer=setInterval(()=>{nodes.forEach(n=>n.classList.remove('is-lit'));nodes[step%7].classList.add('is-lit');step++;if(step>=total){clearInterval(timer);nodes.forEach(n=>n.classList.remove('is-lit'));nodes[index].classList.add('is-winner');const result=choices.querySelector('.entertainment-draw-result');if(result)result.innerHTML='获得 <strong>'+prize+'</strong> 枚游戏筹码';const p=choices.querySelector('.entertainment-draw p');if(p)p.textContent='本次抽取已完成'}},75);
 }
 function entertainmentBet(){return Math.floor(Number($('entertainmentBet')?.value)||0)}
 function showEntertainmentDice(message=''){
@@ -2062,7 +2062,7 @@ function blackjackAction(action){
 function finishEntertainmentBlackjack(message=''){
  const game=s.entertainmentBlackjack;if(!game||game.status!=='active')return;
  const player=entertainmentValue(game.player);let dealer=entertainmentValue(game.dealer);if(player<=21)while(dealer<17){game.dealer.push(entertainmentCard());dealer=entertainmentValue(game.dealer)}
- let payout=0,result=message;if(!message){if(player>21)result='爆牌，庄家获胜。';else if(dealer>21||player>dealer){payout=game.bet*(player===21&&game.player.length===2?2.5:2);result='你赢了，获得 '+payout+' 枚筹码。'}else if(player===dealer){payout=game.bet;result='平局，退回本金。'}else result='庄家获胜，本局未获得筹码。'}
+ let payout=0,result=message;if(!message){if(player>21)result='爆牌，庄家获胜。';else if(dealer>21||player>dealer){payout=Math.floor(game.bet*(player===21&&game.player.length===2?2.5:2));result='你赢了，获得 '+payout+' 枚筹码。'}else if(player===dealer){payout=game.bet;result='平局，退回本金。'}else result='庄家获胜，本局未获得筹码。'}
  s.entertainmentChips=entertainmentBalance()+payout;game.status='settled';game.result=result;game.payout=payout;save();
  const face=c=>c.suit+['','A','2','3','4','5','6','7','8','9','10','J','Q','K'][c.rank];
  $('choices').innerHTML=entertainmentHead('二十一点')+'<section class="entertainment-game-panel"><p>你的手牌：'+game.player.map(face).join('　')+'（'+player+' 点）</p><p>庄家手牌：'+game.dealer.map(face).join('　')+'（'+dealer+' 点）</p><div class="entertainment-game-result">'+result+'</div><button type="button" data-bj-again>再开一局</button><button class="entertainment-back" type="button" data-back>返回娱乐区</button></section>';
