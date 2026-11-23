@@ -67,7 +67,7 @@ function makeCharacter(kind){
   ellipsoid(root,skin,[s*.30,.82,.03],[.082,.09,.085]);
  }
  // Neck is deliberately visible between torso and head.
- const neck=lathe([[0,0],[dims.neck*.72,0],[dims.neck*.82,.08],[dims.neck*.76,.19],[dims.neck*.58,.23],[0,.23]],skin,40);
+ const neck=lathe([[0,0],[dims.neck*.72,0],[dims.neck*.82,.10],[dims.neck*.80,.24],[dims.neck*.68,.34],[dims.neck*.48,.40],[0,.40]],skin,40);
  neck.position.y=1.27;root.add(neck);
  // Head profile: broad lower face, full cheeks, rounded chin; no pointed jaw.
  const hx=dims.headX,hy=dims.headY,hz=dims.headZ;
