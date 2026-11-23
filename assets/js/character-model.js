@@ -15,6 +15,30 @@
       const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));
       return mesh(parent,new T.TubeGeometry(curve,segments,radius,tubular,false),material);
     };
+    const sweep=(parent,points,profile,material,segments=28,radial=18)=>{
+      const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)),false,"catmullrom",.35);
+      const frames=curve.computeFrenetFrames(segments,false),positions=[],uvs=[],indices=[];
+      const radiusAt=t=>{
+        let k=0;while(k<profile.length-2&&t>profile[k+1][0])k++;
+        const a=profile[k],b=profile[k+1],u=Math.max(0,Math.min(1,(t-a[0])/(b[0]-a[0])));
+        const smooth=u*u*(3-2*u);
+        return [a[1]+(b[1]-a[1])*smooth,a[2]+(b[2]-a[2])*smooth];
+      };
+      for(let i=0;i<=segments;i++){
+        const t=i/segments,p=curve.getPointAt(t),r=radiusAt(t),n=frames.normals[i],b=frames.binormals[i];
+        for(let j=0;j<radial;j++){
+          const a=j/radial*Math.PI*2,ca=Math.cos(a),sa=Math.sin(a);
+          positions.push(p.x+n.x*ca*r[0]+b.x*sa*r[1],p.y+n.y*ca*r[0]+b.y*sa*r[1],p.z+n.z*ca*r[0]+b.z*sa*r[1]);
+          uvs.push(j/radial,t);
+          if(i<segments){const v=i*radial+j,vn=i*radial+(j+1)%radial,nn=(i+1)*radial+j,nnn=(i+1)*radial+(j+1)%radial;indices.push(v,nn,vn,vn,nn,nnn);}
+        }
+      }
+      const geo=new T.BufferGeometry();
+      geo.setAttribute("position",new T.Float32BufferAttribute(positions,3));
+      geo.setAttribute("uv",new T.Float32BufferAttribute(uvs,2));
+      geo.setIndex(indices);geo.computeVertexNormals();
+      return mesh(parent,geo,material);
+    };
     const ellipsoid=(parent,x,y,z,sx,sy,sz,material)=>{
       const o=lathe(parent,[[0,-1],[.28,-.94],[.62,-.76],[.88,-.48],[1,-.12],[.98,.28],[.78,.65],[.42,.9],[0,1]],material,24,.92);
       o.position.set(x,y,z);o.scale.set(sx,sy,sz);return o;
@@ -66,22 +90,30 @@
     for(const side of [-1,1]){
       const blush=ellipsoid(head,side*.165,-.12,.187,.039,.015,.007,skinWarm);blush.material.transparent=true;blush.material.opacity=.32;
     }
-    // Arms retain hierarchical pivots for the existing animation system.
+    // Arms: tapered swept surfaces provide continuous, organic contours from shoulder to cuff.
+    // Animation pivots remain at the shoulder and elbow so all existing activity poses still work.
     const arms=[];
     for(const side of [-1,1]){
       const shoulder=new T.Group();shoulder.position.set(side*.29,1.56,0);body.add(shoulder);
-      // Shoulder cap and upper sleeve are custom tapered lofts with overlapping soft transitions.
-      lathe(shoulder,[[0,-.49],[.045,-.47],[.072,-.4],[.084,-.27],[.11,-.12],[.105,-.035],[.07,.045],[0,.06]],shirt,24,.9);
+      sweep(shoulder,[[0,.13,0],[0,.055,.008],[0,-.09,.025],[0,-.25,.035],[0,-.43,.025]],
+        [[0,.105,.095],[.2,.13,.11],[.48,.105,.09],[.78,.08,.07],[1,.067,.061]],shirt,30,20);
+      // A narrow turned cuff is integrated into the sleeve silhouette.
+      sweep(shoulder,[[0,-.385,.027],[0,-.415,.027],[0,-.438,.025]],
+        [[0,.069,.062],[.5,.071,.063],[1,.064,.058]],shirtShade,10,18);
       const elbow=new T.Group();elbow.position.set(0,-.43,0);shoulder.add(elbow);
-      ellipsoid(elbow,0,0,0,.068,.066,.067,shirtShade);
-      lathe(elbow,[[0,-.36],[.025,-.35],[.043,-.29],[.052,-.19],[.049,-.09],[.056,-.025],[.045,.035],[0,.04]],skin,22,.92);
-      // Palm is a softly tapered, slightly flattened form; fingers are curved tapered tubes.
-      lathe(elbow,[[0,-.49],[.035,-.485],[.052,-.45],[.06,-.405],[.055,-.36],[.035,-.33],[0,-.325]],skin,20,.8);
+      // The forearm begins inside the sleeve and tapers naturally toward the wrist.
+      sweep(elbow,[[0,.075,.02],[0,-.035,.028],[0,-.17,.035],[0,-.305,.03]],
+        [[0,.061,.057],[.28,.059,.054],[.68,.043,.041],[1,.031,.03]],skin,24,18);
+      // Palm and fingers are shaped as one tapered hand silhouette with individually curved digits.
+      sweep(elbow,[[0,-.285,.03],[0,-.34,.045],[0,-.405,.05],[0,-.445,.045]],
+        [[0,.035,.031],[.34,.052,.027],[.76,.047,.019],[1,.026,.014]],skin,18,16);
       for(let f=0;f<4;f++){
-        const x=-.034+f*.022;
-        tube(elbow,[[x,-.445,.035],[x-.004,-.475,.045],[x-.009,-.493,.043]],.008,skin,8,6);
+        const x=-.032+f*.021;
+        sweep(elbow,[[x,-.386,.066],[x-.003,-.423,.07],[x-.008,-.448,.066]],
+          [[0,.010,.009],[.55,.008,.007],[1,.002,.002]],skin,10,10);
       }
-      tube(elbow,[[side*.045,-.39,.045],[side*.071,-.415,.06],[side*.073,-.45,.06]],.011,skin,10,6);
+      sweep(elbow,[[side*.035,-.345,.04],[side*.058,-.37,.055],[side*.068,-.405,.06]],
+        [[0,.014,.012],[.6,.011,.01],[1,.003,.003]],skin,10,10);
       arms.push({shoulder,elbow,side});
     }
     // A continuous hip/shorts loft gives both legs a shared pelvis silhouette.
@@ -89,15 +121,17 @@
     const legs=[];
     for(const side of [-1,1]){
       const hip=new T.Group();hip.position.set(side*.145,.78,0);rig.add(hip);
-      lathe(hip,[[0,-.49],[.055,-.48],[.092,-.42],[.105,-.31],[.11,-.18],[.12,-.08],[.115,.02],[.09,.09],[0,.1]],pants,24,.9);
+      // Upper leg is a curved, tapered loft that grows out of the pelvis; no spherical hip cap.
+      sweep(hip,[[0,.12,0],[0,.025,.012],[0,-.14,.018],[0,-.30,.012],[0,-.43,0]],
+        [[0,.128,.112],[.2,.126,.11],[.52,.112,.098],[.82,.091,.083],[1,.082,.075]],pants,30,20);
       const knee=new T.Group();knee.position.set(0,-.43,0);hip.add(knee);
-      ellipsoid(knee,0,0,0,.083,.07,.075,pants);
-      lathe(knee,[[0,-.39],[.04,-.38],[.067,-.31],[.075,-.2],[.071,-.1],[.075,-.025],[.06,.045],[0,.05]],pants,24,.92);
-      // Foot shape is a short sculpted shoe with a distinct curved sole, not a box.
+      // Knee volume is formed by the continuous radius profile, not an attached ball.
+      sweep(knee,[[0,.07,.005],[0,.015,.012],[0,-.11,.018],[0,-.25,.025],[0,-.35,.035]],
+        [[0,.083,.077],[.2,.086,.079],[.58,.071,.068],[.88,.054,.052],[1,.048,.046]],pants,28,20);
       const foot=new T.Group();foot.position.set(0,-.34,.065);knee.add(foot);
-      const shoeMesh=lathe(foot,[[0,-.085],[.055,-.083],[.095,-.055],[.11,-.005],[.105,.055],[.075,.105],[.035,.12],[0,.12]],shoe,24,.72);
+      const shoeMesh=lathe(foot,[[0,-.085],[.055,-.083],[.095,-.055],[.11,-.005],[.105,.055],[.075,.105],[.035,.12],[0,.12]],shoe,28,.72);
       shoeMesh.rotation.x=Math.PI/2;shoeMesh.scale.z=.72;shoeMesh.position.z=.035;
-      const soleMesh=lathe(foot,[[0,-.092],[.06,-.09],[.098,-.07],[.105,-.048],[.08,-.034],[0,-.032]],sole,24,.75);
+      const soleMesh=lathe(foot,[[0,-.092],[.06,-.09],[.098,-.07],[.105,-.048],[.08,-.034],[0,-.032]],sole,28,.75);
       soleMesh.rotation.x=Math.PI/2;soleMesh.scale.z=.72;soleMesh.position.z=.035;
       legs.push({hip,knee,side});
     }
