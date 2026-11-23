@@ -35,9 +35,9 @@
       };
       // One lofted SDF trunk gives the chest, waist and pelvis a continuous silhouette.
       const torsoProfile=[
-        [.59,.158,.116],[.66,.178,.128],[.75,.166,.12],
-        [.84,.143,.105],[.92,.15,.108],[1.00,.185,.132],
-        [1.09,.205,.145],[1.17,.184,.128],[1.235,.132,.096],[1.285,.075,.065]
+        [.59,.17,.12],[.66,.185,.132],[.75,.182,.13],
+        [.84,.174,.122],[.92,.174,.122],[1.00,.19,.135],
+        [1.09,.205,.145],[1.17,.19,.132],[1.235,.095,.078],[1.285,.052,.052]
       ];
       const torsoSdf=(x,y,z)=>{
         let a=torsoProfile[0],b=torsoProfile[torsoProfile.length-1];
@@ -49,7 +49,7 @@
         return Math.hypot(Math.max(radial,0),Math.max(vertical,0))+Math.min(Math.max(radial,vertical),0);
       };
       const forms=[
-        [0,1.43,0,.315,.33,.25],[0,1.235,0,.065,.105,.065],
+        [0,1.46,0,.32,.29,.255],[0,1.265,0,.047,.09,.05],
         [-.27,1.055,0,.086,.145,.078],[.27,1.055,0,.086,.145,.078],
         [-.345,.82,0,.066,.17,.064],[.345,.82,0,.066,.17,.064],
         [-.38,.625,0,.057,.095,.058],[.38,.625,0,.057,.095,.058],
@@ -60,7 +60,7 @@
       ];
       const field=(x,y,z)=>{
         let d=torsoSdf(x,y,z);
-        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.078);
+        for(const f of forms)d=smoothMin(d,ellipsoidSdf(x,y,z,...f),.065);
         return d;
       };
       const nx=58,ny=91,nz=36,x0=-.58,y0=.015,z0=-.36,dx=.02,dy=.02,dz=.02;
