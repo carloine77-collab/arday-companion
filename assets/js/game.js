@@ -3244,8 +3244,8 @@ function persistFurniture(item){
    targetTheta=roomMode==='bedroom'?.55:roomMode==='kitchen'?.78:roomMode==='bathroom'?.72:.68;targetPhi=1.08;targetRadius=roomMode==='bedroom'?12.7:roomMode==='bathroom'?13.1:13.4;applyCamera();
   }
   const seatRaycaster=new T.Raycaster();
-  function resolveSeatSurfaceY(item){
-   if(!item?.group)return .66;
+  function resolveSeatSurfaceY(item,fallback=.66){
+   if(!item?.group)return fallback;
    const group=item.group;group.updateMatrixWorld(true);
    const halfWidth=Math.max(.14,Math.min(.38,(Number(item.width)||.8)*.22));
    const depth=Number(item.depth)||.8;
@@ -3267,7 +3267,7 @@ function persistFurniture(item){
    if(/脚凳/.test(name))return group.position.y+.48;
    if(/阅读椅/.test(name))return group.position.y+.72;
    if(/办公椅/.test(name))return group.position.y+.74;
-   return group.position.y+.66;
+   return group.position.y+fallback;
   }
   function updateActivity(a,anchorOverride,roomOverride,furnitureIdOverride){
    const act=normalizeActivity(a),meta=activityMeta[act]||{location:'center',pose:'wave',anchor:'default'};
@@ -3277,7 +3277,14 @@ function persistFurniture(item){
    const anchor=anchorOverride||meta.anchor||'default';let p=positions[meta.location]||positions.center,faceAngle=person.rotation.y,poseOverride=null,sleepingOnLoftBed=false,seatFurniture=null;
    const furniture=(predicate,room=characterRoom)=>furnitureRegistry.filter(it=>it.room===room&&predicate(it));
    const nearest=(items,origin)=>items.sort((a,b)=>Math.hypot(a.group.position.x-origin.x,a.group.position.z-origin.z)-Math.hypot(b.group.position.x-origin.x,b.group.position.z-origin.z))[0];
-   const nearestSeat=(origin,room=characterRoom)=>nearest(furniture(it=>['chair','cushion'].includes(furnitureKindForPlaced({name:it.name})),room).filter(it=>Math.hypot(it.group.position.x-origin.x,it.group.position.z-origin.z)<=2.6),origin);
+   const nearestSeat=(origin,room=characterRoom,maxDistance=2.6)=>{
+   const seats=furniture(it=>['chair','cushion'].includes(furnitureKindForPlaced({name:it.name})),room).map(item=>{
+    const dx=origin.x-item.group.position.x,dz=origin.z-item.group.position.z,distance=Math.hypot(dx,dz);
+    const forwardX=Math.sin(item.group.rotation.y),forwardZ=Math.cos(item.group.rotation.y),alignment=distance>.001?(forwardX*dx+forwardZ*dz)/distance:1;
+    return {item,distance,alignment,score:distance+(1-alignment)*.42};
+   }).filter(entry=>entry.distance<=maxDistance).sort((a,b)=>a.score-b.score);
+   return seats[0]?.item||null;
+  };
    const faceToward=(from,to)=>Math.atan2(to.x-from.x,to.z-from.z);
    const standInFront=(item,extra=.52)=>{const front=new T.Vector3(0,0,1).applyAxisAngle(new T.Vector3(0,1,0),item.group.rotation.y),distance=(Number(item.depth)||.8)/2+extra;p=[item.group.position.x+front.x*distance,0,item.group.position.z+front.z*distance];faceAngle=faceToward({x:p[0],z:p[2]},item.group.position)};
    if(anchor==='desk'){
@@ -3321,7 +3328,7 @@ function persistFurniture(item){
       const offset=new T.Vector3(.88,2.68,0).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
       p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y+Math.PI/2;
      }else{
-      const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),offset=new T.Vector3(0,.92,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
+      const half=(Number(bed.depth)||3.42)/2,headBack=2.585,clearance=.16,z=Math.min(half-.2,Math.max(.98,headBack-half+clearance)),mattressY=Math.max(.35,Math.min(1.35,resolveSeatSurfaceY(bed,.92)-bed.group.position.y+.035)),offset=new T.Vector3(0,mattressY,z).applyAxisAngle(new T.Vector3(0,1,0),bed.group.rotation.y);
       p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y;
      }
     }else if(act==='sleep'){p=[0,.08,1.35];faceAngle=0}
@@ -3346,10 +3353,10 @@ function persistFurniture(item){
     if(item)standInFront(item,.72);else{p=[...positions.window];faceAngle=Math.PI}
    }
    if(act==='wake'){person.position.set(...p);target.set(...p);wakeStartedAt=performance.now();wakeLookAt=wakeStartedAt+1550} else target.set(...p);pose=act==='wake'?'wake':(poseOverride||meta.pose||'wave');activityFacing=faceAngle;if(['sofa','desk','shelf','table','chair','cushion','bouquet','bed','loftDesk','sink','piano','washingMachine','treadmill','gameConsole','wallArt','window'].includes(anchor))person.rotation.y=faceAngle;
-   basePose=pose;seatedHeight=pose==='sit'?Math.max(.62,Math.min(.82,resolveSeatSurfaceY(seatFurniture))):0;walkRoute=[];walkIndex=0;walkPauseUntil=0;
+   basePose=pose;seatedHeight=pose==='sit'?Math.max(.12,Math.min(1.05,resolveSeatSurfaceY(seatFurniture))):0;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
-   rig.rotation.set(act==='wake'?-Math.PI/2:0,0,0);rig.position.set(0,seatedHeight,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||act==='wake'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
+   rig.rotation.set(act==='wake'?-Math.PI/2:0,0,0);rig.position.set(0,0,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||act==='wake'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
    body.position.y=pose==='sit'?-.48:0;legs.forEach(l=>{l.hip.position.y=pose==='sit'?-.17:.13;l.hip.rotation.x=pose==='sit'?-.84:0;l.knee.rotation.x=pose==='sit'?1.02:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-.84:pose==='sleep'?-.98:0});
   }
@@ -3646,7 +3653,7 @@ function persistFurniture(item){
    }
    if(pose==='idleWalk'&&!moving&&distance<.075&&t>idleWalkStartedAt+350){pose=basePose;idleNextMove=t+1800+Math.random()*2600;}
    phase+=dt*(moving?9:2);
-   if(moving){legs.forEach((l,i)=>{l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.42;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.48;l.ankle.rotation.x=-(l.hip.rotation.x+l.knee.rotation.x)*.72});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.34;a.shoulder.rotation.z=a.side*(.06+Math.sin(phase+i*Math.PI)*.04);a.elbow.rotation.x=-.12+Math.max(0,Math.sin(phase+i*Math.PI))*.08;a.wrist.rotation.x=Math.sin(phase+i*Math.PI)*.08});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
+   if(moving){legs.forEach((l,i)=>{l.hip.position.y+=(.13-l.hip.position.y)*.18;l.hip.rotation.x=Math.sin(phase+i*Math.PI)*.42;l.knee.rotation.x=Math.max(0,Math.sin(phase+i*Math.PI))*.48;l.ankle.rotation.x=-(l.hip.rotation.x+l.knee.rotation.x)*.72});arms.forEach((a,i)=>{a.shoulder.rotation.x=Math.sin(phase+i*Math.PI)*.34;a.shoulder.rotation.z=a.side*(.06+Math.sin(phase+i*Math.PI)*.04);a.elbow.rotation.x=-.12+Math.max(0,Math.sin(phase+i*Math.PI))*.08;a.wrist.rotation.x=Math.sin(phase+i*Math.PI)*.08});body.rotation.y=Math.sin(phase)*.035;person.rotation.y+=(Math.atan2(delta.x,delta.z)-person.rotation.y)*(1-Math.exp(-dt*8));}
    else{
     if(activeActivity!=='idle'){const turn=Math.atan2(Math.sin(activityFacing-person.rotation.y),Math.cos(activityFacing-person.rotation.y));person.rotation.y+=turn*(1-Math.exp(-dt*7));}
     legs.forEach(l=>{const wakeProgress=pose==='wake'?Math.max(0,Math.min(1,(t-wakeStartedAt)/5200)):1,wakeEase=wakeProgress*wakeProgress*(3-2*wakeProgress),hipTarget=pose==='wake'?-.78*(1-wakeEase):pose==='sit'?-.84:pose==='bedRead'?- .16:pose==='bedRest'?- .08:0,kneeTarget=pose==='wake'?1.02*(1-wakeEase):pose==='sit'?1.02:pose==='bedRead'?.28:pose==='bedRest'?.16:0,hipY=pose==='wake'?.13-.18*(1-wakeEase):pose==='sit'?-.17:.13,ankleTarget=-(hipTarget+kneeTarget)*.72;l.hip.position.y+=(hipY-l.hip.position.y)*.1;l.hip.rotation.x+=(hipTarget-l.hip.rotation.x)*.1;l.knee.rotation.x+=(kneeTarget-l.knee.rotation.x)*.1;l.ankle.rotation.x+=(ankleTarget-l.ankle.rotation.x)*.12});
@@ -3707,7 +3714,10 @@ function persistFurniture(item){
    }else{
     head.rotation.x*=.94;head.rotation.y*=.94;head.rotation.z*=.94;
    }
-   if(pose!=='wake')body.position.y+=((pose==='sit'?-.48:0)+Math.sin(t*.0015)*.026-body.position.y)*.08;
+   const seatedAndArrived=pose==='sit'&&!moving&&distance<.075;
+   const desiredSeatHeight=seatedAndArrived?seatedHeight:0;
+   rig.position.y+=(desiredSeatHeight-rig.position.y)*(1-Math.exp(-dt*10));
+   if(pose!=='wake')body.position.y+=((seatedAndArrived?-.48:0)+Math.sin(t*.0015)*.026-body.position.y)*.08;
    if(t>lastBlink&&activeActivity!=='sleep'){eyeGroups.forEach(g=>{g.scale.y=.12});setTimeout(()=>{if(activeActivity!=='sleep')eyeGroups.forEach(g=>{g.scale.y=1})},90);lastBlink=t+2400+Math.random()*2600;}
    updateFurnitureHotspots();
    renderer.render(scene,camera);lastDraw=t
