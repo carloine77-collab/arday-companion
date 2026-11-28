@@ -4,7 +4,7 @@
   const co=Math.cos(angle),si=Math.sin(angle),hx=item.width/2,hz=item.depth/2;
   return [[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([lx,lz])=>[x+lx*co+lz*si,z-lx*si+lz*co]);
  }
- function rectsOverlap(a,b){
+ function rectsOverlap(a,b,tolerance=.12){
   const axes=[];
   for(const poly of [a,b])for(let i=0;i<4;i++){
    const p=poly[i],q=poly[(i+1)%4],dx=q[0]-p[0],dz=q[1]-p[1],len=Math.hypot(dx,dz)||1;
@@ -12,7 +12,7 @@
   }
   for(const [ax,az] of axes){
    const pa=a.map(p=>p[0]*ax+p[1]*az),pb=b.map(p=>p[0]*ax+p[1]*az);
-   if(Math.max(...pa)<=Math.min(...pb)+.04||Math.max(...pb)<=Math.min(...pa)+.04)return false;
+   if(Math.max(...pa)<=Math.min(...pb)+tolerance||Math.max(...pb)<=Math.min(...pa)+tolerance)return false;
   }
   return true;
  }
