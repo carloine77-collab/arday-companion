@@ -3379,10 +3379,10 @@ function persistFurniture(item){
       p=[bed.group.position.x+offset.x,bed.group.position.y+offset.y,bed.group.position.z+offset.z];faceAngle=bed.group.rotation.y;
      }
     }else if(act==='sleep'){p=[0,.08,1.35];faceAngle=0}
-   }else if(['sink','piano','washingMachine','stove'].includes(anchor)){
-    const kind=anchor==='sink'?'sink':anchor;
+   }else if(['sink','piano','washingMachine','stove','shower','bathtub','toilet'].includes(anchor)){
+    const kind=anchor;
     const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})===kind)[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})===kind,characterRoom),person.position);
-    if(item){if(anchor==='piano'){const stool=nearestSeat(item.group.position);if(stool&&Math.hypot(stool.group.position.x-item.group.position.x,stool.group.position.z-item.group.position.z)<2.5){p=[stool.group.position.x,0,stool.group.position.z];faceAngle=faceToward(stool.group.position,item.group.position);seatFurniture=stool}else{standInFront(item,.62);poseOverride='stand'}}else standInFront(item,.52)}
+    if(item){if(anchor==='piano'){const stool=nearestSeat(item.group.position);if(stool&&Math.hypot(stool.group.position.x-item.group.position.x,stool.group.position.z-item.group.position.z)<2.5){p=[stool.group.position.x,0,stool.group.position.z];faceAngle=faceToward(stool.group.position,item.group.position);seatFurniture=stool}else{standInFront(item,.62);poseOverride='stand'}}else{standInFront(item,.52);if(anchor==='bathtub'||anchor==='toilet')poseOverride='sit'}}
    }else if(anchor==='treadmill'){
     const item=furnitureIdOverride?furniture(it=>it.id===furnitureIdOverride&&furnitureKindForPlaced({name:it.name})==='treadmill')[0]:nearest(furniture(it=>furnitureKindForPlaced({name:it.name})==='treadmill',characterRoom),person.position);
     if(item){p=[item.group.position.x,0,item.group.position.z];const consolePoint=new T.Vector3(0,0,-(item.depth/2-.12)).applyAxisAngle(new T.Vector3(0,1,0),item.group.rotation.y);faceAngle=faceToward({x:p[0],z:p[2]},{x:item.group.position.x+consolePoint.x,z:item.group.position.z+consolePoint.z})}
