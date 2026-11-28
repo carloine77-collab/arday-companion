@@ -78,19 +78,6 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      width=2.2;depth=1.15;
     }else if(variant==='雾蓝绒布'){
      // Purpose-built L sectional: one continuous upholstered seat pad wraps the corner into the chaise.
-     const lShape=(left,front,back,returnX,returnBack,radius=.12)=>{
-      const shape=new T.Shape();
-      shape.moveTo(left+radius,-front);
-      shape.lineTo(1.525-radius,-front);shape.quadraticCurveTo(1.525,-front,1.525,-front+radius);
-      shape.lineTo(1.525,-back-radius);shape.quadraticCurveTo(1.525,-back,1.525-radius,-back);
-      shape.lineTo(returnX+radius,-back);shape.quadraticCurveTo(returnX,-back,returnX,-back+radius);
-      shape.lineTo(returnX,-.2-radius);shape.quadraticCurveTo(returnX,-.2,returnX-radius,-.2);
-      shape.lineTo(left+radius,-.2);shape.quadraticCurveTo(left,-.2,left,-.2-radius);
-      shape.lineTo(left,-front+radius);shape.quadraticCurveTo(left,-front,left+radius,-front);
-      const geometry=new T.ExtrudeGeometry(shape,{depth:.18,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:.035,bevelThickness:.025,curveSegments:8});
-      geometry.rotateX(-Math.PI/2);
-      const mesh=new T.Mesh(geometry,material);mesh.position.y=.39;group.add(mesh);mesh.castShadow=true;mesh.receiveShadow=true;return mesh;
-     };
      // Broad single-piece L-shaped plinth; no separate corner chaise block.
      box(0,.25,0,3.0,.2,1.78,walnut);
      box(.93,.25,.72,1.18,.2,.72,walnut);
@@ -111,7 +98,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      const corner=soft(.35,.75,.2,.28,.29,.24,fabricShade);
      // One restrained seam across the main run; no four-way cushion grid.
      seam([[-.92,.565,-.2],[-.45,.57,-.2],[0,.57,-.2],[.35,.57,-.2]],.008);
-     for(const x of [-1.39,1.39]){
+     for(const x of [-1.39]){
       const arm=soft(x,.59,-.04,.13,.27,.78,fabric);arm.rotation.z=-.035;
       const cap=soft(x,.86,-.04,.15,.07,.72,fabricShade);
      }
@@ -176,17 +163,18 @@ Object.assign(window.ArdayFurnitureModelCategories, {
       }
      }
      for(const x of [-1.015,1.015]){
-      for(const z of [-.27,.27]){const piping=new T.Mesh(new T.TorusGeometry(.105,.009,6,24,Math.PI),welt);piping.position.set(x,.61,z);piping.rotation.z=Math.PI/2;group.add(piping)}
+      for(const z of [-.27,.27]){
+       const piping=new T.Mesh(new T.TorusGeometry(.105,.009,6,24,Math.PI),welt);
+       piping.position.set(x,.61,z);piping.rotation.z=Math.PI/2;group.add(piping);
+      }
       box(x,.48,-.015,.018,.3,.68,walnutEdge);
      }
      for(const x of [-.86,.86])for(const z of [-.32,.32]){
- 
-    }
-     const ferrule=new T.Mesh(new T.CylinderGeometry(.054,.052,.045,16),walnutEdge);
-     ferrule.position.set(x,.035,z);group.add(ferrule);
+      const ferrule=new T.Mesh(new T.CylinderGeometry(.054,.052,.045,16),walnutEdge);
+      ferrule.position.set(x,.035,z);group.add(ferrule);
+     }
     }
    
- 
   Object.assign(ctx,{width,depth,height,surfaceType,surfaceY,supportId,wallAxis,wallSide,anchor,action});
   return true;
  },
