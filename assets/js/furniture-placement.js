@@ -13,8 +13,8 @@
  }
  function rectsOverlap(a,b,tolerance=.12){
   const axes=[];
-  for(const poly of [a,b])for(let i=0;i<poly.length;i++){
-   const p=poly[i],q=poly[(i+1)%poly.length],dx=q[0]-p[0],dz=q[1]-p[1],len=Math.hypot(dx,dz)||1;
+  for(const polygon of [a,b])for(let i=0;i<polygon.length;i++){
+   const p=polygon[i],q=polygon[(i+1)%polygon.length],dx=q[0]-p[0],dz=q[1]-p[1],len=Math.hypot(dx,dz)||1;
    axes.push([-dz/len,dx/len]);
   }
   for(const [ax,az] of axes){
