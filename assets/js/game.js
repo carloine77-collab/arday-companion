@@ -418,15 +418,16 @@ function openTab(name,force=false){
   const shopFoodIcons=new Map((shopCatalog['食物食材']||[]).map(([label,icon])=>[String(label).replace(/\s*×\s*1$/,''),icon]));
   const cookedFoodIcons=[['蛋炒饭','🍚'],['番茄炒蛋','🍳'],['蔬菜汤','🥣'],['牛肉面','🍜'],['奶油蘑菇饭','🍄'],['吐司','🍞'],['豆腐煲','🍲'],['土豆','🥔'],['意面','🍝'],['浓汤','🥣'],['焗','🧀'],['蒸蛋','🥚'],['烩饭','🍛'],['煎饼','🥞'],['照烧','🍗'],['松饼','🥞']];
   const inventoryFoodIcon=name=>{const clean=String(name||'').replace(/^成品食物·/,'').replace(/\s*×\s*\d+$/,'');if(shopFoodIcons.has(clean))return shopFoodIcons.get(clean);const match=cookedFoodIcons.find(([keyword])=>clean.includes(keyword));return match?match[1]:'🍽️'};
-  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':entity.kind==='dungeon-item'?'副本道具':entity.kind==='consumable'?'消耗品':'食物';const icon=category==='食物'?inventoryFoodIcon(item):entity.kind==='dungeon-item'?(entity.icon||'✦'):entity.kind==='consumable'?'✚':'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category,category==='食物'?'food':''])});
+  s.inventory.forEach((entity,index)=>{const item=entity.name;if(item==='修理工具')return;const category=entity.kind==='furniture'?'家具':(entity.kind==='dungeon-item'||entity.kind==='consumable')?'副本道具':'食物';const icon=category==='食物'?inventoryFoodIcon(item):entity.kind==='dungeon-item'?(entity.icon||'✦'):entity.kind==='consumable'?'✚':'▧';tabEntries.push([item,icon,(category==='家具'?'place-owned-':'use-inventory-')+index,0,'',category,category==='食物'?'food':''])});
   Object.entries(ingredientNames).forEach(([key,label])=>{const count=pantryCount(key);if(count>0)tabEntries.push([label+' ×'+count,inventoryFoodIcon(label),'pantry-inventory-'+key,0,'','食物','food'])});
   
   const navigation=document.createElement('div');navigation.className='inventory-navigation';
   const nav=document.createElement('div');nav.className='inventory-categories';
-  ['全部','食物','家具','副本道具','消耗品'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category&&!inventoryRecycleMode?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;inventoryRecycleMode=false;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
+  ['全部','食物','家具','副本道具'].forEach(category=>{const button=document.createElement('button');button.type='button';button.className='inventory-category'+(inventoryCategory===category&&!inventoryRecycleMode?' active':'');button.textContent=category;button.onclick=()=>{inventoryCategory=category;inventoryRecycleMode=false;if(category==='副本道具')commissionSystem.record('supply-review');openTab('物品',true)};nav.appendChild(button)});
   const recycleTab=document.createElement('button');recycleTab.type='button';recycleTab.className='inventory-recycle-entry'+(inventoryRecycleMode?' active':'');recycleTab.textContent='回收';recycleTab.setAttribute('aria-label','进入回收');recycleTab.onclick=()=>{inventoryRecycleMode=true;openTab('物品',true)};
   navigation.append(nav,recycleTab);$('choices').appendChild(navigation);$('choices').appendChild(inventoryGrid);$('choices').classList.toggle('is-recycling',inventoryRecycleMode);
   if(inventoryRecycleMode){tabEntries.splice(0,tabEntries.length,...tabEntries.filter(entry=>{const key=entry[2].startsWith('pantry-inventory-')?entry[2].slice('pantry-inventory-'.length):null;const entity=key?null:s.inventory[Number(entry[2].replace(/^(?:use-inventory-|place-owned-)/,''))];return (key?Number(ingredientUnitPrices[key])||0:inventoryOriginalPrice(entity))>0}))}
+  if(inventoryCategory==='消耗品')inventoryCategory='副本道具';
   const filtered=tabEntries.filter(entry=>inventoryRecycleMode||inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description,category,visualType])=>{
@@ -3785,7 +3786,7 @@ initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activit
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
 
-if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「消耗品」分类中，将急救包用于 Arday。另外，家具商店中每个二级分类的首次购买免费，每个分类限一次。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
+if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「副本道具」分类中，将急救包用于 Arday。另外，家具商店中每个二级分类的首次购买免费，每个分类限一次。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
 function playIntroSequence(){
