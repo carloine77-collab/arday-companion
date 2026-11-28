@@ -522,11 +522,12 @@ function renderEvents(){
  const open=s.events.filter(e=>(e.status==='open'||(e.favorite&&e.category==='letter'))&&['letter','system'].includes(e.category)).sort((a,b)=>(b.created||0)-(a.created||0));
  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
- const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 条';$('choices').appendChild(count);
+ const header=document.createElement('div');header.className='mailbox-header';
+ const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 条';header.appendChild(count);
  const clearableSystem=open.filter(e=>e.category==='system'&&!e.rewardBundle);
  if(clearableSystem.length){
   const tools=document.createElement('div');tools.className='mailbox-tools';
-  const clear=document.createElement('button');clear.type='button';clear.className='mailbox-clear-system';clear.textContent='系统提示一键已读并删除';
+  const clear=document.createElement('button');clear.type='button';clear.className='mailbox-clear-system';clear.textContent='一键删除';
   clear.onclick=()=>{
    const targets=s.events.filter(e=>e.category==='system'&&e.status==='open'&&!e.rewardBundle);
    if(!targets.length)return;
@@ -534,10 +535,11 @@ function renderEvents(){
    const removed=new Set(targets.map(e=>e.id));
    s.events=s.events.filter(e=>!removed.has(e.id));
    save();refreshTopActions();renderEvents();
-   toast('已清理 '+targets.length+' 封系统提示');
+   toast('已删除 '+targets.length+' 封系统提示');
   };
-  tools.appendChild(clear);$('choices').appendChild(tools);
+  tools.appendChild(clear);header.appendChild(tools);
  }
+ $('choices').appendChild(header);
  if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无消息</h3>';$('choices').appendChild(empty);}
  open.forEach(e=>{
   const isLetter=e.category==='letter';const wrap=document.createElement('div');wrap.className='event-card-wrap';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
@@ -1303,7 +1305,10 @@ function furnitureKindForPlaced(item){
  if(/餐桌/.test(name))return 'dining';
  if(/^冰箱/.test(name))return 'fridge';
  if(/灶/.test(name))return 'stove';
- if(/水槽|洗手台|淋浴间/.test(name))return 'sink';
+ if(/淋浴间/.test(name))return 'shower';
+ if(/浴缸/.test(name))return 'bathtub';
+ if(/马桶/.test(name))return 'toilet';
+ if(/水槽|洗手台/.test(name))return 'sink';
  if(/上床下桌/.test(name))return 'loftBed';
  if(/^(?:床(?:$|·)|布艺床|双人床|软包床|木框床|榻榻米)/.test(name))return 'bed';
  if(/椅/.test(name)||/凳子/.test(name))return 'chair';
