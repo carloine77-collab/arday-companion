@@ -14,14 +14,23 @@
       const pelvis=boneRoot;
       bones.push(pelvis);bonePoints.push({bone:pelvis,point:new T.Vector3(0,.70,0)});
       const spine=addBone("spine",pelvis,[0,.27,0],[0,.97,0]);
-      const neck=addBone("neck",spine,[0,.28,0],[0,1.25,0]);
+      const spineUpper=addBone("spine.upper",spine,[0,.13,0],[0,1.10,0]);
+      const neck=addBone("neck",spineUpper,[0,.15,0],[0,1.25,0]);
       const head=addBone("head",neck,[0,.20,0],[0,1.45,0]);
       const arms=[],legs=[];
       for(const side of [-1,1]){
-        const shoulder=addBone(side<0?"shoulder.L":"shoulder.R",spine,[side*.24,.12,0],[side*.24,1.09,0]);
+        const shoulder=addBone(side<0?"shoulder.L":"shoulder.R",spineUpper,[side*.24,-.01,0],[side*.24,1.09,0]);
         const elbow=addBone(side<0?"elbow.L":"elbow.R",[shoulder][0],[side*.12,-.25,0],[side*.36,.84,0]);
         const wrist=addBone(side<0?"wrist.L":"wrist.R",elbow,[side*.035,-.22,0],[side*.395,.62,0]);
-        arms.push({shoulder,elbow,wrist,side});
+        const palm=addBone(side<0?"palm.L":"palm.R",wrist,[side*.019,-.045,.025],[side*.414,.575,.025]);
+        const fingers=[];
+        for(let fingerIndex=0;fingerIndex<4;fingerIndex++){
+          const x=(fingerIndex-1.5)*.015,base=addBone((side<0?"finger.L.":"finger.R.")+fingerIndex+".1",palm,[x,-.025,.018],[side*.414+x,.55,.043]);
+          const tip=addBone((side<0?"finger.L.":"finger.R.")+fingerIndex+".2",base,[0,-.022,0],[side*.414+x,.528,.043]);fingers.push({base,tip});
+        }
+        const thumbBase=addBone(side<0?"thumb.L.1":"thumb.R.1",palm,[side*.04,-.006,.005],[side*.454,.569,.03]);
+        const thumbTip=addBone(side<0?"thumb.L.2":"thumb.R.2",thumbBase,[side*.012,-.018,.018],[side*.466,.551,.048]);fingers.push({base:thumbBase,tip:thumbTip});
+        arms.push({shoulder,elbow,wrist,palm,fingers,side});
         const hip=addBone(side<0?"hip.L":"hip.R",pelvis,[side*.13,.13,0],[side*.13,.83,0]);
         const knee=addBone(side<0?"knee.L":"knee.R",hip,[0,-.29,0],[side*.13,.54,0]);
         const ankle=addBone(side<0?"ankle.L":"ankle.R",knee,[0,-.27,0],[side*.13,.27,0]);
@@ -30,7 +39,8 @@
         // terminal ankle joint while the shoe was rigidly parented to ankle.
         // A short foot bone gives those vertices a matching deformation span.
         const foot=addBone(side<0?"foot.L":"foot.R",ankle,[0,-.12,.04],[side*.13,.15,.04]);
-        legs.push({hip,knee,ankle,foot,side});
+        const toe=addBone(side<0?"toe.L":"toe.R",foot,[0,0,.085],[side*.13,.15,.125]);
+        legs.push({hip,knee,ankle,foot,toe,side});
       }
       const smoothMin=(a,b,k)=>{const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25};
       const ellipsoidSdf=(x,y,z,cx,cy,cz,rx,ry,rz)=>{
@@ -78,6 +88,7 @@
       const field=(x,y,z)=>{
         let d=torsoSdf(x,y,z);
         for(const limb of limbs)d=smoothMin(d,taperedLimbSdf(x,y,z,limb.a,limb.b,limb.rA,limb.rB),limb.blend);
+        for(const side of [-1,1])d=smoothMin(d,ellipsoidSdf(x,y,z,side*.13,.535,.012,.104,.112,.098),.045);
         for(const hand of hands)d=smoothMin(d,ellipsoidSdf(x,y,z,...hand,.046,.052,.043),.045);
         return d;
       };
@@ -105,6 +116,7 @@
           influences.set(segment.parentIndex,(influences.get(segment.parentIndex)||0)+weight*(1-t));
           influences.set(segment.childIndex,(influences.get(segment.childIndex)||0)+weight*t);
         }
+        for(const leg of legs){const kneeIndex=boneIndexByObject.get(leg.knee),kneePoint=bonePointByObject.get(leg.knee);if(v.distanceToSquared(kneePoint)<.018)influences.set(kneeIndex,(influences.get(kneeIndex)||0)*1.42)}
         const near=[...influences.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4),sum=near.reduce((total,item)=>total+item[1],0);
         for(let q=0;q<4;q++){const influence=near[q];skinIndices.push(influence?influence[0]:0);skinWeights.push(influence?influence[1]/sum:0)}
         return id;
@@ -199,11 +211,14 @@
       // Small upper side panels connect the crown to the longer locks.
       makeWolfLock("wolfcut-side-left",-.305,.385,-.075,.095,.36,.09,-.08,hairLight);
       makeWolfLock("wolfcut-side-right",.305,.385,-.075,.095,.36,.09,.08,hairLight);
+      for(const arm of arms)for(const finger of arm.fingers){
+        ellipsoid(finger.base,0,-.012,.002,.009,.021,.009,skin,"finger-proximal");
+        ellipsoid(finger.tip,0,-.010,.002,.008,.017,.008,skin,"finger-distal");
+      }
       for(const l of legs){
         const shoeMount=new T.Group();shoeMount.position.set(0,.11,.02);l.foot.add(shoeMount);
-        // One rounded shoe shell plus a very thin outsole; the old full-size
-        // overlapping lathe pair looked like two stacked shoes.
-        const upper=ellipsoid(shoeMount,0,-.17,.015,.103,.071,.165,shoe,"shoe-upper");upper.userData.characterOutline=true;
+        const heel=ellipsoid(shoeMount,0,-.17,-.045,.103,.071,.11,shoe,"shoe-heel-quarter");heel.userData.characterOutline=true;
+        const toeUpper=ellipsoid(l.toe,0,-.06,.035,.102,.066,.095,shoe,"shoe-articulated-toe");toeUpper.userData.characterOutline=true;
         const base=ellipsoid(shoeMount,0,-.237,.025,.101,.016,.16,sole,"shoe-sole");base.userData.characterOutline=true;
       }
       const shadow=new T.Mesh(new T.CircleGeometry(.48,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
@@ -211,7 +226,7 @@
       const weightArray=geo.attributes.skinWeight.array;let invalidWeights=0;for(let i=0;i<weightArray.length;i+=4){const total=weightArray[i]+weightArray[i+1]+weightArray[i+2]+weightArray[i+3];if(!Number.isFinite(total)||Math.abs(total-1)>.001)invalidWeights++}if(invalidWeights)throw new Error("Invalid skin weights: "+invalidWeights);
       const report={vertices:geo.attributes.position.count,triangles:geo.index.count/3,bones:bones.length,skinned:bodyMesh.isSkinnedMesh,materials:geo.groups.length};
       if(!report.skinned||report.vertices<1000||report.bones<12||report.triangles<1000)throw new Error("Unified skinned character validation failed: "+JSON.stringify(report));
-      return {person,rig,body,head,eyeGroups,arms,legs,shadow,skeleton,bodyMesh,report};
+      return {person,rig,body,pelvis,spine,spineUpper,head,eyeGroups,arms,legs,shadow,skeleton,bodyMesh,report};
     }catch(error){
       if(person){person.parent?.remove(person);person.traverse(o=>{if(o.geometry&&!madeGeometries.has(o.geometry))o.geometry.dispose?.()})}
       madeGeometries.forEach(g=>g.dispose?.());madeMaterials.forEach(m=>m.dispose?.());
