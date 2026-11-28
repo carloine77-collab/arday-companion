@@ -94,7 +94,7 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      const seatPad=new T.Mesh(seatGeometry,fabric);seatPad.position.y=.355;group.add(seatPad);seatPad.castShadow=true;seatPad.receiveShadow=true;
      // Continuous raised back rails meet at the outside corner; shallow overlaps hide the join.
      const mainBack=soft(0,.79,-.69,1.43,.29,.2,fabricShade);mainBack.rotation.x=-.055;
-     const returnBack=soft(1.38,.79,.18,.2,.29,.91,fabricShade);returnBack.rotation.y=Math.PI/2;
+     const returnBack=soft(1.38,.79,.18,.2,.29,.91,fabricShade);
      const cornerBack=soft(1.34,.79,-.57,.25,.28,.27,fabricShade);
      // Fine upholstery piping follows the two visible inner edges without splitting the seat into boxes.
      seam([[-1.28,.565,.13],[-.82,.568,.145],[-.35,.568,.15],[.12,.568,.15],[.32,.568,.2],[.48,.568,.38],[.67,.568,.62],[.9,.568,.91]],.0065,welt);
@@ -102,9 +102,9 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      seam([[-1.18,.565,-.2],[-.72,.566,-.2],[-.25,.566,-.2],[.16,.566,-.2]],.0038,fabricShade);
      seam([[.66,.565,.35],[.68,.566,.58],[.72,.566,.82],[.78,.565,1.0]],.0038,fabricShade);
      // Upholstered left arm with a softly crowned top and a narrow welt around its cap.
-     const leftArm=soft(-1.39,.59,-.02,.145,.27,.77,fabric);leftArm.rotation.z=-.035;
-     const leftArmCap=soft(-1.39,.855,-.02,.155,.065,.73,fabricShade);
-     seam([[-1.39,.91,-.68],[-1.39,.92,-.35],[-1.39,.92,0],[-1.39,.91,.34]],.0065,welt);
+     const leftArm=soft(-1.39,.59,-.30,.145,.27,.53,fabric);leftArm.rotation.z=-.035;
+     const leftArmCap=soft(-1.39,.855,-.30,.155,.065,.51,fabricShade);
+     seam([[-1.39,.91,-.78],[-1.39,.92,-.52],[-1.39,.92,-.26],[-1.39,.91,0],[ -1.39,.91,.18]],.0065,welt);
      // Exposed walnut rail is recessed beneath the chaise edge; feet follow the full L footprint.
      box(1.455,.34,.52,.055,.25,1.02,walnutEdge);
      for(const [x,z] of [[-1.27,-.72],[0,-.72],[1.27,-.72],[-1.27,.72],[1.27,.94],[.48,.94]]){
