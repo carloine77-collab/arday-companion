@@ -1120,6 +1120,7 @@ function tick(){
 
  render();
  if($('stage').classList.contains('calendar-mode'))renderCalendar();
+ if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='职业'&&s.careerQuotaRenderDay!==key){const activeTab=$('choices').querySelector('[data-career-tab].active')?.dataset.careerTab||'real';showCareer(activeTab)}
  save();
 }
 
@@ -1807,6 +1808,7 @@ function careerApplicationChance(job,score=careerCompositeScore(job)){
  return Math.max(.12,Math.min(.94,.55+(score-Number(job.minScore||0))*.012-(Number(job.selectivity)||0)));
 }
 function showCareer(tab='real'){
+ s.careerQuotaRenderDay=keyAt(Date.now());
  if(tab==='guild'){renderOrganizationCareer();return}
  $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');
  $('drawerTitle').textContent='职业';$('choices').className='choices career-view';
@@ -1875,6 +1877,7 @@ function updateOrganizationContributionCompliance(at=Date.now()){
  }
 }
 function renderOrganizationCareer(){
+ s.careerQuotaRenderDay=keyAt(Date.now());
  $('drawer').classList.remove('profile-expanded','shop-drawer','furniture-drawer');
  $('drawerTitle').textContent='职业';$('choices').className='choices career-view';
  const g=ARDAY_FACTIONS.find(f=>f.id===s.factionMembership),tabs='<nav class="career-tabs"><button data-career-tab="real"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild" class="active"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav>';
