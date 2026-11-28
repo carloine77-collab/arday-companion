@@ -883,3 +883,9 @@ header.top{position:relative}
  .balloon-playfield{min-height:440px}
  .balloon-stage{min-height:260px}
 }
+
+
+/* System-only bulk read and delete control. */
+.drawer .choices.events-view>.mailbox-tools{display:flex;justify-content:flex-end;align-items:center;margin:0 1px 1px;}
+.drawer .choices.events-view .mailbox-clear-system{min-height:32px;padding:0 11px;border:1px solid #c9bba8;border-radius:3px;background:#f8f3eb;color:#806e5a;font:600 10px/1.2 'Noto Serif SC',Georgia,serif;letter-spacing:.03em;}
+.drawer .choices.events-view .mailbox-clear-system:active{background:#eee5d8;}
