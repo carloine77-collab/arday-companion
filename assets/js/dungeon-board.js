@@ -21,6 +21,7 @@ let dungeonBoardTimer=null,dungeonBoardRunToken=0,dungeonBoardAnimatingMissionId
 const C=(stat,difficulty,successText,successEffects,failureText,failureEffects,successChance=1,failureChance=-1)=>({stat,difficulty,success:{text:successText,effects:successEffects,chance:successChance},failure:{text:failureText,effects:failureEffects,chance:failureChance}});
 const O=(label,effects={},chance=0,check=null,item=null)=>({label,effects,chance,...(check?{check}:{}),...(item?{item}:{})});
 const D=(id,title,desc,options,weight=1)=>({id,title,desc,options,weight});
+const A=(id,title,desc,effects,text,weight=1)=>({...D(id,title,desc,[O('直接结算',effects)],weight),direct:true,directText:text});
 const DUNGEON_EVENT_LIBRARY={
 scene:[
 D('scene-chemistry','化学楼的晚自习',"实验台上的冷却计时器只剩两分钟，失控反应正在升温，而总电源开关位于泄漏区内。",[O("核对实验记录",{intelligence:1},0,C('intelligence',57,'你发现记录中的反应时间被人为改写。',{perception:1},'数据在眼前自行重排，你只得匆忙离开。',{energy:-1})),O("切断总电源",{strength:1,energy:-1},1),O("从通风廊撤离",{agility:1,clean:-1})]),
@@ -28,7 +29,11 @@ D('scene-gym','熄灯后的体育馆',"体育馆的铁门突然落锁，失控�
 D('scene-auditorium','礼堂的第二场演出',"礼堂的安全出口被舞台布景堵住，幕布后传来脚步声，观众席间还散落着备用通道钥匙。",[O("拉开幕布查看",{willpower:1},0,C('willpower',60,'幕布后只有一面朝向观众席的旧镜子。',{perception:1},'镜面里的人群同时起身，你被迫退回走廊。',{fun:-1})),O("搜索观众席",{perception:1,energy:-1},1),O("从侧门撤离",{agility:1})],.9),
 D('scene-rooftop','天台门禁',"天台门禁显示出口已解锁，但门外站着一个与你穿着相同、正试图刷卡进楼的人。",[O("重置门禁记录",{intelligence:1},0,C('intelligence',62,'后台记录显示，另一张卡来自明天。',{perception:1},'门锁反向闭合，你被金属边缘划伤。',{clean:-1},2,-1)),O("强行推开天台门",{strength:1,energy:-1},1),O("绕行楼梯间",{agility:1,fun:-1})]),
 D('scene-specimen','标本走廊',"标本走廊尽头的玻璃柜正在破裂，柜中动物标本全部转向你，唯一完好的侧门被柜体挡住。",[O("核对柜体编号",{perception:1,fun:-1},0,C('perception',58,'标签编号指向一间已经拆除的教室。',{intelligence:1},'玻璃后的倒影开始移动，你打碎柜门脱身。',{clean:-1})),O("遮住玻璃柜",{willpower:1},1),O("直接冲向出口",{agility:1,energy:-1})]),
-D('scene-lostfound','失物招领处',"失物招领处的登记簿记载着一把能打开地下门的钥匙，但值班室里有人正在逐页撕毁记录。",[O("翻查旧登记",{intelligence:1},0,C('intelligence',55,'你找到一条与当前路线吻合的地下通道记录。',{perception:1},'登记簿的页码不断减少，你浪费了不少时间。',{energy:-1})),O("拿走登记的钥匙",{perception:1},0,null,'fate'),O("撕毁剩余记录",{willpower:1,clean:-1})]),
+D('scene-lostfound','失物招领处',"失物招领处的登记簿记载着一把能打开地下门的钥匙，但值班室里有人正在逐页撕毁记录。",[O("翻查旧登记",{intelligence:1},0,C('intelligence',55,'你找到一条与当前路线吻合的地下通道记录。',{perception:1},'登记簿的页码不断减少，你浪费了不少时间。',{energy:-1})),O("拿走登记的钥匙",{perception:1},0,null,'fate'),O("撕毁剩余记录",{willpower:1,clean:-1})]),,
+A('scene-stairwell','封闭的楼梯间','楼梯间的应急灯突然熄灭，黑暗中有东西从上方滚落，撞在你脚边。',{willpower:1},'你稳住呼吸，在黑暗中找到了下行扶手。',.9),
+A('scene-classroom','空教室的暖气','空教室的暖气仍在运行，窗边放着一瓶未开封的水和一件干燥外套。',{energy:1,clean:1},'你取用了教室里留下的应急物资。',.8),
+D('scene-artroom','美术教室的湿画布','美术教室里一幅尚未干透的画挡住了门，画中走廊的出口位置与现实完全相反。',[O('沿画中路线寻找出口',{perception:1},0,C('perception',59,'你发现画布背后藏着真正的门牌。',{intelligence:1},'你跟错了画中的方向，绕回原地。',{energy:-1})),O('撕开画布强行通过',{strength:1,clean:-1})],.85),
+D('scene-roofwater','天台水箱','天台水箱底部正在漏水，水箱旁的梯子通往安全平台，但梯脚已经松动。',[O('加固梯脚',{strength:1,energy:-1},0,C('strength',58,'梯子重新固定，你安全抵达平台。',{willpower:1},'梯脚滑脱，你跌回天台。',{clean:-1,energy:-1})),O('借排水管攀下去',{agility:1,clean:-1})],.85)
 ],
 anomaly:[
 D('anomaly-rollcall','空座位点名',"空教室里广播正在点名，答到的人会被锁定座位，而点名册上只剩你的名字。",[O("对着广播答到",{willpower:1},0,C('willpower',59,'点名声停下，座位恢复原位。',{energy:1},'你的声音从空座位后方传来。',{energy:-2})),O("检查点名册",{intelligence:1,fun:-1},1),O("离开教室",{agility:1,clean:-1})]),
@@ -36,7 +41,11 @@ D('anomaly-broadcast','倒放的广播',"广播终端不断播出校园各处的
 D('anomaly-mirror','镜中迟到者',"走廊镜子里的学生正从镜中伸手出来，而镜面旁的消防箱里放着一块厚布和破窗锤。",[O("观察镜中动作",{perception:1},0,C('perception',57,'镜中人的脚步指向一条隐藏楼梯。',{intelligence:1},'镜面突然起雾，你的视线短暂失焦。',{energy:-1})),O("用布盖住镜子",{strength:1,clean:-1},1),O("砸碎镜面",{willpower:1,fun:-1})]),
 D('anomaly-vending','自动售货机',"自动售货机吞下学生证后锁死出口，屏幕要求投入一件随身物品才会吐回证件。",[O("破解机器密码",{intelligence:1},0,C('intelligence',56,'机器吐出一枚刻着楼层编号的旧硬币。',{perception:1},'屏幕亮起你的学生证照片，机器开始报警。',{willpower:-1})),O("撬开出货口",{strength:1,energy:-1},0,null,'stimulant'),O("切断机器电源",{agility:1,clean:-1})]),
 D('anomaly-umbrella','雨伞下的脚步',"空走廊里一把湿雨伞正自行移动，伞下的脚步声逐渐逼近，地面水迹却通向一扇侧门。",[O("跟随伞下脚步",{willpower:1},0,C('willpower',63,'脚步把你带到一扇原本不存在的侧门。',{agility:1},'有人贴近耳边呼吸，你的娱乐状态下降。',{fun:-1})),O("追踪地面水迹",{perception:1,clean:-1},1),O("抢走雨伞",{strength:1,energy:-1})]),
-D('anomaly-photo','没有脸的合照',"公告栏上的毕业合照多出一个陌生学生，照片背面写着他的名字和一间已封闭教室的门牌号。",[O("辨认照片背景",{perception:1},0,C('perception',60,'照片拍摄地点是地图上被涂黑的区域。',{intelligence:1},'照片表层剥落，粉尘刺激了眼睛。',{clean:-1},2,-1)),O("撕下陌生人像",{willpower:1,energy:-1},1),O("取下照片带走",{fun:1,clean:1})],.85)
+D('anomaly-photo','没有脸的合照',"公告栏上的毕业合照多出一个陌生学生，照片背面写着他的名字和一间已封闭教室的门牌号。",[O("辨认照片背景",{perception:1},0,C('perception',60,'照片拍摄地点是地图上被涂黑的区域。',{intelligence:1},'照片表层剥落，粉尘刺激了眼睛。',{clean:-1},2,-1)),O("撕下陌生人像",{willpower:1,energy:-1},1),O("取下照片带走",{fun:1,clean:1})],.85),
+A('anomaly-lockers','自行开合的储物柜','走廊储物柜同时弹开，里面的学生证全部印着今天的日期和你的照片。',{fun:-1,willpower:1},'你强迫自己移开视线，继续前进。',.9),
+A('anomaly-bell','提前响起的下课铃','下课铃比实际时间提前响起，铃声结束后整层楼的门锁全部自动闭合。',{energy:-1,willpower:1},'你在门锁闭合前冲出了教学楼。',.9),
+D('anomaly-intercom','教室内线电话','讲台电话响起，听筒里的人准确说出你下一步要走的方向，并要求你不要回头。',[O('追问对方身份',{willpower:1},0,C('willpower',62,'对方报出一组真实的门禁编号。',{intelligence:1},'听筒传来你的声音，你立即挂断电话。',{fun:-1})),O('拔掉电话线路',{strength:1,energy:-1})],.8),
+D('anomaly-shadow','晚到的影子','走廊灯光下你的影子慢了半拍才抬手，而它脚边出现了一把你从未见过的钥匙。',[O('捡起钥匙',{perception:1},0,C('perception',60,'钥匙齿纹对应附近的储物间。',{intelligence:1},'影子先一步捡起钥匙，你的手指被地面划伤。',{clean:-1})),O('关掉走廊灯',{willpower:1,fun:-1})],.85)
 ],
 clue:[
 D('clue-report','缺页的实验报告',"实验报告缺失了关键页，剩余数据表明地下设备层将在十分钟后断电，原始样本仍锁在实验柜里。",[O("复算实验数据",{intelligence:1},0,C('intelligence',58,'公式指向地下设备层的备用电源。',{perception:1},'数据在计算器上变成一串重复日期。',{energy:-1},2,-1)),O("带走原始样本",{perception:1,energy:-1},0,null,'fate'),O("销毁错误报告",{willpower:1,clean:-1})]),
@@ -44,7 +53,11 @@ D('clue-card','失效的门禁卡',"一张失效门禁卡留下了三次刷卡�
 D('clue-timetable','被改写的课表',"被篡改的课表把全校学生安排到同一间教室，唯一空出的时段正好对应地下通道开放时间。",[O("比对课程时间",{intelligence:1},0,C('intelligence',62,'空白时段对应一条未标注的地下通道。',{perception:1},'课表上的时间开始与腕表同步倒退。',{willpower:-1},2,-1)),O("询问值日生",{willpower:1,fun:-1},1),O("撕下课表末页",{strength:1,clean:-1})]),
 D('clue-journal','校刊剪报',"旧校刊报道了一起尚未发生的实验室事故，报道日期、地点和现场照片都与今晚完全吻合。",[O("核对新闻档案",{intelligence:1,fun:-1},0,C('intelligence',57,'原稿留下了事故地点和一段手写警告。',{perception:1},'档案柜自动上锁，你在黑暗中摸索出口。',{energy:-1})),O("拍下事故报道",{perception:1},0,null,'stimulant'),O("烧毁剪报",{willpower:1,clean:-1})]),
 D('clue-pipeline','地下管线图',"地下管线图标出三条通往操场的检修路线，只有其中一条避开了正在泄漏的主水管。",[O("测算管线走向",{intelligence:1},0,C('intelligence',60,'管线尽头连接着一处未登记的设备间。',{perception:1},'线条延伸到纸张之外，你失去了方向。',{energy:-1})),O("寻找检修井",{agility:1,clean:-1},1),O("收起管线图",{willpower:1,fun:1})]),
-D('clue-library','图书馆借阅记录',"图书馆借阅记录显示同一本书被连续借出七次，所有记录都指向地下阅览室同一张桌子。",[O("调取座位监控",{perception:1},0,C('perception',56,'监控里出现一条通往地下阅览室的楼梯。',{intelligence:1},'监控切成实时视角，你正坐在屏幕里。',{fun:-1})),O("借走异常书籍",{intelligence:1},0,null,'fate'),O("关闭阅览室",{willpower:1,energy:-1})],.9)
+D('clue-library','图书馆借阅记录',"图书馆借阅记录显示同一本书被连续借出七次，所有记录都指向地下阅览室同一张桌子。",[O("调取座位监控",{perception:1},0,C('perception',56,'监控里出现一条通往地下阅览室的楼梯。',{intelligence:1},'监控切成实时视角，你正坐在屏幕里。',{fun:-1})),O("借走异常书籍",{intelligence:1},0,null,'fate'),O("关闭阅览室",{willpower:1,energy:-1})],.9),
+A('clue-notice','过期的维修通知','维修通知标出了墙内一条仍可通行的管道，你按图找到入口却被灰尘呛得不断咳嗽。',{clean:-1,perception:1},'你记下了墙内通道的位置。',.9),
+A('clue-keytag','遗失的钥匙牌','地上有一块标着地下二层的钥匙牌，牌背刻着一串门锁编号。',{perception:1},'你记住了钥匙牌上的编号。',.85),
+D('clue-labnote','实验员的便签','便签写着“不要启动备用电源”，而配电箱显示主电源将在一分钟后彻底断开。',[O('检查电路图',{intelligence:1},0,C('intelligence',61,'你找到独立供电线路，避开了异常设备。',{perception:1},'电路图上的线路不断改变，你只能撤离。',{energy:-1})),O('直接启动备用电源',{willpower:1,energy:-1})],.9),
+D('clue-tape','被剪断的录音带','录音带只剩最后十秒，背景里有人重复报出一间教室的门牌号，磁带盒却标着另一栋楼。',[O('修复录音带',{intelligence:1,fun:-1},0,C('intelligence',58,'完整录音指出了正确的楼栋。',{perception:1},'磁带彻底断裂，线索无法恢复。',{fun:-1})),O('按门牌号直接寻找',{agility:1,energy:-1})],.8)
 ],
 crisis:[
 D('crisis-stairs','楼梯间的回声',"楼梯间发生结构坍塌，身后的怪物正在追来，而前方楼层指示牌显示的出口方向彼此矛盾。",[O("跨越坍塌台阶",{agility:1,energy:-1},0,C('agility',57,'你在楼层错位前冲进安全门。',{willpower:1},'台阶突然延长，你摔倒后擦伤手臂。',{clean:-1,energy:-1})),O("确认楼层方向",{perception:1,fun:-1},1),O("冲向最近出口",{willpower:1,energy:-2})]),
@@ -52,7 +65,11 @@ D('crisis-leak','实验室泄漏',"实验室储罐破裂，腐蚀性液体正向
 D('crisis-bridge','玻璃连廊裂纹',"玻璃连廊已经出现贯穿裂缝，另一端的安全门正在关闭，脚下只剩两根承重梁尚未断裂。",[O("冲过玻璃连廊",{agility:1,energy:-1},0,C('agility',62,'你在玻璃完全碎裂前抵达对岸。',{energy:1},'碎片划破鞋底，你跌出连廊。',{clean:-1,energy:-2})),O("沿承重梁移动",{strength:1,willpower:1},1),O("退回原路",{perception:1,fun:-1})]),
 D('crisis-firedoor','锁闭的防火门',"防火门后有人呼救，但门锁已经变形，墙上的消防图标明备用钥匙在隔壁值班室。",[O("强行破门",{strength:1,energy:-2},0,C('strength',64,'门后是空的消防通道，墙上留有逃生标记。',{perception:1},'门框脱落砸中肩膀，你被迫撤退。',{energy:-1},2,-1)),O("寻找备用钥匙",{intelligence:1,perception:1},1),O("隔门确认情况",{willpower:1,fun:-1})]),
 D('crisis-equipment','坠落的体育器材',"体育馆器材架即将倾倒并堵住唯一出口，旁边的垫子可以翻越，墙上的警铃也仍能使用。",[O("稳住器材架",{strength:1,clean:-1},0,C('strength',58,'器材停止滑动，架底露出一枚旧钥匙。',{perception:1},'器材架倾倒，你只能跳开避让。',{energy:-1,clean:-1})),O("翻越地垫撤离",{agility:1,energy:-1},1),O("拉响警铃",{willpower:1,fun:-1})]),
-D('crisis-water','漫水的盥洗室',"盥洗室的水位正在上涨，电线已经浸水，墙角总阀和高处通风窗是仅有的两个出口。",[O("关闭供水总阀",{intelligence:1},0,C('intelligence',59,'阀门后藏着一条干燥的检修通道。',{agility:1},'阀门转动后水流反而加快，你仓促爬上隔间。',{energy:-1,clean:-1})),O("翻出通风窗",{agility:1,energy:-1},1),O("取走漂浮纸条",{perception:1,clean:-1})],.9)
+D('crisis-water','漫水的盥洗室',"盥洗室的水位正在上涨，电线已经浸水，墙角总阀和高处通风窗是仅有的两个出口。",[O("关闭供水总阀",{intelligence:1},0,C('intelligence',59,'阀门后藏着一条干燥的检修通道。',{agility:1},'阀门转动后水流反而加快，你仓促爬上隔间。',{energy:-1,clean:-1})),O("翻出通风窗",{agility:1,energy:-1},1),O("取走漂浮纸条",{perception:1,clean:-1})],.9),
+A('crisis-sprinkler','失控的消防喷淋','消防喷淋突然启动，水流冲垮了走廊堆放的杂物，你被飞散的碎片击中。',{clean:-1,energy:-1},'你躲避不及，被碎片擦伤。',.9),
+A('crisis-coldroom','失温的冷藏室','冷藏室的门在身后自动锁死，低温让你的动作逐渐迟缓。',{energy:-1,willpower:1},'你强撑着找到内部开门装置。',.85),
+D('crisis-elevator','停在夹层的电梯','电梯卡在两层楼之间，顶部检修口可以爬出，但电梯仍在缓慢下坠。',[O('撬开检修口',{strength:1,energy:-1},0,C('strength',61,'你及时爬进电梯井侧面的检修平台。',{willpower:1},'电梯突然下坠，你撞上轿厢内壁。',{clean:-1,energy:-1})),O('按下紧急制动',{intelligence:1},0,C('intelligence',59,'制动装置停止下坠。',{perception:1},'制动按钮失灵，你只能寻找出口。',{energy:-1}))],.85),
+D('crisis-gas','走廊里的刺激性气体','走廊开始弥漫刺激性气体，最近的防毒面具在锁柜里，而通风窗需要爬上高处才能打开。',[O('砸开锁柜',{strength:1,clean:-1}),O('爬上通风窗',{agility:1,energy:-1},0,C('agility',60,'你打开通风窗，气体迅速散去。',{willpower:1},'窗框松脱，你摔回地面。',{energy:-1,clean:-1}))],.85)
 ],
 supply:[
 D('supply-infirmary','医务室值班窗',"医务室的药柜没有上锁，但值班医生不见踪影，柜门上的记录提示其中一支药剂已经过期。",[O("核对药品批次",{intelligence:1},0,C('intelligence',58,'你找到一支未开封的应急注射剂。',{perception:1},'药瓶颜色发生变化，你立刻放弃。',{willpower:1})),O("呼叫值班人员",{willpower:1,fun:-1},0,null,'stimulant'),O("翻窗离开",{agility:1,clean:-1})]),
@@ -60,7 +77,11 @@ D('supply-machine','停运的自动售货机',"停电的自动售货机卡住了
 D('supply-security','保安室钥匙板',"保安室钥匙板上挂着地下层钥匙，但值班室门外传来脚步声，钥匙编号也已被打乱。",[O("辨认钥匙编号",{perception:1},0,C('perception',59,'你发现一把标记为“地下层”的钥匙。',{intelligence:1},'钥匙板整体脱落，金属声引来了脚步。',{willpower:-1},2,-1)),O("拿走旧钥匙",{agility:1,energy:-1},1),O("锁上保安室",{strength:1,clean:-1})]),
 D('supply-club','社团储物柜',"社团储物柜里堆满未领取的急救包，柜门已经变形，旁边柜子的锁却完好无损。",[O("查找社团登记",{intelligence:1},0,C('intelligence',55,'档案显示社团活动地点在旧礼堂地下。',{perception:1},'柜门关闭后无法再次打开，你空手离开。',{fun:-1})),O("取走急救用品",{perception:1},0,null,'stimulant'),O("撬开相邻柜门",{strength:1,clean:-1},1)]),
 D('supply-kitchen','食堂后厨',"食堂后厨还留着一份热食和一张值班表，门外的脚步声正在靠近，后门没有上锁。",[O("检查食物来源",{perception:1},0,C('perception',61,'餐盘底部藏着一张出口示意图。',{intelligence:1},'食物散发出刺鼻气味，你感到反胃。',{hunger:-1,fun:-1})),O("取用后厨食物",{energy:1,hunger:1},0,null,'stimulant'),O("从后门撤离",{agility:1,clean:-1})],.95),
-D('supply-library','图书馆应急灯',"图书馆应急灯即将熄灭，灯光照出的书架编号组成一组坐标，书架后方传来敲击声。",[O("按编号排列书籍",{intelligence:1},0,C('intelligence',60,'书架移开，露出一处隐藏补给格。',{perception:1},'书架滑轨卡死，灰尘呛得你不断咳嗽。',{clean:-1})),O("取走应急灯",{perception:1},0,null,'fate'),O("记下坐标离开",{willpower:1,energy:1})])
+D('supply-library','图书馆应急灯',"图书馆应急灯即将熄灭，灯光照出的书架编号组成一组坐标，书架后方传来敲击声。",[O("按编号排列书籍",{intelligence:1},0,C('intelligence',60,'书架移开，露出一处隐藏补给格。',{perception:1},'书架滑轨卡死，灰尘呛得你不断咳嗽。',{clean:-1})),O("取走应急灯",{perception:1},0,null,'fate'),O("记下坐标离开",{willpower:1,energy:1})]),
+A('supply-water','饮水机的备用桶','走廊饮水机旁堆着两桶未拆封的饮用水，地面却留有刚刚拖行过的血迹。',{hunger:1,energy:1},'你取水补充了体力。',.9),
+A('supply-firstaid','遗落的急救包','楼梯转角的急救包还没有被打开，包装上沾着新鲜的灰尘和鞋印。',{clean:1},'你从急救包中取用了可用物资。',.9),
+D('supply-workshop','维修间的工具箱','维修间的工具箱没有上锁，里面有撬棍和手电筒，但门外的脚步声正逐渐靠近。',[O('拿走撬棍',{strength:1},0,null,'fate'),O('拿走手电筒',{perception:1,energy:1},0,null,'stimulant')],.85),
+D('supply-locker','体育器材柜','器材柜里有一双完好的运动鞋和一瓶清洁剂，柜门却被卡在半开的位置。',[O('取走运动鞋',{agility:1},0,C('agility',56,'你顺利取出运动鞋。',{energy:1},'柜门夹住鞋带，你只能放弃。',{energy:-1})),O('取走清洁剂',{clean:1,willpower:1})],.8)
 ],
 turning:[
 D('turning-clock','倒转的校钟',"校钟突然倒转，钟声却在加速；墙上的校园地图只有在钟声停顿时才会显出出口。",[O("校准钟摆",{intelligence:1},0,C('intelligence',62,'钟声停下，校园地图上的出口重新显现。',{perception:1},'钟摆突然加速，你被迫从钟楼撤离。',{energy:-1},2,-1)),O("跟随钟声前进",{willpower:1,energy:-1},1),O("拆下钟表指针",{strength:1,clean:-1})]),
@@ -68,7 +89,11 @@ D('turning-map','重新绘制的校园地图',"校园地图上的道路不断改
 D('turning-building','不存在的第四栋',"导航显示第四栋教学楼就在前方，楼内逐层亮起的灯光却正沿着你所在的方向移动。",[O("观察亮灯顺序",{perception:1},0,C('perception',61,'灯光组成一条通往出口的箭头。',{intelligence:1},'所有窗户同时亮起，你的判断被彻底打乱。',{willpower:-1})),O("朝亮灯处前进",{agility:1,energy:-1},1),O("关闭导航设备",{willpower:1,fun:1})]),
 D('turning-rain','悬停的雨',"操场上方的雨滴全部悬停，积水中却出现一条通往出口的倒影，水面正不断向外扩张。",[O("触碰水面倒影",{willpower:1,clean:-1},0,C('willpower',63,'镜面映出一条真实存在的撤离路线。',{perception:1},'水面传来强烈牵引，你耗费精力挣脱。',{energy:-2},2,-1)),O("绕开操场积水",{agility:1},1),O("记录雨滴位置",{intelligence:1,fun:-1})]),
 D('turning-exit','出口广播',"广播宣布南门将在三分钟后关闭，但腕表显示广播时间快了整整一倍，南门外的警报已经响起。",[O("计算真实时间",{intelligence:1},0,C('intelligence',60,'你识破倒计时误差，找到提前开放的出口。',{agility:1},'两套时间互相冲突，你错过一段安全窗口。',{energy:-1},2,-1)),O("立即冲向南门",{agility:1,energy:-2},1),O("等待广播结束",{willpower:1,fun:-1})]),
-D('turning-classroom','终点教室',"终点教室的黑板写着本轮调查已结束，讲台上的骰子却仍在滚动，门外传来下一轮的脚步声。",[O("检查黑板背面",{perception:1},0,C('perception',64,'黑板后藏着一枚刻有出口符号的筹码。',{intelligence:1},'粉笔字迹渗出水迹，你的注意力被持续消耗。',{fun:-1},2,-1)),O("拿起讲台骰子",{willpower:1},0,null,'fate'),O("离开终点教室",{agility:1,energy:-1})],.8)
+D('turning-classroom','终点教室',"终点教室的黑板写着本轮调查已结束，讲台上的骰子却仍在滚动，门外传来下一轮的脚步声。",[O("检查黑板背面",{perception:1},0,C('perception',64,'黑板后藏着一枚刻有出口符号的筹码。',{intelligence:1},'粉笔字迹渗出水迹，你的注意力被持续消耗。',{fun:-1},2,-1)),O("拿起讲台骰子",{willpower:1},0,null,'fate'),O("离开终点教室",{agility:1,energy:-1})],.8),
+A('turning-silent','突然静止的校园','整座校园的声音同时消失，几秒后所有钟表恢复走动，你的精力却明显下降。',{energy:-1,willpower:1},'你在寂静中稳住了心神。',.9),
+A('turning-double','重复经过的路口','你第三次经过同一处路口时，墙上的指示牌终于显出一条此前不存在的路线。',{perception:1,intelligence:1},'你识别出路线循环的规律。',.85),
+D('turning-duplicate','走廊尽头的自己','走廊尽头出现另一个你，对方手里拿着一枚骰子，并示意你交换身上的一件物品。',[O('观察对方的动作',{perception:1},0,C('perception',63,'你发现对方的影子没有手指。',{willpower:1},'对方突然向前一步，你被迫后退。',{energy:-1})),O('拒绝交换并离开',{willpower:1,agility:1})],.8),
+D('turning-platform','移动的楼层平台','电梯平台停在两层楼之间，上层传来求救声，下层则亮着出口指示灯。',[O('前往上层救人',{willpower:1,energy:-1},0,C('willpower',62,'你救出被困学生并获得一条路线情报。',{perception:1},'上层无人回应，平台开始下沉。',{energy:-1})),O('前往下层出口',{agility:1,clean:-1})],.85)
 ]
 };
 
@@ -154,7 +179,7 @@ function continueDungeonBoard(){
  const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};if(settleDungeonIfDue?.(Date.now()))return;const mission=s.activeDungeon;if(!mission?.board?.result)return;const b=mission.board;b.result=null;if(b.steps>=DUNGEON_BOARD_MAX_STEPS){mission.board.completedAt=Date.now();mission.scheduleEndAt=mission.board.completedAt;mission.endsAt=mission.scheduleEndAt;save();settleDungeonIfDue(Date.now());return}save();renderDungeonBoard()}
 function renderDungeonEvent(){
  const {state:s,$,save,clamp,addDungeonItem,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};
- if(settleDungeonIfDue?.(Date.now()))return;const mission=s.activeDungeon;if(!mission?.board?.pending)return;const {event,tile}=mission.board.pending,cell=DUNGEON_BOARD_TILES.find(t=>t[0]===tile);$('drawerTitle').textContent='';$('choices').className='choices infinite-view dungeon-event-view';
+ if(settleDungeonIfDue?.(Date.now()))return;const mission=s.activeDungeon;if(!mission?.board?.pending)return;const {event,tile}=mission.board.pending;if(event.direct){resolveDungeonEvent(0);return}const cell=DUNGEON_BOARD_TILES.find(t=>t[0]===tile);$('drawerTitle').textContent='';$('choices').className='choices infinite-view dungeon-event-view';
  $('choices').innerHTML='<section class="dungeon-event-modal tone-'+tile+'"><button class="dungeon-board-exit" id="leaveDungeonBoard" type="button" aria-label="退出转盘">退出转盘</button><div class="dungeon-event-symbol">'+cell[2]+'</div><h2>'+event.title+'</h2><p>'+event.desc+'</p><div class="dungeon-event-choices">'+event.options.map((o,i)=>'<button class="dungeon-event-choice" data-dungeon-choice="'+i+'"><span>'+(i+1)+'</span><b>'+o.label+'</b>'+(o.check?'<small>'+dungeonEffectLabel(o.check.stat)+'检定</small>':'')+'<i>›</i></button>').join('')+'</div></section>';
  const leave=$('leaveDungeonBoard');if(leave)leave.onclick=leaveDungeonBoard;$('choices').querySelectorAll('[data-dungeon-choice]').forEach(button=>button.onclick=()=>resolveDungeonEvent(Number(button.dataset.dungeonChoice)));
 }
@@ -172,7 +197,7 @@ function resolveDungeonEvent(index){
  let nodeModifier=0;if(event.nodeId){const nodeSucceeded=!!option.check&&checkPassed;b.specialNodes=b.specialNodes||{};b.specialNodes[event.nodeId]=nodeSucceeded;const bonuses=nodeSucceeded?{'node-1':3,'node-2':4,'node-3':6}:{'node-1':-2,'node-2':-3,'node-3':-5};nodeModifier=bonuses[event.nodeId]||0}
  let chanceDelta=0;const chanceTotal=(Number(option.chance)||0)+(Number(outcome?.chance)||0)+nodeModifier;if(chanceTotal){const before=Number(b.chanceModifier)||0;b.chanceModifier=Math.max(-10,Math.min(10,before+chanceTotal));chanceDelta=b.chanceModifier-before}
  let itemName='';const itemId=outcome?.item||option.item,itemChance=Number(outcome?.itemChance??option.itemChance??.18);if(itemId&&!b.itemFound&&Math.random()<Math.max(0,Math.min(1,itemChance))){const item=addDungeonItem(itemId);if(item){itemName=item.name||'特殊道具';b.itemFound=true}}
- b.pending=null;b.result={title:event.title,choice:option.label,changes,chanceDelta,itemName,outcomeText:outcome?.text||'',checkChance,checkStat,checkPassed,nodeId:event.nodeId||null,nodeModifier};save();renderDungeonResult();
+ b.pending=null;b.result={title:event.title,choice:event.direct?'':option.label,changes,chanceDelta,itemName,outcomeText:outcome?.text||event.directText||'',checkChance,checkStat,checkPassed,nodeId:event.nodeId||null,nodeModifier};save();renderDungeonResult();
 }
 function chooseDungeonBoard(){
  const {state:s,$,save,settleDungeonIfDue}=window.ArdayDungeonBoardRuntime||{};const mission=s.activeDungeon;if(!mission)return;if(settleDungeonIfDue?.(Date.now()))return;if(mission.boardChoiceMade&&mission.mode!=='board'){window.ArdayDungeonBoardRuntime?.showDungeon?.();return}mission.mode='board';mission.boardChoiceMade=true;mission.board=mission.board||{version:3,missionId:mission.id,steps:0,position:0,chanceModifier:0,pending:null};mission.board.eventHistory=Array.isArray(mission.board.eventHistory)?mission.board.eventHistory:[];ensureDungeonBoardLayout(mission.board);mission.board.missionId=mission.id;save();if(mission.board?.pending)renderDungeonEvent();else if(mission.board?.result)renderDungeonResult();else renderDungeonBoard()}
