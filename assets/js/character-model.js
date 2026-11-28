@@ -257,8 +257,8 @@
       }
       for(const l of legs){
         const shoeMount=new T.Group();shoeMount.position.set(0,.11,.02);l.foot.add(shoeMount);
-        const heel=ellipsoid(shoeMount,0,-.17,-.045,.103,.071,.11,shoe,"shoe-heel-quarter");heel.userData.characterOutline=true;
-        const toeUpper=ellipsoid(l.toe,0,-.06,.035,.102,.066,.095,shoe,"shoe-articulated-toe");toeUpper.userData.characterOutline=true;
+        const heel=ellipsoid(shoeMount,0,-.135,-.045,.103,.092,.11,shoe,"shoe-heel-quarter");heel.userData.characterOutline=true;
+        const toeUpper=ellipsoid(l.toe,0,-.02,.035,.102,.078,.095,shoe,"shoe-articulated-toe");toeUpper.userData.characterOutline=true;
         const base=ellipsoid(shoeMount,0,-.237,.025,.101,.016,.16,sole,"shoe-sole");base.userData.characterOutline=true;
       }
       const shadow=new T.Mesh(new T.CircleGeometry(.48,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
