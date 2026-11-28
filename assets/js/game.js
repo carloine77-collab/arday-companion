@@ -2756,10 +2756,10 @@ function initArday3D(){
   const furnitureRegistry=[];
   // Bridge the scene-local registry to the outer interaction-menu module without leaking the array.
   window.ArdayGetFurnitureHotspot=(id)=>{const item=furnitureRegistry.find(entry=>String(entry.id)===String(id));if(!item?.button)return null;item.button.__furnitureItem=item;return item.button};
-  const roomBounds={minX:-5.0,maxX:5.0,minZ:-3.65,maxZ:3.65};
+  // Use the actual inner faces of all four room walls; previous bounds left 20–33 cm unusable margins.\n  const roomBounds={minX:-5.14,maxX:5.14,minZ:-3.92,maxZ:3.92};
   function wallTransform(group,side,offset,y=0){
-   const maxOffset=group.userData?.wallObject&&String(group.userData.furnitureKey||'').includes('window')?4.25:4.5;
-   const clamped=side==='back'||side==='front'?Math.max(-maxOffset,Math.min(maxOffset,offset)):Math.max(-3.25,Math.min(3.25,offset));
+   const maxOffset=group.userData?.wallObject&&String(group.userData.furnitureKey||'').includes('window')?4.25:5.05;
+   const clamped=side==='back'||side==='front'?Math.max(-maxOffset,Math.min(maxOffset,offset)):Math.max(-3.82,Math.min(3.82,offset));
    if(side==='back'){group.position.set(clamped,y,-3.89);group.rotation.y=0}
    else if(side==='front'){group.position.set(clamped,y,3.89);group.rotation.y=Math.PI}
    else if(side==='left'){group.position.set(-5.16,y,clamped);group.rotation.y=Math.PI/2}
@@ -2771,14 +2771,14 @@ function initArday3D(){
    // Validate the full wall-mounted object's span, not only its center.
    // Wall-mounted cabinets were previously allowed to overhang room edges.
    const alongBack=side==='back'||side==='front';
-   const wallHalf=alongBack?5.0:3.65;
+   const wallHalf=alongBack?5.12:3.9;
    const width=item.isDoor?1.24:item.id?.includes('window')?2.1:(Number(item.width)||.35);
    const half=width/2,limit=wallHalf-half;
    if(Math.abs(offset)>limit)return false;
    for(const other of furnitureRegistry){
     if(other===item||other.room!==item.room||!other.wallAxis||other.wallSide!==side)continue;
     const otherWidth=other.isDoor?1.24:other.id?.includes('window')?2.1:(Number(other.width)||.35);
-    const clearance=(width+otherWidth)/2+.12;
+    const clearance=(width+otherWidth)/2+.025;
     if(Math.abs(wallOffset(other)-offset)<clearance)return false;
    }
    return true;
@@ -3526,7 +3526,7 @@ function persistFurniture(item){
        const point=raycaster.ray.intersectPlane(candidate.plane,new T.Vector3());if(!point)continue;
        const alongX=candidate.side==='back'||candidate.side==='front';
        const offset=(alongX?point.x:point.z)+furnitureDrag.wallOffsetDelta;
-       if(Math.abs(offset)>(alongX?4.5:3.25))continue;
+       if(Math.abs(offset)>(alongX?5.05:3.82))continue;
        if(point.y<.1||point.y>4.7)continue;
        // Filter blocked candidates before distance ranking, so a blocked near wall
        // cannot prevent the pointer from reaching another available wall.
