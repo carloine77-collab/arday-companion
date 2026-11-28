@@ -291,3 +291,11 @@ footer.bottom .bottom-actions .decorate{background:#fff8ec!important}
 /* Explicit door destination control in the decoration toolbar. */
 #doorDestinationButton[hidden]{display:none!important}
 .stage.editing #doorDestinationButton:not([hidden]){display:inline-flex!important;visibility:visible!important;width:44px!important;height:44px!important;min-height:44px!important;min-width:44px!important;align-items:center;justify-content:center;padding:0!important;border-radius:50%!important;background:#725743!important;color:#fff8ed!important;border:1px solid #725743!important;box-shadow:0 3px 10px #44331e30!important;font-size:11px!important;font-weight:650!important;pointer-events:auto!important}
+
+/* Persistent, legible status labels beside the stat-group headings. */
+.status-tags{display:inline-flex;flex-wrap:wrap;align-items:center;gap:3px;margin-left:5px;vertical-align:middle;letter-spacing:0}
+.status-tag{display:inline-flex;align-items:center;white-space:nowrap;padding:2px 5px;border:1px solid #d8c6ad;border-radius:4px;background:#f4eadb;color:#72543d;font:600 9px/1.25 system-ui,sans-serif;letter-spacing:0}
+.status-tag.fatal,.status-tag.sick{border-color:#c98f80;background:#f4e1da;color:#8c493e}
+.status-tag.fatigued,.status-tag.starving,.status-tag.insomnia{border-color:#d8b58a;background:#f5ead8;color:#8a6038}
+.status-tag.depressed,.status-tag.lonely{border-color:#cbb9aa;background:#eee6df;color:#71594c}
+.status-tag.joyful{border-color:#c9b17d;background:#f5eedb;color:#80672e}
