@@ -39,6 +39,7 @@ s.attributes=s.attributes&&typeof s.attributes==='object'?s.attributes:{agility:
 s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.intelligence+s.attributes.perception+s.attributes.willpower)/5);
 if(isFreshInstall){Object.keys(s.attributes).forEach(key=>s.attributes[key]=1);s.combat=1;s.friend=0;s.bored=0;s.hate=0;s.love=0;}
 s.firstPlayedAt=Number(s.firstPlayedAt)||Date.now();
+s.lastOnlineAt=Number(s.lastOnlineAt)||Number(s.lastTick)||Number(s.last)||Date.now();s.absenceLetterMilestones=Array.isArray(s.absenceLetterMilestones)?s.absenceLetterMilestones.filter(n=>[1,3,7,14,21,30].includes(Number(n))).map(Number):[];
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[];
 const starterTeammateIds=new Set(['lin','mori','qiao']);s.teamRoster=s.teamRoster.filter(member=>!starterTeammateIds.has(member.id)||member.recruited===true);
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});if(s.teamRoster.length>8)s.teamRoster=s.teamRoster.slice(0,8);
@@ -1097,6 +1098,7 @@ function applyOffline(){
 function tick(){
  expireCookedMeals(Date.now());
  applyOffline();
+ checkAbsenceLetters(Date.now());
  const now=new Date(),key=keyAt(now),hourKey=key+'-'+now.getHours();
  // On a fresh install or when reopening within the same hour, initialize the
  // current activity once. Replay above handles all completed intervening hours.
@@ -1669,6 +1671,29 @@ function writeArdayLetter(at=Date.now(),trigger='daily',context={}){
  s.lastArdayLetterAt=at;s.ardayLetterHistory=Array.isArray(s.ardayLetterHistory)?s.ardayLetterHistory:[];
  s.ardayLetterHistory.unshift(letter.id);s.ardayLetterHistory=s.ardayLetterHistory.slice(0,12);
  return e;
+}
+function checkAbsenceLetters(at=Date.now()){
+ if(document.hidden)return false;
+ const previous=Number(s.lastOnlineAt)||at,elapsed=at-previous;
+ if(elapsed<0){s.lastOnlineAt=at;return false}
+ const milestones=[1,3,7,14,21,30],sent=new Set(s.absenceLetterMilestones||[]);
+ if(elapsed>=86400000&&s.introStage==='complete'&&s.introFriendshipAwarded){
+  const library=window.ArdayLetterCopy;
+  if(library?.generateAbsence){
+   for(const days of milestones){
+    if(elapsed<days*86400000||sent.has(days))continue;
+    const letter=library.generateAbsence({days,random:Math.random});
+    if(!letter)continue;
+    const event=addEvent(letter.title,letter.detail,'arday-letter');
+    if(!event)continue;
+    event.letterId=letter.id;event.letterTopic='absence';event.absenceDays=days;
+    sent.add(days);
+   }
+  }
+ }
+ s.absenceLetterMilestones=Array.from(sent).sort((a,b)=>a-b);
+ s.lastOnlineAt=at;
+ return true;
 }
 function expireSharedGoalProposals(at=Date.now()){
  const expired=(s.events||[]).filter(e=>e.type==='shared-goal-proposal'&&e.status==='open'&&Number(e.expiresAt)>0&&Number(e.expiresAt)<=at);
@@ -3757,9 +3782,9 @@ if(!s.introNarrationCompleted&&s.introStage==='awaiting-first-aid')playIntroSequ
   $('drawer').classList.remove('open');
   document.querySelectorAll('.tool').forEach(button=>button.classList.remove('active'));
  }
- document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();updateArday3D();if(s.activeDungeon?.mode==='board'&&$('drawer').classList.contains('open'))showDungeonPending()}else{window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(!skipUnloadSave)save()}});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();updateArday3D();if(s.activeDungeon?.mode==='board'&&$('drawer').classList.contains('open'))showDungeonPending()}else{window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(!skipUnloadSave){s.lastOnlineAt=Date.now();save()}}});
  window.addEventListener('pageshow',()=>{dismissRestoredDungeonBoard();tick();updateArday3D()});
- window.addEventListener('pagehide',()=>{dismissRestoredDungeonBoard();window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(!skipUnloadSave)save()});
+ window.addEventListener('pagehide',()=>{dismissRestoredDungeonBoard();window.ArdayDungeonBoardRuntime?.pauseBoard?.();if(!skipUnloadSave){s.lastOnlineAt=Date.now();save()}});
  setInterval(tick,30000);
  setInterval(()=>{if(s.activeInteraction&&Date.now()>=Number(s.activeInteraction.endsAt||0))finishImmediateInteraction(Date.now())},1000);
  setInterval(()=>{const key=keyAt(Date.now());if(s.calendar?.anchor!==key){ensureScheduleAt(Date.now());save();renderCalendar()}render()},60000);
