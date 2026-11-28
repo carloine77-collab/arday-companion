@@ -49,7 +49,8 @@
    const support=registry.find(x=>x.id===item.supportId);
    if(!support)return false;
    const co=Math.cos(support.group.rotation.y),si=Math.sin(support.group.rotation.y);
-   const localCorners=poly.map(([px,pz])=>{const wx=px-support.group.position.x,wz=pz-support.group.position.z;return [wx*co-wz*si,wx*si+wz*co]});
+   const supportedVertices=parts.flatMap(part=>part);
+   const localCorners=supportedVertices.map(([px,pz])=>{const wx=px-support.group.position.x,wz=pz-support.group.position.z;return [wx*co-wz*si,wx*si+wz*co]});
    const maxX=Math.max(...localCorners.map(v=>Math.abs(v[0]))),maxZ=Math.max(...localCorners.map(v=>Math.abs(v[1])));
    const supportMargin=item.surfaceType==='tabletop'?.018:.08;
    if(!item.allowSupportOverlap&&(maxX>support.width/2-supportMargin||maxZ>support.depth/2-supportMargin))return false;
