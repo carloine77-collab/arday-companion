@@ -12,7 +12,7 @@
   }
   for(const [ax,az] of axes){
    const pa=a.map(p=>p[0]*ax+p[1]*az),pb=b.map(p=>p[0]*ax+p[1]*az);
-   if(Math.max(...pa)<=Math.min(...pb)+.025||Math.max(...pb)<=Math.min(...pa)+.025)return false;
+   if(Math.max(...pa)<=Math.min(...pb)+.04||Math.max(...pb)<=Math.min(...pa)+.04)return false;
   }
   return true;
  }
