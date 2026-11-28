@@ -2756,7 +2756,8 @@ function initArday3D(){
   const furnitureRegistry=[];
   // Bridge the scene-local registry to the outer interaction-menu module without leaking the array.
   window.ArdayGetFurnitureHotspot=(id)=>{const item=furnitureRegistry.find(entry=>String(entry.id)===String(id));if(!item?.button)return null;item.button.__furnitureItem=item;return item.button};
-  // Use the actual inner faces of all four room walls; previous bounds left 20–33 cm unusable margins.\n  const roomBounds={minX:-5.14,maxX:5.14,minZ:-3.92,maxZ:3.92};
+  // Use the actual inner faces of all four room walls; previous bounds left 20–33 cm unusable margins.
+  const roomBounds={minX:-5.14,maxX:5.14,minZ:-3.92,maxZ:3.92};
   function wallTransform(group,side,offset,y=0){
    const maxOffset=group.userData?.wallObject&&String(group.userData.furnitureKey||'').includes('window')?4.25:5.05;
    const clamped=side==='back'||side==='front'?Math.max(-maxOffset,Math.min(maxOffset,offset)):Math.max(-3.82,Math.min(3.82,offset));
