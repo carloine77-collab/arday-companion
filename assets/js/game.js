@@ -978,6 +978,18 @@ function ensureScheduleAt(value){
  
  
  
+ if((s.calendar.version||0)<24){
+  // Remove legacy scheduled meals and all saved autonomous cooking/eating blocks.
+  Object.keys(s.calendar.days||{}).forEach(key=>{
+   s.calendar.days[key]=(s.calendar.days[key]||[]).filter(ev=>!['eat','cook'].includes(normalizeActivity(ev.activity)));
+   if(!s.calendar.days[key].length)delete s.calendar.days[key];
+  });
+  if(['eat','cook'].includes(normalizeActivity(s.currentActivity))&&!s.activeInteraction){
+   s.currentActivity='idle';s.currentActivityAnchor=null;s.currentActivityRoom='living';s.currentActivityFurnitureId=null;
+  }
+  if(['eat','cook'].includes(normalizeActivity(s.activeInteraction?.activity)))s.activeInteraction=null;
+  s.calendar.version=24;
+ }
  if(s.calendar.anchor!==currentKey&&requestedKey>=currentKey){
   s.calendar.anchor=currentKey;
   Object.keys(s.calendar.days).forEach(k=>{if(k<currentKey)delete s.calendar.days[k]});
@@ -1322,10 +1334,26 @@ function processActivityAt(value){
  let ev=resolved.event,activity=resolved.activity;
  let placedMealEaten=false;
  if([7,12,18].includes(hour)){
-  const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·')&&['living','bedroom','kitchen','bathroom'].includes(item.room));
-  if(meal){const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);applyActivityEffectsWithFeedback({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);if(meal.preparedBy==='player')writeArdayLetter(d.getTime(),'meal',{item:dishName});}
-  else{
-   // The scheduled meal is self-served when no prepared dish is placed; cooking upgrades its recovery.
+  const meal=(s.placed||[]).find(item=>typeof item.name==='string'&&item.name.startsWith('成品食物·')&&item.preparedBy==='player'&&['living','bedroom','kitchen','bathroom'].includes(item.room));
+  if(meal){
+   const dishName=meal.name.split('·').slice(1).join('·'),recipe=Object.values(recipes).find(r=>r.name===dishName);
+   s.placed=s.placed.filter(item=>item.id!==meal.id);arday3D?.consumePlacedMeal?.(meal.id);
+   applyActivityEffectsWithFeedback({hunger:recipe?.hunger||28,fun:2});placedMealEaten=true;s.mealPrepMisses=0;
+   say('这道'+dishName+'是你做的？手艺真好。');remember('meal','Arday吃了'+dishName,2);
+   writeArdayLetter(d.getTime(),'meal',{item:dishName});
+  }else{
+   // No player-prepared dish means no meal recovery. Arday asks the player instead of self-serving.
+   const missedKey=key+'-'+hour;
+   s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];
+   if(!s.mealMissedKeys.includes(missedKey)){
+    s.mealMissedKeys.push(missedKey);s.mealMissedKeys=s.mealMissedKeys.slice(-60);
+    s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0)+1;
+   }
+   if(s.lastMealPromptDay!==key){
+    const misses=Math.max(0,Number(s.mealPrepMisses)||0);
+    say(misses>=3?'你已经好几顿没给我做饭了。是最近太忙，还是不想再给我准备了？':'今天怎么没给我准备饭？是忘了，还是有什么原因？');
+    s.lastMealPromptDay=key;
+   }
   }
  }
  const meta=activityMeta[activity],sessionId=key+'-'+(ev?.start??hour)+'-'+activity;
@@ -1342,9 +1370,9 @@ function processActivityAt(value){
   if(activity==='guildTraining')grantGuildTrainingAttribute(d.getTime());
   if(activity==='walk')discoverSpecialCommission(d.getTime());
   if(ev?.kind==='autonomous'){
-   const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。',read:'阿尔读了一会儿书。',music:'阿尔听了一阵音乐。',listenRecords:'阿尔听了一阵唱片。',cook:'阿尔自己做了一顿饭。'};
+   const notes={laundry:'阿尔把一轮衣物洗好了。',exercise:'阿尔自己锻炼了一会儿。',playPiano:'阿尔在钢琴前坐了一阵。',walk:'阿尔出门散了会儿步。',read:'阿尔读了一会儿书。',music:'阿尔听了一阵音乐。',listenRecords:'阿尔听了一阵唱片。'};
    if(notes[activity])addEvent('阿尔的日常记录',notes[activity],'autonomous');
-   const letterTriggers={cook:'cook',read:'read',music:'music',listenRecords:'music',laundry:'laundry',walk:'walk',tidy:'tidy',playPiano:'music'};
+   const letterTriggers={read:'read',music:'music',listenRecords:'music',laundry:'laundry',walk:'walk',tidy:'tidy',playPiano:'music'};
    const trigger=letterTriggers[activity];
    const dayStart=new Date(d.getTime());dayStart.setHours(0,0,0,0);
    const todaysLetters=s.events.filter(item=>item.category==='letter'&&Number(item.created||0)>=dayStart.getTime()).length;
@@ -1454,7 +1482,7 @@ function openFurnitureActions(kind,furnitureId=null){
  center.setAttribute('role','button');center.setAttribute('tabindex','0');center.setAttribute('aria-label','关闭'+set.title+'互动菜单');center.title='点击关闭';
  center.onclick=closeFurnitureActions;center.onkeydown=(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();closeFurnitureActions()}};
  center.append(title,subtitle);wheel.appendChild(center);
- const symbols={read:'▤',write:'✎',chat:'♡',computerPlay:'⌘',browseWeb:'⌕',program:'⌘',guildTraining:'⚑',walk:'↗',playPiano:'♫',exercise:'↗',laundry:'◌',hug:'♡',admireDecor:'◇',admireView:'☼',watchTV:'▣',listenRecords:'♫',rest:'☾',music:'♫',wash:'◌',bouquet:'✿',admireFlowers:'✿',smellFlowers:'❀',sleep:'☾',cook:'♨'};
+ const symbols={read:'▤',write:'✎',chat:'♡',computerPlay:'⌘',browseWeb:'⌕',program:'⌘',guildTraining:'⚑',walk:'↗',playPiano:'♫',exercise:'↗',laundry:'◌',hug:'♡',admireDecor:'◇',admireView:'☼',watchTV:'▣',listenRecords:'♫',rest:'☾',music:'♫',wash:'◌',bouquet:'✿',admireFlowers:'✿',smellFlowers:'❀',sleep:'☾'};
  if(actions.length){
   actions.forEach(([activity,context],index)=>{
    const angle=(-90+index*(360/actions.length))*Math.PI/180;
