@@ -1131,6 +1131,7 @@ function relation(action){
  // emotional distance in the relationship and changes only through neglect
  // or relational conflict, not through repeated music, reading or games.
  if(['listen','walk','read','game','music','chat','computerPlay','browseWeb','program','playPiano','exercise','laundry','hug','admireDecor','admireView','watchTV','listenRecords','bouquet','admireFlowers','smellFlowers'].includes(action)){
+  s.lastPlayerInteractionAt=Date.now();
   s.friend=clamp(s.friend+1);
   if(['hug','bouquet','admireFlowers'].includes(action))s.love=clamp(s.love+1);
   remember('shared',action);
@@ -1319,7 +1320,7 @@ function updateStatusBuffs(at=Date.now()){
   {id:'sick',active:Number(s.clean)<25,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+n);s.energy=clamp(s.energy-n)}},
   {id:'fatigued',active:Number(s.energy)<25,apply:n=>{s.fun=clamp(s.fun-n);s.bored=Math.min(100,(Number(s.bored)||0)+n)}},
   {id:'insomnia',active:(()=>{const hour=new Date(at).getHours(),since=at-24*hourMs,slept=(s.activityLog||[]).filter(entry=>entry&&entry.activity==='sleep'&&Number(entry.at)>=since&&Number(entry.at)<=at).length;return hour>=8&&slept<5})(),apply:()=>{}},
-  {id:'lonely',active:(()=>{const since=at-48*hourMs,shared=(s.activityLog||[]).some(entry=>entry&&entry.withPlayer&&Number(entry.at)>=since&&Number(entry.at)<=at);return !!s.introNarrationCompleted&&Number(s.friend)<25&&!shared})(),apply:()=>{}},
+  {id:'lonely',active:(()=>{const since=at-48*hourMs,shared=(s.activityLog||[]).some(entry=>entry&&entry.withPlayer&&Number(entry.at)>=since&&Number(entry.at)<=at);return !!s.introNarrationCompleted&&Number(s.friend)<25&&Number(s.lastPlayerInteractionAt||0)<since&&!shared})(),apply:()=>{}},
   {id:'joyful',active:Number(s.fun)>=80,apply:()=>{}}
  ];
  for(const rule of rules){let state=s.statusBuffs[rule.id]||(s.statusBuffs[rule.id]={active:false,since:0,nextEffectAt:0});
