@@ -28,7 +28,7 @@ document.querySelectorAll('footer.bottom .tool').forEach(button=>button.addEvent
 }));
 
 window.addEventListener('error',event=>{const stage=$('stage');if(!stage)return;let msg=stage.querySelector('.three-status');if(!msg){msg=document.createElement('div');msg.className='three-status';stage.appendChild(msg)}msg.textContent='脚本运行错误：'+(event.message||'未知错误')});
-const base={friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['窗户'],pantry:{},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
+const base={gameStartedAt:Date.now(),friend:12,bored:0,hate:0,love:0,energy:72,hunger:58,clean:72,fun:58,combat:15,money:0,items:[],furniture:['窗户'],pantry:{},preferences:{},memories:[],events:[],mealPrepMisses:0,mealMissedKeys:[],statusBuffs:{},visits:0,last:Date.now(),lastTick:Date.now(),calendar:null,room:{sofa:0,window:0,table:0},activityLog:[],lastHourKey:''};
 let s={...base};
 let selectedCalendarDay=0,isFreshInstall=false,skipUnloadSave=false;const forceNewGameKey='arday-force-new-game-v1';try{if(localStorage.getItem(forceNewGameKey)==='1'){localStorage.removeItem('arday-save-v2');localStorage.removeItem(forceNewGameKey);isFreshInstall=true;}else{const old=JSON.parse(localStorage.getItem('arday-save-v2')||'null');if(old){s={...base,...old};if(typeof old.money!=='number')s.money=typeof old.coins==='number'?old.coins*10:30000;if(!old.testFundsV3){s.testFundsV3=true;}}else isFreshInstall=true;}}catch(e){isFreshInstall=true} delete s.coins;
 s.preferences=Object.fromEntries(Object.entries(s.preferences&&typeof s.preferences==='object'?s.preferences:{}).map(([key,value])=>[key,Math.max(0,Math.min(10,Number(value)||0))]));s.preferenceUpdatedAt=Number(s.preferenceUpdatedAt)||Date.now();delete s.personality;s.memories=s.memories||[];
@@ -93,7 +93,7 @@ function refreshDungeonUnlocks(){
  DUNGEON_TIERS.forEach((tier,index)=>{if(index===0)return;const previous=DUNGEON_TIERS[index-1],needed=DUNGEON_CLEAR_REQUIREMENTS[tier]||0;if((Number(s.dungeonProgress[previous])||0)>=needed&&!s.dungeonUnlocks.includes(tier))s.dungeonUnlocks.push(tier)});
 }
 refreshDungeonUnlocks();
-s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};s.introStage='awaiting-first-aid';}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'})).filter(event=>event.title!=='新的一天');
+s.mealPrepMisses=Math.max(0,Number(s.mealPrepMisses)||0);s.mealMissedKeys=Array.isArray(s.mealMissedKeys)?s.mealMissedKeys:[];s.statusBuffs=s.statusBuffs&&typeof s.statusBuffs==='object'?s.statusBuffs:{};s.gameStartedAt=Number(s.gameStartedAt)||Date.now();if(s.introNarrationCompleted&&!Number(s.lastPlayerInteractionAt))s.lastPlayerInteractionAt=Date.now();if(isFreshInstall){s.energy=18;s.hunger=18;s.clean=18;s.fun=18;s.statusBuffs.fatal={active:true,since:Date.now(),nextEffectAt:Date.now()+12*3600000};s.introStage='awaiting-first-aid';}delete s.attach;delete s.roomCondition;s.events=(s.events||[]).filter(event=>event&&(['arday-letter','shared-goal-proposal','life-memory','life-evening','relationship-conflict','daily','autonomous','long','system-action'].includes(event.type)||event.category==='letter'||event.category==='system')).map(event=>({...event,category:['arday-letter','shared-goal-proposal','life-memory','life-evening'].includes(event.type)||event.category==='letter'?'letter':'system'})).filter(event=>event.title!=='新的一天');
 s.events=s.events.filter(event=>!(event.type==='shared-goal-proposal'&&event.goalId==='outing'));
 if(!s.windowOnlyOutingMigrationV1){
  Object.values(s.calendar?.days||{}).forEach(day=>(Array.isArray(day)?day:[]).forEach(event=>{
@@ -1334,8 +1334,8 @@ function updateStatusBuffs(at=Date.now()){
   {id:'starving',active:Number(s.hunger)<15,apply:n=>{s.energy=clamp(s.energy-2*n);s.fun=clamp(s.fun-n)}},
   {id:'sick',active:Number(s.clean)<25,apply:n=>{s.bored=Math.min(100,(Number(s.bored)||0)+n);s.energy=clamp(s.energy-n)}},
   {id:'fatigued',active:Number(s.energy)<25,apply:n=>{s.fun=clamp(s.fun-n);s.bored=Math.min(100,(Number(s.bored)||0)+n)}},
-  {id:'insomnia',active:(()=>{const hour=new Date(at).getHours(),since=at-24*hourMs,slept=(s.activityLog||[]).filter(entry=>entry&&entry.activity==='sleep'&&Number(entry.at)>=since&&Number(entry.at)<=at).length;return hour>=8&&slept<5})(),apply:()=>{}},
-  {id:'lonely',active:(()=>{const since=at-48*hourMs,shared=(s.activityLog||[]).some(entry=>entry&&entry.withPlayer&&Number(entry.at)>=since&&Number(entry.at)<=at);return !!s.introNarrationCompleted&&Number(s.friend)<25&&Number(s.lastPlayerInteractionAt||0)<since&&!shared})(),apply:()=>{}},
+  {id:'insomnia',active:(()=>{const hour=new Date(at).getHours(),since=at-24*hourMs,started=Number(s.gameStartedAt)||at,slept=(s.activityLog||[]).filter(entry=>entry&&entry.activity==='sleep'&&Number(entry.at)>=since&&Number(entry.at)<=at).length;return at-started>=24*hourMs&&hour>=8&&slept<5})(),apply:()=>{}},
+  {id:'lonely',active:(()=>{const since=at-48*hourMs,lastInteraction=Number(s.lastPlayerInteractionAt)||Number(s.gameStartedAt)||at,shared=(s.activityLog||[]).some(entry=>entry&&entry.withPlayer&&Number(entry.at)>=since&&Number(entry.at)<=at);return !!s.introNarrationCompleted&&Number(s.friend)<25&&at-lastInteraction>=48*hourMs&&!shared})(),apply:()=>{}},
   {id:'joyful',active:Number(s.fun)>=80,apply:()=>{}}
  ];
  for(const rule of rules){let state=s.statusBuffs[rule.id]||(s.statusBuffs[rule.id]={active:false,since:0,nextEffectAt:0});
@@ -3815,7 +3815,7 @@ function playIntroSequence(){
  let index=Math.max(0,Math.min(lines.length,Math.floor(Number(s.introNarrationIndex)||0)));
  const bubble=$('dialogue');
  const advance=()=>{
-  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;save();bubble._introAdvance=null;bubble.classList.remove('intro-advance-ready');bubble.style.display='none';bubble.style.pointerEvents='none';return}
+  if(index>=lines.length){s.introNarrationCompleted=true;s.introNarrationIndex=lines.length;if(!Number(s.lastPlayerInteractionAt))s.lastPlayerInteractionAt=Date.now();save();bubble._introAdvance=null;bubble.classList.remove('intro-advance-ready');bubble.style.display='none';bubble.style.pointerEvents='none';return}
   saySystem(lines[index]);index++;s.introNarrationIndex=index;save();
   clearTimeout(dialogueTimer);
   armIntroDialogueAdvance(advance);
