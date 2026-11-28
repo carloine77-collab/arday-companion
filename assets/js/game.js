@@ -2778,7 +2778,7 @@ function initArday3D(){
    for(const other of furnitureRegistry){
     if(other===item||other.room!==item.room||!other.wallAxis||other.wallSide!==side)continue;
     const otherWidth=other.isDoor?1.24:other.id?.includes('window')?2.1:(Number(other.width)||.35);
-    const clearance=(width+otherWidth)/2+.025;
+    const clearance=Math.max(0,(width+otherWidth)/2-.025);
     if(Math.abs(wallOffset(other)-offset)<clearance)return false;
    }
    return true;
