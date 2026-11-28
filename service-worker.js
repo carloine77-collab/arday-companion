@@ -1,4 +1,4 @@
-const CACHE_NAME = "arday-shell-v366";
+const CACHE_NAME = "arday-shell-v367";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -25,11 +25,11 @@ const APP_SHELL = [
   "./assets/js/furniture-models-bedroom.js?v=20261123-seat-cushion1",
   "./assets/js/furniture-models-kitchen.js?v=20261123-cabinet-top-surfaces2",
   "./assets/js/furniture-models-lighting.js?v=20261123-cabinet-top-surfaces2",
-  "./assets/js/furniture-models-living.js?v=20261128-blue-velvet-sectional2",
+  "./assets/js/furniture-models-living.js?v=20261128-blue-velvet-sectional3",
   "./assets/js/furniture-models-office.js?v=20261123-cabinet-top-surfaces2",
   "./assets/js/furniture-models-tables.js?v=20261123-table-builder-fix1",
   "./assets/js/furniture-models.js?v=20261123-cabinet-top-surfaces2",
-  "./assets/js/furniture-placement.js?v=20261122-full-room-scan1",
+  "./assets/js/furniture-placement.js?v=20261128-actual-footprints1",
   "./assets/js/economy.js?v=20261123-schedule-goals1",
   "./assets/js/chat-copy.js?v=20261119a",
   "./assets/js/chat-system.js?v=20261119a",
@@ -39,7 +39,7 @@ const APP_SHELL = [
   "./assets/js/hall/hall-scene.js?v=20261122-exchange-label2",
   "./assets/js/dungeon-board.js?v=20261121-global-balance4",
   "./assets/js/game-data/exchange-data.js?v=20261122-exchange-terminal1",
-  "./assets/js/game.js?v=20261128-room-bounds-fix1",
+  "./assets/js/game.js?v=20261128-collision-footprints1",
   "./assets/icons/arday-icon.svg"
 ];
 self.addEventListener("install", event => {
