@@ -515,6 +515,21 @@ function renderEvents(){
  $('drawer').classList.remove('exchange-drawer','shop-drawer','profile-expanded');$('choices').className='choices';
  $('drawerTitle').textContent='信箱';$('choices').className='choices events-view';$('choices').innerHTML='';
  const count=document.createElement('div');count.className='mailbox-count';count.textContent=open.length+' 条';$('choices').appendChild(count);
+ const clearableSystem=open.filter(e=>e.category==='system'&&!e.rewardBundle);
+ if(clearableSystem.length){
+  const tools=document.createElement('div');tools.className='mailbox-tools';
+  const clear=document.createElement('button');clear.type='button';clear.className='mailbox-clear-system';clear.textContent='系统提示一键已读并删除';
+  clear.onclick=()=>{
+   const targets=s.events.filter(e=>e.category==='system'&&e.status==='open'&&!e.rewardBundle);
+   if(!targets.length)return;
+   if(!confirm('将 '+targets.length+' 封系统提示标记为已读并删除？阿尔的来信和新手补给邮件不会受到影响。'))return;
+   const removed=new Set(targets.map(e=>e.id));
+   s.events=s.events.filter(e=>!removed.has(e.id));
+   save();refreshTopActions();renderEvents();
+   toast('已清理 '+targets.length+' 封系统提示');
+  };
+  tools.appendChild(clear);$('choices').appendChild(tools);
+ }
  if(!open.length){const empty=document.createElement('div');empty.className='event-empty mailbox-empty';empty.innerHTML='<span>✧</span><h3>暂无消息</h3>';$('choices').appendChild(empty);}
  open.forEach(e=>{
   const isLetter=e.category==='letter';const wrap=document.createElement('div');wrap.className='event-card-wrap';const b=document.createElement('button');b.type='button';b.className='choice event-card '+(isLetter?'letter-card':'system-card');
