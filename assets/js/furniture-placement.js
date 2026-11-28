@@ -32,7 +32,7 @@
    return canPlaceOnWall(item,side,value);
   }
   const parts=footprintParts(item,x,z,angle);
-  if(parts.some(poly=>poly.some(([px,pz])=>px<bounds.minX||px>bounds.maxX||pz<bounds.minZ||pz>bounds.maxZ)))return false;
+  if(parts.some(polygon=>polygon.some(([px,pz])=>px<bounds.minX||px>bounds.maxX||pz<bounds.minZ||pz>bounds.maxZ)))return false;
   for(const other of registry){
    if(other===item||other.room!==item.room||other.wallAxis)continue;
    // A tabletop object is elevated above floor furniture. 2D footprint overlap
