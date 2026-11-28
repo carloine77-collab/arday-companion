@@ -39,8 +39,15 @@ s.attributes=s.attributes&&typeof s.attributes==='object'?s.attributes:{agility:
 s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.intelligence+s.attributes.perception+s.attributes.willpower)/5);
 if(isFreshInstall){Object.keys(s.attributes).forEach(key=>s.attributes[key]=1);s.combat=1;s.friend=0;s.bored=0;s.hate=0;s.love=0;}
 s.firstPlayedAt=Number(s.firstPlayedAt)||Date.now();
-// New-game furniture allowance: one free purchase per visible second-level category.
-s.starterFurnitureFreeCategories=s.starterFurnitureFreeCategories&&typeof s.starterFurnitureFreeCategories==='object'&&!Array.isArray(s.starterFurnitureFreeCategories)?s.starterFurnitureFreeCategories:(isFreshInstall?{}:null);
+// New-game furniture allowance: choose up to two items from each first-level category.
+const legacyStarterFurniture=s.starterFurnitureFreeCategories&&typeof s.starterFurnitureFreeCategories==='object'&&!Array.isArray(s.starterFurnitureFreeCategories)?s.starterFurnitureFreeCategories:null;
+if(s.starterFurnitureSelections&&typeof s.starterFurnitureSelections==='object'&&!Array.isArray(s.starterFurnitureSelections)){
+ s.starterFurnitureSelections=Object.fromEntries(Object.entries(s.starterFurnitureSelections).map(([group,count])=>[group,Math.max(0,Math.min(2,Math.floor(Number(count)||0)))]));
+}else if(isFreshInstall){s.starterFurnitureSelections={};}
+else if(legacyStarterFurniture){
+ const migrated={};Object.entries(legacyStarterFurniture).forEach(([key,used])=>{if(!used)return;const group=String(key).split('::')[0];migrated[group]=Math.min(2,(migrated[group]||0)+1)});
+ s.starterFurnitureSelections=migrated;
+}else s.starterFurnitureSelections=null;
 if(!s.absenceTrackingV1){s.lastOnlineAt=Date.now();s.absenceLetterMilestones=[];s.absenceTrackingV1=true;}else{s.lastOnlineAt=Number(s.lastOnlineAt)||Date.now();s.absenceLetterMilestones=Array.isArray(s.absenceLetterMilestones)?s.absenceLetterMilestones.filter(n=>[1,3,7,14,21,30].includes(Number(n))).map(Number):[];}
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[];
 const starterTeammateIds=new Set(['lin','mori','qiao']);s.teamRoster=s.teamRoster.filter(member=>!starterTeammateIds.has(member.id)||member.recruited===true);
@@ -339,12 +346,13 @@ function recyclePantryIngredient(key){
  const name=ingredientNames[key],original=ingredientUnitPrices[key];if(!name||!original||pantryCount(key)<=0)return;s.pantry[key]=pantryCount(key)-1;const refund=Math.round(original*.3);s.money=(Number(s.money)||0)+refund;moneyRecord('shared','income',refund,'食材回收：'+name);save();render();openTab('物品',true);toast('已回收：'+name);
 }
 function purchase(id,label,cost){
- const isFurniturePurchase=id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-')||id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-');
- const furnitureFreeKey=isFurniturePurchase?shopFurnitureGroup+'::'+shopFurnitureType:'';
- const starterFurnitureFree=!!(isFurniturePurchase&&s.starterFurnitureFreeCategories&&typeof s.starterFurnitureFreeCategories==='object'&&!s.starterFurnitureFreeCategories[furnitureFreeKey]);
+ const isStarterFurniture=id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-');
+ const starterFurnitureGroup=shopFurnitureGroup;
+ const starterFurnitureCount=Math.max(0,Number(s.starterFurnitureSelections?.[starterFurnitureGroup])||0);
+ const starterFurnitureFree=!!(isStarterFurniture&&s.starterFurnitureSelections&&starterFurnitureCount<2);
  const actualCost=starterFurnitureFree?0:(Number(cost)||0);
  if(s.money<actualCost){toast('¥不足');return}
- if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}const room=arday3D.applyRoomFinish(id);if(!room){toast('请先进入需要装修的房间');return}s.money-=actualCost;if(starterFurnitureFree)s.starterFurnitureFreeCategories[furnitureFreeKey]=true;const roomLabel={living:'客厅',bedroom:'卧室',kitchen:'厨房',bathroom:'浴室'}[room]||'当前房间';const surface=id.startsWith('buy-wallpaper-')?'墙面':'地面';addEvent('你更换了房间饰面',roomLabel+'的'+surface+'已更换为'+label+'，其他房间保持原样。','player-action');remember('purchase','房间装修：'+roomLabel+' / '+label,2);saySystem('已经把'+roomLabel+'的'+surface+'换好了。');save();render();toast(roomLabel+surface+'装修完成：'+label);openTab('商店',true);return}
+ if(id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-')){if(!arday3D?.applyRoomFinish){toast('房间装修系统尚未就绪');return}const room=arday3D.applyRoomFinish(id);if(!room){toast('请先进入需要装修的房间');return}s.money-=actualCost;const roomLabel={living:'客厅',bedroom:'卧室',kitchen:'厨房',bathroom:'浴室'}[room]||'当前房间';const surface=id.startsWith('buy-wallpaper-')?'墙面':'地面';addEvent('你更换了房间饰面',roomLabel+'的'+surface+'已更换为'+label+'，其他房间保持原样。','player-action');remember('purchase','房间装修：'+roomLabel+' / '+label,2);saySystem('已经把'+roomLabel+'的'+surface+'换好了。');save();render();toast(roomLabel+surface+'装修完成：'+label);openTab('商店',true);return}
  if(id.startsWith('buy-recipe-')){
   const recipeId=id.slice('buy-recipe-'.length);
   if(!recipes[recipeId]){toast('菜谱信息不存在');return}
@@ -355,7 +363,7 @@ function purchase(id,label,cost){
  }
  if(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-')){
   const furnitureName=furnitureNameById[id];if(!furnitureName){toast('商品信息不存在');return}
-  s.money-=actualCost;if(starterFurnitureFree)s.starterFurnitureFreeCategories[furnitureFreeKey]=true;const acquired=addInventoryItem(furnitureName,'furniture');acquired.originalPrice=starterFurnitureFree?0:(Number(cost)||0);addEvent('你购入了一件家具',starterFurnitureFree?label+'使用新手福利免费获得，已放入物品栏。':label+'已放入物品栏。','player-action');
+  s.money-=actualCost;if(starterFurnitureFree)s.starterFurnitureSelections[starterFurnitureGroup]=starterFurnitureCount+1;const acquired=addInventoryItem(furnitureName,'furniture');acquired.originalPrice=starterFurnitureFree?0:(Number(cost)||0);addEvent('你购入了一件家具',starterFurnitureFree?label+'使用新手福利免费获得，已放入物品栏。':label+'已放入物品栏。','player-action');
   remember('purchase',label,2);save();render();toast(starterFurnitureFree?'新手福利：本分类首次购买免费':'购入：'+label);return;
  }
  s.money-=cost;
@@ -431,7 +439,7 @@ function openTab(name,force=false){
   const filtered=tabEntries.filter(entry=>inventoryRecycleMode||inventoryCategory==='全部'||entry[5]===inventoryCategory);tabEntries.length=0;tabEntries.push(...filtered);
  }
  tabEntries.forEach(([label,emoji,id,cost,description,category,visualType])=>{
-  let b=document.createElement('button');const isShop=name==='商店',isInventoryFood=name==='物品'&&visualType==='food';b.className=isShop?'choice shop-product-card':isInventoryFood?'choice inventory-food-card':'choice';const furnitureFreeKey=isShop&&shopCategory==='家具'&&(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-')||id.startsWith('buy-wallpaper-')||id.startsWith('buy-floor-'))?shopFurnitureGroup+'::'+shopFurnitureType:'';const starterFurnitureFree=!!(furnitureFreeKey&&s.starterFurnitureFreeCategories&&typeof s.starterFurnitureFreeCategories==='object'&&!s.starterFurnitureFreeCategories[furnitureFreeKey]);let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
+  let b=document.createElement('button');const isShop=name==='商店',isInventoryFood=name==='物品'&&visualType==='food';b.className=isShop?'choice shop-product-card':isInventoryFood?'choice inventory-food-card':'choice';const isStarterFurniture=isShop&&shopCategory==='家具'&&(id.startsWith('buy-furniture-')||id.startsWith('buy-bedroom-')||id.startsWith('buy-kitchen-')||id.startsWith('buy-floor-lamp-'));const starterFurnitureCount=Math.max(0,Number(s.starterFurnitureSelections?.[shopFurnitureGroup])||0);const starterFurnitureFree=!!(isStarterFurniture&&s.starterFurnitureSelections&&starterFurnitureCount<2);let owned=(id==='buy-player'&&has('唱片机'))||(id==='buy-desk'&&has('书桌'))||(id==='buy-shelf'&&has('书架'))||(id.startsWith('buy-recipe-')&&(s.unlockedRecipes||[]).includes(id.slice('buy-recipe-'.length)));
   if(isShop){const desc=description||'';b.dataset.search=(label+' '+(shopFurnitureGroup||'')+' '+(shopFurnitureType||'')+' '+(shopBookType||'')).toLowerCase();b.innerHTML='<span class="shop-product-icon">'+emoji+'</span><span class="shop-product-info"><strong>'+label+'</strong>'+(desc?'<small>'+desc+'</small>':'')+'</span><span class="shop-product-price">'+(starterFurnitureFree||Number(cost)===0?'免费':id.startsWith('exchange-dungeon-')?cost+' 积分':'¥'+cost)+'</span><span class="shop-product-buy">'+(owned?'已收藏':id.startsWith('exchange-dungeon-')?'兑换':starterFurnitureFree?'新手福利':'购入')+'</span>';}
   else b.innerHTML=isInventoryFood?'<span class="inventory-food-icon">'+emoji+'</span><span class="inventory-food-name">'+label+'</span>':'<span class="emoji">'+emoji+'</span>'+label+(cost?'<small>'+(owned?'已拥有':cost+' ¥')+'</small>':'');
   b.onclick=()=>{
@@ -1836,7 +1844,7 @@ function showCareer(tab='real'){
   const j=s.job;
   $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav><section class="career-current"><div class="career-current-mark">在职</div><div class="career-current-copy"><h2>'+j.title+'</h2><strong>¥'+j.salary+' / 日</strong><small>'+pad(j.start)+':00–'+pad(j.end)+':00 · '+(j.end-j.start)+'小时</small><small>入职日期 '+j.startDate+'</small></div><button id="resignJob" type="button" onclick="window.resignFromJob(event)">辞职</button></section>';
  }else{
-  const jobs=ARDAY_SOCIAL_JOBS;
+  const jobs=ARDAY_SOCIAL_JOBS.map((job,index)=>({job,index,eligible:careerCompositeScore(job)>=Number(job.minScore||0)})).sort((a,b)=>Number(b.eligible)-Number(a.eligible)||a.index-b.index).map(entry=>entry.job);
   const applicationDay=keyAt(Date.now());s.jobApplications=s.jobApplications||{};s.jobApplications[applicationDay]=s.jobApplications[applicationDay]||{};
   $('choices').innerHTML='<nav class="career-tabs"><button data-career-tab="real" class="active"><i class="career-tab-glyph">▤</i><span>社会履历</span></button><button data-career-tab="guild"><i class="career-tab-glyph">✣</i><span>组织身份</span></button></nav><div class="career-jobs-grid">'+jobs.map((j,index)=>{
    const attempted=!!s.jobApplications[applicationDay][j.id],dailyChanceLocked=!canMakeDailyChanceAttempt(),parts=careerStatBreakdown(j),fitScore=careerCompositeScore(j),eligible=fitScore>=j.minScore,chance=careerApplicationChance(j,fitScore),hours=j.end-j.start,main=parts[0];
@@ -3805,7 +3813,9 @@ initArday3D();if(s.activeInteraction)presentActivity(s.activeInteraction.activit
 // Room doors change only the player's viewpoint. Arday's schedule and
 // physical location remain controlled by the simulation clock.
 
-if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来','欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「副本道具」分类中，将急救包用于 Arday。另外，家具商店中每个二级分类的首次购买免费，每个分类限一次。','system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
+const starterGiftDetail='欢迎进入 ARDAY。检测到初始角色 Arday 的生存状态为「濒死」。这份补给是为你的第一次行动准备的。请领取附件，再到背包的「副本道具」分类中，将急救包用于 Arday。另外，家具商店的每个一级分类可任选两件家具免费领取，超过两件后按商品标价购买。';
+s.events.forEach(event=>{if(event?.rewardBundle&&event.title==='ARDAY 新手补给：先让他活下来')event.detail=starterGiftDetail});
+if(isFreshInstall&&!s.introGiftMailCreated){const gift=addEvent('ARDAY 新手补给：先让他活下来',starterGiftDetail,'system-action');if(gift)gift.rewardBundle={firstAid:2,money:1000};s.introGiftMailCreated=true;}
 tick();
 function showCurrentScheduleBubble(){const now=new Date(),ev=eventAt(dayKey(now),now.getHours()),activity=normalizeActivity(ev?.activity||s.currentActivity||'idle'),meta=activityMeta[activity]||{},title=ev?.title||meta.title||'自己的时间';say(title==='自己的时间'?'我正在处理自己的事。':'我正在'+title+'。')}
 function playIntroSequence(){
