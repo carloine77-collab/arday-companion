@@ -92,6 +92,78 @@
    {id:'action-purchase-2',topic:'relationship',title:'猜猜我买了什么',body:'我今天自己出门买了{item}。本来只打算看看，最后还是带回来了。放心，价格很普通，没有乱花钱。\n\n等你回来我给你看。你可以夸我眼光好，最好再顺便亲一下。'}
   ]
  };
+
+ // 扩充信件池：日常随机信、关系私信、活动记录和饭后回信分开抽取。
+ LETTERS.daily.push(
+  {id:'daily-mug',topic:'daily',title:'杯沿上的唇印',body:'我洗杯子时，发现杯沿还留着一点淡淡的唇印。\n\n擦干净了。下次想和你用同一只杯子。'},
+  {id:'daily-receipt',topic:'daily',title:'收银台旁边',body:'便利店买了牛奶、橘子和一卷胶带。小票折了两次，刚好塞进外套口袋。\n\n看见橘子时，想起你剥橘子总爱把白色的丝也一起吃掉。'},
+  {id:'daily-hairclip',topic:'daily',title:'桌上的发夹',body:'桌角多了一枚小发夹。我把它放进白瓷碟里，免得被书压住。\n\n等你来认领。认错也没关系，我会提醒你。'},
+  {id:'daily-socks',topic:'daily',title:'一双干净的袜子',body:'今天晒好的袜子很蓬松，摸起来暖暖的。我把它们叠好，放进抽屉最上层。\n\n你喜欢的那双也在。下次过来，我替你找。'},
+  {id:'daily-toast',topic:'daily',title:'吐司烤得刚好',body:'早上烤了两片吐司，边缘脆脆的。黄油融进面包里，香味留了很久。\n\n忽然觉得，早餐桌对面应该有你。'},
+  {id:'daily-lamp',topic:'daily',title:'台灯的暖光',body:'今晚只开了床头那盏小台灯。光落在书页上，连影子都变得很安静。\n\n要是你在，我就把灯再调暗一点。'},
+  {id:'daily-keyring',topic:'daily',title:'钥匙扣',body:'整理玄关时，把钥匙扣重新挂好了。金属环碰在一起，响了很轻的一声。\n\n下次你进门，我想第一个听见这个声音。'},
+  {id:'daily-ice',topic:'daily',title:'冰块碰到玻璃杯',body:'往苏打水里放了两块冰。冰块碰着杯壁，声音清清脆脆的。\n\n给你也留了一杯。柠檬片放在旁边，自己加。'},
+  {id:'daily-notebook',topic:'daily',title:'便签纸背面',body:'我在便签背面写了几行字，写完才发现正面还有购物清单。牛奶、鸡蛋、洗衣液。\n\n清单先收好了。想对你说的话，没有收起来。'},
+  {id:'daily-cushion',topic:'daily',title:'靠近窗边的位置',body:'我把窗边的靠垫拍松了，又把薄毯叠在扶手上。下午的光刚好照到那里。\n\n那个位置留给你。想坐多久都可以。'},
+  {id:'daily-tangerine',topic:'daily',title:'剥开的橘子',body:'剥橘子时，完整地取下了一整圈果皮。放在盘子里，像一朵歪歪扭扭的小花。\n\n果肉很甜。想分你一半，顺便讨一个吻。'},
+  {id:'daily-rain-window',topic:'daily',title:'玻璃上的雨点',body:'雨点沿着窗玻璃慢慢往下滑。我拿纸巾擦掉了一小块雾气，刚好能看见楼下的路灯。\n\n这样的天气适合窝在一起。毯子我已经找出来了。'},
+  {id:'daily-charger',topic:'daily',title:'多出来的充电线',body:'抽屉里找到一根备用充电线，绕得整整齐齐。我把它放在床头柜第二格。\n\n你来时就不用找插座了。手机和人都要记得充电。'},
+  {id:'daily-soap',topic:'daily',title:'新换的洗手液',body:'洗手液换成了淡淡的柑橘味。按压头有点紧，我试了两次才找到合适的力道。\n\n你应该会喜欢。下次洗手时闻闻看。'},
+  {id:'daily-bookstore',topic:'daily',title:'书店里的纸张味',body:'路过书店时进去待了一会儿。新书的纸张有一点淡淡的味道，我在散文区停了很久。\n\n看到一本想和你一起看的。先替你留在心里了。'}
+ );
+ LETTERS.relationship.push(
+  {id:'rel-sleeve',topic:'relationship',title:'借我牵一会儿',body:'刚才想象了一下，你坐在我旁边，袖口碰着我的手背。\n\n其实不用做什么。把手给我牵一会儿就好。'},
+  {id:'rel-hair',topic:'relationship',title:'头发乱了一点',body:'如果你现在在我面前，我大概会先替你理一下头发。然后故意慢一点收回手。\n\n别躲。我还没看够。'},
+  {id:'rel-spare-key',topic:'relationship',title:'给你留一把钥匙',body:'我把备用钥匙放进玄关的小木盒里了。旁边是门卡和一枚旧硬币。\n\n不是暗示。是认真想让你随时来。'},
+  {id:'rel-pillow',topic:'relationship',title:'枕头旁边',body:'刚把枕头拍松，忽然觉得旁边空了一块。\n\n你来占掉它吧。今晚我不打算把位置让给抱枕。'},
+  {id:'rel-sugar',topic:'relationship',title:'甜度刚刚好',body:'买咖啡时，我替你选了少糖。记得你说过这个比例刚好。\n\n我记得的事情还挺多。比如你靠近时，我会先看你的嘴唇。'},
+  {id:'rel-pocket',topic:'relationship',title:'口袋里的小纸条',body:'写了一张小纸条，折好放进外套口袋。上面只有一句话：回来以后，先抱我。\n\n你找到它时，不许假装没看见。'},
+  {id:'rel-slow-evening',topic:'relationship',title:'把晚上放慢一点',body:'今晚不想赶时间。可以一起洗水果，挑一部电影，再把毯子分一半给你。\n\n电影看不看完都行。我比较在意你坐在哪里。'},
+  {id:'rel-necklace',topic:'relationship',title:'替你收着',body:'桌上那枚小饰品我替你收进首饰盒了，和那条细链放在一起。\n\n东西会记得归处。我也会记得你。'},
+  {id:'rel-voice',topic:'relationship',title:'想听你说话',body:'今天听见有人用很像你的语气说话，我回头看了两次。\n\n后来想想，还是你的声音最好听。随便说点什么给我听吧。'},
+  {id:'rel-handcream',topic:'relationship',title:'护手霜的味道',body:'刚涂了护手霜，是你上次挑的那支。味道留在指尖，淡淡的。\n\n下次见面，把手伸过来。我想牵久一点。'},
+  {id:'rel-morning-kiss',topic:'relationship',title:'早安要当面说',body:'今天醒得很早。窗帘边有一道光，床头的水也还温着。\n\n我想把早安留到见面时说。最好附赠一个吻。'},
+  {id:'rel-photo',topic:'relationship',title:'想拍一张合照',body:'手机相册里有很多随手拍的东西：路灯、咖啡、窗台，还有一只睡着的猫。\n\n突然想添一张我们的合照。你负责靠近镜头，我负责看你。'},
+  {id:'rel-ear',topic:'relationship',title:'说给我一个人听',body:'有些话隔着消息说，总觉得少了一点什么。\n\n下次靠近一点再告诉我吧。我会认真听，也会记很久。'},
+  {id:'rel-home',topic:'relationship',title:'回家时先找我',body:'我把玄关的灯留着了。鞋柜上有水，旁边放着干净的室内拖鞋。\n\n回来先来找我。其他东西都可以等一等。'},
+  {id:'rel-spoon',topic:'relationship',title:'同一把小勺',body:'洗餐具时，发现那把小银勺总被我们拿来分甜点。勺柄已经擦得很亮。\n\n下次还是用它。你一口，我一口。'}
+ );
+ const extraActionLetters={
+  read:[
+   {id:'read-margin-note',topic:'daily',title:'书页边的小字',body:'书页边写了两行批注，墨水有一点晕开。读到那段时，我停了很久。\n\n想把这页给你看。你坐近一点，我念给你听。'},
+   {id:'read-paperclip',topic:'daily',title:'纸夹夹住的章节',body:'今天读完一章，用铜色纸夹夹住了下一页。桌边的茶已经凉了，书倒是舍不得合上。\n\n有句话很适合你。我先替你记着。'}
+  ],
+  music:[
+   {id:'music-speaker',topic:'daily',title:'音箱旁边',body:'把音箱挪到窗边，低音听起来更柔和了。桌上的玻璃杯也跟着轻轻震了一下。\n\n下次放给你听。你可以把头靠在我肩上。'},
+   {id:'music-humming',topic:'daily',title:'没唱完的副歌',body:'听到副歌时，跟着哼了几句。唱得不算完整，倒是记住了旋律。\n\n下次你在旁边，我就唱给你听。只唱给你。'}
+  ],
+  laundry:[
+   {id:'laundry-softener',topic:'daily',title:'柔顺剂的香味',body:'晾衣服时，阳台上都是柔顺剂的淡香。毛巾晒得暖暖的，摸起来很软。\n\n我把最柔软的那条留给你。'},
+   {id:'laundry-clips',topic:'daily',title:'木衣夹',body:'今天用了那排木衣夹。夹子有一点旧，但夹得很牢。收衣服时，阳光还留在袖口。\n\n你那件衣服已经叠好了，放在柜子上层。'}
+  ],
+  walk:[
+   {id:'walk-bakery',topic:'daily',title:'面包店刚出炉',body:'路过面包店时，刚好闻到黄油香。买了两个小餐包，纸袋还是温的。\n\n一个留给你。回来时记得来拿。'},
+   {id:'walk-crossing',topic:'daily',title:'路口的红灯',body:'在路口等红灯时，看见一只猫蹲在便利店门口。它盯着纸袋看了半天，最后慢悠悠地走开了。\n\n我也买了点东西回来。想和你一起分。'}
+  ],
+  tidy:[
+   {id:'tidy-drawer',topic:'daily',title:'抽屉里的小东西',body:'整理抽屉时，找到一枚纽扣、两张贴纸和一根短短的铅笔。都没有扔，先放进小盒子里。\n\n以后我们也可以一起整理。你负责挑贴纸。'},
+   {id:'tidy-blanket',topic:'daily',title:'叠好的毯子',body:'把沙发毯叠成了方方正正的一块，放在靠垫旁边。遥控器也找到了，就在茶几下面。\n\n晚上过来吧。位置和毯子都给你留好了。'}
+  ]
+ };
+ Object.entries(extraActionLetters).forEach(([key,items])=>{(ACTION_LETTERS[key]||(ACTION_LETTERS[key]=[])).push(...items)});
+ ACTION_LETTERS.meal.push(
+  {id:'meal-player-17',topic:'relationship',title:'餐桌边等你',body:'你准备的{item}我吃完了。餐盘洗好，筷子也放回筷筒。\n\n下次吃饭，想等你一起坐下。'},
+  {id:'meal-player-18',topic:'daily',title:'汤匙还温着',body:'{item}很好吃。我把碗放在水槽里泡了一会儿，连汤匙都洗得干干净净。\n\n今天这顿饭，让人心情很好。'},
+  {id:'meal-player-19',topic:'relationship',title:'想把第一口留给你',body:'吃{item}的时候，第一口就觉得你应该也会喜欢。\n\n下次做给我时，先尝一口再递给我。我要和你分着吃。'},
+  {id:'meal-player-20',topic:'daily',title:'餐垫上的阳光',body:'我坐在餐垫旁边吃完了{item}。窗边的阳光落在盘子边缘，连水杯都亮晶晶的。\n\n谢谢你准备这顿饭。'},
+  {id:'meal-player-21',topic:'relationship',title:'今天也被照顾到了',body:'{item}已经吃完。你把饭留给我的时候，我就觉得今天会过得不错。\n\n等你回来，我想亲口谢谢你。'},
+  {id:'meal-player-22',topic:'daily',title:'碗底最后一点',body:'{item}最后一点也吃掉了。米粒没有剩，汤汁也没有浪费。\n\n我把碗洗好了。你做的饭，我会认真吃完。'},
+  {id:'meal-player-23',topic:'relationship',title:'这顿饭有你的味道',body:'今天的{item}很好吃。吃到一半时，我忽然想起你在厨房忙碌的样子。\n\n下次让我站在你旁边，好不好？'},
+  {id:'meal-player-24',topic:'daily',title:'饭后的一小段时间',body:'吃完{item}，我在桌边坐了一会儿。把杯子里的水喝完，才慢慢起身收拾。\n\n这样的日常，我很喜欢。'},
+  {id:'meal-player-25',topic:'relationship',title:'想和你交换一口',body:'{item}很好吃。吃到喜欢的那一口时，还是想让你也尝尝。\n\n下次坐我旁边。我们交换着吃。'},
+  {id:'meal-player-26',topic:'daily',title:'厨房的小小回声',body:'我吃完了{item}，把盘子放进水槽。水声响了一会儿，厨房又安静下来。\n\n谢谢你。今天的胃和心情都被照顾好了。'}
+ );
+
  function generate({state={},random=Math.random,trigger='daily',context={}}={}){
   if(ACTION_LETTERS[trigger]?.length){
    const candidates=ACTION_LETTERS[trigger].filter(item=>!(Array.isArray(state.ardayLetterHistory)&&state.ardayLetterHistory.includes(item.id)));
