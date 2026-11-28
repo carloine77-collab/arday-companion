@@ -25,7 +25,12 @@
         const hip=addBone(side<0?"hip.L":"hip.R",pelvis,[side*.13,.13,0],[side*.13,.83,0]);
         const knee=addBone(side<0?"knee.L":"knee.R",hip,[0,-.29,0],[side*.13,.54,0]);
         const ankle=addBone(side<0?"ankle.L":"ankle.R",knee,[0,-.27,0],[side*.13,.27,0]);
-        legs.push({hip,knee,ankle,side});
+        // Extend the skinning chain through the ankle into the shoe volume.
+        // The lower-leg vertices previously had to blend between knee and a
+        // terminal ankle joint while the shoe was rigidly parented to ankle.
+        // A short foot bone gives those vertices a matching deformation span.
+        const foot=addBone(side<0?"foot.L":"foot.R",ankle,[0,-.12,.04],[side*.13,.15,.04]);
+        legs.push({hip,knee,ankle,foot,side});
       }
       const smoothMin=(a,b,k)=>{const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25};
       const ellipsoidSdf=(x,y,z,cx,cy,cz,rx,ry,rz)=>{
@@ -195,11 +200,11 @@
       makeWolfLock("wolfcut-side-left",-.305,.385,-.075,.095,.36,.09,-.08,hairLight);
       makeWolfLock("wolfcut-side-right",.305,.385,-.075,.095,.36,.09,.08,hairLight);
       for(const l of legs){
-        const foot=new T.Group();foot.position.set(0,-.01,.06);l.ankle.add(foot);
+        const shoeMount=new T.Group();shoeMount.position.set(0,.11,.02);l.foot.add(shoeMount);
         // One rounded shoe shell plus a very thin outsole; the old full-size
         // overlapping lathe pair looked like two stacked shoes.
-        const upper=ellipsoid(foot,0,-.17,.015,.103,.071,.165,shoe,"shoe-upper");upper.userData.characterOutline=true;
-        const base=ellipsoid(foot,0,-.237,.025,.101,.016,.16,sole,"shoe-sole");base.userData.characterOutline=true;
+        const upper=ellipsoid(shoeMount,0,-.17,.015,.103,.071,.165,shoe,"shoe-upper");upper.userData.characterOutline=true;
+        const base=ellipsoid(shoeMount,0,-.237,.025,.101,.016,.16,sole,"shoe-sole");base.userData.characterOutline=true;
       }
       const shadow=new T.Mesh(new T.CircleGeometry(.48,32),new T.MeshBasicMaterial({color:0x40362d,transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;person.add(shadow);
       bodyMesh.updateMatrixWorld(true);skeleton.update();
