@@ -736,7 +736,7 @@ window.ArdayGameConfig = {
     minimumSleepHours: 6,
     maximumSleepHours: 8,
     activityEffects: {
-     rest:8, eat:1, wash:-1, read:-2, chat:0, computerWork:-4,
+     rest:8, eat:1, wash:-1, shower:-2, takeBath:-3, useToilet:-1, read:-2, chat:0, computerWork:-4,
      computerPlay:-3, watchTV:-2, listenRecords:-1, music:-1, walk:-5, game:-3, write:-3, work:-4,
      sitChair:5, tea:0
     }
@@ -748,6 +748,9 @@ window.ArdayGameConfig = {
  rest:{title:'休息',duration:'long',autonomous:true,autonomy:{need:'energy',threshold:72,weight:2.2,base:1.5},requires:'seat',menuLabel:'休息',location:'sofa',pose:'sit',anchor:'sofa',effect:{fun:1}},
  sleep:{title:'睡觉',duration:'long',autonomous:false,menuLabel:'睡觉',location:'bed',pose:'sleep',anchor:'bed',effect:{}},
  wash:{title:'洗漱',duration:'long',autonomous:true,autonomy:{need:'clean',threshold:60,weight:1.35},requires:'sink',menuLabel:'洗漱',location:'kitchen',pose:'stand',anchor:'sink',effect:{clean:22}},
+ shower:{title:'淋浴',duration:'long',autonomous:false,menuLabel:'淋浴',location:'bathroom',pose:'stand',anchor:'shower',effect:{clean:40}},
+ takeBath:{title:'泡澡',duration:'long',autonomous:false,menuLabel:'泡澡',location:'bathroom',pose:'sit',anchor:'bathtub',effect:{clean:35,fun:5}},
+ useToilet:{title:'使用洗手间',duration:'short',autonomous:false,menuLabel:'使用洗手间',location:'bathroom',pose:'sit',anchor:'toilet',effect:{}},
   tidy:{title:'整理房间',duration:'long',autonomous:true,autonomy:{need:'fun',threshold:42,weight:.32,base:.25},menuLabel:'整理房间',location:'center',pose:'stand',anchor:'default',effect:{fun:2}},
  admireView:{title:'欣赏窗外景色',duration:'short',autonomous:false,menuLabel:'室外景观',location:'window',pose:'stand',anchor:'window',effect:{fun:1}},
  admireDecor:{title:'欣赏与回忆',duration:'short',autonomous:false,menuLabel:'欣赏与回忆',location:'center',pose:'stand',anchor:'wallArt',effect:{fun:1}},
@@ -778,6 +781,9 @@ window.ArdayGameConfig = {
  fridge:{title:'冰箱',action:'kitchen'},
  stove:{title:'灶台',action:'kitchen'},
  sink:{title:'水槽',activities:{wash:{anchor:'sink'}}},
+ shower:{title:'淋浴间',activities:{shower:{anchor:'shower'}}},
+ bathtub:{title:'浴缸',activities:{takeBath:{anchor:'bathtub'}}},
+ toilet:{title:'马桶',activities:{useToilet:{anchor:'toilet'}}},
  bed:{title:'床',activities:{rest:{anchor:'bed'},read:{anchor:'bed'}}},
  loftBed:{title:'上床下桌',activities:{rest:{anchor:'bed'},read:{anchor:'bed'},write:{anchor:'loftDesk'}}},
  chair:{title:'椅子',activities:{sitChair:{anchor:'chair'},read:{anchor:'chair'},chat:{anchor:'chair'}}},
