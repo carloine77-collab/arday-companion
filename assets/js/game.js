@@ -3356,7 +3356,7 @@ function persistFurniture(item){
    basePose=pose;seatedHeight=pose==='sit'?Math.max(.12,Math.min(1.05,resolveSeatSurfaceY(seatFurniture))):0;walkRoute=[];walkIndex=0;walkPauseUntil=0;
    if(act==='walk'){walkRoute=['outside','window','rug','sofa','center'].map(k=>positions[k]);walkIndex=0;target.set(...walkRoute[0]);pose='walk'}
    if(act==='idle'){pose='idle';idleNextMove=performance.now()+1800;idleNextGesture=performance.now()+6500+Math.random()*4000;idleGestureUntil=0}
-   rig.rotation.set(act==='wake'?-Math.PI/2:0,0,0);rig.position.set(0,0,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||act==='wake'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
+   rig.rotation.set(act==='wake'?-Math.PI/2:0,0,0);rig.position.set(0,rig.position.y,0);rig.scale.set(1,sleepingOnLoftBed?.76:1,1);eyeGroups.forEach(g=>{g.scale.y=act==='sleep'?.055:1});if(act==='sleep'||act==='wake'||(anchor==='bed'&&['read','rest'].includes(act)))rig.rotation.set(-Math.PI/2,0,0);
    body.position.y=pose==='sit'?-.48:0;legs.forEach(l=>{l.hip.position.y=pose==='sit'?-.17:.13;l.hip.rotation.x=pose==='sit'?-.84:0;l.knee.rotation.x=pose==='sit'?1.02:0});
    arms.forEach((arm,i)=>{arm.shoulder.rotation.z=(pose==='wave'&&i===1)?-.85:(pose==='sit'?.15:0);arm.elbow.rotation.x=pose==='sit'?-.84:pose==='sleep'?-.98:0});
   }
