@@ -61,12 +61,14 @@ Object.assign(window.ArdayFurnitureModelCategories, {
     applyPainterMap(walnut,woodMap,.014);applyPainterMap(walnutEdge,woodMap,.012);
     const soft=(x,y,z,sx,sy,sz,material)=>{const o=new T.Mesh(new T.SphereGeometry(1,32,22),material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);group.add(o);o.castShadow=true;o.receiveShadow=true;return o};
     const seam=(points,r=.008,material=welt)=>{const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const mesh=new T.Mesh(new T.TubeGeometry(curve,Math.max(16,points.length*3),r,8,false),material);group.add(mesh);mesh.castShadow=true};
-    box(0,.27,0,2.08,.16,.82,walnut);box(0,.31,-.425,1.98,.19,.055,walnutEdge);box(0,.35,.39,1.98,.16,.06,walnut);
-    for(const x of [-.62,0,.62]){soft(x,.49,-.105,.345,.145,.405,fabric);seam([[x-.29,.53,-.48],[x-.15,.55,-.49],[x,.55,-.49],[x+.15,.55,-.49],[x+.29,.53,-.48]],.009)}
-    for(const x of [-.62,0,.62]){const back=soft(x,.755,.295,.34,.315,.16,fabricShade);back.rotation.x=-.13;seam([[x-.28,.73,.13],[x-.16,.72,.125],[x,.72,.12],[x+.16,.72,.125],[x+.28,.73,.13]],.007)}
-    for(const x of [-1.015,1.015]){soft(x,.59,-.015,.17,.285,.49,fabric);soft(x,.855,-.045,.19,.085,.43,fabricShade);box(x,.39,.02,.055,.43,.79,walnut);seam([[x,.91,-.34],[x,.925,-.18],[x,.925,0],[x,.925,.18],[x,.91,.31]],.007)}
-    for(const x of [-.86,.86])for(const z of [-.32,.32]){const leg=new T.Mesh(new T.CylinderGeometry(.035,.052,.25,12),walnut);leg.position.set(x,.125,z);group.add(leg);leg.castShadow=true}
-    box(0,.19,-.423,1.86,.07,.035,walnutEdge);
+    if(variant!=='雾蓝绒布'){
+     box(0,.27,0,2.08,.16,.82,walnut);box(0,.31,-.425,1.98,.19,.055,walnutEdge);box(0,.35,.39,1.98,.16,.06,walnut);
+     for(const x of [-.62,0,.62]){soft(x,.49,-.105,.345,.145,.405,fabric);seam([[x-.29,.53,-.48],[x-.15,.55,-.49],[x,.55,-.49],[x+.15,.55,-.49],[x+.29,.53,-.48]],.009)}
+     for(const x of [-.62,0,.62]){const back=soft(x,.755,.295,.34,.315,.16,fabricShade);back.rotation.x=-.13;seam([[x-.28,.73,.13],[x-.16,.72,.125],[x,.72,.12],[x+.16,.72,.125],[x+.28,.73,.13]],.007)}
+     for(const x of [-1.015,1.015]){soft(x,.59,-.015,.17,.285,.49,fabric);soft(x,.855,-.045,.19,.085,.43,fabricShade);box(x,.39,.02,.055,.43,.79,walnut);seam([[x,.91,-.34],[x,.925,-.18],[x,.925,0],[x,.925,.18],[x,.91,.31]],.007)}
+     for(const x of [-.86,.86])for(const z of [-.32,.32]){const leg=new T.Mesh(new T.CylinderGeometry(.035,.052,.25,12),walnut);leg.position.set(x,.125,z);group.add(leg);leg.castShadow=true}
+     box(0,.19,-.423,1.86,.07,.035,walnutEdge);
+    }
     if(variant==='亚麻燕麦'){
      // Compact loveseat: tapered exposed legs, channel back and two broad cushions.
      box(0,.25,-.02,1.82,.12,.78,walnut);
@@ -75,9 +77,51 @@ Object.assign(window.ArdayFurnitureModelCategories, {
      for(const x of [-.94,.94]){const arm=soft(x,.62,.02,.13,.24,.43,fabricShade);arm.rotation.z=-.08}
      width=2.2;depth=1.15;
     }else if(variant==='雾蓝绒布'){
-     // L-shaped sectional: return chaise, extended base and a distinct corner back.
-     box(.92,.27,.78,.78,.16,1.05,walnut);soft(.92,.49,.78,.37,.15,.48,fabric);const chaiseBack=soft(.92,.77,1.12,.37,.31,.15,fabricShade);chaiseBack.rotation.x=-.12;
-     soft(1.28,.59,.76,.16,.28,.5,fabric);box(1.28,.39,.76,.055,.42,.78,walnut);width=3.05;depth=2.15;
+     // Purpose-built L sectional: one continuous upholstered seat pad wraps the corner into the chaise.
+     const lShape=(left,front,back,returnX,returnBack,radius=.12)=>{
+      const shape=new T.Shape();
+      shape.moveTo(left+radius,-front);
+      shape.lineTo(1.525-radius,-front);shape.quadraticCurveTo(1.525,-front,1.525,-front+radius);
+      shape.lineTo(1.525,-back-radius);shape.quadraticCurveTo(1.525,-back,1.525-radius,-back);
+      shape.lineTo(returnX+radius,-back);shape.quadraticCurveTo(returnX,-back,returnX,-back+radius);
+      shape.lineTo(returnX,-.2-radius);shape.quadraticCurveTo(returnX,-.2,returnX-radius,-.2);
+      shape.lineTo(left+radius,-.2);shape.quadraticCurveTo(left,-.2,left,-.2-radius);
+      shape.lineTo(left,-front+radius);shape.quadraticCurveTo(left,-front,left+radius,-front);
+      const geometry=new T.ExtrudeGeometry(shape,{depth:.18,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:.035,bevelThickness:.025,curveSegments:8});
+      geometry.rotateX(-Math.PI/2);
+      const mesh=new T.Mesh(geometry,material);mesh.position.y=.39;group.add(mesh);mesh.castShadow=true;mesh.receiveShadow=true;return mesh;
+     };
+     // Broad single-piece L-shaped plinth; no separate corner chaise block.
+     box(0,.25,0,3.0,.2,1.78,walnut);
+     box(.93,.25,.72,1.18,.2,.72,walnut);
+     const seatShape=new T.Shape();
+     seatShape.moveTo(-1.42,.82);seatShape.lineTo(1.42,.82);seatShape.quadraticCurveTo(1.5,.82,1.5,.74);
+     seatShape.lineTo(1.5,-1.0);seatShape.quadraticCurveTo(1.5,-1.08,1.42,-1.08);
+     seatShape.lineTo(.42,-1.08);seatShape.quadraticCurveTo(.34,-1.08,.34,-1.0);
+     seatShape.lineTo(.34,-.27);seatShape.quadraticCurveTo(.34,-.19,.26,-.19);
+     seatShape.lineTo(-1.42,-.19);seatShape.quadraticCurveTo(-1.5,-.19,-1.5,-.27);
+     seatShape.lineTo(-1.5,.74);seatShape.quadraticCurveTo(-1.5,.82,-1.42,.82);
+     const seatGeometry=new T.ExtrudeGeometry(seatShape,{depth:.19,bevelEnabled:true,bevelSegments:4,steps:1,bevelSize:.045,bevelThickness:.035,curveSegments:10});
+     seatGeometry.rotateX(-Math.PI/2);
+     const seatPad=new T.Mesh(seatGeometry,fabric);seatPad.position.y=.36;group.add(seatPad);seatPad.castShadow=true;seatPad.receiveShadow=true;
+     // Two broad back cushions and one continuous return cushion; the corner is physically joined.
+     const backA=soft(-.55,.77,.19,.88,.31,.19,fabricShade);backA.rotation.x=-.08;
+     const backB=soft(.82,.77,.19,.62,.31,.19,fabricShade);backB.rotation.x=-.08;
+     const returnBack=soft(.88,.77,.77,.58,.31,.19,fabricShade);returnBack.rotation.y=Math.PI/2;
+     const corner=soft(.35,.75,.2,.28,.29,.24,fabricShade);
+     // One restrained seam across the main run; no four-way cushion grid.
+     seam([[-.92,.565,-.2],[-.45,.57,-.2],[0,.57,-.2],[.35,.57,-.2]],.008);
+     for(const x of [-1.39,1.39]){
+      const arm=soft(x,.59,-.04,.13,.27,.78,fabric);arm.rotation.z=-.035;
+      const cap=soft(x,.86,-.04,.15,.07,.72,fabricShade);
+     }
+     // The chaise has a single uninterrupted outer rail and the feet support the full L footprint.
+     box(1.43,.39,.48,.07,.42,1.12,walnut);
+     for(const [x,z] of [[-1.25,-.72],[0,-.72],[1.25,-.72],[-1.25,.72],[1.25,.92],[.48,.92]]){
+      const foot=new T.Mesh(new T.CylinderGeometry(.035,.045,.2,12),walnut);
+      foot.position.set(x,.11,z);group.add(foot);foot.castShadow=true;
+     }
+     width=3.05;depth=2.15;height=.94;
     }else if(variant==='经典款'){
      for(const x of [-.72,-.36,0,.36,.72]){const tuft=new T.Mesh(new T.SphereGeometry(.035,8,6),gold);tuft.position.set(x,.86,.455);group.add(tuft)}
      box(0,.92,.31,1.78,.16,.13,walnut);for(const x of [-.82,.82]){const roll=soft(x,.78,.18,.18,.12,.48,fabricShade);roll.rotation.z=x<0?-.08:.08}
@@ -121,20 +165,23 @@ Object.assign(window.ArdayFurnitureModelCategories, {
       }
      }
     }
-    // Fine upholstery finishing: welted cushion edges, panel seams and recessed feet.
-    for(const x of [-.62,0,.62]){
-     const stitch=soft(x,.515,-.505,.22,.008,.012,welt);
-     stitch.scale.set(.22,.012,.018);
-     for(const side of [-1,1]){
-      const seamLine=box(x+side*.285,.49,-.105,.012,.012,.62,welt);
-      seamLine.rotation.z=side*.025;
+    if(variant!=='雾蓝绒布'){
+     // Fine upholstery finishing: welted cushion edges, panel seams and recessed feet.
+     for(const x of [-.62,0,.62]){
+      const stitch=soft(x,.515,-.505,.22,.008,.012,welt);
+      stitch.scale.set(.22,.012,.018);
+      for(const side of [-1,1]){
+       const seamLine=box(x+side*.285,.49,-.105,.012,.012,.62,welt);
+       seamLine.rotation.z=side*.025;
+      }
      }
+     for(const x of [-1.015,1.015]){
+      for(const z of [-.27,.27]){const piping=new T.Mesh(new T.TorusGeometry(.105,.009,6,24,Math.PI),welt);piping.position.set(x,.61,z);piping.rotation.z=Math.PI/2;group.add(piping)}
+      box(x,.48,-.015,.018,.3,.68,walnutEdge);
+     }
+     for(const x of [-.86,.86])for(const z of [-.32,.32]){
+ 
     }
-    for(const x of [-1.015,1.015]){
-     for(const z of [-.27,.27]){const piping=new T.Mesh(new T.TorusGeometry(.105,.009,6,24,Math.PI),welt);piping.position.set(x,.61,z);piping.rotation.z=Math.PI/2;group.add(piping)}
-     box(x,.48,-.015,.018,.3,.68,walnutEdge);
-    }
-    for(const x of [-.86,.86])for(const z of [-.32,.32]){
      const ferrule=new T.Mesh(new T.CylinderGeometry(.054,.052,.045,16),walnutEdge);
      ferrule.position.set(x,.035,z);group.add(ferrule);
     }
