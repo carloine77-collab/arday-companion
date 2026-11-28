@@ -39,7 +39,7 @@ s.attributes=s.attributes&&typeof s.attributes==='object'?s.attributes:{agility:
 s.combat=Math.round((s.attributes.agility+s.attributes.strength+s.attributes.intelligence+s.attributes.perception+s.attributes.willpower)/5);
 if(isFreshInstall){Object.keys(s.attributes).forEach(key=>s.attributes[key]=1);s.combat=1;s.friend=0;s.bored=0;s.hate=0;s.love=0;}
 s.firstPlayedAt=Number(s.firstPlayedAt)||Date.now();
-s.lastOnlineAt=Number(s.lastOnlineAt)||Number(s.lastTick)||Number(s.last)||Date.now();s.absenceLetterMilestones=Array.isArray(s.absenceLetterMilestones)?s.absenceLetterMilestones.filter(n=>[1,3,7,14,21,30].includes(Number(n))).map(Number):[];
+if(!s.absenceTrackingV1){s.lastOnlineAt=Date.now();s.absenceLetterMilestones=[];s.absenceTrackingV1=true;}else{s.lastOnlineAt=Number(s.lastOnlineAt)||Date.now();s.absenceLetterMilestones=Array.isArray(s.absenceLetterMilestones)?s.absenceLetterMilestones.filter(n=>[1,3,7,14,21,30].includes(Number(n))).map(Number):[];}
 s.teamRoster=Array.isArray(s.teamRoster)?s.teamRoster:[];
 const starterTeammateIds=new Set(['lin','mori','qiao']);s.teamRoster=s.teamRoster.filter(member=>!starterTeammateIds.has(member.id)||member.recruited===true);
 s.teamRoster.forEach(m=>{m.combat=clamp(Number(m.combat)||0);m.malice=clamp(Number(m.malice)||0)});if(s.teamRoster.length>8)s.teamRoster=s.teamRoster.slice(0,8);
